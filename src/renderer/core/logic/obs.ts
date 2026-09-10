@@ -1,4 +1,4 @@
-import { LocalStorageProxy } from "./LocalStorageProxy";
+import { LocalStorageProxy } from "~/logic/LocalStorageProxy";
 
 /**
  * Send an OBS WebSocket 5 "CreateRecordChapter" request (Add Chapter Marker).

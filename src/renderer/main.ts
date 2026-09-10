@@ -9,7 +9,7 @@ import { gen1Hotkeys } from "~/games/gen1/hotkeys";
 import { PokemonGame } from "~/logic/PokeDataTypes.js";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
-import { useEmulatorStatsStore } from "./stores/useEmulatorStatsStore";
+import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { loadLegacyStorage } from "~/logic/Storage";
 import { registerControlServer } from "~/core/control/useControlServer";
 import { gen1ControlRoutes } from "~/games/gen1/control";

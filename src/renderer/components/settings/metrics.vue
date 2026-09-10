@@ -64,7 +64,7 @@
 import PubSub from "~/logic/PubSub";
 import { SpeciesMetrics, useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.ts";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData.ts";
-import { useEmulatorStatsStore } from "~/stores/useEmulatorStatsStore";
+import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { defineComponent } from "vue";
 
 /** Counters that are mirrored to the Shuckie emulator when the "Shuckie Counters" option is on. */

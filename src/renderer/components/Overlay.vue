@@ -36,7 +36,7 @@ import { useGameSpeciesData } from "~/stores/useGameSpeciesData.js";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.js";
 import { useMetaStore } from "~/stores/metaStore";
 import { useBattleStore } from "~/stores/useBattleStore";
-import { useEmulatorStatsStore } from "~/stores/useEmulatorStatsStore";
+import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 
 // vue components:
 import graphics from "./graphics.vue";

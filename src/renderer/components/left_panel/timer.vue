@@ -10,7 +10,7 @@
 import PubSub from "~/logic/PubSub";
 import { defineComponent } from "vue";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
-import { useEmulatorStatsStore, formatShuckieTime } from "~/stores/useEmulatorStatsStore";
+import { useEmulatorStatsStore, formatShuckieTime } from "~/core/stores/useEmulatorStatsStore";
 
 export default defineComponent({
     data() {

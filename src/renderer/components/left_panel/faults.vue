@@ -34,13 +34,14 @@
 
 <script>
 import PubSub from "~/logic/PubSub";
-import { sendObsChapterMarker } from "~/logic/obs";
+import { sendObsChapterMarker } from "~/core/logic/obs";
+import { gen1ChapterMarkers } from "~/games/gen1/markers";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.js";
 import { FaultMode } from "~/stores/types/FaultMode";
 import { defineComponent } from "vue";
 import { useMetaStore } from "~/stores/metaStore.js";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData.js";
-import { useEmulatorStatsStore } from "~/stores/useEmulatorStatsStore";
+import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 export default defineComponent({
     inject: [ "game_properties" ],
     data() {
@@ -82,7 +83,7 @@ export default defineComponent({
         reset_occurred() {
             this.metrics.update("blackout_pending", false);
             this.metrics.update("resets", this.metrics.resets + 1);
-            sendObsChapterMarker('RESET');
+            sendObsChapterMarker(gen1ChapterMarkers.reset());
             if (this.runConfig.advanced.shuckie_counters) {
                 this.emulator.incrementCounter("playerResets");
             }
@@ -91,7 +92,7 @@ export default defineComponent({
             if (newProp?.value == "Overworld" && oldProp?.value == "Battle" && this.metrics.blackout_pending == true) {
                 this.metrics.update("blackout_pending", false);
                 if (this.runConfig.advanced.count_blackouts) {
-                    sendObsChapterMarker('BLACKOUT');
+                    sendObsChapterMarker(gen1ChapterMarkers.blackout());
                     this.metrics.update("blackouts", this.metrics.blackouts + 1);
                     if (this.runConfig.advanced.shuckie_counters) {
                         this.emulator.incrementCounter("blackout_counter");
