@@ -1,0 +1,181 @@
+# External contracts the unified app must preserve
+
+Everything in this file is an interface that some *other* program depends on. None of it is
+visible in a screenshot, so the parity harness (see `parity-harness.md`) records each one as an
+oracle. Changing any of these is a feature change and needs Scott's sign-off.
+
+Sources verified on 2026-09-10: `A:\Dropbox\stp-projects\programs\queuer` (Mirror Move: `main.js`,
+`FRONTEND_LAUNCH.md`, `CLAUDE.md`, `fixture_recorder.js`), `A:\Programs\supershuckie`,
+`A:\Dropbox\stp-projects\programs\fury_cutter`, `A:\Dropbox\stp-projects\programs\compare_gym_splits`,
+gen1 sources, `%APPDATA%\PokeAByte\Mappers`.
+
+## 1. Recording queuer (Mirror Move) — launch protocol
+
+The queuer auto-launches one frontend per queue item and drives it over HTTP. It is the main
+consumer of the overlay and the reason the unified app cannot change any of the following without a
+matching queuer change (queuer changes are allowed, but must land in the same step, see plan Phase 3.6).
+
+| Aspect | Today (gen1–5) | Where |
+|---|---|---|
+| Launch | `spawn("npm", ["run","dev"], {shell:true, detached:true})` in `FRONTEND_CONFIGS[gen].dir` | `main.js` `FRONTEND_CONFIGS`, `spawnFrontend` |
+| App names | `stp-generation1-overlay`, `stp-generation2-overlay`, `stp-generation3-overlay`, `gen4-overlay-app`, `gen5-overlay-app` (= `package.json` `name` = `%APPDATA%\<name>`) | `FRONTEND_CONFIGS` |
+| Window placement | Queuer pre-writes `%APPDATA%\<name>\dev-window-state.json` `{bounds, isFullScreen:true}`; every frontend reads it in `is.dev` mode only | all five `main.js` |
+| Readiness | Polls `GET http://127.0.0.1:30159/status` for up to 120 s, expects `{ready:true,…}` | `ensureOverlayFrontendRunning` |
+| Shutdown | `GET /quit` (gen2–5; `window.close()` after 200 ms), then `taskkill /pid <pid-on-30159> /T /F`, then tracked PID | `shutdownOverlayFrontend` |
+| Gen detection | Substring match on the **mapper path** (`detectGenContext`); gen3 is the fallback | `main.js:1301` |
+| Game verification | `/status.selected_game` must equal `expectedSelectedGameFromMapperId(mapperId)`, else `GET /set-game?game=<expected>` | `main.js:652` |
+
+**Unified app requirement:** one entry `FRONTEND_CONFIGS.unified = { dir: "A:\\Programs\\stp-unified-frontend", name: "stp-overlay" }`
+and `detectGenContext` returning `genKey: "unified"` for every mapper. The `dev-window-state.json` handling must be
+kept verbatim in the unified `src/main` (it already exists in gen1's main).
+
+## 2. Overlay control server — `http://127.0.0.1:30159`
+
+gen2–5 each run `http.createServer` **inside the renderer** (`frontend.js`). gen1 has **no** control server;
+the queuer skips it via `isGen1` guards. The unified app moves the server to the main process
+(one implementation, `src/main/control-server.ts`) and must answer every route below with the same
+semantics. Port 30159 is single-tenant: only one overlay can run at a time.
+
+### Routes the queuer calls (in call order for one item)
+
+| Route | Query | Gen guard in queuer | Effect |
+|---|---|---|---|
+| `GET /status` | – | all | `{ ready, selected_game, starter or starterString, right_panel or right_ui, hpType, … }` |
+| `GET /set-game` | `game=<name>` (URL-encoded, may contain `&`) | gen2–5 | sets the game dropdown; queuer waits 1 s then re-reads `/status` |
+| `GET /set-starter` | `species=` | all (gen1 request fails silently) | selects the solo species |
+| `GET /set-hidden-power` | `type=` | not gen1 | |
+| `GET /set-shuckie-counters` | `enabled=true|false` | not gen1 | |
+| `GET /set-show-tutor-moves` | `enabled=` | not gen1, not gen2 | |
+| `GET /set-unobtainable-moves` | `mode=<Always Cross Out|…>` | not gen1 | |
+| `GET /set-automatic-post-battle-splits` | `enabled=` | not gen1 | |
+| `GET /set-counters` | `bonk=false&repel_counter=false` | gen2 only | |
+| `GET /refresh` | – | not gen1 | reload styles for the starter |
+| `GET /set-evolution` | `enabled=true&species=` / `enabled=false&species=` | not gen1, not gen2 | **gen4: after `/refresh`; gen3/gen5: before `/refresh`** |
+| `GET /set-right-panel` | `panel=Battle Graphic` (gen2/3) or `panel=Automatic` (gen4/5) | not gen1 | |
+| `GET /set-splits` | `mode=First|Followup` | not gen1 | |
+| `GET /load-split-file` | `file=<name>` | not gen1, only with `item.splitFile` | loads a previous-split CSV for comparison |
+| `GET /new-run` | – | not gen1 | same as the F23 hotkey / "New Run" button |
+| `GET /reload` | – | all | `location.reload()` after 200 ms |
+| `GET /quit` | – | gen2–5 | `window.close()` after 200 ms |
+
+### `/status` field names differ per gen (the queuer branches on them)
+
+| Field | gen2 | gen3 | gen4 | gen5 |
+|---|---|---|---|---|
+| starter | `starter` | `starterString` | `starter` | `starter` |
+| right panel | `right_panel` | `right_panel` | `right_ui` | `right_ui` |
+| game | `selected_game` (`this.game_selection`) | `selected_game` (`this.gameSelection`) | `selected_game` | `selected_game` |
+| evolution | – (no concept) | yes | yes | yes |
+| hidden power | `hpType` | `hpType` | `hpType` | `hpType` |
+
+**Unified `/status`:** return the union — `starter` **and** `starterString`, `right_panel` **and** `right_ui`,
+plus `app: "stp-overlay"`, `generation`, `mapper_path`. The queuer's existing per-gen branches then keep
+working unchanged, and a later queuer cleanup can key on `app`.
+
+### Expected `selected_game` strings (from `expectedSelectedGameFromMapperId`)
+
+`"Black 2"`, `"White 2"`, `"Black"`, `"White"`, `"Platinum"`, `"HeartGold and SoulSilver"`, `"Diamond and Pearl"`,
+`"FireRed and LeafGreen"`, `"Emerald"`, `"Crystal"`, **`"Gold & Silver"`** (ampersand — this is also the split folder
+name), `null` for gen1 (Yellow / Red and Blue are set from the mapper automatically).
+
+These strings are the `GameModule.editions` / game-select values and the on-disk split folder names. They are
+**not** the mapper `game_name` values (see `mapper-matrix.md`).
+
+## 3. Super Shuckie — `http://127.0.0.1:30158`
+
+Used by gen1 (`useEmulatorStatsStore`, poll every **10 ms**) and by gen5's `ShuckieTimer`.
+
+| Call | Shape (from `supershuckie-frontend-webserver/src/lib.rs`) |
+|---|---|
+| `GET /stats` | `{ time_current: number|null, total_elapsed_frames: number, is_playing_back: bool, is_playback_finished: bool, counters: { playerResets?, blackout_counter?, … }, … }` |
+| `POST /mark-start` (optionally `?offset=`) | start the emulator-side timer |
+| `POST /mark-end` | end it |
+| `POST /increment-counter?name=X[&by=Y]` | bump a counter |
+
+Failures are swallowed and throttled, so the app runs without Shuckie. The harness stubs this server
+(replaying the fixture's `F` frame samples as `total_elapsed_frames`) and logs every POST as an oracle.
+
+## 4. OBS WebSocket 5 — `ws://localhost:4455`
+
+gen1 `logic/obs.ts` opens a throw-away socket per marker and sends `CreateRecordChapter`
+with `chapterName` = `IN - <battle.trainer.class>` / `OUT - <battle.trainer.class>` (URL and password
+overridable via localStorage keys `obs_websocket_url`, `obs_websocket_password`).
+Consumers: `fury_cutter.py` (cuts battles from markers; recognises `IN - X` / `OUT - X` after stripping
+leading `$%#`, and also plain `Battle` / `Overworld` names) and the StreamUP chapter-marker OBS plugin.
+gen2 additionally documents "critical item" and "new move" chapter markers (`CRITICAL_ITEM_CHAPTER_MARKER.md`,
+`NEW_MOVE_CHAPTER_MARKER.md` in the gen2 repo) — port those names byte-for-byte.
+
+The harness runs a tiny OBS WebSocket stub (Hello → Identify → Identified, then records every
+`CreateRecordChapter`) so the marker sequence per fixture is an oracle.
+
+## 5. Split CSV files
+
+gen1 writes, **relative to `process.cwd()`**:
+
+```
+./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>-simple.csv
+./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>-full.csv
+./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>.csv            (deprecated format)
+./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>-battleSummary.csv
+./splits/<GamePath>/<Species>/finishes/…   (copies on run completion)
+./splits/<GamePath>/<Species>/refilmed/{attempts,finishes}/…   (refilming mode)
+```
+
+`<GamePath>` is the game name (`Yellow`, `Red and Blue`, …), `<L>` the edition letter (`Y`/`R`/`B`).
+4,822 historical files exist under `A:\Programs\gen1-stp-frontend\splits\`; older ones lack the `<L>-`
+prefix. gen2–5 folder names: `Crystal`, `Gold & Silver`, `HGSS`, `Platinum`, `Black`, … (confirm in
+the per-gen inventories, Phase 2.1).
+
+Consumers: `compare_gym_splits` reads `<Species>-<N>-simple.csv` and requires columns `trainer_name` and
+`real_time_hmmss`; the overlay's own "Split Comparison" / `previous_splits`; the queuer's `/load-split-file`.
+Byte-identical output for a replayed fixture is the behavioural oracle (wall-clock columns handled by the
+fake clock, see `parity-harness.md` §5).
+
+**Unified app:** keep the same relative layout but resolve it against one explicit *app root*
+(dev: repo root; packaged: directory of the executable) instead of the implicit cwd, and copy the five
+legacy `splits/` trees into `stp-unified-frontend/splits/` once (Phase 3.7). The queuer spawns with
+cwd = repo dir, so behaviour is unchanged for it.
+
+## 6. Persistence locations (migration sources)
+
+| App | Where user data lives today | Notes |
+|---|---|---|
+| gen1 | `%APPDATA%\stp-generation1-overlay\data\overlay_settings.json`, `data\<game>\<species>\{settings,metrics}.json`; `./storage/Storage.json` (577 KB, cwd-relative, read-only migration source); `localStorage` for `current_splits`/`previous_splits`, OBS url/password, sprite-scale overrides | already the target format |
+| gen2 | `localStorage` (`MyStorage`), leveldb 3.0 MB | `%APPDATA%\stp-generation2-overlay\Local Storage\leveldb` |
+| gen3 | `localStorage`, leveldb 17 MB. **`storage/Storage.json` in the repo is 0 bytes** (the plan's "Storage.json" claim is wrong for gen3) | `%APPDATA%\stp-generation3-overlay\…` |
+| gen4 | `localStorage` (`MyStorage` + `style_settings_manager`), leveldb 13 MB | `%APPDATA%\gen4-overlay-app\…` |
+| gen5 | `localStorage`, leveldb 7.9 MB, plus `gen5stylesettings.zip` (1.9 MB) in userData | `%APPDATA%\gen5-overlay-app\…` |
+
+**Decision 10 (Scott, 2026-09-10): one file-based mechanism for everything; the unified app never uses `localStorage`.**
+Shipped style defaults are per-species JSON in the repo (written back by dev-mode runs, as the legacy apps do with
+`default_style_settings.js`); user state is under userData. The unified app's userData is `%APPDATA%\stp-overlay\`.
+Because Chromium's `localStorage` is origin-scoped
+and lives in LevelDB, the importer (Phase 2.6) reads a *copy* of each legacy `Local Storage\leveldb`
+folder with a Node LevelDB reader (`classic-level`) and decodes Chromium's `_file://` + `\x00\x01<key>`
+records (value prefix byte 0 = UTF-16LE, 1 = Latin-1). This is deterministic and unit-testable with a
+copied leveldb fixture; it never opens the live profile. gen1's `data\` tree is copied file-for-file.
+
+## 7. keyhook.exe
+
+Binary only (no source anywhere on disk). `md5 73db8f5278d94b21e6fc1beea09b144e`, 373,946 bytes,
+identical in the gen2 and gen3 repos; **removed from the gen1 repo in commit `996d031` (2026-09-10)**, so
+gen1 dev currently runs without hotkeys unless the exe is placed next to the project. gen1 looks in
+`process.cwd()`, then `process.resourcesPath`, then PATH. Stdout protocol: lines `down,keyCode,time`
+(`1`/`0`, Win32 VK code, ms). The unified app vendors it at `resources/keyhook.exe`, spawns it once from
+main, and forwards events over IPC.
+
+## 8. PokeAByte — `http://localhost:8085`
+
+REST (`GET /mapper`, `POST /mapper/set-property-value/`, `/mapper/set-property-bytes/`,
+`/mapper/set-properties-by-bits/`) and the SignalR hub `/updates` (`PropertiesChanged`, `MapperLoaded`,
+`InstanceReset`, plus `Error`/`Hello` no-ops). Details and the mock in `parity-harness.md` §3. The mapper
+files come from the `PokeAByte/mappers` git checkout in `%APPDATA%\PokeAByte\Mappers`; which mapper each
+frontend targets is in `mapper-matrix.md`.
+
+## 9. Out of scope, but sharing infrastructure
+
+`A:\Dropbox\stp-projects\programs\frontends\` holds **stale** clones of gen1–5 (older HEADs of the same GitHub
+remotes — never use them as inputs), plus `poketcg-frontend`, `tcg_frontend` and `race-frontend` (plain HTML
+overlays, not Electron) and an unrelated January 2025 React/Vite project that is also called
+`stp-unified-frontend`. None of these are inputs to this plan. The TCG mapper (`STANDARD/gen1/pokemon_tcg.xml`)
+is therefore not a supported game.

@@ -1,0 +1,16 @@
+export const auto_save_settings = [
+    "starterName",
+    "overlayName",
+    "perfectDVs",
+    "options",
+    "pkmnMoves",
+    "pkmnSlots",
+    "state",
+    "prevSpecies",
+    "oldExpValue",
+    "player_id",
+    "blackout",
+    "autosplitter_toggle",
+    "game_name",
+    "collect_split_data",
+]

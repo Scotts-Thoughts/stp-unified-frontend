@@ -1,0 +1,258 @@
+
+
+<template>
+<div v-if="meta.gameState == 'Battle' || meta.gameState == 'From Battle'">
+    <div class="trainerLabel">{{"Wild " + wild_pkmn_name(wild_mon.species.value)}}</div>
+    <div class="tinted-box" style="height: 242px; --url: url(images/ui/opponent.svg);"></div>
+    <div class="enemyGraphic">
+        <div class="ePkmnStyle">
+            <!-- Art -->
+            <img v-if="meta.game == 'Yellow'"            class="ePkmnSprite"
+                :class="{ ePkmnSpriteResizing: resize.resize.slot === 0 }"
+                :data-enemy-slot="0"
+                :data-enemy-species="wild_mon.species.value"
+                :style="[enemy_styles.faint, { transform: resize.transformFor(wild_mon.species.value) }]"
+                :src="'images/pokemon/' + wild_mon.species.value + '.png'"/>
+            <img v-else-if="meta.game == 'Red and Blue'" class="ePkmnSprite"
+                :class="{ ePkmnSpriteResizing: resize.resize.slot === 0 }"
+                :data-enemy-slot="0"
+                :data-enemy-species="wild_mon.species.value"
+                :style="[enemy_styles.faint, { transform: resize.transformFor(wild_mon.species.value) }]"
+                :src="'images/pokemon/Red_and_Blue/' + wild_mon.species.value + '.png'"/>
+            
+            <!-- UI Elements -->
+            <img class="canvas" :class="svgColorClass(speed_comparison(wild_mon.speed).comparison, wild_mon)" :src="'images/ui/speed_comp/0.svg'"/>
+            <img class="enemyStatsArea opacityTransition" :style="enemy_styles.faint_stats_background" :src="'images/stats/0.svg'"/>
+            
+            <!-- Types -->
+            <img                                       class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/' + enemyType1().toLowerCase() + '.png'"/>
+            <img v-if="enemyType1() != enemyType2(0)"  class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/' + enemyType2(0).toLowerCase() + '.png'"/>
+            <img v-if="enemyType3(0) == 'Ghost'"       class="ePkmnTypeIcons ePkmnType_3 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/ghost.png'"/>
+            
+            <!-- Species & Level -->
+            <div class="ePkmnSpecies opacityTransition" :style="enemy_styles.species">{{wild_mon.species.value}}</div>
+            <div class="ePkmnLevel opacityTransition"   :style="enemy_styles.species">Lv:{{wild_mon.level.value}}</div>
+            
+            <!-- Moves -->
+            <div v-for="move_index in [0, 1, 2, 3]">
+                <img v-if="wild_mon['move' + (move_index + 1)]?.value != null" 
+                    :class="'ds eMoveIconStyle moveIcon' + (move_index + 1) + ' opacityTransition'" 
+                    :style="enemy_fainted_styles" 
+                    :src="move_icon(wild_mon['move' + (move_index + 1)]?.value)"
+                />
+                <div :class="'ePkmnMoveStyle ePkmnMove' + (move_index + 1) + ' opacityTransition'" 
+                    :style="enemy_styles.text">
+                    {{move_name(wild_mon['move' + (move_index + 1)]?.value)}}
+                </div>
+            </div>
+
+            <!-- Stat Labels -->
+            <div class="ePkmnStatLabelStyle ePkmnLabelHp   opacityTransition" :style="stat_mod(0).style"                                           >HP</div>
+            <div class="ePkmnStatLabelStyle ePkmnLabelAtk  opacityTransition" :style="stat_mod(wild_mon.modEnemyStageAttack.value).style" >Atk.</div>
+            <div class="ePkmnStatLabelStyle ePkmnLabelDef  opacityTransition" :style="stat_mod(wild_mon.modEnemyStageDefense.value).style">Def.</div>
+            <div class="ePkmnStatLabelStyle ePkmnLabelSpc  opacityTransition" :style="stat_mod(wild_mon.modEnemyStageSpecial.value).style">Spc.</div>
+            <div class="ePkmnStatLabelStyle ePkmnLabelSpe  opacityTransition" :style="stat_mod(wild_mon.modEnemyStageSpeed.value).style"  >Spe.</div>
+            <div class="ePkmnStatLabelStyle ePkmnLabelCrit opacityTransition" :style="stat_mod(0).style"                                           >Crit.</div>
+
+            <!-- Stats -->
+            <div class="ePkmnStatsStyle ePkmnHp   opacityTransition" :style="enemy_styles.text">{{wild_mon.maxHp.value}}</div>
+            <div class="ePkmnStatsStyle ePkmnAtk  opacityTransition" :style="enemy_styles.text">{{wild_mon.attack.value}}</div>
+            <div class="ePkmnStatsStyle ePkmnDef  opacityTransition" :style="enemy_styles.text">{{wild_mon.defense.value}}</div>
+            <div class="ePkmnStatsStyle ePkmnSpc  opacityTransition" :style="enemy_styles.text">{{wild_mon.speed.value}}</div>
+            <div class="ePkmnStatsStyle ePkmnSpe  opacityTransition" :style="enemy_styles.text">{{wild_mon.special.value}}</div>
+            <div class="ePkmnStatsStyle ePkmnCrit opacityTransition" :style="enemy_styles.text">{{enemy_crit_rate(wild_mon)}}%</div>
+        
+            <!-- Modifiers -->
+            <div v-for="mod in [
+                ['modEnemyStageAttack',  'Atk',],
+                ['modEnemyStageDefense', 'Def',],
+                ['modEnemyStageSpecial', 'Spc',],
+                ['modEnemyStageSpeed',   'Spd',],
+            ]">
+                <div v-show="(meta.enemyState == 'Pokemon' || meta.enemyState == 'Pokemon Sent Out' || meta.enemyState == 'Fainting') && wild_mon[mod[0]].value != '0'" 
+                    :class="'ePkmnModsStyle ePkmnMod' + mod[1]">
+                    {{stat_mod(wild_mon[mod[0]].value).mod}}
+                </div>
+            </div>
+            <!-- Speed Comparison -->
+            <div>
+                <transition name="fade">
+                    <div v-show="overlay.right_panel.speed_comparison" :style="enemy_styles.text" class="speed_comparison">{{speed_comparison(wild_mon.speed).comparison}}</div>
+                </transition>
+            </div>
+        </div>
+    </div> 
+</div>
+</template>
+
+<script lang="ts">
+import { get_enemy_pkmn_styles } from "../../methods/enemy";
+import PokeData from "~/logic/PokeData";
+import { capitalize_words, move_name } from "../../methods/text_functions";
+import { useMetaStore } from "~/stores/metaStore";
+import { defineComponent, inject } from "vue";
+import { GameHookProperty } from "~/packages/gameHookMapperClient";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
+import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
+
+type SpeedComparison = "Outspeeds" | "Outsped" | "Speed-tie";
+export default defineComponent({
+    props: [
+        "enemy_pkmn_faint_types",
+    ],
+    data() {
+        return {
+            game_properties: inject<Record<string, GameHookProperty>>("game_properties", {}),
+            overlay: useOverlaySettingsStore(),
+            meta: useMetaStore(),
+            resize: useEnemySpriteResizeStore(),
+            enemyModColour:  ["0", "background: #d84444;"],
+        }
+    },
+    methods: {
+        move_name,
+        get_enemy_pkmn_styles,
+        /** Path of the type icon for a move of the wild pokemon. Unknown moves fall back to the normal type. */
+        move_icon(rawMoveName) {
+            const move = PokeData.findMove(this.move_name(rawMoveName));
+            return 'images/elements/type-icons/' + (move?.type ?? "Normal").toLowerCase() + '.png';
+        },
+        wild_pkmn_name(species_string) {
+            if (species_string == null || species_string == undefined) { return "" }
+            species_string = species_string.toLowerCase()
+            const speciesMappings = {
+                "nidoranm":     "Nidoran M",
+                "nidoranf":     "Nidoran F",
+                "mr. mime":     "Mr. Mime",
+                "farfetch'd":   "Farfetch'd",
+            };
+            const formattedMove = speciesMappings[species_string];
+            return formattedMove || capitalize_words(species_string);
+        },
+        enemyMods(modValue) {
+            if (this.meta.gameState !== "Battle") { 
+                return this.enemyModColour
+            }
+            var raised = [modValue, "background: #d84444;"]
+            var lowered = [modValue, "background: #21c500"]
+            if (modValue < 0) { 
+                this.enemyModColour = raised 
+                return raised
+            }
+            if (modValue > 0) { 
+                this.enemyModColour = lowered 
+                return lowered
+            }
+            return this.enemyModColour 
+        },
+        speed_comparison(enemy_speed_incoming): { comparison: SpeedComparison, color: string} {
+            let enemy_hp = this.game_properties.battle.enemyPokemon.hp.value
+            let player_speed   = this.game_properties.battle.yourPokemon.speed.value
+            let enemy_speed = enemy_speed_incoming.value
+            let object = {
+                comparison: "Outspeeds" as SpeedComparison,
+                color: "background-color: rgba(255, 63, 63, 0.6)",
+            }
+            if (player_speed > enemy_speed) {
+                object.comparison = "Outsped"
+                object.color      = "background-color: rgba(28, 255, 58, 0.4)"
+            }
+            else if (player_speed == enemy_speed) {
+                object.comparison = "Speed-tie"
+                object.color      = "background-color: rgba(255, 255, 0, 0.5)"
+            }
+            if (enemy_hp == 0) {
+                object.color      = "background-color: rgba(28, 255, 58, 0.5); opacity: 0.0; filter: grayscale(100%)"
+            }
+            return object
+        },
+        svgColorClass(speed_comparison: SpeedComparison, enemy_data: GameHookProperty) {
+            const isFainted = enemy_data.hp.value
+            if (isFainted == 0) {
+                return 'grey-svg';
+            }
+            if (speed_comparison === 'Outsped') {
+                return 'blue-svg';
+            } 
+            else if (speed_comparison === 'Speed-tie') {
+                return 'yellow-svg';
+            }
+            return 'red-svg';
+        },
+        enemyType1() {
+            const speciesName = this.game_properties.battle.enemyPokemon.species.value
+            if (speciesName == null) { 
+                return "Normal"
+            }
+            return PokeData.findSpecies(speciesName)?.type_1 ?? "Normal"
+        },
+        enemyType2(slotNumber: number) {
+            const speciesName = this.game_properties.battle.enemyPokemon.species.value
+            const type_1 = this.enemyType1()
+            if (speciesName == null) { 
+                return "Normal"
+            }
+            const type_2 = PokeData.findSpecies(speciesName)?.type_2 ?? type_1
+            if (type_1 == type_2 && this.meta.starter == 'Pumpkaboo' && this.game_properties.patch.backport.prop_2.value == 8 && this.game_properties.battle.enemyPokemon.partyPos.value == slotNumber) {
+                return 'Ghost'
+            }
+            return type_2
+        },
+        enemyType3(slotNumber: number) {
+            const speciesName = this.game_properties.battle.enemyPokemon?.species.value
+            const type1 = PokeData.findSpecies(speciesName)?.type_1 || "Normal"
+            const type2 = PokeData.findSpecies(speciesName)?.type_2 || "Normal"
+            if (type2 != null && type1 != type2 && this.meta.starter == 'Pumpkaboo' && this.game_properties.patch.backport.prop_2.value == 8 && this.game_properties.battle.enemyPokemon.partyPos.value == slotNumber) {
+                return 'Ghost'
+            }
+            else {
+                return "Normal"
+            }
+        },
+        stat_mod(modifer) {
+            let mod = modifer
+            let mod_string = ""
+            let style_string = ""
+
+            if (mod == 0) {
+                style_string = 'opacity: .7;'
+            }
+            if (mod > 0) {
+                mod_string = `+${mod}`
+                style_string = 'opacity: .1;'
+            }
+            if (mod < 0) {
+                mod_string = mod
+                style_string = 'opacity: .1;'
+            }
+
+            let object = {
+                mod: mod_string,
+                style: style_string,
+            }
+            // return { mod: -1, style: 'opacity: .7;' }
+            // console.log(object)
+            return object
+        },
+        enemy_crit_rate(pkmnData: GameHookProperty) {
+            const speciesName = pkmnData?.species.value
+            const base_speed = PokeData.findSpecies(speciesName)?.base_stats.speed
+            if (base_speed) {
+                return Math.round(Math.round((Math.floor(base_speed/2)/256) * 10000) / 100)
+            }
+            return "";
+        },
+    },
+    computed: {
+        enemy_fainted_styles() {
+            return this.enemy_pkmn_faint_types(this.game_properties.battle.enemyPokemon);
+        },
+        enemy_styles() {
+            return this.get_enemy_pkmn_styles(this.game_properties.battle.enemyPokemon);
+        },
+        wild_mon() {
+            return this.game_properties.battle.enemyPokemon
+        }
+    }
+});
+</script>

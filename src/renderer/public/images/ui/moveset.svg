@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Individual_Areas" data-name="Individual Areas" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="eCrit" x1="19" y1="759.5" x2="379" y2="759.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <linearGradient id="eCrit-2" data-name="eCrit" x1="23" y1="703" x2="375" y2="703" xlink:href="#eCrit"/>
+    <filter id="drop-shadow-2" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="1"/>
+      <feGaussianBlur result="blur-2" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".9"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="eCrit-3" data-name="eCrit" x1="23" y1="744" x2="375" y2="744" xlink:href="#eCrit"/>
+    <filter id="drop-shadow-3" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="1"/>
+      <feGaussianBlur result="blur-3" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".9"/>
+      <feComposite in2="blur-3" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="eCrit-4" data-name="eCrit" x1="23" y1="785" x2="375" y2="785" xlink:href="#eCrit"/>
+    <filter id="drop-shadow-4" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="1"/>
+      <feGaussianBlur result="blur-4" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".9"/>
+      <feComposite in2="blur-4" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="eCrit-5" data-name="eCrit" x1="23" y1="826" x2="375" y2="826" xlink:href="#eCrit"/>
+    <filter id="drop-shadow-5" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="1"/>
+      <feGaussianBlur result="blur-5" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".9"/>
+      <feComposite in2="blur-5" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Solo_Challenge" data-name="Solo Challenge">
+    <g id="Stats">
+      <g id="Moveset">
+        <rect id="Label" x="19" y="670" width="360" height="179" rx="6" ry="6" style="fill: url(#eCrit); stroke-width: 0px;"/>
+        <rect id="Label-2" data-name="Label" x="23" y="684" width="352" height="38" rx="6" ry="6" style="fill: url(#eCrit-2); filter: url(#drop-shadow-2); stroke-width: 0px;"/>
+        <rect id="Label-3" data-name="Label" x="23" y="725" width="352" height="38" rx="6" ry="6" style="fill: url(#eCrit-3); filter: url(#drop-shadow-3); stroke-width: 0px;"/>
+        <rect id="Label-4" data-name="Label" x="23" y="766" width="352" height="38" rx="6" ry="6" style="fill: url(#eCrit-4); filter: url(#drop-shadow-4); stroke-width: 0px;"/>
+        <rect id="Label-5" data-name="Label" x="23" y="807" width="352" height="38" rx="6" ry="6" style="fill: url(#eCrit-5); filter: url(#drop-shadow-5); stroke-width: 0px;"/>
+      </g>
+    </g>
+  </g>
+</svg>

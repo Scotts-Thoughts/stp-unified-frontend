@@ -1,0 +1,8 @@
+node_modules/
+out/
+dist/
+splits/
+tools/fixtures/raw/
+tools/reports/
+tools/baselines/**/*.png
+tools/sandbox/

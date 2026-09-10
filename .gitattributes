@@ -1,0 +1,5 @@
+# Byte preservation is a hard requirement of this project: the parity harness
+# compares CSS/CSV/JSON bytes between the legacy apps and this tree, so git must
+# never normalise line endings. gen1's src/renderer/.gitattributes said
+# `* text=auto`; it is overridden here (and in place) for the same reason.
+* -text
