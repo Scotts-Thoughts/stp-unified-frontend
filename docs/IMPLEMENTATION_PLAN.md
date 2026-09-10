@@ -18,7 +18,7 @@ Companion documents (all in `docs/`):
 | `external-contracts.md` | every interface another program depends on: queuer launch protocol and control server on port 30159, Super Shuckie, OBS chapter markers, split CSVs, persistence locations, keyhook |
 | `parity-harness.md` | the mock PokeAByte wire protocol, fixture format as actually written, clock/isolation strategy, oracles, scripts |
 | `mapper-matrix.md` | which mapper file each legacy overlay is written against and the three game-name flavours |
-| `known-legacy-bugs.md` | 29 bugs/quirks (28 from the survey, #29 found by the harness self-test) and how each is preserved |
+| `known-legacy-bugs.md` | 30 bugs/quirks (28 from the survey, #29-#30 found by the harness) and how each is preserved |
 
 Working directory: `A:\Programs\stp-unified-frontend`.
 Source directories `A:\Programs\gen1..gen5-stp-frontend` are **read-only inputs**. Nothing is ever edited there;

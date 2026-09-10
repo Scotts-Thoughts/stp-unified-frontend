@@ -1,0 +1,178 @@
+{
+  "_comment": [
+    "Synthetic gen1 Yellow scenario: a new game, one wild battle, one BROCK battle and a reset.",
+    "It is built to touch every gen1 state-machine hook in components/frontend.js:",
+    "  player.playerId 0 -> N        new run (attempts++, timer start)",
+    "  meta.state To Battle/Battle/From Battle/Overworld with battle.type Trainer",
+    "                                OBS 'IN - BROCK' and 'OUT - <class>' chapter markers",
+    "  battle.type change            useBattleStore.startBattle",
+    "  battle.lowHealthAlarm Disabled + battle.type Trainer",
+    "                                endBattle, Full/Deprecated/Simple split CSVs, right-panel override",
+    "  player.playerId N -> 0        reset (resets++)",
+    "Every path is checked against the mapper XML at build time, so a typo fails the build",
+    "instead of silently doing nothing. Values are plausible, not a real run: this fixture",
+    "proves determinism and no-change-under-refactor, never correctness (see make-fixture.ts)."
+  ],
+  "replayName": "gen1-yellow-smoke",
+  "recordedAt": "2026-01-01T12:00:00.000Z",
+  "item": {
+    "replayName": "gen1-yellow-smoke",
+    "mapperId": "DEPRECATED/gen1/pokemon_yellow_deprecated.xml",
+    "gameCode": "y",
+    "species": "Pikachu",
+    "number": "1",
+    "starter": "Pikachu"
+  },
+  "framesPerSecond": 60,
+  "frameIntervalMs": 250,
+  "initial": {
+    "meta.state": "No Pokemon",
+    "player.playerId": 0,
+    "player.name": "",
+    "player.teamCount": 0,
+    "player.money": 3000,
+    "overworld.map": "Pallet Town",
+    "battle.type": "None",
+    "battle.lowHealthAlarm": "Enabled",
+    "battle.trainer.class": "NOBODY",
+    "battle.trainer.number": 0,
+    "screen.tiles.column1.tile1": 0,
+    "gameTime.hours": 0,
+    "gameTime.minutes": 0,
+    "gameTime.seconds": 0,
+    "gameTime.frames": 0
+  },
+  "steps": [
+    {
+      "tMs": 2000,
+      "comment": "New game: playerId goes positive, which is gen1's new-run trigger.",
+      "set": {
+        "player.playerId": 44910,
+        "player.name": "SCOTT",
+        "player.teamCount": 1,
+        "meta.state": "Overworld",
+        "player.team.0.species": "Pikachu",
+        "player.team.0.level": 5,
+        "player.team.0.hp": 20,
+        "player.team.0.maxHp": 20,
+        "player.team.0.attack": 10,
+        "player.team.0.defense": 9,
+        "player.team.0.speed": 14,
+        "player.team.0.special": 11,
+        "player.team.0.move1": "THUNDERSHOCK",
+        "player.team.0.move2": "GROWL",
+        "player.team.0.move3": "TAIL WHIP",
+        "player.team.0.move4": "QUICK ATTACK",
+        "player.team.0.move1pp": 30,
+        "player.team.0.move2pp": 40,
+        "player.team.0.move3pp": 30,
+        "player.team.0.move4pp": 30
+      }
+    },
+    {
+      "tMs": 5000,
+      "comment": "Walking around; only the clock and step counter move.",
+      "set": { "overworld.map": "Route 1", "gameTime.seconds": 5, "patch.steps.stepsCount": 42 }
+    },
+    {
+      "tMs": 8000,
+      "comment": "Wild battle. battle.type is set before meta.state, because the meta.state watcher reads battle.type in the same tick.",
+      "set": {
+        "battle.type": "Wild",
+        "battle.trainer.team.0.species": "Rattata",
+        "battle.trainer.team.0.level": 3,
+        "battle.trainer.team.0.hp": 14,
+        "battle.trainer.team.0.maxHp": 14,
+        "battle.yourPokemon.species": "Pikachu",
+        "battle.yourPokemon.level": 5,
+        "battle.yourPokemon.hp": 20,
+        "battle.yourPokemon.maxHp": 20,
+        "meta.state": "To Battle"
+      }
+    },
+    { "tMs": 9000, "set": { "meta.state": "Battle", "gameTime.seconds": 9 } },
+    {
+      "tMs": 13000,
+      "comment": "Enemy faints. lowHealthAlarm Disabled is gen1's end-of-battle edge; a Wild battle writes no split.",
+      "set": { "battle.trainer.team.0.hp": 0, "battle.lowHealthAlarm": "Disabled" }
+    },
+    {
+      "tMs": 14000,
+      "set": { "battle.type": "None", "battle.lowHealthAlarm": "Enabled", "meta.state": "From Battle" }
+    },
+    {
+      "tMs": 15000,
+      "comment": "Back to the overworld: gen1 sends 'OUT - <trainer class>' even after a wild battle.",
+      "set": { "meta.state": "Overworld", "gameTime.seconds": 15, "patch.battles.wildBattles": 1 }
+    },
+    {
+      "tMs": 25000,
+      "comment": "BROCK. This is the path that writes split CSVs and the 'IN - BROCK' chapter marker.",
+      "set": {
+        "battle.type": "Trainer",
+        "battle.trainer.class": "BROCK",
+        "battle.trainer.name": "BROCK",
+        "battle.trainer.number": 1,
+        "battle.trainer.totalPokemon": 2,
+        "battle.trainer.team.0.species": "Geodude",
+        "battle.trainer.team.0.level": 12,
+        "battle.trainer.team.0.hp": 32,
+        "battle.trainer.team.0.maxHp": 32,
+        "battle.yourPokemon.species": "Pikachu",
+        "battle.yourPokemon.level": 12,
+        "battle.yourPokemon.hp": 34,
+        "battle.yourPokemon.maxHp": 34,
+        "overworld.map": "Pewter City",
+        "meta.state": "To Battle"
+      }
+    },
+    { "tMs": 26000, "set": { "meta.state": "Battle", "patch.battles.trainerBattles": 1 } },
+    {
+      "tMs": 34000,
+      "set": {
+        "patch.battle_info.turns.battleTurns": 6,
+        "patch.battle_info.turns.playerTurns": 3,
+        "patch.battle_info.experienceGained": 210,
+        "battle.trainer.team.0.hp": 0
+      }
+    },
+    {
+      "tMs": 35000,
+      "comment": "End of the BROCK battle: endBattle + logData for Full, Deprecated and Simple.",
+      "set": { "battle.lowHealthAlarm": "Disabled" }
+    },
+    {
+      "tMs": 36000,
+      "set": {
+        "battle.type": "None",
+        "battle.lowHealthAlarm": "Enabled",
+        "meta.state": "From Battle",
+        "player.badges.badge1": true,
+        "player.team.0.level": 13
+      }
+    },
+    { "tMs": 37000, "comment": "'OUT - BROCK'.", "set": { "meta.state": "Overworld", "gameTime.minutes": 1 } },
+    {
+      "tMs": 45000,
+      "comment": "Reset: playerId back to 0 while the run is not finished increments resets.",
+      "set": { "player.playerId": 0, "meta.state": "No Pokemon", "player.name": "", "player.teamCount": 0 }
+    },
+    {
+      "tMs": 50000,
+      "comment": "Same save loaded again -- a second attempt.",
+      "set": {
+        "player.playerId": 44911,
+        "player.name": "SCOTT",
+        "player.teamCount": 1,
+        "meta.state": "Overworld",
+        "overworld.map": "Pallet Town",
+        "player.team.0.species": "Pikachu",
+        "player.team.0.level": 5,
+        "player.team.0.hp": 20,
+        "player.badges.badge1": false,
+        "gameTime.minutes": 0,
+        "gameTime.seconds": 0
+      }
+    }
+  ]
+}

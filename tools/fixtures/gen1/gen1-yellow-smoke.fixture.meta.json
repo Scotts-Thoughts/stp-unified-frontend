@@ -1,0 +1,11 @@
+{
+  "file": "A:\\Programs\\stp-unified-frontend\\tools\\fixtures\\gen1\\gen1-yellow-smoke.fixture.jsonl.gz",
+  "synthetic": true,
+  "mapperId": "DEPRECATED/gen1/pokemon_yellow_deprecated.xml",
+  "replayName": "gen1-yellow-smoke",
+  "events": 84,
+  "properties": 1496,
+  "lastFrame": 3000,
+  "durationSec": 50,
+  "bytes": 50117
+}

@@ -33,7 +33,13 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:linux": "npm run build && electron-builder --linux",
+    "parity:selftest": "tsx tools/parity/mock-pokeabyte/selftest.ts",
+    "parity:mock": "tsx tools/parity/mock-pokeabyte/cli.ts",
+    "parity:scan": "tsx tools/parity/scan-fixture.ts",
+    "parity:run": "tsx tools/parity/run.ts",
+    "parity:diff": "tsx tools/parity/diff.ts",
+    "parity:preflight": "tsx tools/parity/preflight.ts"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -46,6 +52,7 @@
     "electron-builder": "^26.0.12",
     "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^4.0.0",
+    "fast-xml-parser": "^5.11.1",
     "pixelmatch": "^7.2.0",
     "playwright-core": "^1.63.0",
     "pngjs": "^7.0.0",
