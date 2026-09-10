@@ -1,0 +1,100 @@
+/**
+ * Rules that belong to the document rather than to any one generation (plan 1.5).
+ *
+ * The reset, the html/body box, the #app and #app-container boxes and the five
+ * @font-face declarations. Everything else in gen1's stylesheet is
+ * `games/gen1/style.css`, scoped under `.gen-1`.
+ *
+ * Nothing here was edited: the rules are in the order they appeared in
+ * `style-yellow.css`, and this file is linked before the generation's, so the cascade
+ * order between any two of them is what it was when they shared a file.
+ *
+ * The @font-face `src` paths are relative to the stylesheet, so they gained the two
+ * `../` this file's new depth needs and still point at `src/renderer/fonts/`. The
+ * families (oseb, osb, titan, play, play_regular) keep their names, which plan
+ * section 4 requires.
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* gen1's `:root` set these two, and they beat the `html` rule below on
+   specificity -- transposed on purpose or not, that is what the document
+   computes today, so they stay here and stay on `:root`. */
+:root {
+    height: 1920px;
+    width: 1080px;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+}
+
+/* @font-face {
+    src: url(../../fonts/OpenSans-VariableFont_wdth\,wght.ttf);
+    font-family: oseb;
+} */
+@font-face {
+    src: url(../../fonts/OpenSans-ExtraBold.ttf);
+    font-family: oseb;
+    font-weight: 700;
+}
+
+@font-face {
+    src: url(../../fonts/Play-Bold.ttf);
+    font-family: osb;
+}
+
+@font-face {
+    src: url(../../fonts/TitanOne-Regular.ttf);
+    font-family: titan;
+}
+
+@font-face {
+    src: url(../../fonts/Play-Bold.ttf);
+    font-family: play;
+}
+
+@font-face {
+    src: url(../../fonts/Play-Regular.ttf);
+    font-family: play_regular;
+}
+
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    /* Hide scrollbars */
+    background-color: #000000;
+    margin: 0;
+    padding: 0;
+}
+
+/* Scaling container that maintains 16:9 aspect ratio */
+#app-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: top left;
+    transform: scale(1);
+}

@@ -3,10 +3,14 @@
 <head>
     <meta charset="utf-8">
     <title>Scott's Thoughts - Generation 1 Overlay - v1.5.0</title>
-    <link rel="stylesheet" href="style-yellow.css">
+    <!-- base first, then the generation's: the cascade order between any two rules
+         is the order they had when they shared style-yellow.css (plan 1.5). Phase 3
+         replaces the second link with the GameModule's dynamic import. -->
+    <link rel="stylesheet" href="core/styles/base.css">
+    <link rel="stylesheet" href="games/gen1/style.css">
 </head>
 <body>
-    <div id="app-container">
+    <div id="app-container" class="gen-1">
         <div id="app">
             <keyhook :table="hotkeys"></keyhook>
             <div v-if="ready == false">
