@@ -89,7 +89,7 @@ import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { useMetaStore } from "~/stores/metaStore";
 import { trainer_name_lookup } from "~/autosplitter/trainer_name_lookup";
 import { convertDurationToSeconds, convertSecondsToDuration } from "~/utils/timehelpers";
-import { split_trainers } from "~/autosplitter/split_trainers";
+import { split_trainers } from "~/games/gen1/data/splits";
 import movepool from "./right_panel/move_pool.vue"
 import splits_followup from "./right_panel/splits_followup"
 import splits_first from "./right_panel/splits_first"

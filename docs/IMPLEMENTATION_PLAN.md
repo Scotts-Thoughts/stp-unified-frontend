@@ -296,7 +296,10 @@ trigger makes it fail.
 + `src/main/keyhook.ts`; `state.js` → `useGameStateSync()`; `no_mapper.js` → `GameSelect.vue` (Phase 3.2 replaces its
 look); `exp_bar.js`, `settings/interface_1.js`, `settings/encounters.js`, `splits_first.js`, `splits_followup.js`.
 1.2 Move the split lists (`data/autosplitter.js`) into `games/gen1/data/splits.ts`; engine stays in `core/autosplitter`.
-Delete `deprecated_autosplitter.js` after confirming nothing imports it (it does not today).
+~~Delete `deprecated_autosplitter.js` after confirming nothing imports it (it does not today).~~ **Corrected
+2026-09-10: it *is* imported** — `autosplitter/autosplitter_functions.js:1` reads it for the `trainerName` column of
+the Deprecated CSV variant, so it moved into `games/gen1/data/` with the other two tables instead of being deleted.
+`autosplitter/split_trainers.js` (the right panel's display names) moved with them; `splits.ts` re-exports all three.
 1.3 Delete `methods/`, `settings/pokemon_settings.js`, both `createWatchedObject.js`, `logic/temp/`, `battle_summaries/test`,
 `data/keyhook.js`, `data/saved_settings.js` (if unreferenced), `Major Refactor.txt`.
 1.4 Introduce `GameModule`, `registry.ts` (single entry: gen1 covering Yellow and Red and Blue) and the **mapper

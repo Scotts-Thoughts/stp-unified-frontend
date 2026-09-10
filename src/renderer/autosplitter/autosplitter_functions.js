@@ -1,4 +1,4 @@
-import { deprecated_autosplitter } from "~/data/deprecated_autosplitter";
+import { deprecated_autosplitter } from "~/games/gen1/data/splits";
 import { capitalize_words } from "../methods/text_functions";
 import { formatShuckieTime } from "~/stores/useEmulatorStatsStore";
 import { splitMilliseconds } from "~/logic/Timer";

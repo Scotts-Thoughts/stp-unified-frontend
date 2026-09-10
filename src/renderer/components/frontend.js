@@ -1,7 +1,7 @@
 import PubSub from "~/logic/PubSub";
 import { LocalStorageProxy } from "~/logic/LocalStorageProxy.js";
 import { log_split, autosplitter_process, format_trainer_name, logData, logCopy } from "../autosplitter/autosplitter_functions.js";
-import { autosplitter } from "~/data/autosplitter.js";
+import { autosplitter } from "~/games/gen1/data/splits";
 import { sendObsChapterMarker } from "~/logic/obs";
 import { computed, defineComponent } from "vue";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore.js";
