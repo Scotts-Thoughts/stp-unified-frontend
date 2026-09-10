@@ -109,11 +109,16 @@ single-tenant).
 |---|---|---|---|
 | legacy genN (reference) | `A:\Programs\genN-stp-frontend\node_modules\electron\dist\electron.exe` (25.x) | `["A:\\Programs\\genN-stp-frontend"]` | sandbox dir seeded with `keyhook.exe`, `storage/`, empty `splits/` |
 | legacy genN (same-Electron baseline) | the unified repo's Electron 37 binary | same | same |
-| unified | Electron 37 | `["out/main/index.js"]` (built with `electron-vite build`; **never** the dev server, its `http://localhost:5173` origin changes `localStorage` scoping) | sandbox |
+| unified | Electron 37 | the repo root (built with `electron-vite build`; **never** the dev server, its `http://localhost:5173` origin changes `localStorage` scoping) — passing the root, not `out/main/index.js`, makes Electron read `package.json`, so the app name, `main` and `app.isPackaged` are what a real launch sees | sandbox |
 
-Environment for every launch: `APPDATA=<sandbox>\AppData` (Electron derives `userData` from it on Windows, so
-each run has a fresh profile and the legacy `dev-window-state.json` logic sees nothing),
-`NODE_ENV=production`, `ELECTRON_ENABLE_LOGGING=1`, and Chromium switch `--force-device-scale-factor=1`.
+Environment for every launch: `NODE_ENV=production`, `ELECTRON_ENABLE_LOGGING=1`, and Chromium switches
+`--force-device-scale-factor=1` and **`--user-data-dir=<sandbox>\userData`**.
+
+**[corrected 2026-09-10]** Revision 2 said `APPDATA=<sandbox>\AppData` gives each run a fresh profile.
+It does not: Electron resolves `app.getPath('appData')` on Windows through the known-folder API, not the
+environment, so runs launched that way all shared `%APPDATA%\Electron` and read each other's `localStorage`
+(two identical runs produced split tables two rows apart). `--user-data-dir` is what actually isolates a run;
+`APPDATA` is still set into the sandbox for anything that reads it directly.
 After launch: `BrowserWindow.setContentSize(1920,1080)`, `webContents.setZoomFactor(1)`, assert
 `getContentBounds()` is 1920×1080 (fail loudly on displays that cannot fit it — use a virtual display or
 `--headless`-style offscreen window if needed), then wait for `#app` and the mock's `MapperLoaded` ack.
@@ -174,3 +179,81 @@ npm scripts: `parity:baseline <gen> <fixture>`, `parity:run <target> <fixture>`,
   fixture stores them as-is.
 - `meta.gameName` (DEPRECATED mappers) vs `meta.game_name` (STANDARD/ST mappers) is mapper content, not
   protocol; the mock serves whatever the fixture recorded. See `mapper-matrix.md`.
+
+---
+
+## 9. Status — what is built and how to run it (2026-09-10)
+
+Everything in sections 1–8 is implemented in `tools/parity/` except oracle 6 (the scripted control-server
+session), which needs `src/main/control-server.ts` from Phase 1.8 to exist first. `diff.ts` already compares
+`status.json` when a run produces one.
+
+```
+npm run parity:preflight -- unified          # which single-tenant port is held, and by what
+npm run parity:selftest                      # 32 checks: the mock vs gen1's real GameHookMapperClient
+npm run parity:scan -- <fixture> --out=tools/reports
+npm run parity:run  -- <target> <fixture> --out=<dir>
+npm run parity:diff -- <baseline-dir> <candidate-dir>
+npm run parity:mock -- <fixture>             # serve a fixture by hand, no Playwright
+```
+
+`<target>` is `unified`, `legacy:genN@25` or `legacy:genN@37`.
+
+### Determinism is not free — four things the runner has to do
+
+Getting two identical runs to agree took four fixes; each is commented where it is handled, and any change to
+the runner has to keep all four:
+
+1. **`--user-data-dir` per sandbox** (section 4). Without it runs share `%APPDATA%\Electron`.
+2. **`page.clock.pauseAt()` after `install()`.** `install()` alone keeps the fake clock ticking with real
+   time, so the overlay's timer samples wall clock and the `.cs` digits differ every run. With the clock
+   paused, `requestAnimationFrame` only fires when the clock is advanced — so "wait two frames" is spelled
+   `clock.runFor(32)`, never an rAF promise, which would wait forever (`settle()` in `capture.ts`).
+3. **A CDP barrier before every clock step** (`CLOCK_STEP_MS` in `run.ts`). Hub messages reach the renderer on
+   its IO thread while `page.clock` advances over the DevTools pipe; without draining first, the app applies a
+   property change at a different virtual time in each run.
+4. **Arm the mapper before the reload.** A client that connects while no mapper is loaded leaves `_debouceMap`
+   null and throws from its rAF loop a frame later (known-legacy-bugs.md #29) — landing in a different capture
+   each run. Arming first also matches the queuer's real launch order.
+
+Collecting the whole `userData` tree is a fifth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
+DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between
+identical runs. `run.ts` collects only what the app writes, and `localStorage` is compared from the page dump.
+
+### `--redirect-ports`
+
+Ports 8085 / 30158 / 4455 / 30159 are single-tenant, so a parity run normally requires PokeAByte, Super
+Shuckie and any overlay to be closed. `--redirect-ports` binds the stubs to 18085 / 30258 / 14455 and installs
+an init script that rewrites those hosts inside the renderer's `fetch`, `XMLHttpRequest` and `WebSocket`. It
+changes URL strings only, so every oracle still holds. It cannot move the overlay's **own** control server off
+30159, so gen2–5 targets still need that port free.
+
+### Synthetic fixtures
+
+`make-fixture.ts` builds a fixture from a shipped mapper XML plus a scenario (`tools/parity/scenarios/*.json`),
+expanding the XML exactly as PokeAByte does (`lib/mapper-xml.ts`: classes, `var:` substitution, `{address} + n`
+expressions, references, static `value=` properties). Every path a scenario sets is checked against the mapper
+at build time, so a typo fails the build instead of silently doing nothing.
+
+A synthetic fixture proves **determinism and no-change-under-refactor**, never correctness — its values are
+chosen, not recorded. Every one carries `"synthetic": true` in its header. The recorded matrix in plan 0.2 is
+still the ceiling on parity confidence.
+
+### Phase 0.4 result
+
+`tools/fixtures/gen1/gen1-yellow-smoke.fixture.jsonl.gz` (DEPRECATED/gen1 Yellow: new game → wild battle →
+BROCK → reset → second attempt, 25 checkpoints) run twice against the copied gen1:
+
+- **all nine applicable oracles green**, including three split CSVs, `data/overlay_settings.json`,
+  `data/Yellow/Venomoth/{metrics,settings}.json` and the OBS marker sequence
+  `OUT - NOBODY`, `IN - BROCK`, `OUT - BROCK`, `RESET`;
+- the deliberate-break test passes: `font-size: 68px → 67px` on `.gametimeClock` is caught by oracles 1 and 2
+  at every checkpoint, and renaming the `case "BROCK"` split trigger is caught by oracle 3
+  (`Y-Venomoth-1-simple.csv` present in the baseline, absent in the broken build) and oracle 4.
+
+Still outstanding for a full Phase 0 exit, both blocked on things outside the harness:
+
+- **recorded fixtures** for the 0.2 matrix (decision 6: Scott records them). Until then the only recorded
+  fixture is gen2 Crystal, and gen1-vs-gen1 parity rests on the synthetic fixture.
+- **legacy baselines** (0.4) and the Electron 37 boot check for gen2–5 (checklist step 8): both need ports
+  8085/30158/30159 free, i.e. PokeAByte, Super Shuckie and the running overlay closed.
