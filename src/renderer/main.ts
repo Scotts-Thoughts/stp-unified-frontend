@@ -9,6 +9,8 @@ import { PokemonGame } from "~/logic/PokeDataTypes.js";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { useEmulatorStatsStore } from "./stores/useEmulatorStatsStore";
+import { registerControlServer } from "~/core/control/useControlServer";
+import { gen1ControlRoutes } from "~/games/gen1/control";
 
 const main = defineComponent({
     components: {
@@ -23,6 +25,8 @@ const main = defineComponent({
             mapper: null as GameHookMapperClient|null,
             /** Resolves once the overlay settings have been read from disk. */
             overlayLoaded: null as Promise<void> | null,
+            /** Detaches the control-server bridge; see `created`. */
+            unregisterControl: null as (() => void) | null,
         }
     },
     created() {
@@ -46,6 +50,19 @@ const main = defineComponent({
             useEmulatorStatsStore().stopPolling();
         };
         this.mapper.connect();
+
+        // The queuer drives the overlay over http://127.0.0.1:30159 (plan 1.8). gen1 had
+        // no control server, so this is purely additive; the routes live in
+        // games/gen1/control.ts because they are per generation.
+        this.unregisterControl = registerControlServer(() =>
+            gen1ControlRoutes(
+                () => this.ready,
+                () => (this.mapper?.meta?.path as string | undefined) ?? null,
+            ),
+        );
+    },
+    unmounted() {
+        this.unregisterControl?.();
     },
 });
 

@@ -1,8 +1,19 @@
 // Modules to control application life and create native browser window
-const { electronApp, optimizer, is } = require('@electron-toolkit/utils');
-const { app, shell, BrowserWindow, ipcMain, screen } = require('electron')
-const path = require("path");
-const fs = require("fs");
+import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { app, shell, BrowserWindow, screen, type BrowserWindow as BrowserWindowType } from 'electron'
+import path from "path";
+import fs from "fs";
+import { ControlServer } from "./control-server";
+import { registerIpc } from "./ipc";
+import { startKeyhook, stopKeyhook } from "./keyhook";
+
+/**
+ * The one overlay window. The control server (port 30159) and the keyhook forwarder
+ * both need it, and both outlive a renderer reload, so it is held here rather than
+ * passed around.
+ */
+let mainWindow: BrowserWindowType | null = null;
+const controlServer = new ControlServer(() => mainWindow);
 
 const devStateFile = () => path.join(app.getPath('userData'), 'dev-window-state.json')
 
@@ -56,7 +67,7 @@ function createWindow() {
     }
 
     // Create the browser window.
-    const mainWindow = new BrowserWindow(windowOptions);
+    mainWindow = new BrowserWindow(windowOptions);
 
     if (useSaved && savedState.isFullScreen) {
         mainWindow.setFullScreen(true)
@@ -110,7 +121,9 @@ function createWindow() {
         })
     }
 
-    ipcMain.handle('settings_dir', () => app.getPath("userData"))
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    })
 
     mainWindow.on('ready-to-show', () => {
         //zoom the window appropriately before showing
@@ -160,6 +173,10 @@ app.whenReady().then(() => {
         // Set app user model id for windows
     electronApp.setAppUserModelId('com.electron');
 
+    registerIpc(() => mainWindow);
+    controlServer.start();
+    startKeyhook(() => mainWindow);
+
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
     // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -168,6 +185,11 @@ app.whenReady().then(() => {
         window._userData = app.getPath('userData');
     });
     createWindow();
+})
+
+app.on('will-quit', () => {
+    controlServer.stop();
+    stopKeyhook();
 })
 
 // In this file you can include the rest of your app's specific main process

@@ -1,0 +1,29 @@
+{
+  "_comment": [
+    "The queuer's call order for one queue item, from docs/external-contracts.md section 2",
+    "(A:\\Dropbox\\stp-projects\\programs\\queuer main.js). `skipFor` mirrors the queuer's own",
+    "per-generation guards, so replaying this script against genN issues exactly the calls",
+    "the queuer would issue against genN.",
+    "",
+    "/quit is deliberately last and /reload is left out: both take the window away, and the",
+    "harness needs the app alive to finish the run. They are covered by their own scripts."
+  ],
+  "name": "queuer-item",
+  "calls": [
+    { "route": "/status", "comment": "readiness poll: the queuer waits up to 120 s for ready:true" },
+    { "route": "/set-game", "query": { "game": "Yellow" }, "skipFor": ["gen1"] },
+    { "route": "/set-starter", "query": { "species": "Pikachu" } },
+    { "route": "/set-hidden-power", "query": { "type": "Ice" }, "skipFor": ["gen1"] },
+    { "route": "/set-shuckie-counters", "query": { "enabled": "true" }, "skipFor": ["gen1"] },
+    { "route": "/set-show-tutor-moves", "query": { "enabled": "true" }, "skipFor": ["gen1", "gen2"] },
+    { "route": "/set-unobtainable-moves", "query": { "mode": "Always Cross Out" }, "skipFor": ["gen1"] },
+    { "route": "/set-automatic-post-battle-splits", "query": { "enabled": "true" }, "skipFor": ["gen1"] },
+    { "route": "/set-counters", "query": { "bonk": "false", "repel_counter": "false" }, "skipFor": ["gen1", "gen3", "gen4", "gen5"] },
+    { "route": "/refresh", "skipFor": ["gen1"] },
+    { "route": "/set-evolution", "query": { "enabled": "false", "species": "Pikachu" }, "skipFor": ["gen1", "gen2"] },
+    { "route": "/set-right-panel", "query": { "panel": "Automatic" }, "skipFor": ["gen1"] },
+    { "route": "/set-splits", "query": { "mode": "First" }, "skipFor": ["gen1"] },
+    { "route": "/new-run", "skipFor": ["gen1"] },
+    { "route": "/status" }
+  ]
+}

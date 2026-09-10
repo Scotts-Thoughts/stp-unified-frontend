@@ -184,15 +184,16 @@ npm scripts: `parity:baseline <gen> <fixture>`, `parity:run <target> <fixture>`,
 
 ## 9. Status — what is built and how to run it (2026-09-10)
 
-Everything in sections 1–8 is implemented in `tools/parity/` except oracle 6 (the scripted control-server
-session), which needs `src/main/control-server.ts` from Phase 1.8 to exist first. `diff.ts` already compares
-`status.json` when a run produces one.
+Everything in sections 1–8 is implemented in `tools/parity/`, oracle 6 included: `--control` replays the
+queuer's call order for one queue item (`tools/parity/control-scripts/queuer-item.json`, whose `skipFor`
+entries mirror the queuer's own per-generation guards) against the running overlay and records every
+exchange plus the `/status` that follows it into `status.json`.
 
 ```
 npm run parity:preflight -- unified          # which single-tenant port is held, and by what
 npm run parity:selftest                      # 32 checks: the mock vs gen1's real GameHookMapperClient
 npm run parity:scan -- <fixture> --out=tools/reports
-npm run parity:run  -- <target> <fixture> --out=<dir>
+npm run parity:run  -- <target> <fixture> --out=<dir> [--control]
 npm run parity:diff -- <baseline-dir> <candidate-dir>
 npm run parity:mock -- <fixture>             # serve a fixture by hand, no Playwright
 ```

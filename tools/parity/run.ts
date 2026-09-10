@@ -13,6 +13,9 @@
  *   --no-shuckie        do not start the Super Shuckie stub (covers the "not running" path)
  *   --no-obs            do not start the OBS stub
  *   --writes=ignore     log PokeAByte writes without applying them
+ *   --control[=<file>]  after the replay, drive the control server with a scripted queuer
+ *                       session (default tools/parity/control-scripts/queuer-item.json)
+ *                       and record it as oracle 6
  *   --keep-open         leave the app running after the replay (manual inspection)
  *   --redirect-ports    bind the stubs to spare ports and rewrite the app's URLs to match
  *
@@ -21,8 +24,9 @@
  *
  * `--redirect-ports` is the escape hatch for a machine that is mid-session: the stubs
  * bind 18085/30258/14455 and an init script rewrites those hosts inside the renderer's
- * fetch/XHR/WebSocket. It changes URL strings only, so every oracle still holds -- but
- * it cannot move the overlay's OWN control server off 30159, so gen2-5 targets still
+ * fetch/XHR/WebSocket. It changes URL strings only, so every oracle still holds. The
+ * unified app's own control server moves to 30259 as well (STP_CONTROL_PORT); the legacy
+ * apps hardcode 30159 in their renderers and cannot be moved, so legacy targets still
  * need that port free.
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -36,10 +40,13 @@ import { ReplayDriver } from "./mock-pokeabyte/replay.ts";
 import { capture, installEvalShims, settle, type ConsoleEntry } from "./capture.ts";
 import { scanFixture, type Checkpoint, type ScanResult } from "./scan-fixture.ts";
 import { parseTarget, prepareSandbox, REPO, type Target } from "./targets.ts";
+import { loadControlScript, runControlScript } from "./control-script.ts";
 
 /** Canonical ports the overlays hardcode, and the spares --redirect-ports uses. */
-const CANONICAL_PORTS = { pokeabyte: 8085, shuckie: 30158, obs: 4455 };
-const SPARE_PORTS = { pokeabyte: 18085, shuckie: 30258, obs: 14455 };
+const CANONICAL_PORTS = { pokeabyte: 8085, shuckie: 30158, obs: 4455, control: 30159 };
+const SPARE_PORTS = { pokeabyte: 18085, shuckie: 30258, obs: 14455, control: 30259 };
+
+const DEFAULT_CONTROL_SCRIPT = join(REPO, "tools", "parity", "control-scripts", "queuer-item.json");
 
 const SIGNALR_PING_MS = 15000;
 
@@ -68,6 +75,8 @@ export interface RunOptions {
   writes?: "apply" | "ignore";
   keepOpen?: boolean;
   redirectPorts?: boolean;
+  /** Path to a control script, or true for the default queuer session. */
+  control?: string | boolean;
   log?: (msg: string) => void;
 }
 
@@ -98,7 +107,11 @@ export async function run(opts: RunOptions): Promise<RunResult> {
   mkdirSync(outDir, { recursive: true });
 
   const ports = opts.redirectPorts ? SPARE_PORTS : CANONICAL_PORTS;
-  if (opts.redirectPorts) log(`[run] --redirect-ports: stubs on ${JSON.stringify(ports)}`);
+  if (opts.redirectPorts) {
+    log(`[run] --redirect-ports: stubs on ${JSON.stringify(ports)}`);
+    // Only the unified app can be told to listen elsewhere; gen2-5 hardcode 30159.
+    if (target.kind === "unified") target.controlPort = ports.control;
+  }
   const mock = new MockPokeAByte({ port: ports.pokeabyte, writes: opts.writes ?? "apply", log });
   const shuckie = opts.shuckie === false ? null : new ShuckieStub({ port: ports.shuckie, log });
   const obs = opts.obs === false ? null : new ObsStub({ port: ports.obs, log });
@@ -124,6 +137,14 @@ export async function run(opts: RunOptions): Promise<RunResult> {
       }
     });
     page.on("pageerror", (err) => consoleLog.push({ type: "pageerror", text: String(err) }));
+    // "Failed to load resource" in the console does not say *which* resource; without
+    // the URL a missing asset is impossible to chase down from a report.
+    page.on("requestfailed", (request) => {
+      consoleLog.push({
+        type: "requestfailed",
+        text: `${request.failure()?.errorText ?? "failed"} ${request.url()}`,
+      });
+    });
 
     await blockNetwork(page, ports, log);
     await installEvalShims(page);
@@ -223,6 +244,22 @@ export async function run(opts: RunOptions): Promise<RunResult> {
 
     // Everything the app did over the whole run, not per checkpoint.
     await settleFor(page, opts, 2000);
+
+    if (opts.control) {
+      const scriptFile = typeof opts.control === "string" ? opts.control : DEFAULT_CONTROL_SCRIPT;
+      // The overlay's control server runs on real time, so the virtual clock has to be
+      // nudged for any setTimeout the routes schedule; the exchanges themselves are
+      // request/response and do not depend on it.
+      const exchanges = await runControlScript(loadControlScript(scriptFile), {
+        port: target.controlPort,
+        generation: target.kind === "unified" ? "unified" : target.generation,
+        log,
+      });
+      await settleFor(page, opts, 1200);
+      writeFileSync(join(outDir, "status.json"), JSON.stringify(exchanges, null, 1));
+      log(`[run] control script ${basename(scriptFile)}: ${exchanges.length} exchange(s)`);
+    }
+
     writeFileSync(join(outDir, "writes.json"), JSON.stringify(mock.writeLog, null, 1));
     writeFileSync(join(outDir, "obs-markers.json"), JSON.stringify(obs?.markers ?? [], null, 1));
     writeFileSync(join(outDir, "shuckie-calls.json"), JSON.stringify(shuckie?.calls ?? [], null, 1));
@@ -285,6 +322,10 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
       LOCALAPPDATA: join(target.appData, "Local"),
       NODE_ENV: "production",
       ELECTRON_ENABLE_LOGGING: "1",
+      // ./splits and ./storage resolve against this instead of the working directory
+      // the harness happened to launch with (plan 1.7).
+      STP_APP_ROOT: target.cwd,
+      ...(target.controlPort === CANONICAL_PORTS.control ? {} : { STP_CONTROL_PORT: String(target.controlPort) }),
     },
     timeout: 60000,
   });
@@ -465,6 +506,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     writes: (strFlag("writes") as "apply" | "ignore") ?? "apply",
     keepOpen: argv.includes("--keep-open"),
     redirectPorts: argv.includes("--redirect-ports"),
+    control: strFlag("control") ?? argv.includes("--control"),
   });
   console.log(
     `\n${result.target} x ${result.fixture}: ${result.checkpoints.length} captures, ${result.writes} writes, ` +

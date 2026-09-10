@@ -75,9 +75,13 @@ export default defineComponent({
     },
     created() {
         PubSub.subscribe("@run/cleared", this.clear_run);
+        // The queuer's `/load-split-file` route: main reads and parses the CSV, the
+        // control handler publishes the rows (plan 1.8).
+        PubSub.subscribe("@splits/previous_loaded", this.set_previous_splits);
     },
     unmounted() {
         PubSub.unsubscribe("@run/cleared", this.clear_run);
+        PubSub.unsubscribe("@splits/previous_loaded", this.set_previous_splits);
     },
     watch: {
         current_splits: {
@@ -131,6 +135,10 @@ export default defineComponent({
             this.metrics.update("player_id", 0);
             this.metrics.update("run_finished", false);
             this.metrics.update("splits_logged", false);
+        },
+        /** Replaces the split comparison shown in the right panel. */
+        set_previous_splits(splits) {
+            this.previous_splits = Array.isArray(splits) ? splits : [];
         },
         load_split_settings() {
             this.current_splits = LocalStorageProxy['current_splits'] ?? []

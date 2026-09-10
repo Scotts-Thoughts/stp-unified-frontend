@@ -1,0 +1,52 @@
+import { app } from "electron";
+import { dirname, isAbsolute, join, resolve } from "path";
+
+/**
+ * Where `./splits` and `./storage` live.
+ *
+ * Every legacy overlay resolves those two directories against `process.cwd()`, which
+ * happens to be the repo when the queuer launches `npm run dev` from the app folder,
+ * and happens to be wherever the user double-clicked when the app is packaged. Plan 1.7
+ * replaces the accident with an explicit root that keeps the same layout in both cases:
+ *
+ *   dev       the repo (the folder holding package.json)      -> ./splits, ./storage as today
+ *   packaged  the folder the executable sits in               -> next to the .exe
+ *
+ * `STP_APP_ROOT` overrides both, which is how the parity harness points a run at its
+ * sandbox without depending on the working directory it was launched with.
+ */
+export function appRoot(): string {
+  const override = process.env.STP_APP_ROOT;
+  if (override) return resolve(override);
+  if (app.isPackaged) return dirname(app.getPath("exe"));
+  return app.getAppPath();
+}
+
+/** `<appRoot>/splits`, the root of every split CSV the autosplitter writes. */
+export function splitsRoot(): string {
+  return join(appRoot(), "splits");
+}
+
+/** `<appRoot>/storage`, the shipped defaults (extraResources in a packaged build). */
+export function storageRoot(): string {
+  return join(appRoot(), "storage");
+}
+
+/** `%APPDATA%/<app name>/data`, the user-state tree (plan section 2 persistence rule). */
+export function userDataRoot(): string {
+  return join(app.getPath("userData"), "data");
+}
+
+/**
+ * Resolves a caller-supplied relative path inside `root` and refuses anything that
+ * escapes it. Every path the control server and the renderer send in crosses this,
+ * because they arrive over IPC and, for `/load-split-file`, over an HTTP query string.
+ */
+export function resolveInside(root: string, relative: string): string {
+  const target = isAbsolute(relative) ? resolve(relative) : resolve(root, relative);
+  const rootResolved = resolve(root);
+  if (target !== rootResolved && !target.startsWith(rootResolved + "\\") && !target.startsWith(rootResolved + "/")) {
+    throw new Error(`Path escapes ${rootResolved}: ${relative}`);
+  }
+  return target;
+}

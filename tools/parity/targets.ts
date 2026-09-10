@@ -38,6 +38,12 @@ export interface Target {
   userDataDir: string;
   /** package.json "name" = the %APPDATA% folder the app writes to. */
   appName: string;
+  /**
+   * The overlay's own control server port. 30159 is the queuer's, and the only one it
+   * talks to; the harness moves it when another overlay already owns 30159, which the
+   * unified app honours through STP_CONTROL_PORT. Legacy apps hardcode it and cannot.
+   */
+  controlPort: number;
   electronMajor: number;
 }
 
@@ -81,6 +87,7 @@ export function parseTarget(spec: string): Target {
       appData: join(sandbox, "AppData"),
       userDataDir: join(sandbox, "userData"),
       appName: "stp-overlay",
+      controlPort: 30159,
       electronMajor: 37,
     };
   }
@@ -99,6 +106,7 @@ export function parseTarget(spec: string): Target {
     appData: join(sandbox, "AppData"),
     userDataDir: join(sandbox, "userData"),
     appName: LEGACY_APP_NAMES[gen],
+    controlPort: 30159,
     electronMajor: major,
   };
 }
