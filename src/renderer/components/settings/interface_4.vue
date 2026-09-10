@@ -79,6 +79,7 @@ import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
 import { SplitsMode } from "~/stores/types/SplitsMode";
 import { RightPanelMode } from "~/stores/types/RightPanelMode";
 import { StatsPanelMode } from "~/stores/types/StatsPanelMode";
+import { IS_RELEASE } from "~/core/env";
 export default defineComponent({
     data() {
         return {
@@ -87,7 +88,7 @@ export default defineComponent({
             StatsPanelMode,
             RightPanelMode,
             SplitsMode,
-            isRelease: process.env.NODE_ENV !== "development",
+            isRelease: IS_RELEASE,
         }
     },
 });

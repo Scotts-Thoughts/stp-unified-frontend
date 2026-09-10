@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { PokemonGame } from "~/logic/PokeDataTypes";
-const path = require('path');
-import { loadAppSettings, saveAppSettings } from "./helper/files";
+import { loadAppSettings, saveAppSettings, dataPath } from "./helper/files";
 import { formatTime, getTime, Timer, TimerData } from "~/logic/Timer";
 import { findLegacySpeciesEntry } from "~/logic/legacyStorage";
 import { FaultMode } from "./types/FaultMode";
@@ -47,7 +46,7 @@ export const useSpeciesMetricsStore = defineStore('species_metrics', {
 		async load(game: PokemonGame|null, starter: string|null) {
 			let next = defaultSpeciesMetrics();
 			if (game && starter) {
-				const loaded = await loadAppSettings<Partial<SpeciesMetrics>>(path.join(game, starter), METRICS_FILE_NAME);
+				const loaded = await loadAppSettings<Partial<SpeciesMetrics>>(dataPath(game, starter), METRICS_FILE_NAME);
 				next = loaded
 					? { ...next, ...loaded, timer: { ...next.timer, ...(loaded.timer ?? {}) } }
 					: { ...next, ...legacyMetrics(game, starter) };
@@ -59,7 +58,7 @@ export const useSpeciesMetricsStore = defineStore('species_metrics', {
 		/** Saves to `%APPDATA%/stp-generation1-overlay/data/${game}/${starter}/metrics.json` */
 		async save(game: PokemonGame|null, starter: string|null) {
 			if (game && starter) {
-				await saveAppSettings<SpeciesMetrics>(path.join(game, starter), METRICS_FILE_NAME, this.$state);
+				await saveAppSettings<SpeciesMetrics>(dataPath(game, starter), METRICS_FILE_NAME, this.$state);
 			}
 		},
 		update<K extends keyof SpeciesMetrics>(key: K, value: SpeciesMetrics[K]) {

@@ -22,6 +22,8 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
+      /** Outstanding main-process calls; used by the parity harness, not by the app. */
+      __pendingIpc: () => number,
       settings_dir: () => Promise<string>,
       app_root: () => Promise<string>,
       splits: {
@@ -40,6 +42,9 @@ declare global {
       },
       storage: {
         read: (relative: string) => Promise<string | null>,
+        write: (relative: string, contents: string) => Promise<string>,
+      },
+      source: {
         write: (relative: string, contents: string) => Promise<string>,
       },
       obsAuth: (password: string, salt: string, challenge: string) => Promise<string>,

@@ -3,8 +3,7 @@ import { capitalize_words } from "../methods/text_functions";
 import { formatShuckieTime } from "~/stores/useEmulatorStatsStore";
 import { splitMilliseconds } from "~/logic/Timer";
 
-const path = require("path");
-const fs = require("fs");
+import { appendSplitCsv, copySplitFile, splitPath } from "~/core/persistence/splitFiles";
 export function log_split() {
     const {formatted: time } = this.metrics.getTime();
     const opponent = this.mapper.properties.battle.trainer.class.value;
@@ -376,17 +375,21 @@ export function format_trainer_name(trainer_class, trainer_number) {
 
 // TODO: the `refilmed_finish` parameter is unused.
 export function logData(gameName, gameName_Path, str, file_name, starterName, log_type, testStatus, refilming_mode, refilmed_attempt, refilmed_finish) {
-    const dirPath = refilming_mode ? `./splits/${gameName_Path}/${starterName}/refilmed/attempts/` : `./splits/${gameName_Path}/${starterName}/attempts/`;
+    // Relative to <appRoot>/splits (plan 1.7); the legacy code built "./splits/..." and
+    // let it resolve against the working directory.
+    const dirPath = refilming_mode
+        ? splitPath(gameName_Path, starterName, "refilmed", "attempts")
+        : splitPath(gameName_Path, starterName, "attempts");
     const testStatusText = testStatus ? "test_run_" : "";
     let attempt_number = refilming_mode ? refilmed_attempt : file_name;
-    let filePath = path.join(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}-simple.csv`);
+    let filePath = splitPath(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}-simple.csv`);
     let header = "player_name,pokemon,trainer_name,real_time_hmmss,resets,blackouts,failures,level,game_time,battle_duration,move1,move2,move3,move4\n";
     if (log_type == "Simple") {
         header = "player_name,pokemon,trainer_name,real_time_hmmss,resets,blackouts,level,game_time," +
         "battle_duration,move1,move2,move3,move4\n";
     }
     else if (log_type == "Full") {
-        filePath = path.join(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}-full.csv`);
+        filePath = splitPath(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}-full.csv`);
         header = "date_string,time_string,player_name,pokemon,trainer_name,trainer_id,location,total_pokemon," +
             "real_time_total,real_time_hmmss,real_time_file_label,resets,blackouts,failures,level,game_time,battle_duration," + 
             "move1,move2,move3,move4,move1pp,move2pp,move3pp,move4pp,move1ppUp,move2ppUp,move3ppUp,move4ppUp," +
@@ -419,7 +422,7 @@ export function logData(gameName, gameName_Path, str, file_name, starterName, lo
             "Blackouts,Attempt Number,Failures, Rival's Team\n";
     }
     else if (log_type == "Deprecated") {
-        filePath = path.join(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}.csv`);
+        filePath = splitPath(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}.csv`);
         header = "ROM,Species,Trainer,Start Time,Real Time,Game Time,Level,Resets," +
             "RTHours,RTMinutes,RTSeconds,RTMilliseconds,Move 1,Move 2,Move 3,Move 4," +
             "Attack,Defense,Sp. Attack,Sp. Defense,Speed," +
@@ -446,60 +449,34 @@ export function logData(gameName, gameName_Path, str, file_name, starterName, lo
             "Blackouts,Attempt Number,Failures, Rival's Team\n"
     }
     else if (log_type == "Battle Summary") {
-        filePath = path.join(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}-battleSummary.csv`);
+        filePath = splitPath(dirPath, `${gameName}-${testStatusText}${starterName}-${attempt_number}-battleSummary.csv`);
         header = "Unknown"
     }
-    fs.mkdir(dirPath, { recursive: true }, (err) => {
-        if (!fs.existsSync(filePath)) {
-            fs.writeFile(filePath, header, (err) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    fs.appendFile(filePath, str, (err) => {
-                        if (err) {
-                            console.error(err);
-                        }
-                    });
-                }
-            });
-        } else {
-            fs.appendFile(filePath, str, (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            });   
-        }
-    });
+    return appendSplitCsv(filePath, header, str);
 }
 
 // TODO: the `refilmed_finish` parameter is unused.
 export function logCopy(gameName, gameName_Path, file_name, starterName, finished_run_count, refilming_mode, refilmed_attempt, refilmed_finish) {
-    var dirPathAttempts = refilming_mode ? `./splits/${gameName_Path}/${starterName}/refilmed/attempts/` : `./splits/${gameName_Path}/${starterName}/attempts/`
-    var dirPathFinishes = refilming_mode ? `./splits/${gameName_Path}/${starterName}/refilmed/finishes/` : `./splits/${gameName_Path}/${starterName}/finishes/`
+    var dirPathAttempts = refilming_mode
+        ? splitPath(gameName_Path, starterName, "refilmed", "attempts")
+        : splitPath(gameName_Path, starterName, "attempts")
+    var dirPathFinishes = refilming_mode
+        ? splitPath(gameName_Path, starterName, "refilmed", "finishes")
+        : splitPath(gameName_Path, starterName, "finishes")
     let attempt_number = refilming_mode ? refilmed_attempt : file_name;
     let finish_number = refilming_mode ? refilmed_attempt : finished_run_count;
     console.log("LogCopy Variables", gameName, gameName_Path, file_name, starterName, finished_run_count, dirPathAttempts, dirPathFinishes, attempt_number, finish_number)
-    fs.mkdir(dirPathFinishes, { recursive: true }, (err) => {
-        fs.copyFile(
-            path.join(dirPathAttempts, `${gameName}-${starterName}-${attempt_number}-simple.csv`), 
-            path.join(dirPathFinishes, `${gameName}-${starterName}-${finish_number}-simple.csv`), (err) => {
-            if (err) {
-                console.error(err);
-            }
-        });
-        fs.copyFile(
-            path.join(dirPathAttempts, `${gameName}-${starterName}-${attempt_number}-full.csv`), 
-            path.join(dirPathFinishes, `${gameName}-${starterName}-${finish_number}-full.csv`), (err) => {
-            if (err) {
-                console.error(err);
-            }
-        });
-        fs.copyFile(
-            path.join(dirPathAttempts, `${gameName}-${starterName}-${attempt_number}.csv`), 
-            path.join(dirPathFinishes, `${gameName}-${starterName}-${finish_number}.csv`), (err) => {
-            if (err) {
-                console.error(err);
-            }
-        });
-    });
+    // The three copies keep the legacy order (simple, full, deprecated); the queue in
+    // splitFiles.ts guarantees every logData write has landed before the first copy.
+    return Promise.all([
+        copySplitFile(
+            splitPath(dirPathAttempts, `${gameName}-${starterName}-${attempt_number}-simple.csv`),
+            splitPath(dirPathFinishes, `${gameName}-${starterName}-${finish_number}-simple.csv`)),
+        copySplitFile(
+            splitPath(dirPathAttempts, `${gameName}-${starterName}-${attempt_number}-full.csv`),
+            splitPath(dirPathFinishes, `${gameName}-${starterName}-${finish_number}-full.csv`)),
+        copySplitFile(
+            splitPath(dirPathAttempts, `${gameName}-${starterName}-${attempt_number}.csv`),
+            splitPath(dirPathFinishes, `${gameName}-${starterName}-${finish_number}.csv`)),
+    ]);
 }

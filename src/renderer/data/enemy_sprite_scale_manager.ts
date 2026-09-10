@@ -11,12 +11,17 @@
  *   3. defaults (scale 1, offsets 0, flipped false)
  *
  * Persistence:
- *   - In dev (npm run dev): commit() writes back to the source JSON via fs.
+ *   - In dev (npm run dev): commit() writes back to the source JSON, over the
+ *     `source:write` IPC channel rather than `require("fs")` (plan 1.6).
  *   - In a packaged build: commit() falls back to localStorage (read-only file).
  */
 
 import { reactive } from "vue";
+import { IS_DEV } from "~/core/env";
 import bundledScales from "./enemy_sprite_scales.json";
+
+/** Relative to `src/renderer`, the root `source:write` resolves against. */
+const SOURCE_FILE = "data/enemy_sprite_scales.json";
 
 export interface EnemySpriteEntry {
     scale: number;
@@ -64,15 +69,6 @@ const state = reactive({
 for (const key of Object.keys(state.scales)) {
     state.scales[key] = normalize(state.scales[key]);
 }
-
-const IS_DEV: boolean = (() => {
-    try {
-        // import.meta.env.DEV is provided by Vite; defaults to false in packaged builds.
-        return !!(import.meta as any).env?.DEV;
-    } catch (e) {
-        return false;
-    }
-})();
 
 function readOverride(key: string): EnemySpriteEntry | null {
     if (typeof localStorage === "undefined") return null;
@@ -137,16 +133,20 @@ export const enemySpriteScaleManager = {
         state.version++;
 
         if (IS_DEV) {
-            try {
-                const fs = require("fs");
-                const path = require("path");
-                // electron-vite dev launches with cwd = project root.
-                const filePath = path.resolve(process.cwd(), "src/renderer/data/enemy_sprite_scales.json");
-                fs.writeFileSync(filePath, JSON.stringify(state.scales, null, 4) + "\n", "utf8");
-                writeOverride(key, null);
-            } catch (e) {
-                console.error("[enemySpriteScaleManager] dev-mode write failed:", e);
-            }
+            // The write is async now that it crosses IPC, so the override is cleared in
+            // the callback instead of on the next line. Nothing observable changes: the
+            // override and `state.scales[key]` hold the same entry until it resolves.
+            window.api.source
+                .write(SOURCE_FILE, JSON.stringify(state.scales, null, 4) + "\n")
+                .then(() => {
+                    writeOverride(key, null);
+                    state.version++;
+                })
+                .catch((e) => {
+                    console.error("[enemySpriteScaleManager] dev-mode write failed:", e);
+                    // Keep the value the user just set rather than losing the edit.
+                    writeOverride(key, current);
+                });
         } else {
             // Packaged builds can't rewrite the bundled JSON — persist as override.
             writeOverride(key, current);

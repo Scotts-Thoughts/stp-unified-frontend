@@ -40,6 +40,14 @@ export interface CaptureMeta {
   tMs: number;
   frame: number;
   elements: number;
+  /**
+   * `Date.now()` inside the renderer at capture time -- the *virtual* clock, not the
+   * wall clock. Two runs of the same fixture must agree on it: everything the overlay
+   * time-stamps (the on-screen timer, CSV durations, battle lengths) is derived from
+   * it, so a drift here is the root cause of a whole class of oracle-1 diffs, and this
+   * is where it is visible. `diff.ts` compares it.
+   */
+  virtualNow: number;
   capturedAt: string;
 }
 
@@ -127,7 +135,7 @@ export async function captureLocalStorage(page: Page): Promise<Record<string, st
 export interface CaptureInput {
   page: Page;
   dir: string;
-  meta: Omit<CaptureMeta, "elements" | "capturedAt">;
+  meta: Omit<CaptureMeta, "elements" | "virtualNow" | "capturedAt">;
   console: ConsoleEntry[];
   /** Screenshots dominate run time; skip them while iterating on other oracles. */
   screenshot?: boolean;
@@ -148,6 +156,7 @@ export async function capture(input: CaptureInput): Promise<CaptureMeta> {
   const full: CaptureMeta = {
     ...meta,
     elements: Object.keys(styles).length,
+    virtualNow: Number(await page.evaluate("Date.now()")),
     capturedAt: new Date().toISOString(),
   };
   writeFileSync(join(dir, "meta.json"), JSON.stringify(full, null, 1));
@@ -187,5 +196,68 @@ export async function settle(page: Page, virtualMs = 1200): Promise<void> {
   await page.clock.runFor(Math.max(0, virtualMs - twoFrames));
   await page.evaluate("0");
   await page.clock.runFor(Math.min(virtualMs, twoFrames));
+  await flushRender(page);
+}
+
+/**
+ * A real task boundary in the renderer, which drains every pending microtask.
+ *
+ * Vue writes the DOM from a microtask queued by the reactive update, so the text a
+ * capture reads is only current once that queue has drained. `page.evaluate` is not
+ * enough on its own: it resolves over CDP, and whether the render job ran before the
+ * reply was serialised is a matter of real-time luck -- which is exactly how the
+ * on-screen timer's hundredths digit ended up one frame stale in one run out of
+ * several, tripping oracles 1 and 2 on a fixture that is otherwise deterministic.
+ *
+ * `MessageChannel` is the primitive to use because `page.clock` does not fake it: a
+ * faked `setTimeout(0)` would never fire while the clock is paused, and a microtask
+ * chain cannot outlast the microtask queue it is queued on.
+ */
+export async function flushRender(page: Page): Promise<void> {
+  await page.evaluate(
+    "new Promise(function (resolve) {" +
+      "  var ch = new MessageChannel();" +
+      "  ch.port1.onmessage = function () { resolve(); };" +
+      "  ch.port2.postMessage(0);" +
+      "})",
+  );
+}
+
+/**
+ * Waits for the things that load on **real** time, which the frozen virtual clock never
+ * advances past: image decoding and web fonts.
+ *
+ * Without this, a capture can land while a sprite the overlay just switched to is still
+ * decoding, and two identical runs differ by thousands of pixels while every computed
+ * style and rect matches -- which is exactly how it presents in a report. The wait is
+ * polled from Node, not with `page.waitForFunction`: that helper polls with page timers,
+ * and a paused clock never fires them.
+ *
+ * `img.complete` also becomes true for a failed load, so a missing asset
+ * (known-legacy-bugs.md #31) times the loop out rather than hanging it.
+ */
+export async function waitForRenderIdle(page: Page, timeoutMs = 5000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const state = (await page
+      .evaluate(
+        "(function () {" +
+          "  var imgs = Array.prototype.slice.call(document.images);" +
+          "  var pending = imgs.filter(function (i) { return !i.complete; }).length;" +
+          "  var fonts = (document.fonts && document.fonts.status) || 'loaded';" +
+          "  return { pending: pending, fonts: fonts };" +
+          "})()",
+      )
+      .catch(() => ({ pending: 0, fonts: "loaded" }))) as { pending: number; fonts: string };
+
+    if (state.pending === 0 && state.fonts === "loaded") break;
+    if (Date.now() > deadline) break;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  // CSS background and mask images are not observable through `document.images`, and
+  // the overlay uses them for every panel backdrop. Local file reads are sub-millisecond,
+  // so one short real pause after the images are idle covers them.
+  await new Promise((resolve) => setTimeout(resolve, 50));
   await page.evaluate("0");
 }

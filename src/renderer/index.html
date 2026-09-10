@@ -8,7 +8,7 @@
 <body>
     <div id="app-container">
         <div id="app">
-            <keyhook></keyhook>
+            <keyhook :table="hotkeys"></keyhook>
             <div v-if="ready == false">
                 <div>Please load a mapper in PokeAByte...</div>
                 <br>

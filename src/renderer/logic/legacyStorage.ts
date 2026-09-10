@@ -1,4 +1,4 @@
-import { JsonStorage } from "./Storage.js";
+import { JsonStorage } from "./Storage";
 import { PokemonGame } from "./PokeDataTypes";
 
 /**

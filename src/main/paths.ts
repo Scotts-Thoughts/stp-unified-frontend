@@ -32,6 +32,19 @@ export function storageRoot(): string {
   return join(appRoot(), "storage");
 }
 
+/**
+ * `<appRoot>/src/renderer`, the renderer's own source tree.
+ *
+ * Dev mode only. Two gen1 features edit shipped data by rewriting the file they were
+ * loaded from, so the edit lands in git: the enemy-sprite resize tool
+ * (`data/enemy_sprite_scales.json`) and, from Phase 2.2, the per-species style defaults.
+ * The legacy code did it with `require("fs")` and `process.cwd()`; the root is explicit
+ * now and a packaged build refuses the write (plan 1.6).
+ */
+export function rendererSourceRoot(): string {
+  return join(appRoot(), "src", "renderer");
+}
+
 /** `%APPDATA%/<app name>/data`, the user-state tree (plan section 2 persistence rule). */
 export function userDataRoot(): string {
   return join(app.getPath("userData"), "data");

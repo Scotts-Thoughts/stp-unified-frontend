@@ -37,7 +37,7 @@ import { MockPokeAByte } from "./mock-pokeabyte/server.ts";
 import { ObsStub } from "./mock-pokeabyte/obs-stub.ts";
 import { ShuckieStub } from "./mock-pokeabyte/shuckie-stub.ts";
 import { ReplayDriver } from "./mock-pokeabyte/replay.ts";
-import { capture, installEvalShims, settle, type ConsoleEntry } from "./capture.ts";
+import { capture, flushRender, installEvalShims, settle, waitForRenderIdle, type ConsoleEntry } from "./capture.ts";
 import { scanFixture, type Checkpoint, type ScanResult } from "./scan-fixture.ts";
 import { parseTarget, prepareSandbox, REPO, type Target } from "./targets.ts";
 import { loadControlScript, runControlScript } from "./control-script.ts";
@@ -226,8 +226,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
 
       while (pending.length && pending[0].tMs <= batch.tMs) {
         const cp = pending.shift()!;
-        await settleFor(page, opts, 1200);
-        clockT += opts.realtime ? 0 : 1200;
+        clockT += await settleFor(page, opts, 1200);
         const dir = join(outDir, cp.id);
         await capture({
           page,
@@ -434,20 +433,56 @@ async function warmUp(page: Page, opts: RunOptions): Promise<void> {
   }
 }
 
-/** One CDP round trip: everything already queued on the renderer's task queue has run. */
-async function barrier(page: Page): Promise<void> {
+/**
+ * Everything already queued on the renderer's task queue has run, and no main-process
+ * call is still in flight.
+ *
+ * The CDP round trip alone only drains tasks; a `data:read` that has not answered yet
+ * would resolve *after* the clock moved, and the overlay would stamp a different time
+ * than it did last run. The pending-IPC count comes from the preload; polling it from
+ * Node rather than with page.waitForFunction matters, because that helper polls with
+ * page timers, which a paused fake clock never fires.
+ */
+async function barrier(page: Page, timeoutMs = 5000): Promise<void> {
   await page.evaluate("0");
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const pending = await page
+      .evaluate("(window.api && window.api.__pendingIpc) ? window.api.__pendingIpc() : 0")
+      .catch(() => 0);
+    if (Number(pending) === 0) return;
+    if (Date.now() > deadline) {
+      console.warn(`[run] ${pending} IPC call(s) still pending after ${timeoutMs} ms; continuing`);
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
 }
 
-async function settleFor(page: Page, opts: RunOptions, virtualMs: number): Promise<void> {
+/**
+ * Settle the app before a capture: advance the virtual clock past every debounce, then
+ * wait out the things that are *not* on the virtual clock -- pending IPC and image and
+ * font loading -- and let two more frames render on top of whatever that unblocked.
+ */
+async function settleFor(page: Page, opts: RunOptions, virtualMs: number): Promise<number> {
   if (opts.realtime) {
     await new Promise((r) => setTimeout(r, Math.min(virtualMs, 1500)));
     await page.evaluate(
       () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))),
     );
-    return;
+    await waitForRenderIdle(page);
+    return 0;
   }
   await settle(page, virtualMs);
+  await barrier(page);
+  await waitForRenderIdle(page);
+  // An image that finished decoding during the wait still needs a frame to paint, and
+  // with the clock paused a frame only happens when the clock moves.
+  const extraFrame = 32;
+  await page.clock.runFor(extraFrame);
+  await flushRender(page);
+  // The caller tracks where the virtual clock is, so report everything that was added.
+  return virtualMs + extraFrame;
 }
 
 /** Files under userData that the overlay itself writes (plan section 2 persistence rule). */

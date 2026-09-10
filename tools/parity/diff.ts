@@ -68,6 +68,7 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
       perCheckpoint.push({ id, differences: 1 });
       continue;
     }
+    diffVirtualClock(join(baselineDir, id), join(candidateDir, id), id, differences);
     diffStyles(join(baselineDir, id), join(candidateDir, id), id, differences);
     diffPixels(join(baselineDir, id), join(candidateDir, id), id, pixelMode, outDir, differences);
     diffJsonFile(join(baselineDir, id, "storage.json"), join(candidateDir, id, "storage.json"), 4, "localStorage", id, differences);
@@ -99,6 +100,29 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
   };
   writeFileSync(join(outDir, "report.json"), JSON.stringify(report, null, 1));
   return report;
+}
+
+/**
+ * The renderer's virtual clock at capture time (structure, not one of the nine).
+ *
+ * It is checked first and separately because it explains the others: every timestamp
+ * the overlay renders or writes -- the timer, CSV durations, battle lengths, the OBS
+ * marker order -- is derived from it, so if two runs disagree here, the oracle 1 and 3
+ * differences underneath are symptoms and not independent findings.
+ */
+function diffVirtualClock(baseDir: string, candDir: string, checkpoint: string, out: Difference[]): void {
+  const base = readJson<{ virtualNow?: number }>(join(baseDir, "meta.json"));
+  const cand = readJson<{ virtualNow?: number }>(join(candDir, "meta.json"));
+  if (base?.virtualNow === undefined || cand?.virtualNow === undefined) return;
+  if (base.virtualNow === cand.virtualNow) return;
+  out.push({
+    oracle: 0,
+    name: "virtual clock",
+    checkpoint,
+    detail: `renderer Date.now() differs by ${cand.virtualNow - base.virtualNow} ms`,
+    baseline: String(base.virtualNow),
+    candidate: String(cand.virtualNow),
+  });
 }
 
 // ---------------------------------------------------------------- oracle 1

@@ -1,9 +1,8 @@
 import { defineStore } from "pinia";
-import { loadAppSettings, saveAppSettings } from "./helper/files";
+import { loadAppSettings, saveAppSettings, dataPath } from "./helper/files";
 import { deepMerge } from "./helper/merge";
 import { findLegacySpeciesEntry } from "~/logic/legacyStorage";
 import { textures } from "~/data/textures";
-const path = require('path');
 
 const SETTINGS_FILE_NAME = "settings.json";
 
@@ -40,7 +39,7 @@ export const useGameSpeciesData = defineStore("game_species_data", {
 			if (!game || !starter) {
 				return;
 			}
-			await saveAppSettings(path.join(game, starter), SETTINGS_FILE_NAME, this.$state);
+			await saveAppSettings(dataPath(game, starter), SETTINGS_FILE_NAME, this.$state);
 		},
 		/**
 		 * Loads the complete state from `%APPDATA%/data/${game}/${starter}/settings.json`.
@@ -51,7 +50,7 @@ export const useGameSpeciesData = defineStore("game_species_data", {
 				return;
 			}
 			const defaults = defaultGameSpeciesSettings();
-			const loaded = await loadAppSettings<Partial<GameSpeciesData>>(path.join(game, starter), SETTINGS_FILE_NAME);
+			const loaded = await loadAppSettings<Partial<GameSpeciesData>>(dataPath(game, starter), SETTINGS_FILE_NAME);
 			const next = loaded
 				? deepMerge(defaults, loaded)
 				: { ...defaults, styling: presetStyling(game, starter) ?? defaults.styling };
@@ -69,7 +68,7 @@ export const useGameSpeciesData = defineStore("game_species_data", {
 				return;
 			}
 			const defaults = defaultGameSpeciesSettings();
-			const loaded = await loadAppSettings<Partial<GameSpeciesData>>(path.join(game, starter), SETTINGS_FILE_NAME);
+			const loaded = await loadAppSettings<Partial<GameSpeciesData>>(dataPath(game, starter), SETTINGS_FILE_NAME);
 			const styling = loaded?.styling
 				? deepMerge(defaults.styling, loaded.styling)
 				: (presetStyling(game, starter) ?? defaults.styling);

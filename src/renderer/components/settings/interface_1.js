@@ -5,7 +5,8 @@ import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
 import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
 import { defineComponent } from "vue";
-import { openFolder } from "../../methods/file_system_functions";
+import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
+import { IS_RELEASE } from "~/core/env";
 
 const template = /*html*/`
     <div>Game:</div>
@@ -80,12 +81,14 @@ export default defineComponent({
             runConfig: useGameSpeciesData(),
             metrics: useSpeciesMetricsStore(),
             enemyResize: useEnemySpriteResizeStore(),
-            isRelease: process.env.NODE_ENV !== "development",
+            isRelease: IS_RELEASE,
         }
     },
     methods: {
         open_splits_folder() {
-            openFolder('splits', this.meta.game, this.meta.starter, 'finishes')
+            // Was methods/file_system_functions.openFolder, which built the path with
+            // require("fs") in the renderer; the folder is still created before opening.
+            revealSplitFolder(splitPath(this.meta.game, this.meta.starter, 'finishes'))
         }
     }
 });

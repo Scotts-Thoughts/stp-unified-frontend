@@ -13,36 +13,62 @@ import { electronAPI } from '@electron-toolkit/preload'
  * Every `on*` returns an unsubscribe function, because the renderer registers these
  * from component lifecycle hooks that run again after a hot reload.
  */
+/**
+ * Outstanding `invoke` calls.
+ *
+ * Every main-process call is real async, and the parity harness advances a *virtual*
+ * clock; if a settings read resolves after the clock has moved, the overlay stamps a
+ * timer or a saved file with a different time than it did on the previous run. The
+ * counter lets the harness wait for the IPC boundary to be idle before it steps the
+ * clock (docs/parity-harness.md section 9). It is a diagnostic only -- nothing in the
+ * app reads it, and it costs one increment per call.
+ */
+let pendingInvokes = 0
+const invoke = (channel, ...args) => {
+  pendingInvokes++
+  return ipcRenderer.invoke(channel, ...args).finally(() => {
+    pendingInvokes--
+  })
+}
+
 const api = {
-  settings_dir: () => ipcRenderer.invoke('settings_dir'),
+  /** Number of main-process calls still in flight; see `pendingInvokes`. */
+  __pendingIpc: () => pendingInvokes,
+
+  settings_dir: () => invoke('settings_dir'),
   /** The folder `./splits` and `./storage` are resolved against (plan 1.7). */
-  app_root: () => ipcRenderer.invoke('app_root'),
+  app_root: () => invoke('app_root'),
 
   splits: {
-    write: (relative, contents, append = false) => ipcRenderer.invoke('splits:write', relative, contents, append),
-    read: (relative) => ipcRenderer.invoke('splits:read', relative),
-    exists: (relative) => ipcRenderer.invoke('splits:exists', relative),
-    list: (relative) => ipcRenderer.invoke('splits:list', relative),
-    copy: (from, to) => ipcRenderer.invoke('splits:copy', from, to),
-    mkdir: (relative) => ipcRenderer.invoke('splits:mkdir', relative),
-    reveal: (relative) => ipcRenderer.invoke('splits:reveal', relative),
+    write: (relative, contents, append = false) => invoke('splits:write', relative, contents, append),
+    read: (relative) => invoke('splits:read', relative),
+    exists: (relative) => invoke('splits:exists', relative),
+    list: (relative) => invoke('splits:list', relative),
+    copy: (from, to) => invoke('splits:copy', from, to),
+    mkdir: (relative) => invoke('splits:mkdir', relative),
+    reveal: (relative) => invoke('splits:reveal', relative),
   },
 
   data: {
-    read: (relative) => ipcRenderer.invoke('data:read', relative),
-    write: (relative, contents) => ipcRenderer.invoke('data:write', relative, contents),
-    list: (relative) => ipcRenderer.invoke('data:list', relative),
+    read: (relative) => invoke('data:read', relative),
+    write: (relative, contents) => invoke('data:write', relative, contents),
+    list: (relative) => invoke('data:list', relative),
   },
 
   storage: {
-    read: (relative) => ipcRenderer.invoke('storage:read', relative),
-    write: (relative, contents) => ipcRenderer.invoke('storage:write', relative, contents),
+    read: (relative) => invoke('storage:read', relative),
+    write: (relative, contents) => invoke('storage:write', relative, contents),
+  },
+
+  /** Dev-mode writes back into `src/renderer/**`, so edited defaults land in git. */
+  source: {
+    write: (relative, contents) => invoke('source:write', relative, contents),
   },
 
   /** OBS WebSocket 5 auth string; the sha256 pair used to live in the renderer. */
-  obsAuth: (password, salt, challenge) => ipcRenderer.invoke('obs:auth', password, salt, challenge),
+  obsAuth: (password, salt, challenge) => invoke('obs:auth', password, salt, challenge),
 
-  setGameIcon: (iconName) => ipcRenderer.invoke('set-game-icon', iconName),
+  setGameIcon: (iconName) => invoke('set-game-icon', iconName),
 
   /**
    * Control-server requests from the queuer. The handler returns the JSON body; the

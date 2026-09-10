@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { app, ipcMain, shell, type BrowserWindow } from "electron";
-import { appRoot, resolveInside, splitsRoot, storageRoot, userDataRoot } from "./paths";
+import { appRoot, rendererSourceRoot, resolveInside, splitsRoot, storageRoot, userDataRoot } from "./paths";
 
 /**
  * Everything the renderer used to do with `require("fs")`, `require("path")`,
@@ -87,6 +87,21 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
   ipcMain.handle("storage:write", (_e, relative: string, contents: string) => {
     if (app.isPackaged) throw new Error("storage/ is read-only in a packaged build; write to userData instead");
     const target = resolveInside(storageRoot(), relative);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, contents);
+    return target;
+  });
+
+  // --- renderer source tree: <appRoot>/src/renderer/** -------------------------
+  /**
+   * Dev mode only: the enemy-sprite resize tool rewrites the JSON it was loaded from so
+   * the new scale lands in git, exactly as gen1 does today with `require("fs")` and
+   * `process.cwd()` (plan 1.6). A packaged build has no source tree to write to and the
+   * caller falls back to a user-data override instead.
+   */
+  ipcMain.handle("source:write", (_e, relative: string, contents: string) => {
+    if (app.isPackaged) throw new Error("the renderer source tree is not writable in a packaged build");
+    const target = resolveInside(rendererSourceRoot(), relative);
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, contents);
     return target;

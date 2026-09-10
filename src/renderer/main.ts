@@ -4,11 +4,13 @@ import PokeData from "~/logic/PokeData.js";
 import { GameHookMapperClient } from "~/packages/gameHookMapperClient";
 import frontend from "~/components/frontend.js";
 import no_mapper from "~/components/no_mapper.js";
-import keyhook from "~/components/keyhook.js";
+import keyhook from "~/core/hotkeys/Hotkeys.vue";
+import { gen1Hotkeys } from "~/games/gen1/hotkeys";
 import { PokemonGame } from "~/logic/PokeDataTypes.js";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { useEmulatorStatsStore } from "./stores/useEmulatorStatsStore";
+import { loadLegacyStorage } from "~/logic/Storage";
 import { registerControlServer } from "~/core/control/useControlServer";
 import { gen1ControlRoutes } from "~/games/gen1/control";
 
@@ -27,12 +29,19 @@ const main = defineComponent({
             overlayLoaded: null as Promise<void> | null,
             /** Detaches the control-server bridge; see `created`. */
             unregisterControl: null as (() => void) | null,
+            /** gen1's F-key table, passed to <keyhook/> (plan 1.1). */
+            hotkeys: gen1Hotkeys(),
         }
     },
     created() {
         // Load the overlay settings right away, so that the game and species dropdowns on the "no mapper" screen
         // reflect the last session and changes made there are not overwritten later.
-        this.overlayLoaded = this.settings.overlay.load()
+        //
+        // storage/Storage.json comes first and must finish first: loading the overlay
+        // settings starts the species-load chain, which reads the legacy presets
+        // synchronously through findLegacySpeciesEntry (plan 1.6).
+        this.overlayLoaded = loadLegacyStorage()
+            .then(() => this.settings.overlay.load())
             .catch((err) => console.error("[main] Failed to load the overlay settings:", err));
 
         this.mapper = new GameHookMapperClient();

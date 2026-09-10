@@ -1,6 +1,7 @@
 import { defineComponent } from "vue";
 import PokeData from "~/logic/PokeData";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
+import { IS_RELEASE } from "~/core/env";
 
 const template = /*html*/`
     <div>
@@ -24,7 +25,7 @@ export default defineComponent({
     data() {
         return {
             settings: useOverlaySettingsStore(),
-            isRelease: process.env.NODE_ENV !== "development",
+            isRelease: IS_RELEASE,
         }
     },
     computed: {
