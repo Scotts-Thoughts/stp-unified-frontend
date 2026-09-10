@@ -6,18 +6,20 @@
  * stored in enemy_sprite_scales.json so the saved values ship with the build.
  *
  * Lookup order:
- *   1. localStorage user override (`enemyScale_<Species>`) — live in-session edits
+ *   1. user-state override (`enemyScale_<Species>`) — live in-session edits
  *   2. enemy_sprite_scales.json (bundled at build time, rewritten in dev)
  *   3. defaults (scale 1, offsets 0, flipped false)
  *
  * Persistence:
  *   - In dev (npm run dev): commit() writes back to the source JSON, over the
  *     `source:write` IPC channel rather than `require("fs")` (plan 1.6).
- *   - In a packaged build: commit() falls back to localStorage (read-only file).
+ *   - In a packaged build: commit() falls back to the user-state override, because
+ *     the bundled JSON is read-only there.
  */
 
 import { reactive } from "vue";
 import { IS_DEV } from "~/core/env";
+import { getUserState, setUserState } from "~/core/persistence/userState";
 import bundledScales from "./enemy_sprite_scales.json";
 
 /** Relative to `src/renderer`, the root `source:write` resolves against. */
@@ -70,26 +72,29 @@ for (const key of Object.keys(state.scales)) {
     state.scales[key] = normalize(state.scales[key]);
 }
 
+/**
+ * The per-species override, from the user-state file (plan 1.10).
+ *
+ * The key is still `enemyScale_<Species>`, and a value that was written as a JSON string
+ * or as a bare number by the old local-storage version still parses -- the file may have
+ * been migrated from one.
+ */
 function readOverride(key: string): EnemySpriteEntry | null {
-    if (typeof localStorage === "undefined") return null;
-    const raw = localStorage.getItem(`enemyScale_${key}`);
+    const raw = getUserState<unknown>(`enemyScale_${key}`, null);
     if (raw == null || raw === "") return null;
+    if (typeof raw === "object") return normalize(raw);
+    if (typeof raw === "number") return { ...DEFAULTS, scale: raw };
     try {
-        return normalize(JSON.parse(raw));
+        return normalize(JSON.parse(String(raw)));
     } catch (e) {
-        const n = parseFloat(raw);
+        const n = parseFloat(String(raw));
         if (!Number.isNaN(n)) return { ...DEFAULTS, scale: n };
         return null;
     }
 }
 
 function writeOverride(key: string, entry: EnemySpriteEntry | null): void {
-    if (typeof localStorage === "undefined") return;
-    if (entry == null) {
-        localStorage.removeItem(`enemyScale_${key}`);
-    } else {
-        localStorage.setItem(`enemyScale_${key}`, JSON.stringify(entry));
-    }
+    setUserState(`enemyScale_${key}`, entry);
 }
 
 function entryFor(species: any): EnemySpriteEntry {
@@ -110,7 +115,7 @@ export const enemySpriteScaleManager = {
     getYOffset(species: any): number  { return entryFor(species).yOffset; },
     getFlipped(species: any): boolean { return entryFor(species).flipped; },
 
-    /** Update the in-session entry (localStorage). Does not touch the file. */
+    /** Update the in-session entry (a user-state override). Does not touch the source JSON. */
     setLive(species: any, partial: Partial<EnemySpriteEntry>): void {
         const key = speciesKey(species);
         if (!key) return;
@@ -122,7 +127,7 @@ export const enemySpriteScaleManager = {
 
     /**
      * Commit the current entry for a species: in dev, write to the source JSON;
-     * in prod, keep the override in localStorage. Clears the live override on
+     * in prod, keep the user-state override. Clears the live override on
      * dev success so the bundled value becomes authoritative.
      */
     commit(species: any): void {

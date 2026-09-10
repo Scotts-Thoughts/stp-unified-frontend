@@ -147,6 +147,17 @@ cwd = repo dir, so behaviour is unchanged for it.
 | gen5 | `localStorage`, leveldb 7.9 MB, plus `gen5stylesettings.zip` (1.9 MB) in userData | `%APPDATA%\gen5-overlay-app\…` |
 
 **Decision 10 (Scott, 2026-09-10): one file-based mechanism for everything; the unified app never uses `localStorage`.**
+
+Implemented for gen1 on 2026-09-10 (plan 1.10). The four things gen1 kept in `localStorage` --
+`current_splits`, `previous_splits`, `obs_websocket_url`/`obs_websocket_password`,
+`enemy_sprite_styles_enabled` and the `enemyScale_<Species>` overrides -- are now
+`%APPDATA%\stp-overlay\data\user_state.json`, **under the same key names**, so the Phase 2.6 importer can
+copy LevelDB records into it without a translation table. `core/persistence/userState.ts` reads the file once
+before the overlay mounts and serves every later read from memory, because the call sites (a render path, and
+the OBS marker helper) are synchronous; writes are debounced 250 ms with a `beforeunload` flush, which is the
+trade gen4 already makes. The one-time import of gen1's *own* `Local Storage` is **not built yet** and waits
+for the LevelDB reader below.
+
 Shipped style defaults are per-species JSON in the repo (written back by dev-mode runs, as the legacy apps do with
 `default_style_settings.js`); user state is under userData. The unified app's userData is `%APPDATA%\stp-overlay\`.
 Because Chromium's `localStorage` is origin-scoped

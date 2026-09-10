@@ -200,10 +200,15 @@ npm run parity:mock -- <fixture>             # serve a fixture by hand, no Playw
 
 `<target>` is `unified`, `legacy:genN@25` or `legacy:genN@37`.
 
-### Determinism is not free — four things the runner has to do
+### Determinism is not free — seven things the runner has to do
 
-Getting two identical runs to agree took four fixes; each is commented where it is handled, and any change to
-the runner has to keep all four:
+Getting two identical runs to agree took seven fixes; each is commented where it is handled, and any change to
+the runner has to keep all seven. Items 5–7 were added on 2026-09-10 during Phase 1, after the first four
+turned out to leave a flake that reproduced in roughly every other pair of runs: the on-screen timer's
+hundredths digit differed at 5 of 25 checkpoints (oracles 1 and 2), with an identical virtual clock at every
+capture. Each capture now records `virtualNow` (the renderer's `Date.now()`) and `hubRx` (hub frames it had
+processed) in `meta.json`, and `diff.ts` compares both — so if this class of problem returns, the report names
+the cause instead of listing its symptoms.
 
 1. **`--user-data-dir` per sandbox** (section 4). Without it runs share `%APPDATA%\Electron`.
 2. **`page.clock.pauseAt()` after `install()`.** `install()` alone keeps the fake clock ticking with real
@@ -216,8 +221,36 @@ the runner has to keep all four:
 4. **Arm the mapper before the reload.** A client that connects while no mapper is loaded leaves `_debouceMap`
    null and throws from its rAF loop a frame later (known-legacy-bugs.md #29) — landing in a different capture
    each run. Arming first also matches the queuer's real launch order.
+5. **Wait for the hub frames to be *received*, not just written** (`barrier()` + `installHubReceiptProbe()` in
+   `run.ts`). Item 3's CDP round trip drains the renderer's task queue, which is not the same as the WebSocket
+   having delivered anything: `mock.pushChanges()` writes to a socket, and that pipe has no ordering with
+   respect to CDP. The mock counts the frames it writes to the connected client
+   (`SignalRHub.sentToCurrentClient`), an init script counts the ones the renderer receives on `/updates`
+   (`window.__hubRx`), and the barrier waits for the second to reach the first — which is what makes item 7
+   mean anything, since "drain first" is not a thing you can express without it. Only `/updates` is counted:
+   the overlay also opens a socket to the OBS stub, and counting those would let the barrier pass on frames the
+   mapper never sent.
+6. **A real task boundary before reading the DOM** (`flushRender()` in `capture.ts`). Vue writes the DOM from a
+   microtask; `page.evaluate` resolves over CDP without guaranteeing that microtask ran, so a capture could
+   read text one frame stale. `MessageChannel` is the primitive to use, because `page.clock` does not fake it —
+   a faked `setTimeout(0)` would never fire while the clock is paused, and a microtask chain cannot outlast the
+   queue it is on.
+7. **Drain before the clock sweep, not only after it** (the first `barrier()` in `settleFor`). This is the one
+   that actually closed the flake. The batch loop calls `mock.pushChanges()` and goes straight into
+   `settleFor`, whose `settle()` starts a 1,200 ms `clock.runFor` immediately — so the hub frame arrives while
+   that sweep is in flight, and `Date.now()` inside the property handler returns whichever intermediate value
+   the sweep has reached. Which one depends on real-time interleaving. A run that starts its timer from a
+   property change therefore stamped `metrics.timer.started_at` a few milliseconds apart between two otherwise
+   identical runs, which is why the difference was ~10 ms and not a whole 16 ms frame, and why `virtualNow` and
+   `hubRx` were identical at every capture: the harness fed both runs the same input at the same clock, and the
+   app read the clock mid-advance.
 
-Collecting the whole `userData` tree is a fifth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
+   Two earlier attempts are worth recording because they *look* like fixes and are not. Draining only after the
+   sweep (item 5 as first written) leaves the window open. And offsetting the sample by a millisecond to avoid
+   landing on a 16 ms boundary is built on a false premise — `settle()` advances 1,200 ms, which is itself a
+   multiple of 16, so *every* capture lands on a boundary, not just the flaky ones.
+
+Collecting the whole `userData` tree is an eighth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
 DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between
 identical runs. `run.ts` collects only what the app writes, and `localStorage` is compared from the page dump.
 

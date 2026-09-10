@@ -13,6 +13,7 @@
 import { defineStore } from "pinia";
 import PokeData from "../logic/PokeData";
 import { enemySpriteScaleManager } from "../data/enemy_sprite_scale_manager";
+import { getUserState, setUserState } from "~/core/persistence/userState";
 
 interface ResizeState {
     species: string | null;
@@ -26,10 +27,11 @@ const EMPTY: ResizeState = { species: null, slot: null, baseSize: BASE_SIZE };
 const STYLES_ENABLED_KEY = "enemy_sprite_styles_enabled";
 
 function loadStylesEnabled(): boolean {
-    if (typeof localStorage === "undefined") return true;
-    const raw = localStorage.getItem(STYLES_ENABLED_KEY);
+    // It was the string "true"/"false" in local storage and is a boolean in the file,
+    // so a profile saved before plan 1.10 still reads as off.
+    const raw = getUserState<boolean | string | null>(STYLES_ENABLED_KEY, null);
     if (raw == null) return true;
-    return raw !== "false";
+    return raw !== false && raw !== "false";
 }
 
 export const useEnemySpriteResizeStore = defineStore("enemy_sprite_resize", {
@@ -83,9 +85,7 @@ export const useEnemySpriteResizeStore = defineStore("enemy_sprite_resize", {
         },
         setStylesEnabled(value: boolean): void {
             this.styles_enabled = value;
-            if (typeof localStorage !== "undefined") {
-                localStorage.setItem(STYLES_ENABLED_KEY, value ? "true" : "false");
-            }
+            setUserState(STYLES_ENABLED_KEY, value);
         },
 
         beginFromClick(slot: number, species: string): void {

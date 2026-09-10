@@ -111,18 +111,30 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
  * differences underneath are symptoms and not independent findings.
  */
 function diffVirtualClock(baseDir: string, candDir: string, checkpoint: string, out: Difference[]): void {
-  const base = readJson<{ virtualNow?: number }>(join(baseDir, "meta.json"));
-  const cand = readJson<{ virtualNow?: number }>(join(candDir, "meta.json"));
-  if (base?.virtualNow === undefined || cand?.virtualNow === undefined) return;
-  if (base.virtualNow === cand.virtualNow) return;
-  out.push({
-    oracle: 0,
-    name: "virtual clock",
-    checkpoint,
-    detail: `renderer Date.now() differs by ${cand.virtualNow - base.virtualNow} ms`,
-    baseline: String(base.virtualNow),
-    candidate: String(cand.virtualNow),
-  });
+  type Probe = { virtualNow?: number; hubRx?: number };
+  const base = readJson<Probe>(join(baseDir, "meta.json"));
+  const cand = readJson<Probe>(join(candDir, "meta.json"));
+  if (!base || !cand) return;
+  if (base.virtualNow !== undefined && cand.virtualNow !== undefined && base.virtualNow !== cand.virtualNow) {
+    out.push({
+      oracle: 0,
+      name: "virtual clock",
+      checkpoint,
+      detail: `renderer Date.now() differs by ${cand.virtualNow - base.virtualNow} ms`,
+      baseline: String(base.virtualNow),
+      candidate: String(cand.virtualNow),
+    });
+  }
+  if (base.hubRx !== undefined && cand.hubRx !== undefined && base.hubRx !== cand.hubRx) {
+    out.push({
+      oracle: 0,
+      name: "hub frames processed",
+      checkpoint,
+      detail: `the renderer had processed ${cand.hubRx} hub frames, not ${base.hubRx}`,
+      baseline: String(base.hubRx),
+      candidate: String(cand.hubRx),
+    });
+  }
 }
 
 // ---------------------------------------------------------------- oracle 1

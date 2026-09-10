@@ -4,5 +4,8 @@ dist/
 splits/
 tools/fixtures/raw/
 tools/reports/
-tools/baselines/**/*.png
+# Baselines are re-captured, never reviewed as text: one checkpoint's styles.json is
+# ~16 MB (834 elements x every computed property), so one gen1 fixture run is ~400 MB.
+# Plan 0.1 only ignored the PNGs, which was written before that was measured.
+tools/baselines/
 tools/sandbox/

@@ -1,10 +1,11 @@
-import { LocalStorageProxy } from "~/logic/LocalStorageProxy";
+import { getUserState } from "~/core/persistence/userState";
 
 /**
  * Send an OBS WebSocket 5 "CreateRecordChapter" request (Add Chapter Marker).
- * Connects to ws://localhost:4455 (or the `obs_websocket_url` value in local storage), identifies, sends the
+ * Connects to ws://localhost:4455 (or the saved `obs_websocket_url`), identifies, sends the
  * chapter name, then closes. Fails silently if OBS is not running.
- * Optional: set `obs_websocket_password` in local storage if OBS has authentication enabled.
+ * Optional: set `obs_websocket_password` in the user state if OBS has authentication enabled.
+ * Both keep the key names they had in localStorage (plan 1.10, core/persistence/userState.ts).
  *
  * The sha256 pair for the authentication challenge is computed in the main process
  * (`obs:auth`) instead of `require("crypto")` here (plan 1.6). That makes Identify
@@ -14,8 +15,8 @@ import { LocalStorageProxy } from "~/logic/LocalStorageProxy";
  * @param chapterName Name for the chapter marker (e.g. "RESET", "IN - BROCK")
  */
 export function sendObsChapterMarker(chapterName: string): void {
-	const url = (LocalStorageProxy.obs_websocket_url as string | null) || "ws://localhost:4455";
-	const password = (LocalStorageProxy.obs_websocket_password as string | null) || null;
+	const url = getUserState<string | null>("obs_websocket_url", null) || "ws://localhost:4455";
+	const password = getUserState<string | null>("obs_websocket_password", null) || null;
 	const requestId = "chapter-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
 	let ws: WebSocket;
 	try {

@@ -48,6 +48,15 @@ export interface CaptureMeta {
    * is where it is visible. `diff.ts` compares it.
    */
   virtualNow: number;
+  /**
+   * Hub frames the renderer had processed when the capture was taken.
+   *
+   * The companion to `virtualNow`: together they say "the same clock, and the same
+   * amount of mapper input". If the two runs agree on both and still render different
+   * text, the difference is in the renderer's own scheduling and not in what the
+   * harness fed it.
+   */
+  hubRx: number;
   capturedAt: string;
 }
 
@@ -135,7 +144,7 @@ export async function captureLocalStorage(page: Page): Promise<Record<string, st
 export interface CaptureInput {
   page: Page;
   dir: string;
-  meta: Omit<CaptureMeta, "elements" | "virtualNow" | "capturedAt">;
+  meta: Omit<CaptureMeta, "elements" | "virtualNow" | "hubRx" | "capturedAt">;
   console: ConsoleEntry[];
   /** Screenshots dominate run time; skip them while iterating on other oracles. */
   screenshot?: boolean;
@@ -157,6 +166,7 @@ export async function capture(input: CaptureInput): Promise<CaptureMeta> {
     ...meta,
     elements: Object.keys(styles).length,
     virtualNow: Number(await page.evaluate("Date.now()")),
+    hubRx: Number(await page.evaluate("window.__hubRx || 0")),
     capturedAt: new Date().toISOString(),
   };
   writeFileSync(join(dir, "meta.json"), JSON.stringify(full, null, 1));

@@ -525,6 +525,15 @@ async function settleFor(page: Page, mock: MockPokeAByte, opts: RunOptions, virt
     await waitForRenderIdle(page);
     return 0;
   }
+  // Drain *before* advancing, not only after. The caller pushes a batch of property
+  // changes and comes straight here, so without this the clock sweep below is already
+  // running when the hub frame arrives -- and `Date.now()` inside that handler returns
+  // whatever intermediate value the sweep has reached, which depends on real-time
+  // interleaving. That is how a new run stamped `metrics.timer.started_at` a few
+  // milliseconds apart between two otherwise identical runs, and why the on-screen
+  // timer's hundredths digit differed at 5 of 25 checkpoints while `virtualNow` and
+  // `hubRx` at every capture were identical.
+  await barrier(page, mock);
   await settle(page, virtualMs);
   await barrier(page, mock);
   await waitForRenderIdle(page);

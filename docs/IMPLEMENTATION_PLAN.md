@@ -227,8 +227,11 @@ runs rewrite those files.
 **0.1 Copy gen1 in**: `src/`, `electron.vite.config.js`, `tsconfig*`, `package.json`, `README.md`, `storage/`, `icon.png`.
 Exclude `node_modules`, `out`, `dist`, `splits`, `app/style-yellow.css` (stale), `src/renderer/Major Refactor.txt`.
 `keyhook.exe` is **no longer in gen1** — take gen2's (identical to gen3's) into `resources/`. `git init`; add
-`.gitignore` (`node_modules/ out/ dist/ splits/ tools/fixtures/raw/ tools/reports/ tools/baselines/**/*.png
+`.gitignore` (`node_modules/ out/ dist/ splits/ tools/fixtures/raw/ tools/reports/ tools/baselines/
 tools/sandbox/`); the first commit is the pristine gen1 copy plus `docs/` so every later diff is reviewable.
+**[corrected 2026-09-10]** revision 2 ignored only `tools/baselines/**/*.png`. It has to be the whole tree:
+oracle 1 records every computed property of every element, so one checkpoint's `styles.json` is ~16 MB and one
+gen1 fixture run is ~400 MB. Baselines are re-captured, never reviewed as text.
 **Assets stay in plain git (decision 11).** The legacy repos already track their images in git (gen1's `.git` alone is
 1.8 GB), so this changes nothing about `clone → npm install → npm run dev` and adds no LFS quota or tooling. Rules that
 keep the history from bloating: images are only ever *added*, never rewritten in place (a changed texture gets a new
@@ -589,7 +592,52 @@ Status as of 2026-09-10, after the first implementation session.
 10. ◐ Phase 0 is complete except for the two blocked items (5 and 8), both outside the harness. Phase 1 can
     start now: the synthetic fixture is a working regression net for the gen1 refactor.
 
-## 8. Corrections this session made to the plan
+## 7b. Phase 1 checklist
+
+Status as of 2026-09-10, after the second implementation session. Every item below was verified by replaying
+`tools/fixtures/gen1/gen1-yellow-smoke.fixture.jsonl.gz` against the built app and diffing all nine oracles
+against a baseline captured at the start of the session (`tools/baselines/unified/gen1-yellow-smoke`, git-ignored).
+1.1, 1.2, 1.5 and 1.9 are green against that baseline with **zero** differences at zero pixel tolerance.
+
+1.10 is the one item that deliberately changes an oracle, and the exact change is: the per-checkpoint
+`localStorage` dump goes from `{current_splits, previous_splits}` to `{}`, and
+`files/appdata/data/user_state.json` appears holding the same values. That is decision 10 landing, not a
+regression, and it is why Phase 1's exit baseline has to be re-captured after it rather than compared to the
+one before it.
+
+| # | What | Status |
+|---|---|---|
+| 1.1 | Template-string components → SFCs; `frontend.js` → `Overlay.vue` + `games/gen1/hooks.ts`; `state.js` → `games/gen1/state.ts` + `state.vue`; `no_mapper.js` → `GameSelect.vue` | ✅ no `const template` left anywhere |
+| 1.2 | Split lists → `games/gen1/data/splits.ts` | ✅ (correction: `deprecated_autosplitter` is live, so it moved rather than being deleted) |
+| 1.3 | Delete dead gen1 files | ✅ `6a11b50`, plus `components/autosplitter.js` (an empty stub) in 1.1 |
+| 1.4 | `GameModule`, `registry.ts`, the mapper translation layer | ⛔ **not started** — the largest remaining piece; see below |
+| 1.5 | `style-yellow.css` → `games/gen1/style.css` under `.gen-1` + `core/styles/base.css` | ✅ 12 rules base, 349 scoped, verified rule-for-rule and pixel-for-pixel |
+| 1.6 | No `require` in the renderer | ✅ `b0d1d2b` |
+| 1.7 | App root | ✅ `e610bc8` |
+| 1.8 | Control server | ✅ `e610bc8` |
+| 1.9 | OBS + Shuckie to `core/`, marker names to data | ✅ |
+| 1.10 | Persistence to files, `localStorage` retired | ◐ the four `localStorage` consumers now use `core/persistence/userState.ts`; the **one-time import of gen1's own `Local Storage`** is not built — `external-contracts.md` §6 puts the Chromium LevelDB reader in Phase 2.6, where four more generations need it, so it is better built once there. Until then a gen1 user's saved split comparison and OBS credentials do not carry over. |
+
+**What 1.4 still needs**, in the order it has to happen:
+
+1. `MapperProfile` and `MapperAdapter` types in `core/mapper/`, and the two gen1 profiles
+   (`DEPRECATED/gen1/pokemon_yellow_deprecated.xml`, `.../pokemon_red_blue_deprecated.xml`) covering the
+   **224 read paths and 36 write paths** `docs/gen1-inventory.md` measured — not the 199/6 the plan first said.
+2. Rewriting every store, component and hook read to go through canonical keys. That is what unlocks typing the
+   script blocks that are still plain JavaScript (`Overlay.vue`, `settings/interface_1.vue`,
+   `settings/encounters.vue`, `left_panel/exp_bar.vue`), all of which are untyped only because they reach into
+   `mapper.properties` or the array form of `inject`.
+3. `registry.ts` with the single gen1 entry, detection on `/mapper` `meta.path` then the identity property, and
+   `PokemonGame` extended with the four gen5 names.
+4. Hack mappers stay unregistered (decision 8); loading one shows the unsupported-mapper state.
+
+**Also outstanding before Phase 2 starts:** the CSS scoping done by hand in 1.5 has to happen four more times
+(2.5). It was done here with a throwaway script plus a checker that re-parses both outputs and proves same
+rules / same bodies / same relative order. Phase 2.5 should land that as a committed tool — the two bugs it
+caught here (native CSS nesting flattened by a naive brace scan; `url()` paths breaking when the file moves
+two directories deeper) will recur in every generation.
+
+## 8. Corrections the first implementation session made to the plan
 
 - **`known-legacy-bugs.md` #29 and #30** are new, both found by the harness: the mapper client's rAF
   debounce loop dereferences a nulled `_debouceMap` (including on the ordinary "connected before a mapper is
@@ -602,3 +650,35 @@ Status as of 2026-09-10, after the first implementation session.
   `bytes`, and the overlays read bytes, so the replayer replays every `E` from t=0 instead; the reason is at
   the top of `mock-pokeabyte/replay.ts`, and keyframes are now used as a consistency check on the recording.
 - **gen1's write list** is bigger than the plan said (see checklist step 9).
+
+## 8b. Corrections the second implementation session made (2026-09-10, Phase 1)
+
+- **1.2 was wrong about `deprecated_autosplitter.js`.** It said nothing imports it; `autosplitter_functions.js:1`
+  does, for the `trainerName` column of the Deprecated CSV. It moved into `games/gen1/data/` instead of being
+  deleted. (That lookup interpolates two `battle.trainer` *properties* rather than their `.value`s and works
+  only because `GameHookProperty.toString()` returns the value — checked, not a bug, not added to the bug list.)
+- **1.3's "delete `methods/`" is too broad.** `methods/enemy.js` and `methods/text_functions.js` are imported by
+  five live components; only `file_system_functions.js` and `unused_functions.js` were dead, and both are gone.
+  `docs/gen1-inventory.md`, regenerated after the Phase 1 renames, reports the same **224 paths / 188 read /
+  36 written** as before the refactor and no longer has a "paths only reached from dead code" section -- an
+  independent check that nothing in Phase 1 added, dropped or moved a mapper access.
+- **The `.gitignore` line in 0.1 was too narrow** (see the correction in place): baselines are ~400 MB per
+  fixture run, not a handful of PNGs.
+- **`parity-harness.md` §9 grew from four determinism requirements to seven.** The first four left a flake that
+  reproduced in about every other pair of runs: the on-screen timer's hundredths digit differed at 5 of 25
+  checkpoints. The three additions are a hub-frame receipt count, a `MessageChannel` task boundary before
+  reading the DOM, and — the one that actually closed it — draining the hub *before* the clock sweep and not
+  only after. The runner pushed a batch and went straight into a 1,200 ms `clock.runFor`, so the frame landed
+  mid-sweep and the property handler read an intermediate `Date.now()`; that is why the difference was ~10 ms
+  rather than a whole 16 ms frame. Two plausible-looking non-fixes are recorded there too, so nobody re-derives
+  them.
+- **Captures now record two probes**, `virtualNow` and `hubRx`, and `diff.ts` compares both. They are what
+  turned "five checkpoints render different text" into "the clock and the input were identical, so it is the
+  renderer's scheduling" — worth keeping for every later generation.
+- **gen1's stylesheet uses native CSS nesting.** Nothing in revision 2 mentions it, and 2.5's "prefix every
+  selector with `.gen-N` via PostCSS" has to preserve it: a naive brace scan hoists the inner rules to the top
+  level and silently changes what they match.
+- **`.gen-N` belongs on `#app-container`, not on `#app`.** The layout oracle keys elements by tag, classes and
+  nth-child walking up to #app-container *exclusive*, so putting the class there keeps every key stable and
+  every pre-scoping baseline comparable. 2.5 should do the same for each generation.
+

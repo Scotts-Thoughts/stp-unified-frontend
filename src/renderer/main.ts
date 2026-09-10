@@ -11,6 +11,7 @@ import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { loadLegacyStorage } from "~/logic/Storage";
+import { flushUserState, loadUserState } from "~/core/persistence/userState";
 import { registerControlServer } from "~/core/control/useControlServer";
 import { gen1ControlRoutes } from "~/games/gen1/control";
 
@@ -37,12 +38,19 @@ const main = defineComponent({
         // Load the overlay settings right away, so that the game and species dropdowns on the "no mapper" screen
         // reflect the last session and changes made there are not overwritten later.
         //
-        // storage/Storage.json comes first and must finish first: loading the overlay
-        // settings starts the species-load chain, which reads the legacy presets
-        // synchronously through findLegacySpeciesEntry (plan 1.6).
-        this.overlayLoaded = loadLegacyStorage()
+        // Both files have to be read before the overlay settings load: that starts the
+        // species-load chain, which reads the legacy presets synchronously through
+        // findLegacySpeciesEntry (plan 1.6), and the user state has to be in memory
+        // before anything reads it synchronously (plan 1.10). `ready` only turns true
+        // after this resolves, so no component can observe an empty cache.
+        this.overlayLoaded = Promise.all([loadLegacyStorage(), loadUserState()])
             .then(() => this.settings.overlay.load())
             .catch((err) => console.error("[main] Failed to load the overlay settings:", err));
+
+        // The user-state writes are debounced 250 ms; local storage was synchronous, so
+        // without this a quit within that window would lose the last edit. Best-effort,
+        // the same trade gen4 makes with its own beforeunload flush.
+        window.addEventListener("beforeunload", () => { void flushUserState(); });
 
         this.mapper = new GameHookMapperClient();
         this.mapper.onMapperLoaded = async () => {

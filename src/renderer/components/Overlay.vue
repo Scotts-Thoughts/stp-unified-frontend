@@ -28,7 +28,7 @@
  */
 import PubSub from "~/logic/PubSub";
 import { installGen1RunHooks } from "~/games/gen1/hooks";
-import { LocalStorageProxy } from "~/logic/LocalStorageProxy.js";
+import { getUserState, setUserState } from "~/core/persistence/userState";
 import { log_split, autosplitter_process, format_trainer_name } from "../autosplitter/autosplitter_functions.js";
 import { computed, defineComponent } from "vue";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore.js";
@@ -94,13 +94,13 @@ export default defineComponent({
     watch: {
         current_splits: {
             handler: function (newVal) {
-                LocalStorageProxy['current_splits'] = newVal
+                setUserState("current_splits", newVal)
             },
             deep: true,
         },
         previous_splits: {
             handler: function (newVal) {
-                LocalStorageProxy['previous_splits'] = newVal
+                setUserState("previous_splits", newVal)
             },
             deep: true,
         },
@@ -149,8 +149,8 @@ export default defineComponent({
             this.previous_splits = Array.isArray(splits) ? splits : [];
         },
         load_split_settings() {
-            this.current_splits = LocalStorageProxy['current_splits'] ?? []
-            this.previous_splits = LocalStorageProxy['previous_splits'] ?? []
+            this.current_splits = getUserState("current_splits", [])
+            this.previous_splits = getUserState("previous_splits", [])
         },
         padTime(time) {
             return !time
