@@ -1,0 +1,6 @@
+{
+  "name": "stp-overlay-tools",
+  "private": true,
+  "type": "module",
+  "description": "Parity harness and asset tooling. ESM-only, run with tsx; the app itself stays CommonJS."
+}
