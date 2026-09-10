@@ -91,8 +91,8 @@ import { trainer_name_lookup } from "~/autosplitter/trainer_name_lookup";
 import { convertDurationToSeconds, convertSecondsToDuration } from "~/utils/timehelpers";
 import { split_trainers } from "~/games/gen1/data/splits";
 import movepool from "./right_panel/move_pool.vue"
-import splits_followup from "./right_panel/splits_followup"
-import splits_first from "./right_panel/splits_first"
+import splits_followup from "./right_panel/splits_followup.vue"
+import splits_first from "./right_panel/splits_first.vue"
 import splits_summary from "./right_panel/splits_summary.vue"
 import enemy_graphic from "./right_panel/enemy_graphic.vue"
 import wild_pokemon from "./right_panel/wild_pokemon.vue"

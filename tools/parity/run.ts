@@ -148,6 +148,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
 
     await blockNetwork(page, ports, log);
     await installEvalShims(page);
+    await installHubReceiptProbe(page);
     if (opts.redirectPorts) await installPortRedirect(page, ports);
     // clock.install() alone keeps ticking with real time; pauseAt() is what actually
     // freezes it, and without that the overlay's timer samples wall clock and two
@@ -173,7 +174,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     // attempts to the real ports would otherwise leak into oracle 9 non-deterministically.
     consoleLog.length = 0;
 
-    await warmUp(page, opts);
+    await warmUp(page, mock, opts);
 
     const pending = [...wanted].sort((a, b) => a.tMs - b.tMs);
     let nextPing = SIGNALR_PING_MS;
@@ -191,12 +192,12 @@ export async function run(opts: RunOptions): Promise<RunResult> {
         return;
       }
       // Drain: everything pushed for the old time is applied before the clock moves.
-      await barrier(page);
+      await barrier(page, mock);
       // fastForward fires each due timer at most once, which is what a long gap between
       // fixture ticks means; runFor would replay thousands of 10 ms Shuckie polls.
       if (dt > 250) await page.clock.fastForward(dt);
       else await page.clock.runFor(dt);
-      await barrier(page);
+      await barrier(page, mock);
     };
 
     for await (const batch of driver.batches()) {
@@ -226,7 +227,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
 
       while (pending.length && pending[0].tMs <= batch.tMs) {
         const cp = pending.shift()!;
-        clockT += await settleFor(page, opts, 1200);
+        clockT += await settleFor(page, mock, opts, 1200);
         const dir = join(outDir, cp.id);
         await capture({
           page,
@@ -242,7 +243,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     }
 
     // Everything the app did over the whole run, not per checkpoint.
-    await settleFor(page, opts, 2000);
+    await settleFor(page, mock, opts, 2000);
 
     if (opts.control) {
       const scriptFile = typeof opts.control === "string" ? opts.control : DEFAULT_CONTROL_SCRIPT;
@@ -254,7 +255,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
         generation: target.kind === "unified" ? "unified" : target.generation,
         log,
       });
-      await settleFor(page, opts, 1200);
+      await settleFor(page, mock, opts, 1200);
       writeFileSync(join(outDir, "status.json"), JSON.stringify(exchanges, null, 1));
       log(`[run] control script ${basename(scriptFile)}: ${exchanges.length} exchange(s)`);
     }
@@ -425,34 +426,85 @@ async function installPortRedirect(page: Page, ports: typeof CANONICAL_PORTS): P
  * run. So the warm-up interleaves real sleeps with clock steps until the app stops
  * doing anything.
  */
-async function warmUp(page: Page, opts: RunOptions): Promise<void> {
+async function warmUp(page: Page, mock: MockPokeAByte, opts: RunOptions): Promise<void> {
   for (let i = 0; i < 12; i++) {
     await new Promise((r) => setTimeout(r, 50));
     if (!opts.realtime) await page.clock.runFor(200);
-    await barrier(page);
+    await barrier(page, mock);
   }
 }
 
 /**
- * Everything already queued on the renderer's task queue has run, and no main-process
- * call is still in flight.
+ * Counts hub frames as the renderer receives them, so the runner can tell that a push
+ * has been *applied* and not merely written to the socket.
+ *
+ * All listeners for one `message` event run in the same task, and this one is added in
+ * the WebSocket constructor -- before SignalR assigns `onmessage` -- so it runs first.
+ * That is fine: Node reads the counter from a later task, by which point every listener
+ * for that event, SignalR's included, has run and the property values are in the store.
+ *
+ * Only the `/updates` socket is counted. The overlay also opens one to the OBS stub,
+ * and counting those would let the barrier pass on frames the mapper never sent.
+ */
+async function installHubReceiptProbe(page: Page): Promise<void> {
+  await page.addInitScript({
+    content:
+      "(function () {" +
+      "  window.__hubRx = 0;" +
+      "  var Native = window.WebSocket;" +
+      "  function Counted(url, protocols) {" +
+      "    var socket = protocols === undefined ? new Native(url) : new Native(url, protocols);" +
+      "    if (String(url).indexOf('/updates') !== -1) {" +
+      "      socket.addEventListener('message', function () { window.__hubRx++; });" +
+      "    }" +
+      "    return socket;" +
+      "  }" +
+      "  Counted.prototype = Native.prototype;" +
+      "  Counted.CONNECTING = Native.CONNECTING;" +
+      "  Counted.OPEN = Native.OPEN;" +
+      "  Counted.CLOSING = Native.CLOSING;" +
+      "  Counted.CLOSED = Native.CLOSED;" +
+      "  window.WebSocket = Counted;" +
+      "})()",
+  });
+}
+
+/**
+ * Everything already queued on the renderer's task queue has run, no main-process call
+ * is still in flight, and every hub frame the mock has written has been processed.
  *
  * The CDP round trip alone only drains tasks; a `data:read` that has not answered yet
  * would resolve *after* the clock moved, and the overlay would stamp a different time
  * than it did last run. The pending-IPC count comes from the preload; polling it from
  * Node rather than with page.waitForFunction matters, because that helper polls with
  * page timers, which a paused fake clock never fires.
+ *
+ * The hub count closes the same hole for the *other* pipe. `mock.pushChanges()` writes
+ * to a WebSocket, which reaches the renderer independently of CDP, so a change could
+ * land on either side of the next `clock.runFor` -- and a new run that starts its timer
+ * from a property change would stamp `started_at` a frame apart between two otherwise
+ * identical runs. That showed up as the on-screen timer's hundredths digit differing at
+ * 5 of 25 checkpoints, with an identical `virtualNow` at every one of them.
  */
-async function barrier(page: Page, timeoutMs = 5000): Promise<void> {
+async function barrier(page: Page, mock?: MockPokeAByte, timeoutMs = 5000): Promise<void> {
   await page.evaluate("0");
   const deadline = Date.now() + timeoutMs;
   for (;;) {
-    const pending = await page
-      .evaluate("(window.api && window.api.__pendingIpc) ? window.api.__pendingIpc() : 0")
-      .catch(() => 0);
-    if (Number(pending) === 0) return;
+    const state = (await page
+      .evaluate(
+        "({" +
+          " ipc: (window.api && window.api.__pendingIpc) ? window.api.__pendingIpc() : 0," +
+          " hub: window.__hubRx || 0" +
+          "})",
+      )
+      .catch(() => ({ ipc: 0, hub: Number.POSITIVE_INFINITY }))) as { ipc: number; hub: number };
+    const wanted = mock ? mock.hubFramesSent : 0;
+    if (Number(state.ipc) === 0 && Number(state.hub) >= wanted) return;
     if (Date.now() > deadline) {
-      console.warn(`[run] ${pending} IPC call(s) still pending after ${timeoutMs} ms; continuing`);
+      console.warn(
+        `[run] barrier timed out after ${timeoutMs} ms ` +
+          `(${state.ipc} IPC pending, ${state.hub}/${wanted} hub frames); continuing`,
+      );
       return;
     }
     await new Promise((resolve) => setTimeout(resolve, 5));
@@ -464,7 +516,7 @@ async function barrier(page: Page, timeoutMs = 5000): Promise<void> {
  * wait out the things that are *not* on the virtual clock -- pending IPC and image and
  * font loading -- and let two more frames render on top of whatever that unblocked.
  */
-async function settleFor(page: Page, opts: RunOptions, virtualMs: number): Promise<number> {
+async function settleFor(page: Page, mock: MockPokeAByte, opts: RunOptions, virtualMs: number): Promise<number> {
   if (opts.realtime) {
     await new Promise((r) => setTimeout(r, Math.min(virtualMs, 1500)));
     await page.evaluate(
@@ -474,7 +526,7 @@ async function settleFor(page: Page, opts: RunOptions, virtualMs: number): Promi
     return 0;
   }
   await settle(page, virtualMs);
-  await barrier(page);
+  await barrier(page, mock);
   await waitForRenderIdle(page);
   // An image that finished decoding during the wait still needs a frame to paint, and
   // with the clock paused a frame only happens when the clock moves.

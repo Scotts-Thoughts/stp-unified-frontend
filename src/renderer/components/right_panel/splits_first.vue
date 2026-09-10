@@ -1,13 +1,8 @@
-import { defineComponent } from "vue";
-import { split_trainers } from "~/games/gen1/data/splits";
-import PokeData from "~/logic/PokeData";
-import { useMetaStore } from "~/stores/metaStore";
-
-const template = /*html*/`
+<template>
     <div>
         <table  class="splits_table" style="height: 960px;" cellspacing="0">
             <tbody>
-                <tr :style="{'background-color': \`var(--\${starter_type_2})\`, 'outline': '2px solid #000'}">
+                <tr :style="{'background-color': `var(--${starter_type_2})`, 'outline': '2px solid #000'}">
                     <td style="font-size: 18px; padding-left: 3px">Split</td>
                     <td style="font-size: 18px; width: 180px;  text-align: left; padding-left: 3px;"></td>
                     <td style="font-size: 18px; width: 10px;  text-align: left; padding-left: 3px;"></td>
@@ -25,17 +20,33 @@ const template = /*html*/`
         </table>
         <div class="tinted-box" style="--url: url(images/ui/movepool.svg)"></div>
     </div>
-`
+</template>
+
+<script lang="ts">
+/**
+ * The "first run" splits table: completed splits, then the ones still to come (plan 1.1).
+ *
+ * Converted from a template-string component. `game_properties` moves from the array
+ * form of `inject` to the typed `inject()` call the other SFCs use, which is the only
+ * way the `meta.gameName.value` read below survives `lang="ts"`; the injected value is
+ * the same object either way.
+ */
+import { defineComponent, inject } from "vue";
+import { split_trainers } from "~/games/gen1/data/splits";
+import { GameHookProperty } from "~/packages/gameHookMapperClient";
+import PokeData from "~/logic/PokeData";
+import { useMetaStore } from "~/stores/metaStore";
 
 export default defineComponent({
-    template,
     props: [
         "current_splits",
         "trainer_name_lookup",
     ],
-    inject: ["game_properties"],
     data() {
-        return { meta: useMetaStore() };
+        return {
+            meta: useMetaStore(),
+            game_properties: inject<Record<string, GameHookProperty>>("game_properties", {}),
+        };
     },
     computed: {
         first_splits() {
@@ -58,3 +69,4 @@ export default defineComponent({
         }
     }
 });
+</script>

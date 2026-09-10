@@ -1,14 +1,4 @@
-import { useMetaStore } from "~/stores/metaStore";
-import battle_testing from "./battle_testing.vue";
-import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
-import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
-import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
-import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
-import { defineComponent } from "vue";
-import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
-import { IS_RELEASE } from "~/core/env";
-
-const template = /*html*/`
+<template>
     <div>Game:</div>
     <select v-model="settings.edition" class="dropdownMenu dropdown_menu_column3">
         <option>Yellow</option>
@@ -66,10 +56,31 @@ const template = /*html*/`
             </tbody>
         </table>
     </div>
-`
+</template>
+
+<script>
+/**
+ * The Interface settings panel: game and species pickers, the splits folder button and
+ * the dev-only style controls (plan 1.1).
+ *
+ * Converted from a template-string component. Plain JavaScript rather than `lang="ts"`
+ * for the same reason as `left_panel/exp_bar.vue`: the template reads `$event.target.checked`
+ * and `game_properties` through the array form of `inject`, both of which vue-tsc rejects
+ * without rewriting the logic. Plan 1.1 compiles the template ahead of time; retyping the
+ * body is a later pass with the harness as the net.
+ */
+import { useMetaStore } from "~/stores/metaStore";
+import battle_testing from "./battle_testing.vue";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
+import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
+import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
+import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
+import { defineComponent } from "vue";
+import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
+import { IS_RELEASE } from "~/core/env";
+
 
 export default defineComponent({
-    template,
     inject: ["game_properties"],
     components: {
         battle_testing,
@@ -92,3 +103,4 @@ export default defineComponent({
         }
     }
 });
+</script>

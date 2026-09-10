@@ -1,9 +1,4 @@
-import { defineComponent } from "vue";
-import { useMetaStore } from "~/stores/metaStore.js";
-import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
-import { useSettingsStore } from "~/stores/useSettingsStore";
-
-const template = /*html*/`
+<template>
     <div>Encounter Settings:</div>
     <table>
         <tbody>
@@ -59,7 +54,22 @@ const template = /*html*/`
             </tr>
         </tbody>
     </table>
-`;
+</template>
+
+<script>
+/**
+ * The Encounters settings panel, and the startup write of the encounter flags to the
+ * ROM (plan 1.1; known-legacy-bugs.md #30 for the race in `mounted`).
+ *
+ * Converted from a template-string component. Plain JavaScript rather than `lang="ts"`,
+ * as with `left_panel/exp_bar.vue`: the panel reads and writes mapper properties through
+ * the array form of `inject`, which vue-tsc cannot follow without rewriting the logic.
+ */
+import { defineComponent } from "vue";
+import { useMetaStore } from "~/stores/metaStore.js";
+import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
+import { useSettingsStore } from "~/stores/useSettingsStore";
+
 
 /** Flags that live in `patch.encounter_flags` of the mapper, grouped by game. */
 const ENCOUNTER_FLAGS = {
@@ -82,7 +92,6 @@ const ENCOUNTER_FLAGS = {
 const MT_MOON_MAPS = ["Mt Moon - 1", "Mt Moon - 2", "Mt Moon - 3"];
 
 export default defineComponent({
-    template,
     inject: ["mapper"],
     data() {
         return {
@@ -213,3 +222,4 @@ export default defineComponent({
         })
     }
 });
+</script>

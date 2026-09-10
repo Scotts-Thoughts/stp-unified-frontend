@@ -1,9 +1,4 @@
-import { defineComponent } from "vue";
-import PokeData from "~/logic/PokeData";
-import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
-import { IS_RELEASE } from "~/core/env";
-
-const template = /*html*/`
+<template>
     <div>
         <div>Game:</div>
             <select v-model="settings.edition" class="dropdownMenu dropdown_menu_column3">
@@ -18,10 +13,25 @@ const template = /*html*/`
                 <option v-for="key in filtered_pokemon_list" :value="key">{{key}}</option>
             </select><br>
     </div>
-`
+</template>
+
+<script lang="ts">
+/**
+ * The pre-mapper screen: pick the edition and the solo species while PokeAByte has no
+ * mapper loaded (plan 1.1, renamed from `no_mapper.js`).
+ *
+ * Phase 3.2 replaces the look with the box-art grid that gen3-5 use, for every
+ * generation. Until then this is gen1's two dropdowns, unchanged -- including the
+ * `isRelease` guard that hides the Yellow Legacy option in a release build, even though
+ * hack mappers are out of scope (decision 8, known-legacy-bugs.md #22).
+ */
+import { defineComponent } from "vue";
+import PokeData from "~/logic/PokeData";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
+import { IS_RELEASE } from "~/core/env";
+
 
 export default defineComponent({
-    template,
     data() {
         return {
             settings: useOverlaySettingsStore(),
@@ -40,3 +50,4 @@ export default defineComponent({
         }
     }
 });
+</script>

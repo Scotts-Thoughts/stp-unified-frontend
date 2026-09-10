@@ -17,6 +17,16 @@ export interface HubClient {
   ping(): void;
   close(): void;
   readonly open: boolean;
+  /**
+   * WebSocket frames written to this client, handshake response included.
+   *
+   * The runner compares it with the renderer's own received-frame count to know that a
+   * push has been *applied* before it moves the virtual clock. Node writing a frame and
+   * the renderer processing it are two different pipes from a CDP round trip, so
+   * without this the overlay can stamp a timer from the clock on either side of the
+   * change (docs/parity-harness.md section 9).
+   */
+  readonly sent: number;
 }
 
 export interface HubOptions {
@@ -36,6 +46,8 @@ export class SignalRHub {
   private readonly wss = new WebSocketServer({ noServer: true });
   private readonly clients = new Set<HubClient>();
   private readonly tokens = new Set<string>();
+  /** The most recently handshaken client; a page reload replaces it. */
+  private newest: HubClient | null = null;
 
   constructor(private readonly opts: HubOptions = {}) {}
 
@@ -70,18 +82,22 @@ export class SignalRHub {
 
   private accept(ws: WebSocket): void {
     let handshakeDone = false;
+    let sent = 0;
+    /** Every frame this server writes goes through here, so `sent` cannot drift. */
+    const write = (payload: string): void => {
+      if (ws.readyState !== ws.OPEN) return;
+      ws.send(payload + SEP);
+      sent++;
+    };
     const client: HubClient = {
       get open() {
         return ws.readyState === ws.OPEN;
       },
-      send: (target, ...args) => {
-        if (ws.readyState !== ws.OPEN) return;
-        ws.send(JSON.stringify({ type: 1, target, arguments: args }) + SEP);
+      get sent() {
+        return sent;
       },
-      ping: () => {
-        if (ws.readyState !== ws.OPEN) return;
-        ws.send(JSON.stringify({ type: 6 }) + SEP);
-      },
+      send: (target, ...args) => write(JSON.stringify({ type: 1, target, arguments: args })),
+      ping: () => write(JSON.stringify({ type: 6 })),
       close: () => ws.close(),
     };
 
@@ -98,13 +114,14 @@ export class SignalRHub {
         if (!handshakeDone) {
           // Handshake request: {"protocol":"json","version":1}
           if (msg.protocol !== "json") {
-            ws.send(JSON.stringify({ error: `Unsupported protocol '${String(msg.protocol)}'` }) + SEP);
+            write(JSON.stringify({ error: `Unsupported protocol '${String(msg.protocol)}'` }));
             ws.close();
             return;
           }
           handshakeDone = true;
-          ws.send("{}" + SEP);
+          write("{}");
           this.clients.add(client);
+          this.newest = client;
           this.opts.onConnected?.(client);
           continue;
         }
@@ -124,9 +141,20 @@ export class SignalRHub {
     });
 
     ws.on("close", () => {
+      if (this.newest === client) this.newest = null;
       if (this.clients.delete(client)) this.opts.onDisconnected?.(client);
     });
     ws.on("error", (err) => this.opts.log?.(`[hub] socket error: ${String(err)}`));
+  }
+
+  /**
+   * Frames written to the client that is currently connected, or 0 when none is.
+   *
+   * A page reload drops the old socket and starts a new one, so this resets with the
+   * renderer's own counter rather than accumulating across documents.
+   */
+  get sentToCurrentClient(): number {
+    return this.newest?.sent ?? 0;
   }
 
   /** Fan-out to every handshaken client. */

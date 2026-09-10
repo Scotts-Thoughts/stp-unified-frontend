@@ -61,6 +61,16 @@ export class MockPokeAByte {
     return this.hubConnections;
   }
 
+  /**
+   * Hub frames written to the currently connected renderer.
+   *
+   * The runner waits for the page's own received-frame count to reach this before it
+   * advances the virtual clock; see `SignalRHub.sentToCurrentClient`.
+   */
+  get hubFramesSent(): number {
+    return this.hub.sentToCurrentClient;
+  }
+
   get mapperLoaded(): boolean {
     return this.loaded;
   }

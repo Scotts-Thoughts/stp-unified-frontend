@@ -1,8 +1,4 @@
-import { defineComponent } from "vue";
-import PokeData from "~/logic/PokeData";
-import { useMetaStore } from "~/stores/metaStore";
-
-const template = /*html*/`
+<template>
 <div>
     <div class="expBar">
         <div class="expMeterStyle expMeterOuter">
@@ -10,10 +6,26 @@ const template = /*html*/`
         </div>
     </div>
 </div>
-`
+</template>
+
+<script>
+/**
+ * The experience bar and its level-up animation (plan 1.1).
+ *
+ * Converted from a template-string component. The script block is deliberately plain
+ * JavaScript, not `lang="ts"`: the animation assigns `null` to `style.transition`,
+ * re-types `prevSpecies` from `undefined` to a string and reaches into
+ * `game_properties` through the array form of `inject`, and every one of those needs a
+ * cast to satisfy vue-tsc. Plan 1.1 asks for the template to be compiled ahead of time,
+ * not for the logic to be rewritten; typing it is a later pass with the harness as the
+ * net.
+ */
+import { defineComponent } from "vue";
+import PokeData from "~/logic/PokeData";
+import { useMetaStore } from "~/stores/metaStore";
+
 
 export default defineComponent({
-    template,
     inject: ["game_properties"],
     data() {
         return {
@@ -129,3 +141,4 @@ export default defineComponent({
         })
     }
 });
+</script>
