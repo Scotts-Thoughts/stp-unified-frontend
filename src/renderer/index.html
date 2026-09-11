@@ -15,12 +15,13 @@
             <keyhook :table="hotkeys"></keyhook>
             <div v-if="ready == false">
                 <div>Please load a mapper in PokeAByte...</div>
+                <div v-if="unsupportedMapper">Unsupported mapper: {{ unsupportedMapper }}</div>
                 <br>
                 <no_mapper></no_mapper>
             </div>
             <div v-else>
                 <frontend
-                    :mapper="mapper"
+                    :game="game"
                 ></frontend>
             </div>
         </div>

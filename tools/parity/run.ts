@@ -41,6 +41,7 @@ import { capture, flushRender, installEvalShims, settle, waitForRenderIdle, type
 import { scanFixture, type Checkpoint, type ScanResult } from "./scan-fixture.ts";
 import { parseTarget, prepareSandbox, REPO, type Target } from "./targets.ts";
 import { loadControlScript, runControlScript } from "./control-script.ts";
+import { checkWriteLog } from "./profile-check.ts";
 
 /** Canonical ports the overlays hardcode, and the spares --redirect-ports uses. */
 const CANONICAL_PORTS = { pokeabyte: 8085, shuckie: 30158, obs: 4455, control: 30159 };
@@ -170,6 +171,13 @@ export async function run(opts: RunOptions): Promise<RunResult> {
 
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForSelector("#app", { timeout: 30000 });
+    // Park the pointer. The Electron window is a real window under the real cursor,
+    // and Chromium re-evaluates :hover whenever layout changes under a stationary
+    // pointer -- so a range slider that happened to sit under the desktop cursor was
+    // captured in its hover colours for six checkpoints of one run and in its normal
+    // colours in the next. (0, 0) is the corner of the full-screen background canvas,
+    // which nothing styles on hover. A synthetic move sets the position Chromium uses.
+    await page.mouse.move(0, 0);
     // The document before the reload is not part of the run; its failed connection
     // attempts to the real ports would otherwise leak into oracle 9 non-deterministically.
     consoleLog.length = 0;
@@ -264,6 +272,16 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     writeFileSync(join(outDir, "obs-markers.json"), JSON.stringify(obs?.markers ?? [], null, 1));
     writeFileSync(join(outDir, "shuckie-calls.json"), JSON.stringify(shuckie?.calls ?? [], null, 1));
     writeFileSync(join(outDir, "console-tail.json"), JSON.stringify(consoleLog, null, 1));
+
+    // Oracle 5, second half: every write must be one the mapper profile declares
+    // (plan 1.4). The verdict is written next to the log so a later diff or a human can
+    // see it; the run itself keeps going, because a violation is a finding, not a crash.
+    const profileCheck = checkWriteLog(header.mapperId, mock.writeLog);
+    writeFileSync(join(outDir, "profile-check.json"), JSON.stringify(profileCheck, null, 1));
+    if (profileCheck.violations.length) {
+      log(`[run] profile ${profileCheck.profileId ?? "(none)"}: ${profileCheck.violations.length} undeclared write(s)`);
+      for (const v of profileCheck.violations) log(`[run]   ${v}`);
+    }
     collectFiles(target, outDir, log);
     writeFileSync(
       join(outDir, "run.json"),
@@ -429,10 +447,25 @@ async function installPortRedirect(page: Page, ports: typeof CANONICAL_PORTS): P
 async function warmUp(page: Page, mock: MockPokeAByte, opts: RunOptions): Promise<void> {
   for (let i = 0; i < 12; i++) {
     await new Promise((r) => setTimeout(r, 50));
-    if (!opts.realtime) await page.clock.runFor(200);
+    if (!opts.realtime) await page.clock.runFor(WARM_UP_STEP_MS);
     await barrier(page, mock);
   }
 }
+
+/**
+ * A whole number of animation frames, and that is load-bearing.
+ *
+ * Boot resolves on real time (the IPC settings reads), so *which* warm-up step the
+ * overlay's timer gets constructed in varies from run to run -- and the timer runs on
+ * `requestAnimationFrame`, which the fake clock schedules 16 ms from whenever the chain
+ * started. With 200 ms steps (200 mod 16 = 8) a chain anchored in an odd step ticks
+ * 8 ms out of phase with one anchored in an even step, and the on-screen hundredths
+ * digit read `.22` in one run and `.23` in the next at every checkpoint whose clock
+ * happened to sit on the even grid. 192 = 12 x 16, so the anchor's phase is the same
+ * whichever step it lands in. Every other advance the runner makes is either fixed by
+ * the fixture (deterministic) or a multiple of 16 already (`settle`, `extraFrame`).
+ */
+const WARM_UP_STEP_MS = 192;
 
 /**
  * Counts hub frames as the renderer receives them, so the runner can tell that a push

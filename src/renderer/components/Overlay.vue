@@ -21,10 +21,11 @@
  * right panel compares (plan 1.1, converted from `components/frontend.js`).
  *
  * The mapper subscriptions this component used to install in `mounted` are now
- * `games/gen1/hooks.ts`; nothing else moved, and the script block stays plain JavaScript
- * for the same reason as the settings panels -- `mapper` arrives as an untyped prop and
- * every read below goes through it. Plan 1.4 replaces those reads with the adapter's
- * canonical keys, and that is the point at which typing this pays for itself.
+ * `games/gen1/hooks.ts`; nothing else moved. `game` is the session `main.ts` builds --
+ * the detected module and profile, and `properties` as the profile's canonical view
+ * over the mapper (plan 1.4). The script block stays plain JavaScript: the reads below
+ * are canonical keys now, but the view is untyped until Phase 2 settles the shared
+ * key shapes.
  */
 import PubSub from "~/logic/PubSub";
 import { installGen1RunHooks } from "~/games/gen1/hooks";
@@ -57,7 +58,7 @@ export default defineComponent({
         right_panel, //Right Panel
         enemy_sprite_resize_handle, // dev-only resize tool
     },
-    props: [ "mapper" ],
+    props: [ "game" ],
     data() {
         return {
             battle: useBattleStore(),
@@ -120,8 +121,8 @@ export default defineComponent({
     },
     computed: {
         gametimeSplit() {
-            const h = this.mapper.properties.gameTime.hours
-            const m = this.mapper.properties.gameTime.minutes
+            const h = this.game.properties.gameTime.hours
+            const m = this.game.properties.gameTime.minutes
             const timecode = h + ":" + m.toString().padStart(2, "0")
             return timecode
         },
@@ -173,10 +174,12 @@ export default defineComponent({
     },
     provide() {
         return {
+            // The canonical view (plan 1.4): the mapper client's own property objects,
+            // under the names the profile declares.
             "game_properties": computed(() => {
-                return this.mapper.properties;
+                return this.game.properties;
             }),
-            "mapper": this.mapper,
+            "game": computed(() => this.game),
         }
     }
 });

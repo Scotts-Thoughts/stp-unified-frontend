@@ -1,0 +1,94 @@
+import type { Component } from "vue";
+import type { MapperProfile } from "../mapper/MapperProfile";
+import type { HotkeyTable } from "../hotkeys/KeyHook";
+import type { ControlRoutes } from "../control/useControlServer";
+
+/**
+ * The contract every generation implements (plan section 2, "GameModule").
+ *
+ * A module is data plus a handful of install functions. `core/` never imports a
+ * `games/genN/` file; it only ever holds a `GameModule` handed to it by
+ * `games/registry.ts`, which is how five generations share one set of stores and
+ * components.
+ *
+ * What is here is what gen1 implements today. Fields the plan lists that no module
+ * yet needs (`features` beyond the ones gen1 exercises, `components` slots, the
+ * `logCopy` variants) are typed but optional, and grow as each generation lands in
+ * Phase 2 -- adding a field to the interface and to every module in the same commit,
+ * never as an untyped side channel.
+ */
+
+/** A user-selectable edition: the queuer's `selected_game` vocabulary and the box-art grid. */
+export interface Edition {
+    /** Display name and `selected_game` value: "Yellow", "Red", "Gold & Silver"... */
+    name: string;
+    /** The mapper game (a data key) this edition plays on: "Yellow", "Red and Blue"... */
+    game: string;
+    /** Path under `images/box_art/`; gen1 and gen2 have placeholders (decision 16). */
+    boxArt: string;
+    /** Folder under `splits/` the autosplitter writes to. */
+    splitFolder: string;
+    /** File-name prefix of the split CSVs ("Y", "R", "B"). */
+    splitPrefix: string;
+    /** Icon under `resources/icons/` for the window and taskbar. */
+    icon: string;
+    /** Only listed in a dev build -- gen1's "Yellow Legacy" (known-legacy-bugs.md #22). */
+    devOnly?: boolean;
+}
+
+/** Everything a generation can switch on. Absent means off. */
+export type Feature =
+    | "abilities" | "natures" | "physicalSpecialSplit" | "doubleBattles" | "badgeBoosts" | "expBar"
+    | "repelCounter" | "bonkCounter" | "voltorbFlip" | "fling" | "inventorySprites" | "romPatching"
+    | "evolutionSplits" | "forms" | "secondScreen" | "shuckieTimer" | "styleMode" | "backportImporter"
+    | "rngHelper" | "vitamins" | "encounterFlags";
+
+/**
+ * The run hooks: reset / new-run / blackout / split-trigger / run-finished watchers and
+ * the game-state machine. Both take what the overlay already has -- `installRunHooks`
+ * the overlay component instance (its split-state fields and autosplitter methods are
+ * the context, see `games/gen1/hooks.ts`), `installStateSync` the canonical view.
+ */
+export interface RunHooks {
+    installRunHooks(vm: any): void;
+    installStateSync(gameProperties: any): void;
+}
+
+/** The OBS chapter-marker names, per generation; the client is shared (`core/logic/obs.ts`). */
+export interface ChapterMarkers {
+    battleIn(trainerClass: string): string;
+    battleOut(trainerClass: string): string;
+    reset(): string;
+    blackout(): string;
+    [kind: string]: (...args: string[]) => string;
+}
+
+export interface GameModule {
+    id: "gen1" | "gen2" | "gen3" | "gen4" | "gen5";
+    generation: 1 | 2 | 3 | 4 | 5;
+    /** The mapper profiles this module ships; today exactly the mappers in `docs/mapper-matrix.md`. */
+    mappers: MapperProfile[];
+    /** The mapper game-name strings this module accepts: the data keys. */
+    games: string[];
+    editions: Edition[];
+    features: Partial<Record<Feature, boolean>>;
+    hooks: RunHooks;
+    /** Per-generation data. Typed loosely until Phase 2 settles the shared shapes. */
+    data: {
+        splits: Record<string, unknown>;
+        [table: string]: unknown;
+    };
+    hotkeys(): HotkeyTable;
+    control(isReady: () => boolean, mapperPath: () => string | null): ControlRoutes;
+    chapterMarkers: ChapterMarkers;
+    /** Loads the generation's stylesheet (`games/genN/style.css`, scoped under `.gen-N`). */
+    styles(): Promise<unknown>;
+    /** Generation-specific SFC variants, only where the DOM differs (Phase 2). */
+    components?: Partial<Record<string, Component>>;
+    persistence: {
+        /** The legacy app's userData folder name, for the one-time import (Phase 2.6). */
+        legacyAppName: string;
+    };
+    /** Which `logCopy` the autosplitter uses (known-legacy-bugs.md #21). */
+    logCopyVariant: "gen1" | "gen2" | "gen3" | "gen4" | "gen5";
+}

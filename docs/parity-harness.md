@@ -200,10 +200,10 @@ npm run parity:mock -- <fixture>             # serve a fixture by hand, no Playw
 
 `<target>` is `unified`, `legacy:genN@25` or `legacy:genN@37`.
 
-### Determinism is not free — seven things the runner has to do
+### Determinism is not free — nine things the runner has to do
 
-Getting two identical runs to agree took seven fixes; each is commented where it is handled, and any change to
-the runner has to keep all seven. Items 5–7 were added on 2026-09-10 during Phase 1, after the first four
+Getting two identical runs to agree took nine fixes; each is commented where it is handled, and any change to
+the runner has to keep all nine. Items 5–9 were added on 2026-09-10 during Phase 1, after the first four
 turned out to leave a flake that reproduced in roughly every other pair of runs: the on-screen timer's
 hundredths digit differed at 5 of 25 checkpoints (oracles 1 and 2), with an identical virtual clock at every
 capture. Each capture now records `virtualNow` (the renderer's `Date.now()`) and `hubRx` (hub frames it had
@@ -249,8 +249,21 @@ the cause instead of listing its symptoms.
    sweep (item 5 as first written) leaves the window open. And offsetting the sample by a millisecond to avoid
    landing on a 16 ms boundary is built on a false premise — `settle()` advances 1,200 ms, which is itself a
    multiple of 16, so *every* capture lands on a boundary, not just the flaky ones.
+8. **Every clock step the runner makes is a whole number of frames** (`WARM_UP_STEP_MS = 192` in `run.ts`).
+   Item 7 removed the mid-sweep read but the hundredths digit still flipped between runs, and this time the
+   arithmetic was exact: boot resolves on *real* time (the IPC settings reads), so which warm-up step the
+   overlay's timer is constructed in varies, and the timer runs on `requestAnimationFrame`, which the fake clock
+   schedules 16 ms from whenever the chain started. With 200 ms steps (200 mod 16 = 8) a chain anchored in an odd
+   step ticks 8 ms out of phase with one anchored in an even step — `.22` against `.23`. 192 = 12 × 16. Every
+   other advance is fixed by the fixture or already a multiple of 16 (`settle` 1,200; `extraFrame` 32).
+9. **Park the pointer** (`page.mouse.move(0, 0)` after the reload). The Electron window is a real window under
+   the real desktop cursor, and Chromium re-evaluates `:hover` whenever layout changes under a stationary
+   pointer. A range slider that happened to sit under the cursor was captured in its hover colours
+   (`rgb(0,88,156)` fill, `rgb(229,229,229)` track) for six checkpoints of one run and its normal colours
+   (`rgb(0,120,212)` / `rgb(239,239,239)`) in the next — a pixel-only difference with identical styles and text.
+   (0, 0) is the corner of the full-screen background canvas, which nothing styles on hover.
 
-Collecting the whole `userData` tree is an eighth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
+Collecting the whole `userData` tree is a tenth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
 DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between
 identical runs. `run.ts` collects only what the app writes, and `localStorage` is compared from the page dump.
 

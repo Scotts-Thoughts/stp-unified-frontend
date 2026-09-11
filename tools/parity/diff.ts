@@ -85,6 +85,7 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
   diffTree(join(baselineDir, "files", "splits"), join(candidateDir, "files", "splits"), 3, differences);
   diffTree(join(baselineDir, "files", "appdata"), join(candidateDir, "files", "appdata"), 4, differences);
   diffJsonFile(join(baselineDir, "writes.json"), join(candidateDir, "writes.json"), 5, "write log", undefined, differences, stripTiming);
+  diffProfileCheck(join(candidateDir, "profile-check.json"), differences);
   diffJsonFile(join(baselineDir, "status.json"), join(candidateDir, "status.json"), 6, "control server", undefined, differences);
   diffJsonFile(join(baselineDir, "obs-markers.json"), join(candidateDir, "obs-markers.json"), 7, "chapter markers", undefined, differences, stripTiming);
   diffJsonFile(join(baselineDir, "shuckie-calls.json"), join(candidateDir, "shuckie-calls.json"), 8, "shuckie calls", undefined, differences, stripTiming);
@@ -134,6 +135,19 @@ function diffVirtualClock(baseDir: string, candDir: string, checkpoint: string, 
       baseline: String(base.hubRx),
       candidate: String(cand.hubRx),
     });
+  }
+}
+
+/**
+ * Oracle 5, second half: the candidate's writes must all be declared by its mapper
+ * profile (`tools/parity/profile-check.ts`, written by the runner). This is not a
+ * baseline comparison -- a write outside the profile is wrong on its own.
+ */
+function diffProfileCheck(file: string, out: Difference[]): void {
+  const result = readJson<{ profileId: string | null; violations: string[] }>(file);
+  if (!result) return;
+  for (const v of result.violations) {
+    out.push({ oracle: 5, name: `${ORACLE_NAMES[5]} (profile)`, detail: v });
   }
 }
 

@@ -10,12 +10,12 @@ import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
  * mounted (plan 1.1, extracted verbatim from `components/frontend.js`'s `mounted`).
  *
  * In plan order these are the reset, blackout, new-run, "NINTEN" rename, autosplitter,
- * run-finished and Alakazam-Yellow watchers. They are `GameModule.hooks` in plan 1.4;
- * until the adapter exists they still speak raw gen1 mapper paths, and the split-trigger
+ * run-finished and Alakazam-Yellow watchers. They are `GameModule.hooks.installRunHooks`; until the adapter exists they still speak raw gen1 mapper paths, and the split-trigger
  * trainer lists are still the inline `switch` statements they always were.
  *
- * `vm` is the overlay component instance, which is what `this` was. Keeping it as the
- * context object is deliberate: the hooks write `simple_data_str`, `full_data_str`,
+ * `vm` is the overlay component instance, which is what `this` was; `vm.game.properties`
+ * is the profile's canonical view (plan 1.4), which for gen1 spells every key the way the
+ * mapper does. Keeping the instance as the context object is deliberate: the hooks write `simple_data_str`, `full_data_str`,
  * `deprecated_data_str` and `split_data` on it, and call `log_split()` and
  * `autosplitter_process()`, which are the `autosplitter_functions.js` helpers bound as
  * component methods. Untangling that is plan 1.4's job, not this move's.
@@ -28,26 +28,26 @@ export function installGen1RunHooks(vm: any): void {
 
 
     // RESET - Identifies when a reset occurs and publishes an event
-    vm.mapper.properties.player.playerId.change((newProp, oldProp) => {
+    vm.game.properties.player.playerId.change((newProp, oldProp) => {
         if (newProp.value == 0 && oldProp.value > 0 && vm.metrics.run_finished == false) {
             PubSub.publish("@run/reset_occurred");
         }
     });
     // BLACKOUT - Identifies when a blackout might have occurred, and marks battles in the OBS recording.
-    vm.mapper.properties.meta.state.change((newProp, oldProp) => {
+    vm.game.properties.meta.state.change((newProp, oldProp) => {
         PubSub.publish("@run/check_blackout", [newProp, oldProp]);
-        if (newProp.value == "To Battle" && vm.mapper.properties.battle.type.value == "Trainer") {
+        if (newProp.value == "To Battle" && vm.game.properties.battle.type.value == "Trainer") {
             vm.settings.clearRightPanelOverride();
             if (oldProp.value == "Overworld") {
-                sendObsChapterMarker(gen1ChapterMarkers.battleIn(vm.mapper.properties.battle.trainer.class.value));
+                sendObsChapterMarker(gen1ChapterMarkers.battleIn(vm.game.properties.battle.trainer.class.value));
             }
         }
         else if (newProp.value == "Overworld" && oldProp.value == "From Battle") {
-            sendObsChapterMarker(gen1ChapterMarkers.battleOut(vm.mapper.properties.battle.trainer.class.value));
+            sendObsChapterMarker(gen1ChapterMarkers.battleOut(vm.game.properties.battle.trainer.class.value));
         }
     });
     // NEW_RUN_STARTED - Determines if the player has pressed 'New Game' and started a new playthrough
-    vm.mapper.properties.player.playerId.change((newProp) => {
+    vm.game.properties.player.playerId.change((newProp) => {
         if (newProp.value > 0 && vm.metrics.run_finished == false && newProp.value != vm.metrics.player_id) {
             if (vm.runConfig.advanced.no_attempt == true) {
                 return
@@ -65,7 +65,7 @@ export function installGen1RunHooks(vm: any): void {
         }
     })
     // Only allow the player to reset once after the champion without resets incrementing
-    vm.mapper.properties.player.name.change((newProp) => {
+    vm.game.properties.player.name.change((newProp) => {
         if (vm.metrics.run_finished == true && newProp.value == "NINTEN") {
             vm.metrics.update("run_finished", false);
         }
@@ -74,31 +74,31 @@ export function installGen1RunHooks(vm: any): void {
     //! Refactor into 'components/autosplitter.js' component
     //* Autosplitter
     //log the start of a battle to the console
-    vm.mapper.properties.battle.type.change((newProp) => {
-        vm.battle.startBattle(vm.mapper.properties, newProp.value, vm.collect_split_data);
+    vm.game.properties.battle.type.change((newProp) => {
+        vm.battle.startBattle(vm.game.properties, newProp.value, vm.collect_split_data);
     });
     //write to file at the end of a key battle
     //the `lowHealthAlarm` property is used to play the Red-bar sound effect
     //it is turned off as soon as "Player defeated Trainer" starts to render in the textbox
-    vm.mapper.properties.battle.lowHealthAlarm.change((prop) => {
+    vm.game.properties.battle.lowHealthAlarm.change((prop) => {
         //Collect battle starting metrics
         vm.autosplitter_process()
-        if (prop.value == "Disabled" && vm.mapper.properties.battle.type.value == "Trainer") {
-            let trainer = vm.mapper.properties.battle.trainer.class.value
-            let id = vm.mapper.properties.battle.trainer.number.value
+        if (prop.value == "Disabled" && vm.game.properties.battle.type.value == "Trainer") {
+            let trainer = vm.game.properties.battle.trainer.class.value
+            let id = vm.game.properties.battle.trainer.number.value
             let unique = `${trainer}_${id}`
             const gameName = vm.gameLetter;
             const gameName_Path = vm.gamePath; // Used for split data
             const advanced = vm.runConfig.advanced;
 
-            vm.battle.endBattle(vm.mapper.properties, vm.collect_split_data);
+            vm.battle.endBattle(vm.game.properties, vm.collect_split_data);
 
             //write full split data (this is written for every single battle)
             logData(gameName, gameName_Path, vm.full_data_str, vm.metrics.attempts, vm.meta.starter, "Full", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
 
             //write deprecated split data (this is written for only pre-defined trainers)
             //a list of these trainers can be found within `autosplitter.js` and inside the parent `Yellow` or `Red and Blue`
-            if (autosplitter[vm.mapper.properties.meta.gameName.value][unique]) {
+            if (autosplitter[vm.game.properties.meta.gameName.value][unique]) {
                 logData(gameName, gameName_Path, vm.deprecated_data_str, vm.metrics.attempts, vm.meta.starter, "Deprecated", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
             }
 
@@ -161,9 +161,9 @@ export function installGen1RunHooks(vm: any): void {
     });
     //log the final times with the final gametime
     //I am watching tile1 for a specifc tile that appears when the gametime displays on screen
-    vm.mapper.properties.screen.tiles.column1.tile1.change((newProp) => {
+    vm.game.properties.screen.tiles.column1.tile1.change((newProp) => {
         if (newProp.value == 122) {
-            if (vm.mapper.properties.events.beatChampion.value == true && vm.mapper.properties.overworld.map.value == "Hall of Fame") {
+            if (vm.game.properties.events.beatChampion.value == true && vm.game.properties.overworld.map.value == "Hall of Fame") {
                 const gameName = vm.gameLetter;
                 const gameName_Path = vm.gamePath; // Used for split data
                 const advanced = vm.runConfig.advanced;
@@ -174,13 +174,13 @@ export function installGen1RunHooks(vm: any): void {
                 logData(gameName, gameName_Path, vm.deprecated_data_str, vm.metrics.attempts, vm.meta.starter, "Deprecated", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
                 logData(gameName, gameName_Path, vm.full_data_str, vm.metrics.attempts, vm.meta.starter, "Full", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
                 vm.split_data.push(vm.simple_data)
-                console.log(`Autosplitter - Run Ended: Real-Time: ${formattedTime[0]}${formattedTime[1]} Resets: ${vm.metrics.resets} Blackouts: ${vm.metrics.blackouts} Level: ${vm.mapper.properties.player.team[0].level.value} Gametime: ${vm.gametimeSplit})`)
+                console.log(`Autosplitter - Run Ended: Real-Time: ${formattedTime[0]}${formattedTime[1]} Resets: ${vm.metrics.resets} Blackouts: ${vm.metrics.blackouts} Level: ${vm.game.properties.player.team[0].level.value} Gametime: ${vm.gametimeSplit})`)
                 vm.metrics.update("run_finished", true); //stop incrementing resets
             }
         }
     });
     //when the triangular cursor appears on the screen, copy the split files to the finishes folder
-    vm.mapper.properties.screen.text.prompt.change((newProp, oldProp) => {
+    vm.game.properties.screen.text.prompt.change((newProp, oldProp) => {
         if (vm.metrics.splits_logged == false && vm.metrics.run_finished == true && newProp.bytes == 0xEE && oldProp.bytes == 0x7F) {
             const advanced = vm.runConfig.advanced;
             logCopy(  // copy the current attempt's split data to the finished folder
@@ -203,9 +203,9 @@ export function installGen1RunHooks(vm: any): void {
     //! end of autosplitter
 
     // Alakazam Yellow exception
-    vm.mapper.properties?.trainers?.viridianForest?.bugcatcher2?.change((newValue, oldValue) => {
+    vm.game.properties?.trainers?.viridianForest?.bugcatcher2?.change((newValue, oldValue) => {
         if (vm.meta.game == "Yellow" && vm.meta.starter == "Alakazam" && newValue.value == true) {
-            vm.mapper.properties.patch.wEarlyEncounters.set("On", false)
+            vm.game.properties.patch.wEarlyEncounters.set("On", false)
         }
     });
 }

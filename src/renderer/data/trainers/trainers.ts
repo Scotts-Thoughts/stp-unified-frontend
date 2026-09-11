@@ -12,5 +12,9 @@ export const trainers: Record<PokemonGame, Record<string, Trainer>> = {
 	"FireRed and LeafGreen": {},
 	"Diamond and Pearl": {},
 	"Platinum": {},
-	"HeartGold and SoulSilver": {}
+	"HeartGold and SoulSilver": {},
+	"Black": {},
+	"White": {},
+	"Black 2": {},
+	"White 2": {}
 };

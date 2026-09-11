@@ -6,7 +6,7 @@
             <tr><td>No Moon:</td><td>         <input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.wEarlyEncountersNoMoon"/></td></tr>
         </tbody>
     </table>
-    <table v-if="mapper.properties.meta.gameName.value == 'Yellow'" class="ui_table">
+    <table v-if="game.properties.meta.gameName.value == 'Yellow'" class="ui_table">
         <tbody>
             <tr>
                 <td>Route 1</td>        <td>- Test:</td>
@@ -30,7 +30,7 @@
             </tr>
         </tbody>
     </table>
-    <table v-if="mapper.properties.meta.gameName.value == 'Red and Blue'" class="ui_table">
+    <table v-if="game.properties.meta.gameName.value == 'Red and Blue'" class="ui_table">
         <tbody>
             <tr>
                 <td>Route 3</td> <td>- Spearow:</td>
@@ -92,7 +92,7 @@ const ENCOUNTER_FLAGS = {
 const MT_MOON_MAPS = ["Mt Moon - 1", "Mt Moon - 2", "Mt Moon - 3"];
 
 export default defineComponent({
-    inject: ["mapper"],
+    inject: ["game"],
     data() {
         return {
             meta: useMetaStore(),
@@ -156,25 +156,25 @@ export default defineComponent({
         },
         /** Write a single encounter setting to the ROM. */
         write_encounter_setting(key, value) {
-            const game = this.mapper.properties.meta.gameName.value;
+            const game = this.game.properties.meta.gameName.value;
             if (key === "wEarlyEncounters") {
-                this.mapper.properties.patch.wEarlyEncounters.set(value == true ? "On" : "Off", false);
+                this.game.properties.patch.wEarlyEncounters.set(value == true ? "On" : "Off", false);
                 return;
             }
             if (key === "wEarlyEncountersNoMoon") {
                 return; // Only used by the overlay itself, see the map change handler below.
             }
             if ((ENCOUNTER_FLAGS[game] ?? []).includes(key)) {
-                this.mapper.properties.patch.encounter_flags?.[key]?.set(value == true, false);
+                this.game.properties.patch.encounter_flags?.[key]?.set(value == true, false);
             }
         },
         /** Write all encounter settings to the ROM. */
         set_encounters() {
             this.initialize_encounter_settings();
-            const game = this.mapper.properties.meta.gameName.value;
+            const game = this.game.properties.meta.gameName.value;
             const encounterSettings = this.runConfig.config.gameSpecific;
             const early_encounters_value = encounterSettings.wEarlyEncounters == true ? "On" : "Off";
-            this.mapper.properties.patch.wEarlyEncounters.set(early_encounters_value, false)
+            this.game.properties.patch.wEarlyEncounters.set(early_encounters_value, false)
             if (game == 'Yellow') {
                 this.mapper.setBits([ // Set bits can only be called on properties that share the same address
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_ROUTE1_TEST', value: encounterSettings.EVENT_ENCOUNTER_ROUTE1_TEST == true, freeze: false },
@@ -203,21 +203,21 @@ export default defineComponent({
             this.initialize_encounter_settings();
         }
         //HM Encounters
-        this.mapper.properties.overworld.map.change((newValue, oldValue) => {
+        this.game.properties.overworld.map.change((newValue, oldValue) => {
             const encounterSettings = this.runConfig.config.gameSpecific;
             const alakazamYellow = this.meta.game == "Yellow" && this.meta.starter == "Alakazam";
-            if (newValue.value == "Pallet Town" && oldValue.value == "Pallet Town - Oak's Lab" && this.mapper.properties.events.got_pokedex.value == false) {
+            if (newValue.value == "Pallet Town" && oldValue.value == "Pallet Town - Oak's Lab" && this.game.properties.events.got_pokedex.value == false) {
                 this.set_encounters()
             }
             else if (encounterSettings.wEarlyEncountersNoMoon && MT_MOON_MAPS.includes(newValue.value)) {
-                this.mapper.properties.patch.wEarlyEncounters.set("Off", false)
+                this.game.properties.patch.wEarlyEncounters.set("Off", false)
             }
             // Alakazam Yellow exception
             else if (alakazamYellow && MT_MOON_MAPS.includes(newValue.value)) {
-                this.mapper.properties.patch.wEarlyEncounters.set("Off", false)
+                this.game.properties.patch.wEarlyEncounters.set("Off", false)
             }
-            else if (newValue.value == "Viridian Forest" && alakazamYellow && this.mapper.properties?.trainers?.viridianForest?.bugcatcher2?.value == false) {
-                this.mapper.properties.patch.wEarlyEncounters.set("Off", false)
+            else if (newValue.value == "Viridian Forest" && alakazamYellow && this.game.properties?.trainers?.viridianForest?.bugcatcher2?.value == false) {
+                this.game.properties.patch.wEarlyEncounters.set("Off", false)
             }
         })
     }

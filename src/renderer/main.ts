@@ -5,7 +5,6 @@ import { GameHookMapperClient } from "~/packages/gameHookMapperClient";
 import frontend from "~/components/Overlay.vue";
 import no_mapper from "~/components/GameSelect.vue";
 import keyhook from "~/core/hotkeys/Hotkeys.vue";
-import { gen1Hotkeys } from "~/games/gen1/hotkeys";
 import { PokemonGame } from "~/logic/PokeDataTypes.js";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
@@ -13,7 +12,8 @@ import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { loadLegacyStorage } from "~/logic/Storage";
 import { flushUserState, loadUserState } from "~/core/persistence/userState";
 import { registerControlServer } from "~/core/control/useControlServer";
-import { gen1ControlRoutes } from "~/games/gen1/control";
+import { buildCanonicalView } from "~/core/mapper/MapperAdapter";
+import { detect, MODULES, type Detection } from "~/games/registry";
 
 const main = defineComponent({
     components: {
@@ -30,9 +30,36 @@ const main = defineComponent({
             overlayLoaded: null as Promise<void> | null,
             /** Detaches the control-server bridge; see `created`. */
             unregisterControl: null as (() => void) | null,
-            /** gen1's F-key table, passed to <keyhook/> (plan 1.1). */
-            hotkeys: gen1Hotkeys(),
+            /**
+             * The F-key table passed to <keyhook/> (plan 1.1). Bound at startup, before
+             * any mapper is known, exactly as gen1 did; Phase 3.1 rebinds it per
+             * detected module.
+             */
+            hotkeys: MODULES[0].hotkeys(),
+            /** What `registry.detect` found for the loaded mapper (plan 1.4). */
+            session: null as Detection | null,
+            /** The `/mapper` path of a mapper no module claims -- every hack mapper (decision 8). */
+            unsupportedMapper: null as string | null,
         }
+    },
+    computed: {
+        /**
+         * What the overlay is handed instead of the raw mapper client: the detected
+         * module, and `properties` as the profile's canonical view over the client's
+         * tree (plan 1.4). It is a computed so the view is rebuilt when the client
+         * reassigns `properties` on its 60 s mapper refresh; value changes do not
+         * invalidate it, because the build never reads `.value`.
+         */
+        game() {
+            if (!this.session || !this.mapper) return null;
+            return {
+                module: this.session.module,
+                profile: this.session.profile,
+                game: this.session.game,
+                properties: buildCanonicalView(this.session.profile, this.mapper.properties),
+                meta: this.mapper.meta,
+            };
+        },
     },
     created() {
         // Load the overlay settings right away, so that the game and species dropdowns on the "no mapper" screen
@@ -54,7 +81,21 @@ const main = defineComponent({
 
         this.mapper = new GameHookMapperClient();
         this.mapper.onMapperLoaded = async () => {
-            const gameName = this.mapper!.properties.meta.gameName.value as PokemonGame;
+            // Which generation, which profile, which game -- from the mapper's path
+            // first and its identity property second (plan 1.4). For gen1 the game is
+            // the same `meta.gameName.value` this read directly before.
+            const detection = detect(this.mapper!.meta?.path, this.mapper!.properties, this.mapper!.meta);
+            if (!detection) {
+                // A hack mapper, or one no module ships a profile for (decision 8).
+                // gen1 used to call PokeData.setGame here and throw (known-legacy-bugs.md
+                // #22), leaving the overlay stuck on "Please load a mapper" with no clue.
+                this.unsupportedMapper = (this.mapper!.meta?.path as string | undefined) ?? "unknown mapper";
+                console.warn(`[main] no GameModule claims the loaded mapper: ${this.unsupportedMapper}`);
+                return;
+            }
+            this.unsupportedMapper = null;
+            this.session = detection;
+            const gameName = detection.game as PokemonGame;
             PokeData.setGame(gameName);
 
             await this.overlayLoaded;
@@ -64,6 +105,7 @@ const main = defineComponent({
         };
         this.mapper.onMapperUnloaded = () => {
             this.ready = false
+            this.session = null;
             useEmulatorStatsStore().stopPolling();
         };
         this.mapper.connect();
@@ -71,8 +113,10 @@ const main = defineComponent({
         // The queuer drives the overlay over http://127.0.0.1:30159 (plan 1.8). gen1 had
         // no control server, so this is purely additive; the routes live in
         // games/gen1/control.ts because they are per generation.
+        // Registered at startup, before a mapper is known, so /status answers during
+        // boot as the queuer expects; Phase 3.1 swaps the table per detected module.
         this.unregisterControl = registerControlServer(() =>
-            gen1ControlRoutes(
+            MODULES[0].control(
                 () => this.ready,
                 () => (this.mapper?.meta?.path as string | undefined) ?? null,
             ),

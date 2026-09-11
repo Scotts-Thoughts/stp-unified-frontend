@@ -610,7 +610,7 @@ one before it.
 | 1.1 | Template-string components → SFCs; `frontend.js` → `Overlay.vue` + `games/gen1/hooks.ts`; `state.js` → `games/gen1/state.ts` + `state.vue`; `no_mapper.js` → `GameSelect.vue` | ✅ no `const template` left anywhere |
 | 1.2 | Split lists → `games/gen1/data/splits.ts` | ✅ (correction: `deprecated_autosplitter` is live, so it moved rather than being deleted) |
 | 1.3 | Delete dead gen1 files | ✅ `6a11b50`, plus `components/autosplitter.js` (an empty stub) in 1.1 |
-| 1.4 | `GameModule`, `registry.ts`, the mapper translation layer | ⛔ **not started** — the largest remaining piece; see below |
+| 1.4 | `GameModule`, `registry.ts`, the mapper translation layer | ✅ `core/mapper/` (profile types + adapter), two identity profiles over the 224/36 inventory paths, `core/game/GameModule.ts`, `games/registry.ts`, `games/gen1/index.ts`; every read goes through the canonical view; `npm run parity:adapter` (13 checks) and the write-log profile check in the runner |
 | 1.5 | `style-yellow.css` → `games/gen1/style.css` under `.gen-1` + `core/styles/base.css` | ✅ 12 rules base, 349 scoped, verified rule-for-rule and pixel-for-pixel |
 | 1.6 | No `require` in the renderer | ✅ `b0d1d2b` |
 | 1.7 | App root | ✅ `e610bc8` |
@@ -618,18 +618,14 @@ one before it.
 | 1.9 | OBS + Shuckie to `core/`, marker names to data | ✅ |
 | 1.10 | Persistence to files, `localStorage` retired | ◐ the four `localStorage` consumers now use `core/persistence/userState.ts`; the **one-time import of gen1's own `Local Storage`** is not built — `external-contracts.md` §6 puts the Chromium LevelDB reader in Phase 2.6, where four more generations need it, so it is better built once there. Until then a gen1 user's saved split comparison and OBS credentials do not carry over. |
 
-**What 1.4 still needs**, in the order it has to happen:
-
-1. `MapperProfile` and `MapperAdapter` types in `core/mapper/`, and the two gen1 profiles
-   (`DEPRECATED/gen1/pokemon_yellow_deprecated.xml`, `.../pokemon_red_blue_deprecated.xml`) covering the
-   **224 read paths and 36 write paths** `docs/gen1-inventory.md` measured — not the 199/6 the plan first said.
-2. Rewriting every store, component and hook read to go through canonical keys. That is what unlocks typing the
-   script blocks that are still plain JavaScript (`Overlay.vue`, `settings/interface_1.vue`,
-   `settings/encounters.vue`, `left_panel/exp_bar.vue`), all of which are untyped only because they reach into
-   `mapper.properties` or the array form of `inject`.
-3. `registry.ts` with the single gen1 entry, detection on `/mapper` `meta.path` then the identity property, and
-   `PokemonGame` extended with the four gen5 names.
-4. Hack mappers stay unregistered (decision 8); loading one shows the unsupported-mapper state.
+**How 1.4 landed.** gen1's paths *are* the canonical vocabulary, so both gen1 profiles are identity maps; the
+adapter (`buildCanonicalView`) aliases declared **containers** to the mapper's real objects and leaves to the real
+property objects, so `.value`/`.change()`/`.set()` are the same objects with the same timing, and dynamic accesses the
+static inventory cannot see (`badges['badge' + x]`, `battle[side][stat]`) keep working. 36 declared keys are absent
+from the shipped mapper files (`patch.battle_info.hits.*`); the legacy code reads every one optional-chained with a
+default, so the view hands back `undefined` exactly as the raw tree did. Components still spell keys the way gen1's
+mapper does — that is the identity profile, not a leak — and the four script blocks left as plain JavaScript stay
+that way until Phase 2 settles the shared key shapes.
 
 **Also outstanding before Phase 2 starts:** the CSS scoping done by hand in 1.5 has to happen four more times
 (2.5). It was done here with a throwaway script plus a checker that re-parses both outputs and proves same

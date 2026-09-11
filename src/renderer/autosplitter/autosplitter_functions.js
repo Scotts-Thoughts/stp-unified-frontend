@@ -6,7 +6,7 @@ import { splitMilliseconds } from "~/logic/Timer";
 import { appendSplitCsv, copySplitFile, splitPath } from "~/core/persistence/splitFiles";
 export function log_split() {
     const {formatted: time } = this.metrics.getTime();
-    const opponent = this.mapper.properties.battle.trainer.class.value;
+    const opponent = this.game.properties.battle.trainer.class.value;
     const shuckieEnabled = this.runConfig.advanced.shuckie_timer
         && this.emulator?.stats?.time_current != null;
     const [t0, t1] = shuckieEnabled
@@ -20,20 +20,20 @@ export function autosplitter_process() {
         const d = new Date()
         const battle_end = Date.now()
         //values
-        let gameTimeH = this.mapper.properties.gameTime?.hours?.value
-        let gameTimeM = this.mapper.properties.gameTime?.minutes?.value
-        let gameTimeS = this.mapper.properties.gameTime?.seconds?.value
-        let gameTimeF = this.mapper.properties.gameTime?.frames?.value
+        let gameTimeH = this.game.properties.gameTime?.hours?.value
+        let gameTimeM = this.game.properties.gameTime?.minutes?.value
+        let gameTimeS = this.game.properties.gameTime?.seconds?.value
+        let gameTimeF = this.game.properties.gameTime?.frames?.value
 
         //data to be collected with the autosplitter
         let date_string = (d.getMonth() + 1) + "-" + d.getDate().toString().padStart(2, "0")
         let time_string = d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0") + ":" + d.getSeconds().toString().padStart(2, "0")
-        let player_name = this.mapper.properties.player.name.value
+        let player_name = this.game.properties.player.name.value
         let pokemon = this.meta.starter;
-        let trainer_name = this.format_trainer_name(this.mapper.properties.battle.trainer.class.value, this.mapper.properties.battle.trainer.number.value)
-        let trainer_id = this.mapper.properties.battle.trainer.number.value
-        let location = this.mapper.properties.overworld.map.value
-        let total_pokemon = this.mapper.properties.battle.trainer.totalPokemon
+        let trainer_name = this.format_trainer_name(this.game.properties.battle.trainer.class.value, this.game.properties.battle.trainer.number.value)
+        let trainer_id = this.game.properties.battle.trainer.number.value
+        let location = this.game.properties.overworld.map.value
+        let total_pokemon = this.game.properties.battle.trainer.totalPokemon
         let { raw: time, formatted: formattedTime } = this.metrics.getTime();
         // When the Shuckie timer is enabled, every time field uses the emulator's timer instead of the local one,
         // so on-disk logs and the splits panel match the displayed overlay time.
@@ -50,41 +50,41 @@ export function autosplitter_process() {
         let resets = this.metrics.resets.toString()
         let blackouts = this.metrics.blackouts.toString()
         let failures = this.metrics.resets + this.metrics.blackouts
-        let level = this.mapper.properties.player.team[0].level.value.toString()
+        let level = this.game.properties.player.team[0].level.value.toString()
         let game_time = this.gametimeSplit.toString()
         let battle_duration = (battle_end - this.battle.statistics.battle_start)/1000 
-        let move1 = this.mapper.properties.player.team[0].move1.value
-        let move2 = this.mapper.properties.player.team[0].move2.value
-        let move3 = this.mapper.properties.player.team[0].move3.value
-        let move4 = this.mapper.properties.player.team[0].move4.value
-        let move1pp = this.mapper.properties.player.team[0].move1pp.value
-        let move2pp = this.mapper.properties.player.team[0].move2pp.value
-        let move3pp = this.mapper.properties.player.team[0].move3pp.value
-        let move4pp = this.mapper.properties.player.team[0].move4pp.value
-        let move1ppUp = this.mapper.properties.player.team[0].move1ppUp.value
-        let move2ppUp = this.mapper.properties.player.team[0].move2ppUp.value
-        let move3ppUp = this.mapper.properties.player.team[0].move3ppUp.value
-        let move4ppUp = this.mapper.properties.player.team[0].move4ppUp.value
-        let saves = this.mapper.properties.patch.saves.saveCount.value
-        let steps = this.mapper.properties.patch.steps.stepsCount.value
-        let bonks = this.mapper.properties.patch.steps.bonks.value
-        let trainerBattles = this.mapper.properties.patch.battles.trainerBattles.value
-        let wildBattles = this.mapper.properties.patch.battles.wildBattles.value
-        let battleTurns = this.mapper.properties.patch.battle_info.turns.battleTurns.value
-        let playerTurns = this.mapper.properties.patch.battle_info.turns.playerTurns.value
-        let enemyTurns = this.mapper.properties.patch.battle_info.turns.enemyTurns.value
-        let itemsInBag = this.mapper.properties.player.itemCount.value
-        let money = this.mapper.properties.player.money.value
-        let rivalTeam = this.mapper.properties.rival.finalTeam.value
-        let statusCondition = this.mapper.properties.player.team[0].statusCondition.value
-        let type1 = this.mapper.properties.player.team[0].type1.value
-        let type2 = this.mapper.properties.player.team[0].type2.value
-        let experience = this.mapper.properties.player.team[0].expPoints.value
+        let move1 = this.game.properties.player.team[0].move1.value
+        let move2 = this.game.properties.player.team[0].move2.value
+        let move3 = this.game.properties.player.team[0].move3.value
+        let move4 = this.game.properties.player.team[0].move4.value
+        let move1pp = this.game.properties.player.team[0].move1pp.value
+        let move2pp = this.game.properties.player.team[0].move2pp.value
+        let move3pp = this.game.properties.player.team[0].move3pp.value
+        let move4pp = this.game.properties.player.team[0].move4pp.value
+        let move1ppUp = this.game.properties.player.team[0].move1ppUp.value
+        let move2ppUp = this.game.properties.player.team[0].move2ppUp.value
+        let move3ppUp = this.game.properties.player.team[0].move3ppUp.value
+        let move4ppUp = this.game.properties.player.team[0].move4ppUp.value
+        let saves = this.game.properties.patch.saves.saveCount.value
+        let steps = this.game.properties.patch.steps.stepsCount.value
+        let bonks = this.game.properties.patch.steps.bonks.value
+        let trainerBattles = this.game.properties.patch.battles.trainerBattles.value
+        let wildBattles = this.game.properties.patch.battles.wildBattles.value
+        let battleTurns = this.game.properties.patch.battle_info.turns.battleTurns.value
+        let playerTurns = this.game.properties.patch.battle_info.turns.playerTurns.value
+        let enemyTurns = this.game.properties.patch.battle_info.turns.enemyTurns.value
+        let itemsInBag = this.game.properties.player.itemCount.value
+        let money = this.game.properties.player.money.value
+        let rivalTeam = this.game.properties.rival.finalTeam.value
+        let statusCondition = this.game.properties.player.team[0].statusCondition.value
+        let type1 = this.game.properties.player.team[0].type1.value
+        let type2 = this.game.properties.player.team[0].type2.value
+        let experience = this.game.properties.player.team[0].expPoints.value
         //deprecated properties (these are used by all of my legacy software)
 
         let incremented_finished_run_count = this.metrics.finishes + 1
         let runIdentifier = this.meta.starter.toString() + " " + incremented_finished_run_count.toString()
-        let trainerName = deprecated_autosplitter[this.mapper.properties.meta.gameName.value][`${this.mapper.properties.battle.trainer.class}_${this.mapper.properties.battle.trainer.number}`]
+        let trainerName = deprecated_autosplitter[this.game.properties.meta.gameName.value][`${this.game.properties.battle.trainer.class}_${this.game.properties.battle.trainer.number}`]
         
         let RTHours = time.hours;
         let RTMinutes = time.minutes;
@@ -93,109 +93,109 @@ export function autosplitter_process() {
         let startTime = this.battle.statistics.time_split_start
         let realTime = this.padTime(time.hours) + ":" + this.padTime(time.minutes) + ":" + this.padTime(time.seconds) + "." + this.padTime(time.ms)
         let gameTime = this.padTime(gameTimeH) + ":" + this.padTime(gameTimeM) + ":" + this.padTime(gameTimeS) + "." + this.padTime(gameTimeF)
-        let hp = this.mapper.properties.player.team[0].hp.value
-        let maxHp = this.mapper.properties.player.team[0].maxHp.value
-        let atk = this.mapper.properties.player.team[0].attack.value
-        let def = this.mapper.properties.player.team[0].defense.value
-        let spA = this.mapper.properties.player.team[0].special.value
-        let spD = this.mapper.properties.player.team[0].special.value
-        let spe = this.mapper.properties.player.team[0].speed.value
-        let statExp_hp = this.mapper.properties.player.team[0].statExpHp.value
-        let statExp_atk = this.mapper.properties.player.team[0].statExpAttack.value
-        let statExp_def = this.mapper.properties.player.team[0].statExpDefense.value
-        let statExp_spA = this.mapper.properties.player.team[0].statExpSpecial.value
-        let statExp_spD = this.mapper.properties.player.team[0].statExpSpecial.value
-        let statExp_spe = this.mapper.properties.player.team[0].statExpSpeed.value
-        let dvAttack = this.mapper.properties.player.team[0].dvAttack.value
-        let dvDefense = this.mapper.properties.player.team[0].dvDefense.value
-        let dvSpeed = this.mapper.properties.player.team[0].dvSpeed.value
-        let dvSpecial = this.mapper.properties.player.team[0].dvSpecial.value
-        let mod_atk = this.mapper.properties.battle.yourPokemon.modStageAttack.value
-        let mod_def = this.mapper.properties.battle.yourPokemon.modStageDefense.value
-        let mod_spA = this.mapper.properties.battle.yourPokemon.modStageSpecial.value
-        let mod_spD = this.mapper.properties.battle.yourPokemon.modStageSpecial.value
-        let mod_spe = this.mapper.properties.battle.yourPokemon.modStageSpeed.value
-        let mod_acc = this.mapper.properties.battle.yourPokemon.modStageAccuracy.value
-        let mod_eva = this.mapper.properties.battle.yourPokemon.modStageEvasion.value
-        let battle_atk = this.mapper.properties.battle.yourPokemon.attack.value
-        let battle_def = this.mapper.properties.battle.yourPokemon.defense.value
-        let battle_spA = this.mapper.properties.battle.yourPokemon.special.value
-        let battle_spD = this.mapper.properties.battle.yourPokemon.special.value
-        let battle_spe = this.mapper.properties.battle.yourPokemon.speed.value
+        let hp = this.game.properties.player.team[0].hp.value
+        let maxHp = this.game.properties.player.team[0].maxHp.value
+        let atk = this.game.properties.player.team[0].attack.value
+        let def = this.game.properties.player.team[0].defense.value
+        let spA = this.game.properties.player.team[0].special.value
+        let spD = this.game.properties.player.team[0].special.value
+        let spe = this.game.properties.player.team[0].speed.value
+        let statExp_hp = this.game.properties.player.team[0].statExpHp.value
+        let statExp_atk = this.game.properties.player.team[0].statExpAttack.value
+        let statExp_def = this.game.properties.player.team[0].statExpDefense.value
+        let statExp_spA = this.game.properties.player.team[0].statExpSpecial.value
+        let statExp_spD = this.game.properties.player.team[0].statExpSpecial.value
+        let statExp_spe = this.game.properties.player.team[0].statExpSpeed.value
+        let dvAttack = this.game.properties.player.team[0].dvAttack.value
+        let dvDefense = this.game.properties.player.team[0].dvDefense.value
+        let dvSpeed = this.game.properties.player.team[0].dvSpeed.value
+        let dvSpecial = this.game.properties.player.team[0].dvSpecial.value
+        let mod_atk = this.game.properties.battle.yourPokemon.modStageAttack.value
+        let mod_def = this.game.properties.battle.yourPokemon.modStageDefense.value
+        let mod_spA = this.game.properties.battle.yourPokemon.modStageSpecial.value
+        let mod_spD = this.game.properties.battle.yourPokemon.modStageSpecial.value
+        let mod_spe = this.game.properties.battle.yourPokemon.modStageSpeed.value
+        let mod_acc = this.game.properties.battle.yourPokemon.modStageAccuracy.value
+        let mod_eva = this.game.properties.battle.yourPokemon.modStageEvasion.value
+        let battle_atk = this.game.properties.battle.yourPokemon.attack.value
+        let battle_def = this.game.properties.battle.yourPokemon.defense.value
+        let battle_spA = this.game.properties.battle.yourPokemon.special.value
+        let battle_spD = this.game.properties.battle.yourPokemon.special.value
+        let battle_spe = this.game.properties.battle.yourPokemon.speed.value
         //patch properties (these are going to be used by new software in the future; ROM patch required)
-        let patch_frameCount = this.mapper.properties.patch.time?.frameCount?.value ?? 0
-        let patch_oWFrameCount = this.mapper.properties.patch.time?.oWFrameCount?.value ?? 0
-        let patch_battleFrameCount = this.mapper.properties.patch.time?.battleFrameCount?.value ?? 0
-        let patch_menuFrameCount = this.mapper.properties.patch.time?.menuFrameCount?.value ?? 0
-        let patch_introsFrameCount = this.mapper.properties.patch.time?.introsFrameCount?.value ?? 0
-        let patch_saveCount = this.mapper.properties.patch.saves?.saveCount?.value ?? 0
-        let patch_reloadCount = this.mapper.properties.patch.saves?.reloadCount?.value ?? 0
-        let patch_clockResetCount = this.mapper.properties.patch.saves?.clockResetCount?.value ?? 0
-        let patch_stepsCount = this.mapper.properties.patch.steps?.stepsCount.value ?? 0
-        let patch_stepsCountWalk = this.mapper.properties.patch.steps?.stepsCountWalk.value ?? 0
-        let patch_stepsCountBike = this.mapper.properties.patch.steps?.stepsCountBike.value ?? 0
-        let patch_stepsCountSurf = this.mapper.properties.patch.steps?.stepsCountSurf.value ?? 0
-        let patch_bonks = this.mapper.properties.patch.steps?.bonks.value ?? 0
-        let patch_battles = this.mapper.properties.patch.battles?.trainerBattles.value + this.mapper.properties.patch.battles?.wildBattles.value ?? 0
-        let patch_trainerBattles = this.mapper.properties.patch.battles?.trainerBattles.value ?? 0
-        let patch_wildBattles = this.mapper.properties.patch.battles?.wildBattles.value ?? 0
-        let patch_battlesFled = this.mapper.properties.patch.battles?.battlesFled.value ?? 0
-        let patch_failedRuns = this.mapper.properties.patch.battles?.failedRuns.value ?? 0
-        let patch_totalDamageDealt = this.mapper.properties.patch.battle_info.damage?.totalDamageDealt?.value ?? 0
-        let patch_actualDamageDealt = this.mapper.properties.patch.battle_info.damage?.actualDamageDealt?.value ?? 0
-        let patch_totalDamageTaken = this.mapper.properties.patch.battle_info.damage?.totalDamageTaken?.value ?? 0
-        let patch_actualDamageTaken = this.mapper.properties.patch.battle_info.damage?.actualDamageTaken?.value ?? 0
-        let patch_ownMovesHit = this.mapper.properties.patch.battle_info.hits?.ownMovesHit?.value ?? 0
-        let patch_ownMovesMissed = this.mapper.properties.patch.battle_info.hits?.ownMovesMissed?.value ?? 0
-        let patch_enemyMovesHit = this.mapper.properties.patch.battle_info.hits?.enemyMovesHit?.value ?? 0
-        let patch_enemyMovesMissed = this.mapper.properties.patch.battle_info.hits?.enemyMovesMissed?.value ?? 0
-        let patch_ownMovesSE = this.mapper.properties.patch.battle_info.hits?.ownMovesSE?.value ?? 0
-        let patch_ownMovesNVE = this.mapper.properties.patch.battle_info.hits?.ownMovesNVE?.value ?? 0
-        let patch_enemyMovesSE = this.mapper.properties.patch.battle_info.hits?.enemyMovesSE?.value ?? 0
-        let patch_enemyMovesNVE = this.mapper.properties.patch.battle_info.hits?.enemyMovesNVE?.value ?? 0
-        let patch_criticalsDealt = this.mapper.properties.patch.battle_info.hits?.criticalsDealt?.value ?? 0
-        let patch_oHKOsDealt = this.mapper.properties.patch.battle_info.hits?.oHKOsDealt?.value ?? 0
-        let patch_criticalsTaken = this.mapper.properties.patch.battle_info.hits?.criticalsTaken?.value ?? 0
-        let patch_oHKOsTaken = this.mapper.properties.patch.battle_info.hits?.oHKOsTaken?.value ?? 0
-        let patch_wasConfused = this.mapper.properties.patch.battle_info.status?.wasConfused?.value ?? 0
-        let patch_enemyBecameConfused = this.mapper.properties.patch.battle_info.status?.enemyBecameConfused?.value ?? 0
-        let patch_wasParalyzed = this.mapper.properties.patch.battle_info.status?.wasParalyzed?.value ?? 0
-        let patch_enemyWasParalyzed = this.mapper.properties.patch.battle_info.status?.enemyWasParalyzed?.value ?? 0
-        let patch_wasBurned = this.mapper.properties.patch.battle_info.status?.wasBurned?.value ?? 0
-        let patch_enemyWasBurned = this.mapper.properties.patch.battle_info.status?.enemyWasBurned?.value ?? 0
-        let patch_wasFrozen = this.mapper.properties.patch.battle_info.status?.wasFrozen?.value ?? 0
-        let patch_enemyWasFrozen = this.mapper.properties.patch.battle_info.status?.enemyWasFrozen?.value ?? 0
-        let patch_wasPoisoned = this.mapper.properties.patch.battle_info.status?.wasPoisoned?.value ?? 0
-        let patch_enemyWasPoisoned = this.mapper.properties.patch.battle_info.status?.enemyWasPoisoned?.value ?? 0
-        let patch_wasPoisonedBadly = this.mapper.properties.patch.battle_info.status?.wasPoisonedBadly?.value ?? 0
-        let patch_enemyWasPoisonedBadly = this.mapper.properties.patch.battle_info.status?.enemyWasPoisonedBadly?.value ?? 0
-        let patch_fellAsleep = this.mapper.properties.patch.battle_info.status?.fellAsleep?.value ?? 0
-        let patch_enemyFellAsleep = this.mapper.properties.patch.battle_info.status?.enemyFellAsleep?.value ?? 0
-        let patch_playerTurnsConfused = this.mapper.properties.patch.battle_info.status?.playerTurnsConfused?.value ?? 0
-        let patch_enemyTurnsConfused = this.mapper.properties.patch.battle_info.status?.enemyTurnsConfused?.value ?? 0
-        let patch_playerTurnsConfusedHitSelf = this.mapper.properties.patch.battle_info.status?.playerTurnsConfusedHitSelf?.value ?? 0
-        let patch_enemyTurnsConfusedHitSelf = this.mapper.properties.patch.battle_info.status?.enemyTurnsConfusedHitSelf?.value ?? 0
-        let patch_playerTurnsParalyzed = this.mapper.properties.patch.battle_info.status?.playerTurnsParalyzed?.value ?? 0
-        let patch_enemyTurnsParalyzed = this.mapper.properties.patch.battle_info.status?.enemyTurnsParalyzed?.value ?? 0
-        let patch_playerTurnsParalyzedFully = this.mapper.properties.patch.battle_info.status?.playerTurnsParalyzedFully?.value ?? 0
-        let patch_enemyTurnsParalyzedFully = this.mapper.properties.patch.battle_info.status?.enemyTurnsParalyzedFully?.value ?? 0
-        let patch_PlayerTurnsAsleep = this.mapper.properties.patch.battle_info.status.PlayerTurnsAsleep.value ?? 0
-        let patch_EnemyTurnsAsleep = this.mapper.properties.patch.battle_info.status.EnemyTurnsAsleep.value ?? 0
+        let patch_frameCount = this.game.properties.patch.time?.frameCount?.value ?? 0
+        let patch_oWFrameCount = this.game.properties.patch.time?.oWFrameCount?.value ?? 0
+        let patch_battleFrameCount = this.game.properties.patch.time?.battleFrameCount?.value ?? 0
+        let patch_menuFrameCount = this.game.properties.patch.time?.menuFrameCount?.value ?? 0
+        let patch_introsFrameCount = this.game.properties.patch.time?.introsFrameCount?.value ?? 0
+        let patch_saveCount = this.game.properties.patch.saves?.saveCount?.value ?? 0
+        let patch_reloadCount = this.game.properties.patch.saves?.reloadCount?.value ?? 0
+        let patch_clockResetCount = this.game.properties.patch.saves?.clockResetCount?.value ?? 0
+        let patch_stepsCount = this.game.properties.patch.steps?.stepsCount.value ?? 0
+        let patch_stepsCountWalk = this.game.properties.patch.steps?.stepsCountWalk.value ?? 0
+        let patch_stepsCountBike = this.game.properties.patch.steps?.stepsCountBike.value ?? 0
+        let patch_stepsCountSurf = this.game.properties.patch.steps?.stepsCountSurf.value ?? 0
+        let patch_bonks = this.game.properties.patch.steps?.bonks.value ?? 0
+        let patch_battles = this.game.properties.patch.battles?.trainerBattles.value + this.game.properties.patch.battles?.wildBattles.value ?? 0
+        let patch_trainerBattles = this.game.properties.patch.battles?.trainerBattles.value ?? 0
+        let patch_wildBattles = this.game.properties.patch.battles?.wildBattles.value ?? 0
+        let patch_battlesFled = this.game.properties.patch.battles?.battlesFled.value ?? 0
+        let patch_failedRuns = this.game.properties.patch.battles?.failedRuns.value ?? 0
+        let patch_totalDamageDealt = this.game.properties.patch.battle_info.damage?.totalDamageDealt?.value ?? 0
+        let patch_actualDamageDealt = this.game.properties.patch.battle_info.damage?.actualDamageDealt?.value ?? 0
+        let patch_totalDamageTaken = this.game.properties.patch.battle_info.damage?.totalDamageTaken?.value ?? 0
+        let patch_actualDamageTaken = this.game.properties.patch.battle_info.damage?.actualDamageTaken?.value ?? 0
+        let patch_ownMovesHit = this.game.properties.patch.battle_info.hits?.ownMovesHit?.value ?? 0
+        let patch_ownMovesMissed = this.game.properties.patch.battle_info.hits?.ownMovesMissed?.value ?? 0
+        let patch_enemyMovesHit = this.game.properties.patch.battle_info.hits?.enemyMovesHit?.value ?? 0
+        let patch_enemyMovesMissed = this.game.properties.patch.battle_info.hits?.enemyMovesMissed?.value ?? 0
+        let patch_ownMovesSE = this.game.properties.patch.battle_info.hits?.ownMovesSE?.value ?? 0
+        let patch_ownMovesNVE = this.game.properties.patch.battle_info.hits?.ownMovesNVE?.value ?? 0
+        let patch_enemyMovesSE = this.game.properties.patch.battle_info.hits?.enemyMovesSE?.value ?? 0
+        let patch_enemyMovesNVE = this.game.properties.patch.battle_info.hits?.enemyMovesNVE?.value ?? 0
+        let patch_criticalsDealt = this.game.properties.patch.battle_info.hits?.criticalsDealt?.value ?? 0
+        let patch_oHKOsDealt = this.game.properties.patch.battle_info.hits?.oHKOsDealt?.value ?? 0
+        let patch_criticalsTaken = this.game.properties.patch.battle_info.hits?.criticalsTaken?.value ?? 0
+        let patch_oHKOsTaken = this.game.properties.patch.battle_info.hits?.oHKOsTaken?.value ?? 0
+        let patch_wasConfused = this.game.properties.patch.battle_info.status?.wasConfused?.value ?? 0
+        let patch_enemyBecameConfused = this.game.properties.patch.battle_info.status?.enemyBecameConfused?.value ?? 0
+        let patch_wasParalyzed = this.game.properties.patch.battle_info.status?.wasParalyzed?.value ?? 0
+        let patch_enemyWasParalyzed = this.game.properties.patch.battle_info.status?.enemyWasParalyzed?.value ?? 0
+        let patch_wasBurned = this.game.properties.patch.battle_info.status?.wasBurned?.value ?? 0
+        let patch_enemyWasBurned = this.game.properties.patch.battle_info.status?.enemyWasBurned?.value ?? 0
+        let patch_wasFrozen = this.game.properties.patch.battle_info.status?.wasFrozen?.value ?? 0
+        let patch_enemyWasFrozen = this.game.properties.patch.battle_info.status?.enemyWasFrozen?.value ?? 0
+        let patch_wasPoisoned = this.game.properties.patch.battle_info.status?.wasPoisoned?.value ?? 0
+        let patch_enemyWasPoisoned = this.game.properties.patch.battle_info.status?.enemyWasPoisoned?.value ?? 0
+        let patch_wasPoisonedBadly = this.game.properties.patch.battle_info.status?.wasPoisonedBadly?.value ?? 0
+        let patch_enemyWasPoisonedBadly = this.game.properties.patch.battle_info.status?.enemyWasPoisonedBadly?.value ?? 0
+        let patch_fellAsleep = this.game.properties.patch.battle_info.status?.fellAsleep?.value ?? 0
+        let patch_enemyFellAsleep = this.game.properties.patch.battle_info.status?.enemyFellAsleep?.value ?? 0
+        let patch_playerTurnsConfused = this.game.properties.patch.battle_info.status?.playerTurnsConfused?.value ?? 0
+        let patch_enemyTurnsConfused = this.game.properties.patch.battle_info.status?.enemyTurnsConfused?.value ?? 0
+        let patch_playerTurnsConfusedHitSelf = this.game.properties.patch.battle_info.status?.playerTurnsConfusedHitSelf?.value ?? 0
+        let patch_enemyTurnsConfusedHitSelf = this.game.properties.patch.battle_info.status?.enemyTurnsConfusedHitSelf?.value ?? 0
+        let patch_playerTurnsParalyzed = this.game.properties.patch.battle_info.status?.playerTurnsParalyzed?.value ?? 0
+        let patch_enemyTurnsParalyzed = this.game.properties.patch.battle_info.status?.enemyTurnsParalyzed?.value ?? 0
+        let patch_playerTurnsParalyzedFully = this.game.properties.patch.battle_info.status?.playerTurnsParalyzedFully?.value ?? 0
+        let patch_enemyTurnsParalyzedFully = this.game.properties.patch.battle_info.status?.enemyTurnsParalyzedFully?.value ?? 0
+        let patch_PlayerTurnsAsleep = this.game.properties.patch.battle_info.status.PlayerTurnsAsleep.value ?? 0
+        let patch_EnemyTurnsAsleep = this.game.properties.patch.battle_info.status.EnemyTurnsAsleep.value ?? 0
         let patch_playerHpHealed = 0 //not working in yellow; there is no ROM implementation of this
         let patch_enemyHpHealed = 0 //not working in yellow; there is no ROM implementation of this
-        let patch_playerPokemonFainted = this.mapper.properties.patch.battle_info?.playerPokemonFainted?.value ?? 0
-        let patch_enemyPokemonFainted = this.mapper.properties.patch.battle_info?.enemyPokemonFainted?.value ?? 0
-        let patch_experienceGained = this.mapper.properties.patch.battle_info?.experienceGained?.value ?? 0
-        let patch_switchout = this.mapper.properties.patch.battle_info?.switchout?.value ?? 0
-        let patch_moneyMade = this.mapper.properties.patch.money?.moneyMade?.value ?? 0
-        let patch_moneySpent = this.mapper.properties.patch.money?.moneySpent?.value ?? 0
-        let patch_moneyLost = this.mapper.properties.patch.money?.moneyLost?.value ?? 0
-        let patch_itemsPickedUp = this.mapper.properties.patch.items?.itemsPickedUp?.value ?? 0
-        let patch_itemsBought = this.mapper.properties.patch.items?.itemsBought?.value ?? 0
-        let patch_itemsSold = this.mapper.properties.patch.items?.itemsSold?.value ?? 0
-        let patch_ballsThrown = this.mapper.properties.patch.catching?.ballsThrown?.value ?? 0
-        let patch_pokemonCaughtInBalls = this.mapper.properties.patch.catching?.pokemonCaughtInBalls ?? 0
-        let patch_movesLearnt = this.mapper.properties.patch.movesLearnt ?? 0
+        let patch_playerPokemonFainted = this.game.properties.patch.battle_info?.playerPokemonFainted?.value ?? 0
+        let patch_enemyPokemonFainted = this.game.properties.patch.battle_info?.enemyPokemonFainted?.value ?? 0
+        let patch_experienceGained = this.game.properties.patch.battle_info?.experienceGained?.value ?? 0
+        let patch_switchout = this.game.properties.patch.battle_info?.switchout?.value ?? 0
+        let patch_moneyMade = this.game.properties.patch.money?.moneyMade?.value ?? 0
+        let patch_moneySpent = this.game.properties.patch.money?.moneySpent?.value ?? 0
+        let patch_moneyLost = this.game.properties.patch.money?.moneyLost?.value ?? 0
+        let patch_itemsPickedUp = this.game.properties.patch.items?.itemsPickedUp?.value ?? 0
+        let patch_itemsBought = this.game.properties.patch.items?.itemsBought?.value ?? 0
+        let patch_itemsSold = this.game.properties.patch.items?.itemsSold?.value ?? 0
+        let patch_ballsThrown = this.game.properties.patch.catching?.ballsThrown?.value ?? 0
+        let patch_pokemonCaughtInBalls = this.game.properties.patch.catching?.pokemonCaughtInBalls ?? 0
+        let patch_movesLearnt = this.game.properties.patch.movesLearnt ?? 0
 
         //definitions for what split data is logged to file
         let simple_data = [
@@ -282,7 +282,7 @@ export function autosplitter_process() {
         this.full_data_str = full_data_str // assign within Data so it can be recalled on future loops
         this.deprecated_data_str = deprecated_data_str // assign within Data so it can be recalled on future loops
         this.simple_data = simple_data // assign within Data so it can be recalled on future loops
-        if (this.collect_split_data == true && (this.mapper.properties.meta.state.value == "Battle" || this.mapper.properties.meta.state.value == "From Battle")) {
+        if (this.collect_split_data == true && (this.game.properties.meta.state.value == "Battle" || this.game.properties.meta.state.value == "From Battle")) {
             this.current_splits.push({
                 trainer: trainer_name, 
                 time:    real_time_hmmss,
@@ -292,7 +292,7 @@ export function autosplitter_process() {
 }
 
 export function format_trainer_name(trainer_class, trainer_number) {
-    const game = this.mapper.properties.meta.gameName.value
+    const game = this.game.properties.meta.gameName.value
     if (game == 'Red and Blue') {
         //rivals
         if (trainer_class == "RIVAL1" && trainer_number == 1)  { return "Rival1-Lab" }
@@ -357,19 +357,19 @@ export function format_trainer_name(trainer_class, trainer_number) {
     if (trainer_class == "AGATHA")  { return "Agatha" }
     if (trainer_class == "LANCE")   { return "Lance" }
     //notable npcs
-    if (trainer_class == "ROCKET"       && this.mapper.properties.battle.trainer.number == 5)   { return "Cerulean Rocket" }
-    if (trainer_class == "YOUNGSTER"    && this.mapper.properties.battle.trainer.number == 1)   { return "Youngster Ben" }
-    if (trainer_class == "LASS"         && this.mapper.properties.battle.trainer.number == 10)  { return "Oddish Lass" } 
-    if (trainer_class == "JR TRAINER F" && this.mapper.properties.battle.trainer.number == 1)   { return "Pecking Lass" } 
-    if (trainer_class == "JR TRAINER F" && this.mapper.properties.battle.trainer.number == 3)   { return "Sandy" } 
-    if (trainer_class == "JR TRAINER F" && this.mapper.properties.battle.trainer.number == 5)   { return "Wrapping Lass" } 
-    if (trainer_class == "SUPER NERD"   && this.mapper.properties.battle.trainer.number == 2)   { return "Fossil Nerd" }
-    if (trainer_class == "POKEMANIAC"   && this.mapper.properties.battle.trainer.number == 7)   { return "Slowbone" }
-    if (trainer_class == "JR TRAINER F" && this.mapper.properties.battle.trainer.number == 10)  { return "Status-Condition-Jr-Trainer" }
-    if (trainer_class == "HIKER"        && this.mapper.properties.battle.trainer.number == 9)   { return "Selfdestructing Hiker" }
-    if (trainer_class == "JR TRAINER F" && this.mapper.properties.battle.trainer.number == 18)  { return "Finisher" }
-    if (trainer_class == "ROCKET"       && this.mapper.properties.battle.trainer.number == 38)  { return "Hypno Rocket" }
-    if (trainer_class == "CHANNELER"    && this.mapper.properties.battle.trainer.number == 10)  { return "Agatha Jr" }
+    if (trainer_class == "ROCKET"       && this.game.properties.battle.trainer.number == 5)   { return "Cerulean Rocket" }
+    if (trainer_class == "YOUNGSTER"    && this.game.properties.battle.trainer.number == 1)   { return "Youngster Ben" }
+    if (trainer_class == "LASS"         && this.game.properties.battle.trainer.number == 10)  { return "Oddish Lass" } 
+    if (trainer_class == "JR TRAINER F" && this.game.properties.battle.trainer.number == 1)   { return "Pecking Lass" } 
+    if (trainer_class == "JR TRAINER F" && this.game.properties.battle.trainer.number == 3)   { return "Sandy" } 
+    if (trainer_class == "JR TRAINER F" && this.game.properties.battle.trainer.number == 5)   { return "Wrapping Lass" } 
+    if (trainer_class == "SUPER NERD"   && this.game.properties.battle.trainer.number == 2)   { return "Fossil Nerd" }
+    if (trainer_class == "POKEMANIAC"   && this.game.properties.battle.trainer.number == 7)   { return "Slowbone" }
+    if (trainer_class == "JR TRAINER F" && this.game.properties.battle.trainer.number == 10)  { return "Status-Condition-Jr-Trainer" }
+    if (trainer_class == "HIKER"        && this.game.properties.battle.trainer.number == 9)   { return "Selfdestructing Hiker" }
+    if (trainer_class == "JR TRAINER F" && this.game.properties.battle.trainer.number == 18)  { return "Finisher" }
+    if (trainer_class == "ROCKET"       && this.game.properties.battle.trainer.number == 38)  { return "Hypno Rocket" }
+    if (trainer_class == "CHANNELER"    && this.game.properties.battle.trainer.number == 10)  { return "Agatha Jr" }
     else return capitalize_words(trainer_class)
 }
 

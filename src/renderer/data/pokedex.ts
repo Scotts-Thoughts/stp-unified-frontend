@@ -21,4 +21,9 @@ export const GameDexes: Record<PokemonGame, Record<string, PokemonSpecies>> = {
     "Diamond and Pearl": DiamondAndPearlDex,
     "Platinum": PlatinumDex,
     "HeartGold and SoulSilver": HeartGoldAndSoulSilverDex,
+    // gen5 ships no data until Phase 2; the registry never detects a gen5 mapper before then.
+    "Black": {},
+    "White": {},
+    "Black 2": {},
+    "White 2": {},
 }

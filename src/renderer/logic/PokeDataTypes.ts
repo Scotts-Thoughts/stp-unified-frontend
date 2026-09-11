@@ -8,7 +8,13 @@ export type PokemonGame = "Yellow"
 	| "FireRed and LeafGreen"
 	| "Diamond and Pearl"
 	| "Platinum"
-	| "HeartGold and SoulSilver";
+	| "HeartGold and SoulSilver"
+	// gen5 (plan 1.4): the mapper's `meta.game_name` strings, which are data keys like
+	// the others. No data ships for them until Phase 2.
+	| "Black"
+	| "White"
+	| "Black 2"
+	| "White 2";
 	
 /** Possible pokemon growth rates. */
 export type GrowthRate = "Erratic" | "Fast" | "Medium Fast" | "Medium Slow" | "Slow" | "Fluctuating";
