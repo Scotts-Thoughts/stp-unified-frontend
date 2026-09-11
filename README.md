@@ -80,7 +80,9 @@ same harness, which is how a refactor is shown not to change gen1.
 ## Where the app keeps things
 
 - User state (what the legacy apps kept in `localStorage`): `%APPDATA%/stp-overlay/data/user_state.json`,
-  same key names.
+  one section per generation plus a global one, same key names. On first launch each section is seeded
+  from the legacy app's own profile (`%APPDATA%/<legacy app>/Local Storage/leveldb`, read from a copy);
+  `npm run import:dump <profile folder>` shows what that takes.
 - gen1's per-species settings and metrics: `%APPDATA%/stp-overlay/data/<game>/<species>/`.
 - Shipped style defaults: `games/genN/data/style/<Game>_<Species>.json` (a dev-mode edit writes the file).
 - Split CSVs: `splits/` next to the app (the five legacy trees consolidated, every folder name kept).

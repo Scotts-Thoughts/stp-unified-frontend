@@ -1,6 +1,7 @@
 /**
  * The small, global pieces of user state that gen1 kept in `localStorage`, moved to a
- * file (decision 10, plan 1.10).
+ * file (decision 10, plan 1.10) -- and, since Phase 2, everything gen2-5's `MyStorage`
+ * keeps as well.
  *
  * `localStorage` cannot hold anything for this app. The queuer launches it with
  * `npm run dev`, so the renderer's origin is `http://localhost:5173`, while a packaged
@@ -9,8 +10,20 @@
  *
  * Everything lives in one file, `%APPDATA%/stp-overlay/data/user_state.json`, under the
  * *same key names* the legacy `localStorage` used. That is deliberate: the Phase 2.6
- * importer, which decodes each legacy app's Chromium LevelDB, can then copy records
- * across without a translation table, and the file reads as "what localStorage held".
+ * importer decodes each legacy app's Chromium LevelDB and copies records across without
+ * a translation table, and the file reads as "what localStorage held".
+ *
+ * ## Namespaces (plan 2.6)
+ *
+ * Each legacy app had its own `localStorage`, and the lifted components read their keys
+ * verbatim -- gen4 and gen5 both keep `starter` and `selected_game`, in different
+ * vocabularies. So the file is one section per generation, and a read or write goes to
+ * the *active* generation's section (main.ts sets it when a module activates) unless
+ * the caller names one (the box-art grid writes each generation's edition before any
+ * is active). Two things are global, as they should be shared: the OBS url and
+ * password, and the `enemyScale_<Species>` overrides (a species is the same species
+ * across games). A file from before the namespaces -- one flat object -- is read as
+ * gen1's section plus the globals, which is what it was.
  *
  * ## Why there is a cache
  *
@@ -31,14 +44,40 @@
  * runner's IPC barrier waits for the write to land before it reads the tree.
  */
 
+import { GLOBAL_NAMESPACE, isGlobalKey, parseUserStateFile, serializeUserState } from "../../../shared/userStateFormat";
+
+export { isGlobalKey, parseUserStateFile } from "../../../shared/userStateFormat";
+
 /** Read once by {@link loadUserState}; every synchronous getter is served from here. */
-let cache: Record<string, unknown> = {};
+let cache: Record<string, Record<string, unknown>> = {};
+let active = "gen1";
+
+/**
+ * The generation whose section reads and writes go to. gen1 before a mapper is
+ * detected: the pre-mapper screen is gen1's, as it always was.
+ */
+export function setActiveNamespace(id: string | null): void {
+    active = id ?? "gen1";
+}
+
+function section(namespace: string): Record<string, unknown> {
+    return (cache[namespace] ??= {});
+}
+
+function namespaceFor(key: string, explicit?: string): string {
+    return isGlobalKey(key) ? GLOBAL_NAMESPACE : (explicit ?? active);
+}
+
+/** The active generation's view, flat, globals included: what its legacy `localStorage` held. */
+export function activeUserState(): Record<string, unknown> {
+    return { ...section(GLOBAL_NAMESPACE), ...section(active) };
+}
 
 // A read-only window into the cache for the parity harness (oracle 4 compares what
 // the app has persisted at each checkpoint; the legacy apps expose the same thing as
 // `localStorage`). Nothing in the app reads it.
 if (typeof window !== "undefined") {
-    (window as any).__stpUserState = () => JSON.parse(JSON.stringify(cache));
+    (window as any).__stpUserState = () => JSON.parse(JSON.stringify(activeUserState()));
 }
 let loaded: Promise<void> | null = null;
 
@@ -60,8 +99,7 @@ export function loadUserState(): Promise<void> {
         try {
             const raw = await window.api.data.read(FILE);
             if (!raw) return;
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed === "object") cache = parsed as Record<string, unknown>;
+            cache = parseUserStateFile(JSON.parse(raw));
         } catch (err) {
             // A corrupt file must not stop the overlay from starting; the next write
             // replaces it, exactly as a corrupt localStorage value used to be overwritten.
@@ -72,17 +110,18 @@ export function loadUserState(): Promise<void> {
 }
 
 /** The value for `key`, or `fallback` when nothing has been saved. */
-export function getUserState<T>(key: string, fallback: T): T {
-    const value = cache[key];
+export function getUserState<T>(key: string, fallback: T, namespace?: string): T {
+    const value = section(namespaceFor(key, namespace))[key];
     return value === undefined || value === null ? fallback : (value as T);
 }
 
 /**
- * Every saved key, in insertion order -- `localStorage.key(i)` for the managers that
- * sweep the store (gen3's `resetAllToDefaults`/`exportCurrentAsDefaults`).
+ * Every saved key of the active generation (or the named one), in insertion order --
+ * `localStorage.key(i)` for the managers that sweep the store (gen3's
+ * `resetAllToDefaults`/`exportCurrentAsDefaults`).
  */
-export function userStateKeys(): string[] {
-    return Object.keys(cache);
+export function userStateKeys(namespace?: string): string[] {
+    return Object.keys(section(namespace ?? active));
 }
 
 /**
@@ -91,9 +130,10 @@ export function userStateKeys(): string[] {
  * `null` and `undefined` delete the key, which is what assigning them to
  * `LocalStorageProxy` did.
  */
-export function setUserState(key: string, value: unknown): void {
-    if (value === undefined || value === null) delete cache[key];
-    else cache[key] = value;
+export function setUserState(key: string, value: unknown, namespace?: string): void {
+    const target = section(namespaceFor(key, namespace));
+    if (value === undefined || value === null) delete target[key];
+    else target[key] = value;
     schedule();
 }
 
@@ -110,7 +150,7 @@ function schedule(): void {
 }
 
 function write(): Promise<unknown> {
-    const snapshot = JSON.stringify(cache, null, 4);
+    const snapshot = serializeUserState(cache);
     inFlight = inFlight
         .then(() => window.api.data.write(FILE, snapshot))
         .catch((err) => console.error(`[user-state] could not write data/${FILE}:`, err));

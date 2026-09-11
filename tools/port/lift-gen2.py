@@ -149,17 +149,44 @@ new_open = (
 )
 options = replace_once(options, old_open, new_open, "openFolder")
 
-ib_start = options.index("        importBackports() {")
-ib_end = options.index("        },", options.index("console.error('[Backport Import] Error:', err);", ib_start)) + len("        },")
-options = options[:ib_start] + (
+# The backport importer (decision 15, known-legacy-bugs.md #26): the legacy method
+# appended what it parsed to the *shipped* data files with require("fs") and read the
+# two ASM files through `File.path`. Its body stays; the file appends become one call
+# into games/gen2/backportOverrides.ts (userData, re-applied by the module's prepare())
+# and the reads go through the File API, which is what a renderer without fs has.
+# The parser itself is the legacy lib/backport_importer.js, ported verbatim below.
+options = replace_once(
+    options,
     "        importBackports() {\n"
-    "            // Not ported yet. The legacy importer appended parsed ASM to the *shipped*\n"
-    "            // data files with require(\"fs\") (known-legacy-bugs.md #26); decision 15 says\n"
-    "            // it writes userData overrides instead, which is a small redesign of its\n"
-    "            // persistence, not a lift. The button stays and says so.\n"
-    "            this.backport_import_status = 'Backport import is not available in this build yet.';\n"
-    "        },"
-) + options[ib_end:]
+    "            const backportImporter = require('./lib/backport_importer.js');\n",
+    "        async importBackports() {\n"
+    "            // The parser is games/gen2/backports.js (the legacy lib/backport_importer.js);\n"
+    "            // the file appends are games/gen2/backportOverrides.ts (decision 15).\n",
+    "importBackports head",
+)
+options = replace_once(
+    options,
+    "                const backportsContent = fs.readFileSync(backportsFileInput.files[0].path, 'utf8');\n"
+    "                const movesContent = fs.readFileSync(movesFileInput.files[0].path, 'utf8');\n",
+    "                const backportsContent = await backportsFileInput.files[0].text();\n"
+    "                const movesContent = await movesFileInput.files[0].text();\n",
+    "importBackports reads",
+)
+for name in ("parseBackportMoves", "buildMoveLookup", "parseBackportPokemon"):
+    options = replace_once(options, f"backportImporter.{name}(", f"{name}(", f"importBackports {name}")
+options = replace_once(
+    options,
+    "                // Write moves to data files\n"
+    "                const filePaths = backportImporter.getDataFilePaths();\n"
+    "                const movesAdded = backportImporter.appendMovesToG2MoveData(moves, filePaths.g2MoveData);\n"
+    "                const movesArrayAdded = backportImporter.appendMovesToGen2Moves(moves, filePaths.gen2moves);\n"
+    "                const pokemonAdded = backportImporter.appendPokemonToCrystal(pokemonName, data, filePaths.pokemonCrystal);\n"
+    "                const moveMapAdded = backportImporter.appendToBackportMoveMap(pokemonName, newMoveMap, filePaths.backportMoveMap);\n",
+    "                // Was four appends to the shipped data files; the overrides file instead.\n"
+    "                const { movesAdded, pokemonAdded, moveMapAdded } = await recordBackport(pokemonName, moves, newMoveMap, data,\n"
+    "                    { g2MoveData, gen2moves, dexDataCrystal, backportMoveMap });\n",
+    "importBackports writes",
+)
 
 assert "this.game.connect" not in options and ".onMapperLoaded =" not in options and ".onMapperUnloaded =" not in options
 # One bare reference is left: a truthiness guard (`if (!this.mapper || ...)`). The
@@ -209,7 +236,9 @@ header = """<script>
  *   - OBS marker method -> core/logic/obs.ts (the same exchange, plan 1.9).
  *   - logData/logCopy   -> games/gen2/splits.js over the splits IPC.
  *   - `<script src>`    -> imports of games/gen2/data/*.js.
- *   - openFolder        -> the splits IPC; importBackports is a stub (see it).
+ *   - openFolder        -> the splits IPC; importBackports keeps its body over the
+ *                          File API, with the parser in games/gen2/backports.js and its
+ *                          file appends in games/gen2/backportOverrides.ts (decision 15).
  *   - `images/...`      -> `images/gen2/...` everywhere (template, script,
  *                          stylesheet, data): the generation's tree sits next to gen1's
  *                          images, under the same document-relative root, until Phase 4
@@ -229,6 +258,8 @@ import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen2Hotkeys } from "./hotkeys";
 import { loadCsvFile, logData, logCopy, transition } from "./splits.js";
+import { buildMoveLookup, parseBackportMoves, parseBackportPokemon } from "./backports.js";
+import { recordBackport } from "./backportOverrides";
 """
 
 # A classic <script> runs in sloppy mode, where assigning to an undeclared name creates
@@ -262,3 +293,21 @@ sfc = "<template>\n<div>\n" + template + "\n</div>\n</template>\n\n" + header + 
 print("Overlay.vue:", sfc.count("\n"), "lines;", len(imports), "data imports")
 left = [(options[: m.start()].count("\n"), m.group(0)) for m in re.finditer(r"require\([^)]*\)", options)]
 print("remaining require():", left)
+
+# ---- the backport parser: lib/backport_importer.js up to its file writers ----------------
+# Everything before `appendMovesToG2MoveData` is parsing (the ASM regexes, the type
+# map, the move lookup) and moves over verbatim; the four appenders and
+# getDataFilePaths wrote the shipped files and are replaced by backportOverrides.ts.
+bp_src = (LEGACY / "lib" / "backport_importer.js").read_text(encoding="utf-8")
+bp_end = bp_src.index("// Append new moves to g2MoveData.js (object format)")
+parser = bp_src[:bp_end].rstrip() + "\n"
+parser = replace_once(parser, "const fs = require('fs');\nconst path = require('path');\n\n", "", "backports requires")
+for name in ("normalizeName", "titleCase", "buildMoveLookup", "resolveMoveName", "parseBackportMoves", "parseBackportPokemon"):
+    parser = replace_once(parser, f"function {name}(", f"export function {name}(", f"backports export {name}")
+assert "require(" not in parser and "fs." not in parser
+(OUT / "backports.js").write_text(
+    "/**\n * gen2's backport-ASM parser: the first half of the legacy `lib/backport_importer.js`,\n"
+    " * verbatim as an ES module (tools/port/lift-gen2.py). The second half wrote the\n"
+    " * shipped data files and is games/gen2/backportOverrides.ts now (decision 15).\n */\n" + parser,
+    encoding="utf-8")
+print("backports.js:", parser.count("\n"), "lines")

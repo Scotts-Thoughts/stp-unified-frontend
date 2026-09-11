@@ -48,7 +48,9 @@
     "parity:diff": "tsx tools/parity/diff.ts",
     "parity:preflight": "tsx tools/parity/preflight.ts",
     "parity:adapter": "tsx tools/parity/adapter-selftest.ts",
-    "parity:profile": "tsx tools/parity/profile-check.ts"
+    "parity:profile": "tsx tools/parity/profile-check.ts",
+    "import:selftest": "tsx tools/import/selftest.ts",
+    "import:dump": "tsx tools/import/dump-localstorage.ts"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.2",

@@ -13,6 +13,7 @@ import { buildCanonicalView } from "~/core/mapper/MapperAdapter";
 import type { GameModule } from "~/core/game/GameModule";
 import { detect, loadModule, type Detection } from "~/games/registry";
 import { setActiveModule } from "~/core/game/active";
+import { setActiveNamespace } from "~/core/persistence/userState";
 import { initEnv } from "~/core/env";
 import { installScaleToFit, removeScaleToFit } from "~/core/window/scaleToFit";
 
@@ -199,6 +200,7 @@ const main = defineComponent({
                 await Promise.all([this.overlayLoaded, module.prepare?.()]);
                 await applyModuleStyles(module);
                 setActiveModule(module.id);
+                setActiveNamespace(module.id);
                 if (module.id !== "gen1") this.settings.releaseCss();
                 applyScaleToFit(module);
                 this.session = { ...detection, module };
@@ -213,6 +215,7 @@ const main = defineComponent({
             this.session?.module.deactivate?.();
             this.session = null;
             setActiveModule(null);
+            setActiveNamespace(null);
             applyScaleToFit(gen1);
             void applyModuleStyles(gen1).then(() => this.settings.reapplyCss());
         };

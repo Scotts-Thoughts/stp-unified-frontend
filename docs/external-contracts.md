@@ -164,16 +164,20 @@ Implemented for gen1 on 2026-09-10 (plan 1.10). The four things gen1 kept in `lo
 copy LevelDB records into it without a translation table. `core/persistence/userState.ts` reads the file once
 before the overlay mounts and serves every later read from memory, because the call sites (a render path, and
 the OBS marker helper) are synchronous; writes are debounced 250 ms with a `beforeunload` flush, which is the
-trade gen4 already makes. The one-time import of gen1's *own* `Local Storage` is **not built yet** and waits
-for the LevelDB reader below.
+trade gen4 already makes. The one-time import of every legacy app's `Local Storage` -- gen1's own included --
+is built (2026-09-12, `src/main/importLegacy.ts`): the file is one section per generation (`format: 2`) plus
+a `global` one, and each section is seeded once from its legacy profile's LevelDB, read from a copy.
 
 Shipped style defaults are per-species JSON in the repo (written back by dev-mode runs, as the legacy apps do with
 `default_style_settings.js`); user state is under userData. The unified app's userData is `%APPDATA%\stp-overlay\`.
 Because Chromium's `localStorage` is origin-scoped
 and lives in LevelDB, the importer (Phase 2.6) reads a *copy* of each legacy `Local Storage\leveldb`
-folder with a Node LevelDB reader (`classic-level`) and decodes Chromium's `_file://` + `\x00\x01<key>`
-records (value prefix byte 0 = UTF-16LE, 1 = Latin-1). This is deterministic and unit-testable with a
-copied leveldb fixture; it never opens the live profile. gen1's `data\` tree is copied file-for-file.
+folder with a LevelDB reader written for the purpose (`src/main/leveldb.ts`, no native module) and decodes
+Chromium's `_<origin>` + `\x00` + format byte + key records (format byte 0 = UTF-16LE, 1 = Latin-1, for keys
+and values alike). gen2-5 wrote under `file://` (they load `index.html` from disk); gen1 under
+`http://localhost:5173`; the importer takes the app's origin with the most records first and ignores
+`devtools://devtools`. This is deterministic and tested (`npm run import:selftest`); it never opens the live
+profile. gen1's `data\` tree is copied file-for-file.
 
 ## 7. keyhook.exe
 

@@ -658,7 +658,8 @@ Status as of 2026-09-11, third implementation session (continued).
    a hope: the same code runs, and the legacy-vs-unified diff says so.
 5. `tools/port/scope-css.py` scopes the stylesheet under `.gen-N` and proves the split lossless (2.5).
 6. The layered style store on the file-backed user state (`core/persistence/styleSettings.ts`), with the
-   generation's own key rules (2.6; the LevelDB importer is still to come).
+   generation's own key rules (2.6), and the first-launch importer of every legacy app's `localStorage`
+   (`src/main/leveldb.ts`, `localStorageImport.ts`, `importLegacy.ts`; done 2026-09-12, see below).
 7. Parity against the legacy app under the harness (2.7).
 
 | gen | inventory | data | profiles | lift | CSS | persistence | parity vs legacy |
@@ -670,8 +671,8 @@ Status as of 2026-09-11, third implementation session (continued).
 
 **Phase 2 as of 2026-09-11 (evening): every generation is lifted and green** -- gen2 on the one real recording,
 gen3/gen4/gen5 on synthetic fixtures, gen1 unchanged by the whole phase (the `unified@<worktree>` check). What
-Phase 2 still owes, carried into the later phases: the LevelDB importer (2.6, decision 3) and gen2's backport
-importer stub (decision 15); oracle 6's control-script sessions (`--control`, blocked on port 30159); real
+Phase 2 still owed, and has since been given (2026-09-12): the LevelDB importer (2.6, decision 3) and gen2's backport
+importer (decision 15). Still owed: oracle 6's control-script sessions (`--control`, blocked on port 30159); real
 recordings for gen1/3/4/5 (decision 6, Scott); and `npm run dev` for the lifted generations, whose images sit
 behind the `out/renderer/images/genN` junctions until Phase 4 merges the pools.
 
@@ -861,6 +862,46 @@ rule in the tools:
   with five `setBytes` in one `Promise.all`; Chromium's connection pool and the server decide their arrival
   order, and two runs of the *same* legacy app differed there. The claim is "the same writes at the same
   instant".
+- **The user state is one section per generation (2.6, 2026-09-12).** Each legacy app had its own
+  `localStorage`, and the lifted components read their keys verbatim -- gen4 and gen5 both keep `starter` and
+  `selected_game`, in different vocabularies -- so one flat file would have had the last generation's value
+  win for every shared name, and an import of five profiles into it would have been wrong four times over.
+  `data/user_state.json` is format 2 now: a `global` section (the OBS url and password, the
+  `enemyScale_<Species>` overrides) and one section per generation, with reads and writes going to the
+  *active* generation's (main.ts sets it with the module) unless the caller names one (the box-art grid,
+  writing each generation's edition). The harness's probe returns the active generation's flat view, which
+  is exactly what its legacy `localStorage` held, so oracle 4 compares as before; every fixture starts from
+  an empty profile either way, and all five runs are unchanged.
+- **The `localStorage` importer is a LevelDB reader in plain TypeScript** (`src/main/leveldb.ts`: the
+  MANIFEST's live table set, the block-based tables with prefix-compressed keys and snappy, the write-ahead
+  log with its checksums, merged by sequence so the newest record wins and a deletion hides). No native
+  module: `classic-level` would have had to build against the running Electron, for a read that happens once.
+  Chromium's record shape is `_<origin>\0<format byte><key>` -> `<format byte><value>`, format 0 UTF-16LE and 1
+  Latin-1 (`src/main/localStorageImport.ts`); the values are `MyStorage`'s `JSON.stringify` output and are
+  parsed back the way its `get` parsed them. On this machine the five profiles decode to 6 / 164 / 545 / 633 /
+  369 keys, and two things the survey did not predict showed up: gen2-5 wrote under `file://` (they load
+  `index.html` from disk; only gen1 ran under Vite's `http://localhost:5173`), and gen5's profile carries five
+  stale keys under a dev-server origin next to its 368 real ones -- so the importer takes the app's origin
+  with the most records first, and DevTools' own history (`devtools://devtools`, in the same database) not
+  at all. It runs at every launch and seeds only a generation whose section is absent, from a copy of the
+  profile, never the folder the legacy app may have open. `npm run import:selftest` checks the reader on
+  hand-built records and on whatever profiles are present; `npm run import:dump <profile>` shows what would
+  be taken.
+- **gen2's backport importer (decision 15, #26; 2026-09-12).** The legacy `importBackports` read two ASM files
+  through `File.path` and `require("fs")`, parsed them with `lib/backport_importer.js`, and appended the result
+  to four *shipped* data files so the import survived a restart by having rewritten the app. The lift now keeps
+  the method's body: the parser half of that file is `games/gen2/backports.js` verbatim (an ES module, the
+  regexes untouched), the files are read through the File API, and the four appends are one call into
+  `games/gen2/backportOverrides.ts`, which keeps the same entries in `%APPDATA%/stp-overlay/data/gen2/
+  backports.json` and folds them into the in-memory tables in gen2's `prepare()` -- the state the rewritten
+  files used to load into. The in-memory update the method did after the appends is unchanged, and so is its
+  status text. The shipped tables are never written.
+- **A parity run's window is pinned to the primary display.** With someone working at the machine, a run's
+  window opened on -- or was moved to -- another monitor, and there Windows shrinks a 1920x1080 content window
+  (a 1080-tall display) or reports it as 1914x1063 whatever is asked (one scaled 150%;
+  `--force-device-scale-factor=1` pins the renderer, not the frame). Every green run had used the primary. The
+  runner now moves the window to the primary display's work-area corner before sizing it, and again before any
+  capture that finds it drifted.
 - gen4's parity fixture is synthetic (`tools/parity/scenarios/gen4-platinum-smoke.json`, built from the
   shipped `ST/gen4/pokemon_platinum_ne.xml`): a new game, the starter, a route change, a wild battle, Leader
   Roark, a level-up, a blackout and a reset, 21 checkpoints over 90 s. It proves determinism and no-change
@@ -892,7 +933,7 @@ Status as of 2026-09-11, evening.
 
 Also done on the way: a first-launch import of gen1's file-based user data from `%APPDATA%/stp-generation1-overlay/data`
 into `%APPDATA%/stp-overlay/data` (the package rename would otherwise have started gen1 empty; `src/main/importLegacy.ts`).
-The `localStorage` (LevelDB) half of the 2.6 importer is still to come.
+The `localStorage` (LevelDB) half of the 2.6 importer followed on 2026-09-12 (section 7c, last bullet).
 
 Verified after the wiring: every generation's parity run and the gen1 no-change check, unchanged (the lazy import is
 one more awaited step inside the boot barrier the harness already waits on).
@@ -936,8 +977,8 @@ templates read the same bytes from the pool that they read through the junctions
 | 5.3 README | ✅ rewritten for the unified layout: structure, how to add a game, the harness, where the app keeps things. |
 | 5.4 final parity run | ✅ every generation on its fixture after Phase 4 (this section's verification); manifest and size report in 4.1. `tools/sandbox/` copies are runtime artefacts (gitignored) and are left for the next harness run rather than deleted -- deleting them only makes the next run re-copy the legacy trees. |
 
-What remains open across the plan, all outside what this session could close: the `localStorage` (LevelDB) half of
-the 2.6 importer and gen2's backport importer stub (decision 15); oracle 6's control-script sessions (port 30159);
+What remains open across the plan, all outside what this session could close: oracle 6's control-script sessions
+(port 30159);
 real fixture recordings for gen1/3/4/5 (decision 6); the queuer patch to apply and dry-run (3.6); a packaged build
 to produce and try (3.5); and the decomposition of the four lifted components into the shared stores (the 2.4
 refactor proper), which is where 4.3 and 4.4 resume.

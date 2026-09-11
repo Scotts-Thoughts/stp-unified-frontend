@@ -15,7 +15,7 @@ Verified inputs (2026-09-10): PokeAByte 0.11.2 source (`A:\Programs\PokeAByte\sr
 | 1 | **Computed styles + layout** | `getComputedStyle` (all properties) and `getBoundingClientRect` of every element under `#app-container`, keyed by a stable path (`tag.class1.class2:nth-child(n)` chain) | exact, after normalising `auto`/`none` spellings; the primary oracle because it is independent of the Chromium version |
 | 2 | **Pixels** | `page.screenshot()` of the 1920×1080 content | zero tolerance when both sides run the same Electron (§4); `pixelmatch` threshold 0.1 + AA-skip when comparing Electron 25 vs 37 |
 | 3 | **Split CSVs** | every file the app writes under `<sandbox>/splits/**` | byte-identical (wall clock is faked, §5) |
-| 4 | **App data** | `<sandbox>/APPDATA/<app>/data/**` (gen1 format) and, for gen2–5, a `localStorage` dump taken via `page.evaluate` at the end of the run | JSON-normalised deep-equal |
+| 4 | **App data** | `<sandbox>/APPDATA/<app>/data/**` (gen1 format) and, for gen2–5, a `localStorage` dump taken via `page.evaluate` at the end of the run (the unified app's `__stpUserState()` returns the active generation's section flat, globals included, which is what its legacy `localStorage` held) | JSON-normalised deep-equal |
 | 5 | **PokeAByte writes** | every `POST /mapper/set-property-value|set-property-bytes|set-properties-by-bits` the app sends, in order, with body | exact sequence, the writes of one virtual instant compared as a set (an app that issues five `setBytes` in one `Promise.all` cannot order their arrival, and two runs of the *same* app differ there) |
 | 6 | **Control server** | `GET /status` after each scripted control call (`/set-game`, `/set-starter`, `/refresh`, …) | deep-equal on the fields the queuer reads (`external-contracts.md` §2) |
 | 7 | **OBS chapter markers** | every `CreateRecordChapter` received by the OBS stub | exact sequence of names |
@@ -345,6 +345,11 @@ tree under `images/genN/` -- and a build junctions `out/renderer/images` to it (
 Before that, the runner junctioned `out/renderer/images/genN` to the legacy apps' trees; `junctionLegacyImages`
 still does so for a `unified@<dir>` worktree of a commit older than the pool, and finds the folders present
 otherwise. Either way the renderer reads the same bytes over the same `file://` transport.
+
+The window is pinned to the primary display: Chromium opens it where the user is working, and on a 1080-tall
+or a 150%-scaled monitor a 1920x1080 content window ends up 1914x1063 whatever `setContentSize` asks, so the
+runner moves it to the primary display's work-area corner before sizing and locking it, and again before a
+capture that finds it drifted (`ensureContentSize`).
 
 `resources/keyhook.exe` is copied into the sandbox for every run; when something outside git has quarantined it
 (it happens on this machine), the sandbox logs that and the run proceeds without hotkeys -- no oracle presses a

@@ -7,6 +7,11 @@ import { trainer_name_lookup } from "./data/autosplitter/trainer_name_lookup.js"
 import { gen2ControlRoutes } from "./control";
 import Overlay from "./Overlay.vue";
 import { loadGen2StyleDefaults } from "./storage";
+import { applyBackportOverrides, loadBackportOverrides } from "./backportOverrides";
+import { backportMoveMap } from "./data/backport_move_map.js";
+import { g2MoveData } from "./data/g2MoveData.js";
+import { gen2moves } from "./data/gen2moves.js";
+import { dexDataCrystal } from "./data/pokemon_crystal.js";
 
 /**
  * Generation 2: Crystal, and Gold & Silver (plan 2.4, lifted 2026-09-10).
@@ -69,6 +74,9 @@ export const gen2: GameModule = {
     scaleToFit: true,
     prepare: async () => {
         await loadGen2StyleDefaults();
+        // The backports imported so far (decision 15): into the tables before the overlay
+        // mounts, which is the state the legacy's rewritten data files loaded into.
+        applyBackportOverrides(await loadBackportOverrides(), { g2MoveData, gen2moves, dexDataCrystal, backportMoveMap });
     },
     persistence: { legacyAppName: "stp-generation2-overlay" },
     logCopyVariant: "gen2",

@@ -1065,7 +1065,9 @@
  *   - OBS marker method -> core/logic/obs.ts (the same exchange, plan 1.9).
  *   - logData/logCopy   -> games/gen2/splits.js over the splits IPC.
  *   - `<script src>`    -> imports of games/gen2/data/*.js.
- *   - openFolder        -> the splits IPC; importBackports is a stub (see it).
+ *   - openFolder        -> the splits IPC; importBackports keeps its body over the
+ *                          File API, with the parser in games/gen2/backports.js and its
+ *                          file appends in games/gen2/backportOverrides.ts (decision 15).
  *   - `images/...`      -> `images/gen2/...` everywhere (template, script,
  *                          stylesheet, data): the generation's tree sits next to gen1's
  *                          images, under the same document-relative root, until Phase 4
@@ -1085,6 +1087,8 @@ import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen2Hotkeys } from "./hotkeys";
 import { loadCsvFile, logData, logCopy, transition } from "./splits.js";
+import { buildMoveLookup, parseBackportMoves, parseBackportPokemon } from "./backports.js";
+import { recordBackport } from "./backportOverrides";
 import { auto_save_settings } from "./data/auto_save_settings.js";
 import { autosplitter } from "./data/autosplitter.js";
 import { backportMoveMap } from "./data/backport_move_map.js";
@@ -2813,12 +2817,83 @@ export default defineComponent({
             console.log(`.\\${folderName}\\${game_name}\\${path}\\${path2}`);
             revealSplitFolder(fullPath);
         },
-        importBackports() {
-            // Not ported yet. The legacy importer appended parsed ASM to the *shipped*
-            // data files with require("fs") (known-legacy-bugs.md #26); decision 15 says
-            // it writes userData overrides instead, which is a small redesign of its
-            // persistence, not a lift. The button stays and says so.
-            this.backport_import_status = 'Backport import is not available in this build yet.';
+        async importBackports() {
+            // The parser is games/gen2/backports.js (the legacy lib/backport_importer.js);
+            // the file appends are games/gen2/backportOverrides.ts (decision 15).
+            const backportsFileInput = this.$refs.backportsFile;
+            const movesFileInput = this.$refs.backportMovesFile;
+
+            if (!backportsFileInput?.files[0] || !movesFileInput?.files[0]) {
+                this.backport_import_status = 'Please select both ASM files.';
+                return;
+            }
+
+            try {
+                const backportsContent = await backportsFileInput.files[0].text();
+                const movesContent = await movesFileInput.files[0].text();
+
+                // Parse moves from backport_moves.asm
+                const { moves, newMoveMap } = parseBackportMoves(movesContent);
+
+                // Build lookup from existing move data for resolving ASM constants
+                const moveLookup = buildMoveLookup(g2MoveData);
+
+                // Parse pokemon from backports.asm
+                const { parsedName, data } = parseBackportPokemon(backportsContent, newMoveMap, moveLookup);
+
+                // Use the text input for display name, fall back to parsed name
+                const pokemonName = this.backport_pokemon_name.trim() || parsedName;
+                this.backport_pokemon_name = pokemonName;
+
+                // Was four appends to the shipped data files; the overrides file instead.
+                const { movesAdded, pokemonAdded, moveMapAdded } = await recordBackport(pokemonName, moves, newMoveMap, data,
+                    { g2MoveData, gen2moves, dexDataCrystal, backportMoveMap });
+
+                // Update in-memory data so changes are visible immediately
+                for (const move of moves) {
+                    if (!g2MoveData[move.displayName]) {
+                        this.g2MoveData[move.displayName] = {
+                            Move: move.displayName,
+                            Type: move.type,
+                            Power: move.power,
+                            Accuracy: move.accuracy,
+                            PP: move.pp,
+                            Description: move.description
+                        };
+                        this.gen2moves.push({
+                            Move: move.displayName,
+                            Type: move.type,
+                            Power: move.power,
+                            Accuracy: move.accuracy,
+                            PP: move.pp,
+                            Description: move.description
+                        });
+                    }
+                }
+                if (pokemonAdded) {
+                    this.dexDataCrystal[pokemonName] = { name: pokemonName, ...data };
+                }
+                if (moveMapAdded) {
+                    const moveMapping = {};
+                    for (let i = 1; i <= 3; i++) {
+                        moveMapping[`BACKPORT_MOVE_${i}`] = newMoveMap[`NEW_MOVE_${i}`] || null;
+                    }
+                    this.backportMoveMap[pokemonName] = moveMapping;
+                }
+
+                // Build status message
+                let status = '';
+                if (movesAdded > 0) status += `Added ${movesAdded} new move(s) to data files.\n`;
+                else status += `No new moves to add (already exist).\n`;
+                if (pokemonAdded) status += `Added "${pokemonName}" to Pokemon data.`;
+                else status += `"${pokemonName}" already exists in Pokemon data (skipped).`;
+                this.backport_import_status = status;
+
+                console.log('[Backport Import]', status);
+            } catch (err) {
+                this.backport_import_status = `Error: ${err.message}`;
+                console.error('[Backport Import] Error:', err);
+            }
         },
         async set_rom_starter() {
             let starter = this.starter

@@ -23,7 +23,8 @@
  * loaded, for every generation (plan 3.2, decided 2026-09-02). It lists every edition
  * of every manifest, thirteen tiles, and a click stores the edition where that
  * generation reads it -- gen1's overlay settings store, or the lifted component's own
- * user-state key (`ModuleManifest.editionKey`) -- and sets the taskbar icon to the
+ * user-state key (`ModuleManifest.editionKey`) in that generation's section of the
+ * user state -- and sets the taskbar icon to the
  * edition's. The streamed overlay is untouched: the edition is a user setting,
  * distinct from the game the mapper detects (plan 3.1).
  *
@@ -55,7 +56,7 @@ export default defineComponent({
         currentEdition(manifest: ModuleManifest): string | null {
             if (manifest.id === "gen1") return this.settings.edition;
             void this.revision;
-            return manifest.editionKey ? getUserState<string | null>(manifest.editionKey, null) : null;
+            return manifest.editionKey ? getUserState<string | null>(manifest.editionKey, null, manifest.id) : null;
         },
         isSelected(manifest: ModuleManifest, edition: Edition): boolean {
             return this.currentEdition(manifest) === edition.name;
@@ -64,7 +65,7 @@ export default defineComponent({
             if (manifest.id === "gen1") {
                 this.settings.edition = edition.name as typeof this.settings.edition;
             } else if (manifest.editionKey) {
-                setUserState(manifest.editionKey, edition.name);
+                setUserState(manifest.editionKey, edition.name, manifest.id);
                 this.revision++;
             }
             window.api.set_game_icon(edition.icon);

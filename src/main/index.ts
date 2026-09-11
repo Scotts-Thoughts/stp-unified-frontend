@@ -6,7 +6,7 @@ import fs from "fs";
 import { ControlServer } from "./control-server";
 import { registerIpc } from "./ipc";
 import { startKeyhook, stopKeyhook } from "./keyhook";
-import { ensureImagePool, importLegacyUserData } from "./importLegacy";
+import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
 
 /**
  * The one overlay window. The control server (port 30159) and the keyhook forwarder
@@ -175,6 +175,7 @@ app.whenReady().then(() => {
     electronApp.setAppUserModelId('com.electron');
 
     importLegacyUserData();
+    importLegacyLocalStorage();
     ensureImagePool();
     registerIpc(() => mainWindow);
     controlServer.start();

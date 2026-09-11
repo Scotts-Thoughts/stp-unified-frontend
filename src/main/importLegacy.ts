@@ -1,6 +1,8 @@
-import { cpSync, existsSync, readdirSync, symlinkSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { app } from "electron";
+import { isGlobalKey, parseUserStateFile, serializeUserState, type UserStateSections } from "../shared/userStateFormat";
+import { readLegacyLocalStorage } from "./localStorageImport";
 import { userDataRoot } from "./paths";
 
 /**
@@ -44,5 +46,69 @@ export function ensureImagePool(): void {
         symlinkSync(pool, link, "junction");
     } catch (err) {
         console.error(`[images] could not junction ${link} -> ${pool}:`, err);
+    }
+}
+
+/** The legacy apps' userData folder names (= their package.json names), by generation. */
+const LEGACY_APPS: Record<string, string> = {
+    gen1: "stp-generation1-overlay",
+    gen2: "stp-generation2-overlay",
+    gen3: "stp-generation3-overlay",
+    gen4: "gen4-overlay-app",
+    gen5: "gen5-overlay-app",
+};
+
+/**
+ * First-launch import of the legacy apps' `localStorage` (plan 2.6, decision 3): each
+ * generation's section of `data/user_state.json` is seeded, once, from its legacy
+ * app's `Local Storage/leveldb` -- the same key names, the same values, so the lifted
+ * components find exactly what their `MyStorage` used to find. The global keys (OBS,
+ * sprite-scale overrides) come from the first generation that has them. A generation
+ * whose section already exists is left alone, so this never overwrites a run's state;
+ * one whose legacy profile is absent is simply not seeded.
+ */
+export function importLegacyLocalStorage(): void {
+    const dir = userDataRoot();
+    const file = join(dir, "user_state.json");
+    let sections: UserStateSections = {};
+    if (existsSync(file)) {
+        try {
+            sections = parseUserStateFile(JSON.parse(readFileSync(file, "utf-8")));
+        } catch (err) {
+            console.error(`[import] ${file} is unreadable; nothing imported:`, err);
+            return;
+        }
+    }
+    const profiles = dirname(app.getPath("userData"));
+    let changed = false;
+    for (const [gen, appName] of Object.entries(LEGACY_APPS)) {
+        if (sections[gen]) continue;
+        let values: Record<string, unknown> | null;
+        try {
+            values = readLegacyLocalStorage(join(profiles, appName), (m) => console.log(m));
+        } catch (err) {
+            console.error(`[import] ${appName}: could not read its localStorage:`, err);
+            continue;
+        }
+        if (!values) continue;
+        const global = (sections.global ??= {});
+        const own: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(values)) {
+            if (isGlobalKey(key)) {
+                if (!(key in global)) global[key] = value;
+            } else {
+                own[key] = value;
+            }
+        }
+        sections[gen] = own;
+        changed = true;
+        console.log(`[import] ${gen}: ${Object.keys(own).length} key(s) from ${appName}`);
+    }
+    if (!changed) return;
+    try {
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(file, serializeUserState(sections));
+    } catch (err) {
+        console.error(`[import] could not write ${file}:`, err);
     }
 }

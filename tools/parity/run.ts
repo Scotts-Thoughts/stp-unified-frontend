@@ -428,8 +428,17 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
   const page = await app.firstWindow({ timeout: 60000 });
   // 1920x1080 content at zoom 1 is the parity claim; a display that cannot fit it
   // would silently rescale every rect.
-  const bounds = await app.evaluate(async ({ BrowserWindow }) => {
+  const bounds = await app.evaluate(async ({ BrowserWindow, screen }) => {
     const win = BrowserWindow.getAllWindows()[0];
+    // Chromium opens a new window on the display the user is working on, and a
+    // 1920x1080 content window does not survive every display: a 1080-tall one has
+    // Windows shrink it, and one scaled 150% reports 1914x1063 whatever is asked
+    // (`--force-device-scale-factor=1` pins the renderer, not the window frame). A
+    // whole run came back 1914x1063 while someone was working at another monitor. So
+    // the window goes to the primary display's work-area corner first -- the display
+    // every green run has used -- and only then is sized and locked.
+    const corner = screen.getPrimaryDisplay().workArea;
+    win.setPosition(corner.x, corner.y);
     win.setContentSize(1920, 1080);
     win.webContents.setZoomFactor(1);
     // The window is taller than the display's work area, and Windows shrinks such a
@@ -456,10 +465,14 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
  * for the layout to catch up.
  */
 async function ensureContentSize(app: ElectronApplication, log: (m: string) => void): Promise<boolean> {
-  const bounds = await app.evaluate(async ({ BrowserWindow }) => {
+  const bounds = await app.evaluate(async ({ BrowserWindow, screen }) => {
     const win = BrowserWindow.getAllWindows()[0];
     const before = win.getContentBounds();
     if (before.width !== 1920 || before.height !== 1080) {
+      // Back to the primary display first: on a scaled or short one the size call
+      // alone lands at 1914x1063 again (see launch()).
+      const corner = screen.getPrimaryDisplay().workArea;
+      win.setPosition(corner.x, corner.y);
       win.setContentSize(1920, 1080);
       win.webContents.setZoomFactor(1);
     }
