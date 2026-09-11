@@ -6,6 +6,10 @@ import { goldSilverDeprecated } from "./gen2/mappers/gold-silver-deprecated";
 import { diamondPearlStandard } from "./gen4/mappers/diamond-pearl";
 import { heartGoldSoulSilverStandard } from "./gen4/mappers/heartgold-soulsilver";
 import { platinumStandard } from "./gen4/mappers/platinum";
+import { black2Standard } from "./gen5/mappers/black-2";
+import { blackStandard } from "./gen5/mappers/black";
+import { white2Standard } from "./gen5/mappers/white-2";
+import { whiteStandard } from "./gen5/mappers/white";
 
 /**
  * Every mapper profile the app ships, by generation, with no app or Vue imports so the
@@ -20,6 +24,7 @@ export const PROFILES: Readonly<Record<string, readonly MapperProfile[]>> = {
     gen1: [yellowDeprecated, redBlueDeprecated],
     gen2: [crystalDeprecated, goldSilverDeprecated],
     gen4: [platinumStandard, diamondPearlStandard, heartGoldSoulSilverStandard],
+    gen5: [blackStandard, whiteStandard, black2Standard, white2Standard],
 };
 
 export function allProfiles(): MapperProfile[] {

@@ -665,7 +665,7 @@ Status as of 2026-09-11, third implementation session (continued).
 |---|---|---|---|---|---|---|---|
 | 2 | ✅ 256 paths / 60 writes | ✅ 25 files + 40 style JSON | ✅ Crystal, Gold & Silver | ✅ `games/gen2/Overlay.vue` | ✅ 706 rules | ✅ (import deferred) | ✅ **all nine oracles green** on the recorded Crystal run (`c-wigglytuff-2-11311`, 22 checkpoints), three unified runs against a legacy baseline that two legacy runs agree on (2026-09-11) |
 | 4 | ✅ 231 paths / 79 writes | ✅ 31 files + 383 style JSON + 506 sprite scales | ✅ Platinum, D&P, HG&SS (`ST/gen4/*_ne` and `STANDARD/gen4/*`) | ✅ `games/gen4/Overlay.vue` (10,607 lines) | ✅ 569 rules | ✅ gen4's key rule, style-field filter, 500 ms debounced write | ✅ **all nine oracles green, pixel-exact** on the synthetic Platinum fixture (`gen4-platinum-smoke`, 19 checkpoints), two unified runs against a legacy baseline two legacy runs agree on (2026-09-11) |
-| 5 | | | | | | | |
+| 5 | ✅ 241 paths / 83 writes | ✅ 26 files + 327 style JSON + 669 sprite scales | ✅ Black, White, Black 2, White 2 (`STANDARD/gen5/*`) | ✅ `games/gen5/Overlay.vue` (10,641 lines) + its Timer/PubSub/timer components and form tables as ES modules | ✅ 570 rules | ✅ gen5's key rule, style-field filter, three-layer read, 1 s debounced write without flush | ✅ **all nine oracles green, pixel-exact** on the synthetic Black fixture (`gen5-black-smoke`, 14 checkpoints), two unified runs against a legacy baseline two legacy runs agree on (2026-09-11) |
 | 3 | | | | | | | |
 
 **What the harness found while lifting gen2**, each of which would have been invisible to review and is now a
@@ -688,7 +688,11 @@ rule in the tools:
   JPEG through a different path for it than for a `file://` image: two in a channel at nine hundred pixels of
   every frame, with every other oracle green, and identical the moment the same file was loaded over
   `file://` (a redirect from the scheme to `file://` is `ERR_UNSAFE_REDIRECT`). gen2's PNG textures never
-  showed it. So a lifted module's images live at `images/genN/...` next to gen1's own `images/`, the document
+  showed it. It is a race, not a rule: the two decode paths depend on whether the file was complete when the
+  image was first painted, the scheme merely made the slow outcome consistent, and over `file://` one unified
+  run in three still landed on it (identical build, 901 pixels again). The pixel oracle's exact mode now
+  forgives a channel delta of two -- imperceptible, and oracle 1 compares every computed colour exactly -- so
+  the race cannot fail a run on either side. So a lifted module's images live at `images/genN/...` next to gen1's own `images/`, the document
   resolves them like the legacy page did, `src/main/assets.ts` is gone, and the parity runner junctions
   `out/renderer/images/genN` to the legacy tree for a run. Phase 4 merges the trees under that same root, so
   the port-time rewrite is already the final shape; `npm run dev` for gen2-5 waits for that merge (the Vite
@@ -754,11 +758,46 @@ rule in the tools:
   `ERR_FILE_NOT_FOUND` lines are gone. (Oracle 4 also lists `current_splits`/`previous_splits` "only in
   candidate" -- the previous commit predates the `__stpUserState` probe, so its state was invisible to the
   capture; the collected `data/user_state.json` files are identical.)
+- **`this.mapper` stays undefined inside `created()`.** The legacy component constructed its client in
+  `mounted`, so during `created()` every `this.mapper?.properties...` short-circuited: gen4's and gen5's
+  species-settings blocks are skipped there and run only from `mounted`, after the mapper is loaded. The
+  session prop exists from the start, so the first lifts renamed those to `this.game?.` and ran the blocks a
+  lifecycle step early -- invisible for gen4, but gen5's `encounters_psyduck` watcher then fired against a
+  patch property the Black mapper does not have (a `TypeError` the legacy app never logs) and persisted a
+  `Black_Heatran` key a step early. `rename_mapper` now leaves `created()` alone, and the lifted component
+  declares no `mapper` field, so the reads short-circuit exactly as they did.
+- gen5's `style_settings_manager.js` is a third variant: a style key reads as defaults < bare key < user
+  override, merged, and a dev-mode write keeps the *full* value under the bare key (`threeLayer` in the
+  shared store); its defaults write is debounced 1 s with no unload flush (#25). Its `logCopy` follows
+  `refilming_mode` (#21), its `v-else` wrapper is a `v-else-if`, and it creates `splits/Platinum` and
+  `splits/HGSS` at load (#17) -- all reproduced. Its timer is gen1's lineage (`logic/Timer.js`, `PubSub.js`,
+  two template-string components) and is ported as ES modules with the bodies as they were; the runtime
+  compiler the shell already carries for its in-DOM template compiles them. The second-screen key sender
+  (node-key-sender, decision 9) is a main-process channel.
+- **Vue 3.2 flushed a component's pre-watchers LIFO; Vue 3.5 flushes them FIFO** (its
+  `findInsertionIndex` puts an equal-id job after the queued ones where 3.2.47's put it before). gen5's
+  `created()` registers one `$watch` per species setting, its `starter` watch option is registered earlier,
+  and at boot `load_all_settings` changes `starter` first and then four style fields: under 3.2 the four
+  settings watchers ran *before* the starter watcher and saved the loaded values back to the species key
+  (`Black_Heatran`) while `is_loading_evolution_style` was still false; under 3.5 the starter watcher runs
+  first, raises the flag, and the four skip -- a persisted key present in the legacy state and absent in the
+  unified one, found by oracle 4 and traced with an instrumented sandbox copy. The lifts give those watchers
+  `flush: 'sync'`, which is the precedence 3.2 gave them (at the assignment, before any queued watcher, and
+  still behind the flag inside `loadEvolutionStyle`); gen4 gets the same seam for the same guard. Observable
+  behaviour is the parity claim, not the scheduler.
+- The harness dropped every boot-time console error: the pre-reload document's log was cleared *after* the
+  reload settled, by which point the new document had already connected to the armed mock and run its boot.
+  The log is now cleared the moment the new document is created, and oracle 9 sees the boot -- including,
+  on the legacy side, the `spawn keyhook.exe ENOENT` page error when the exe is missing (both sides spawn it
+  from the sandbox cwd; the unified app from its main process, which logs instead of throwing).
+  `STP_PARITY_KEEP_SANDBOX=1` skips the sandbox refresh so an instrumented legacy copy survives a run.
 - gen4's parity fixture is synthetic (`tools/parity/scenarios/gen4-platinum-smoke.json`, built from the
   shipped `ST/gen4/pokemon_platinum_ne.xml`): a new game, the starter, a route change, a wild battle, Leader
   Roark, a level-up, a blackout and a reset, 21 checkpoints over 90 s. It proves determinism and no-change
   under the lift, not correctness (decision 6 still stands). Its Roark split is placed after the timer's first
-  minute on purpose: known-legacy-bugs.md #33.
+  minute on purpose: known-legacy-bugs.md #33. gen5's (`gen5-black-smoke.json`, from
+  `STANDARD/gen5/pokemon_black.xml`) follows the same shape with gen5's own edges: `flags.new_game`, the
+  `player.name` reset, the `battle.other.battle` pointer for a blackout, and the Cilan split.
 
 ## 8. Corrections the first implementation session made to the plan
 

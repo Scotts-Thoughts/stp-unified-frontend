@@ -1,0 +1,20 @@
+{
+  "overlay_color": "#dd9c74",
+  "ui_saturation": "1.8",
+  "imageXOffset": "-21",
+  "imageYOffset": "-70",
+  "imageScale": "0.62",
+  "imageFlip": true,
+  "backgroundTexture": "Dragon",
+  "backgroundBlur": 1,
+  "backgroundScale": "180",
+  "backgroundXOffset": -28,
+  "backgroundYOffset": 3,
+  "backgroundBrightness": 97,
+  "backgroundContrast": "184",
+  "backgroundSaturation": 92,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Vital Spirit",
+  "evolution": true,
+  "selected_evolution_species": "Lillipup"
+}

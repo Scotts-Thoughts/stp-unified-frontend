@@ -179,15 +179,17 @@ export class GameHookMapperClient {
     }
 
     /**
-     * Replaces the debounced-path list and, if a mapper is loaded, rebuilds the map
-     * against it (plan 2.4, gen4). The legacy gen4 app called `deboucePath()` before
+     * Replaces the debounced-path list (and the frame count an update is held for --
+     * gen5 sets 15 where the others keep 10) and, if a mapper is loaded, rebuilds the
+     * map against it (plan 2.4, gen4/gen5). The legacy gen4 app called `deboucePath()` before
      * `connect()`, so its map was built by the first `loadMapper()`; the unified app
      * knows which module's paths apply only once the mapper is loaded and detected
      * (main.ts), so the map is rebuilt then -- entries already counting down are kept
      * -- and every later `loadMapper()` builds it from the same list.
      */
-    setDebouncePaths(paths: string[]) {
+    setDebouncePaths(paths: string[], frames = 10) {
         this._debouceList = [...paths]
+        this._debouceTimeout = frames
         if (!this._properties || this._properties.length === 0) return
         const previous = this._debouceMap
         this._debouceMap = new Map()

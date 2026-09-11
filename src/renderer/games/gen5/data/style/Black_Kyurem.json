@@ -1,0 +1,16 @@
+{
+  "backgroundTexture": "Dark Moon",
+  "backgroundContrast": "140",
+  "backgroundScale": "142",
+  "backgroundYOffset": "50",
+  "backgroundXOffset": "50",
+  "backgroundBlur": "1",
+  "backgroundBrightness": "103",
+  "imageFlip": true,
+  "imageScale": "1.14",
+  "imageYOffset": "23",
+  "imageXOffset": "9",
+  "overlay_color": "#67d0f0",
+  "ui_saturation": "1.2",
+  "pkmn_ability": "Pressure"
+}

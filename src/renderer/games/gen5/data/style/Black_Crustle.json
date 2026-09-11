@@ -1,0 +1,13 @@
+{
+  "overlay_color": "#e89453",
+  "ui_saturation": "1.3",
+  "imageYOffset": "14",
+  "imageScale": "1.19",
+  "imageFlip": true,
+  "backgroundTexture": "Rock",
+  "backgroundBlur": "4",
+  "backgroundScale": "133",
+  "backgroundFlip": true,
+  "backgroundContrast": "129",
+  "selected_evolution_species": "Crustle"
+}

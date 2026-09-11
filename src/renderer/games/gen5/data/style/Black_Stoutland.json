@@ -1,0 +1,20 @@
+{
+  "overlay_color": "#dd9c74",
+  "ui_saturation": "1.8",
+  "imageXOffset": "22",
+  "imageYOffset": "0",
+  "imageScale": "1.21",
+  "imageFlip": true,
+  "backgroundTexture": "Dragon",
+  "backgroundScale": "180",
+  "backgroundXOffset": 52,
+  "backgroundYOffset": -48,
+  "backgroundBrightness": 87,
+  "backgroundContrast": "184",
+  "backgroundSaturation": 113,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Intimidate",
+  "backgroundBlur": "1",
+  "evolution": true,
+  "selected_evolution_species": "Stoutland"
+}

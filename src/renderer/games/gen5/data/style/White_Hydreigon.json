@@ -1,0 +1,17 @@
+{
+  "imageScale": "0.98",
+  "imageFlip": true,
+  "imageYOffset": "85",
+  "imageXOffset": "14",
+  "overlay_color": "#688db8",
+  "ui_saturation": "1.5",
+  "backgroundTexture": "Dragon",
+  "backgroundScale": "155",
+  "backgroundContrast": "165",
+  "backgroundBlur": "1",
+  "backgroundBrightness": "83",
+  "backgroundHue": "231",
+  "backgroundSaturation": "16",
+  "pkmn_ability": "Levitate",
+  "pkmnNature": "Hardy"
+}

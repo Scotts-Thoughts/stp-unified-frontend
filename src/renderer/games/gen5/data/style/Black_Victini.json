@@ -1,0 +1,21 @@
+{
+  "selected_evolution_species": "Victini",
+  "pkmn_ability": "Victory Star",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Psychic",
+  "overlay_color": "#ef774a",
+  "imageFlip": true,
+  "imageYOffset": "-21",
+  "imageScale": "0.78",
+  "imageXOffset": "38",
+  "ui_saturation": "1.2",
+  "backgroundHue": "293",
+  "backgroundScale": "146",
+  "backgroundContrast": "167",
+  "backgroundYOffset": "-12",
+  "backgroundXOffset": "41",
+  "backgroundBrightness": "76",
+  "backgroundSaturation": "123",
+  "backgroundBlur": "1",
+  "backgroundFlip": true
+}

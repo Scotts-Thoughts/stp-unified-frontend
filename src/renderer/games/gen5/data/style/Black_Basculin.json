@@ -1,0 +1,14 @@
+{
+  "pkmn_ability": "Reckless",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Water",
+  "overlay_color": "#63ae69",
+  "evolution": false,
+  "selected_evolution_species": "Basculin",
+  "imageFlip": true,
+  "imageScale": "0.76",
+  "imageYOffset": "36",
+  "ui_saturation": "1.3",
+  "backgroundContrast": "135",
+  "backgroundScale": "109"
+}

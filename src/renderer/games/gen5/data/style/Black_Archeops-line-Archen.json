@@ -1,0 +1,22 @@
+{
+  "imageFlip": true,
+  "backgroundFlip": true,
+  "backgroundYOffset": "70",
+  "backgroundScale": "116",
+  "backgroundContrast": "114",
+  "backgroundBlur": "3",
+  "imageScale": "0.83",
+  "imageYOffset": "-87",
+  "overlay_color": "#349ad7",
+  "ui_saturation": "1.1",
+  "imageXOffset": 0,
+  "imageSat": 100,
+  "imageRotation": 0,
+  "backgroundTexture": "Rock",
+  "backgroundHue": 0,
+  "backgroundUrl": "",
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundBrightness": 100,
+  "backgroundSaturation": 100
+}

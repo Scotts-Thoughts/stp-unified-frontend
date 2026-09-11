@@ -1,0 +1,20 @@
+{
+  "overlay_color": "#4ab655",
+  "ui_saturation": "1.5",
+  "imageXOffset": "22",
+  "imageYOffset": "-92",
+  "imageScale": "0.58",
+  "backgroundTexture": "Grass",
+  "backgroundBlur": 1,
+  "backgroundScale": "192",
+  "backgroundFlip": false,
+  "backgroundXOffset": -28,
+  "backgroundYOffset": 3,
+  "backgroundBrightness": "69",
+  "backgroundContrast": "189",
+  "backgroundSaturation": 92,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Overgrow",
+  "evolution": true,
+  "selected_evolution_species": "Snivy"
+}

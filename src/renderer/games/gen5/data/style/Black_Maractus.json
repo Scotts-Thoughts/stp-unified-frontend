@@ -1,0 +1,15 @@
+{
+  "overlay_color": "#88ca63",
+  "ui_saturation": "1.5",
+  "imageYOffset": "7",
+  "imageSat": "119",
+  "imageRotation": "-3.04",
+  "backgroundTexture": "Ground",
+  "backgroundBlur": "4",
+  "backgroundHue": "0",
+  "backgroundBrightness": "59",
+  "backgroundContrast": "125",
+  "backgroundSaturation": "96",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Chlorophyll"
+}

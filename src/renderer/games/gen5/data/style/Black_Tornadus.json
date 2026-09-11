@@ -1,0 +1,16 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.95",
+  "imageYOffset": "67",
+  "imageXOffset": "-21",
+  "backgroundTexture": "Dragon",
+  "backgroundContrast": "189",
+  "backgroundBlur": "2",
+  "backgroundScale": "141",
+  "backgroundYOffset": "-44",
+  "backgroundHue": "326",
+  "overlay_color": "#5f4474",
+  "ui_saturation": "1.8",
+  "pkmn_ability": "Prankster",
+  "pkmnNature": "Hardy"
+}

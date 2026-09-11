@@ -115,6 +115,8 @@ export interface GameModule {
      * connecting. main.ts applies them once the mapper is detected as this module's.
      */
     debouncePaths?: readonly string[];
+    /** How many frames the client holds a debounced update: gen4 left the client's 10, gen5 set 15. */
+    debounceFrames?: number;
     /**
      * The 16:9 fit-to-window script gen2/gen4/gen5's index.html ran (`core/window/
      * scaleToFit.ts`); the shell installs it while the module is active.

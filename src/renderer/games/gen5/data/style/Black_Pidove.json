@@ -1,0 +1,18 @@
+{
+  "overlay_color": "#dd8e8a",
+  "imageXOffset": "-14",
+  "imageYOffset": "-78",
+  "imageScale": "0.64",
+  "imageFlip": true,
+  "backgroundTexture": "Normal",
+  "backgroundBlur": 0,
+  "backgroundScale": 100,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": 0,
+  "backgroundBrightness": 100,
+  "backgroundContrast": "165",
+  "backgroundSaturation": 100,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Big Pecks",
+  "selected_evolution_species": "Unfezant"
+}

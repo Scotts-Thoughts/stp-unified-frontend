@@ -153,10 +153,10 @@ const main = defineComponent({
             }
             this.unsupportedMapper = null;
             const module = detection.module;
-            // gen4 debounces four property groups by ten frames (plan 2.4); the list is
+            // gen4 and gen5 debounce four property groups by ten or fifteen frames (plan 2.4); the list is
             // the module's, applied now that the module is known and cleared for one
             // that declares none, so a mapper switch never inherits the previous list.
-            this.mapper!.setDebouncePaths([...(module.debouncePaths ?? [])]);
+            this.mapper!.setDebouncePaths([...(module.debouncePaths ?? [])], module.debounceFrames ?? 10);
 
             // Everything the module needs in memory, then its presentation, then the
             // session -- the overlay mounts on the next tick after `ready`. What gen1

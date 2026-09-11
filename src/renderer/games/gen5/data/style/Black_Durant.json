@@ -1,0 +1,14 @@
+{
+  "overlay_color": "#848589",
+  "imageYOffset": "-120",
+  "imageScale": "0.7",
+  "imageFlip": true,
+  "backgroundBlur": "4",
+  "backgroundScale": "122",
+  "backgroundYOffset": "81",
+  "backgroundContrast": "110",
+  "pkmn_ability": "Hustle",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Ground",
+  "backgroundBrightness": "19"
+}

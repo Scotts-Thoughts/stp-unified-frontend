@@ -65,6 +65,11 @@ export function readSplitCsv(relative: string): Promise<string | null> {
   return enqueue(() => window.api.splits.read(relative).catch(() => null));
 }
 
+/** Creates a folder under the splits root (gen5 makes three at load, known-legacy-bugs.md #17). */
+export function ensureSplitFolder(relative: string): Promise<unknown> {
+  return enqueue(() => window.api.splits.mkdir(relative));
+}
+
 /** Creates the folder and opens it in Explorer (the "open splits folder" button). */
 export function revealSplitFolder(relative: string): Promise<string> {
   return enqueue(() => window.api.splits.reveal(relative));

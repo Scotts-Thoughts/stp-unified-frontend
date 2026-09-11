@@ -1,0 +1,20 @@
+{
+  "overlay_color": "#007191",
+  "ui_saturation": "1.5",
+  "imageXOffset": "0",
+  "imageYOffset": "0",
+  "imageScale": "1.07",
+  "imageFlip": true,
+  "backgroundTexture": "Dragon",
+  "backgroundBlur": 0,
+  "backgroundHue": "127",
+  "backgroundScale": "135",
+  "backgroundFlip": false,
+  "backgroundXOffset": "-61",
+  "backgroundYOffset": -48,
+  "backgroundBrightness": "73",
+  "backgroundContrast": "182",
+  "backgroundSaturation": 113,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Sheer Force"
+}

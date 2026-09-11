@@ -1,0 +1,16 @@
+{
+  "imageScale": "0.99",
+  "imageYOffset": "67",
+  "overlay_color": "#89cdef",
+  "ui_saturation": "1.5",
+  "backgroundHue": "201",
+  "backgroundScale": "186",
+  "backgroundYOffset": "125",
+  "backgroundXOffset": "125",
+  "backgroundContrast": "173",
+  "backgroundBlur": "2",
+  "backgroundBrightness": "66",
+  "pkmn_ability": "Prankster",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Electric"
+}

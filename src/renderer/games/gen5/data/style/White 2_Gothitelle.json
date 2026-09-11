@@ -1,0 +1,8 @@
+{
+  "pkmn_ability": "Frisk",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Psychic",
+  "overlay_color": "#f85888",
+  "evolution": true,
+  "selected_evolution_species": "Gothitelle"
+}

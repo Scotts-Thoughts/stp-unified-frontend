@@ -28,6 +28,7 @@ declare global {
       app_root: () => Promise<string>,
       is_packaged: () => Promise<boolean>,
       set_game_icon: (relative: string) => void,
+      send_virtual_key: (keyName: string | number) => void,
       splits: {
         write: (relative: string, contents: string, append?: boolean) => Promise<string>,
         read: (relative: string) => Promise<string | null>,

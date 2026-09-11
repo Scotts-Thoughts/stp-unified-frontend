@@ -14,7 +14,7 @@
  * the exact string the runtime compiler saw.
  *
  * Scripts and stylesheets are stripped first so nothing executes and nothing loads.
- * The output is the *content* of the app's `v-else` wrapper (the overlay proper --
+ * The output is the *content* of the app's `v-else` wrapper (gen5's is a `v-else-if`; the overlay proper --
  * `.mainContainer` and its siblings), since the unified shell provides the ready gate
  * and the wrapper. Anything after the `v-else` wrapper (gen2's dev-only `<Teleport>`)
  * is appended after it.
@@ -61,7 +61,7 @@ try {
       "  if (!app) return { error: 'no #app' };" +
       "  var children = Array.prototype.slice.call(app.children);" +
       "  var elseIndex = -1;" +
-      "  for (var i = 0; i < children.length; i++) if (children[i].hasAttribute('v-else')) { elseIndex = i; break; }" +
+      "  for (var i = 0; i < children.length; i++) if (children[i].hasAttribute('v-else') || children[i].hasAttribute('v-else-if')) { elseIndex = i; break; }" +
       "  if (elseIndex === -1) return { error: 'no v-else wrapper under #app' };" +
       "  var wrapper = children[elseIndex];" +
       "  var after = children.slice(elseIndex + 1).map(function (c) { return c.outerHTML; });" +

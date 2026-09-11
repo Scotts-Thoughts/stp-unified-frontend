@@ -1,0 +1,11 @@
+{
+  "overlay_color": "#8ecdcc",
+  "ui_saturation": "2",
+  "imageXOffset": 0,
+  "imageYOffset": 0,
+  "imageScale": 1,
+  "imageFlip": true,
+  "backgroundTexture": "Water",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Torrent"
+}

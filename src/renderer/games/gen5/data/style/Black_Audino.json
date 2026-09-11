@@ -1,0 +1,16 @@
+{
+  "pkmn_ability": "Regenerator",
+  "imageScale": "0.83",
+  "imageFlip": true,
+  "imageYOffset": "-6",
+  "imageXOffset": "1",
+  "overlay_color": "#f0a3ad",
+  "ui_saturation": "1.3",
+  "backgroundTexture": "Fairy",
+  "backgroundContrast": "158",
+  "backgroundScale": "123",
+  "backgroundYOffset": "-81",
+  "backgroundBlur": "1",
+  "backgroundSaturation": "167",
+  "backgroundBrightness": "77"
+}

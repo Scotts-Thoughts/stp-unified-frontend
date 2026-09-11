@@ -1,0 +1,19 @@
+{
+  "overlay_color": "#aa9d8d",
+  "ui_saturation": "2",
+  "imageXOffset": "7",
+  "imageYOffset": "-70",
+  "imageScale": "0.66",
+  "imageFlip": true,
+  "backgroundTexture": "Poison",
+  "backgroundBlur": 4,
+  "backgroundHue": "222",
+  "backgroundScale": "124",
+  "backgroundFlip": false,
+  "backgroundYOffset": 30,
+  "backgroundBrightness": 80,
+  "backgroundContrast": "140",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Stench",
+  "selected_evolution_species": "Garbodor"
+}

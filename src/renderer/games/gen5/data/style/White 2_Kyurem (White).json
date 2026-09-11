@@ -1,0 +1,16 @@
+{
+  "imageFlip": true,
+  "imageScale": "1.31",
+  "imageYOffset": "22",
+  "imageSat": "96",
+  "imageXOffset": "50",
+  "overlay_color": "#ebd33c",
+  "pkmn_ability": "Turboblaze",
+  "backgroundHue": "0",
+  "backgroundSaturation": "0",
+  "backgroundContrast": "172",
+  "backgroundScale": "129",
+  "backgroundYOffset": "-70",
+  "backgroundBlur": "1",
+  "ui_saturation": "0.9"
+}

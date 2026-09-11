@@ -1,0 +1,18 @@
+{
+  "selected_evolution_species": "Gible",
+  "evolution": true,
+  "overlay_color": "#7038f8",
+  "backgroundTexture": "Dragon",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Sand Veil",
+  "ui_saturation": 0.6,
+  "backgroundSaturation": 100,
+  "backgroundContrast": 100,
+  "backgroundBrightness": 100,
+  "backgroundYOffset": 0,
+  "backgroundScale": 100,
+  "backgroundHue": 0,
+  "imageFlip": false,
+  "imageScale": 1,
+  "imageYOffset": 0
+}

@@ -1,0 +1,12 @@
+{
+  "overlay_color": "#4c4f6e",
+  "ui_saturation": "1.3",
+  "imageXOffset": "-7",
+  "imageYOffset": "-28",
+  "imageScale": "0.9",
+  "imageFlip": true,
+  "backgroundTexture": "Rock",
+  "backgroundHue": "0",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Sturdy"
+}

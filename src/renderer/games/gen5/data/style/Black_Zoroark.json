@@ -1,0 +1,17 @@
+{
+  "overlay_color": "#635e75",
+  "ui_saturation": "1.4",
+  "imageXOffset": 0,
+  "imageYOffset": "22",
+  "imageScale": "1.05",
+  "imageFlip": true,
+  "backgroundHue": "0",
+  "backgroundScale": "133",
+  "backgroundYOffset": "-8",
+  "backgroundContrast": "200",
+  "backgroundSaturation": "42",
+  "pkmn_ability": "Illusion",
+  "selected_evolution_species": "Zoroark",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Dark"
+}

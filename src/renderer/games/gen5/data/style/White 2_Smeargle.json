@@ -1,0 +1,19 @@
+{
+  "pkmn_ability": "Technician",
+  "imageFlip": true,
+  "imageScale": "0.72",
+  "imageYOffset": "-42",
+  "imageXOffset": "7",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Paint",
+  "overlay_color": "#e6d9c7",
+  "backgroundScale": "131",
+  "backgroundFlip": true,
+  "backgroundYOffset": "72",
+  "backgroundContrast": "108",
+  "backgroundBrightness": "74",
+  "backgroundHue": "307",
+  "backgroundSaturation": "87",
+  "backgroundBlur": "1",
+  "ui_saturation": "1.9"
+}

@@ -1935,31 +1935,31 @@ export default defineComponent({
         }
     },
     created() {
-        if (MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`]) {
-            this.overlay_color          = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].overlay_color           ?? this.default_colors[g4PokemonData[this.starter]?.type_1];
-            this.imageXOffset           = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].imageXOffset            ?? 0;
-            this.imageYOffset           = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].imageYOffset            ?? 0;
-            this.imageScale             = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].imageScale              ?? 1;
-            this.imageFlip              = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].imageFlip               ?? false;
-            this.imageSat               = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].imageSat                ?? 100
-            this.imageRotation          = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].imageRotation           ?? 0
-            this.backgroundBlur         = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].backgroundBlur          ?? 0
-            this.backgroundHue          = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].backgroundHue           ?? 0
-            this.backgroundScale        = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].backgroundScale         ?? 100
-            this.backgroundUrl          = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].backgroundUrl           ?? ""
-            this.use_custom_background  = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].use_custom_background   ?? false
-            this.backgroundXOffset      = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].backgroundXOffset       ?? 0
-            this.backgroundYOffset      = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].backgroundYOffset       ?? 0
-            this.backgroundTexture      = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`].backgroundTexture       ?? `${this.g4PokemonData[this.starter]?.type_1 ?? ''}`
-            this.pkmn_ability           = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`]?.pkmn_ability           ?? g4PokemonData[this.starter]?.abilities?.[0] ?? null
-            this.attempt_number         = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`]?.attempt_number         ?? 0
-            this.finished_run_count     = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`]?.finished_run_count     ?? 0
-            this.playerResets           = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`]?.playerResets           ?? 0
-            this.blackout_counter       = MyStorage[`${this.game?.properties.meta.game_name.value}_${this.starter}`]?.blackout_counter       ?? 0
+        if (MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`]) {
+            this.overlay_color          = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].overlay_color           ?? this.default_colors[g4PokemonData[this.starter]?.type_1];
+            this.imageXOffset           = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].imageXOffset            ?? 0;
+            this.imageYOffset           = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].imageYOffset            ?? 0;
+            this.imageScale             = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].imageScale              ?? 1;
+            this.imageFlip              = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].imageFlip               ?? false;
+            this.imageSat               = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].imageSat                ?? 100
+            this.imageRotation          = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].imageRotation           ?? 0
+            this.backgroundBlur         = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].backgroundBlur          ?? 0
+            this.backgroundHue          = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].backgroundHue           ?? 0
+            this.backgroundScale        = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].backgroundScale         ?? 100
+            this.backgroundUrl          = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].backgroundUrl           ?? ""
+            this.use_custom_background  = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].use_custom_background   ?? false
+            this.backgroundXOffset      = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].backgroundXOffset       ?? 0
+            this.backgroundYOffset      = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].backgroundYOffset       ?? 0
+            this.backgroundTexture      = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`].backgroundTexture       ?? `${this.g4PokemonData[this.starter]?.type_1 ?? ''}`
+            this.pkmn_ability           = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`]?.pkmn_ability           ?? g4PokemonData[this.starter]?.abilities?.[0] ?? null
+            this.attempt_number         = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`]?.attempt_number         ?? 0
+            this.finished_run_count     = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`]?.finished_run_count     ?? 0
+            this.playerResets           = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`]?.playerResets           ?? 0
+            this.blackout_counter       = MyStorage[`${this.mapper?.properties.meta.game_name.value}_${this.starter}`]?.blackout_counter       ?? 0
             // Evolution flags live in their own non-style key; fall back to the legacy base key
             // for users whose data predates that change.
             const evoStateKey = this.getEvolutionStateStorageKey()
-            const legacyKey = `${this.game?.properties.meta.game_name.value}_${this.starter}`
+            const legacyKey = `${this.mapper?.properties.meta.game_name.value}_${this.starter}`
             this.evolution              = MyStorage[evoStateKey]?.evolution              ?? MyStorage[legacyKey]?.evolution              ?? 0
             this.evolution_splits_label = MyStorage[evoStateKey]?.evolution_splits_label ?? MyStorage[legacyKey]?.evolution_splits_label ?? 0
         }
@@ -2014,7 +2014,9 @@ export default defineComponent({
                         ...MyStorage[storageKey],
                         [propName]: newValue
                     };
-                }
+                },
+                // flush: 'sync' -- the precedence Vue 3.2 gave these; see tools/port/lift-gen5.py.
+                { flush: 'sync' }
             );
         }
         for (let i = 0; i < this.auto_save_settings.length; i++) {

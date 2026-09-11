@@ -1,0 +1,17 @@
+{
+  "overlay_color": "#8ecdcc",
+  "ui_saturation": "2",
+  "imageXOffset": "-28",
+  "imageYOffset": "-70",
+  "imageScale": "0.62",
+  "imageFlip": true,
+  "backgroundTexture": "Water",
+  "backgroundBlur": 0,
+  "backgroundScale": 125,
+  "backgroundFlip": false,
+  "backgroundYOffset": 19,
+  "backgroundBrightness": 87,
+  "backgroundContrast": 124,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Torrent"
+}

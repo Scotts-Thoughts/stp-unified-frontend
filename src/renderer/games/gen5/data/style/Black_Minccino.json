@@ -1,0 +1,16 @@
+{
+  "overlay_color": "#a8a878",
+  "backgroundTexture": "Normal",
+  "backgroundBlur": 1,
+  "backgroundScale": 191,
+  "backgroundXOffset": -28,
+  "backgroundYOffset": 3,
+  "backgroundBrightness": 97,
+  "backgroundContrast": 166,
+  "backgroundSaturation": 92,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Technician",
+  "pkmn_gender": "Female",
+  "evolution": true,
+  "selected_evolution_species": "Minccino"
+}

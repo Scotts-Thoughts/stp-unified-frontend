@@ -1,0 +1,21 @@
+{
+  "overlay_color": "#99d6d2",
+  "ui_saturation": "1.5",
+  "imageXOffset": "14",
+  "imageYOffset": "-63",
+  "imageScale": "0.64",
+  "imageFlip": false,
+  "backgroundTexture": "Psychic",
+  "backgroundBlur": "0",
+  "backgroundHue": "196",
+  "backgroundScale": "127",
+  "backgroundFlip": true,
+  "backgroundYOffset": "92",
+  "backgroundBrightness": 90,
+  "backgroundContrast": "168",
+  "backgroundSaturation": 133,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Synchronize",
+  "selected_evolution_species": "Elgyem",
+  "evolution": true
+}

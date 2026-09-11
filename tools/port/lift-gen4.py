@@ -19,6 +19,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from lift_common import (  # noqa: E402
     assemble_sfc, component_options, cut, data_imports, hotkey_table, implicit_globals_decl,
     prepare_template, remaining_requires, rename_mapper, replace_once, write_hotkeys,
+    assert_no_mapper_outside_created,
 )
 from lift_assets import rebase_assets  # noqa: E402
 
@@ -26,6 +27,7 @@ LEGACY = pathlib.Path("A:/Programs/gen4-stp-frontend/app")
 OUT = pathlib.Path("src/renderer/games/gen4")
 ASSET_GEN = "gen4"
 TEMPLATE = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path("tools/port/gen4-template.html")
+NL = chr(10)
 
 src = (LEGACY / "frontend.js").read_text(encoding="utf-8")
 options = component_options(src)
@@ -183,7 +185,33 @@ options = replace_once(
 )
 
 assert ".onMapperLoaded =" not in options and ".onMapperUnloaded =" not in options and "connect()" not in options
-assert "this.mapper" not in options, "a this.mapper reference survived the seams"
+# ---- 6b. the species-settings watchers keep the precedence Vue 3.2 gave them -------------
+# Same seam as gen5's (tools/port/lift-gen5.py explains it): the legacy page ran Vue
+# 3.2.47, which flushed a component's pre-watchers LIFO, so the `$watch` per species
+# setting registered in `created()` ran before the `starter` watch option; Vue 3.5
+# flushes FIFO. gen4's parity fixture is green either way, but the same
+# `is_loading_evolution_style` guard sits in these watchers, so they get the same
+# precedence and the two lifts read alike.
+options = replace_once(
+    options,
+    "                        [propName]: newValue" + NL
+    + "                    };" + NL
+    + "                }" + NL
+    + "            );" + NL
+    + "        }" + NL
+    + "        for (let i = 0; i < this.auto_save_settings.length; i++) {",
+    "                        [propName]: newValue" + NL
+    + "                    };" + NL
+    + "                }," + NL
+    + "                // flush: 'sync' -- the precedence Vue 3.2 gave these; see tools/port/lift-gen5.py." + NL
+    + "                { flush: 'sync' }" + NL
+    + "            );" + NL
+    + "        }" + NL
+    + "        for (let i = 0; i < this.auto_save_settings.length; i++) {",
+    "settings watchers flush",
+)
+
+assert_no_mapper_outside_created(options)
 assert "GameHookMapperClient" not in options
 assert ".deboucePath(" not in options and "._debouceTimeout" not in options
 

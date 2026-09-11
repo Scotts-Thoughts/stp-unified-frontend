@@ -1,0 +1,265 @@
+[
+ {
+  "file": "lib/stageModifiers.js",
+  "out": "games/gen5/data/stageModifiers.js",
+  "globals": [
+   "stageModifiersData"
+  ],
+  "lines": 50,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/type-effectiveness.js",
+  "out": "games/gen5/data/type-effectiveness.js",
+  "globals": [
+   "typeData"
+  ],
+  "lines": 342,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/type effectiveness array.js",
+  "out": "games/gen5/data/type effectiveness array.js",
+  "globals": [
+   "typeEffectivenessArray"
+  ],
+  "lines": 327,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/typeBoostingItems.js",
+  "out": "games/gen5/data/typeBoostingItems.js",
+  "globals": [
+   "typeBoostingItems"
+  ],
+  "lines": 83,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hiddenPowerTypes.js",
+  "out": "games/gen5/data/hiddenPowerTypes.js",
+  "globals": [
+   "hiddenPowerTypes"
+  ],
+  "lines": 18,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hiddenpower-all.js",
+  "out": "games/gen5/data/hiddenpower-all.js",
+  "globals": [
+   "hiddenpowers"
+  ],
+  "lines": 99,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/natureDefinitions.js",
+  "out": "games/gen5/data/natureDefinitions.js",
+  "globals": [
+   "natures_2"
+  ],
+  "lines": 202,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/textures.js",
+  "out": "games/gen5/data/textures.js",
+  "globals": [
+   "textures"
+  ],
+  "lines": 394,
+  "rebased": 28,
+  "imports": []
+ },
+ {
+  "file": "lib/default_colors.js",
+  "out": "games/gen5/data/default_colors.js",
+  "globals": [
+   "default_colors"
+  ],
+  "lines": 21,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/autosplitter.js",
+  "out": "games/gen5/data/autosplitter.js",
+  "globals": [
+   "autosplitter"
+  ],
+  "lines": 115,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/post_game_moves.js",
+  "out": "games/gen5/data/post_game_moves.js",
+  "globals": [
+   "post_game_moves"
+  ],
+  "lines": 103,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/auto_save_settings.js",
+  "out": "games/gen5/data/auto_save_settings.js",
+  "globals": [
+   "auto_save_settings"
+  ],
+  "lines": 89,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/natures.js",
+  "out": "games/gen5/data/natures.js",
+  "globals": [
+   "natures"
+  ],
+  "lines": 403,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hiddenpower.js",
+  "out": "games/gen5/data/hiddenpower.js",
+  "globals": [
+   "hiddenpower_type_selector"
+  ],
+  "lines": 18,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves/natural_gift.js",
+  "out": "games/gen5/data/moves/natural_gift.js",
+  "globals": [
+   "natural_gift"
+  ],
+  "lines": 66,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves/cross_generation_moves.js",
+  "out": "games/gen5/data/moves/cross_generation_moves.js",
+  "globals": [
+   "cross_generation_moves"
+  ],
+  "lines": 24750,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/g5tmhmMapping.js",
+  "out": "games/gen5/data/g5tmhmMapping.js",
+  "globals": [
+   "g5tmhmMapping"
+  ],
+  "lines": 104,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/pokedex/black_white.js",
+  "out": "games/gen5/data/pokedex/black_white.js",
+  "globals": [
+   "pokedex_black_white"
+  ],
+  "lines": 76876,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/pokedex/black2_white2.js",
+  "out": "games/gen5/data/pokedex/black2_white2.js",
+  "globals": [
+   "pokedex_black2_white2"
+  ],
+  "lines": 85535,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/trainers/black.js",
+  "out": "games/gen5/data/trainers/black.js",
+  "globals": [
+   "trainers_black"
+  ],
+  "lines": 38757,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves/black.js",
+  "out": "games/gen5/data/moves/black.js",
+  "globals": [
+   "black_moves"
+  ],
+  "lines": 11202,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/misc/tmhm.js",
+  "out": "games/gen5/data/misc/tmhm.js",
+  "globals": [
+   "tmhm"
+  ],
+  "lines": 383,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/game_variables.js",
+  "out": "games/gen5/data/game_variables.js",
+  "globals": [
+   "game_variables"
+  ],
+  "lines": 272,
+  "rebased": 0,
+  "imports": [
+   "import { pokedex_black_white } from \"./pokedex/black_white.js\";",
+   "import { pokedex_black2_white2 } from \"./pokedex/black2_white2.js\";"
+  ]
+ },
+ {
+  "file": "references/abilities.js",
+  "out": "games/gen5/data/references/abilities.js",
+  "globals": [
+   "ability_glossary"
+  ],
+  "lines": 167,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/demo_split_data.js",
+  "out": "games/gen5/data/demo_split_data.js",
+  "globals": [
+   "demo_split_data"
+  ],
+  "lines": 122,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves/unobtainable_moves.js",
+  "out": "games/gen5/data/moves/unobtainable_moves.js",
+  "globals": [
+   "unobtainable_moves_object"
+  ],
+  "lines": 175,
+  "rebased": 0,
+  "imports": []
+ }
+]

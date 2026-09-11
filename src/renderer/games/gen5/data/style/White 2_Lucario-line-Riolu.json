@@ -1,0 +1,22 @@
+{
+  "backgroundContrast": "129",
+  "backgroundBrightness": "71",
+  "backgroundTexture": "Brushed Steel",
+  "backgroundFlip": true,
+  "backgroundYOffset": "21",
+  "imageFlip": true,
+  "imageScale": "0.64",
+  "imageYOffset": "-70",
+  "overlay_color": "#8bb1c4",
+  "ui_saturation": "1.1",
+  "imageXOffset": 0,
+  "imageSat": 100,
+  "imageRotation": 0,
+  "backgroundBlur": 0,
+  "backgroundHue": 0,
+  "backgroundScale": 100,
+  "backgroundUrl": "",
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundSaturation": 100
+}

@@ -1,0 +1,9 @@
+{
+  "backgroundContrast": "120",
+  "backgroundBlur": "2",
+  "imageFlip": true,
+  "imageScale": "0.97",
+  "imageYOffset": "9",
+  "overlay_color": "#4b86c0",
+  "ui_saturation": "1.2"
+}

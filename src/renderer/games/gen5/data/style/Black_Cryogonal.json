@@ -1,0 +1,19 @@
+{
+  "overlay_color": "#6584b8",
+  "ui_saturation": "1.6",
+  "imageXOffset": "0",
+  "imageYOffset": "92",
+  "imageScale": "0.8",
+  "imageFlip": true,
+  "backgroundTexture": "Ice",
+  "backgroundBlur": 4,
+  "backgroundHue": "0",
+  "backgroundScale": "127",
+  "backgroundFlip": false,
+  "backgroundXOffset": 19,
+  "backgroundYOffset": -54,
+  "backgroundBrightness": "62",
+  "backgroundContrast": "200",
+  "pkmn_ability": "Levitate",
+  "pkmnNature": "Hardy"
+}

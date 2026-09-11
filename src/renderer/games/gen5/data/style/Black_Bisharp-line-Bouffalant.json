@@ -1,0 +1,13 @@
+{
+  "imageFlip": true,
+  "imageScale": "1.1",
+  "imageYOffset": "9",
+  "imageXOffset": "-21",
+  "overlay_color": "#98733d",
+  "ui_saturation": "1.7",
+  "backgroundTexture": "Dark Moon",
+  "backgroundContrast": "120",
+  "backgroundFlip": false,
+  "backgroundYOffset": "8",
+  "backgroundScale": "120"
+}

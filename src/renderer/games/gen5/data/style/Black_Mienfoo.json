@@ -1,0 +1,8 @@
+{
+  "overlay_color": "#c03028",
+  "backgroundTexture": "Fighting",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Inner Focus",
+  "selected_evolution_species": "Mienfoo",
+  "evolution": true
+}

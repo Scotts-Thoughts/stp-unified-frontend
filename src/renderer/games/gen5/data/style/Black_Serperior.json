@@ -1,0 +1,18 @@
+{
+  "overlay_color": "#4ab655",
+  "ui_saturation": "1.5",
+  "imageXOffset": "7",
+  "imageYOffset": "-42",
+  "imageScale": "1.17",
+  "imageFlip": true,
+  "backgroundTexture": "Grass",
+  "backgroundBlur": 1,
+  "backgroundScale": "192",
+  "backgroundXOffset": -28,
+  "backgroundYOffset": 3,
+  "backgroundBrightness": "69",
+  "backgroundContrast": "189",
+  "backgroundSaturation": 92,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Overgrow"
+}

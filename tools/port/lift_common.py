@@ -39,13 +39,28 @@ def component_options(src: str) -> str:
 
 
 def rename_mapper(options: str, expect_plain: int, expect_optional: int) -> str:
-    """`this.mapper.X` -> `this.game.X`, with the counts the legacy source has today."""
+    """`this.mapper.X` -> `this.game.X`, with the counts the legacy source has today.
+
+    Everywhere except inside `created()`: the legacy component constructed its client
+    in `mounted`, so during `created()` `this.mapper` was undefined and every
+    `this.mapper?.properties...` there short-circuited -- gen4's and gen5's settings
+    blocks are skipped at that point and run only from `mounted`, after the mapper is
+    loaded. The session prop exists from the start, so a renamed `this.game?.` would
+    run those blocks a lifecycle step early (gen5: a settings watcher then fired on a
+    mapper path the loaded game does not have). Left as `this.mapper` -- still
+    undefined, since the lifted component declares no such field -- they short-circuit
+    exactly as before.
+    """
     n = options.count("this.mapper.")
     assert n == expect_plain, f"this.mapper.: expected {expect_plain}, found {n}"
-    options = options.replace("this.mapper.", "this.game.")
     n2 = options.count("this.mapper?.")
     assert n2 == expect_optional, f"this.mapper?.: expected {expect_optional}, found {n2}"
-    return options.replace("this.mapper?.", "this.game?.")
+    a = options.index("\n    created() {")
+    b = options.index("\n    watch: {", a)
+    assert "this.mapper." not in options[a:b], "a non-optional this.mapper in created() would have thrown in the legacy app"
+    head, created, tail = options[:a], options[a:b], options[b:]
+    rename = lambda s: s.replace("this.mapper.", "this.game.").replace("this.mapper?.", "this.game?.")
+    return rename(head) + created + rename(tail)
 
 
 def data_imports(options: str, out_dir: pathlib.Path) -> list[str]:
@@ -133,3 +148,10 @@ def assemble_sfc(template: str, header: str, imports: list[str], implicit: str, 
 
 def remaining_requires(options: str) -> list[tuple[int, str]]:
     return [(options[: m.start()].count("\n"), m.group(0)) for m in re.finditer(r"require\([^)]*\)", options)]
+
+
+def assert_no_mapper_outside_created(options: str) -> None:
+    """Every `this.mapper` left is inside `created()` (see rename_mapper)."""
+    a = options.index("\n    created() {")
+    b = options.index("\n    watch: {", a)
+    assert "this.mapper" not in options[:a] + options[b:], "a this.mapper reference survived the seams"

@@ -224,6 +224,14 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     // (known-legacy-bugs.md #29), which lands in a different capture every run.
     mock.loadMapper();
 
+    // The document before the reload is not part of the run: its failed connection
+    // attempts to the real ports would leak into oracle 9 non-deterministically. Its
+    // log is dropped the moment the new document is created -- not after the reload
+    // settles, because by then the new document has already connected to the armed
+    // mock and run its boot (gen5's settings watchers and the exception one of them
+    // throws land within ~100 ms of #app appearing), and a reset there erased every
+    // boot-time error from oracle 9 on both sides.
+    page.once("framenavigated", () => { consoleLog.length = 0; });
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForSelector("#app", { timeout: 30000 });
     // Park the pointer. The Electron window is a real window under the real cursor,
@@ -239,10 +247,6 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     // keyboard. Nothing in a run needs real input; the fixture is the only input.
     const cdp = await page.context().newCDPSession(page);
     await cdp.send("Input.setIgnoreInputEvents", { ignore: true });
-    // The document before the reload is not part of the run; its failed connection
-    // attempts to the real ports would otherwise leak into oracle 9 non-deterministically.
-    consoleLog.length = 0;
-
     await warmUp(page, mock, opts);
 
     const pending = [...wanted].sort((a, b) => a.tMs - b.tMs);

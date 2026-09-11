@@ -1,0 +1,20 @@
+{
+  "overlay_color": "#724e7a",
+  "ui_saturation": "1.6",
+  "imageXOffset": 0,
+  "imageYOffset": "7",
+  "imageScale": "0.92",
+  "imageFlip": true,
+  "backgroundTexture": "Bug",
+  "backgroundBlur": 3,
+  "backgroundHue": 0,
+  "backgroundScale": "160",
+  "backgroundFlip": false,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": "98",
+  "backgroundBrightness": 87,
+  "backgroundContrast": "120",
+  "backgroundSaturation": 100,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Download"
+}

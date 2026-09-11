@@ -1,0 +1,20 @@
+{
+  "overlay_color": "#e89453",
+  "ui_saturation": "1.3",
+  "imageYOffset": "-106",
+  "imageScale": "0.58",
+  "imageFlip": true,
+  "backgroundTexture": "Rock",
+  "backgroundBlur": "4",
+  "backgroundHue": 0,
+  "backgroundScale": "133",
+  "backgroundFlip": true,
+  "backgroundYOffset": -19,
+  "backgroundBrightness": 87,
+  "backgroundContrast": "129",
+  "backgroundSaturation": 100,
+  "evolution": true,
+  "selected_evolution_species": "Dwebble",
+  "pkmn_ability": "Sturdy",
+  "pkmnNature": "Hardy"
+}

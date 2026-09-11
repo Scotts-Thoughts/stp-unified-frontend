@@ -1,0 +1,11 @@
+{
+  "file": "A:\\Programs\\stp-unified-frontend\\tools\\fixtures\\gen5\\gen5-black-smoke.fixture.jsonl.gz",
+  "synthetic": true,
+  "mapperId": "STANDARD/gen5/pokemon_black.xml",
+  "replayName": "gen5-black-smoke",
+  "events": 138,
+  "properties": 5349,
+  "lastFrame": 5520,
+  "durationSec": 92,
+  "bytes": 127282
+}

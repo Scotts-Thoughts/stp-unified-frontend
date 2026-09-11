@@ -1,0 +1,14 @@
+{
+  "overlay_color": "#3c7957",
+  "backgroundTexture": "Dark Moon",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Big Pecks",
+  "evolution": false,
+  "selected_evolution_species": "Unfezant",
+  "imageFlip": true,
+  "imageScale": "1.04",
+  "imageYOffset": "23",
+  "imageXOffset": "23",
+  "ui_saturation": "1.6",
+  "backgroundBlur": "2"
+}

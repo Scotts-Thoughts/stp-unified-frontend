@@ -1,0 +1,18 @@
+{
+  "overlay_color": "#a4b2d5",
+  "ui_saturation": "1.9",
+  "imageXOffset": "-13",
+  "imageYOffset": "38",
+  "imageScale": "1.18",
+  "backgroundTexture": "Dragon",
+  "backgroundBlur": "1",
+  "backgroundScale": 145,
+  "backgroundXOffset": 52,
+  "backgroundYOffset": -48,
+  "backgroundBrightness": 87,
+  "backgroundContrast": "175",
+  "backgroundSaturation": "88",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Turboblaze",
+  "backgroundHue": "175"
+}

@@ -1,0 +1,15 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.57",
+  "imageYOffset": "-116",
+  "backgroundTexture": "Ghost",
+  "backgroundFlip": true,
+  "backgroundScale": "141",
+  "backgroundYOffset": "125",
+  "backgroundXOffset": "125",
+  "backgroundBlur": "0",
+  "backgroundHue": "30",
+  "overlay_color": "#f6dc66",
+  "ui_saturation": "1.1",
+  "selected_evolution_species": "Galvantula"
+}

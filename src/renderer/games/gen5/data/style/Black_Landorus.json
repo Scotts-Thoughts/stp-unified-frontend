@@ -1,0 +1,14 @@
+{
+  "pkmn_ability": "Sand Force",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Ground",
+  "overlay_color": "#ef9451",
+  "imageScale": "0.95",
+  "imageYOffset": "67",
+  "imageXOffset": "-21",
+  "ui_saturation": "1.5",
+  "backgroundBrightness": "33",
+  "backgroundBlur": "4",
+  "backgroundSaturation": "0",
+  "backgroundContrast": "127"
+}

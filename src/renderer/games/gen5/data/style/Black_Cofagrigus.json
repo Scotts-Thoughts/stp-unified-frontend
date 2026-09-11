@@ -1,0 +1,15 @@
+{
+  "selected_evolution_species": "Cofagrigus",
+  "ui_saturation": 0.6,
+  "backgroundContrast": 100,
+  "backgroundScale": 100,
+  "imageFlip": false,
+  "imageScale": 1,
+  "imageYOffset": 0,
+  "imageXOffset": 0,
+  "overlay_color": "#705898",
+  "evolution": false,
+  "pkmn_ability": "Mummy",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Ghost"
+}

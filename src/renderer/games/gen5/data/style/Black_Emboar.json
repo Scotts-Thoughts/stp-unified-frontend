@@ -1,0 +1,18 @@
+{
+  "overlay_color": "#e69355",
+  "ui_saturation": "1.2",
+  "imageXOffset": "0",
+  "imageYOffset": "22",
+  "imageScale": "1.09",
+  "imageFlip": true,
+  "backgroundTexture": "Fire",
+  "backgroundBlur": 3,
+  "backgroundHue": 0,
+  "backgroundScale": "200",
+  "backgroundFlip": true,
+  "backgroundYOffset": "-3",
+  "backgroundBrightness": 71,
+  "backgroundContrast": "163",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Blaze"
+}

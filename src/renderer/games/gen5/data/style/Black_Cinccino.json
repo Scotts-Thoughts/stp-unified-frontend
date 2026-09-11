@@ -1,0 +1,21 @@
+{
+  "overlay_color": "#a8a878",
+  "ui_saturation": 0.6,
+  "imageXOffset": 0,
+  "imageYOffset": 0,
+  "imageScale": 1,
+  "imageFlip": false,
+  "backgroundTexture": "Normal",
+  "backgroundBlur": 1,
+  "backgroundHue": 0,
+  "backgroundScale": 191,
+  "backgroundXOffset": -28,
+  "backgroundYOffset": 3,
+  "backgroundBrightness": 97,
+  "backgroundContrast": 166,
+  "backgroundSaturation": 92,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Cute Charm",
+  "evolution": true,
+  "selected_evolution_species": "Cinccino"
+}

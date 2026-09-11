@@ -1,0 +1,22 @@
+{
+  "overlay_color": "#f2d18e",
+  "ui_saturation": "1.6",
+  "imageXOffset": "7",
+  "imageYOffset": "57",
+  "imageScale": "0.72",
+  "imageFlip": true,
+  "imageSat": 100,
+  "imageRotation": 0,
+  "backgroundTexture": "Ghost",
+  "backgroundBlur": 0,
+  "backgroundHue": 0,
+  "backgroundScale": "110",
+  "backgroundUrl": "",
+  "backgroundFlip": false,
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": 0,
+  "backgroundBrightness": 100,
+  "backgroundContrast": "122",
+  "backgroundSaturation": 100
+}

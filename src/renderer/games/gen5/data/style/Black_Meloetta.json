@@ -1,0 +1,20 @@
+{
+  "overlay_color": "#dfedb3",
+  "ui_saturation": "1.9",
+  "imageXOffset": "7",
+  "imageYOffset": "0",
+  "imageScale": "0.88",
+  "imageFlip": true,
+  "imageSat": "122",
+  "backgroundTexture": "Fighting",
+  "backgroundBlur": "3",
+  "backgroundHue": "314",
+  "backgroundScale": "110",
+  "backgroundXOffset": "-54",
+  "backgroundYOffset": "-19",
+  "backgroundBrightness": "85",
+  "backgroundContrast": "150",
+  "backgroundSaturation": "60",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Serene Grace"
+}

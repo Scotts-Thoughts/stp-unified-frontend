@@ -1,0 +1,15 @@
+{
+  "pkmn_ability": "Blaze",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fire",
+  "overlay_color": "#e59255",
+  "imageFlip": true,
+  "imageScale": "0.7",
+  "imageYOffset": "-50",
+  "backgroundScale": "121",
+  "backgroundContrast": "121",
+  "backgroundBrightness": "48",
+  "backgroundFlip": true,
+  "backgroundBlur": "3",
+  "ui_saturation": "1.6"
+}

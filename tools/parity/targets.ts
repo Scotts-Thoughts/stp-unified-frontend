@@ -199,7 +199,10 @@ export function prepareSandbox(target: Target, opts: SandboxOptions = {}): strin
     // otherwise starts from the first run's edits -- attempt_number 2, and a different
     // split file name. robocopy only copies files whose size or time differs, so the
     // refresh costs the rewritten files and nothing else.
-    if (!existsSync(appTree) || opts.clean) {
+    // STP_PARITY_KEEP_SANDBOX=1 skips the refresh so an instrumented copy (a console.log
+    // in a legacy method) survives the next run. Debugging only; a kept tree carries
+    // the previous run's dev-mode edits (known-legacy-bugs.md #25).
+    if (!existsSync(appTree) || (opts.clean && !process.env.STP_PARITY_KEEP_SANDBOX)) {
       log(`[sandbox] ${existsSync(appTree) ? "refreshing" : "copying"} ${LEGACY_DIRS[target.generation]} -> ${appTree}`);
       copyLegacyTree(LEGACY_DIRS[target.generation], appTree, log);
     }

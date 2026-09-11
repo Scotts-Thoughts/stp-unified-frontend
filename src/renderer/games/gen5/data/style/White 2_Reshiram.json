@@ -1,0 +1,15 @@
+{
+  "pkmn_ability": "Turboblaze",
+  "pkmnNature": "Rash",
+  "backgroundTexture": "Dragon",
+  "overlay_color": "#7038f8",
+  "backgroundContrast": "186",
+  "backgroundBlur": "2",
+  "backgroundScale": "151",
+  "backgroundYOffset": "-30",
+  "backgroundBrightness": "92",
+  "imageSat": "104",
+  "ui_saturation": "0.3",
+  "imageYOffset": "14",
+  "imageXOffset": "-14"
+}

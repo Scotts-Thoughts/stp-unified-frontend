@@ -1,0 +1,16 @@
+{
+  "pkmn_ability": "Shield Dust",
+  "pkmnNature": "Hardy",
+  "overlay_color": "#8bc56a",
+  "imageFlip": true,
+  "imageScale": "0.44",
+  "imageYOffset": "-184",
+  "backgroundScale": "125",
+  "backgroundContrast": "96",
+  "backgroundHue": "358",
+  "backgroundBrightness": "48",
+  "backgroundSaturation": "113",
+  "ui_saturation": "1.4",
+  "evolution": true,
+  "selected_evolution_species": "Caterpie"
+}

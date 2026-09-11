@@ -65,6 +65,20 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     if (!image.isEmpty()) window.setIcon(image);
   });
 
+  // --- gen5's second-screen key sender (decision 9) --------------------------------
+  // node-key-sender calls a Java helper; the legacy renderer required it directly and
+  // logged the failure when Java was missing. Same here, from the main process.
+  ipcMain.on("send-virtual-key", (_e, keyName: string | number) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const keySender = require("node-key-sender") as { sendKey(key: string | number): unknown };
+      keySender.sendKey(keyName);
+      console.log(`Virtual key sent: ${keyName}`);
+    } catch (error) {
+      console.error(`Failed to send virtual key ${keyName}:`, error);
+    }
+  });
+
   /** The "open splits folder" button; creates the folder first, as the legacy code did. */
   ipcMain.handle("splits:reveal", async (_e, relative: string) => {
     const target = resolveInside(splitsRoot(), relative);

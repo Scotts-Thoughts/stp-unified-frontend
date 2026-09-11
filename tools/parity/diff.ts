@@ -261,16 +261,22 @@ function diffPixels(
     });
     return;
   }
-  // Exact mode still forgives a channel that differs by one: the GPU rasterises
-  // gen4's filtered, scaled background texture with rounding that differs by that
-  // much between two runs of the *same* app, at the same six pixels of a 1920x1080
-  // frame (two legacy gen4 runs, 2026-09-11). Anything larger, or any pixel whose
-  // colour actually changed, is still a difference; the diff image is drawn from the
-  // snapped candidate so a real change stands out on its own.
+  // Exact mode still forgives a channel that differs by up to two. Chromium decodes
+  // gen4's 6341x2835 background JPEG through one of two paths depending on whether the
+  // file was complete when the image was first painted -- a race the harness cannot
+  // pin, since the bytes come off the disk on real time while the app boots -- and the
+  // two paths disagree by exactly two in one channel at about nine hundred pixels of
+  // the frame (2026-09-11: identical builds, 901 pixels in one run of three; the
+  // legacy app is as exposed and agreed with itself by luck). The GPU adds a +-1 on a
+  // handful of pixels of the same texture between any two runs. Anything larger, or
+  // any pixel whose colour actually changed, is still a difference -- a wrong colour,
+  // a shifted line or a missing texture is tens of levels, not two -- and oracle 1
+  // compares every computed colour exactly. The diff image is drawn from the snapped
+  // candidate so a real change stands out on its own.
   if (mode === "exact") {
     for (let i = 0; i < b.data.length; i++) {
       const d = b.data[i] - a.data[i];
-      if (d === 1 || d === -1) b.data[i] = a.data[i];
+      if (d !== 0 && d >= -2 && d <= 2) b.data[i] = a.data[i];
     }
   }
   const out_ = new PNG({ width: a.width, height: a.height });

@@ -1,0 +1,13 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.52",
+  "imageYOffset": "-134",
+  "imageXOffset": "7",
+  "overlay_color": "#8fc6d3",
+  "ui_saturation": "1.4",
+  "backgroundScale": "119",
+  "backgroundContrast": "127",
+  "backgroundBrightness": "85",
+  "evolution": true,
+  "selected_evolution_species": "Squirtle"
+}

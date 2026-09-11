@@ -1,0 +1,21 @@
+{
+  "overlay_color": "#4c4f6e",
+  "ui_saturation": "1.3",
+  "imageXOffset": 0,
+  "imageYOffset": "29",
+  "imageScale": "1.15",
+  "imageFlip": true,
+  "backgroundTexture": "Rock",
+  "backgroundBlur": 5,
+  "backgroundHue": "0",
+  "backgroundScale": 120,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": -39,
+  "backgroundBrightness": 69,
+  "backgroundContrast": 110,
+  "backgroundSaturation": 0,
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Sturdy",
+  "selected_evolution_species": "Gigalith",
+  "evolution": true
+}

@@ -42,6 +42,8 @@ const api = {
   is_packaged: () => invoke('is_packaged'),
   /** Taskbar/window icon: a file under resources/icons/ (gen3/4/5's `set-game-icon`). Fire and forget, as it was. */
   set_game_icon: (relative) => ipcRenderer.send('set-game-icon', relative),
+  /** gen5's second-screen key sender (node-key-sender in the main process, decision 9). Fire and forget. */
+  send_virtual_key: (keyName) => ipcRenderer.send('send-virtual-key', keyName),
 
   splits: {
     write: (relative, contents, append = false) => invoke('splits:write', relative, contents, append),

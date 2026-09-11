@@ -1,0 +1,83 @@
+export const typeBoostingItems = {
+    "Black Belt":     "Fighting",
+    "Black Glasses":  "Dark",
+    "BlackGlasses":   "Dark",
+    "Charcoal":       "Fire",
+    "Dragon Fang":    "Dragon",
+    "Hard Stone":     "Rock",
+    "Magnet":         "Electric",
+    "Metal Coat":     "Steel",
+    "Miracle Seed":   "Grass",
+    "Mystic Water":   "Water",
+    "NeverMeltIce":   "Ice",  // This one's a bit tricky due to the original casing
+    "Never-Melt Ice": "Ice",
+    "Pink Bow":       "Normal",
+    "Poison Barb":    "Poison",
+    "Polkadot Bow":   "Normal",
+    "Sharp Beak":     "Flying",
+    "Silver Powder":  "Bug",
+    "SilverPowder":   "Bug",
+    "Soft Sand":      "Ground",
+    "Spell Tag":      "Ghost",
+    "Twisted Spoon":  "Psychic",
+    "TwistedSpoon":   "Psychic",
+
+    //Gen3 Items
+    "Silk Scarf": "Normal",
+    "Soul Dew":   [ "Dragon", "Psychic" ],
+
+    //Gen4 Plates
+    "Draco Plate":  "Dragon",
+    "Dread Plate":  "Dark",
+    "Earth Plate":  "Ground",
+    "Fist Plate":   "Fighting",
+    "Flame Plate":  "Fire",
+    "Icicle Plate": "Ice",
+    "Insect Plate": "Bug",
+    "Iron Plate":   "Steel",
+    "Meadow Plate": "Grass",
+    "Mind Plate":   "Psychic",
+    "Sky Plate":    "Flying",
+    "Splash Plate": "Water",
+    "Spooky Plate": "Ghost",
+    "Stone Plate":  "Rock",
+    "Toxic Plate":  "Poison",
+    "Zap Plate":    "Electric",
+
+    //gen4 specific items
+    "Adamant Orb":  [ "Dragon", "Steel" ],
+    "Griseous Orb": [ "Dragon", "Ghost" ],
+    "Lustrous Orb": [ "Dragon", "Ghost" ],
+
+    //gen4 incenses (1.2x type-boost)
+    "Odd Incense":  "Psychic",
+    "Rock Incense": "Rock",
+    "Rose Incense": "Grass",
+    "Sea Incense":  "Water",
+    "Wave Incense": "Water",
+
+    //gen6 specific items
+    "Pixie Plate": "Fairy",
+    
+    //gen8 specific items
+    "Blank Plate": "Normal",
+    "Legend Plate": "Special",
+
+    "Fire Gem"    : "Fire",
+    "Water Gem"   : "Water",
+    "Electric Gem": "Electric",
+    "Grass Gem"   : "Grass",
+    "Ice Gem"     : "Ice",
+    "Fighting Gem": "Fighting",
+    "Poison Gem"  : "Poison",
+    "Ground Gem"  : "Ground",
+    "Flying Gem"  : "Flying",
+    "Psychic Gem" : "Psychic",
+    "Bug Gem"     : "Bug",
+    "Rock Gem"    : "Rock",
+    "Ghost Gem"   : "Ghost",
+    "Dragon Gem"  : "Dragon",
+    "Dark Gem"    : "Dark",
+    "Steel Gem"   : "Steel",
+    "Normal Gem"  : "Normal",
+}

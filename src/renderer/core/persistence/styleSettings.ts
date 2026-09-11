@@ -40,9 +40,20 @@ export interface StyleSettingsOptions {
     styleProperties?: readonly string[];
     /**
      * gen4's debounced defaults write (500 ms after the last edit, flushed on
-     * `beforeunload`); gen2 writes on every edit. Omitted means immediate.
+     * `beforeunload`); gen5's is 1 s with no flush; gen2 writes on every edit.
+     * Omitted means immediate.
      */
     writeDebounceMs?: number;
+    /** gen5 does not flush its pending write on unload (known-legacy-bugs.md #25). */
+    noUnloadFlush?: boolean;
+    /**
+     * gen5's manager keeps a third layer: a style key reads as the defaults, then the
+     * bare key, then the `user_` override, merged; and a dev-mode write stores the
+     * *full* value under the bare key (gen2/gen4 store the filtered defaults there),
+     * so run counters and split history round-trip while the defaults file stays
+     * small. A null write deletes the bare key too.
+     */
+    threeLayer?: boolean;
 }
 
 export interface StyleSettingsStore {
@@ -90,7 +101,7 @@ export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSe
         }
         pendingWrites.clear();
     };
-    if (options.writeDebounceMs) window.addEventListener("beforeunload", flushPendingWrites);
+    if (options.writeDebounceMs && !options.noUnloadFlush) window.addEventListener("beforeunload", flushPendingWrites);
     const writeDefaultsFile = (key: string): void => {
         const delay = options.writeDebounceMs;
         if (!delay) {
@@ -126,6 +137,11 @@ export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSe
             }
             const userValue = getUserState<Record<string, unknown> | null>(`user_${key}`, null);
             const defaultValue = (defaults[key] as Record<string, unknown> | undefined) || null;
+            if (options.threeLayer) {
+                const localValue = getUserState<Record<string, unknown> | null>(key, null);
+                if (userValue === null && localValue === null && defaultValue === null) return null;
+                return { ...(defaultValue || {}), ...(localValue || {}), ...(userValue || {}) };
+            }
             if (userValue === null && defaultValue === null) return null;
             if (userValue === null) return defaultValue;
             if (defaultValue === null) return userValue;
@@ -149,9 +165,11 @@ export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSe
             }
             writeDefaultsFile(key);
             // The legacy manager also wrote the bare key to localStorage "for immediate
-            // use"; nothing reads a bare style key back, but the write is kept so the
-            // persisted state matches what the legacy app left behind.
-            setUserState(key, defaults[key] ?? null);
+            // use" -- gen2/gen4 the filtered defaults, gen5 the full value (which its
+            // three-layer `get` reads back). Kept so the persisted state matches what
+            // the legacy app left behind.
+            if (options.threeLayer) setUserState(key, value === undefined ? null : value);
+            else setUserState(key, defaults[key] ?? null);
         },
 
         getDefault: (key) => defaults[key] ?? null,

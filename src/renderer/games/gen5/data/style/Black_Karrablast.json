@@ -1,0 +1,12 @@
+{
+  "imageScale": "0.64",
+  "imageFlip": true,
+  "imageYOffset": "-65",
+  "overlay_color": "#2d82c5",
+  "ui_saturation": "1",
+  "backgroundScale": "140",
+  "backgroundBrightness": "79",
+  "backgroundYOffset": "125",
+  "backgroundBlur": "5",
+  "selected_evolution_species": "Escavalier"
+}

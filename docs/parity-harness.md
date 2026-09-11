@@ -310,6 +310,12 @@ cause instead of listing its symptoms.
    past", once in a few runs. With the install a second earlier the pause is always a forward move there; the
    re-created document replays the log and takes `recordedAt` from the `pauseAt` entry regardless.
 
+The console oracle has one more subtlety: the pre-reload document's log (its failed connection attempts to
+the real ports) is dropped the moment the new document is created (`framenavigated`), not after the reload
+settles -- by then the new document has connected to the armed mock and run its boot, and a reset there
+erased every boot-time error on both sides for the first week of the harness's life. `STP_PARITY_KEEP_SANDBOX=1`
+skips the legacy sandbox refresh so an instrumented copy (a stashed trace in a legacy method) survives a run.
+
 Collecting the whole `userData` tree is a thirteenth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
 DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between
 identical runs. `run.ts` collects only what the app writes, and `localStorage` is compared from the page dump.

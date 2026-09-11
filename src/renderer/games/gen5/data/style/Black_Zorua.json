@@ -1,0 +1,21 @@
+{
+  "overlay_color": "#635e75",
+  "ui_saturation": "1.4",
+  "imageXOffset": "-21",
+  "imageYOffset": "-78",
+  "imageScale": "0.62",
+  "imageFlip": true,
+  "backgroundTexture": "Dark",
+  "backgroundHue": "0",
+  "backgroundScale": "133",
+  "backgroundFlip": true,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": "-8",
+  "backgroundBrightness": 100,
+  "backgroundContrast": "200",
+  "backgroundSaturation": "42",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Illusion",
+  "selected_evolution_species": "Zorua",
+  "evolution": true
+}

@@ -1,0 +1,7 @@
+{
+  "pkmn_ability": "Blaze",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fire",
+  "overlay_color": "#f08030",
+  "selected_evolution_species": "Charizard"
+}
