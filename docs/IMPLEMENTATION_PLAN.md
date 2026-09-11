@@ -616,7 +616,7 @@ one before it.
 | 1.7 | App root | ✅ `e610bc8` |
 | 1.8 | Control server | ✅ `e610bc8` |
 | 1.9 | OBS + Shuckie to `core/`, marker names to data | ✅ |
-| 1.10 | Persistence to files, `localStorage` retired | ◐ the four `localStorage` consumers now use `core/persistence/userState.ts`; the **one-time import of gen1's own `Local Storage`** is not built — `external-contracts.md` §6 puts the Chromium LevelDB reader in Phase 2.6, where four more generations need it, so it is better built once there. Until then a gen1 user's saved split comparison and OBS credentials do not carry over. |
+| 1.10 | Persistence to files, `localStorage` retired | ✅ the four `localStorage` consumers use `core/persistence/userState.ts`; the one-time import of gen1's own `Local Storage` was built with Phase 2.6's LevelDB reader on 2026-09-12 (`src/main/importLegacy.ts`, section 7c), where four more generations needed it, so it was built once. |
 
 **How 1.4 landed.** gen1's paths *are* the canonical vocabulary, so both gen1 profiles are identity maps; the
 adapter (`buildCanonicalView`) aliases declared **containers** to the mapper's real objects and leaves to the real
@@ -902,6 +902,27 @@ rule in the tools:
   `--force-device-scale-factor=1` pins the renderer, not the frame). Every green run had used the primary. The
   runner now moves the window to the primary display's work-area corner before sizing it, and again before any
   capture that finds it drifted.
+- **Oracle 6 ran for every generation (2026-09-12).** It had never run: the legacy apps open their control
+  server on a literal `listen(30159, ...)` inside `frontend.js`, and that port belonged to whichever overlay was
+  running on the machine. The harness now rewrites the literal in the *sandbox copy* when `--redirect-ports`
+  is on (the legacy trees stay read-only inputs; the clean run's refresh restores the file), so a run no
+  longer needs any port free. The control script was rewritten from the queuer's `configureOverlay` rather
+  than from its description: `onlyFor` guards for the branches (`/set-counters` for gen2, gen4's `/refresh`
+  before `/set-evolution`, the others' after), `$expectedGame` from the queuer's own `expectedSelectedGameFromMapperId`
+  and `$rightPanel` from its `detectGenContext`, the guards keyed by the **fixture's** generation whichever
+  app answers. Two contract corrections fell out (external-contracts.md section 2): the queuer's gen1 guards
+  are narrower than the doc said -- it sends `/set-starter`, `/set-evolution`, `/refresh`, `/set-right-panel`,
+  `/set-splits` and `/new-run` to gen1 too, and its `overlayFetch` throws on a failed call, so against the
+  legacy gen1 (no server) an item never got past `/set-starter`; and a lifted table's error reply carried its
+  HTTP status inside the body (`{ ok, status: 400, error }`) where gen2-5 sent `{ ok, error }` with the
+  status on the response, which the main process now does. The union `/status` is built in the shell for
+  every generation (`app`, `generation`, `mapper_path`, `starter`/`starterString`, `right_panel`/`right_ui`),
+  and the oracle compares a `/status` key by key, allowing exactly those extras. Result: gen2, gen3, gen4
+  and gen5 answer the queuer's session as their legacy apps do -- every route, status and body, and every
+  `/status` field the legacy reports; gen1, which had no server, answers all nine calls (the two it has no
+  equivalent for say `unsupported: true`) and is compared against the previous commit's worktree. The queuer's
+  gen1 verification expects `right_panel: "Battle Graphic"`, a mode gen1 does not have; `docs/queuer-unified.patch`
+  now sends gen1 `Automatic`, which is what a gen1 item needs to be drivable at all.
 - gen4's parity fixture is synthetic (`tools/parity/scenarios/gen4-platinum-smoke.json`, built from the
   shipped `ST/gen4/pokemon_platinum_ne.xml`): a new game, the starter, a route change, a wild battle, Leader
   Roark, a level-up, a blackout and a reset, 21 checkpoints over 90 s. It proves determinism and no-change
@@ -927,7 +948,7 @@ Status as of 2026-09-11, evening.
 | 3.2 pre-mapper screen | ✅ the box-art grid (`components/GameSelect.vue`) for every generation, thirteen tiles, gen4's tile styling; a click stores the edition and sets the taskbar icon. gen1/gen2 tiles are the legacy window icons as placeholders (decision 16); "Yellow Legacy" shows in a dev build only. |
 | 3.3 one client | ✅ gen3's `disconnect()` (called on `beforeunload`, as gen3/4/5 did) and gen4's warn-not-throw on a failed write, folded into `packages/gameHookMapperClient.ts`; #24 handling as listed. |
 | 3.4 window and icon | ✅ `set-game-icon` for every generation; gen3/4/5's `.ico`s, gen1's and gen2's `icon.png` (a NativeImage from a PNG, no conversion needed). |
-| 3.5 packaging | ✅ `package.json`: `stp-overlay` 3.0.0, `asar: false`, `files: out/**` minus the image junction, `extraResources`: `storage/**`, `resources/**` and the image pool as `images/`; `npm start` runs the built app. `dev-window-state.json` is read in dev and when packaged, and written on close in both. A packaged build has not been produced yet (electron-builder on this machine is untested); `npm run build` + `npm start` is the shape the queuer will get. |
+| 3.5 packaging | ✅ `package.json`: `stp-overlay` 3.0.0, `asar: false`, `files: out/**` minus the image junction, `extraFiles`: `storage/**` and `resources/**` (next to the exe, which is what `appRoot()` resolves against when packaged), `extraResources`: the image pool as `resources/images`; `npm start` runs the built app. `dev-window-state.json` is read in dev and when packaged, and written on close in both. **A packaged build was produced and tried on 2026-09-12** (`npm run build:unpack`, electron-builder 26 `--dir`, 3.8 GB in `dist/win-unpacked/`): `npm run packaged:probe` launches the exe the way a double-click would (no `STP_APP_ROOT`, an unrelated working directory, the network blocked) and checks the renderer's location, the image-pool junction and the box-art grid's images, `storage/Storage.json` through the storage IPC, `keyhook.exe` in the package, and `/status` on the control server -- all pass. The first build found `storage/` and `keyhook.exe` where electron-builder puts `extraResources` (`resources/storage`, `resources/resources/`) and not where the main process looks (next to the exe): hence `extraFiles`. The `build:win` zip step (the same tree, stored uncompressed) has not been run. |
 | 3.6 queuer | ⏸ patch prepared (`docs/queuer-unified.patch`, `docs/external-contracts.md`); not applied -- the queuer tree has Scott's uncommitted edits, and decision 12 wants the change shown and dry-run. |
 | 3.7 splits | ✅ `tools/splits/consolidate.ts` copied the five trees into `splits/` (10,662 files, 228.6 MB, no conflicts; every folder name kept, gen3's four and gen5's gen4 leftovers included). |
 
@@ -977,11 +998,10 @@ templates read the same bytes from the pool that they read through the junctions
 | 5.3 README | ✅ rewritten for the unified layout: structure, how to add a game, the harness, where the app keeps things. |
 | 5.4 final parity run | ✅ every generation on its fixture after Phase 4 (this section's verification); manifest and size report in 4.1. `tools/sandbox/` copies are runtime artefacts (gitignored) and are left for the next harness run rather than deleted -- deleting them only makes the next run re-copy the legacy trees. |
 
-What remains open across the plan, all outside what this session could close: oracle 6's control-script sessions
-(port 30159);
-real fixture recordings for gen1/3/4/5 (decision 6); the queuer patch to apply and dry-run (3.6); a packaged build
-to produce and try (3.5); and the decomposition of the four lifted components into the shared stores (the 2.4
-refactor proper), which is where 4.3 and 4.4 resume.
+What remains open across the plan, all outside what this session could close: real fixture recordings for
+gen1/3/4/5 (decision 6); the queuer patch to apply and dry-run (3.6); and the decomposition of the four lifted
+components into the shared stores (the 2.4 refactor proper), which is where 4.3 and 4.4 resume. Oracle 6 (the
+control-script sessions) and the packaged build (3.5) closed on 2026-09-12 -- see 7d and the last bullets of 7c.
 
 ## 8. Corrections the first implementation session made to the plan
 

@@ -225,11 +225,16 @@ const main = defineComponent({
         // route table is the active module's (gen1's before a mapper is known, so
         // /status answers during boot as the queuer expects); a lifted module's routes
         // drive its mounted overlay component directly.
-        this.unregisterControl = registerControlServer(() =>
-            this.module.control({
-                isReady: () => this.ready,
-                mapperPath: () => (this.mapper?.meta?.path as string | undefined) ?? null,
-                overlay: () => this.$refs.overlay ?? null,
+        this.unregisterControl = registerControlServer(
+            () =>
+                this.module.control({
+                    isReady: () => this.ready,
+                    mapperPath: () => (this.mapper?.meta?.path as string | undefined) ?? null,
+                    overlay: () => this.$refs.overlay ?? null,
+                }),
+            () => ({
+                generation: this.module.generation,
+                mapperPath: (this.mapper?.meta?.path as string | undefined) ?? null,
             }),
         );
     },

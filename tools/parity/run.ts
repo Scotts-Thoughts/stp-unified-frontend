@@ -25,9 +25,9 @@
  * `--redirect-ports` is the escape hatch for a machine that is mid-session: the stubs
  * bind 18085/30258/14455 and an init script rewrites those hosts inside the renderer's
  * fetch/XHR/WebSocket. It changes URL strings only, so every oracle still holds. The
- * unified app's own control server moves to 30259 as well (STP_CONTROL_PORT); the legacy
- * apps hardcode 30159 in their renderers and cannot be moved, so legacy targets still
- * need that port free.
+ * unified app's own control server moves to 30259 as well (STP_CONTROL_PORT), and a
+ * legacy sandbox's too: gen2-5 hardcode 30159 in their renderers, so the literal is
+ * rewritten in the sandbox copy (targets.ts, moveLegacyControlPort).
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -39,9 +39,9 @@ import { ShuckieStub } from "./mock-pokeabyte/shuckie-stub.ts";
 import { ReplayDriver } from "./mock-pokeabyte/replay.ts";
 import { capture, finishAnimations, flushRender, installEvalShims, settle, waitForRenderIdle, type ConsoleEntry } from "./capture.ts";
 import { scanFixture, type Checkpoint, type ScanResult } from "./scan-fixture.ts";
-import { parseTarget, prepareSandbox, REPO, type Target } from "./targets.ts";
+import { moveLegacyControlPort, parseTarget, prepareSandbox, REPO, type Target } from "./targets.ts";
 import { loadControlScript, runControlScript } from "./control-script.ts";
-import { checkWriteLog } from "./profile-check.ts";
+import { checkWriteLog, generationOf } from "./profile-check.ts";
 
 /** Canonical ports the overlays hardcode, and the spares --redirect-ports uses. */
 const CANONICAL_PORTS = { pokeabyte: 8085, shuckie: 30158, obs: 4455, control: 30159 };
@@ -114,8 +114,10 @@ export async function run(opts: RunOptions): Promise<RunResult> {
   const ports = opts.redirectPorts ? SPARE_PORTS : CANONICAL_PORTS;
   if (opts.redirectPorts) {
     log(`[run] --redirect-ports: stubs on ${JSON.stringify(ports)}`);
-    // Only the unified app can be told to listen elsewhere; gen2-5 hardcode 30159.
+    // The unified app is told to listen elsewhere (STP_CONTROL_PORT); a legacy sandbox
+    // has its hardcoded literal rewritten.
     if (target.kind === "unified") target.controlPort = ports.control;
+    else moveLegacyControlPort(target, ports.control, log);
   }
   const mock = new MockPokeAByte({ port: ports.pokeabyte, writes: opts.writes ?? "apply", log });
   const shuckie = opts.shuckie === false ? null : new ShuckieStub({ port: ports.shuckie, log });
@@ -328,9 +330,12 @@ export async function run(opts: RunOptions): Promise<RunResult> {
       // The overlay's control server runs on real time, so the virtual clock has to be
       // nudged for any setTimeout the routes schedule; the exchanges themselves are
       // request/response and do not depend on it.
+      // The queuer's guards go by the fixture's generation, whichever app answers: the
+      // unified app playing a gen3 fixture gets the gen3 call shape.
       const exchanges = await runControlScript(loadControlScript(scriptFile), {
         port: target.controlPort,
-        generation: target.kind === "unified" ? "unified" : target.generation,
+        generation: generationOf(header.mapperId) ?? target.generation,
+        mapperId: header.mapperId,
         log,
       });
       await settleFor(page, mock, opts, 1200);

@@ -15,7 +15,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { allProfiles } from "../../src/renderer/games/profiles";
+import { allProfiles, PROFILES } from "../../src/renderer/games/profiles";
 import type { MapperProfile, WriteKind } from "../../src/renderer/core/mapper/MapperProfile";
 import type { WriteLogEntry } from "./mock-pokeabyte/server.ts";
 
@@ -35,6 +35,14 @@ export interface ProfileCheckResult {
 
 export function profileFor(mapperId: string): MapperProfile | null {
   return allProfiles().find((p) => p.pathPatterns.some((re) => re.test(mapperId))) ?? null;
+}
+
+/** The generation whose manifest lists the profile that claims the mapper ("gen3"), or null. */
+export function generationOf(mapperId: string): string | null {
+  for (const [generation, profiles] of Object.entries(PROFILES)) {
+    if (profiles.some((p) => p.pathPatterns.some((re) => re.test(mapperId)))) return generation;
+  }
+  return null;
 }
 
 export function checkWriteLog(mapperId: string, log: WriteLogEntry[]): ProfileCheckResult {

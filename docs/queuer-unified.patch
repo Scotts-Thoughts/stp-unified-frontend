@@ -24,15 +24,19 @@
      if ("bonk" in status || "repel_counter" in status || "hpType" in status) return "gen2";
      if ("starterString" in status || "gameSelection" in status) return "gen3";
      if ("right_ui" in status) {
-@@ -1330,7 +1338,10 @@
+@@ -1330,7 +1338,13 @@
      code === "bw" || code === "b2w2"
    ));
  
 -  const genKey = isGen1 ? "gen1" : isGen2 ? "gen2" : isGen4 ? "gen4" : isGen5 ? "gen5" : "gen3";
+-  const rightPanel = (isGen4 || isGen5) ? "Automatic" : "Battle Graphic";
 +  const legacyGenKey = isGen1 ? "gen1" : isGen2 ? "gen2" : isGen4 ? "gen4" : isGen5 ? "gen5" : "gen3";
 +  // One frontend for every generation: the launch config is the unified app's, while
 +  // isGen1/2/4/5 keep selecting the per-generation call shapes below.
 +  const genKey = USE_UNIFIED_FRONTEND ? "unified" : legacyGenKey;
-   const rightPanel = (isGen4 || isGen5) ? "Automatic" : "Battle Graphic";
++  // gen1's right panel has "Automatic", "Movepool" and "Splits" and no "Battle Graphic"
++  // (the legacy gen1 had no control server at all, so no gen1 item ever got this far);
++  // the unified app takes "Battle Graphic" as Automatic and reports "Automatic".
++  const rightPanel = (isGen4 || isGen5 || isGen1) ? "Automatic" : "Battle Graphic";
    return { isGen1, isGen2, isGen4, isGen5, genKey, rightPanel };
  }

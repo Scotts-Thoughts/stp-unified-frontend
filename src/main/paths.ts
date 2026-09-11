@@ -27,7 +27,7 @@ export function splitsRoot(): string {
   return join(appRoot(), "splits");
 }
 
-/** `<appRoot>/storage`, the shipped defaults (extraResources in a packaged build). */
+/** `<appRoot>/storage`, the shipped defaults (`extraFiles` in a packaged build: next to the exe, like `resources/`). */
 export function storageRoot(): string {
   return join(appRoot(), "storage");
 }

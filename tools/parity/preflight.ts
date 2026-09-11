@@ -17,7 +17,7 @@ const PORTS: { port: number; host: string; what: string; neededBy: string }[] = 
   { port: 8085, host: "localhost", what: "PokeAByte", neededBy: "every target" },
   { port: 30158, host: "127.0.0.1", what: "Super Shuckie", neededBy: "gen1/gen5 (or pass --no-shuckie)" },
   { port: 4455, host: "127.0.0.1", what: "OBS WebSocket", neededBy: "chapter markers (or pass --no-obs)" },
-  { port: 30159, host: "127.0.0.1", what: "an overlay control server", neededBy: "gen2-5 targets" },
+  { port: 30159, host: "127.0.0.1", what: "an overlay control server", neededBy: "every target (or pass --redirect-ports, which moves it to 30259)" },
 ];
 
 export async function portFree(port: number, host: string): Promise<boolean> {

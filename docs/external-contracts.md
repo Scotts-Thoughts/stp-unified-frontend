@@ -41,9 +41,16 @@ window-state file goes; the app reads it in dev and, additively, when packaged.
 ## 2. Overlay control server — `http://127.0.0.1:30159`
 
 gen2–5 each run `http.createServer` **inside the renderer** (`frontend.js`). gen1 has **no** control server;
-the queuer skips it via `isGen1` guards. The unified app moves the server to the main process
-(one implementation, `src/main/control-server.ts`) and must answer every route below with the same
-semantics. Port 30159 is single-tenant: only one overlay can run at a time.
+the queuer's `isGen1` guards skip *some* of its calls there (the column below is read off `configureOverlay`
+in its `main.js`, 2026-09-12 -- it is not "everything but `/set-starter`"). The unified app moves the server
+to the main process (one implementation, `src/main/control-server.ts`) and must answer every route below
+with the same semantics. Port 30159 is single-tenant: only one overlay can run at a time.
+
+The queuer's `overlayFetch` **throws** on a connection failure or a non-2xx reply, and
+`configureAndVerifyOverlay` gives up after three attempts. So against the legacy gen1 a queue item never got
+past `/set-starter`; against the unified app gen1 answers every call, and its `/status` is polled like any
+other generation's. A route's error reply is `{ ok: false, error }` with the HTTP status on the response
+(400, 404, 500), never in the body -- `tools/parity/diff.ts` oracle 6 compares the bodies.
 
 ### Routes the queuer calls (in call order for one item)
 
@@ -51,19 +58,19 @@ semantics. Port 30159 is single-tenant: only one overlay can run at a time.
 |---|---|---|---|
 | `GET /status` | – | all | `{ ready, selected_game, starter or starterString, right_panel or right_ui, hpType, … }` |
 | `GET /set-game` | `game=<name>` (URL-encoded, may contain `&`) | gen2–5 | sets the game dropdown; queuer waits 1 s then re-reads `/status` |
-| `GET /set-starter` | `species=` | all (gen1 request fails silently) | selects the solo species |
+| `GET /set-starter` | `species=` | all (the legacy gen1 had no server: the fetch failed and the item stopped) | selects the solo species |
 | `GET /set-hidden-power` | `type=` | not gen1 | |
 | `GET /set-shuckie-counters` | `enabled=true|false` | not gen1 | |
 | `GET /set-show-tutor-moves` | `enabled=` | not gen1, not gen2 | |
 | `GET /set-unobtainable-moves` | `mode=<Always Cross Out|…>` | not gen1 | |
 | `GET /set-automatic-post-battle-splits` | `enabled=` | not gen1 | |
 | `GET /set-counters` | `bonk=false&repel_counter=false` | gen2 only | |
-| `GET /refresh` | – | not gen1 | reload styles for the starter |
-| `GET /set-evolution` | `enabled=true&species=` / `enabled=false&species=` | not gen1, not gen2 | **gen4: after `/refresh`; gen3/gen5: before `/refresh`** |
-| `GET /set-right-panel` | `panel=Battle Graphic` (gen2/3) or `panel=Automatic` (gen4/5) | not gen1 | |
-| `GET /set-splits` | `mode=First|Followup` | not gen1 | |
-| `GET /load-split-file` | `file=<name>` | not gen1, only with `item.splitFile` | loads a previous-split CSV for comparison |
-| `GET /new-run` | – | not gen1 | same as the F23 hotkey / "New Run" button |
+| `GET /refresh` | – | all -- gen2: after `/set-counters`; gen4: **before** `/set-evolution`; gen1/3/5: **after** it | reload styles for the starter |
+| `GET /set-evolution` | `enabled=true&species=` / `enabled=false&species=` | not gen2 (gen1 gets it like gen3/5; the unified gen1 answers `ok: false, unsupported: true`) | **gen4: after `/refresh`; gen1/gen3/gen5: before `/refresh`** |
+| `GET /set-right-panel` | `panel=Battle Graphic` (gen1/2/3) or `panel=Automatic` (gen4/5) | all | gen1 has no "Battle Graphic" mode: the unified app takes it as `Automatic` and reports `Automatic`, which the queuer's gen1 verification rejects -- `docs/queuer-unified.patch` sends gen1 `Automatic` |
+| `GET /set-splits` | `mode=First|Followup` | all | |
+| `GET /load-split-file` | `file=<name>` | only with `item.splitFile` | loads a previous-split CSV for comparison |
+| `GET /new-run` | – | all | same as the F23 hotkey / "New Run" button |
 | `GET /reload` | – | all | `location.reload()` after 200 ms |
 | `GET /quit` | – | gen2–5 | `window.close()` after 200 ms |
 

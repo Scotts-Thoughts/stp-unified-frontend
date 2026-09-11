@@ -6,7 +6,7 @@
  * tools/sandbox/, never from A:\Programs\genN-stp-frontend. The copy is made with
  * junctions for node_modules and the image trees, so it costs seconds, not gigabytes.
  */
-import { cpSync, existsSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { basename, join, resolve } from "node:path";
 
@@ -41,7 +41,8 @@ export interface Target {
   /**
    * The overlay's own control server port. 30159 is the queuer's, and the only one it
    * talks to; the harness moves it when another overlay already owns 30159, which the
-   * unified app honours through STP_CONTROL_PORT. Legacy apps hardcode it and cannot.
+   * unified app honours through STP_CONTROL_PORT and a legacy sandbox gets by having
+   * its hardcoded literal rewritten (moveLegacyControlPort).
    */
   controlPort: number;
   electronMajor: number;
@@ -220,6 +221,37 @@ export function prepareSandbox(target: Target, opts: SandboxOptions = {}): strin
     }
   }
   return target.cwd;
+}
+
+/**
+ * Moves a legacy sandbox's control server off 30159 (`--redirect-ports`).
+ *
+ * gen2-5 open the server in the renderer with a literal `controlServer.listen(30159,
+ * '127.0.0.1', ...)` in their frontend.js, so the port cannot be moved from outside the
+ * tree. The sandbox copy is not the tree: the literal is rewritten there, in the one
+ * file that carries it, and nothing else changes (the log line that names the port is
+ * left alone -- it is console output, and oracle 9 reads that). A clean run's refresh
+ * (robocopy) restores the original file first, so the rewrite is per run; a kept
+ * sandbox (STP_PARITY_KEEP_SANDBOX) is already on the spare port and is left as it is.
+ */
+export function moveLegacyControlPort(target: Target, port: number, log: (m: string) => void): void {
+  if (target.kind !== "legacy") return;
+  const candidates = ["app/frontend.js", "app/scripts/frontend.js"].map((f) => join(target.appArg, f));
+  const file = candidates.find((f) => existsSync(f));
+  if (!file) throw new Error(`no frontend.js under ${target.appArg} to move the control server in`);
+  const source = readFileSync(file, "utf8");
+  const canonical = /\.listen\(30159,/g;
+  const already = source.includes(`.listen(${port},`);
+  if (!canonical.test(source)) {
+    if (already) {
+      target.controlPort = port;
+      return;
+    }
+    throw new Error(`${file} does not contain the control server's listen(30159, ...)`);
+  }
+  writeFileSync(file, source.replace(canonical, `.listen(${port},`));
+  target.controlPort = port;
+  log(`[sandbox] control server moved to ${port} in ${file}`);
 }
 
 const JUNCTION_DIRS = ["node_modules", "images", "app/images", "src/renderer/public/images"];

@@ -11,7 +11,9 @@ it that are "why", not "what", are in the section headers of the source files th
 1. `npm ci`
 2. `npm run dev` -- the overlay opens and waits for PokeAByte (`http://localhost:8085`) to load a mapper.
    Code changes apply to the running app.
-3. `npm run build` -- the packaged-shape build in `out/`; `npm run build:win` wraps it with electron-builder.
+3. `npm run build` -- the packaged-shape build in `out/`; `npm run build:unpack` wraps it with electron-builder
+   into `dist/win-unpacked/` (3.8 GB, the image pool included) and `npm run packaged:probe` launches that exe
+   with the network blocked and checks it found everything; `npm run build:win` zips the same tree.
 
 The recording queuer launches the app with `npm run dev` and drives it over `http://127.0.0.1:30159`
 (`docs/external-contracts.md` says exactly what it sends and expects; `docs/queuer-unified.patch` is the
@@ -65,10 +67,13 @@ generation's profile, the generation's module is imported on demand, its stylesh
 
 ```
 npm run parity:preflight                                   # who holds the ports
-npx tsx tools/parity/run.ts unified <fixture> --out=tools/reports/<name> --redirect-ports
-npx tsx tools/parity/run.ts legacy:gen3@37 <fixture> --out=tools/reports/<name> --redirect-ports
+npx tsx tools/parity/run.ts unified <fixture> --out=tools/reports/<name> --redirect-ports --control
+npx tsx tools/parity/run.ts legacy:gen3@37 <fixture> --out=tools/reports/<name> --redirect-ports --control
 npx tsx tools/parity/diff.ts tools/reports/<legacy> tools/reports/<unified>
 ```
+
+`--redirect-ports` keeps the run off the ports a live PokeAByte, Super Shuckie, OBS or overlay hold;
+`--control` adds the queuer's control-server session for one queue item (oracle 6).
 
 A fixture is a recording of PokeAByte's property stream (`tools/fixtures/`, made by the queuer's Capture
 Fixtures mode) or a synthetic one built from a mapper XML and a scenario (`tools/parity/make-fixture.ts`,

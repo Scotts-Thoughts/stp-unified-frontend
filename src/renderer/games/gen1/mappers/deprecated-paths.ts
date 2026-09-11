@@ -250,7 +250,15 @@ export const GEN1_DEPRECATED_READS: readonly string[] = [
     "trainers.viridianForest.bugcatcher2",
 ];
 
-/** The 36 written paths and how each is written; the harness checks the write log against this. */
+/**
+ * The 36 written paths and how each is written; the harness checks the write log against this.
+ *
+ * The encounter flags are written two ways by the same component (`settings/encounters.vue`,
+ * as in the legacy gen1): `set_encounters` sends them address-grouped through `setBits`,
+ * and a single flag that changes -- a species' settings loading with different values,
+ * which the queuer's `/set-starter` causes -- goes through the property's own `set()`,
+ * a value write. Oracle 6 was the first run to take that second path.
+ */
 export const GEN1_DEPRECATED_WRITES: Readonly<Record<string, WriteKind[]>> = {
     "battle.yourPokemon.move1": ["value"],
     "battle.yourPokemon.move1pp": ["value"],
@@ -260,14 +268,14 @@ export const GEN1_DEPRECATED_WRITES: Readonly<Record<string, WriteKind[]>> = {
     "battle.yourPokemon.move3pp": ["value"],
     "battle.yourPokemon.move4": ["value"],
     "battle.yourPokemon.move4pp": ["value"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_GEODUDE": ["bits"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_PARAS": ["bits"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_SANDSHREW": ["bits"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE16_DODUO": ["bits"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE1_TEST": ["bits"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE3_SPEAROW": ["bits"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE6_CUT_USER": ["bits"],
-    "patch.encounter_flags.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY": ["bits"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_GEODUDE": ["bits", "value"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_PARAS": ["bits", "value"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_SANDSHREW": ["bits", "value"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE16_DODUO": ["bits", "value"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE1_TEST": ["bits", "value"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE3_SPEAROW": ["bits", "value"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE6_CUT_USER": ["bits", "value"],
+    "patch.encounter_flags.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY": ["bits", "value"],
     "patch.hChosenStarter": ["bytes", "value"],
     "patch.wEarlyEncounters": ["value"],
     "player.itemCount": ["value"],

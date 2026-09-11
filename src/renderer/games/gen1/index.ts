@@ -44,7 +44,7 @@ export const gen1: GameModule = {
         splits: { autosplitter, deprecated_autosplitter, split_trainers },
     },
     hotkeys: gen1Hotkeys,
-    control: (ctx) => gen1ControlRoutes(ctx.isReady, ctx.mapperPath),
+    control: (ctx) => gen1ControlRoutes(ctx.isReady),
     chapterMarkers: gen1ChapterMarkers,
     overlay: Overlay,
     cssClass: "gen-1",

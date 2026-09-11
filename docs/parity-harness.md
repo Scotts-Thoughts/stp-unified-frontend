@@ -17,7 +17,7 @@ Verified inputs (2026-09-10): PokeAByte 0.11.2 source (`A:\Programs\PokeAByte\sr
 | 3 | **Split CSVs** | every file the app writes under `<sandbox>/splits/**` | byte-identical (wall clock is faked, §5) |
 | 4 | **App data** | `<sandbox>/APPDATA/<app>/data/**` (gen1 format) and, for gen2–5, a `localStorage` dump taken via `page.evaluate` at the end of the run (the unified app's `__stpUserState()` returns the active generation's section flat, globals included, which is what its legacy `localStorage` held) | JSON-normalised deep-equal |
 | 5 | **PokeAByte writes** | every `POST /mapper/set-property-value|set-property-bytes|set-properties-by-bits` the app sends, in order, with body | exact sequence, the writes of one virtual instant compared as a set (an app that issues five `setBytes` in one `Promise.all` cannot order their arrival, and two runs of the *same* app differ there) |
-| 6 | **Control server** | `GET /status` after each scripted control call (`/set-game`, `/set-starter`, `/refresh`, …) | deep-equal on the fields the queuer reads (`external-contracts.md` §2) |
+| 6 | **Control server** | every scripted control call (the queuer's order for one item: `/set-game`, `/set-starter`, `/refresh`, …), its HTTP status and body, and the `GET /status` after each | route, query, status and body exact; a `/status` body key by key -- every baseline field present with the same value, and only the documented union extras (`app`, `generation`, `mapper_path`, `starter`/`starterString`, `right_panel`/`right_ui`) allowed beyond them (`external-contracts.md` §2) |
 | 7 | **OBS chapter markers** | every `CreateRecordChapter` received by the OBS stub | exact sequence of names |
 | 8 | **Super Shuckie calls** | every `POST /mark-start|mark-end|increment-counter` | exact sequence |
 | 9 | **Console** | renderer `console.error` / uncaught exceptions | none allowed that the baseline did not also have |
@@ -188,9 +188,12 @@ npm scripts: `parity:baseline <gen> <fixture>`, `parity:run <target> <fixture>`,
 ## 9. Status — what is built and how to run it (2026-09-10)
 
 Everything in sections 1–8 is implemented in `tools/parity/`, oracle 6 included: `--control` replays the
-queuer's call order for one queue item (`tools/parity/control-scripts/queuer-item.json`, whose `skipFor`
-entries mirror the queuer's own per-generation guards) against the running overlay and records every
-exchange plus the `/status` that follows it into `status.json`.
+queuer's call order for one queue item (`tools/parity/control-scripts/queuer-item.json`, whose `skipFor` /
+`onlyFor` entries mirror the queuer's own per-generation guards, read off its `configureOverlay`) against
+the running overlay and records every exchange plus the `/status` that follows it into `status.json`. The
+guards go by the **fixture's** generation whichever app answers, so the unified app playing a gen3 fixture
+gets gen3's call shape; `$expectedGame` and `$rightPanel` in a query are computed per fixture the way the
+queuer computes them per item (`control-script.ts`).
 
 ```
 npm run parity:preflight -- unified          # which single-tenant port is held, and by what
@@ -371,8 +374,11 @@ fix. The Phase 2 gen2 commit was checked this way for gen1 (see plan section 7c 
 Ports 8085 / 30158 / 4455 / 30159 are single-tenant, so a parity run normally requires PokeAByte, Super
 Shuckie and any overlay to be closed. `--redirect-ports` binds the stubs to 18085 / 30258 / 14455 and installs
 an init script that rewrites those hosts inside the renderer's `fetch`, `XMLHttpRequest` and `WebSocket`. It
-changes URL strings only, so every oracle still holds. It cannot move the overlay's **own** control server off
-30159, so gen2–5 targets still need that port free.
+changes URL strings only, so every oracle still holds. The overlay's **own** control server moves to 30259 as
+well: the unified app through `STP_CONTROL_PORT`, a legacy sandbox by having the one literal
+`controlServer.listen(30159, ...)` in its copied `frontend.js` rewritten (`targets.ts`,
+`moveLegacyControlPort`; the clean run's refresh restores the file first, so the rewrite is per run). With
+it a run needs no port at all to be free.
 
 ### Synthetic fixtures
 
@@ -402,4 +408,5 @@ Still outstanding for a full Phase 0 exit, both blocked on things outside the ha
 - **recorded fixtures** for the 0.2 matrix (decision 6: Scott records them). Until then the only recorded
   fixture is gen2 Crystal, and gen1-vs-gen1 parity rests on the synthetic fixture.
 - **legacy baselines** (0.4) and the Electron 37 boot check for gen2–5 (checklist step 8): both need ports
-  8085/30158/30159 free, i.e. PokeAByte, Super Shuckie and the running overlay closed.
+  8085/30158/30159 free, i.e. PokeAByte, Super Shuckie and the running overlay closed -- or, since 2026-09-12,
+  `--redirect-ports`, which moves all four.

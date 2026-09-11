@@ -28,13 +28,35 @@ export function missing(parameter: string): ControlReply {
   return { ok: false, status: 400, error: `Missing ${parameter} parameter` };
 }
 
+/** What every generation's `/status` reports besides its own table (external-contracts.md section 2). */
+export interface ControlStatusContext {
+  generation: number;
+  mapperPath: string | null;
+}
+
+/**
+ * The union `/status` (docs/external-contracts.md section 2): each generation's own
+ * fields, `app`, `generation` and `mapper_path`, and both spellings of the two names
+ * the queuer branches on -- `starter` / `starterString` and `right_panel` / `right_ui`
+ * -- so that each of its per-generation branches reads a field that exists. A table's
+ * own fields are never overwritten; only the missing spelling is added.
+ */
+export function unionStatus(fields: Record<string, unknown>, ctx: ControlStatusContext): Record<string, unknown> {
+  const out: Record<string, unknown> = { app: "stp-overlay", generation: ctx.generation, mapper_path: ctx.mapperPath, ...fields };
+  for (const [a, b] of [["starter", "starterString"], ["right_panel", "right_ui"]] as const) {
+    if (a in out && !(b in out)) out[b] = out[a];
+    else if (b in out && !(a in out)) out[a] = out[b];
+  }
+  return out;
+}
+
 /**
  * Binds a route table to the main process. Returns an unsubscribe function.
  *
  * `/status` is handled here rather than in the table so that the union fields
- * (`ok`, `ready`, `app`) are impossible to forget in a per-generation table.
+ * (`ok`, `ready`, `app`, the aliases) are impossible to forget in a per-generation table.
  */
-export function registerControlServer(getRoutes: () => ControlRoutes | null): () => void {
+export function registerControlServer(getRoutes: () => ControlRoutes | null, context: () => ControlStatusContext): () => void {
   if (!window.api?.onControlRequest) {
     console.warn("[control] preload API is missing; the queuer cannot drive this overlay.");
     return () => {};
@@ -44,7 +66,7 @@ export function registerControlServer(getRoutes: () => ControlRoutes | null): ()
     if (!table) return { ok: false, ready: false, error: "Overlay is not ready" };
 
     if (route === "/status") {
-      return { ok: true, app: "stp-overlay", ...table.status() };
+      return { ok: true, ...unionStatus(table.status(), context()) };
     }
     const handler = table.routes[route];
     if (!handler) return { ok: false, error: "Unknown endpoint" };

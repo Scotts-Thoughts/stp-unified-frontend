@@ -12,9 +12,11 @@
       "out/**",
       "!out/renderer/images/**"
     ],
-    "extraResources": [
+    "extraFiles": [
       "storage/**",
-      "resources/**",
+      "resources/**"
+    ],
+    "extraResources": [
       {
         "from": "src/renderer/public/images",
         "to": "images"
@@ -50,7 +52,8 @@
     "parity:adapter": "tsx tools/parity/adapter-selftest.ts",
     "parity:profile": "tsx tools/parity/profile-check.ts",
     "import:selftest": "tsx tools/import/selftest.ts",
-    "import:dump": "tsx tools/import/dump-localstorage.ts"
+    "import:dump": "tsx tools/import/dump-localstorage.ts",
+    "packaged:probe": "tsx tools/parity/packaged-probe.ts"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.2",

@@ -8,7 +8,8 @@
  *
  * `/status` reports the **union** of the per-generation field names -- `starter` and
  * `starterString`, `right_panel` and `right_ui` -- so each of the queuer's existing
- * per-gen branches reads a field that exists.
+ * per-gen branches reads a field that exists (`app`, `generation` and `mapper_path`
+ * come from the shell, `core/control/useControlServer.ts`, for every generation).
  *
  * gen1 has no evolution splits, no tutor moves and no unobtainable-move mode, so those
  * routes answer `ok: false` with `unsupported: true` rather than silently accepting a
@@ -30,7 +31,7 @@ const UNSUPPORTED = (route: string): ControlReply => ({
   error: `${route} has no gen1 equivalent`,
 });
 
-export function gen1ControlRoutes(isReady: () => boolean, mapperPath: () => string | null): ControlRoutes {
+export function gen1ControlRoutes(isReady: () => boolean): ControlRoutes {
   const settings = () => useOverlaySettingsStore();
   const runConfig = () => useGameSpeciesData();
   const meta = () => useMetaStore();
@@ -41,8 +42,6 @@ export function gen1ControlRoutes(isReady: () => boolean, mapperPath: () => stri
       const config = runConfig().config;
       return {
         ready: isReady(),
-        generation: 1,
-        mapper_path: mapperPath(),
         gameName: s.game,
         // gen1 derives the game from the mapper; the queuer expects null here and sets
         // nothing, so `selected_game` reports the edition the user picked instead.

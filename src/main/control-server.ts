@@ -102,9 +102,13 @@ export class ControlServer {
       const reply = MAIN_ROUTES.has(route)
         ? await this.handleInMain(route, query)
         : await this.askRenderer(route, query);
-      if (reply.ok === false && reply.error === "Unknown endpoint") res.statusCode = 404;
-      else if (reply.ok === false && reply.status === 400) res.statusCode = 400;
-      res.end(JSON.stringify(reply));
+      // A route's `status` is the HTTP status it wants, not part of the body: gen2-5 set
+      // `res.statusCode = 400` and sent `{ ok: false, error }`, and the queuer reads
+      // `error` from that body. Oracle 6 compares the bodies.
+      const { status, ...body } = reply;
+      if (typeof status === "number") res.statusCode = status;
+      else if (reply.ok === false && reply.error === "Unknown endpoint") res.statusCode = 404;
+      res.end(JSON.stringify(body));
     } catch (err) {
       res.statusCode = 500;
       res.end(JSON.stringify({ ok: false, error: err instanceof Error ? err.message : String(err) }));

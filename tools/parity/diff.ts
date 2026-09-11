@@ -89,7 +89,7 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
   diffTree(join(baselineDir, "files", "appdata"), join(candidateDir, "files", "appdata"), 4, differences, ["data/user_state.json"]);
   diffJsonFile(join(baselineDir, "writes.json"), join(candidateDir, "writes.json"), 5, "write log", undefined, differences, canonicalWrites);
   diffProfileCheck(join(candidateDir, "profile-check.json"), differences);
-  diffJsonFile(join(baselineDir, "status.json"), join(candidateDir, "status.json"), 6, "control server", undefined, differences);
+  diffControl(join(baselineDir, "status.json"), join(candidateDir, "status.json"), differences);
   diffJsonFile(join(baselineDir, "obs-markers.json"), join(candidateDir, "obs-markers.json"), 7, "chapter markers", undefined, differences, stripTiming);
   diffJsonFile(join(baselineDir, "shuckie-calls.json"), join(candidateDir, "shuckie-calls.json"), 8, "shuckie calls", undefined, differences, stripTiming);
   diffConsole(join(baselineDir, "console-tail.json"), join(candidateDir, "console-tail.json"), undefined, differences);
@@ -361,6 +361,91 @@ function diffJsonFile(
     baseline: trim(na),
     candidate: trim(nb),
   });
+}
+
+/**
+ * Oracle 6: the scripted control-server session, exchange by exchange.
+ *
+ * Each exchange is the route and query the script sent, the HTTP status and body that
+ * came back, and the `/status` polled right after. Route, query and HTTP status must
+ * match exactly, and so must a body -- gen2-5's reply shapes are the contract
+ * (docs/external-contracts.md section 2) and the lifted route tables answer with the
+ * same objects. A `/status` body, and the polled `status`, is compared as the contract
+ * defines it: the unified app returns the **union** of the generations' field names plus
+ * `app`, `generation` and `mapper_path`, so every field the baseline reports must be in
+ * the candidate with the same value, and the candidate may carry only those documented
+ * extras beyond them. Any other extra field, a missing one, or a different value is a
+ * finding, named by its key rather than as "sequence differs".
+ */
+const STATUS_UNION_EXTRAS = new Set(["app", "generation", "mapper_path", "starter", "starterString", "right_panel", "right_ui"]);
+
+function diffControl(basePath: string, candPath: string, out: Difference[]): void {
+  if (!existsSync(basePath) && !existsSync(candPath)) return;
+  const name = ORACLE_NAMES[6];
+  const a = readJson<ControlExchangeLike[]>(basePath);
+  const b = readJson<ControlExchangeLike[]>(candPath);
+  if (!a || !b) {
+    out.push({ oracle: 6, name, detail: `status.json ${!a ? "missing in the baseline" : "missing in the candidate"} (run with --control on both sides)` });
+    return;
+  }
+  const count = Math.max(a.length, b.length);
+  for (let i = 0; i < count; i++) {
+    const x = a[i];
+    const y = b[i];
+    const label = `#${i + 1} ${x?.route ?? y?.route}`;
+    if (!x || !y) {
+      out.push({ oracle: 6, name, detail: `${label}: ${!x ? "only in the candidate" : "only in the baseline"}` });
+      continue;
+    }
+    if (x.route !== y.route || JSON.stringify(x.query) !== JSON.stringify(y.query)) {
+      out.push({ oracle: 6, name, detail: `${label}: different call`, baseline: `${x.route} ${JSON.stringify(x.query)}`, candidate: `${y.route} ${JSON.stringify(y.query)}` });
+      continue;
+    }
+    if (x.httpStatus !== y.httpStatus) {
+      out.push({ oracle: 6, name, detail: `${label}: HTTP status`, baseline: String(x.httpStatus), candidate: String(y.httpStatus) });
+    }
+    const statusShaped = x.route === "/status";
+    for (const d of diffStatusObject(x.body, y.body, statusShaped)) {
+      out.push({ oracle: 6, name, detail: `${label}: body ${d.detail}`, baseline: d.baseline, candidate: d.candidate });
+    }
+    for (const d of diffStatusObject(x.status, y.status, true)) {
+      out.push({ oracle: 6, name, detail: `${label}: /status afterwards ${d.detail}`, baseline: d.baseline, candidate: d.candidate });
+    }
+  }
+}
+
+interface ControlExchangeLike {
+  route: string;
+  query: Record<string, string>;
+  httpStatus: number;
+  body: unknown;
+  status: unknown;
+}
+
+/** Key-by-key; `union` allows the documented extra fields on the candidate side. */
+function diffStatusObject(base: unknown, cand: unknown, union: boolean): { detail: string; baseline?: string; candidate?: string }[] {
+  const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+  if (!isObject(base) || !isObject(cand)) {
+    const na = JSON.stringify(base);
+    const nb = JSON.stringify(cand);
+    return na === nb ? [] : [{ detail: "differs", baseline: trim(na), candidate: trim(nb) }];
+  }
+  const found: { detail: string; baseline?: string; candidate?: string }[] = [];
+  for (const key of Object.keys(base)) {
+    if (!(key in cand)) {
+      found.push({ detail: `lacks "${key}"`, baseline: trim(JSON.stringify(base[key])) });
+      continue;
+    }
+    const na = JSON.stringify(base[key]);
+    const nb = JSON.stringify(cand[key]);
+    if (na !== nb) found.push({ detail: `"${key}"`, baseline: trim(na), candidate: trim(nb) });
+  }
+  for (const key of Object.keys(cand)) {
+    if (key in base) continue;
+    if (union && STATUS_UNION_EXTRAS.has(key)) continue;
+    found.push({ detail: `has an extra "${key}"`, candidate: trim(JSON.stringify(cand[key])) });
+  }
+  return found;
 }
 
 /**
