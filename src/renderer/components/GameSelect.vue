@@ -21,7 +21,7 @@
 /**
  * The pre-mapper screen: the box-art grid gen3-5 showed while PokeAByte had no mapper
  * loaded, for every generation (plan 3.2, decided 2026-09-02). It lists every edition
- * of every manifest, thirteen tiles, and a click stores the edition where that
+ * of every manifest, fourteen tiles, and a click stores the edition where that
  * generation reads it -- gen1's overlay settings store, or the lifted component's own
  * user-state key (`ModuleManifest.editionKey`) in that generation's section of the
  * user state -- and sets the taskbar icon to the

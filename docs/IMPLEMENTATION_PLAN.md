@@ -945,7 +945,7 @@ Status as of 2026-09-11, evening.
 | step | status |
 |---|---|
 | 3.1 boot flow, lazy modules | ✅ `games/genN/manifest.ts` (profiles, editions, the edition key) is what the shell knows before loading; `games/registry.ts` detects over the manifests and `loadModule()` imports the generation on first detection (Vite splits gen2-5 into their own chunks: entry 10.4 MB with gen1, then 5.3 / 9.5 / 11.3 / 6.0 MB for gen2/3/4/5). The edition is a user setting per generation, stored where each lifted component reads it (`game_selection`, `gameSelection`, `selected_game`; gen1's store). `InstanceReset` tears down and returns to the grid, as before. |
-| 3.2 pre-mapper screen | ✅ the box-art grid (`components/GameSelect.vue`) for every generation, thirteen tiles, gen4's tile styling; a click stores the edition and sets the taskbar icon. gen1/gen2 tiles are the legacy window icons as placeholders (decision 16); "Yellow Legacy" shows in a dev build only. |
+| 3.2 pre-mapper screen | ✅ the box-art grid (`components/GameSelect.vue`) for every generation, fourteen tiles (the plan said thirteen; gen1 has Yellow, Red and Blue), gen4's tile styling; a click stores the edition and sets the taskbar icon. gen1/gen2 tiles are the legacy window icons as placeholders (decision 16); "Yellow Legacy" shows in a dev build only. |
 | 3.3 one client | ✅ gen3's `disconnect()` (called on `beforeunload`, as gen3/4/5 did) and gen4's warn-not-throw on a failed write, folded into `packages/gameHookMapperClient.ts`; #24 handling as listed. |
 | 3.4 window and icon | ✅ `set-game-icon` for every generation; gen3/4/5's `.ico`s, gen1's and gen2's `icon.png` (a NativeImage from a PNG, no conversion needed). |
 | 3.5 packaging | ✅ `package.json`: `stp-overlay` 3.0.0, `asar: false`, `files: out/**` minus the image junction, `extraFiles`: `storage/**` and `resources/**` (next to the exe, which is what `appRoot()` resolves against when packaged), `extraResources`: the image pool as `resources/images`; `npm start` runs the built app. `dev-window-state.json` is read in dev and when packaged, and written on close in both. **A packaged build was produced and tried on 2026-09-12** (`npm run build:unpack`, electron-builder 26 `--dir`, 3.8 GB in `dist/win-unpacked/`): `npm run packaged:probe` launches the exe the way a double-click would (no `STP_APP_ROOT`, an unrelated working directory, the network blocked) and checks the renderer's location, the image-pool junction and the box-art grid's images, `storage/Storage.json` through the storage IPC, `keyhook.exe` in the package, and `/status` on the control server -- all pass. The first build found `storage/` and `keyhook.exe` where electron-builder puts `extraResources` (`resources/storage`, `resources/resources/`) and not where the main process looks (next to the exe): hence `extraFiles`. The `build:win` zip step (the same tree, stored uncompressed) has not been run. |
@@ -998,10 +998,25 @@ templates read the same bytes from the pool that they read through the junctions
 | 5.3 README | ✅ rewritten for the unified layout: structure, how to add a game, the harness, where the app keeps things. |
 | 5.4 final parity run | ✅ every generation on its fixture after Phase 4 (this section's verification); manifest and size report in 4.1. `tools/sandbox/` copies are runtime artefacts (gitignored) and are left for the next harness run rather than deleted -- deleting them only makes the next run re-copy the legacy trees. |
 
-What remains open across the plan, all outside what this session could close: real fixture recordings for
-gen1/3/4/5 (decision 6); the queuer patch to apply and dry-run (3.6); and the decomposition of the four lifted
-components into the shared stores (the 2.4 refactor proper), which is where 4.3 and 4.4 resume. Oracle 6 (the
-control-script sessions) and the packaged build (3.5) closed on 2026-09-12 -- see 7d and the last bullets of 7c.
+What remains open across the plan: real fixture recordings for gen1/3/4/5 (decision 6); the queuer patch to
+apply and dry-run (3.6); and the decomposition of the four lifted components into the shared stores (the 2.4
+refactor proper), which is where 4.3 and 4.4 resume. Oracle 6 (the control-script sessions) and the packaged
+build (3.5) closed on 2026-09-12 -- see 7d and the last bullets of 7c. `npm run parity:all` is the regression
+check for whatever comes next.
+
+**Why the decomposition waits for the recordings, in that order.** The lifted components are 7-11 thousand
+lines each (250-340 methods, a 1,400-line `mounted`), and the net under them is the harness: gen2 has one real
+recording (a Crystal run), gen3/4/5 have synthetic smoke scenarios, gen1 a synthetic one. Moving that much
+logic into shared stores on a smoke net would be proven only for the states the smoke scenarios reach --
+a battle in and out, a level, a badge -- and silently free to drift everywhere else: evolutions, blackouts,
+resets, the second and later battles, the split archive after a whole run. Decision 6 gives the harness
+real runs for every generation, and the decomposition should be measured against those. Until then the
+lifted components are the *supported* shape (the README says so), and edits to them are verified as they
+always were. When the recordings exist, the first slices are the ones with a shared consumer already in
+`core/`: the split-CSV writers (`games/genN/splits.js`, each a variant of gen1's) behind gen1's
+autosplitter engine, then the natures/abilities/type tables gen3-5 share byte-for-byte (2.2's rule: to `core/`
+only when identical), then the texture vocabularies (4.3) and the sprite resolver (4.4) once a style picker
+reads them.
 
 ## 8. Corrections the first implementation session made to the plan
 
