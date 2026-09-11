@@ -1,0 +1,13 @@
+{
+  "overlay_color": "#9b589e",
+  "ui_saturation": "1",
+  "imageXOffset": "-5",
+  "imageYOffset": "45",
+  "imageScale": "1.09",
+  "imageFlip": true,
+  "backgroundTexture": "Dark Water",
+  "backgroundScale": "141",
+  "backgroundBrightness": "86",
+  "backgroundContrast": "137",
+  "pkmn_ability": "Pressure"
+}

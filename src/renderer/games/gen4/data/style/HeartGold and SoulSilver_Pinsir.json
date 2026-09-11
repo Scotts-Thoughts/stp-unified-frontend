@@ -1,0 +1,15 @@
+{
+  "overlay_color": "#6c615f",
+  "ui_saturation": "2",
+  "imageXOffset": "-40",
+  "imageYOffset": "16",
+  "imageScale": "0.81",
+  "imageFlip": true,
+  "backgroundTexture": "Fighting",
+  "backgroundBlur": "1",
+  "backgroundScale": "124",
+  "backgroundBrightness": "48",
+  "backgroundContrast": "118",
+  "pkmn_ability": "Hyper Cutter",
+  "evolution": false
+}

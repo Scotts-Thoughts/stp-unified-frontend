@@ -1,0 +1,16 @@
+{
+  "overlay_color": "#f7acb3",
+  "ui_saturation": "1.2",
+  "imageXOffset": "9",
+  "imageYOffset": "-62",
+  "imageScale": "0.58",
+  "backgroundTexture": "Underwater Rocks",
+  "backgroundBlur": "1",
+  "backgroundScale": "124",
+  "backgroundFlip": true,
+  "backgroundXOffset": "125",
+  "backgroundYOffset": "62",
+  "backgroundContrast": "141",
+  "pkmn_ability": "Hustle",
+  "evolution": false
+}

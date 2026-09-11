@@ -1,0 +1,16 @@
+{
+  "overlay_color": "#3599d2",
+  "ui_saturation": "1.4",
+  "imageXOffset": "2",
+  "imageYOffset": "52",
+  "imageScale": "0.62",
+  "imageFlip": true,
+  "backgroundTexture": "Dark Water",
+  "backgroundBlur": "2",
+  "backgroundScale": "124",
+  "backgroundYOffset": "48",
+  "backgroundBrightness": "71",
+  "backgroundContrast": "130",
+  "pkmn_ability": "Hydration",
+  "evolution": false
+}

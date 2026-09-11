@@ -1,0 +1,13 @@
+{
+  "overlay_color": "#fbca22",
+  "ui_saturation": "1.1",
+  "imageXOffset": "-9",
+  "imageYOffset": "20",
+  "imageScale": "0.91",
+  "imageFlip": true,
+  "backgroundBlur": "3",
+  "backgroundHue": "333",
+  "backgroundContrast": "119",
+  "backgroundSaturation": "155",
+  "pkmn_ability": "Intimidate"
+}

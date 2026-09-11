@@ -1,0 +1,1634 @@
+{
+    "Mega Froslass": {
+        "scale": 1.1527777777777777,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Hydreigon": {
+        "scale": 1.0740740740740742,
+        "xOffset": 2,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Porygon-Z": {
+        "scale": 1.148148148148148,
+        "xOffset": -1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Giratina": {
+        "scale": 1.0833333333333333,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Zangoose": {
+        "scale": 1.1342592592592593,
+        "xOffset": 4,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Diggersby": {
+        "scale": 1.0416666666666667,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Annihilape": {
+        "scale": 1.2175925925925926,
+        "xOffset": 2,
+        "yOffset": -9,
+        "flipped": false
+    },
+    "Pecharunt": {
+        "scale": 1.0231481481481481,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Lunala": {
+        "scale": 1.2453703703703705,
+        "xOffset": 1,
+        "yOffset": -9,
+        "flipped": false
+    },
+    "Melmetal": {
+        "scale": 1.1157407407407407,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Testmoth": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Mheracross": {
+        "scale": 1.2222222222222223,
+        "xOffset": 0,
+        "yOffset": -6,
+        "flipped": false
+    },
+    "Mpinsir": {
+        "scale": 1.0555555555555556,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Koraidon": {
+        "scale": 1.1666666666666667,
+        "xOffset": 0,
+        "yOffset": -7,
+        "flipped": true
+    },
+    "Kleavor": {
+        "scale": 1.1805555555555556,
+        "xOffset": -2,
+        "yOffset": -8,
+        "flipped": false
+    },
+    "Eternatus": {
+        "scale": 1.087962962962963,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Miraidon": {
+        "scale": 1.2638888888888888,
+        "xOffset": -1,
+        "yOffset": -6,
+        "flipped": false
+    },
+    "Yveltal": {
+        "scale": 1.0509259259259258,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Zygarde": {
+        "scale": 1.0787037037037037,
+        "xOffset": 0,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Xerneas": {
+        "scale": 1.2175925925925926,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": true
+    },
+    "Abra": {
+        "scale": 0.9629629629629629,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Aerodactyl": {
+        "scale": 1.0740740740740742,
+        "xOffset": 2,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Aipom": {
+        "scale": 0.9907407407407407,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Alakazam": {
+        "scale": 1.0648148148148149,
+        "xOffset": 0,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Ampharos": {
+        "scale": 1.1250000000000002,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Arbok": {
+        "scale": 1.0092592592592593,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Arcanine": {
+        "scale": 1.1064814814814814,
+        "xOffset": 3,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Ariados": {
+        "scale": 1.0046296296296298,
+        "xOffset": 1,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Articuno": {
+        "scale": 1.1342592592592593,
+        "xOffset": 3,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Azumarill": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Bayleef": {
+        "scale": 1.115740740740741,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Beedrill": {
+        "scale": 1.0972222222222223,
+        "xOffset": -1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Bellossom": {
+        "scale": 0.9537037037037037,
+        "xOffset": 7,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Bellsprout": {
+        "scale": 0.8425925925925926,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Blastoise": {
+        "scale": 1.0555555555555556,
+        "xOffset": 2,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Blissey": {
+        "scale": 1.0324074074074074,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Bulbasaur": {
+        "scale": 0.9675925925925926,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Butterfree": {
+        "scale": 1.0509259259259258,
+        "xOffset": 1,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Caterpie": {
+        "scale": 0.7777777777777778,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Celebi": {
+        "scale": 0.9629629629629629,
+        "xOffset": 0,
+        "yOffset": -9,
+        "flipped": false
+    },
+    "Chansey": {
+        "scale": 1.0555555555555556,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Charizard": {
+        "scale": 1.0509259259259258,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Charmander": {
+        "scale": 0.8425925925925926,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Charmeleon": {
+        "scale": 1.0925925925925926,
+        "xOffset": 4,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Chikorita": {
+        "scale": 0.9444444444444444,
+        "xOffset": 10,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Chinchou": {
+        "scale": 1.0046296296296295,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Clefable": {
+        "scale": 1.0416666666666665,
+        "xOffset": 1,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Clefairy": {
+        "scale": 0.8796296296296297,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Cleffa": {
+        "scale": 0.9074074074074074,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Cloyster": {
+        "scale": 1.046296296296296,
+        "xOffset": 1,
+        "yOffset": -8,
+        "flipped": false
+    },
+    "Corsola": {
+        "scale": 0.9907407407407407,
+        "xOffset": 3,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Crobat": {
+        "scale": 1.0972222222222223,
+        "xOffset": 4,
+        "yOffset": -10,
+        "flipped": true
+    },
+    "Croconaw": {
+        "scale": 1,
+        "xOffset": 5,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Cubone": {
+        "scale": 0.8611111111111112,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Cyndaquil": {
+        "scale": 0.9722222222222222,
+        "xOffset": 2,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Delibird": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Dewgong": {
+        "scale": 1.0231481481481481,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Diglett": {
+        "scale": 0.8055555555555556,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Ditto": {
+        "scale": 0.8564814814814815,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Dodrio": {
+        "scale": 1.162037037037037,
+        "xOffset": 0,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Doduo": {
+        "scale": 1.0833333333333333,
+        "xOffset": -7,
+        "yOffset": -8,
+        "flipped": false
+    },
+    "Donphan": {
+        "scale": 1.0925925925925926,
+        "xOffset": 1,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Dragonair": {
+        "scale": 1.0185185185185186,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Dragonite": {
+        "scale": 1.2361111111111112,
+        "xOffset": 6,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Dratini": {
+        "scale": 0.8657407407407407,
+        "xOffset": 9,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Drowzee": {
+        "scale": 0.9490740740740741,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Dugtrio": {
+        "scale": 0.9768518518518519,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Dunsparce": {
+        "scale": 0.9120370370370371,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Eevee": {
+        "scale": 0.9212962962962963,
+        "xOffset": 4,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Ekans": {
+        "scale": 0.8333333333333334,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Electabuzz": {
+        "scale": 1.0555555555555556,
+        "xOffset": 1,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Electrode": {
+        "scale": 0.9444444444444444,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Elekid": {
+        "scale": 1.037037037037037,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Entei": {
+        "scale": 1.1064814814814814,
+        "xOffset": 4,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Espeon": {
+        "scale": 1.0324074074074074,
+        "xOffset": 0,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Exeggcute": {
+        "scale": 0.9351851851851852,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Exeggutor": {
+        "scale": 1.1018518518518519,
+        "xOffset": 0,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Farfetch'd": {
+        "scale": 0.9722222222222222,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Fearow": {
+        "scale": 1.0648148148148149,
+        "xOffset": 2,
+        "yOffset": -12,
+        "flipped": false
+    },
+    "Feraligatr": {
+        "scale": 1.1944444444444444,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Flaaffy": {
+        "scale": 0.9861111111111112,
+        "xOffset": 9,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Flareon": {
+        "scale": 1.0138888888888888,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Forretress": {
+        "scale": 1.0787037037037037,
+        "xOffset": 1,
+        "yOffset": -9,
+        "flipped": false
+    },
+    "Furret": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Gastly": {
+        "scale": 0.8472222222222222,
+        "xOffset": 0,
+        "yOffset": -9,
+        "flipped": false
+    },
+    "Gengar": {
+        "scale": 1.0509259259259258,
+        "xOffset": 3,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Geodude": {
+        "scale": 1.0324074074074074,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Girafarig": {
+        "scale": 1.1064814814814814,
+        "xOffset": 5,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Gligar": {
+        "scale": 0.8888888888888888,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Gloom": {
+        "scale": 0.9814814814814815,
+        "xOffset": 0,
+        "yOffset": 2,
+        "flipped": false
+    },
+    "Golbat": {
+        "scale": 1.0787037037037035,
+        "xOffset": 2,
+        "yOffset": -14,
+        "flipped": false
+    },
+    "Goldeen": {
+        "scale": 1.0277777777777777,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Golduck": {
+        "scale": 1.0416666666666667,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Golem": {
+        "scale": 1.0092592592592593,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Granbull": {
+        "scale": 1.0601851851851851,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Graveler": {
+        "scale": 1.0648148148148149,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Grimer": {
+        "scale": 0.9629629629629629,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Growlithe": {
+        "scale": 0.9490740740740741,
+        "xOffset": -5,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Gyarados": {
+        "scale": 1.1666666666666667,
+        "xOffset": 0,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Haunter": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": -6,
+        "flipped": false
+    },
+    "Heracross": {
+        "scale": 1.0555555555555556,
+        "xOffset": 2,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Hitmonchan": {
+        "scale": 1.0601851851851851,
+        "xOffset": -3,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Hitmonlee": {
+        "scale": 1.0694444444444444,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Hitmontop": {
+        "scale": 0.9722222222222222,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Hoothoot": {
+        "scale": 0.9027777777777778,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Hoppip": {
+        "scale": 0.9444444444444444,
+        "xOffset": 0,
+        "yOffset": -13,
+        "flipped": false
+    },
+    "Horsea": {
+        "scale": 0.8055555555555556,
+        "xOffset": 4,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Houndoom": {
+        "scale": 1.087962962962963,
+        "xOffset": 0,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Houndour": {
+        "scale": 0.9166666666666666,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Ho-oh": {
+        "scale": 1.171296296296296,
+        "xOffset": 1,
+        "yOffset": -12,
+        "flipped": true
+    },
+    "Hypno": {
+        "scale": 1.0694444444444444,
+        "xOffset": 1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Igglybuff": {
+        "scale": 0.8796296296296297,
+        "xOffset": 0,
+        "yOffset": -5,
+        "flipped": false
+    },
+    "Ivysaur": {
+        "scale": 0.9814814814814815,
+        "xOffset": 5,
+        "yOffset": 1,
+        "flipped": true
+    },
+    "Jigglypuff": {
+        "scale": 0.8703703703703703,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Jolteon": {
+        "scale": 1.1435185185185186,
+        "xOffset": 0,
+        "yOffset": -6,
+        "flipped": false
+    },
+    "Jumpluff": {
+        "scale": 1.087962962962963,
+        "xOffset": 1,
+        "yOffset": -8,
+        "flipped": false
+    },
+    "Jynx": {
+        "scale": 1.0462962962962963,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Kabuto": {
+        "scale": 0.8703703703703703,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Kabutops": {
+        "scale": 1.1435185185185186,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Kadabra": {
+        "scale": 1.0601851851851851,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Kakuna": {
+        "scale": 0.9305555555555556,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Kangaskhan": {
+        "scale": 1.0462962962962963,
+        "xOffset": 0,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Kingdra": {
+        "scale": 1.148148148148148,
+        "xOffset": 1,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Kingler": {
+        "scale": 1.0925925925925926,
+        "xOffset": 1,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Koffing": {
+        "scale": 0.9953703703703703,
+        "xOffset": 1,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Krabby": {
+        "scale": 1.023148148148148,
+        "xOffset": 1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Lanturn": {
+        "scale": 1.0648148148148149,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Lapras": {
+        "scale": 1.0416666666666667,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Larvitar": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Ledian": {
+        "scale": 1.0324074074074074,
+        "xOffset": 0,
+        "yOffset": -5,
+        "flipped": false
+    },
+    "Ledyba": {
+        "scale": 0.8842592592592593,
+        "xOffset": 0,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Lickitung": {
+        "scale": 1.0046296296296295,
+        "xOffset": 0,
+        "yOffset": 1,
+        "flipped": false
+    },
+    "Lugia": {
+        "scale": 1.1064814814814814,
+        "xOffset": 2,
+        "yOffset": -5,
+        "flipped": false
+    },
+    "Machamp": {
+        "scale": 1.1759259259259258,
+        "xOffset": 2,
+        "yOffset": -5,
+        "flipped": true
+    },
+    "Machoke": {
+        "scale": 1.0462962962962963,
+        "xOffset": 1,
+        "yOffset": 1,
+        "flipped": false
+    },
+    "Machop": {
+        "scale": 0.9444444444444444,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Magby": {
+        "scale": 0.8796296296296297,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Magcargo": {
+        "scale": 1.0740740740740742,
+        "xOffset": 1,
+        "yOffset": -5,
+        "flipped": false
+    },
+    "Magikarp": {
+        "scale": 0.9583333333333334,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Magmar": {
+        "scale": 1.0601851851851851,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Magnemite": {
+        "scale": 0.9444444444444444,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Magneton": {
+        "scale": 1.0046296296296295,
+        "xOffset": 0,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Mankey": {
+        "scale": 1.0555555555555556,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Mantine": {
+        "scale": 1.0555555555555556,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Mareep": {
+        "scale": 0.8611111111111112,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Marill": {
+        "scale": 0.9537037037037037,
+        "xOffset": 3,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Marowak": {
+        "scale": 1.1388888888888888,
+        "xOffset": 0,
+        "yOffset": -5,
+        "flipped": false
+    },
+    "Meganium": {
+        "scale": 1.2777777777777777,
+        "xOffset": 1,
+        "yOffset": -8,
+        "flipped": false
+    },
+    "Meowth": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Metapod": {
+        "scale": 0.8657407407407407,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Mew": {
+        "scale": 0.9861111111111112,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Mewtwo": {
+        "scale": 1.1574074074074074,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Miltank": {
+        "scale": 1.125,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Misdreavus": {
+        "scale": 0.9212962962962963,
+        "xOffset": 1,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Moltres": {
+        "scale": 1.0555555555555556,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Mr. Mime": {
+        "scale": 0.9814814814814815,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Muk": {
+        "scale": 1.0555555555555554,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Murkrow": {
+        "scale": 0.9490740740740741,
+        "xOffset": 5,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Natu": {
+        "scale": 0.8333333333333334,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Nidoking": {
+        "scale": 1.0462962962962963,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Nidoqueen": {
+        "scale": 1.0416666666666667,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "NidoranF": {
+        "scale": 0.8564814814814815,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "NidoranM": {
+        "scale": 0.8425925925925926,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Nidorina": {
+        "scale": 0.9768518518518519,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Nidorino": {
+        "scale": 0.9398148148148148,
+        "xOffset": 3,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Ninetales": {
+        "scale": 1.0740740740740742,
+        "xOffset": 2,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Noctowl": {
+        "scale": 1.1157407407407407,
+        "xOffset": 7,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Octillery": {
+        "scale": 1.037037037037037,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Oddish": {
+        "scale": 0.8796296296296297,
+        "xOffset": 11,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Omanyte": {
+        "scale": 0.8518518518518519,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Omastar": {
+        "scale": 1.037037037037037,
+        "xOffset": 2,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Onix": {
+        "scale": 1.037037037037037,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Paras": {
+        "scale": 0.8935185185185185,
+        "xOffset": 0,
+        "yOffset": 1,
+        "flipped": false
+    },
+    "Parasect": {
+        "scale": 1.0324074074074074,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Persian": {
+        "scale": 1.037037037037037,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Phanpy": {
+        "scale": 0.8055555555555556,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Pichu": {
+        "scale": 0.9814814814814815,
+        "xOffset": 13,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Pidgeot": {
+        "scale": 1.0787037037037037,
+        "xOffset": 3,
+        "yOffset": -7,
+        "flipped": true
+    },
+    "Pidgeotto": {
+        "scale": 1.0787037037037037,
+        "xOffset": 2,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Pidgey": {
+        "scale": 0.8842592592592593,
+        "xOffset": 9,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Pikachu": {
+        "scale": 0.9629629629629629,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Piloswine": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Pineco": {
+        "scale": 0.8888888888888888,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Pinsir": {
+        "scale": 1.0694444444444444,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Politoed": {
+        "scale": 1.1990740740740742,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Poliwag": {
+        "scale": 0.9351851851851852,
+        "xOffset": 4,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Poliwhirl": {
+        "scale": 0.9953703703703703,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Poliwrath": {
+        "scale": 1.0740740740740742,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Ponyta": {
+        "scale": 0.9953703703703703,
+        "xOffset": 4,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Porygon": {
+        "scale": 0.9351851851851852,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Porygon2": {
+        "scale": 0.9444444444444444,
+        "xOffset": 1,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Primeape": {
+        "scale": 1.0416666666666667,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Psyduck": {
+        "scale": 0.9351851851851852,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Pupitar": {
+        "scale": 0.9490740740740741,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Quagsire": {
+        "scale": 1.0416666666666667,
+        "xOffset": 0,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Quilava": {
+        "scale": 1.1805555555555556,
+        "xOffset": 0,
+        "yOffset": -5,
+        "flipped": true
+    },
+    "Qwilfish": {
+        "scale": 0.8981481481481481,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Raichu": {
+        "scale": 1.0787037037037037,
+        "xOffset": 0,
+        "yOffset": -5,
+        "flipped": false
+    },
+    "Raikou": {
+        "scale": 1.1018518518518519,
+        "xOffset": 0,
+        "yOffset": 3,
+        "flipped": false
+    },
+    "Rapidash": {
+        "scale": 1.1666666666666667,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Raticate": {
+        "scale": 1.0231481481481481,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Rattata": {
+        "scale": 0.9074074074074074,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Remoraid": {
+        "scale": 0.9675925925925926,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Rhydon": {
+        "scale": 1.0601851851851851,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Rhyhorn": {
+        "scale": 0.9398148148148148,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Sandshrew": {
+        "scale": 0.8796296296296297,
+        "xOffset": 6,
+        "yOffset": 2,
+        "flipped": false
+    },
+    "Sandslash": {
+        "scale": 1.0231481481481481,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Scizor": {
+        "scale": 1.1898148148148149,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Scyther": {
+        "scale": 1.1527777777777777,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Seadra": {
+        "scale": 1.0416666666666667,
+        "xOffset": 2,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Seaking": {
+        "scale": 1.0185185185185184,
+        "xOffset": 1,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Seel": {
+        "scale": 0.9814814814814815,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Sentret": {
+        "scale": 1.0416666666666667,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Shellder": {
+        "scale": 0.8518518518518519,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Shuckle": {
+        "scale": 1,
+        "xOffset": 1,
+        "yOffset": 2,
+        "flipped": true
+    },
+    "Skarmory": {
+        "scale": 1.0324074074074074,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Skiploom": {
+        "scale": 0.9120370370370371,
+        "xOffset": 0,
+        "yOffset": -6,
+        "flipped": false
+    },
+    "Slowbro": {
+        "scale": 1.0092592592592593,
+        "xOffset": 3,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Slowking": {
+        "scale": 1.1064814814814814,
+        "xOffset": 4,
+        "yOffset": -6,
+        "flipped": false
+    },
+    "Slowpoke": {
+        "scale": 0.9398148148148148,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Slugma": {
+        "scale": 0.8703703703703703,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Smeargle": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Smoochum": {
+        "scale": 0.9212962962962963,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Sneasel": {
+        "scale": 1.037037037037037,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Snorlax": {
+        "scale": 1.0648148148148149,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Snubbull": {
+        "scale": 0.9212962962962963,
+        "xOffset": 3,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Spearow": {
+        "scale": 0.8981481481481481,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Spinarak": {
+        "scale": 0.9212962962962963,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Squirtle": {
+        "scale": 0.8472222222222222,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Stantler": {
+        "scale": 1.1851851851851851,
+        "xOffset": 0,
+        "yOffset": -7,
+        "flipped": false
+    },
+    "Starmie": {
+        "scale": 1,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Staryu": {
+        "scale": 0.8842592592592593,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Steelix": {
+        "scale": 1.0555555555555556,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Sudowoodo": {
+        "scale": 1.1018518518518519,
+        "xOffset": 2,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Suicune": {
+        "scale": 1.0555555555555556,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Sunflora": {
+        "scale": 1.027777777777778,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Sunkern": {
+        "scale": 0.8472222222222222,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Swinub": {
+        "scale": 0.8981481481481481,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Tangela": {
+        "scale": 0.9166666666666666,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Tauros": {
+        "scale": 1.0601851851851851,
+        "xOffset": 1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Teddiursa": {
+        "scale": 0.9120370370370371,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Tentacool": {
+        "scale": 0.9074074074074074,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Tentacruel": {
+        "scale": 1.0509259259259258,
+        "xOffset": 1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Togepi": {
+        "scale": 0.8194444444444444,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Togetic": {
+        "scale": 1.0787037037037037,
+        "xOffset": 5,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Totodile": {
+        "scale": 0.9120370370370371,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Typhlosion": {
+        "scale": 1.1805555555555556,
+        "xOffset": 1,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Tyranitar": {
+        "scale": 1.1527777777777777,
+        "xOffset": 2,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Tyrogue": {
+        "scale": 0.8379629629629629,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Umbreon": {
+        "scale": 1.1203703703703705,
+        "xOffset": 0,
+        "yOffset": -3,
+        "flipped": false
+    },
+    "Unown": {
+        "scale": 0.8055555555555556,
+        "xOffset": 9,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Ursaring": {
+        "scale": 1.1388888888888888,
+        "xOffset": 0,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Vaporeon": {
+        "scale": 1.1388888888888888,
+        "xOffset": 1,
+        "yOffset": -6,
+        "flipped": false
+    },
+    "Venomoth": {
+        "scale": 1.0648148148148149,
+        "xOffset": 1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Venonat": {
+        "scale": 0.9120370370370371,
+        "xOffset": 4,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Venusaur": {
+        "scale": 1.0740740740740742,
+        "xOffset": 1,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Victreebel": {
+        "scale": 1.0555555555555556,
+        "xOffset": 2,
+        "yOffset": -2,
+        "flipped": false
+    },
+    "Vileplume": {
+        "scale": 1.0324074074074074,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Voltorb": {
+        "scale": 0.7962962962962963,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Vulpix": {
+        "scale": 0.9166666666666666,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Wartortle": {
+        "scale": 0.9768518518518519,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Weedle": {
+        "scale": 0.8240740740740741,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Weepinbell": {
+        "scale": 1.0185185185185186,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Weezing": {
+        "scale": 1.0601851851851851,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Wigglytuff": {
+        "scale": 1.0694444444444444,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Wobbuffet": {
+        "scale": 1.0694444444444444,
+        "xOffset": 2,
+        "yOffset": -1,
+        "flipped": false
+    },
+    "Wooper": {
+        "scale": 0.8611111111111112,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Xatu": {
+        "scale": 1.0601851851851851,
+        "xOffset": 3,
+        "yOffset": -4,
+        "flipped": false
+    },
+    "Yanma": {
+        "scale": 1.037037037037037,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Zapdos": {
+        "scale": 1.0694444444444444,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Zubat": {
+        "scale": 0.8935185185185185,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    },
+    "Mega Beedrill": {
+        "scale": 1.0972222222222223,
+        "xOffset": 0,
+        "yOffset": 0,
+        "flipped": false
+    }
+}

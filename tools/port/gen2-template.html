@@ -1,0 +1,1042 @@
+
+            <div class="mainContainer">
+            <!-- GRAPHICS -->
+                <div class="graphics">
+                    <img class="canvas texture" ref="background_texture" :src="textures[backgroundTexture]" :style="{ 
+                        'filter': `blur(${backgroundBlur}px) hue-rotate(${backgroundHue}deg) brightness(${backgroundBrightness}%) contrast(${backgroundContrast}%) saturate(${backgroundSaturation}%)` ,
+                        'transform': `scale(${backgroundScale}%) ${backgroundFlip ? 'rotateY(180deg)' : ''} ${backgroundXFlip ? 'rotateX(180deg)' : ''} translate(${backgroundXOffset}px, ${-backgroundYOffset}px)`
+                    }">
+                    <img class="canvas" ref="old_background_texture" style="opacity: 0">
+                    <img class="canvas pokeball" :src="`images/elements/pokeball.png`" :style="{
+                            'transform': `translate(${pokeball_translateX}px, ${-pokeball_translateY}px)`}">
+                    <img class="pokemon_art pokemon_offsets" ref="pokemon_art" :style="{
+                        'transform': `scale(${imageScale}) ${imageFlip ? 'rotateY(180deg)' : ''} translate(${imageXOffset}px, ${-imageYOffset}px)`,
+                        'filter': `saturate(${imageSat}%)
+                        drop-shadow(0 0 0.4px #000)
+                        drop-shadow(0 0 0.4px #000)
+                        drop-shadow(0 0 0.4px #000)
+                        drop-shadow(0 0 0.4px #000)
+                        drop-shadow(0 0 0.4px #000)
+                        drop-shadow(0 0 0.4px #000)
+                        drop-shadow(${imageFlip ? '-3px' : '3px'} 3px 3px #000)
+                        `
+                    }" :src="`images/pokemon/${s1dynamicReset.species.value}.png`">
+                    <div class="svg-container">
+                        <div v-show="blackouts_resets == 'None'" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/timer_2.svg)"></div>
+                        <div v-show="blackouts_resets == 'Blackouts'" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/timer_2.svg)"></div>
+                        <div v-show="blackouts_resets == 'Resets'" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/timer_2.svg)"></div>
+                        <div v-show="blackouts_resets == 'Both'" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/timer.svg)"></div>
+                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/stats.svg)"></div>
+                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/moveset.svg)"></div>
+                    </div>
+                    <img v-if="ui_stats_styling == '2023'" class="exp_background" src="images/exp_bar/exp_bar.png">
+                    <img v-if="ui_stats_styling == '2023'" class="exp_label_box" src="images/exp_bar/exp_label.png">
+                    <div v-if="ui_stats_styling == '2023'" class="exp_growthRate">{{ growthRate(dexDataCrystal[starter].growth_rate) }}</div>
+                    
+                    <div v-if="shuckie_timer == true" class="gametime">
+                        <div class="gametimeClock">{{formatMilliseconds(emulatorStats?.time_current)}}</div>
+                        <div class="gametimeFrames">.{{getCentiseconds(emulatorStats?.time_current)}}</div>
+                    </div>
+                    <div v-else="" class="gametime">
+                        <div class="gametimeClock">{{timer_formatted_time[0]}}</div>
+                        <div class="gametimeFrames">{{timer_formatted_time[1]}}</div>
+                    </div>
+                    <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/ui/gamearea.svg)"></div>
+                    <img v-show="kanto_badges == false" class="canvas" src="images/elements/badges_johto.png">
+                    <img v-show="kanto_badges == true" class="canvas" src="images/elements/badges_kanto.png">
+                    <img v-if="ui_stats_styling == '2024'" class="posAbs" style="z-index: 0;" :src="`images/ui/${ui_type_color_modifier}${ui_stat_arrangement_modifier}stat_values.svg`">
+                </div>
+
+            <!-- DEBUGGING -->
+                <div class="debugging debugging1" style="z-index: 20000;">
+                    <div>Game:</div>
+                    <select v-model="game_selection" class="dropdownMenu dropdown_menu_column3">
+                        <option>Crystal</option>
+                        <option>Gold &amp; Silver</option>
+                    </select><br>
+                    <br>
+                    <button class="buttonStyle" @click="newRun">New Run</button><br>
+                    <div>Timer:</div>
+                    <button @click="pauseUnpauseTime()" class="buttonStyle">Pause/Resume</button><br>
+                    <button class="buttonStyle" @click="set_timer">Set Timer</button><input type="text" class="inputContainer" style="width: 210px; text-align: right;" v-model="timer_startTimeOffset" placeholder="00:00:00.00">
+                    <div v-if="release == false">
+                        <table>
+                            <tbody><tr><td>Show Advanced Settings:</td><td><input class="checkBoxStyle" type="checkbox" v-model="show_advanced_settings"></td></tr>
+                            <tr v-if="show_advanced_settings"><td>Test Run:</td><td><input class="checkBoxStyle" type="checkbox" v-model="testRun"></td></tr>
+                            <tr v-if="show_advanced_settings"><td>No increment:</td><td><input class="checkBoxStyle" type="checkbox" v-model="no_increment"></td></tr>
+                            <tr v-if="show_advanced_settings"><td>Re-filming Mode:</td><td><input class="checkBoxStyle" type="checkbox" v-model="refilming_mode"></td></tr>
+                            <tr v-if="show_advanced_settings"><td>Shuckie Timer:</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_timer"></td></tr>
+                            <tr v-if="show_advanced_settings"><td>Shuckie Counters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_counters"></td></tr>
+                            <tr v-if="show_advanced_settings &amp;&amp; refilming_mode"><td>Attempt Number:</td><td><input class="inputContainer" style="width: 50px; text-align: center;" type="text" v-model="refilmed_attempt"></td></tr>
+                            <tr v-if="show_advanced_settings &amp;&amp; refilming_mode"><td>Finish Number:</td><td> <input class="inputContainer" style="width: 50px; text-align: center;" type="text" v-model="refilmed_finish"></td></tr>
+                            <tr v-if="show_advanced_settings"><td>Debugging:</td><td><input class="checkBoxStyle" type="checkbox" v-model="debugging"></td></tr>
+                            <tr v-if="isInDevMode &amp;&amp; show_advanced_settings &amp;&amp; debugging" title="Dev only. Packaged builds always apply enemy sprite styles."><td>Enemy Sprite Styles:</td><td><input class="checkBoxStyle" type="checkbox" v-model="enemy_sprite_styles_enabled"></td></tr>
+                            <tr v-if="isInDevMode &amp;&amp; show_advanced_settings &amp;&amp; debugging">
+                                <td>Style Mode:</td>
+                                <td>
+                                    <button v-if="!style_mode_active" class="buttonStyle" style="font-size: 11px;" @click="enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
+                                    <button v-else="" class="buttonStyle" style="font-size: 11px; color: #f44;" @click="exitStyleMode()">Exit</button>
+                                </td>
+                            </tr>
+                            <tr v-if="isInDevMode &amp;&amp; show_advanced_settings &amp;&amp; debugging &amp;&amp; style_mode_active">
+                                <td colspan="2" style="font-size: 11px;">{{ style_mode_index + 1 }} / {{ style_mode_species_list.length }} — <strong>{{ styleModeCurrentSpecies() }}</strong></td>
+                            </tr>
+                            <tr v-if="show_advanced_settings"><td>Post-Battle Splits:</td><td><input class="checkBoxStyle" type="checkbox" v-model="automatic_post_battle_splits"></td></tr>
+                            <tr><td>Show Bonk Counter:</td> <td><input class="checkBoxStyle" type="checkbox" v-model="bonk"></td></tr>
+                            <tr><td>Show Repel Counter:</td><td><input class="checkBoxStyle" type="checkbox" v-model="repel_counter"></td></tr>
+                        </tbody></table>
+                    </div>
+                    <br>
+                    <button class="buttonStyle" @click="openFolder(`splits`, `Crystal`, starter, 'finishes')">Open Splits Folder</button>
+                    <br>
+                    <br>
+
+                    <!-- Backport Importer -->
+                    <div v-if="show_advanced_settings">
+                        <div>Import Backports:<input class="checkBoxStyle" type="checkbox" v-model="show_backport_import"></div>
+                        <div v-if="show_backport_import" style="padding: 4px 0;">
+                            <div>Backports ASM:</div>
+                            <input type="file" ref="backportsFile" accept=".asm" class="inputContainer" style="width: 210px;">
+                            <div>Backport Moves ASM:</div>
+                            <input type="file" ref="backportMovesFile" accept=".asm" class="inputContainer" style="width: 210px;">
+                            <div>Display Name:</div>
+                            <input type="text" class="inputContainer" style="width: 210px;" v-model="backport_pokemon_name" placeholder="Auto-detected from ASM">
+                            <br>
+                            <button class="buttonStyle" @click="importBackports">Import</button>
+                            <div v-if="backport_import_status" style="font-size: 11px; margin-top: 4px; white-space: pre-wrap;">{{backport_import_status}}</div>
+                        </div>
+                        <br>
+                    </div>
+
+                    <!-- Style Settings Management -->
+                    <!-- <div v-if="show_advanced_settings" style="margin-bottom: 10px; padding: 8px; border: 1px solid #444; border-radius: 4px;">
+                        <div style="margin-bottom: 5px; font-weight: bold;">Style Settings</div>
+                        <div v-if="isInDevMode" style="color: #4CAF50; font-size: 11px; margin-bottom: 5px;">
+                            Development Mode - Changes save to defaults
+                        </div>
+                        <div v-else style="color: #888; font-size: 11px; margin-bottom: 5px;">
+                            Production Mode - Changes save locally
+                        </div>
+                        <button v-if="isInDevMode" class="buttonStyle" @click="exportStyleSettingsAsDefaults()" style="font-size: 11px;">
+                            Export All Settings as Defaults
+                        </button>
+                        <button class="buttonStyle" @click="resetCurrentPokemonToDefaults()" style="font-size: 11px;">
+                            Reset Current Pokemon to Defaults
+                        </button>
+                        <button class="buttonStyle" @click="resetAllStyleSettingsToDefaults()" style="font-size: 11px; color: #f44;">
+                            Reset ALL to Defaults
+                        </button>
+                    </div> -->
+
+                    <div>Pokemon Editor:<input class="checkBoxStyle" type="checkbox" v-model="editor"></div>
+                    <div v-if="editor">
+                        <div>Moveset Updating:</div>
+                        <input type="text" class="inputContainer" v-model="move1_replacement" placeholder="Input move 1"><br>
+                        <input type="text" class="inputContainer" v-model="move2_replacement" placeholder="Input move 2"><br>
+                        <input type="text" class="inputContainer" v-model="move3_replacement" placeholder="Input move 3"><br>
+                        <input type="text" class="inputContainer" v-model="move4_replacement" placeholder="Input move 4"><br>
+                        <button class="buttonStyle buttonStyle_column3" @click="update_moveset">Update Party Moves</button>
+                        <button class="buttonStyle buttonStyle_column3" @click="update_battle_moveset">Update Battle Moves</button>
+                        <br>
+                        <br>
+                        <div>Pokemon Recalculator:<input class="checkBoxStyle" type="checkbox" v-model="pokemon_recalculator"></div>
+                        <br>
+                        <div v-if="!pokemon_recalculator">
+                            <div>Item Updating:</div>
+                            <input type="text" class="inputContainer" v-model="item1_replacement" placeholder="Input item 1"><br>
+                            <input type="text" class="inputContainer" v-model="item2_replacement" placeholder="Input item 2"><br>
+                            <input type="text" class="inputContainer" v-model="item3_replacement" placeholder="Input item 3"><br>
+                            <input type="text" class="inputContainer" v-model="item4_replacement" placeholder="Input item 4"><br>
+                            <button class="buttonStyle buttonStyle_column3" @click="update_items">Update</button>
+                            <br>
+                            <br>
+                            <div>DV Updating for HP:</div>
+                            <input style="width: 30px;" type="text" class="inputContainer" v-model="dv_atk_replacement" placeholder="Atk">
+                            <button style="width: 80px;" class="buttonStyle buttonStyle_column3" @click="update_atk">Set Atk</button>
+                            <br>
+                            <input style="width: 30px;" type="text" class="inputContainer" v-model="dv_def_replacement" placeholder="Def">
+                            <button style="width: 80px;" class="buttonStyle buttonStyle_column3" @click="update_def">Set Def</button>
+                            <br>
+                            <br>
+                        </div>
+                        <div v-if="pokemon_recalculator">
+                            <div>Update Pokemon:</div>
+                            Level:<input style="width: 40px;" type="text" class="inputContainer" v-model="recalculate_level" placeholder="Level">
+                            <br>
+                            <div>Stat Experience Updating:</div>
+                            <input style="width: 100px;" type="text" class="inputContainer" v-model="stat_exp_hp_replacement" placeholder="HP">{{this.mapper.properties.player.team[0].statExpHp.value}}<br>
+                            <input style="width: 100px;" type="text" class="inputContainer" v-model="stat_exp_atk_replacement" placeholder="Atk">{{this.mapper.properties.player.team[0].statExpAttack.value}}<br>
+                            <input style="width: 100px;" type="text" class="inputContainer" v-model="stat_exp_def_replacement" placeholder="Def">{{this.mapper.properties.player.team[0].statExpDefense.value}}<br>
+                            <input style="width: 100px;" type="text" class="inputContainer" v-model="stat_exp_spc_replacement" placeholder="Spc">{{this.mapper.properties.player.team[0].statExpSpecial.value}}<br>
+                            <input style="width: 100px;" type="text" class="inputContainer" v-model="stat_exp_spe_replacement" placeholder="Spe">{{this.mapper.properties.player.team[0].statExpSpeed.value}}<br>
+                            <button style="width: 80px;" class="buttonStyle buttonStyle_column3" @click="update_pokemon">Update</button><br>
+                        </div>
+                    </div>
+                    <br>
+                    <div v-if="release == false &amp;&amp; debugging &amp;&amp; show_advanced_settings &amp;&amp; !editor">
+                        <div>Debugging:</div>
+                        <br>
+                        <table>
+                            <tbody><tr><td>State:</td>        <td>{{g2stateVariable}}</td></tr>
+                            <tr><td>hChosenStarter:</td>  <td>{{mapper.properties.patch.hChosenStarter}}</td></tr>
+                            <tr><td>wEarlyEncounters:</td>  <td>{{mapper.properties.patch.wEarlyEncounters}}</td></tr>
+                            <tr><td>Held Item:</td>  <td>{{get_held_item}}</td></tr>
+                            <tr><td>svgColorClass:</td>  <td>{{svgColorClass(speed_comparison(0, mapper.properties.battle.trainer.team[0]?.speed).comparison, mapper.properties.battle.trainer.team[0])}}</td></tr>
+                            <tr><td>Speed Comparison:</td>  <td>{{speed_comparison(0, mapper.properties.battle.trainer.team[0]?.speed).comparison, mapper.properties.battle.trainer.team[0]}}</td></tr>
+                            <tr><td>bonks:</td>  <td>{{mapper.properties.patch.steps.bonks.value}}</td></tr>
+                            <tr><td>Enemy State:</td>  <td>{{enemyState}}</td></tr>
+                            <tr><td>Run Complete:</td>  <td>{{run_complete}}</td></tr>
+                            <tr><td>Kanto Badges:</td>  <td>{{kanto_badges}}</td></tr>
+                            <tr><td>Move1:</td><td>{{move_name(camelCase(s1.move1.value))}}</td></tr>
+                            <tr><td>Move2:</td><td>{{move_name(camelCase(s1.move2.value))}}</td></tr>
+                            <tr><td>Move3:</td><td>{{move_name(camelCase(s1.move3.value))}}</td></tr>
+                            <tr><td>Move4:</td><td>{{move_name(camelCase(s1.move4.value))}}</td></tr>
+                            <tr><td>pokemon_gender_list:</td><td>{{pokemon_gender_list}}</td></tr>
+                        </tbody></table>
+                    </div>
+                </div>
+                <div class="debugging debugging2" style="z-index: 20000;">
+                    <div>Solo Pokemon:</div>
+                    <select v-model="starter" @change="load_pokemon_sprite_settings(s1dynamicReset.species.value)" class="dropdownMenu dropdown_menu_column3" style="background-color: rgb(201, 199, 100)">
+                        <option disabled="" value="">Select a species</option>
+                        <option v-for="key in filtered_pokemon_list" :value="`${key}`">{{key}}</option>
+                    </select><br>
+                    <div>Search Pokemon:</div>
+                    <input type="text" class="inputContainer" v-model="search_term" placeholder="Search for a species">
+                    <!-- <button class="buttonStyle" @click="set_rom_starter">Set ROM Starter</button> -->
+                    <button class="buttonStyle" @click="load_splits()">Split Comparison</button><br>
+                    <table>
+                        <tbody><tr>
+                            <td>Previous:</td>
+                            <td><input type="text" class="inputContainer" style="width: 100px;" v-model="previous_label" placeholder="Previous"></td>
+                        </tr>
+                        <tr>
+                            <td>Current:</td>
+                            <td><input type="text" class="inputContainer" style="width: 100px;" v-model="current_label" placeholder="Current"></td>
+                        </tr>
+                    </tbody></table>
+                    <table>
+                        <tbody><tr>
+                            <td>Attempt Number:</td>
+                            <td>{{attempt_number}}</td>
+                            <td><button @click="increment('attempt_number')" class="smallButtonStyle increment">+</button></td>
+                            <td><button @click="decrement('attempt_number')" class="smallButtonStyle2 decrement">-</button></td>
+                        </tr>
+                        <tr>
+                            <td>Finish Number:</td>
+                            <td>{{finished_run_count}}</td>
+                            <td><button @click="increment('finished_run_count')" class="smallButtonStyle increment">+</button></td>
+                            <td><button @click="decrement('finished_run_count')" class="smallButtonStyle2 decrement">-</button></td>
+                        </tr>
+                        <tr>
+                            <td>Resets:</td>
+                            <td>{{playerResets}}</td>
+                            <td><button @click="increment('playerResets')" class="smallButtonStyle increment">+</button></td>
+                            <td><button @click="decrement('playerResets')" class="smallButtonStyle2 decrement">-</button></td>
+                        </tr>
+                        <tr>
+                            <td>Blackouts:</td>
+                            <td>{{blackout_counter}}</td>
+                            <td><button @click="increment('blackout_counter')" class="smallButtonStyle increment">+</button></td>
+                            <td><button @click="decrement('blackout_counter')" class="smallButtonStyle2 decrement">-</button></td>
+                        </tr>
+                        <tr>
+                            <td>Faults:</td>
+                            <td>{{playerResets + blackout_counter}}</td>
+                        </tr>
+                    </tbody></table>
+                    <br>
+                    <div class="demo">
+                        <div>Gender:</div>
+                        <select v-model="pokemon_gender" class="dropdownMenu dropdown_menu_column3">
+                            <option v-for="key in pokemon_gender_list" :value="`${key}`">{{key}}</option>
+                        </select>
+                        <div style="opacity: .7;">Ratio: {{pokemon_gender_ratio}}</div>
+                        <br>
+                        <div>Hidden Power:</div>
+                        <select v-model="hpType" class="dropdownMenu dropdown_menu_column3">
+                            <option>Dark</option>
+                            <option>Ice</option>
+                            <option>Ground</option>
+                            <option>Rock</option>
+                            <option>Psychic</option>
+                            <option>Flying</option>
+                            <option>Fire</option>
+                            <option>Electric</option>
+                            <option>Water</option>
+                            <option>Dragon</option>
+                            <option>Ghost</option>
+                            <option>Bug</option>
+                            <option>Grass</option>
+                            <option>Steel</option>
+                            <option>Poison</option>
+                            <option>Fighting</option>
+                        </select>
+                        <table style="opacity: .7;">
+                            <tbody><tr><td>HP: </td><td style="padding-left: 3px;">{{hpDv(currentHpDVs.atk, currentHpDVs.def, 15, 15)}}</td><td style="padding-left: 18px;">Spe:</td><td style="padding-left: 3px;">15</td></tr>
+                            <tr><td>Atk:</td><td style="padding-left: 3px;">{{currentHpDVs.atk}}</td>                                                      <td style="padding-left: 18px;">Spc:</td><td style="padding-left: 3px;">15</td></tr>
+                            <tr><td>Def:</td><td style="padding-left: 3px;">{{currentHpDVs.def}}</td>                                                              </tr>
+                        </tbody></table>
+                        <div style="opacity: .7;">Base Power: {{currentHpPower}}</div>
+                    </div>
+                    <br>
+                    <div>Encounter Settings:</div>
+                    <table>
+                        <tbody><tr><td>Encounters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="toggle_wEarlyEncounters"></td></tr>
+                        <tr><td>Guaranteed Catches:</td><td><input class="checkBoxStyle" type="checkbox" v-model="toggle_wGuaranteedCatches"></td></tr>
+                    </tbody></table>
+                    <table>
+                        <tbody><tr><td>Route 29</td>     <td>- Sentret:</td>      <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_ROUTE_29_SENTRET"></td></tr>
+                        <tr><td>Route 31</td>     <td>- Bellsprout:</td>   <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_ROUTE31_BELLSPROUT"></td></tr>
+                        <tr><td>Route 32</td>     <td>- Bellsprout:</td>   <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_ROUTE32_BELLSPROUT"></td></tr>
+                        <tr><td>Union Cave</td>   <td>- Sandshrew:</td>    <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_UNION_CAVE_SANDSHREW"></td></tr>
+                        <tr><td>Ilex Forest</td>  <td>- Psyduck:</td>      <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_ILEX_FOREST_PSYDUCK"></td></tr>
+                        <tr><td>Ilex Forest</td>  <td>- Oddish:</td>       <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_ILEX_FOREST_ODDISH"></td></tr>
+                        <tr><td>Route 34</td>     <td>- Abra:</td>         <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_ROUTE34_ABRA"></td></tr>
+                        <tr><td>National Park</td><td>- Psyduck:</td>      <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_NATIONAL_PARK_PSYDUCK"></td></tr>
+                        <tr><td>Olivine City</td> <td>- Krabby:</td>       <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_OLIVINE_CITY_KRABBY"></td></tr>
+                        <tr><td>Violet City</td>  <td>- Poliwag:</td>      <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_VIOLET_CITY_POLIWAG"></td></tr>
+                        <tr><td>Ecruteak City</td><td>- Poliwag:</td>      <td><input class="checkBoxStyle" type="checkbox" v-model="toggle_EVENT_ENCOUNTER_ECRUTEAK_CITY_POLIWAG"></td></tr>
+                    </tbody></table>
+                    <br>
+                    <table>
+                        <tbody><tr><td>Return Base Power:</td> <td style="text-align: right;">{{g2ReturnPowerCalc(mapper.properties.player.team[0])}}</td></tr>
+                        <tr><td>Player Party Count:</td><td style="text-align: right;">{{mapper.properties.player.teamCount.value &gt; 6 ? 0 : mapper.properties.player.teamCount.value}}</td></tr>
+                        <tr><td>Overworld HP:</td>      <td style="text-align: right;">{{mapper.properties.player.team[0].hp.value}} / {{mapper.properties.player.team[0].maxHp.value}}</td></tr>
+                        <tr><td>Status:</td>            <td style="text-align: right;">{{mapper.properties.player.team[0].statusCondition.value == null ? 'None' : mapper.properties.player.team[0].statusCondition.value}}</td></tr>
+                    </tbody></table>
+                    <div>Stat Experience:</div>
+                    <table>
+                        <tbody><tr>
+                            <td>HP:</td> 
+                            <td style="padding-left: 5px;">{{mapper.properties.player.team[0].statExpHp.value}}</td>     
+                            <td style="text-align: right; opacity: .7;">({{statExp(mapper.properties.player.team[0].statExpHp.value)}})</td>    
+                            
+                            <td style="padding-left: 20px;">Spe:</td>
+                            <td style="padding-left: 5px;">{{mapper.properties.player.team[0].statExpSpeed.value}}</td>
+                            <td style="padding-left: 5px; text-align: right; opacity: .7;">({{statExp(mapper.properties.player.team[0].statExpSpeed.value)}})</td>    
+                        </tr>
+                        <tr>
+                            <td>Atk:</td>
+                            <td style="padding-left: 5px;">{{mapper.properties.player.team[0].statExpAttack.value}}</td> 
+                            <td style="text-align: right; opacity: .7;">({{statExp(mapper.properties.player.team[0].statExpAttack.value)}})</td>
+                            
+                            <td style="padding-left: 20px;">Spc:</td>
+                            <td style="padding-left: 5px;">{{mapper.properties.player.team[0].statExpSpecial.value}}</td>
+                            <td style="padding-left: 5px; text-align: right; opacity: .7;">({{statExp(mapper.properties.player.team[0].statExpSpecial.value)}})</td>
+                        </tr>
+                        <tr>
+                            <td>Def:</td>
+                            <td style="padding-left: 5px;">{{mapper.properties.player.team[0].statExpDefense.value}}</td>
+                            <td style="padding-left: 5px; text-align: right; opacity: .7;">({{statExp(mapper.properties.player.team[0].statExpDefense.value)}})</td>
+                        </tr>
+                    </tbody></table>
+                </div>
+                <div class="debugging debugging3" style="z-index: 20000;">
+                    <div>Stats:</div>
+                    <select v-model="stats_setting" class="dropdownMenu">
+                        <option>Automatic</option>
+                        <option>Badge Boosts</option>
+                        <option>Base Stats</option>
+                        <option>DVs</option>
+                        <option>EVs</option>
+                        <option>Vitamins</option>
+                        <option>Detailed EVs</option>
+                    </select>
+                    <br>
+                    <br>
+                    Right UI:<br>
+                    <select v-model="right_panel" class="dropdownMenu">
+                        <option>Battle Graphic</option>
+                        <!-- <option>Inventory</option> -->
+                        <option>Movepool</option>
+                        <option>Splits</option>
+                        <option>Trainers</option>
+                    </select>
+                    <br>
+                    <div>Unobtainable Moves:</div>
+                    <select v-model="unobtainable_moves_toggle" class="dropdownMenu">
+                        <option>Never Cross Out</option>
+                        <option>Cross Out When Starter is Obtained</option>
+                        <option>Cross Out After First Badge</option>
+                        <option>Always Cross Out</option>
+                    </select><br>
+                    Splits:<br>
+                    <select v-model="toggle_compare_splits" class="dropdownMenu">
+                        <option>First</option>
+                        <option>Followup</option>
+                        <option>Followup + Summary</option>
+                    </select>
+                    <br>
+                    <br>
+                    <div>UI Color:</div>
+                    <button @click="color_picker" class="buttonStyle">Color Picker</button><br>
+                    Saturation: <input type="range" min="0" max="2" step="0.1" v-model="ui_saturation"><br>
+                    <br>
+                    <div>Pokemon Image Settings</div>
+                    <table>
+                        <tbody><tr><td>X-Offset:   </td><td><input type="range" min="-600" max="600" v-model="imageXOffset"></td></tr>
+                        <tr><td>Y-Offset:   </td><td><input type="range" min="-600" max="600" v-model="imageYOffset"></td></tr>
+                        <tr><td>Scale:      </td><td><input type="range" min="0.2" max="2.5" step="0.01" v-model="imageScale"></td></tr>
+                        <tr><td>Saturation: </td><td><input type="range" min="90" max="150" step="1" v-model="imageSat"></td></tr>
+                        <tr><td>Flip:       </td><td><input class="checkBoxStyle" type="checkbox" v-model="imageFlip"></td></tr>
+                    </tbody></table>
+                    <br>
+                    <div v-if="show_advanced_settings">
+                        <div>Pokeball Floor:</div>
+                        X-Offset: <input type="range" min="-400" max="400" v-model="pokeball_translateX"><br>
+                        Y-Offset: <input type="range" min="-400" max="400" v-model="pokeball_translateY"><br>
+                        <br>
+                    </div>
+                    <div>Background Texture:</div>
+                    <select v-model="backgroundTexture" class="dropdownMenu">
+                        <option v-for="key in dropdownDownMenuKeys.textures" :key="key" :value="key">
+                            {{ key }}
+                        </option>
+                    </select><br>
+                    <table>
+                        <tbody><tr><td>X-Offset:   </td><td><input type="range" min="-325" max="325" v-model="backgroundXOffset"></td></tr>
+                        <tr><td>Y-Offset:   </td><td><input type="range" min="-325" max="325" v-model="backgroundYOffset"></td></tr>
+                        <tr><td>Scale:      </td><td><input type="range" min="100" max="200" v-model="backgroundScale"></td></tr>
+                        <tr><td>Brightness: </td><td><input type="range" min="0" max="200" v-model="backgroundBrightness"></td></tr>
+                        <tr><td>Contrast:   </td><td><input type="range" min="0" max="200" v-model="backgroundContrast"></td></tr>
+                        <tr><td>Saturation: </td><td><input type="range" min="0" max="200" v-model="backgroundSaturation"></td></tr>
+                        <tr><td>Blur:       </td><td><input type="range" min="0" max="10" v-model="backgroundBlur"></td></tr>
+                        <tr><td>Hue:        </td><td><input type="range" min="0" max="358" v-model="backgroundHue"></td></tr>
+                    </tbody></table>
+                    <table>
+                        <tbody><tr><td style="padding-right: 46px;">Flip</td><td>X:</td><td style="padding-right: 12px;"><input class="checkBoxStyle" type="checkbox" v-model="backgroundFlip"></td><td>Y:</td><td><input class="checkBoxStyle" type="checkbox" v-model="backgroundXFlip"></td></tr>
+                    </tbody></table>
+                    <br>
+                    <div v-if="right_panel == 'Trainers'">
+                        <div>Search Trainers:</div>
+                        <input type="text" v-model="search_trainers" placeholder="Search for a trainer">
+                        <div>Trainer:</div>
+                        <select v-model="examined_trainer" class="dropdownMenu">
+                            <option v-for="trainer in filtered_trainer_list" :key="trainer" :value="trainer">{{ trainer }}</option>
+                        </select><br>
+                    </div>
+                    <br>
+                </div>
+                <div class="debugging debugging4" style="z-index: 20000;">
+                    <div>Candies:</div>
+                    <table>
+                        <tbody><tr>
+                            <td><span :class="rareCandyStatusClass('olivine_lighthouse_5f_rare_candy')">Lighthouse</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('lake_of_rage_hidden_rare_candy')">Lake of Rage</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('violet_city_rare_candy')">Violet</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('route_34_hidden_rare_candy')">Goldenrod</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('route_27_rare_candy')">Tohjo Falls</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('mount_mortar_2f_inside_rare_candy')">Mt. Mortar</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('whirl_island_b1f_hidden_rare_candy')">Whirl Islands</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('listened_to_fan_club_president')">Fan Club</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('cinnabar_island_hidden_rare_candy')">Cinnabar</span></td>
+                        </tr>
+                        <tr>
+                            <td><span :class="rareCandyStatusClass('route_28_hidden_rare_candy')">Mt. Silver</span></td>
+                        </tr>
+                    </tbody></table>
+                </div>
+
+            <!-- Badges -->
+                <div v-show="g2stateVariable != 'Base Stats'">
+                    <div v-show="kanto_badges == false">
+                        <div v-for="badge in progressBadges">
+                            <transition name="fade"><img v-show="mapper.properties.player.badges[badge].value == true" :src="`images/badges/progress bar/${badge}.png`" class="canvas"></transition>
+                        </div>
+                    </div>
+                    <div v-show="kanto_badges == true">
+                        <div v-for="badge in progressBadges2">
+                            <transition name="fade"><img v-show="mapper.properties.player.badges[badge].value == true" :src="`images/badges/progress bar/${badge}.png`" class="canvas"></transition>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- TYPE ICONS -->
+                <transition name="fade1">
+                    <div v-if="!run_complete" class="typeIconContainer">
+                        <img v-show="typeIcons == true" class="type1" :src="`images/type-icons/${ui_type_icons_modifier}${type1().toLowerCase()}.png`">
+                        <img v-show="typeIcons == true &amp;&amp; type1() != type2()" class="type1" :src="`images/type-icons/${ui_type_icons_modifier}${type2().toLowerCase()}.png`">
+                    </div>
+                </transition>
+                
+            <!-- BADGE ICONS -->
+                <div v-if="display_badge_boosts == true" class="statsContainer">          
+                    <img v-show="map.player.badges.badge1.value === true" class="badgeBoostAtk" :src="badgeGraphic(map.player.badges.badge1)">
+                    <img v-show="map.player.badges.badge3.value === true" :class="`${ui_stat_arrangement_modifier}badgeBoostSpd`" :src="badgeGraphic(map.player.badges.badge3)">                    
+                    <img v-show="map.player.badges.badge6.value === true" class="badgeBoostDef" :src="badgeGraphic(map.player.badges.badge6)">                    
+                    <img v-show="map.player.badges.badge7.value === true" :class="`${ui_stat_arrangement_modifier}badgeBoostSpcA`" :src="badgeGraphic(map.player.badges.badge7)">      
+                    <img v-show="map.player.badges.badge7.value === true &amp;&amp; g2spcDefCheck() === `Boost`" :class="`${ui_stat_arrangement_modifier}badgeBoostSpcD`" :src="badgeGraphic(map.player.badges.badge7)">      
+                </div>  
+
+            <!-- STATS OVERLAY GRAPHIC  -->
+                <div class="stats_header">{{stats_header}}</div>
+                <div class="growth_rate">{{growth_rate}}</div>
+                <div class="statsContainer" id="stats">
+                <div v-show="expBarToggle == true" class="expBar">
+                    <div v-if="g2stateVariable == `Base Stats`" class="posAbs exp_label_2024">Exp:</div>
+                    <div v-if="g2stateVariable != `Base Stats`" class="posAbs exp_label_2024">{{decimalToPercentage(calcExpStats(growthRate(dexDataCrystal[starter].growth_rate), mapper.properties.player.team[0].expPoints.value).percent)}}%</div>
+                    <div class="posAbs expMeterStyle expMeterOuter_2024"><div class="expMeterStyle expMeterInner_2024" ref="expBar"></div></div>
+                </div>
+                <!--  New Stats -->
+                <div style="z-index: 200;">
+                    <div class="stats_container"> 
+                        <div v-for="stat in stat_object">
+                            <div v-if="stat.name != 'Hp' &amp;&amp; g2stateVariable == 'Battle'">
+                                <div :class="`mod_style ${ui_stat_arrangement_modifier}mod_${stat.mod_abrv}`" style="font-family: play;">{{ stageModifiers(batp()[`modStage${stat.mod_path}`]) }}</div>
+                            </div>
+                            <div v-if="stats_setting != 'Vitamins'" :style="{ opacity: statLabelOpacity()[stat.name]}" :class="`stat_label_style stat_row_${stat[`${ui_stat_arrangement_modifier}label_row`]} stat_column_${stat.label_column}`">{{stat.label}}</div>
+                            <div v-else="" :style="{ opacity: statLabelOpacity()[stat.name]}" :class="`stat_label_style stat_row_${stat[`${ui_stat_arrangement_modifier}label_row`]} stat_column_${stat.label_column}`">{{stat.vitamin}}</div>
+                            
+                            <div v-if="stats_setting == 'Base Stats'" :class="`stat_value_style stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column}`">{{dexDataCrystal[starter][stat.base_stat_path]}}</div>
+                            <div v-if="stats_setting == 'DVs'" :class="`stat_value_style stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} dv`">{{get_dv(`${stat.name}`)}}/15</div>
+                            <div v-if="stats_setting == 'EVs'" :class="`stat_value_style stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} evs`">{{mapper.properties.player.team[0][`statExp${stat.name_stat_exp}`].value}}</div>
+                            <div v-if="stats_setting == 'Vitamins'" :class="`stat_value_style stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} evs`">{{statExp(mapper.properties.player.team[0][`statExp${stat.name_stat_exp}`].value)}}</div>
+                            <div v-if="stats_setting == 'Automatic'" :class="`stat_value_style stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column}`">{{get_stat(`${stat.name}`)}}</div>
+
+                            <div v-if="stats_setting == 'Hidden Power'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} devs`">Lv60: {{calculate_stat(starter, 60)[stat.abrv]}}</div>
+                            <div v-if="stats_setting == 'Hidden Power'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} percentage_evs`">Lv70: {{calculate_stat(starter, 70)[stat.abrv]}}</div>
+                            <div v-if="stats_setting == 'Hidden Power'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} ev_stats_gained`">Lv80: {{calculate_stat(starter, 80)[stat.abrv]}}</div>
+                            
+                            <div v-if="stats_setting == 'Detailed EVs'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} devs`">{{mapper.properties.player.team[0][`statExp${stat.name_stat_exp}`].value}}/65535</div>
+                            <div v-if="stats_setting == 'Detailed EVs'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} percentage_evs`">{{decimalToPercentage(mapper.properties.player.team[0][`statExp${stat.name_stat_exp}`].value / 65535) }}%</div>
+                            <div v-if="stats_setting == 'Detailed EVs'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} ev_stats_gained`">Stats: {{Math.floor(Math.sqrt(mapper.properties.player.team[0][`statExp${stat.name_stat_exp}`].value) / 4)}}</div>
+                            
+                            <div v-if="stats_setting == 'Badge Boosts'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} devs`">Stat: {{mapper.properties.player.team[0][stat.path].value}}</div>
+                            <div v-if="stats_setting == 'Badge Boosts'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} percentage_evs`">Boost: {{get_bb_stat(`${stat.name}`)}}</div>
+                            <div v-if="stats_setting == 'Badge Boosts'" :class="`stat_value_style detailed_ev_stat_row_${stat[`${ui_stat_arrangement_modifier}value_row`]} stat_column_${stat.value_column} ev_stats_gained`">Result: {{get_stat(`${stat.name}`)}}</div>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+
+            <!-- MOVESET -->
+                <div class="movesetContainer">
+                    <table>
+                        <tbody><tr v-for="pkmnMove in pkmnMoves">
+                            <th v-if="s1[pkmnMove].value">
+                                <img v-show="g2stateVariable != `Battle` &amp;&amp; moveTypeIcon(s1[pkmnMove].value) != null" class="movesetIcon" :src="moveTypeIcon(s1[pkmnMove].value)">
+                                <img v-show="g2stateVariable == `Battle`" class="movesetIcon" :src="moveTypeIcon(batp()[pkmnMove].value)">
+                            </th>
+                            <th class="movesetName" v-if="s1[pkmnMove].value">
+                                <div v-show="g2stateVariable != `Battle` &amp;&amp; s1[pkmnMove].value != null">{{move_name(camelCase(s1[pkmnMove].value))}}</div>
+                                <div v-show="g2stateVariable == `Battle` &amp;&amp; mapper.properties.battle.yourPokemon[pkmnMove].value != null">{{move_name(camelCase(mapper.properties.battle.yourPokemon[pkmnMove].value))}}</div>
+                            </th>
+                            
+                            <th v-if="s1[pkmnMove].value &amp;&amp; damage_ranges == true">
+                                <div v-show="g2stateVariable != `Battle`" class="moveset_damage_min" :key="typeEffectiveness(s1[pkmnMove].value)">N/A</div>
+                                <div v-show="g2stateVariable == `Battle`" class="moveset_damage_min" :key="typeEffectiveness(mapper.properties.battle.yourPokemon[pkmnMove].value)">{{ damage_calculation(mapper.properties.battle.yourPokemon, mapper.properties.battle.enemyPokemon, s1[pkmnMove].value, "Player").damageMin }}-{{ damage_calculation(mapper.properties.battle.yourPokemon, mapper.properties.battle.enemyPokemon, s1[pkmnMove].value, "Player").damageMax }}</div>
+                            </th>
+                            <th v-if="s1[pkmnMove].value &amp;&amp; damage_ranges == true" class="moveset_damage_min_percent">
+                                <div v-show="g2stateVariable != `Battle` &amp;&amp; s1[pkmnMove].value != null">N/A</div>
+                                <div v-show="g2stateVariable == `Battle` &amp;&amp; mapper.properties.battle.yourPokemon[pkmnMove].value != null">{{ damage_calculation(mapper.properties.battle.yourPokemon, mapper.properties.battle.enemyPokemon, s1[pkmnMove].value, "Player").minPercentage }}-{{ damage_calculation(mapper.properties.battle.yourPokemon, mapper.properties.battle.enemyPokemon, s1[pkmnMove].value, "Player").maxPercentage }}%</div>
+                            </th>
+
+                            <th v-if="s1[pkmnMove].value &amp;&amp; damage_ranges == false">
+                                <div v-show="g2stateVariable != `Battle`" class="movesetPower" :key="typeEffectiveness(s1[pkmnMove].value)">{{ typeEffectiveness(s1[pkmnMove].value) }}</div>
+                                <div v-show="g2stateVariable == `Battle`" class="movesetPower" :key="typeEffectiveness(mapper.properties.battle.yourPokemon[pkmnMove].value)">{{ typeEffectiveness(mapper.properties.battle.yourPokemon[pkmnMove].value) }}</div>
+                            </th>
+                            <th v-if="s1[pkmnMove].value &amp;&amp; damage_ranges == false" class="movesetAccuracy">
+                                <div v-show="g2stateVariable != `Battle` &amp;&amp; s1[pkmnMove].value != null">{{ moveAccuracyEvasionDynamic(s1[pkmnMove].value) }}%</div>
+                                <div v-show="g2stateVariable == `Battle` &amp;&amp; mapper.properties.battle.yourPokemon[pkmnMove].value != null">{{ moveAccuracyEvasionDynamic(mapper.properties.battle.yourPokemon[pkmnMove].value) }}%</div>
+                            </th>
+                            <th v-if="s1[pkmnMove].value &amp;&amp; damage_ranges == false" class="movesetPP">
+                                <div v-show="g2stateVariable != `Battle` &amp;&amp; s1[pkmnMove].value != null">{{s1[pkmnMove + "pp"].value}}</div>
+                                <div v-show="g2stateVariable == `Battle` &amp;&amp; mapper.properties.battle.yourPokemon[pkmnMove].value != null">{{mapper.properties.battle.yourPokemon[pkmnMove.toString() + "pp"].value}}</div>
+                            </th>
+                        </tr>
+                    </tbody></table>
+                </div>
+
+            <!--------- RIGHT BAR ---------------------------------------------------------------------------------------------------------------->
+            <transition name="fade1">
+                <!-- Style Mode (dev only): replaces the right panel with a dummy
+                     slot-0 enemy graphic so every species can be styled. Layout
+                     mirrors the live "Battle Graphic" (trainer) block below
+                     (single slot) with dummy stats/moves so all surrounding
+                     graphics render. -->
+                <div v-if="isInDevMode &amp;&amp; style_mode_active" key="style_mode" style="position: absolute;">
+                    <div class="trainerLabel">{{ styleModeCurrentSpecies() }} {{ style_mode_index + 1 }}/{{ style_mode_species_list.length }}</div>
+                    <div class="colored-image" :style="`height: 242px; filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/opponent.svg)"></div>
+                    <img class="canvas red-svg" :src="`images/ui/speed_comp/0.svg`">
+                    <div class="enemyGraphic">
+                        <div class="ePkmnStyle ePkmn1">
+                            <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `drop-shadow(${getEnemySpriteFlipped(styleModeCurrentSpecies()) ? -2 : 2}px 2px 2px #000) saturate(1.3)` }" :src="`images/pokemon/${styleModeCurrentSpecies()}.png`">
+                            <div class="ePkmnSpecies opacityTransition">{{ styleModeCurrentSpecies() }}</div>
+                            <img class="enemyStatsArea" :src="`images/stats/0.svg`">
+                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :src="`images/type-icons-circular/${dexDataCrystal[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.png`">
+                            <img v-if="dexDataCrystal[styleModeCurrentSpecies()]?.type_1 != dexDataCrystal[styleModeCurrentSpecies()]?.type_2" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/type-icons-circular/${dexDataCrystal[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.png`">
+                            <!-- Moves -->
+                            <img v-for="(dummy, i) in style_mode_dummy_moves" :class="`ds eMoveIconStyle moveIcon${i + 1} opacityTransition`" :src="`images/type-icons-circular/${dummy.type}.png`">
+                            <div v-for="(dummy, i) in style_mode_dummy_moves" :class="`ePkmnMoveStyle ePkmnMove${i + 1} opacityTransition`">{{ dummy.name }}</div>
+                            <!-- Level -->
+                            <div class="ePkmnLevel opacityTransition">Lv:50</div>
+                            <!-- Stat Labels -->
+                            <div class="ePkmnStatLabelStyle ePkmnLabelHp  opacityTransition" style="opacity: .7;">HP</div>
+                            <div class="ePkmnStatLabelStyle ePkmnLabelAtk opacityTransition" style="opacity: .7;">Atk.</div>
+                            <div class="ePkmnStatLabelStyle ePkmnLabelDef opacityTransition" style="opacity: .7;">Def.</div>
+                            <div class="ePkmnStatLabelStyle ePkmnLabelSpA opacityTransition" style="opacity: .7;">SpA.</div>
+                            <div class="ePkmnStatLabelStyle ePkmnLabelSpD opacityTransition" style="opacity: .7;">SpD.</div>
+                            <div class="ePkmnStatLabelStyle ePkmnLabelSpe opacityTransition" style="opacity: .7;">Spe.</div>
+                            <!-- Base Stats (dummy values from dexDataCrystal) -->
+                            <div class="ePkmnStatsStyle ePkmnHp  opacityTransition">{{ dexDataCrystal[styleModeCurrentSpecies()]?.base_hp      ?? 100 }}</div>
+                            <div class="ePkmnStatsStyle ePkmnAtk opacityTransition">{{ dexDataCrystal[styleModeCurrentSpecies()]?.base_atk     ?? 50 }}</div>
+                            <div class="ePkmnStatsStyle ePkmnDef opacityTransition">{{ dexDataCrystal[styleModeCurrentSpecies()]?.base_def     ?? 50 }}</div>
+                            <div class="ePkmnStatsStyle ePkmnSpA opacityTransition">{{ dexDataCrystal[styleModeCurrentSpecies()]?.base_spc_atk ?? 50 }}</div>
+                            <div class="ePkmnStatsStyle ePkmnSpD opacityTransition">{{ dexDataCrystal[styleModeCurrentSpecies()]?.base_spc_def ?? 50 }}</div>
+                            <div class="ePkmnStatsStyle ePkmnSpe opacityTransition">{{ dexDataCrystal[styleModeCurrentSpecies()]?.base_spd     ?? 50 }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="right_panel == 'Movepool'" key="1">
+                    <table class="movepoolDemo" cellspacing="0" :style="customFormats()">
+                        <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '2px solid #000'}">
+                            <th class="movepool_header movepool_way">Way</th>
+                            <th class="movepool_header movepool_move">Move</th>
+                            <th class="movepool_header movepool_type">Type</th>
+                            <th class="movepool_header movepool_tableC">Pwr.</th>
+                            <th class="movepool_header movepool_tableC">Acc.</th>
+                            <th class="movepool_header movepool_tableC">PP</th>
+                        </tr>
+                        <tr v-for="x in getMovepool(dexDataCrystal, g2MoveData, tmhmMapping, s1dynamicReset.species.value).level">
+                            <td class="movepool_way">{{x.Level}}</td>
+                            <td class="movepool_move">{{x.Move}}</td>
+                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
+                            <td class="movepool_tableC">{{x.Power}}</td>
+                            <td class="movepool_tableC">{{x.Accuracy}}%</td>
+                            <td class="movepool_tableC">{{x.PP}}</td>
+                        </tr>
+                        <tr v-for="x in getMovepool(dexDataCrystal, g2MoveData, tmhmMapping, s1dynamicReset.species.value).tmhm" :style="getUnobtainableMoveStyle(x, game_selection)">
+                            <td class="movepool_way">{{x.tmhm}}</td>
+                            <td class="movepool_move">{{x.Move}}</td>
+                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
+                            <td class="movepool_tableC">{{movepoolPower(x)}}</td>
+                            <td class="movepool_tableC">{{x.Accuracy}}%</td>
+                            <td class="movepool_tableC">{{x.PP}}</td>
+                        </tr>
+                        <tr v-for="x in getMovepool(dexDataCrystal, g2MoveData, tmhmMapping, s1dynamicReset.species.value).tutor">
+                            <td class="movepool_way">Tutor</td>
+                            <td class="movepool_move">{{x.Move}}</td>
+                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${x.Type?.toLowerCase()})`}">{{x.Type}}</td>
+                            <td class="movepool_tableC">{{x.Power}}</td>
+                            <td class="movepool_tableC">{{x.Accuracy}}%</td>
+                            <td class="movepool_tableC">{{x.PP}}</td>
+                        </tr>
+                    </tbody></table>
+                    <div class="colored-image" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/movepool.svg)"></div>
+                    <div class="movepoolTitle">Movepool</div>
+                </div>
+                <div v-else-if="right_panel == 'Splits'" key="2">
+                    <div key="3">
+                        <div class="split_label">Splits</div>
+                        <div v-if="toggle_compare_splits === 'Followup'">
+                            <table style="height: 960px;" class="splits_table" cellspacing="0">
+                                <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '2px solid #000'}">
+                                    <td style="font-size: 18px; padding-left: 3px">Split</td>
+                                    <td style="font-size: 18px; width: 80px;  text-align: left; padding-left: 3px;"></td>
+                                    <td style="font-size: 18px; width: 110px; text-align: right;">{{previous_label}}</td>
+                                    <td style="font-size: 18px; width: 110px; text-align: right;">{{current_label}}</td>
+                                    <td style="font-size: 18px; width: 68px;  text-align: right; padding-right: 4px;">Diff</td>
+                                </tr>
+                                <tr v-for="split in compare_splits">
+                                    <td class="scaled_icon" style="font-size: 18px; width: 40px; padding-left: 3px; text-align: left;"><img :src="`images/split_images/${trainer_name_lookup.basic[split.trainer]?.trainer}.png`"></td>
+                                    <td style="font-size: 18px; width: 80px;  text-align: left; padding-left: 3px; white-space: nowrap;">{{trainer_name_lookup.basic[split.trainer]?.trainer}}</td>
+                                    <td style="font-size: 18px; width: 110px; text-align: right;">{{split.previous_time}}</td>
+                                    <td style="font-size: 18px; width: 110px; text-align: right;">{{split.current_time}}</td>
+                                    <td style="font-size: 18px; width: 68px;  text-align: right; padding-right: 4px;" :style="split_diff_color(split.difference)">{{split.difference}}</td>
+                                </tr>
+                            </tbody></table>
+                            <div class="colored-image" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/movepool.svg)"></div>
+                        </div>
+                        <div v-else-if="toggle_compare_splits === 'First'">
+                            <table class="splits_table" style="height: 960px;" cellspacing="0">
+                                <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '2px solid #000'}">
+                                    <td style="font-size: 18px; padding-left: 3px">Split</td>
+                                    <td style="font-size: 18px; width: 180px;  text-align: left; padding-left: 3px;"></td>
+                                    <td style="font-size: 18px; width: 10px;  text-align: left; padding-left: 3px;"></td>
+                                    <td style="font-size: 18px; width: 10px;  text-align: left; padding-left: 3px;"></td>
+                                    <td style="font-size: 18px; width: 110px; text-align: right; padding-right: 5px;">Time</td>
+                                </tr>
+                                <tr v-for="split in compare_splits">
+                                    <td class="scaled_icon" style="font-size: 20px; width: 40px; padding-left: 3px; text-align: left;"><img :src="`images/split_images/${trainer_name_lookup.basic[split.trainer]?.trainer}.png`"></td>
+                                    <td style="font-size: 20px; width: 180px; text-align: left; padding-left: 3px;">{{trainer_name_lookup.detailed[split.trainer]?.trainer}}</td>
+                                    <td style="font-size: 20px; width: 10px;  text-align: left; padding-left: 3px;"></td>
+                                    <td style="font-size: 20px; width: 10px;  text-align: left; padding-left: 3px;"></td>
+                                    <td style="font-size: 20px; width: 110px; text-align: right; padding-right: 5px;">{{split.current_time}}</td>
+                                </tr>
+                            </tbody></table>
+                            <div class="colored-image" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/movepool.svg)"></div>
+                        </div>
+                        <div v-else-if="toggle_compare_splits === 'Followup + Summary'">
+                            <div class="split_label">Splits</div>
+                            <table class="splits_table_old" cellspacing="0">
+                                <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '2px solid #000'}">
+                                    <td style="font-size: 16px; width: 80px;  text-align: left; padding-left: 3px;">Split</td>
+                                    <td style="font-size: 16px; width: 110px; text-align: right;">{{previous_label}}</td>
+                                    <td style="font-size: 16px; width: 110px; text-align: right;">{{current_label}}</td>
+                                    <td style="font-size: 16px; width: 68px;  text-align: right; padding-right: 4px;">Diff</td>
+                                </tr>
+                                <tr v-for="split in compare_splits">
+                                    <td style="font-size: 16px; width: 80px;  text-align: left; padding-left: 3px;">{{trainer_name_lookup[split.trainer]?.trainer}}</td>
+                                    <td style="font-size: 16px; width: 110px; text-align: right;">{{split.previous_time}}</td>
+                                    <td style="font-size: 16px; width: 110px; text-align: right;">{{split.current_time}}</td>
+                                    <td style="font-size: 16px; width: 68px;  text-align: right; padding-right: 4px;" :style="split_diff_color(split.difference)">{{split.difference}}</td>
+                                </tr>
+                            </tbody></table>
+                            <div class="battle_summary_label">{{battle_summary_header}}</div>
+                            <table class="battle_summary_table" cellspacing="0">
+                                <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '2px solid #000'}">
+                                    <td style="font-size: 16px; width: 204px;  text-align: left; padding-left: 3px;">Metric</td>
+                                    <td style="font-size: 16px; width: 184px; text-align: right; padding-right: 3px;">Value</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; width: 204px;  text-align: left; padding-left: 3px;">Battle Duration<br>(real-time)</td>
+                                    <td style="font-size: 16px; width: 184px; text-align: right; padding-right: 3px;">{{this.battle_duration != 0 ? this.battle_duration : "-"}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; width: 204px;  text-align: left; padding-left: 3px;">Experience Per Second</td>
+                                    <td style="font-size: 16px; width: 184px; text-align: right; padding-right: 3px;">{{this.exp_per_second != 0 ? this.exp_per_second : "-"}}</td>
+                                </tr>
+                                <tr v-for="stat in battle_summary.global">
+                                    <td style="font-size: 16px; width: 204px;  text-align: left; padding-left: 3px;">{{stat.name}}</td>
+                                    <td style="font-size: 16px; width: 184px; text-align: right; padding-right: 3px;">{{this[stat.data_name] != 0 ? this[stat.data_name] : "-"}}</td>
+                                </tr>
+                                <tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '1px solid #000'}"><td style="font-size: 16px; width: 184px;  text-align: left; padding-left: 3px;">Player:</td><td></td></tr>
+                                <tr v-for="stat in battle_summary.player">
+                                    <td style="font-size: 16px; width: 204px;  text-align: left; padding-left: 3px;">{{stat.name}}</td>
+                                    <td style="font-size: 16px; width: 184px; text-align: right; padding-right: 3px;">{{this[stat.data_name] != 0 ? this[stat.data_name] : "-"}}</td>
+                                </tr>
+                                <tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '1px solid #000'}"><td style="font-size: 16px; width: 184px;  text-align: left; padding-left: 3px;">Enemy:</td><td></td></tr>
+                                <tr v-for="stat in battle_summary.enemy">
+                                    <td style="font-size: 16px; width: 204px;  text-align: left; padding-left: 3px;">{{stat.name}}</td>
+                                    <td style="font-size: 16px; width: 184px; text-align: right; padding-right: 3px;">{{this[stat.data_name] != 0 ? this[stat.data_name] : "-"}}</td>
+                                </tr>
+                            </tbody></table>
+                            <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/ui/splits.svg)"></div>
+                        </div>
+                    </div>
+                </div> 
+                <div v-else-if="right_panel == 'Battle Graphic' &amp;&amp; (battle_fade == true &amp;&amp; battleGraphic == true &amp;&amp; batt.mode.value == `Trainer`)" style="position: absolute;" key="4">
+                    <div class="trainerLabel">{{capitalization_format(fixTrainerName(batt.trainer.class.value, batt.trainer.id.value))}}'s Team</div>
+                    <div class="colored-image" :style="battlePokemonCrop()" style="--url: url(images/ui/opponent.svg)"></div>
+                    <div v-for="x in pkmnSlots">
+                        <img v-show="mapper.properties.battle.trainer.totalPokemon.value > x" class="canvas" :class="svgColorClass(speed_comparison(x, mapper.properties.battle.trainer.team[x]?.speed.value).comparison, mapper.properties.battle.trainer.team[x])" :src="`images/ui/speed_comp/${x}.svg`">
+                    </div>
+                    <div v-for="x in pkmnSlots" class="enemyGraphic">
+                        <div v-show="batt.trainer.team[x].species.value != null" :class="`ePkmnStyle ePkmn${x + 1}`">
+                            <img v-if="batt.trainer.team[x].species.value != null" class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="batt.trainer.team[x].species.value" :style="[enemyPkmnFaint(batt.trainer.team[x]), { transform: enemyTransformFor(batt.trainer.team[x].species.value) }]" :src="`images/pokemon/${batt.trainer.team[x].species.value}.png`">
+                            <div class="ePkmnSpecies opacityTransition" :style="enemyPkmnSpecies(batt.trainer.team[x])">{{batt.trainer.team[x].species.value}}</div>
+                            <img class="enemyStatsArea" :style="enemyPkmnFaintStatsBackground(batt.trainer.team[x])" :src="`images/stats/${x}.svg`">
+                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/type-icons-circular/${enemyType1(x).toLowerCase()}.png`">
+                            <img v-if="enemyType1(x) != enemyType2(x)" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/type-icons-circular/${enemyType2(x).toLowerCase()}.png`">
+                            <!-- Moves -->
+                            <div v-for="move_index in moves = [0, 1, 2, 3]">
+                                <img v-if="enemy_trainer.party[x]?.moves[move_index] != null" :class="`ds eMoveIconStyle moveIcon${move_index + 1} opacityTransition`" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/type-icons-circular/${g2MoveData[move_name(mapper.properties.battle.trainer.team[x][`move${move_index + 1}`]?.value)]?.Type?.toLowerCase()}.png`">
+                                <div :class="`ePkmnMoveStyle ePkmnMove${move_index + 1} opacityTransition`" :style="enemyPkmnText(batt.trainer.team[x])">
+                                    {{move_name(batt.trainer.team[x][`move${move_index + 1}`]?.value)}}
+                                </div>
+                            </div>
+                            <!-- Level -->
+                            <div class="ePkmnLevel opacityTransition" :style="enemyPkmnText(batt.trainer.team[x])">Lv:{{mapper.properties.battle.trainer.team[x]?.level}}</div>
+                            <!-- Stat Labels -->
+                            <div>
+                                <div class="ePkmnStatLabelStyle ePkmnLabelHp  opacityTransition" :style="stat_mod(0, x).style">HP</div>
+                                <div v-for="stat in stat_object">
+                                    <div v-if="stat.name != 'Hp'" :class="`ePkmnStatLabelStyle ePkmnLabel${stat.abrv} opacityTransition`" :style="stat_mod(batt.enemyPokemon[`modStage${stat.mod_path}`].value, x).style">{{stat.label}}</div>
+                                </div>
+                            </div>
+                            <!-- Stat Exp -->
+                            <div v-if="stats_setting == 'EVs' || stats_setting == 'Detailed EVs' || stats_setting == 'Base Stats'">
+                                <div v-for="stat in stat_object" :class="`ePkmnStatsStyle ePkmn${stat.abrv} opacityTransition`" :style="enemyPkmnText(batt.trainer.team[x])">{{dexDataCrystal[batt.trainer.team[x].species.value]?.[stat.base_stat_path]}}</div>
+                            </div>
+                            <!-- DVs -->
+                            <div v-else-if="stats_setting == 'DVs' || stats_setting == 'Hidden Power'">
+                                <div class="ePkmnStatsStyle ePkmnHp  opacityTransition" :style="enemyPkmnText(batt.trainer.team[x])">{{hpDv(batt.trainer.team[x].dvAttack.value, batt.trainer.team[x].dvDefense.value, batt.trainer.team[x].dvSpeed.value, batt.trainer.team[x].dvSpecial.value)}}</div>
+                                <div v-for="stat in stat_object">
+                                    <div v-if="stat.name != 'Hp'" :class="`ePkmnStatsStyle ePkmn${stat.abrv} opacityTransition`" :style="enemyPkmnText(batt.trainer.team[x])">{{batt.trainer.team[x][stat.dv].value}}</div>
+                                </div>
+                            </div>
+                            <!-- Stats -->
+                            <div v-else="">
+                                <div class="ePkmnStatsStyle ePkmnHp  opacityTransition" :style="enemyPkmnText(batt.trainer.team[x])">{{batt.trainer.team[x].maxHp.value}}</div>
+                                <div v-for="stat in stat_object">
+                                    <div v-if="stat.name != 'Hp'" :class="`ePkmnStatsStyle ePkmn${stat.abrv} opacityTransition`" :style="enemyPkmnText(batt.trainer.team[x])">{{activeSlot(x,batt.enemyPokemon.partyPos.value, stat.path, batt.trainer.team[x][stat.path].value, "enemyPokemon")}}</div>
+                                </div>
+                            </div>
+                            <!-- Modifiers -->
+                            <div v-for="stat in stat_object">
+                                <div v-if="stat.name != 'Hp'">
+                                    <div v-show="(enemyState == `Pokemon` || enemyState == `Fainting`) &amp;&amp; batt.enemyPokemon.partyPos.value == x &amp;&amp; batt.enemyPokemon[`modStage${stat.mod_path}`].value != `0`" :class="`ePkmnModsStyle ePkmnMod${stat.abrv}`">
+                                        {{stat_mod(batt.enemyPokemon[`modStage${stat.mod_path}`].value, x).mod}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <transition name="fade">
+                                    <div v-show="speed_comparison_toggle == true" :style="enemyPkmnText(batt.trainer.team[x])" class="speed_comparison">{{speed_comparison(x, mapper.properties.battle.trainer.team[x]?.speed).comparison}}</div>
+                                </transition>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+                <div v-else-if="right_panel == 'Inventory'" key="5">
+                    <table class="inventory_demo" cellspacing="0">
+                        <tbody><tr>
+                            <th class="inventory_header movepool_way">Pocket</th>
+                            <th class="inventory_header movepool_way">Slot</th>
+                            <th class="inventory_header movepool_way">Item</th>
+                            <th class="inventory_header movepool_move">Qty</th>
+                            <th class="inventory_header movepool_type">Sale $</th>
+                            <th class="inventory_header movepool_type">Total $</th>
+                        </tr>
+                        <tr v-for="item in items = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]">
+                            <th v-if="mapper.properties.player.items[item].item.value != null" class="movepool_header movepool_way">Items</th>
+                            <th v-if="mapper.properties.player.items[item].item.value != null" class="movepool_header movepool_way">{{item + 1}}</th>
+                            <th v-if="mapper.properties.player.items[item].item.value != null" class="movepool_header movepool_way">{{capitalization_format(mapper.properties.player.items[item].item.value)}}</th>
+                            <th v-if="mapper.properties.player.items[item].item.value != null" class="movepool_header movepool_move">{{mapper.properties.player.items[item].quantity.value}}</th>
+                            <th v-if="mapper.properties.player.items[item].item.value != null" class="movepool_header movepool_type">${{mapper.properties.player.items[item].quantity.value * 100}}</th>
+                            <th v-if="mapper.properties.player.items[item].item.value != null" class="movepool_header movepool_type">${{mapper.properties.player.items[item].quantity.value * 100 * mapper.properties.player.items[item].quantity.value}}</th>
+                        </tr>
+                        <tr v-for="item in pokeballs = [0,1,2,3]">
+                            <th v-if="mapper.properties.player.pokeBalls[item].item.value != null" class="movepool_header movepool_way">Balls</th>
+                            <th v-if="mapper.properties.player.pokeBalls[item].item.value != null" class="movepool_header movepool_way">{{item + 1}}</th>
+                            <th v-if="mapper.properties.player.pokeBalls[item].item.value != null" class="movepool_header movepool_way">{{capitalization_format(mapper.properties.player.pokeBalls[item].item.value)}}</th>
+                            <th v-if="mapper.properties.player.pokeBalls[item].item.value != null" class="movepool_header movepool_move">{{mapper.properties.player.pokeBalls[item].quantity.value}}</th>
+                            <th v-if="mapper.properties.player.pokeBalls[item].item.value != null" class="movepool_header movepool_type">${{mapper.properties.player.pokeBalls[item].quantity.value * 100}}</th>
+                            <th v-if="mapper.properties.player.pokeBalls[item].item.value != null" class="movepool_header movepool_type">${{mapper.properties.player.pokeBalls[item].quantity.value * 100 * mapper.properties.player.pokeBalls[item].quantity.value}}</th>
+                        </tr>
+                    </tbody></table>
+                    <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/movepool.svg)"></div>
+                    <div class="movepoolTitle">Inventory</div>
+                </div>
+                <div v-else="" key="6">
+                    <table class="movepoolDemo" cellspacing="0" :style="customFormats()">
+                        <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${dexDataCrystal[s1dynamicReset.species.value].type_2.toLowerCase()})`, 'outline': '2px solid #000'}">
+                            <th class="movepool_header movepool_way">Way</th>
+                            <th class="movepool_header movepool_move">Move</th>
+                            <th class="movepool_header movepool_type">Type</th>
+                            <th class="movepool_header movepool_tableC">Pwr.</th>
+                            <th class="movepool_header movepool_tableC">Acc.</th>
+                            <th class="movepool_header movepool_tableC">PP</th>
+                        </tr>
+                        <tr v-for="x in getMovepool(dexDataCrystal, g2MoveData, tmhmMapping, s1dynamicReset.species.value).level">
+                            <td class="movepool_way">{{x.Level}}</td>
+                            <td class="movepool_move">{{x.Move}}</td>
+                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
+                            <td class="movepool_tableC">{{x.Power}}</td>
+                            <td class="movepool_tableC">{{x.Accuracy}}%</td>
+                            <td class="movepool_tableC">{{x.PP}}</td>
+                        </tr>
+                        <tr v-for="x in getMovepool(dexDataCrystal, g2MoveData, tmhmMapping, s1dynamicReset.species.value).tmhm" :style="getUnobtainableMoveStyle(x, game_selection)">
+                            <td class="movepool_way">{{x.tmhm}}</td>
+                            <td class="movepool_move">{{x.Move}}</td>
+                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
+                            <td class="movepool_tableC">{{movepoolPower(x)}}</td>
+                            <td class="movepool_tableC">{{x.Accuracy}}%</td>
+                            <td class="movepool_tableC">{{x.PP}}</td>
+                        </tr>
+                        <tr v-for="x in getMovepool(dexDataCrystal, g2MoveData, tmhmMapping, s1dynamicReset.species.value).tutor">
+                            <td class="movepool_way">Tutor</td>
+                            <td class="movepool_move">{{x.Move}}</td>
+                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${x.Type?.toLowerCase()})`}">{{x.Type}}</td>
+                            <td class="movepool_tableC">{{x.Power}}</td>
+                            <td class="movepool_tableC">{{x.Accuracy}}%</td>
+                            <td class="movepool_tableC">{{x.PP}}</td>
+                        </tr>
+                    </tbody></table>
+                    <div class="colored-image" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/movepool.svg)"></div>
+                    <div class="movepoolTitle">Movepool</div>
+                </div>
+            </transition>
+            <transition name="fadeDelayed">
+                <div v-if="(right_panel == 'Battle Graphic' &amp;&amp; battle_fade == true &amp;&amp; g2trainerEnemySelector(batt.trainer.class.value) == 1) &amp;&amp; battleGraphic == true &amp;&amp; showSpecialTrainerGraphics == true" style="position: absolute;">
+                    <img class="canvas" :src="specialTrainerGraphics()">
+                </div>
+            </transition>
+
+            <!-- LABELS -->
+                <div class="resetsContainer">
+                    <div class="timerTitle moves_header">moves</div>
+                    <div v-show="damage_ranges == true">
+                        <div class="timerTitle moves_header" style="left: 225px;">dmg.</div>
+                        <div class="timerTitle moves_header" style="left: 298px;">range</div>
+                    </div>
+                    <div v-show="damage_ranges == false">
+                        <div class="timerTitle moves_header" style="left: 208px;">pwr.</div>
+                        <div class="timerTitle moves_header" style="left: 278px;">acc.</div>
+                        <div class="timerTitle moves_header" style="left: 328px;">pp</div>
+                    </div>
+                    <div v-show="blackouts_resets == 'None'">
+                        <div class="genericLabels resetsLabel_1">faults</div>
+                    </div>
+                    <div v-show="blackouts_resets == 'Resets'">
+                        <div class="genericLabels resetsLabel_1">resets</div>
+                    </div>
+                    <div v-show="blackouts_resets == 'Blackouts'">
+                        <div class="genericLabels blackoutLabel_1">blackouts</div>
+                    </div>
+                    <div v-show="blackouts_resets == 'Both'">
+                        <div class="genericLabels resetsLabel">resets</div>
+                        <div class="genericLabels blackoutLabel">blackouts</div>
+                    </div>
+                </div>
+                <div class="timerContainer">
+                    <div class="timerTitle">time played at 4x game-speed</div>
+                </div>
+            <!-- EXP BAR -->
+                <div v-show="expBarToggle == true" class="expBar">
+                    <div v-if="ui_stats_styling == '2023'" class="posAbs exp_label">Exp:</div>
+                    <div v-if="ui_stats_styling == '2023'" class="posAbs expMeterOuter"><div class="expMeterInner" ref="expBar"></div></div>
+                </div>
+            </div>
+
+            <!-- BATTLE POP UPS ------------------------------------------------------------------------------------------------------------------------------>
+            <div v-if="battlePopUps == true">
+                <transition name="fade2">
+                    <!-- ACCURACY -->
+                    <div v-show="battle_fade == true &amp;&amp; batt.yourPokemon?.modStageAccuracy?.value != 0 &amp;&amp; (g2stateVariable == `Battle` || g2stateVariable == `From Battle`) &amp;&amp; batt.yourPokemon?.modStageAccuracy?.bytes < 0x0E" id="accuracy">
+                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/accuracy.svg)"></div>
+                        <div class="accEvaStyle accEvaLabel accuracyLabel">Accuracy:</div>
+                        <div class="accEvaStyle accEvaMod accuracyMod">{{ batt.yourPokemon?.modStageAccuracy?.value }}</div>
+                    </div>
+                </transition>
+                <!-- BONKS -->
+                <transition name="fade2">
+                    <div v-if="bonk == true &amp;&amp; g2stateVariable == 'Overworld' &amp;&amp; blackouts_resets != 'Both'" id="bonks">
+                        <div class="colored-image" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/ui/bonks.svg)"></div>
+                        <div class="genericLabels bonksLabel">bonks</div>
+                        <div class="popUpsStyle bonksValue">{{ mapper.properties.patch.steps.bonks.value }}</div>
+                    </div>
+                </transition>
+                <transition name="fade2">
+                    <div v-if="bonk == true &amp;&amp; g2stateVariable == 'Overworld' &amp;&amp; blackouts_resets == 'Both'">
+                        <div class="colored-image" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/ui/bonks_2.svg)"></div>
+                        <div class="genericLabels bonksLabel_1">bonks</div>
+                        <div class="popUpsStyle bonksValue_1">{{ mapper.properties.patch.steps.bonks.value }}</div>
+                    </div>
+                </transition>
+                <!-- REPEL COUNTER -->
+                <transition name="fade2">
+                    <div v-if="repel_counter == true &amp;&amp; g2stateVariable == 'Overworld' &amp;&amp; mapper.properties.squidgyExtras.repelStepsRemaining?.value > 0 &amp;&amp; blackouts_resets != 'Both'">
+                        <div class="colored-image" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/ui/repel.svg)"></div>
+                        <div class="genericLabels repelLabel">repel steps</div>
+                        <div class="popUpsStyle repelSteps">{{ mapper.properties.squidgyExtras.repelStepsRemaining.value }}</div>
+                    </div>
+                </transition>
+                <transition name="fade2">
+                    <div v-if="repel_counter == true &amp;&amp; g2stateVariable == 'Overworld' &amp;&amp; mapper.properties.squidgyExtras.repelStepsRemaining?.value > 0 &amp;&amp; blackouts_resets == 'Both'">
+                        <div class="colored-image" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/ui/repel_2.svg)"></div>
+                        <div class="genericLabels repelLabel_1">repel steps</div>
+                        <div class="popUpsStyle repelSteps_1">{{ mapper.properties.squidgyExtras.repelStepsRemaining.value }}</div>
+                    </div>
+                </transition>
+
+
+                <!-- EVASION -->
+                <transition name="fade2">
+                    <div v-show="battle_fade == true &amp;&amp; batt.yourPokemon?.modStageEvasion?.value != 0 &amp;&amp; (g2stateVariable == `Battle` || g2stateVariable == `From Battle`) &amp;&amp; batt.yourPokemon?.modStageAccuracy?.bytes < 0x0E" id="evasion">
+                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/evasion.svg)"></div>
+                        <div class="accEvaStyle accEvaLabel evasionLabel">Evasion:</div>
+                        <div class="accEvaStyle accEvaMod evasionMod">{{ batt.yourPokemon?.modStageEvasion?.value }}</div>
+                    </div>
+                </transition>
+
+                <!-- SCREENS -->
+                <transition name="fade2">
+                    <div v-show="(g2stateVariable == `Battle` || g2stateVariable == `From Battle`) &amp;&amp; field_effect_first_expiring[2] != 0 &amp;&amp; batt.yourPokemon?.modStageAccuracy?.bytes < 0x0E">
+                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/ui/screens.svg)"></div>
+                        <div class="accEvaStyle accEvaLabel screenLabel">Field:</div>
+                        <div class="accEvaStyle accEvaMod screenTurns">{{field_effect_first_expiring[0]}}: {{field_effect_first_expiring[2]}}</div>
+                    </div>
+                </transition>
+
+                <!-- Resets -->
+                <div v-if="shuckie_counters == true">
+                    <div v-show="blackouts_resets == 'None'">
+                        <transition name="fade2">
+                            <div class="faults_style resets_1"><div id="reset_counter">{{emulatorStats?.counters?.playerResets ?? 0}}</div></div>
+                        </transition>
+                    </div>
+                    <div v-show="blackouts_resets == 'Resets'">
+                        <transition name="fade2">
+                            <div class="faults_style resets_1"><div id="reset_counter">{{emulatorStats?.counters?.playerResets ?? 0}}</div></div>
+                        </transition>
+                    </div>
+                    <div v-show="blackouts_resets == 'Blackouts'">
+                        <transition name="fade2">
+                            <div class="faults_style blackouts_1" id="reset_counter">{{emulatorStats?.counters?.blackout_counter ?? 0}}</div>
+                        </transition>
+                    </div>
+                    <div v-show="blackouts_resets == 'Both'">
+                        <transition name="fade2">
+                            <div class="faults_style resets"><div id="reset_counter">{{emulatorStats?.counters?.playerResets ?? 0}}</div></div>
+                        </transition>
+                        <transition name="fade2">
+                            <div class="faults_style blackouts" id="reset_counter">{{emulatorStats?.counters?.blackout_counter ?? 0}}</div>
+                        </transition>
+                    </div>
+                </div>
+                <div v-else="">    
+                    <div v-show="blackouts_resets == 'None'">
+                        <transition name="fade2">
+                            <div class="faults_style resets_1"><div id="reset_counter">{{playerResets}}</div></div>
+                        </transition>
+                    </div>
+                    <div v-show="blackouts_resets == 'Resets'">
+                        <transition name="fade2">
+                            <div class="faults_style resets_1"><div id="reset_counter">{{playerResets}}</div></div>
+                        </transition>
+                    </div>
+                    <div v-show="blackouts_resets == 'Blackouts'">
+                        <transition name="fade2">
+                            <div class="faults_style blackouts_1" id="reset_counter">{{blackout_counter}}</div>
+                        </transition>
+                    </div>
+                    <div v-show="blackouts_resets == 'Both'">
+                        <transition name="fade2">
+                            <div class="faults_style resets"><div id="reset_counter">{{playerResets}}</div></div>
+                        </transition>
+                        <transition name="fade2">
+                            <div class="faults_style blackouts" id="reset_counter">{{blackout_counter}}</div>
+                        </transition>
+                    </div>
+                </div>
+
+
+                <!-- HELD ITEM -->
+                <div class="heldItem">Held Item:</div>
+                <transition name="fade2">
+                    <div v-show="g2stateVariable != 'Base Stats'" class="item">{{get_held_item}}</div>
+                </transition>
+
+                <!-- Gametime -->
+                <transition name="fade1">
+                    <div v-show="run_complete" style="position: absolute; top: 250px;">
+                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px); top: -186px;`" style="--url: url(images/ui/gametime.svg)"></div>
+                        <div class="genericLabels gametimeLabel">gametime</div>
+                        <div id="gametime_display" style="top: 272px; font-size: 34px; width: 229px; left: 84px;" class="resets">
+                            <div>{{simple_data[7]}}</div>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        
+<teleport to="body" v-if="isInDevMode">
+            <div v-if="enemyResize.species &amp;&amp; enemySpriteHandlePosition()" class="ePkmnSpriteResizeHandle" :style="enemySpriteHandlePosition()" @mousedown="onEnemyResizeHandleMouseDown($event)" title="Drag to resize. Arrows move (Shift = 10px). F1 flips. Enter saves, Escape cancels."></div>
+        </teleport>

@@ -26,6 +26,8 @@ declare global {
       __pendingIpc: () => number,
       settings_dir: () => Promise<string>,
       app_root: () => Promise<string>,
+      is_packaged: () => Promise<boolean>,
+      set_game_icon: (relative: string) => void,
       splits: {
         write: (relative: string, contents: string, append?: boolean) => Promise<string>,
         read: (relative: string) => Promise<string | null>,

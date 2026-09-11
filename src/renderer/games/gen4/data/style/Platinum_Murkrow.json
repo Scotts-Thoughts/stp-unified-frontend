@@ -1,0 +1,11 @@
+{
+  "imageFlip": true,
+  "backgroundTexture": "Dragon",
+  "backgroundBlur": "2",
+  "backgroundScale": "173",
+  "backgroundBrightness": "77",
+  "backgroundContrast": "167",
+  "imageScale": "0.66",
+  "imageYOffset": "-26",
+  "imageXOffset": "-19"
+}

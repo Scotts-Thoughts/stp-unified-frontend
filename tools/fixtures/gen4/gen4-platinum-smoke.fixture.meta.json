@@ -1,0 +1,11 @@
+{
+  "file": "A:\\Programs\\stp-unified-frontend\\tools\\fixtures\\gen4\\gen4-platinum-smoke.fixture.jsonl.gz",
+  "synthetic": true,
+  "mapperId": "ST/gen4/pokemon_platinum_ne.xml",
+  "replayName": "gen4-platinum-smoke",
+  "events": 163,
+  "properties": 4006,
+  "lastFrame": 5400,
+  "durationSec": 90,
+  "bytes": 126419
+}

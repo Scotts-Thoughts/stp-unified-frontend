@@ -1,0 +1,14 @@
+{
+  "overlay_color": "#305373",
+  "ui_saturation": "1.7",
+  "imageXOffset": "52",
+  "imageYOffset": "-40",
+  "imageScale": "0.6",
+  "backgroundScale": "134",
+  "backgroundFlip": true,
+  "backgroundXOffset": "-16",
+  "backgroundYOffset": "20",
+  "backgroundContrast": "148",
+  "evolution": true,
+  "selected_evolution_species": "Murkrow"
+}

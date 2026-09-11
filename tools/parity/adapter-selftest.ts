@@ -100,6 +100,16 @@ try {
 }
 check("a contradictory profile throws at build time", threw);
 
+// 5. a key the mapper file lacks leaves no container behind (gen4's Platinum has no
+// `variables.*`; the legacy code short-circuits on the missing container).
+const sparse: MapperProfile = {
+  ...yellow,
+  id: "test/sparse",
+  reads: { "variables.game_started": { path: "variables.game_started" }, "player.name": { path: "player.name" } },
+};
+const sparseView = buildCanonicalView(sparse, properties) as any;
+check("a key absent from the mapper creates no container", sparseView.variables === undefined && sparseView.player?.name === leaves.get("player.name"));
+
 // 5. detection.
 check("yellow profile matches its /mapper meta.path", matchesPath(yellow, meta.path));
 check("red/blue profile does not match yellow's path", !matchesPath(redBlue, meta.path));

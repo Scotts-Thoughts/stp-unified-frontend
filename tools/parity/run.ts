@@ -29,7 +29,7 @@
  * apps hardcode 30159 in their renderers and cannot be moved, so legacy targets still
  * need that port free.
  */
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { _electron as electron, type ElectronApplication, type Page } from "playwright-core";
@@ -105,6 +105,10 @@ export async function run(opts: RunOptions): Promise<RunResult> {
   log(`[run] ${target.id} x ${fixtureName}: ${wanted.length}/${scan.checkpoints.length} checkpoints`);
 
   prepareSandbox(target, { clean: true, log });
+  // A run's output directory is exactly that run: cpSync into a reused --out dir
+  // adds and overwrites but never deletes, and three files from an earlier gen1 run
+  // once showed up as "only in candidate" against a gen2 baseline.
+  rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
 
   const ports = opts.redirectPorts ? SPARE_PORTS : CANONICAL_PORTS;
@@ -141,6 +145,10 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     // "Failed to load resource" in the console does not say *which* resource; without
     // the URL a missing asset is impossible to chase down from a report.
     page.on("requestfailed", (request) => {
+      // A load the page itself cancelled -- an <img> whose src changed before the
+      // previous file arrived -- is not a failure. It shows up for the asset scheme
+      // and not for file:// only because the main process is slower than the disk.
+      if (request.failure()?.errorText === "net::ERR_ABORTED") return;
       consoleLog.push({
         type: "requestfailed",
         text: `${request.failure()?.errorText ?? "failed"} ${request.url()}`,
@@ -157,8 +165,55 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     // are init scripts, so the document has to be re-created for either to apply from
     // the app's first line.
     if (!opts.realtime) {
-      await page.clock.install({ time: new Date(header.recordedAt) });
-      await page.clock.pauseAt(new Date(header.recordedAt));
+      // Installed a second *before* the pause instant. Between these two calls the
+      // clock of the current (pre-reload) document runs on real time, and an app with
+      // a 10 ms poll (gen4's Shuckie interval) can carry it past `recordedAt` before
+      // pauseAt() lands -- "Cannot fast-forward to the past", once in a few runs. With
+      // the install a second earlier the pause is always a forward move there. The
+      // re-created document replays the log and gets `recordedAt` from the pauseAt
+      // entry regardless, and the init script below pins its frame grid.
+      const recordedAt = new Date(header.recordedAt).getTime();
+      await page.clock.install({ time: new Date(recordedAt - 1000) });
+      await page.clock.pauseAt(new Date(recordedAt));
+      // Pin the animation-frame grid. The fake clock schedules requestAnimationFrame
+      // for the next multiple of 16 of its *tick* counter, and the tick counter of a
+      // re-created document is not zero at the pause: the clock replays its log there,
+      // and between the `install` entry and the `pauseAt` entry it advances the ticks
+      // by the real milliseconds that passed between the two calls above -- a few ms
+      // of CDP round trips, different every run. Two runs then have their frame grids
+      // a few ms apart, and an overlay timer that samples Date.now() on each frame
+      // shows a different hundredth wherever a 10 ms boundary falls between the two
+      // grids (docs/parity-harness.md 9.11). The app has not run a line yet when this
+      // init script does, so aligning the ticks here, and putting the wall clock back
+      // where it was, changes nothing the app could have observed.
+      await page.addInitScript({
+        content:
+          "(function () {" +
+          "  var c = globalThis.__pwClock && globalThis.__pwClock.controller;" +
+          "  if (!c) return;" +
+          "  var ticks = c.performanceNow();" +
+          "  var pad = (16 - (ticks % 16)) % 16;" +
+          "  if (!pad) return;" +
+          "  c.runFor(pad).then(function () { c.setSystemTime(" + recordedAt + "); });" +
+          "})()",
+      });
+      // Node's setImmediate is not one of the functions page.clock fakes, and gen4's
+      // timer hops through it on every frame (`setImmediate(() =>
+      // requestAnimationFrame(updateTime))`). A real setImmediate races the clock's
+      // own real-time yield between two fake timers: when it loses, the clock has
+      // already moved past the next frame boundary before the frame is requested, the
+      // timer skips a frame, and the hundredths digit lags -- at a different
+      // checkpoint every run. Routed through the (fake) setTimeout it fires one
+      // virtual millisecond later, which is what "immediately, before the next frame"
+      // means to the app (docs/parity-harness.md 9.12).
+      await page.addInitScript({
+        content:
+          "(function () {" +
+          "  if (typeof globalThis.setImmediate !== 'function') return;" +
+          "  globalThis.setImmediate = function (cb) { var args = Array.prototype.slice.call(arguments, 1); return setTimeout(function () { cb.apply(null, args); }, 0); };" +
+          "  globalThis.clearImmediate = function (id) { clearTimeout(id); };" +
+          "})()",
+      });
     }
 
     // Arm the mapper BEFORE the reload. That is what the queuer's launch order looks
@@ -485,23 +540,27 @@ async function installPortRedirect(page: Page, ports: typeof CANONICAL_PORTS): P
 async function warmUp(page: Page, mock: MockPokeAByte, opts: RunOptions): Promise<void> {
   for (let i = 0; i < 12; i++) {
     await new Promise((r) => setTimeout(r, 50));
+    // Drain before the sweep as well as after: the app's boot (its __stpPendingBoot,
+    // folded into the barrier's IPC count) must not complete *during* a sweep.
+    await barrier(page, mock);
     if (!opts.realtime) await page.clock.runFor(WARM_UP_STEP_MS);
     await barrier(page, mock);
   }
 }
 
 /**
- * A whole number of animation frames, and that is load-bearing.
+ * A whole number of animation frames (12 x 16).
  *
- * Boot resolves on real time (the IPC settings reads), so *which* warm-up step the
- * overlay's timer gets constructed in varies from run to run -- and the timer runs on
- * `requestAnimationFrame`, which the fake clock schedules 16 ms from whenever the chain
- * started. With 200 ms steps (200 mod 16 = 8) a chain anchored in an odd step ticks
- * 8 ms out of phase with one anchored in an even step, and the on-screen hundredths
- * digit read `.22` in one run and `.23` in the next at every checkpoint whose clock
- * happened to sit on the even grid. 192 = 12 x 16, so the anchor's phase is the same
- * whichever step it lands in. Every other advance the runner makes is either fixed by
- * the fixture (deterministic) or a multiple of 16 already (`settle`, `extraFrame`).
+ * This was introduced as a fix for the hundredths-digit flake on the theory that the
+ * fake clock schedules `requestAnimationFrame` 16 ms from whenever a chain starts, so
+ * a timer constructed in an odd 200 ms step (200 mod 16 = 8) would tick out of phase
+ * with one constructed in an even step. The clock actually schedules every frame for
+ * the next multiple of 16 of its tick counter, so chains are on the grid whichever
+ * step they start in; the flake was the grid itself moving between runs, and the init
+ * script after `clock.pauseAt()` is what pins it (docs/parity-harness.md 9.11). The
+ * 192 stays because a step that is a whole number of frames is the easier one to
+ * reason about, and every other advance is fixed by the fixture or a multiple of 16
+ * already (`settle`, `extraFrame`).
  */
 const WARM_UP_STEP_MS = 192;
 
@@ -564,6 +623,11 @@ async function installHubReceiptProbe(page: Page): Promise<void> {
  * Node rather than with page.waitForFunction matters, because that helper polls with
  * page timers, which a paused fake clock never fires.
  *
+ * `__stpPendingBoot` (main.ts) is folded into the IPC count: a module's boot runs on
+ * dynamic imports, which are neither IPC nor fetch, and a boot that completes mid
+ * clock-sweep anchors the overlay's animation-frame chain on whatever timer the sweep
+ * had reached -- one hundredth behind the legacy app at a quarter of the checkpoints.
+ *
  * The hub count closes the same hole for the *other* pipe. `mock.pushChanges()` writes
  * to a WebSocket, which reaches the renderer independently of CDP, so a change could
  * land on either side of the next `clock.runFor` -- and a new run that starts its timer
@@ -578,7 +642,7 @@ async function barrier(page: Page, mock?: MockPokeAByte, timeoutMs = 5000): Prom
     const state = (await page
       .evaluate(
         "({" +
-          " ipc: (window.api && window.api.__pendingIpc) ? window.api.__pendingIpc() : 0," +
+          " ipc: ((window.api && window.api.__pendingIpc) ? window.api.__pendingIpc() : 0) + (window.__stpPendingBoot || 0)," +
           " fetch: window.__pendingFetch || 0," +
           " hub: window.__hubRx || 0" +
           "})",

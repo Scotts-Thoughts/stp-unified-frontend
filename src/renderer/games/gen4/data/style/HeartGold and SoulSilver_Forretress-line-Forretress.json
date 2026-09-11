@@ -1,0 +1,22 @@
+{
+  "overlay_color": "#ecdadb",
+  "ui_saturation": "0",
+  "imageXOffset": "-33",
+  "imageYOffset": "-47",
+  "imageScale": "0.73",
+  "imageFlip": true,
+  "imageSat": 100,
+  "imageRotation": 0,
+  "backgroundTexture": "Bug",
+  "backgroundBlur": 0,
+  "backgroundHue": 0,
+  "backgroundScale": "105",
+  "backgroundUrl": "",
+  "backgroundFlip": false,
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": "13",
+  "backgroundBrightness": "66",
+  "backgroundContrast": "130",
+  "backgroundSaturation": 100
+}

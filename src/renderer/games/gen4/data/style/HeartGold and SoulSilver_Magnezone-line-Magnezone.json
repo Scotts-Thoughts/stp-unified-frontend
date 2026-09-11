@@ -1,0 +1,16 @@
+{
+  "overlay_color": "#92a6ab",
+  "ui_saturation": 0.6,
+  "backgroundTexture": "Electric",
+  "backgroundBlur": 0,
+  "backgroundHue": "201",
+  "backgroundScale": "180",
+  "backgroundUrl": "",
+  "backgroundFlip": true,
+  "use_custom_background": false,
+  "backgroundXOffset": "125",
+  "backgroundYOffset": "117",
+  "backgroundBrightness": "57",
+  "backgroundContrast": "174",
+  "backgroundSaturation": 100
+}

@@ -1,0 +1,14 @@
+{
+  "backgroundTexture": "Dark",
+  "backgroundScale": "133",
+  "backgroundFlip": true,
+  "backgroundYOffset": "46",
+  "backgroundContrast": "130",
+  "backgroundBrightness": "109",
+  "backgroundHue": "0",
+  "imageScale": "0.89",
+  "imageYOffset": "9",
+  "imageXOffset": "2",
+  "overlay_color": "#36a94b",
+  "ui_saturation": "0"
+}

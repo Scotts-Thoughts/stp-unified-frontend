@@ -1,0 +1,16 @@
+{
+  "overlay_color": "#705848",
+  "imageXOffset": 0,
+  "imageYOffset": 0,
+  "imageScale": 1,
+  "imageFlip": false,
+  "imageSat": 100,
+  "backgroundTexture": "dark",
+  "backgroundHue": 100,
+  "backgroundScale": 100,
+  "backgroundUrl": false,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": 0,
+  "backgroundBrightness": 100,
+  "backgroundContrast": 100
+}

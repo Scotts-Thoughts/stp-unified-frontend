@@ -1,0 +1,21 @@
+export const badgeTypeBoosts = {
+    "Flying"   : "badge1",
+    "Bug"      : "badge2",
+    "Normal"   : "badge3",
+    "Ghost"    : "badge4",
+    "Fighting" : "badge5",
+    "Steel"    : "badge6",
+    "Ice"      : "badge7",
+    "Dragon"   : "badge8",
+    "Rock"     : "badge9",
+    "Water"    : "badge10",
+    "Electric" : "badge11",
+    "Grass"    : "badge12",
+    "Poison"   : "badge13",
+    "Psychic"  : "badge14",
+    "Fire"     : "badge15",
+    "Ground"   : "badge16",
+    "Dark"     : null,
+    "???"      : null,
+}
+//there is no badge that boosts Dark-type moves (Dark moves are never boosted)

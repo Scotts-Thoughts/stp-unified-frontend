@@ -1,0 +1,13 @@
+{
+  "backgroundTexture": "Fighting",
+  "backgroundContrast": "149",
+  "backgroundBlur": "3",
+  "backgroundScale": "184",
+  "backgroundBrightness": "56",
+  "imageFlip": true,
+  "imageScale": "0.68",
+  "imageYOffset": "-19",
+  "imageXOffset": "-5",
+  "overlay_color": "#c4905c",
+  "ui_saturation": "1.2"
+}

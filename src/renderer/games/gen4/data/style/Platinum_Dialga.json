@@ -1,0 +1,13 @@
+{
+  "overlay_color": "#3f5083",
+  "ui_saturation": "1.8",
+  "imageYOffset": "66",
+  "imageScale": "1.19",
+  "backgroundTexture": "Dragon",
+  "backgroundBlur": "1",
+  "backgroundScale": "148",
+  "backgroundYOffset": "-33",
+  "backgroundBrightness": "68",
+  "backgroundContrast": "155",
+  "pkmn_ability": "Pressure"
+}

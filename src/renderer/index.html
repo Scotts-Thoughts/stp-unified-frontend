@@ -3,11 +3,10 @@
 <head>
     <meta charset="utf-8">
     <title>Scott's Thoughts - Generation 1 Overlay - v1.5.0</title>
-    <!-- base first, then the generation's: the cascade order between any two rules
-         is the order they had when they shared style-yellow.css (plan 1.5). Phase 3
-         replaces the second link with the GameModule's dynamic import. -->
+    <!-- base only; the active generation's stylesheet is a <style> element main.ts
+         manages (applyModuleStyles), placed after this link so the cascade order is
+         the one the two files had when they were one (plan 1.5, 3.1). -->
     <link rel="stylesheet" href="core/styles/base.css">
-    <link rel="stylesheet" href="games/gen1/style.css">
 </head>
 <body>
     <div id="app-container" class="gen-1">
@@ -19,11 +18,10 @@
                 <br>
                 <no_mapper></no_mapper>
             </div>
-            <div v-else>
-                <frontend
-                    :game="game"
-                ></frontend>
-            </div>
+            <!-- No wrapper: the overlay component's root is a direct child of #app, as
+                 the legacy apps' v-else wrapper was, so the two trees line up from #app
+                 down (tools/parity/capture.ts roots gen4's comparison there). -->
+            <component v-else :is="overlayComponent" :game="game" ref="overlay"></component>
         </div>
     </div>
 

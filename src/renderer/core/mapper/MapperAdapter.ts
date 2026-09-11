@@ -45,6 +45,12 @@ export function buildCanonicalView(profile: MapperProfile, properties: any): Rec
     const keys = Object.keys(profile.reads).sort((a, b) => a.split(".").length - b.split(".").length || (a < b ? -1 : 1));
     for (const key of keys) {
         const target = resolvePath(properties, profile.reads[key].path);
+        // A key this mapper file does not have leaves no trace: gen4's one profile
+        // vocabulary covers three mappers, and Platinum has no `variables.*` at all.
+        // Creating an empty `variables` container for it would turn the legacy
+        // `properties?.variables?.game_started.change(...)` (a short-circuit on the
+        // missing container) into a TypeError on the missing leaf.
+        if (target === undefined) continue;
         const segments = key.split(".");
         let node: any = view;
         for (let i = 0; i < segments.length - 1; i++) {

@@ -1,0 +1,314 @@
+[
+ {
+  "file": "lib/g4MoveData.js",
+  "out": "games/gen4/data/g4MoveData.js",
+  "globals": [
+   "g4MoveData"
+  ],
+  "lines": 5174,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/g4tmhmMapping.js",
+  "out": "games/gen4/data/g4tmhmMapping.js",
+  "globals": [
+   "g4tmhmMapping"
+  ],
+  "lines": 103,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/stageModifiers.js",
+  "out": "games/gen4/data/stageModifiers.js",
+  "globals": [
+   "stageModifiersData"
+  ],
+  "lines": 50,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/type-effectiveness.js",
+  "out": "games/gen4/data/type-effectiveness.js",
+  "globals": [
+   "typeData"
+  ],
+  "lines": 342,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/type effectiveness array.js",
+  "out": "games/gen4/data/type effectiveness array.js",
+  "globals": [
+   "typeEffectivenessArray"
+  ],
+  "lines": 259,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/typeBoostingItems.js",
+  "out": "games/gen4/data/typeBoostingItems.js",
+  "globals": [
+   "typeBoostingItems"
+  ],
+  "lines": 54,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/platinum_trainers.js",
+  "out": "games/gen4/data/platinum_trainers.js",
+  "globals": [
+   "platinum_trainers"
+  ],
+  "lines": 51454,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hiddenPowerTypes.js",
+  "out": "games/gen4/data/hiddenPowerTypes.js",
+  "globals": [
+   "hiddenPowerTypes"
+  ],
+  "lines": 18,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hiddenpower-all.js",
+  "out": "games/gen4/data/hiddenpower-all.js",
+  "globals": [
+   "hiddenpowers"
+  ],
+  "lines": 99,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/g4PokemonDataPlat.js",
+  "out": "games/gen4/data/g4PokemonDataPlat.js",
+  "globals": [
+   "g4PokemonData"
+  ],
+  "lines": 75055,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/natureDefinitions.js",
+  "out": "games/gen4/data/natureDefinitions.js",
+  "globals": [
+   "natures_2"
+  ],
+  "lines": 202,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/platinum_moves.js",
+  "out": "games/gen4/data/platinum_moves.js",
+  "globals": [
+   "platinum_moves"
+  ],
+  "lines": 9343,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves.js",
+  "out": "games/gen4/data/moves.js",
+  "globals": [
+   "generation4_moves_new"
+  ],
+  "lines": 9342,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/textures.js",
+  "out": "games/gen4/data/textures.js",
+  "globals": [
+   "textures"
+  ],
+  "lines": 41,
+  "rebased": 39,
+  "imports": []
+ },
+ {
+  "file": "lib/default_colors.js",
+  "out": "games/gen4/data/default_colors.js",
+  "globals": [
+   "default_colors"
+  ],
+  "lines": 21,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/game_variables.js",
+  "out": "games/gen4/data/game_variables.js",
+  "globals": [
+   "game_variables"
+  ],
+  "lines": 180,
+  "rebased": 0,
+  "imports": [
+   "import { g4PokemonData } from \"./g4PokemonDataPlat.js\";"
+  ]
+ },
+ {
+  "file": "lib/autosplitter.js",
+  "out": "games/gen4/data/autosplitter.js",
+  "globals": [
+   "autosplitter"
+  ],
+  "lines": 69,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/post_game_moves.js",
+  "out": "games/gen4/data/post_game_moves.js",
+  "globals": [
+   "post_game_moves"
+  ],
+  "lines": 103,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/auto_save_settings.js",
+  "out": "games/gen4/data/auto_save_settings.js",
+  "globals": [
+   "auto_save_settings"
+  ],
+  "lines": 112,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/natures.js",
+  "out": "games/gen4/data/natures.js",
+  "globals": [
+   "natures"
+  ],
+  "lines": 432,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hiddenpower.js",
+  "out": "games/gen4/data/hiddenpower.js",
+  "globals": [
+   "hiddenpower_type_selector"
+  ],
+  "lines": 18,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves/natural_gift.js",
+  "out": "games/gen4/data/moves/natural_gift.js",
+  "globals": [
+   "natural_gift"
+  ],
+  "lines": 66,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves/cross_generation_moves.js",
+  "out": "games/gen4/data/moves/cross_generation_moves.js",
+  "globals": [
+   "cross_generation_moves"
+  ],
+  "lines": 24750,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/pokedex/diamond_pearl.js",
+  "out": "games/gen4/data/pokedex/diamond_pearl.js",
+  "globals": [
+   "pokedex_dp"
+  ],
+  "lines": 58029,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/pokedex/platinum.js",
+  "out": "games/gen4/data/pokedex/platinum.js",
+  "globals": [
+   "pokedex_plat"
+  ],
+  "lines": 58981,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/pokedex/heartgold_soulsilver.js",
+  "out": "games/gen4/data/pokedex/heartgold_soulsilver.js",
+  "globals": [
+   "pokedex_hgss"
+  ],
+  "lines": 58921,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/trainers/diamond_pearl.js",
+  "out": "games/gen4/data/trainers/diamond_pearl.js",
+  "globals": [
+   "trainers_dp"
+  ],
+  "lines": 43771,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/trainers/platinum.js",
+  "out": "games/gen4/data/trainers/platinum.js",
+  "globals": [
+   "trainers_plat"
+  ],
+  "lines": 51454,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/trainers/heartgold_soulsilver.js",
+  "out": "games/gen4/data/trainers/heartgold_soulsilver.js",
+  "globals": [
+   "trainers_hgss"
+  ],
+  "lines": 47157,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/misc/tmhm.js",
+  "out": "games/gen4/data/misc/tmhm.js",
+  "globals": [
+   "tmhm"
+  ],
+  "lines": 383,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/moves/unobtainable_moves.js",
+  "out": "games/gen4/data/moves/unobtainable_moves.js",
+  "globals": [
+   "unobtainable_moves"
+  ],
+  "lines": 421,
+  "rebased": 0,
+  "imports": []
+ }
+]

@@ -1,0 +1,21 @@
+{
+  "overlay_color": "#c08d5b",
+  "imageXOffset": "22",
+  "imageYOffset": "-31",
+  "imageScale": "0.56",
+  "imageFlip": true,
+  "backgroundTexture": "fur",
+  "backgroundBlur": "2",
+  "backgroundHue": "0",
+  "backgroundScale": "152",
+  "backgroundUrl": false,
+  "backgroundFlip": false,
+  "backgroundXFlip": false,
+  "backgroundYOffset": "34",
+  "backgroundBrightness": "108",
+  "backgroundContrast": "112",
+  "finished_run_count": 0,
+  "attempt_number": 0,
+  "kanto_badges": false,
+  "backgroundSaturation": 100
+}

@@ -1,0 +1,14 @@
+{
+  "imageXOffset": "-33",
+  "imageYOffset": "108",
+  "imageScale": "0.6",
+  "imageFlip": true,
+  "backgroundHue": "318",
+  "backgroundScale": "159",
+  "backgroundFlip": true,
+  "backgroundXOffset": "-42",
+  "backgroundYOffset": "37",
+  "backgroundBrightness": "57",
+  "backgroundContrast": "172",
+  "pkmn_ability": "Levitate"
+}

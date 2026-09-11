@@ -13,6 +13,39 @@
  * comparable against the pre-1.5 baselines.
  */
 
+/* gen1's faces, from base.css (one generation's faces at a time, see there). The
+   families keep their names; the paths are relative to this file. */
+/* @font-face {
+    src: url(../../fonts/OpenSans-VariableFont_wdth\,wght.ttf);
+    font-family: oseb;
+} */
+@font-face {
+    src: url(../../fonts/OpenSans-ExtraBold.ttf);
+    font-family: oseb;
+    font-weight: 700;
+}
+
+@font-face {
+    src: url(../../fonts/Play-Bold.ttf);
+    font-family: osb;
+}
+
+@font-face {
+    src: url(../../fonts/TitanOne-Regular.ttf);
+    font-family: titan;
+}
+
+@font-face {
+    src: url(../../fonts/Play-Bold.ttf);
+    font-family: play;
+}
+
+@font-face {
+    src: url(../../fonts/Play-Regular.ttf);
+    font-family: play_regular;
+}
+
+
 /* The palette. It was on `:root`; on `.gen-1` it reaches exactly the same
    elements, because everything that reads these variables is inside
    #app-container, and no rule outside it uses var(). */

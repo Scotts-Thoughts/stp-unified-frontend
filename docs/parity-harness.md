@@ -200,15 +200,17 @@ npm run parity:mock -- <fixture>             # serve a fixture by hand, no Playw
 
 `<target>` is `unified`, `legacy:genN@25` or `legacy:genN@37`.
 
-### Determinism is not free — ten things the runner has to do
+### Determinism is not free — twelve things the runner has to do
 
-Getting two identical runs to agree took ten fixes; each is commented where it is handled, and any change to
-the runner has to keep all ten. Items 5–10 were added on 2026-09-10 during Phase 1, after the first four
+Getting two identical runs to agree took twelve fixes; each is commented where it is handled, and any change to
+the runner has to keep all twelve. Items 5–10 were added on 2026-09-10 during Phase 1, after the first four
 turned out to leave a flake that reproduced in roughly every other pair of runs: the on-screen timer's
 hundredths digit differed at 5 of 25 checkpoints (oracles 1 and 2), with an identical virtual clock at every
-capture. Each capture now records `virtualNow` (the renderer's `Date.now()`) and `hubRx` (hub frames it had
-processed) in `meta.json`, and `diff.ts` compares both — so if this class of problem returns, the report names
-the cause instead of listing its symptoms.
+capture. Item 11 is the one that was actually behind that flake all along (items 7 and 8 narrowed it without
+closing it; see 8); item 12 is gen4's own variant of it. Each capture now records `virtualNow` (the renderer's `Date.now()`), `hubRx` (hub frames it
+had processed) and `ticks` (the fake clock's tick counter, whose multiples of 16 are the animation-frame grid)
+in `meta.json`, and `diff.ts` compares all three — so if this class of problem returns, the report names the
+cause instead of listing its symptoms.
 
 1. **`--user-data-dir` per sandbox** (section 4). Without it runs share `%APPDATA%\Electron`.
 2. **`page.clock.pauseAt()` after `install()`.** `install()` alone keeps the fake clock ticking with real
@@ -250,12 +252,14 @@ the cause instead of listing its symptoms.
    landing on a 16 ms boundary is built on a false premise — `settle()` advances 1,200 ms, which is itself a
    multiple of 16, so *every* capture lands on a boundary, not just the flaky ones.
 8. **Every clock step the runner makes is a whole number of frames** (`WARM_UP_STEP_MS = 192` in `run.ts`).
-   Item 7 removed the mid-sweep read but the hundredths digit still flipped between runs, and this time the
-   arithmetic was exact: boot resolves on *real* time (the IPC settings reads), so which warm-up step the
-   overlay's timer is constructed in varies, and the timer runs on `requestAnimationFrame`, which the fake clock
-   schedules 16 ms from whenever the chain started. With 200 ms steps (200 mod 16 = 8) a chain anchored in an odd
-   step ticks 8 ms out of phase with one anchored in an even step — `.22` against `.23`. 192 = 12 × 16. Every
-   other advance is fixed by the fixture or already a multiple of 16 (`settle` 1,200; `extraFrame` 32).
+   Item 7 removed the mid-sweep read but the hundredths digit still flipped between runs, and the explanation
+   this was built on — that the fake clock schedules `requestAnimationFrame` 16 ms from whenever the chain
+   started, so a chain anchored in an odd 200 ms step (200 mod 16 = 8) ticks out of phase with one anchored in
+   an even step — turned out to be wrong: the clock schedules every frame for the next multiple of 16 of its
+   *tick counter* (`getTimeToNextFrame() = 16 - ticks % 16` in playwright-core's `clock.ts`), so a chain is on
+   the grid whenever it starts. The pairs of runs that agreed after this change agreed by luck (item 11). The
+   192 stays: it is harmless, and a step that is a whole number of frames is the easier one to reason about.
+   Every other advance is fixed by the fixture or already a multiple of 16 (`settle` 1,200; `extraFrame` 32).
 9. **Park the pointer** (`page.mouse.move(0, 0)` after the reload). The Electron window is a real window under
    the real desktop cursor, and Chromium re-evaluates `:hover` whenever layout changes under a stationary
    pointer. A range slider that happened to sit under the cursor was captured in its hover colours
@@ -275,9 +279,58 @@ the cause instead of listing its symptoms.
    transition's end state. The barrier also waits for in-flight `fetch`es (`window.__pendingFetch`), which is the
    third real-time pipe after IPC and the hub socket.
 
-Collecting the whole `userData` tree is an eleventh trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
+11. **Pin the animation-frame grid** (the init script after `clock.pauseAt()` in `run.ts`). The fake clock
+   fires `requestAnimationFrame` on multiples of 16 of its tick counter, and the tick counter of the re-created
+   document is not zero at the pause: `page.clock` records each call with the Node-side `Date.now()` of the
+   call and *replays* that log in every new document, and between the `install` entry and the `pauseAt` entry
+   the replay advances the ticks by the real milliseconds that separated the two calls — a few ms of CDP round
+   trips, different every run (`_replayLogOnce` in `clock.ts`). Two runs then have frame grids a few ms apart,
+   and an overlay timer that samples `Date.now()` on every frame reads a different instant at every capture;
+   the hundredths digit shows it wherever a 10 ms boundary falls between the two grids, which for a 2–5 ms
+   offset is 4–10 of gen2's 22 checkpoints — the exact shape of every flake in this list. Found after the
+   unified gen2 port was one hundredth *behind* the legacy baseline at four checkpoints in two runs and at ten
+   in a third, with `timer_startTime`, `virtualNow` and `hubRx` identical at every one. The init script runs
+   before the app's first line: it reads the tick counter (`performanceNow()`), runs the clock forward to the
+   next multiple of 16 (no timers exist yet, so nothing fires) and puts the wall clock back to `recordedAt`
+   (`setSystemTime`). The grid is now at `recordedAt + 16k` in every run, and `meta.json`'s `ticks` proves it.
+
+12. **Route `setImmediate` through the fake clock** (the init script after the grid pin in `run.ts`). Node's
+   `setImmediate` is not among the functions `page.clock` fakes, and gen4's timer hops through it on every
+   frame (`setImmediate(() => requestAnimationFrame(updateTime))`). Between two fake timers the clock yields
+   to real time once (`_callFirstTimer` awaits a real `setTimeout(0)`), and a real `setImmediate` queued by the
+   frame callback races that yield: when it loses, the clock has already advanced past the next frame
+   boundary before the next frame is requested, the timer skips a frame, and the hundredths digit lags by one
+   frame -- `.20` against `.22` at one checkpoint of one run, with `virtualNow`, `hubRx`, `ticks` and
+   `timer_startTime` all identical. Routed through the (fake) `setTimeout` it fires one virtual millisecond
+   after the frame, which is what "immediately, before the next frame" means to the app, on both sides.
+
+   Also in this family: `clock.install()` is now given `recordedAt - 1000` and `pauseAt()` `recordedAt`. The
+   pre-reload document's clock runs on real time between the two calls, and an app with a 10 ms poll (gen4's
+   Shuckie interval) carried it past `recordedAt` before `pauseAt()` landed -- "Cannot fast-forward to the
+   past", once in a few runs. With the install a second earlier the pause is always a forward move there; the
+   re-created document replays the log and takes `recordedAt` from the `pauseAt` entry regardless.
+
+Collecting the whole `userData` tree is a thirteenth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
 DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between
 identical runs. `run.ts` collects only what the app writes, and `localStorage` is compared from the page dump.
+
+### Where the layout oracle is rooted
+
+Element paths (oracle 1) are relative to where the overlay proper starts, because above it the legacy apps
+and the unified shell differ by design (the shell's `<keyhook>` div, a `v-if` sibling that is or is not
+rendered): the first `.mainContainer` for gen1 and gen2, and for an overlay without one (gen4, whose
+top-level elements sit directly in its `v-else` wrapper) the element directly under `#app` that holds the
+first background canvas -- the legacy wrapper, or the lifted component's root, which is why the shell mounts
+the overlay component as a direct child of `#app` with no wrapper of its own. The root element itself is
+keyed `""` and its rect is compared, so a shell that moved the overlay would still show.
+
+### `unified@<dir>`: the no-change check against the previous commit
+
+A refactor is proven not to change a generation by capturing the baseline from the commit before it with
+the *same* harness: `git worktree add <dir> <commit>`, build there (a `node_modules` junction is enough), and
+run `unified@<dir>` on the fixture; then run `unified` on the working tree and diff. A baseline captured by
+an older harness is not comparable once the capture format moves, and it has moved with nearly every harness
+fix. The Phase 2 gen2 commit was checked this way for gen1 (see plan section 7c for what it found).
 
 ### `--redirect-ports`
 

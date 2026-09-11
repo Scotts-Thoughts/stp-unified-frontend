@@ -2,6 +2,8 @@ import type { GameModule } from "~/core/game/GameModule";
 import type { MapperProfile } from "~/core/mapper/MapperProfile";
 import { matchesIdentity, matchesPath, readIdentity } from "~/core/mapper/MapperAdapter";
 import { gen1 } from "./gen1";
+import { gen2 } from "./gen2";
+import { gen4 } from "./gen4";
 
 /**
  * Mapper -> GameModule (plan 1.4; the fusion in plan 3.1 adds the other four entries
@@ -13,7 +15,7 @@ import { gen1 } from "./gen1";
  * have no meta properties). A mapper nothing claims -- every hack mapper, by decision 8
  * -- yields `null`, and `main.ts` shows the unsupported-mapper state.
  */
-export const MODULES: readonly GameModule[] = [gen1];
+export const MODULES: readonly GameModule[] = [gen1, gen2, gen4];
 
 export interface Detection {
     module: GameModule;

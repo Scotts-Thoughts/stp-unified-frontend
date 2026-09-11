@@ -1,0 +1,19 @@
+{
+  "imageScale": "0.5",
+  "imageYOffset": "144",
+  "imageXOffset": "45",
+  "overlay_color": "#92a6ab",
+  "backgroundScale": "180",
+  "backgroundYOffset": "117",
+  "backgroundXOffset": "125",
+  "backgroundBrightness": "57",
+  "backgroundContrast": "174",
+  "backgroundHue": "201",
+  "backgroundFlip": true,
+  "ui_saturation": 0.6,
+  "backgroundTexture": "Electric",
+  "backgroundBlur": 0,
+  "backgroundUrl": "",
+  "use_custom_background": false,
+  "backgroundSaturation": 100
+}

@@ -1,0 +1,11 @@
+{
+  "pkmn_ability": "Anticipation",
+  "backgroundTexture": "Ground",
+  "backgroundBlur": "3",
+  "backgroundBrightness": "25",
+  "imageScale": "0.81",
+  "imageYOffset": "200",
+  "imageXOffset": "23",
+  "overlay_color": "#a6814d",
+  "ui_saturation": "1.1"
+}

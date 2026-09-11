@@ -1,0 +1,252 @@
+[
+ {
+  "file": "lib/pokemon_crystal.js",
+  "out": "games/gen2/data/pokemon_crystal.js",
+  "globals": [
+   "dexDataCrystal"
+  ],
+  "lines": 25422,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/gen2moves.js",
+  "out": "games/gen2/data/gen2moves.js",
+  "globals": [
+   "gen2moves"
+  ],
+  "lines": 2766,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/g2MoveData.js",
+  "out": "games/gen2/data/g2MoveData.js",
+  "globals": [
+   "g2MoveData"
+  ],
+  "lines": 2791,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/backport_move_map.js",
+  "out": "games/gen2/data/backport_move_map.js",
+  "globals": [
+   "backportMoveMap"
+  ],
+  "lines": 7,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/g2trainers-short.js",
+  "out": "games/gen2/data/g2trainers-short.js",
+  "globals": [
+   "g2trainers"
+  ],
+  "lines": 118507,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/crystal-trainers-otto.js",
+  "out": "games/gen2/data/crystal-trainers-otto.js",
+  "globals": [
+   "g2trainersOtto"
+  ],
+  "lines": 30087,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/type-effectiveness.js",
+  "out": "games/gen2/data/type-effectiveness.js",
+  "globals": [
+   "typeData"
+  ],
+  "lines": 401,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/typeBoostingItems.js",
+  "out": "games/gen2/data/typeBoostingItems.js",
+  "globals": [
+   "typeBoostingItems"
+  ],
+  "lines": 22,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hiddenPowerTypeSelector.js",
+  "out": "games/gen2/data/hiddenPowerTypeSelector.js",
+  "globals": [
+   "hiddenPowerTypeSelector"
+  ],
+  "lines": 20,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/hpTable.js",
+  "out": "games/gen2/data/hpTable.js",
+  "globals": [
+   "hiddenPowerTypes"
+  ],
+  "lines": 19,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/badgeTypeBoosts.js",
+  "out": "games/gen2/data/badgeTypeBoosts.js",
+  "globals": [
+   "badgeTypeBoosts"
+  ],
+  "lines": 21,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/stageModifiers.js",
+  "out": "games/gen2/data/stageModifiers.js",
+  "globals": [
+   "stageModifiersData"
+  ],
+  "lines": 48,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/tmhmmapping.js",
+  "out": "games/gen2/data/tmhmmapping.js",
+  "globals": [
+   "tmhmMapping"
+  ],
+  "lines": 59,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/auto_save_settings.js",
+  "out": "games/gen2/data/auto_save_settings.js",
+  "globals": [
+   "auto_save_settings"
+  ],
+  "lines": 217,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/textures.js",
+  "out": "games/gen2/data/textures.js",
+  "globals": [
+   "textures"
+  ],
+  "lines": 35,
+  "rebased": 33,
+  "imports": []
+ },
+ {
+  "file": "lib/autosplitter.js",
+  "out": "games/gen2/data/autosplitter.js",
+  "globals": [
+   "autosplitter"
+  ],
+  "lines": 62,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/default_textures.js",
+  "out": "games/gen2/data/default_textures.js",
+  "globals": [
+   "default_textures"
+  ],
+  "lines": 19,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/default_colors.js",
+  "out": "games/gen2/data/default_colors.js",
+  "globals": [
+   "default_colors"
+  ],
+  "lines": 21,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/crystal_trainers.js",
+  "out": "games/gen2/data/crystal_trainers.js",
+  "globals": [
+   "crystal_trainers"
+  ],
+  "lines": 33191,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/battle_summary_properties.js",
+  "out": "games/gen2/data/battle_summary_properties.js",
+  "globals": [
+   "battle_summary_properties"
+  ],
+  "lines": 11,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/cross_generation_moves.js",
+  "out": "games/gen2/data/cross_generation_moves.js",
+  "globals": [
+   "cross_generation_moves"
+  ],
+  "lines": 24750,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "autosplitter/trainer_name_lookup.js",
+  "out": "games/gen2/data/autosplitter/trainer_name_lookup.js",
+  "globals": [
+   "trainer_name_lookup"
+  ],
+  "lines": 72,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "autosplitter/split_trainers.js",
+  "out": "games/gen2/data/autosplitter/split_trainers.js",
+  "globals": [
+   "split_trainers"
+  ],
+  "lines": 30,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "autosplitter/battle_summary.js",
+  "out": "games/gen2/data/autosplitter/battle_summary.js",
+  "globals": [
+   "battle_summary"
+  ],
+  "lines": 108,
+  "rebased": 0,
+  "imports": []
+ },
+ {
+  "file": "lib/unobtainable_moves.js",
+  "out": "games/gen2/data/unobtainable_moves.js",
+  "globals": [
+   "unobtainable_moves_object"
+  ],
+  "lines": 10,
+  "rebased": 0,
+  "imports": []
+ }
+]

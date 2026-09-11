@@ -1,0 +1,22 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.6",
+  "imageYOffset": "-47",
+  "imageXOffset": "-26",
+  "backgroundTexture": "Dark Moon",
+  "backgroundScale": "158",
+  "backgroundContrast": "146",
+  "backgroundHue": "315",
+  "backgroundSaturation": "137",
+  "overlay_color": "#66c1cc",
+  "ui_saturation": "1.7",
+  "backgroundYOffset": "31",
+  "backgroundXOffset": "93",
+  "backgroundBrightness": "89",
+  "backgroundBlur": "1",
+  "imageSat": 100,
+  "imageRotation": 0,
+  "backgroundUrl": "",
+  "backgroundFlip": false,
+  "use_custom_background": false
+}

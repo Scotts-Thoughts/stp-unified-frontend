@@ -1,0 +1,15 @@
+{
+  "backgroundUrl": false,
+  "backgroundHue": "0",
+  "backgroundTexture": "fire",
+  "overlay_color": "#e0885c",
+  "backgroundContrast": "127",
+  "backgroundBrightness": "76",
+  "backgroundYOffset": "-112",
+  "backgroundXOffset": 0,
+  "backgroundScale": "159",
+  "imageFlip": true,
+  "imageScale": "0.6",
+  "imageYOffset": "-42",
+  "imageXOffset": "32"
+}

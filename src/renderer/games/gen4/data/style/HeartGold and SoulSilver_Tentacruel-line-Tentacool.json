@@ -1,0 +1,22 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.52",
+  "imageYOffset": "23",
+  "imageXOffset": "-62",
+  "overlay_color": "#78c2e6",
+  "ui_saturation": "1.6",
+  "backgroundTexture": "Underwater Rocks",
+  "backgroundScale": "100",
+  "backgroundContrast": "109",
+  "backgroundSaturation": "133",
+  "backgroundBrightness": "141",
+  "imageSat": 100,
+  "imageRotation": 0,
+  "backgroundBlur": 0,
+  "backgroundHue": 0,
+  "backgroundUrl": "",
+  "backgroundFlip": false,
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": 0
+}

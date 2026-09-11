@@ -9,3 +9,4 @@ tools/reports/
 # Plan 0.1 only ignored the PNGs, which was written before that was measured.
 tools/baselines/
 tools/sandbox/
+__pycache__/

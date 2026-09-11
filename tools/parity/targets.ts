@@ -8,7 +8,7 @@
  */
 import { cpSync, existsSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 
 export const REPO = resolve(import.meta.dirname, "..", "..");
 export const SANDBOX_ROOT = join(REPO, "tools", "sandbox");
@@ -47,7 +47,7 @@ export interface Target {
   electronMajor: number;
 }
 
-const LEGACY_DIRS: Record<Generation, string> = {
+export const LEGACY_DIRS: Record<Generation, string> = {
   gen1: "A:\\Programs\\gen1-stp-frontend",
   gen2: "A:\\Programs\\gen2-stp-frontend",
   gen3: "A:\\Programs\\gen3-stp-frontend",
@@ -63,6 +63,29 @@ const LEGACY_APP_NAMES: Record<Generation, string> = {
   gen5: "gen5-overlay-app",
 };
 
+/**
+ * Where a lifted module's `images/genN/...` resolves during a run of the unified app:
+ * a junction from the built renderer's `images/genN` to the legacy app's image tree,
+ * read-only, so the template finds the same bytes the legacy app rendered, over the
+ * same file:// transport (tools/port/lift_assets.py says why the transport matters).
+ * Phase 4 replaces the junctions with the merged pool; a build empties `out/`, so
+ * they are re-made for every run.
+ */
+export function junctionLegacyImages(appRoot: string, log: (m: string) => void): void {
+  const images = join(appRoot, "out", "renderer", "images");
+  mkdirSync(images, { recursive: true });
+  for (const gen of ["gen2", "gen3", "gen4", "gen5"] as const) {
+    const source = join(LEGACY_DIRS[gen], "app", "images");
+    const link = join(images, gen);
+    if (!existsSync(source) || existsSync(link)) continue;
+    try {
+      symlinkSync(source, link, "junction");
+    } catch (err) {
+      log(`[sandbox] junction ${link} -> ${source} failed: ${(err as Error).message}`);
+    }
+  }
+}
+
 export function unifiedElectron(): string {
   return join(REPO, "node_modules", "electron", "dist", "electron.exe");
 }
@@ -71,18 +94,32 @@ export function legacyElectron(gen: Generation): string {
   return join(LEGACY_DIRS[gen], "node_modules", "electron", "dist", "electron.exe");
 }
 
-/** "legacy:gen2@25" | "legacy:gen2@37" | "unified" */
+/**
+ * "legacy:gen2@25" | "legacy:gen2@37" | "unified" | "unified@<dir>"
+ *
+ * `unified@<dir>` runs a *different checkout* of this app -- a `git worktree` of the
+ * last commit, built there -- with this checkout's harness. That is how a refactor is
+ * proven not to change gen1: the baseline is captured from the commit before it with
+ * the same runner, capture and diff code as the candidate, so the only variable is
+ * the app. (A baseline captured by an older harness is not comparable once the
+ * capture format moves, and the format has moved with nearly every harness fix.)
+ */
 export function parseTarget(spec: string): Target {
-  if (spec === "unified") {
+  const unified = /^unified(?:@(.+))?$/.exec(spec);
+  if (unified) {
     const sandbox = join(SANDBOX_ROOT, "unified");
+    const appRoot = unified[1] ? resolve(unified[1]) : REPO;
+    if (!existsSync(join(appRoot, "out", "main"))) {
+      throw new Error(`unified target ${appRoot} has no out/main -- run electron-vite build there first`);
+    }
     return {
-      id: spec,
+      id: unified[1] ? `unified@${basename(appRoot)}` : spec,
       kind: "unified",
       generation: "gen1",
       executablePath: unifiedElectron(),
       // The repo root, not out/main/index.js: Electron then reads package.json, so the
       // app name, `main` and `app.isPackaged` are what a real launch sees.
-      appArg: REPO,
+      appArg: appRoot,
       cwd: sandbox,
       appData: join(sandbox, "AppData"),
       userDataDir: join(sandbox, "userData"),
@@ -146,8 +183,10 @@ export function prepareSandbox(target: Target, opts: SandboxOptions = {}): strin
     cpSync(keyhook, join(target.cwd, "keyhook.exe"));
   }
 
+  if (target.kind === "unified") junctionLegacyImages(target.appArg, log);
+
   // ./storage holds shipped defaults; gen1 reads Storage.json from it.
-  const storage = target.kind === "unified" ? join(REPO, "storage") : join(LEGACY_DIRS[target.generation], "storage");
+  const storage = target.kind === "unified" ? join(target.appArg, "storage") : join(LEGACY_DIRS[target.generation], "storage");
   if (existsSync(storage) && !existsSync(join(target.cwd, "storage"))) {
     cpSync(storage, join(target.cwd, "storage"), { recursive: true });
   }
@@ -205,4 +244,4 @@ function copyLegacyTree(from: string, to: string, log: (m: string) => void): voi
   );
 }
 
-export { LEGACY_DIRS, LEGACY_APP_NAMES };
+export { LEGACY_APP_NAMES };

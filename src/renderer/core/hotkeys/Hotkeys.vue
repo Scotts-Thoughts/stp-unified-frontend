@@ -27,6 +27,13 @@ export default defineComponent({
 	mounted() {
 		this.unbind = bindHotkeys(this.table);
 	},
+	watch: {
+		/** The table changes when the active GameModule does (plan 3.1). */
+		table(next: HotkeyTable) {
+			this.unbind?.();
+			this.unbind = bindHotkeys(next);
+		},
+	},
 	unmounted() {
 		this.unbind?.();
 		this.unbind = null;

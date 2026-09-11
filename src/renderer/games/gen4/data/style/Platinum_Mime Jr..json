@@ -1,0 +1,15 @@
+{
+  "overlay_color": "#f9e0e7",
+  "ui_saturation": "1.4",
+  "imageXOffset": "23",
+  "imageYOffset": "-26",
+  "imageScale": "0.62",
+  "imageFlip": false,
+  "backgroundHue": "280",
+  "backgroundScale": "117",
+  "backgroundBrightness": "82",
+  "backgroundContrast": "160",
+  "backgroundSaturation": "149",
+  "evolution": true,
+  "selected_evolution_species": "Mime Jr."
+}

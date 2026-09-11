@@ -1,0 +1,9 @@
+{
+  "overlay_color": "#886d98",
+  "ui_saturation": "0.9",
+  "backgroundTexture": "Dark Grass",
+  "backgroundScale": "160",
+  "backgroundFlip": true,
+  "backgroundBrightness": "77",
+  "backgroundContrast": "144"
+}

@@ -1,0 +1,11 @@
+{
+  "overlay_color": "#edcd7f",
+  "ui_saturation": "1.6",
+  "imageYOffset": "158",
+  "imageScale": "0.5",
+  "imageFlip": true,
+  "backgroundHue": "261",
+  "backgroundScale": "115",
+  "backgroundContrast": "156",
+  "pkmn_ability": "Levitate"
+}

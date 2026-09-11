@@ -63,6 +63,14 @@ export interface ChapterMarkers {
     [kind: string]: (...args: string[]) => string;
 }
 
+/** What a module's control-route table can reach. */
+export interface ControlContext {
+    isReady(): boolean;
+    mapperPath(): string | null;
+    /** The mounted overlay component instance, or null before it mounts. gen2-5's lifted routes drive it directly. */
+    overlay(): any;
+}
+
 export interface GameModule {
     id: "gen1" | "gen2" | "gen3" | "gen4" | "gen5";
     generation: 1 | 2 | 3 | 4 | 5;
@@ -78,11 +86,48 @@ export interface GameModule {
         splits: Record<string, unknown>;
         [table: string]: unknown;
     };
+    /**
+     * The F-key table main.ts binds while this module is active. A lifted module
+     * (gen2-5) binds its own table from its overlay's `mounted`, because the handlers
+     * close over the component instance, and returns `{}` here.
+     */
     hotkeys(): HotkeyTable;
-    control(isReady: () => boolean, mapperPath: () => string | null): ControlRoutes;
+    control(ctx: ControlContext): ControlRoutes;
     chapterMarkers: ChapterMarkers;
-    /** Loads the generation's stylesheet (`games/genN/style.css`, scoped under `.gen-N`). */
-    styles(): Promise<unknown>;
+    /** The overlay component main.ts mounts once the mapper is detected. */
+    overlay: Component;
+    /** The class on `#app-container` while this module is active: `gen-N`. */
+    cssClass: string;
+    /** The generation's stylesheet text (`games/genN/style.css?inline`), applied by main.ts before the overlay mounts. */
+    styles(): Promise<string>;
+    /**
+     * Where this module's images live under the renderer's `images/` root
+     * (`images/gen2/`), or none when they are gen1's own. Informational: the references
+     * inside a lifted module were rewritten at port time (tools/port/lift_assets.py,
+     * which also says why a plain relative path and not a URL scheme).
+     */
+    assetPrefix?: string;
+    /** Anything that must be in memory before the overlay mounts (gen2: the per-species style defaults). */
+    prepare?(): Promise<void>;
+    /**
+     * Mapper paths (prefixes) whose updates the client debounces by ten animation
+     * frames -- gen4's `this.mapper.deboucePath(...)` calls, which it made before
+     * connecting. main.ts applies them once the mapper is detected as this module's.
+     */
+    debouncePaths?: readonly string[];
+    /**
+     * The 16:9 fit-to-window script gen2/gen4/gen5's index.html ran (`core/window/
+     * scaleToFit.ts`); the shell installs it while the module is active.
+     */
+    scaleToFit?: boolean;
+    /**
+     * Shell services this module wants running while it is active, started right
+     * before `ready` and stopped when the mapper unloads. gen1 starts its Super
+     * Shuckie poll here; a lifted module polls from inside its own component and
+     * leaves these unset.
+     */
+    activate?(game: string): void;
+    deactivate?(): void;
     /** Generation-specific SFC variants, only where the DOM differs (Phase 2). */
     components?: Partial<Record<string, Component>>;
     persistence: {

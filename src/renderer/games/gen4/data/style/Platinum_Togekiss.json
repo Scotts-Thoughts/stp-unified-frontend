@@ -1,0 +1,11 @@
+{
+  "overlay_color": "#7aa3ca",
+  "ui_saturation": "1.8",
+  "imageXOffset": "-26",
+  "imageYOffset": "101",
+  "imageFlip": true,
+  "backgroundTexture": "Flying",
+  "backgroundScale": "100",
+  "pkmnNature": "Hardy",
+  "pkmn_ability": "Hustle"
+}

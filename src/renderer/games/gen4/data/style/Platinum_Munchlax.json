@@ -1,0 +1,19 @@
+{
+  "overlay_color": "#5b859e",
+  "ui_saturation": "1.5",
+  "imageXOffset": "31",
+  "imageYOffset": "-12",
+  "imageScale": "0.68",
+  "backgroundTexture": "Fallen Trees",
+  "backgroundBlur": "9",
+  "backgroundHue": "8",
+  "backgroundScale": "139",
+  "backgroundFlip": false,
+  "backgroundXOffset": "29",
+  "backgroundYOffset": "24",
+  "backgroundBrightness": "40",
+  "backgroundContrast": "114",
+  "pkmn_ability": "Thick Fat",
+  "evolution": true,
+  "selected_evolution_species": "Munchlax"
+}

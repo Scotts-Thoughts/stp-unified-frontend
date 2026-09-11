@@ -1,0 +1,17 @@
+{
+  "finished_run_count": 2,
+  "attempt_number": 0,
+  "backgroundHue": "55",
+  "backgroundContrast": "152",
+  "backgroundBrightness": "51",
+  "backgroundYOffset": "56",
+  "backgroundScale": "128",
+  "backgroundTexture": "dark",
+  "overlay_color": "#49595d",
+  "backgroundUrl": false,
+  "imageFlip": false,
+  "imageScale": "0.65",
+  "imageYOffset": "0",
+  "imageXOffset": "-10",
+  "backgroundFlip": true
+}

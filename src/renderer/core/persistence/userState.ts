@@ -25,13 +25,21 @@
  *
  * `current_splits` is written from a deep watcher on every split row, which under
  * `localStorage` was a synchronous string assignment and is now an IPC round trip. The
- * 250 ms debounce is the interval the rest of gen1's saves already use. {@link flushUserState}
- * forces the pending write out; the parity harness collects userData after the run, and
- * the runner's IPC barrier waits for the write to land before it reads the tree.
+ * 250 ms window is the interval the rest of gen1's saves already use; it is a leading-
+ * edge window (one timer per burst, see `schedule`). {@link flushUserState} forces the
+ * pending write out; the parity harness collects userData after the run, and the
+ * runner's IPC barrier waits for the write to land before it reads the tree.
  */
 
 /** Read once by {@link loadUserState}; every synchronous getter is served from here. */
 let cache: Record<string, unknown> = {};
+
+// A read-only window into the cache for the parity harness (oracle 4 compares what
+// the app has persisted at each checkpoint; the legacy apps expose the same thing as
+// `localStorage`). Nothing in the app reads it.
+if (typeof window !== "undefined") {
+    (window as any).__stpUserState = () => JSON.parse(JSON.stringify(cache));
+}
 let loaded: Promise<void> | null = null;
 
 const FILE = "user_state.json";
@@ -82,7 +90,11 @@ export function setUserState(key: string, value: unknown): void {
 }
 
 function schedule(): void {
-    if (pending) clearTimeout(pending);
+    // One timer per window, not one per write: `current_splits` and the gen2 timer
+    // text are written on every animation frame, and a trailing-edge debounce would
+    // create and cancel a timer 60 times a second. The write lands 250 ms after the
+    // first change of a burst instead of the last, which no reader can tell apart.
+    if (pending) return;
     pending = setTimeout(() => {
         pending = null;
         write();

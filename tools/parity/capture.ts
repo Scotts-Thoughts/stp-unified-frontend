@@ -57,25 +57,50 @@ export interface CaptureMeta {
    * harness fed it.
    */
   hubRx: number;
+  /**
+   * `performance.now()` inside the renderer: the fake clock's tick counter, whose
+   * multiples of 16 are the animation-frame grid. Two runs that agree on `virtualNow`
+   * but not on this have their frame grids offset, and every per-frame sampler (the
+   * overlay's timer) reads a different instant. `diff.ts` compares it.
+   */
+  ticks: number;
   capturedAt: string;
 }
 
 /**
- * Collects computed styles and layout rects for every element under `#app-container`.
+ * Collects computed styles and layout rects for every element of the overlay.
  *
  * The key is a path built from tag + class list + nth-child, which survives the move
  * from Vue 3.2 runtime templates to 3.5 SFCs (the DOM shape is the parity claim; the
  * component that produced it is not).
+ *
+ * Paths are rooted where the overlay proper starts: the first `.mainContainer`
+ * (gen1, gen2), or for an overlay without one (gen4) the element directly under
+ * `#app` that holds the first background canvas -- the legacy v-else wrapper, or the
+ * lifted component's root. Above it the legacy apps and the unified shell differ by
+ * design (the shell's `<keyhook>` div, a `v-if` sibling that is or is not rendered),
+ * and those wrappers are not a parity claim; the subtree is. Elements outside the root (a dev-only `<Teleport>`
+ * target) are not compared. The root element itself is keyed as "" and its rect is
+ * the first thing checked, so a shell that moved the overlay would still show.
  */
 export async function captureStyles(page: Page): Promise<Record<string, StyleEntry>> {
   return await page.evaluate((skip: string[]) => {
     const skipSet = new Set(skip);
     const out: Record<string, StyleEntry> = {};
 
+    // gen1/gen2 wrap the overlay in `.mainContainer`; gen4 does not -- its top-level
+    // elements sit directly in the v-else wrapper (legacy) or the lifted component's
+    // root (unified), which are both the direct child of #app that holds the first
+    // background canvas. #app-container is the last resort, before either exists.
+    const canvas = document.querySelector("img.canvas");
+    let wrapper: Element | null = canvas;
+    while (wrapper && wrapper.parentElement && wrapper.parentElement.id !== "app") wrapper = wrapper.parentElement;
+    const root: Element | null =
+      document.querySelector(".mainContainer") ?? (wrapper && wrapper.parentElement?.id === "app" ? wrapper : null) ?? document.getElementById("app-container");
     const keyOf = (el: Element): string => {
       const parts: string[] = [];
       let node: Element | null = el;
-      while (node && node.id !== "app-container") {
+      while (node && node !== root) {
         const parent: Element | null = node.parentElement;
         const index = parent ? Array.prototype.indexOf.call(parent.children, node) + 1 : 1;
         const classes = node.classList.length ? "." + [...node.classList].sort().join(".") : "";
@@ -86,13 +111,24 @@ export async function captureStyles(page: Page): Promise<Record<string, StyleEnt
     };
 
     // "0px" and "0" or "auto" and "" mean the same thing in different Chromium builds.
+    // A url() is compared by its path under the app's image root, unquoted, with
+    // forward slashes: the legacy app resolves `images/x.png` against its own file://
+    // tree and the unified app against its `images/genN/`; a custom property keeps
+    // the authored text (`url(images/x.svg)`, unquoted) while a resolved property is
+    // quoted and absolute; and gen2 spells some paths with backslashes. The file is
+    // the claim, not the tree or the spelling.
     const normalise = (value: string): string => {
       const v = value.trim();
       if (v === "" || v === "auto" || v === "normal" || v === "none") return v;
-      return v.replace(/\b0px\b/g, "0").replace(/\s+/g, " ");
+      return v
+        .replace(
+          /url\(\s*["']?(?:(?:file:\/\/\/|https?:\/\/)[^"')]*?[\/\\])?images[\/\\](?:gen[1-5][\/\\])?([^"')]*?)["']?\s*\)/g,
+          (_m: string, tail: string) => `url(images/${tail.replace(/\\/g, "/")})`,
+        )
+        .replace(/\b0px\b/g, "0")
+        .replace(/\s+/g, " ");
     };
 
-    const root = document.getElementById("app-container");
     if (!root) return out;
 
     for (const el of [root, ...root.querySelectorAll("*")]) {
@@ -125,17 +161,37 @@ export async function captureStyles(page: Page): Promise<Record<string, StyleEnt
   }, [...SKIP_PROPERTIES]);
 }
 
-/** localStorage as the legacy apps leave it. Empty in the unified app (decision 10). */
-export async function captureLocalStorage(page: Page): Promise<Record<string, string>> {
+/**
+ * What the app has persisted at this checkpoint, as `key -> value`.
+ *
+ * The legacy apps keep it in `localStorage` as JSON strings; the unified app keeps it
+ * in `data/user_state.json` under the same key names (decision 10) and exposes its
+ * in-memory cache as `window.__stpUserState()`. Both are read into one shape so that
+ * oracle 4 compares *what* was persisted and not *where*: a legacy value is parsed
+ * from its JSON string (a value that is not JSON stays a string), a unified value is
+ * taken as-is. When `localStorage` has entries it wins, so a legacy run is unaffected
+ * by the hook not existing.
+ */
+export async function captureLocalStorage(page: Page): Promise<Record<string, unknown>> {
   return await page.evaluate(() => {
-    const out: Record<string, string> = {};
+    const out: Record<string, unknown> = {};
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key !== null) out[key] = localStorage.getItem(key) ?? "";
+        if (key === null) continue;
+        const raw = localStorage.getItem(key) ?? "";
+        try {
+          out[key] = JSON.parse(raw);
+        } catch {
+          out[key] = raw;
+        }
       }
     } catch {
-      /* a renderer without storage access returns {} */
+      /* a renderer without storage access falls through */
+    }
+    if (Object.keys(out).length === 0) {
+      const hook = (window as any).__stpUserState;
+      if (typeof hook === "function") return hook() as Record<string, unknown>;
     }
     return out;
   });
@@ -144,7 +200,7 @@ export async function captureLocalStorage(page: Page): Promise<Record<string, st
 export interface CaptureInput {
   page: Page;
   dir: string;
-  meta: Omit<CaptureMeta, "elements" | "virtualNow" | "hubRx" | "capturedAt">;
+  meta: Omit<CaptureMeta, "elements" | "virtualNow" | "hubRx" | "ticks" | "capturedAt">;
   console: ConsoleEntry[];
   /** Screenshots dominate run time; skip them while iterating on other oracles. */
   screenshot?: boolean;
@@ -167,6 +223,7 @@ export async function capture(input: CaptureInput): Promise<CaptureMeta> {
     elements: Object.keys(styles).length,
     virtualNow: Number(await page.evaluate("Date.now()")),
     hubRx: Number(await page.evaluate("window.__hubRx || 0")),
+    ticks: Number(await page.evaluate("performance.now()")),
     capturedAt: new Date().toISOString(),
   };
   writeFileSync(join(dir, "meta.json"), JSON.stringify(full, null, 1));

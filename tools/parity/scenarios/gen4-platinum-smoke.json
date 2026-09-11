@@ -1,0 +1,348 @@
+{
+  "_comment": [
+    "Synthetic gen4 Platinum scenario (plan 2.7 for gen4; decision 6 says a recording needs Scott):",
+    "a new game, the starter, a route change, one wild battle, one Leader Roark battle, a level up,",
+    "a blackout and a reset. It is built to touch the hooks in gen4's mounted():",
+    "The Oreburgh part starts at 62 s so the Roark split lands after the timer's first minute:",
+    "  known-legacy-bugs.md #33 (a numeric sub-minute split time) would otherwise throw in both apps.",
+    "  flags.new_game_1 false -> true          new run (startTime, attempt++, ROM starter writes)",
+    "  overworld.map_name change              OBS 'Map Change - <map>' marker",
+    "  battle.mode 'Wild'                     queued 'IN - Wild' marker",
+    "  battle.opponent.trainer set / null     'IN - Leader Roark' / 'OUT - Leader Roark' markers",
+    "  meta.state 'From Battle' with a split trainer",
+    "                                         Full/Deprecated/Simple split CSVs, right_ui -> Splits",
+    "  player.team.0.level change             level-up handling",
+    "  battle.player.team.0.stats.hp -> 0 in Battle",
+    "                                         blackout",
+    "  flags.new_game_1 true -> false         reset (playerResets++, OBS 'RESET')",
+    "Referenced properties carry the glossary value the recorder would have written (a species",
+    "or trainer name), as the gen1 scenario does. Every path is checked against the mapper XML",
+    "at build time. Values are plausible, not a real run: this fixture proves determinism and",
+    "no-change-under-refactor, never correctness (see make-fixture.ts)."
+  ],
+  "replayName": "gen4-platinum-smoke",
+  "recordedAt": "2026-01-01T12:00:00.000Z",
+  "item": {
+    "replayName": "gen4-platinum-smoke",
+    "mapperId": "ST/gen4/pokemon_platinum_ne.xml",
+    "gameCode": "pt",
+    "species": "Turtwig",
+    "number": "1",
+    "starter": "Turtwig"
+  },
+  "framesPerSecond": 60,
+  "frameIntervalMs": 250,
+  "initial": {
+    "meta.state": "No Pokemon",
+    "meta.state_enemy": "N/A",
+    "battle.mode": "",
+    "flags.new_game_1": false,
+    "player.player_id": 0,
+    "player.name": "",
+    "player.team_count": 0,
+    "player.gender": 0,
+    "overworld.map_name": "Twinleaf Town - Map 1",
+    "overworld.map_index": 1,
+    "overworld.x": 10,
+    "overworld.y": 10,
+    "game_time.hours": 0,
+    "game_time.minutes": 0,
+    "game_time.seconds": 0
+  },
+  "steps": [
+    {
+      "tMs": 2000,
+      "comment": "New game: new_game_1 flips true, which is gen4's new-run trigger.",
+      "set": {
+        "flags.new_game_1": true,
+        "player.player_id": 44910,
+        "player.name": "SCOTT"
+      }
+    },
+    {
+      "tMs": 4000,
+      "comment": "The starter is picked; team_count 1 takes meta.state to Overworld.",
+      "set": {
+        "player.starter": "Turtwig",
+        "player.team_count": 1,
+        "meta.state": "Overworld",
+        "player.team.0.species": "Turtwig",
+        "player.team.0.nickname": "TURTWIG",
+        "player.team.0.level": 5,
+        "player.team.0.exp": 135,
+        "player.team.0.nature": "Adamant",
+        "player.team.0.ability": "Overgrow",
+        "player.team.0.stats.hp": 20,
+        "player.team.0.stats.hp_max": 20,
+        "player.team.0.stats.attack": 11,
+        "player.team.0.stats.defense": 11,
+        "player.team.0.stats.speed": 8,
+        "player.team.0.stats.special_attack": 8,
+        "player.team.0.stats.special_defense": 10,
+        "player.team.0.ivs.hp": 20,
+        "player.team.0.ivs.attack": 25,
+        "player.team.0.ivs.defense": 12,
+        "player.team.0.ivs.speed": 9,
+        "player.team.0.ivs.special_attack": 3,
+        "player.team.0.ivs.special_defense": 30,
+        "player.team.0.moves.0.move": "Tackle",
+        "player.team.0.moves.0.pp": 35,
+        "player.team.0.moves.1.move": "Withdraw",
+        "player.team.0.moves.1.pp": 40,
+        "player.team.0.internals.personality_value": 123456789
+      }
+    },
+    {
+      "tMs": 7000,
+      "comment": "Walking to Route 201: a map change marker.",
+      "set": {
+        "overworld.map_name": "Route 201 - Map 1",
+        "overworld.map_index": 2,
+        "overworld.x": 30,
+        "game_time.seconds": 7
+      }
+    },
+    {
+      "tMs": 10000,
+      "comment": "Wild Starly. The active Pokemon's PV matches the party leader's, which is the mapper's Battle rule; mode before state.",
+      "set": {
+        "battle.player.active_pokemon.species": "Turtwig",
+        "battle.player.active_pokemon.level": 5,
+        "battle.player.active_pokemon.exp": 135,
+        "battle.player.active_pokemon.stats.hp": 20,
+        "battle.player.active_pokemon.stats.hp_max": 20,
+        "battle.player.active_pokemon.internals.personality_value": 123456789,
+        "battle.player.team.0.stats.hp": 20,
+        "battle.opponent.active_pokemon.species": "Starly",
+        "battle.opponent.active_pokemon.level": 2,
+        "battle.opponent.active_pokemon.stats.hp": 12,
+        "battle.opponent.active_pokemon.stats.hp_max": 12,
+        "battle.opponent.enemy_bar_synced_hp": 12,
+        "battle.opponent.team_count": 1,
+        "battle.mode": "Wild",
+        "meta.state": "Battle",
+        "meta.state_enemy": "Pokemon In Battle"
+      }
+    },
+    {
+      "tMs": 13000,
+      "comment": "Starly faints.",
+      "set": {
+        "battle.opponent.active_pokemon.stats.hp": 0,
+        "battle.opponent.enemy_bar_synced_hp": 0,
+        "meta.state_enemy": "Pokemon Fainted",
+        "game_time.seconds": 13
+      }
+    },
+    {
+      "tMs": 14000,
+      "set": {
+        "battle.other.outcome_flags": 1,
+        "meta.state": "From Battle",
+        "meta.state_enemy": "Battle Finished"
+      }
+    },
+    {
+      "tMs": 15000,
+      "comment": "Back to the overworld; the wild battle writes no split.",
+      "set": {
+        "meta.state": "Overworld",
+        "meta.state_enemy": "N/A",
+        "battle.mode": "",
+        "battle.other.outcome_flags": 0,
+        "player.team.0.exp": 179,
+        "game_time.seconds": 15
+      }
+    },
+    {
+      "tMs": 19000,
+      "comment": "Level up.",
+      "set": {
+        "player.team.0.level": 6,
+        "player.team.0.exp": 210,
+        "player.team.0.stats.hp": 23,
+        "player.team.0.stats.hp_max": 23,
+        "player.team.0.stats.attack": 13,
+        "player.team.0.stats.defense": 13,
+        "player.team.0.stats.speed": 9,
+        "player.team.0.stats.special_attack": 9,
+        "player.team.0.stats.special_defense": 12,
+        "game_time.seconds": 19
+      }
+    },
+    {
+      "tMs": 62000,
+      "comment": "Oreburgh Gym.",
+      "set": {
+        "overworld.map_name": "Oreburgh City - Map 1",
+        "overworld.map_index": 45,
+        "game_time.seconds": 0,
+        "game_time.minutes": 1
+      }
+    },
+    {
+      "tMs": 64000,
+      "comment": "Leader Roark: trainer, name and id together, then the state.",
+      "set": {
+        "battle.opponent.trainer": "Leader Roark",
+        "battle.opponent.name": "Leader Roark",
+        "battle.opponent.id": 246,
+        "battle.opponent.active_pokemon.species": "Geodude",
+        "battle.opponent.active_pokemon.level": 12,
+        "battle.opponent.active_pokemon.stats.hp": 31,
+        "battle.opponent.active_pokemon.stats.hp_max": 31,
+        "battle.opponent.enemy_bar_synced_hp": 31,
+        "battle.opponent.team_count": 3,
+        "battle.opponent.party_position": 0,
+        "battle.player.active_pokemon.level": 6,
+        "battle.player.active_pokemon.exp": 210,
+        "battle.player.active_pokemon.stats.hp": 23,
+        "battle.player.active_pokemon.stats.hp_max": 23,
+        "battle.player.team.0.stats.hp": 23,
+        "battle.mode": "Trainer",
+        "meta.state": "Battle",
+        "meta.state_enemy": "Pokemon In Battle"
+      }
+    },
+    {
+      "tMs": 67000,
+      "comment": "Roark's Geodude goes down; the next one comes out.",
+      "set": {
+        "battle.opponent.active_pokemon.stats.hp": 0,
+        "battle.opponent.enemy_bar_synced_hp": 0,
+        "meta.state_enemy": "Pokemon Fainted",
+        "battle.player.team.0.stats.hp": 15,
+        "battle.player.active_pokemon.stats.hp": 15,
+        "game_time.seconds": 5,
+        "game_time.minutes": 1
+      }
+    },
+    {
+      "tMs": 68000,
+      "set": {
+        "battle.opponent.party_position": 1,
+        "battle.opponent.active_pokemon.species": "Onix",
+        "battle.opponent.active_pokemon.level": 12,
+        "battle.opponent.active_pokemon.stats.hp": 38,
+        "battle.opponent.active_pokemon.stats.hp_max": 38,
+        "battle.opponent.enemy_bar_synced_hp": 38,
+        "meta.state_enemy": "Pokemon In Battle"
+      }
+    },
+    {
+      "tMs": 71000,
+      "set": {
+        "battle.opponent.active_pokemon.stats.hp": 0,
+        "battle.opponent.enemy_bar_synced_hp": 0,
+        "meta.state_enemy": "Pokemon Fainted",
+        "game_time.seconds": 9,
+        "game_time.minutes": 1
+      }
+    },
+    {
+      "tMs": 72000,
+      "comment": "The battle ends: From Battle with a split trainer writes the three CSVs.",
+      "set": {
+        "battle.other.outcome_flags": 1,
+        "meta.state": "From Battle",
+        "meta.state_enemy": "Battle Finished"
+      }
+    },
+    {
+      "tMs": 73000,
+      "comment": "Overworld again; trainer null fires the OUT marker; first badge.",
+      "set": {
+        "meta.state": "Overworld",
+        "meta.state_enemy": "N/A",
+        "battle.mode": "",
+        "battle.other.outcome_flags": 0,
+        "battle.opponent.trainer": null,
+        "battle.opponent.name": null,
+        "battle.opponent.id": 0,
+        "player.badges.0": true,
+        "player.team.0.stats.hp": 15,
+        "game_time.seconds": 11,
+        "game_time.minutes": 1
+      }
+    },
+    {
+      "tMs": 77000,
+      "comment": "Another wild battle, lost: the leader's HP hits 0 in Battle, which is gen4's blackout.",
+      "set": {
+        "battle.opponent.active_pokemon.species": "Bidoof",
+        "battle.opponent.active_pokemon.level": 4,
+        "battle.opponent.active_pokemon.stats.hp": 18,
+        "battle.opponent.active_pokemon.stats.hp_max": 18,
+        "battle.opponent.enemy_bar_synced_hp": 18,
+        "battle.opponent.team_count": 1,
+        "battle.opponent.party_position": 0,
+        "battle.player.active_pokemon.stats.hp": 15,
+        "battle.player.team.0.stats.hp": 15,
+        "battle.mode": "Wild",
+        "meta.state": "Battle",
+        "meta.state_enemy": "Pokemon In Battle",
+        "game_time.seconds": 15,
+        "game_time.minutes": 1
+      }
+    },
+    {
+      "tMs": 80000,
+      "set": {
+        "battle.player.team.0.stats.hp": 0,
+        "battle.player.active_pokemon.stats.hp": 0,
+        "player.team.0.stats.hp": 0,
+        "game_time.seconds": 18,
+        "game_time.minutes": 1
+      }
+    },
+    {
+      "tMs": 82000,
+      "comment": "Reset: new_game_1 true -> false with the timer running is gen4's reset edge.",
+      "set": {
+        "flags.new_game_1": false,
+        "meta.state": "No Pokemon",
+        "meta.state_enemy": "N/A",
+        "battle.mode": "",
+        "player.team_count": 0,
+        "player.player_id": 0,
+        "player.name": "",
+        "game_time.seconds": 0
+      }
+    },
+    {
+      "tMs": 85000,
+      "comment": "Second attempt starts.",
+      "set": {
+        "flags.new_game_1": true,
+        "player.player_id": 44910,
+        "player.name": "SCOTT"
+      }
+    },
+    {
+      "tMs": 87000,
+      "set": {
+        "player.starter": "Turtwig",
+        "player.team_count": 1,
+        "meta.state": "Overworld",
+        "player.team.0.level": 5,
+        "player.team.0.exp": 135,
+        "player.team.0.stats.hp": 20,
+        "player.team.0.stats.hp_max": 20,
+        "player.team.0.stats.attack": 11,
+        "player.team.0.stats.defense": 11,
+        "player.team.0.stats.speed": 8,
+        "player.team.0.stats.special_attack": 8,
+        "player.team.0.stats.special_defense": 10,
+        "game_time.seconds": 2
+      }
+    },
+    {
+      "tMs": 90000,
+      "comment": "End of the recording.",
+      "set": {
+        "overworld.x": 12,
+        "game_time.seconds": 5
+      }
+    }
+  ]
+}

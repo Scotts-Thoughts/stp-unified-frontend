@@ -71,7 +71,7 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
     diffVirtualClock(join(baselineDir, id), join(candidateDir, id), id, differences);
     diffStyles(join(baselineDir, id), join(candidateDir, id), id, differences);
     diffPixels(join(baselineDir, id), join(candidateDir, id), id, pixelMode, outDir, differences);
-    diffJsonFile(join(baselineDir, id, "storage.json"), join(candidateDir, id, "storage.json"), 4, "localStorage", id, differences);
+    diffPersisted(join(baselineDir, id, "storage.json"), join(candidateDir, id, "storage.json"), id, differences);
     diffConsole(join(baselineDir, id, "console.json"), join(candidateDir, id, "console.json"), id, differences);
     perCheckpoint.push({ id, differences: differences.length - before });
   }
@@ -83,7 +83,10 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
 
   // --- whole-run oracles: 3, 4 (files), 5, 6, 7, 8, 9 --------------------------
   diffTree(join(baselineDir, "files", "splits"), join(candidateDir, "files", "splits"), 3, differences);
-  diffTree(join(baselineDir, "files", "appdata"), join(candidateDir, "files", "appdata"), 4, differences);
+  // data/user_state.json is the unified app's replacement for localStorage; its
+  // contents are compared per checkpoint (diffPersisted), so the file's mere presence
+  // is not a finding against a legacy baseline that never had one.
+  diffTree(join(baselineDir, "files", "appdata"), join(candidateDir, "files", "appdata"), 4, differences, ["data/user_state.json"]);
   diffJsonFile(join(baselineDir, "writes.json"), join(candidateDir, "writes.json"), 5, "write log", undefined, differences, stripTiming);
   diffProfileCheck(join(candidateDir, "profile-check.json"), differences);
   diffJsonFile(join(baselineDir, "status.json"), join(candidateDir, "status.json"), 6, "control server", undefined, differences);
@@ -112,7 +115,7 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
  * differences underneath are symptoms and not independent findings.
  */
 function diffVirtualClock(baseDir: string, candDir: string, checkpoint: string, out: Difference[]): void {
-  type Probe = { virtualNow?: number; hubRx?: number };
+  type Probe = { virtualNow?: number; hubRx?: number; ticks?: number };
   const base = readJson<Probe>(join(baseDir, "meta.json"));
   const cand = readJson<Probe>(join(candDir, "meta.json"));
   if (!base || !cand) return;
@@ -134,6 +137,20 @@ function diffVirtualClock(baseDir: string, candDir: string, checkpoint: string, 
       detail: `the renderer had processed ${cand.hubRx} hub frames, not ${base.hubRx}`,
       baseline: String(base.hubRx),
       candidate: String(cand.hubRx),
+    });
+  }
+  // The frame grid: the fake clock fires requestAnimationFrame on multiples of 16 of
+  // this counter, so a disagreement here (with virtualNow equal) means the two runs'
+  // per-frame samplers read different instants -- a one-hundredth timer difference
+  // at some checkpoints, and nothing else (docs/parity-harness.md 9.11).
+  if (base.ticks !== undefined && cand.ticks !== undefined && base.ticks % 16 !== cand.ticks % 16) {
+    out.push({
+      oracle: 0,
+      name: "frame grid",
+      checkpoint,
+      detail: `the animation-frame grid is offset by ${(cand.ticks - base.ticks) % 16} ms`,
+      baseline: String(base.ticks),
+      candidate: String(cand.ticks),
     });
   }
 }
@@ -244,6 +261,18 @@ function diffPixels(
     });
     return;
   }
+  // Exact mode still forgives a channel that differs by one: the GPU rasterises
+  // gen4's filtered, scaled background texture with rounding that differs by that
+  // much between two runs of the *same* app, at the same six pixels of a 1920x1080
+  // frame (two legacy gen4 runs, 2026-09-11). Anything larger, or any pixel whose
+  // colour actually changed, is still a difference; the diff image is drawn from the
+  // snapped candidate so a real change stands out on its own.
+  if (mode === "exact") {
+    for (let i = 0; i < b.data.length; i++) {
+      const d = b.data[i] - a.data[i];
+      if (d === 1 || d === -1) b.data[i] = a.data[i];
+    }
+  }
   const out_ = new PNG({ width: a.width, height: a.height });
   const changed = pixelmatch(a.data, b.data, out_.data, a.width, a.height, {
     threshold: mode === "tolerant" ? 0.1 : 0,
@@ -263,10 +292,11 @@ function diffPixels(
 
 // ---------------------------------------------------------------- oracles 3, 4
 
-function diffTree(baseDir: string, candDir: string, oracle: number, out: Difference[]): void {
+function diffTree(baseDir: string, candDir: string, oracle: number, out: Difference[], ignore: string[] = []): void {
   const a = existsSync(baseDir) ? walk(baseDir) : new Map<string, string>();
   const b = existsSync(candDir) ? walk(candDir) : new Map<string, string>();
   for (const rel of new Set([...a.keys(), ...b.keys()])) {
+    if (ignore.includes(rel.replace(/\\/g, "/"))) continue;
     const fa = a.get(rel);
     const fb = b.get(rel);
     if (!fa || !fb) {
@@ -327,6 +357,39 @@ function diffJsonFile(
   });
 }
 
+/**
+ * Oracle 4, per checkpoint: the persisted key-value state, compared key by key.
+ *
+ * Insertion order is not a claim -- Chromium's localStorage enumerates in its own
+ * order and the unified app's cache in the app's -- and a single "sequence differs"
+ * over a 40-key map hid which key it was. Values are compared as JSON.
+ */
+function diffPersisted(basePath: string, candPath: string, checkpoint: string, out: Difference[]): void {
+  if (!existsSync(basePath) && !existsSync(candPath)) return;
+  const a = (readJson<Record<string, unknown>>(basePath) ?? {}) as Record<string, unknown>;
+  const b = (readJson<Record<string, unknown>>(candPath) ?? {}) as Record<string, unknown>;
+  const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])].sort();
+  let reported = 0;
+  for (const key of keys) {
+    const va = JSON.stringify(a[key]);
+    const vb = JSON.stringify(b[key]);
+    if (va === vb) continue;
+    if (reported++ >= 12) {
+      out.push({ oracle: 4, name: `${ORACLE_NAMES[4]} (persisted)`, checkpoint, detail: `... and more (${keys.length} keys compared)` });
+      break;
+    }
+    const what = !(key in a) ? "only in candidate" : !(key in b) ? "only in baseline" : "differs";
+    out.push({
+      oracle: 4,
+      name: `${ORACLE_NAMES[4]} (persisted)`,
+      checkpoint,
+      detail: `${key} ${what}`,
+      baseline: va === undefined ? undefined : trim(va),
+      candidate: vb === undefined ? undefined : trim(vb),
+    });
+  }
+}
+
 /** Timing columns are wall-clock even under the fake clock, so the sequence is the claim. */
 function stripTiming(value: unknown): unknown {
   if (!Array.isArray(value)) return value;
@@ -344,10 +407,25 @@ function stripTiming(value: unknown): unknown {
 function diffConsole(basePath: string, candPath: string, checkpoint: string | undefined, out: Difference[]): void {
   const a = readJson<{ type: string; text: string }[]>(basePath) ?? [];
   const b = readJson<{ type: string; text: string }[]>(candPath) ?? [];
-  const baseline = new Set(a.filter((e) => e.type !== "warning").map((e) => e.text));
+  // An error is compared by its message, not its stack: the frames name bundle
+  // files and line numbers that differ between any two builds by design, and the
+  // claim is "the same error happened here" (gen4's currentTime.includes TypeError
+  // is logged by the legacy Vue's warn path without a stack and by the unified app's
+  // errorHandler with one).
+  // ...and by its message with the app's own location folded away: a failed load names
+  // the file's absolute URL, and the same app built in a worktree (`unified@<dir>`)
+  // lives somewhere else.
+  const message = (text: string): string =>
+    text
+      .split("\n")
+      .filter((line) => !/^\s+at\s/.test(line))
+      .join("\n")
+      .replace(/file:\/\/\/\S*?\/out\/renderer\//g, "<app>/out/renderer/")
+      .trim();
+  const baseline = new Set(a.filter((e) => e.type !== "warning").map((e) => message(e.text)));
   for (const entry of b) {
     if (entry.type === "warning") continue;
-    if (baseline.has(entry.text)) continue;
+    if (baseline.has(message(entry.text))) continue;
     out.push({
       oracle: 9,
       name: ORACLE_NAMES[9],

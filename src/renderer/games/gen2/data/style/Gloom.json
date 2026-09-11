@@ -1,0 +1,18 @@
+{
+  "finished_run_count": 0,
+  "attempt_number": 0,
+  "kanto_badges": false,
+  "backgroundHue": "285",
+  "backgroundContrast": "117",
+  "backgroundBrightness": "71",
+  "backgroundYOffset": 0,
+  "backgroundScale": 100,
+  "backgroundTexture": "poison",
+  "overlay_color": "#e1a98d",
+  "backgroundUrl": false,
+  "imageSat": 100,
+  "imageScale": "0.6",
+  "imageYOffset": "-53",
+  "toggle_compare_splits": "First",
+  "imageFlip": true
+}

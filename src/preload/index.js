@@ -38,6 +38,10 @@ const api = {
   settings_dir: () => invoke('settings_dir'),
   /** The folder `./splits` and `./storage` are resolved against (plan 1.7). */
   app_root: () => invoke('app_root'),
+  /** `app.isPackaged`; the legacy style managers' dev/prod switch (core/env.ts). */
+  is_packaged: () => invoke('is_packaged'),
+  /** Taskbar/window icon: a file under resources/icons/ (gen3/4/5's `set-game-icon`). Fire and forget, as it was. */
+  set_game_icon: (relative) => ipcRenderer.send('set-game-icon', relative),
 
   splits: {
     write: (relative, contents, append = false) => invoke('splits:write', relative, contents, append),

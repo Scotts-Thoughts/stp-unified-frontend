@@ -1,0 +1,12 @@
+{
+  "backgroundTexture": "Jungle Swamp",
+  "backgroundScale": "200",
+  "backgroundYOffset": "-125",
+  "backgroundBlur": "4",
+  "imageFlip": true,
+  "imageScale": "0.93",
+  "imageYOffset": "31",
+  "imageXOffset": "-19",
+  "overlay_color": "#85cba3",
+  "ui_saturation": "1.6"
+}

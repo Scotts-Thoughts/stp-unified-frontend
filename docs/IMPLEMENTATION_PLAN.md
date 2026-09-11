@@ -633,6 +633,133 @@ rules / same bodies / same relative order. Phase 2.5 should land that as a commi
 caught here (native CSS nesting flattened by a naive brace scan; `url()` paths breaking when the file moves
 two directories deeper) will recur in every generation.
 
+## 7c. Phase 2 status
+
+Status as of 2026-09-11, third implementation session (continued).
+
+**How a generation is migrated (the recipe as actually run, gen2 first):**
+
+1. `tools/parity/inventory.ts` on the legacy app → `docs/genN-inventory.md` (2.1).
+2. `tools/port/port-data.ts` copies every `<script src>` data file in as an ES module, one export per global
+   (the path under `lib/` kept, cross-file globals imported), with `images/` strings pointed at the
+   generation's tree under the renderer's image root (`images/genN/`); `tools/port/port-style-defaults.ts`
+   turns `default_style_settings.js` into one JSON per species and `tools/port/port-enemy-scales.ts` the
+   sprite-scale table into JSON; `tools/port/port-profile-paths.ts` writes the profile's path tables from the
+   inventory (2.2, 2.3).
+3. `MapperProfile`s from the inventory, identity maps plus the containers the dynamic accesses need (2.3).
+4. **Lift, then refactor** (2.4). `tools/port/extract-template.ts` reads the legacy `#app` markup back out of a
+   real Chromium as the browser-normalised `innerHTML` Vue's runtime compiler compiled, and
+   `tools/port/lift-genN.py` turns the legacy component object into `games/genN/Overlay.vue` with the
+   infrastructure swapped for core -- mapper client, storage, hotkeys, control server, OBS, split files, asset
+   paths -- and *nothing else changed*; every seam is an asserted replacement. The decomposition of the
+   6,750-line component into the shared stores is the refactor proper and is done afterwards, with the harness
+   as the net, exactly as gen1's was in Phase 1. This is the plan's own rule for CSS ("port verbatim, verify,
+   then dedupe") applied to the code, and it is what makes "zero functional change" a measured claim instead of
+   a hope: the same code runs, and the legacy-vs-unified diff says so.
+5. `tools/port/scope-css.py` scopes the stylesheet under `.gen-N` and proves the split lossless (2.5).
+6. The layered style store on the file-backed user state (`core/persistence/styleSettings.ts`), with the
+   generation's own key rules (2.6; the LevelDB importer is still to come).
+7. Parity against the legacy app under the harness (2.7).
+
+| gen | inventory | data | profiles | lift | CSS | persistence | parity vs legacy |
+|---|---|---|---|---|---|---|---|
+| 2 | ✅ 256 paths / 60 writes | ✅ 25 files + 40 style JSON | ✅ Crystal, Gold & Silver | ✅ `games/gen2/Overlay.vue` | ✅ 706 rules | ✅ (import deferred) | ✅ **all nine oracles green** on the recorded Crystal run (`c-wigglytuff-2-11311`, 22 checkpoints), three unified runs against a legacy baseline that two legacy runs agree on (2026-09-11) |
+| 4 | ✅ 231 paths / 79 writes | ✅ 31 files + 383 style JSON + 506 sprite scales | ✅ Platinum, D&P, HG&SS (`ST/gen4/*_ne` and `STANDARD/gen4/*`) | ✅ `games/gen4/Overlay.vue` (10,607 lines) | ✅ 569 rules | ✅ gen4's key rule, style-field filter, 500 ms debounced write | ✅ **all nine oracles green, pixel-exact** on the synthetic Platinum fixture (`gen4-platinum-smoke`, 19 checkpoints), two unified runs against a legacy baseline two legacy runs agree on (2026-09-11) |
+| 5 | | | | | | | |
+| 3 | | | | | | | |
+
+**What the harness found while lifting gen2**, each of which would have been invisible to review and is now a
+rule in the tools:
+
+- A classic `<script>` runs in sloppy mode; an ES module is strict. gen2 assigns 25 names it never declares
+  (`vitaminsUsed`, `g2gamestate`, `d`, `h`, `m`...), which were `window` globals shared across methods. The
+  lift declares them as module-level `let`s, which preserves the sharing exactly.
+- `this.mapper?.properties` (optional chaining) is not matched by a `this.mapper.` replacement; 30 reads went
+  through it.
+- `innerHTML` re-escapes `&` in attributes; Vue decodes either way but vue-tsc's template parser does not.
+- gen1's `@font-face` for `oseb` declared at weight 700 next to gen2's at the default weight made gen2's bold
+  text select the real 700 face where the legacy app synthesised bold from the 400 one -- a pixel difference on
+  every label. Font faces are global; each generation's stylesheet now carries its own and base.css none.
+- A `<base href>` to route a generation's `images/...` through an asset scheme also re-routed every other
+  URL in the document (the injected stylesheet's font faces, chunk imports). Asset references are rewritten
+  textually at port time instead (`tools/port/lift_assets.py`), which is also what Phase 4 has to do anyway.
+- **The interim asset transport is a plain relative path, not a URL scheme.** The first interim was a
+  `stp-assets://genN/` protocol served by the main process, and Chromium decoded gen4's 6341x2835 background
+  JPEG through a different path for it than for a `file://` image: two in a channel at nine hundred pixels of
+  every frame, with every other oracle green, and identical the moment the same file was loaded over
+  `file://` (a redirect from the scheme to `file://` is `ERR_UNSAFE_REDIRECT`). gen2's PNG textures never
+  showed it. So a lifted module's images live at `images/genN/...` next to gen1's own `images/`, the document
+  resolves them like the legacy page did, `src/main/assets.ts` is gone, and the parity runner junctions
+  `out/renderer/images/genN` to the legacy tree for a run. Phase 4 merges the trees under that same root, so
+  the port-time rewrite is already the final shape; `npm run dev` for gen2-5 waits for that merge (the Vite
+  dev server serves `public/`, and a junction there would be copied into every build).
+- gen1's `useSettingsStore` wrote `--overlay-color` and `--style_ui_saturation` onto `<html>` for every
+  generation, overwriting the colour gen2's component had just set. Anything generation-specific that touches
+  the document now checks `core/game/active.ts` first, and gen1's own boot work (`PokeData.setGame`,
+  `overlay.setGame`, the Shuckie poll) moved into gen1's `activate()`.
+- The legacy style managers' dev/prod switch is `!app.isPackaged`, not the Vite flag: an unpackaged build
+  launched by `electron.exe` (the harness, the queuer's `npm run dev`) writes style edits back into the source
+  tree. `core/env.ts` now carries both notions, and the user-state debounce is leading-edge -- a timer per
+  write, 60 times a second, was enough to shift the fake clock's animation-frame ordering.
+- The unified app's whole boot (SignalR handshake, `/mapper` fetch, a module's `prepare()` imports) is one more
+  real-time pipe; counted as `__stpPendingBoot` and drained before every warm-up sweep. (The "one hundredth
+  behind" this was first blamed for turned out to be the harness's own frame grid -- next bullet -- but a boot
+  that finishes mid-sweep is still a real-time event inside a virtual-time run, and the counter stays.)
+- **The hundredths-digit flake, finally.** Playwright's fake clock fires `requestAnimationFrame` on multiples
+  of 16 of its *tick counter*, and after the runner's reload the tick counter of the new document equals the
+  real milliseconds that passed between the runner's `clock.install()` and `clock.pauseAt()` calls (the clock
+  replays its call log there, advancing ticks by the real gap between entries). So the frame grid sat a few
+  random milliseconds off `recordedAt` in every run, and every per-frame sampler -- the overlay timer -- read
+  a different instant at every capture. Two runs of the *legacy* gen2 app agreed only by luck; the unified
+  app was "one hundredth behind" at 4 checkpoints in two runs and 10 in a third. An init script now aligns the
+  ticks to the grid before the app's first line and `meta.json` carries `ticks` (docs/parity-harness.md 9.11).
+  Items 7 and 8 of that list, and the leading-edge user-state debounce, were built on the wrong theory and are
+  marked as such; they stay because each is harmless or independently right.
+- gen4's timer hops through Node's `setImmediate` between frames, which `page.clock` does not fake; the
+  runner routes it through the fake `setTimeout` (harness 9.12). And a real `setImmediate` is not the only
+  thing the renderer shares with Node: the lifted SFCs run with `nodeIntegration`, as the legacy apps did.
+- `tools/port/check-undefined.ts` asks the TypeScript checker which names a lifted script uses but never
+  declares (scope-aware, unlike the text scan used for gen2's list): gen2's lift had missed `newColor`, `x`
+  and `y` -- declared as parameters elsewhere, assigned bare in one method -- and had dropped `loadCsvFile`
+  (the "Load Splits" file picker) altogether; no fixture reaches either. gen4's list has 42 names. `hash()`
+  is undefined in both legacy apps too (known-legacy-bugs.md #32) and is left that way.
+- A Vue prop shadows a computed of the same name: gen4 -- alone among the five -- has a computed `game()`
+  (its game_variables entry), so its lift renames that to `game_data` (30 sites, asserted) before the
+  `this.mapper` -> `this.game` rename; the session prop keeps its name across the modules.
+- gen4 ships `lib/pokedex/platinum.js` *and* `lib/trainers/platinum.js`: `port-data` now keeps the path under
+  `lib/`, and it adds imports for the globals one data file reads from another (`game_variables.js` reads
+  `g4PokemonData` from a file loaded six tags earlier -- a classic script saw it, an ES module does not).
+- gen3/4/5 ship a different `OpenSans-ExtraBold.ttf` from gen1/2 (a pixel difference on every label if
+  swapped); gen4's fonts live under `fonts/gen4/` until Phase 4 dedupes by hash.
+- The legacy `body` rules are not identical to base.css's after all (gen2's and gen4's both add
+  `background-color: #000000`); `scope-css.py` now carries `html`/`body` as `html:has(.gen-N)` /
+  `body:has(.gen-N)` instead of dropping them.
+- A profile key the loaded mapper does not have leaves no container in the canonical view (gen4's one
+  vocabulary covers three mappers; Platinum has no `variables.*`), so the legacy short-circuit
+  `properties?.variables?.game_started.change(...)` stays a short-circuit instead of a TypeError.
+- gen4's legacy `mounted` configured the mapper client (`deboucePath` x4) before connecting; the module
+  declares `debouncePaths` and main.ts applies them to the shared client the moment the mapper is detected --
+  the same moment the legacy map was built, since no hub message can land in between.
+- `set-game-icon` (plan 3.4) is brought forward: the renderer names a file under `resources/icons/` and the
+  module owns the game -> `.ico` table that was gen4's `main.js`.
+- The layout oracle's root is now "where the overlay proper starts": `.mainContainer` (gen1/gen2) or, for gen4,
+  the element directly under `#app` holding the first background canvas -- so the shell mounts the overlay
+  component with no wrapper of its own.
+- **gen1 is unchanged by all of Phase 2**, checked the only way that is comparable: the previous commit was
+  built in a worktree and captured with the same harness (`unified@<dir>`), then diffed against the working
+  tree on the gen1 fixture. Styles, layout, split CSVs, PokeAByte writes, OBS markers and persisted state are
+  identical. The pixel and console oracles differ, and the difference is known-legacy-bugs.md #31 *going
+  away*: the generation's stylesheet is a `<style>` element now, whose base URL is the document, so the panel
+  textures (`--url: url(images/ui/*.svg)`) that a built gen1 has never shown load, and the 123
+  `ERR_FILE_NOT_FOUND` lines are gone. (Oracle 4 also lists `current_splits`/`previous_splits` "only in
+  candidate" -- the previous commit predates the `__stpUserState` probe, so its state was invisible to the
+  capture; the collected `data/user_state.json` files are identical.)
+- gen4's parity fixture is synthetic (`tools/parity/scenarios/gen4-platinum-smoke.json`, built from the
+  shipped `ST/gen4/pokemon_platinum_ne.xml`): a new game, the starter, a route change, a wild battle, Leader
+  Roark, a level-up, a blackout and a reset, 21 checkpoints over 90 s. It proves determinism and no-change
+  under the lift, not correctness (decision 6 still stands). Its Roark split is placed after the timer's first
+  minute on purpose: known-legacy-bugs.md #33.
+
 ## 8. Corrections the first implementation session made to the plan
 
 - **`known-legacy-bugs.md` #29 and #30** are new, both found by the harness: the mapper client's rAF

@@ -7,6 +7,11 @@ import { gen1ChapterMarkers } from "./markers";
 import { redBlueDeprecated } from "./mappers/red-blue-deprecated";
 import { yellowDeprecated } from "./mappers/yellow-deprecated";
 import { useGameStateSync } from "./state";
+import Overlay from "~/components/Overlay.vue";
+import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
+import PokeData from "~/logic/PokeData";
+import type { PokemonGame } from "~/logic/PokeDataTypes";
+import { useSettingsStore } from "~/stores/useSettingsStore";
 
 /**
  * Generation 1: Yellow, and Red/Blue (plan 1.4).
@@ -48,11 +53,24 @@ export const gen1: GameModule = {
         splits: { autosplitter, deprecated_autosplitter, split_trainers },
     },
     hotkeys: gen1Hotkeys,
-    control: gen1ControlRoutes,
+    control: (ctx) => gen1ControlRoutes(ctx.isReady, ctx.mapperPath),
     chapterMarkers: gen1ChapterMarkers,
-    // index.html still links the stylesheet statically (plan 1.5); Phase 3.1 switches
-    // the boot flow to this import and drops the link.
-    styles: () => import("./style.css"),
+    overlay: Overlay,
+    cssClass: "gen-1",
+    // Applied by main.ts as a <style> element (plan 3.1), after core/styles/base.css,
+    // which index.html still links -- the same cascade order the two files had.
+    styles: () => import("./style.css?inline").then((m) => m.default),
+    // What main.ts used to do on mapper load, in the same order: point gen1's data
+    // layer at the game, tell the overlay-settings store (which starts the species
+    // load chain and, through useSettingsStore, the per-species files), then start the
+    // 10 ms Super Shuckie poll. All three are gen1's own and must not run for a lifted
+    // module -- they wrote data/<game>/<species>/*.json for a gen2 run.
+    activate: (game) => {
+        PokeData.setGame(game as PokemonGame);
+        useSettingsStore().overlay.setGame(game as PokemonGame);
+        useEmulatorStatsStore().startPolling();
+    },
+    deactivate: () => useEmulatorStatsStore().stopPolling(),
     persistence: { legacyAppName: "stp-generation1-overlay" },
     logCopyVariant: "gen1",
 };

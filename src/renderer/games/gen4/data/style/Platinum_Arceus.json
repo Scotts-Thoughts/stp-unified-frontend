@@ -1,0 +1,11 @@
+{
+  "imageFlip": true,
+  "imageScale": "1.17",
+  "imageYOffset": "59",
+  "backgroundTexture": "Judgement",
+  "backgroundContrast": "146",
+  "backgroundHue": "210",
+  "backgroundSaturation": "0",
+  "overlay_color": "#cdb650",
+  "ui_saturation": "1.3"
+}

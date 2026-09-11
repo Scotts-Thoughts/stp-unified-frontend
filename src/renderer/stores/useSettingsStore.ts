@@ -4,6 +4,7 @@ import { useGameSpeciesData } from "./useGameSpeciesData";
 import { useSpeciesMetricsStore } from "./useSpeciesMetricsStore"
 import { PokemonGame } from "~/logic/PokeDataTypes";
 import { defineStore } from "pinia";
+import { ownsDocument } from "~/core/game/active";
 
 /**
  * Store for managing general settings. This contains the other more specific settings stores.
@@ -75,8 +76,23 @@ export const useSettingsStore = defineStore('settings', () => {
 	applyCssVariables(runConfig.styling.ui);
 
 	function applyCssVariables(ui: { color: string, saturation: number | string }) {
+		// This store is gen1's, but the shell creates it for every generation (the
+		// pre-mapper screen and the species-load chain need it). The document is only
+		// gen1's to write while gen1 -- or nothing yet -- owns it (core/game/active.ts).
+		if (!ownsDocument("gen1")) return;
 		document.documentElement.style.setProperty('--overlay-color', ui.color);
 		document.documentElement.style.setProperty('--style_ui_saturation', ui.saturation.toString());
+	}
+
+	/** Re-applies the CSS variables; main.ts calls it when gen1 gets the document back. */
+	function reapplyCss() {
+		applyCssVariables(runConfig.styling.ui);
+	}
+
+	/** Removes them; main.ts calls it when another generation takes the document. */
+	function releaseCss() {
+		document.documentElement.style.removeProperty('--overlay-color');
+		document.documentElement.style.removeProperty('--style_ui_saturation');
 	}
 
 	return {
@@ -84,5 +100,7 @@ export const useSettingsStore = defineStore('settings', () => {
 		overlay,
 		game_species: runConfig,
 		loading,
+		reapplyCss,
+		releaseCss,
 	};
 })

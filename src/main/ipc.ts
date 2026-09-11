@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { app, ipcMain, shell, type BrowserWindow } from "electron";
+import { app, ipcMain, nativeImage, shell, type BrowserWindow } from "electron";
 import { appRoot, rendererSourceRoot, resolveInside, splitsRoot, storageRoot, userDataRoot } from "./paths";
 
 /**
@@ -16,6 +16,7 @@ import { appRoot, rendererSourceRoot, resolveInside, splitsRoot, storageRoot, us
 export function registerIpc(getWindow: () => BrowserWindow | null): void {
   ipcMain.handle("settings_dir", () => app.getPath("userData"));
   ipcMain.handle("app_root", () => appRoot());
+  ipcMain.handle("is_packaged", () => app.isPackaged);
 
   // --- splits: the autosplitter's CSVs -----------------------------------------
   ipcMain.handle("splits:write", (_e, relative: string, contents: string, append = false) => {
@@ -50,6 +51,20 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     mkdirSync(target, { recursive: true });
     return target;
   });
+  // --- window icon (plan 3.4, brought forward for gen4's lift) --------------------
+  // gen3/4/5 swap the taskbar icon with the selected game (`set-game-icon`). The
+  // renderer names a file under resources/icons/ -- `gen4/icon-platinum.ico` -- and
+  // the module owns the game -> file mapping; an unknown file leaves the icon alone,
+  // as the legacy `isEmpty()` check did.
+  ipcMain.on("set-game-icon", (_e, relative: string) => {
+    const window = getWindow();
+    if (!window || typeof relative !== "string") return;
+    const target = resolveInside(join(appRoot(), "resources", "icons"), relative);
+    if (!existsSync(target)) return;
+    const image = nativeImage.createFromPath(target);
+    if (!image.isEmpty()) window.setIcon(image);
+  });
+
   /** The "open splits folder" button; creates the folder first, as the legacy code did. */
   ipcMain.handle("splits:reveal", async (_e, relative: string) => {
     const target = resolveInside(splitsRoot(), relative);

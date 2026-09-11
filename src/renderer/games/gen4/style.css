@@ -1,0 +1,4282 @@
+/**
+ * Scoped under `.gen-4` by tools/port/scope-css.py from A:/Programs/gen4-stp-frontend/app/style.css
+ * (plan 2.5). Values untouched; selectors prefixed; `:root` -> `.gen-4`;
+ * `#app-container` -> `.gen-4#app-container`; `html`/`body` -> `:has(.gen-4)`
+ * variants; `*` dropped because core/styles/base.css carries the reset. `url(fonts/...)` re-based to `../../fonts/gen4/`;
+ * `url(images/...)` -> `url(images/gen4/...)` (tools/port/lift_assets.py).
+ * Do not edit by hand -- re-run the tool.
+ */
+.gen-4 {
+    /* Base design size - 16:9 aspect ratio */
+    --design-width: 1920px;
+    --design-height: 1080px;
+    --aspect-ratio: calc(16 / 9);
+    
+
+    --gradient1: hsl(0, 55%, 60%);
+    --gradient2: hsl(0, 55%, 63%);
+    --gradient3: hsl(0, 55%, 72%);
+    --gradient4: hsl(0, 55%, 78%);
+    --gradient5: hsl(0, 55%, 80%);
+    --gradient6: hsl(0, 55%, 78%);
+    --gradient7: hsl(0, 55%, 72%);
+    --gradient8: hsl(0, 55%, 63%);
+    --gradient9: hsl(0, 55%, 60%);
+    --outline1: #808080;
+    --outline2: #4d4d4d;
+    --outline3: #000000;
+
+    /* Movepool Type Colours */
+    --normal:   #9fa19f;
+    --fighting: #ff8000;
+    --grass:    #3fa129;
+    --fire:     #e62829;
+    --water:    #2980ef;
+    --electric: #fac000;
+    --ground:   #915121;
+    --rock:     #8d896c;
+    --psychic:  #ef4179;
+    --poison:   #9141cb;
+    --flying:   #81b9ef;
+    --bug:      #91a119;
+    --ice:      #3dcef3;
+    --ghost:    #704170;
+    --dragon:   #5060e1;
+    --steel:    #60a1b8;
+    --dark:     #624d4e;
+    --fairy:    #ef70ef;
+    --curse:    #68A090;
+
+    /* Bulbapedia (present) */
+    --current_normal:   #9fa19f;
+    --current_fighting: #ff8000;
+    --current_grass:    #3fa129;
+    --current_fire:     #e62829;
+    --current_water:    #2980ef;
+    --current_electric: #fac000;
+    --current_ground:   #915121;
+    --current_rock:     #8d896c;
+    --current_psychic:  #ef4179;
+    --current_poison:   #9141cb;
+    --current_flying:   #81b9ef;
+    --current_bug:      #91a119;
+    --current_ice:      #3dcef3;
+    --current_ghost:    #704170;
+    --current_dragon:   #5060e1;
+    --current_steel:    #60a1b8;
+    --current_dark:     #624d4e;
+    --current_fairy:    #ef70ef;
+    --current_curse:    #68A090;
+
+    --legacy_normal:   #a8a878;
+    --legacy_fighting: #c03028;
+    --legacy_grass:    #78c850;
+    --legacy_fire:     #f08030;
+    --legacy_water:    #6890f0;
+    --legacy_electric: #f3d230;
+    --legacy_ground:   #e0c068;
+    --legacy_rock:     #b8a038;
+    --legacy_psychic:  #f85888;
+    --legacy_poison:   #a040a0;
+    --legacy_flying:   #a890f0;
+    --legacy_bug:      #a8b820;
+    --legacy_ice:      #98d8d8;
+    --legacy_ghost:    #705898;
+    --legacy_dragon:   #7038f8;
+    --legacy_steel:    #b8b8d0;
+    --legacy_dark:     #705848;
+    --legacy_fairy:    #ee99ac; 
+    --legacy_curse:    #2e9fa3;
+
+    /* Damage Category Colours */
+    --legacy_physical: #bf2923;
+    --legacy_special:  #4f5870;
+    --legacy_status:   #8c888c;
+    --current_physical: #EB5628;
+    --current_special:  #375AB2;
+    --current_status:   #828282;
+    /* --current_physical: #F29173;
+    --current_special:  #7D94CD;
+    --current_status:   #AEAEAE; */
+
+    /* Stat Colours */
+    --hp:     #ff5959;
+    --atk:    #f5ac78;
+    --def:    #fae078;
+    --spc:    #8ec7bc;
+    --spcAtk: #9db7f5;
+    --spcDef: #a7db8d;
+    --spd:    #fa92b2;
+    --dark_hp:     #ff0000;
+    --dark_atk:    #f08030;
+    --dark_def:    #f7c80c;
+    --dark_spc:    #28917c;
+    --dark_spcAtk: #6890f0;
+    --dark_spcDef: #78c850;
+    --dark_spd:    #e95380;
+
+    /* Stat Gradients */
+
+    /* Default Border Colours */
+    --normal1:   #6d6d4e;
+    --normal2:   #a8a878;
+    --normal3:   #c6c6a7;
+    --fighting1: #791c17;
+    --fighting2: #bf2923;
+    --fighting3: #d67873;
+    --grass1:    #497d30;
+    --grass2:    #78c850;
+    --grass3:    #a7db8d;
+    --fire1:     #9c531f;
+    --fire2:     #f08030;
+    --fire3:     #f5ac78;
+    --water1:    #445e9c;
+    --water2:    #6890f0;
+    --water3:    #9db7f5;
+    --electric1: #a1871f;
+    --electric2: #f8d030;
+    --electric3: #fae078;
+    --ground1:   #927d44;
+    --ground2:   #e0c068;
+    --ground3:   #ebd69d;
+    --rock1:     #716019;
+    --rock2:     #b89f34;
+    --rock3:     #d1c17d;
+    --psychic1:  #9c3152;
+    --psychic2:  #fa5889;
+    --psychic3:  #fa92b2;
+    --poison1:   #682a68;
+    --poison2:   #a743a7;
+    --poison3:   #c183c1;
+    --flying1:   #675797;
+    --flying2:   #b294e2;
+    --flying3:   #c6b7f5;
+    --bug1:      #697413;
+    --bug2:      #a9bf1f;
+    --bug3:      #c6d16e;
+    --ice1:      #588585;
+    --ice2:      #98dbdb;
+    --ice3:      #bce6e6;
+    --ghost1:    #4f4067;
+    --ghost2:    #6e5597;
+    --ghost3:    #a292bc;
+    --dragon1:   #3b139a;
+    --dragon2:   #6432dd;
+    --dragon3:   #a27dfa;
+    --steel1:    #737382;
+    --steel2:    #bcbcd5;
+    --steel3:    #d1d1e0;
+    --dark1:     #3b291e;
+    --dark2:     #695948;
+    --dark3:     #a29288;
+    --fairy1:    #9b6470;
+    --fairy2:    #ee99ac;
+    --fairy3:    #f4bdc9;
+
+    /* Exp Bar Colours */
+    --expBarBackground: linear-gradient(rgb(239, 239, 239), rgb(157, 157, 157));
+    --expBarExperience: linear-gradient(90deg,hsl(189, 92%, 45%), hsl(187, 100%, 69%));
+}
+
+/* the non-custom-property half of :root */
+html:has(.gen-4) {    height: 1920px; /* Fixed canvas size */
+    width: 1080px;}
+
+.gen-4 .grey-svg {   filter: invert(29%) sepia(96%)  saturate(0%)    hue-rotate(180deg) brightness(95%)  contrast(101%) drop-shadow(0px 1px 1px #0000006e); opacity: .2;}
+
+.gen-4 .blue-svg {   filter: invert(29%) sepia(96%)  saturate(748%)  hue-rotate(180deg) brightness(95%)  contrast(101%) drop-shadow(0px 1px 1px #0000006e); }
+
+.gen-4 .yellow-svg { filter: invert(29%) sepia(100%) saturate(300%)  hue-rotate(10deg)  brightness(110%) contrast(101%) drop-shadow(0px 1px 1px #0000006e); }
+
+.gen-4 .red-svg {    filter: invert(29%) sepia(96%)  saturate(1448%) hue-rotate(310deg) brightness(95%)  contrast(101%) drop-shadow(0px 1px 1px #0000006e); }
+
+html:has(.gen-4) {
+    height: 100%;
+    width: 100%;
+}
+
+body:has(.gen-4) {
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* Hide scrollbars */
+    background-color: #000000;
+    margin: 0;
+    padding: 0;
+}
+
+/* Scaling container that maintains 16:9 aspect ratio */
+.gen-4#app-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--design-width);
+    height: var(--design-height);
+    transform-origin: top left;
+    /* Scale will be applied via JavaScript for dynamic resizing */
+    /* Fallback scale for initial render */
+    transform: scale(1);
+}
+
+.gen-4 #app {
+    position: relative;
+    width: var(--design-width);
+    height: var(--design-height);
+    overflow: hidden;
+}
+
+.gen-4 .canvas {  /* or some other selector */
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 1920px;
+    height: 1080px;
+}
+
+.gen-4 .ui1 {
+    font-size: 12px;
+    position: fixed;
+    left: 462px;
+    top: 24px;
+    width: 350px;
+    z-index: 5;
+    height: 780px;
+    line-height: 13x;
+    text-transform: capitalize;
+    text-align: left;
+    font-family: play;
+    font-weight: 700;
+    z-index: 20000;
+    border: 1px solid #ff000000;
+}
+
+.gen-4 .ui2 {
+    font-size: 13px;
+    position: fixed;
+    left: 772px;
+    top: 30px;
+    width: 320px;
+    z-index: 5;
+    height: 740px;
+    line-height: 13px;
+    text-transform: capitalize;
+    text-align: left;
+    font-family: play;
+    font-weight: 700;
+    z-index: 20000;
+    border: 1px solid #ff000000;
+}
+
+.gen-4 .ui3 {
+    font-size: 12px;
+    position: fixed;
+    left: 1112px;
+    top: 30px;
+    width: 435px;
+    z-index: 5;
+    height: 780px;
+    line-height: 13px;
+    text-transform: capitalize;
+    text-align: left;
+    font-family: play;
+    font-weight: 700;
+    z-index: 20000;
+    border: 1px solid #ff000000;
+}
+
+.gen-4 .dropdownMenu {
+    pointer-events: auto; 
+    position: relative; 
+    width: 300px; 
+    height: 22px; 
+    font-size: 13px; 
+    background: #72fd4f; 
+    font-family: Play;
+    border-radius: 10px;
+    filter: drop-shadow(0px 0px 2px #000000c5);
+}
+
+.gen-4 .dropdownMenu:hover {
+    background: #11ce18;
+}
+
+.gen-4 .nature_grid {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 144px;
+}
+
+.gen-4 .nature_grid_row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.gen-4 .nature_grid_label {
+    width: 12px;
+    flex-shrink: 0;
+    text-align: center;
+    font-family: Play;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.gen-4 .nature_grid_raise { color: #d83a3a; }
+
+.gen-4 .nature_grid_lower { color: #3a6fd8; }
+
+.gen-4 .nature_grid_btn {
+    pointer-events: auto;
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 20px;
+    padding: 0;
+    font-size: 11px;
+    background: #72fd4f;
+    font-family: Play;
+    border: none;
+    border-radius: 10px;
+    filter: drop-shadow(0px 0px 2px #000000c5);
+    cursor: pointer;
+}
+
+.gen-4 .nature_grid_btn:hover {
+    background: #14d61a;
+}
+
+.gen-4 .nature_grid_raise_on {
+    color: #fff;
+    background: #d83a3a;
+}
+
+.gen-4 .nature_grid_raise_on:hover {
+    background: #c43030;
+}
+
+.gen-4 .nature_grid_lower_on {
+    color: #fff;
+    background: #3a6fd8;
+}
+
+.gen-4 .nature_grid_lower_on:hover {
+    background: #3060c4;
+}
+
+.gen-4 .gameToggle {
+    pointer-events: auto;
+    position: relative;
+    width: 280px;
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    filter: drop-shadow(0px 0px 2px #000000c5);
+}
+
+.gen-4 .gameToggleImg {
+    width: 90px;
+    height: auto;
+    cursor: pointer;
+    border-radius: 6px;
+    opacity: 0.45;
+    filter: grayscale(70%);
+    transition: opacity 0.15s, filter 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+}
+
+.gen-4 .gameToggleImg:hover {
+    opacity: 0.85;
+    filter: grayscale(20%);
+    transform: scale(1.05);
+}
+
+.gen-4 .gameToggleImg.selected {
+    opacity: 1;
+    filter: none;
+    border-color: #11ce18;
+    box-shadow: 0 0 6px #11ce18;
+    transform: scale(1.05);
+}
+
+.gen-4 .starter_combobox {
+    position: relative;
+    display: inline-block;
+}
+
+.gen-4 .starter_dropdown_list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 300px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #d8ffc9;
+    border: 1px solid #000;
+    border-radius: 6px;
+    margin: 2px 0 0 0;
+    padding: 0;
+    list-style: none;
+    z-index: 1000;
+    font-family: Play;
+    font-size: 13px;
+    box-shadow: 0px 2px 6px #000000a0;
+}
+
+.gen-4 .starter_dropdown_list li {
+    padding: 3px 8px;
+    cursor: pointer;
+}
+
+.gen-4 .starter_dropdown_list li:hover {
+    background: #72fd4f;
+}
+
+.gen-4 .inputContainer {
+    background-color: #d8ffc9;
+    height: 24px;
+    font-family: play;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.gen-4 .timerOffsetControls {
+    display: inline-flex;
+    width: 169px;
+    vertical-align: middle;
+    gap: 2px;
+    align-items: stretch;
+}
+
+.gen-4 .timerOffsetControls .inputContainer {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    text-align: right;
+}
+
+.gen-4 .timerOffsetClearButton {
+    pointer-events: auto;
+    position: relative;
+    flex-shrink: 0;
+    width: 54px;
+    min-width: 54px;
+    height: 24px;
+    font-size: 13px;
+    background: #72fd4f;
+    font-family: Play;
+    border-radius: 4px;
+    padding: 0 4px;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.gen-4 .timerOffsetClearButton:hover {
+    background: #14d61a;
+}
+
+.gen-4 .buttonStyle {
+    pointer-events: auto; 
+    position: relative; 
+    width: 280px; 
+    height: 22px; 
+    font-size: 13px; 
+    background: #72fd4f; 
+    font-family: Play;
+    border-radius: 10px;
+    /* filter: drop-shadow(0px 0px 1px #000000c5); */
+}
+
+.gen-4 .buttonStyle:hover {
+    background: #14d61a; 
+}
+
+.gen-4 .border {
+    border: 1px solid #ff0000;
+}
+
+/*  ------------------------------------  */
+/*  ------------- FONTS ----------------  */
+/*  replace font to change - leave label  */
+/*  ------------------------------------  */
+
+/* TIMER/RESETS */
+@font-face {
+    src: url(../../fonts/gen4/OpenSans-ExtraBold.ttf);
+    font-family: oseb;
+}
+
+/* @font-face {
+    src: url(fonts/Play-Bold.ttf);
+    font-family: osb;
+} */
+/* TITLES FONT */
+/* replace font to change - leave label */
+@font-face {
+    src: url(../../fonts/gen4/TitanOne-Regular.ttf);
+    font-family: titan;
+}
+
+@font-face { /* replace font to change - leave label */
+    src: url(../../fonts/gen4/Play-Bold.ttf);
+    font-family: play;
+}
+
+@font-face {
+    src: url(../../fonts/gen4/LeagueGothic.ttf);
+    font-family: lgothic;
+}
+
+/*  ------------------------------------  */
+/*  --------------- CSS ----------------  */
+/*  ------------------------------------  */
+.gen-4 .posAbs {
+    position: absolute;
+}
+
+.gen-4 .override {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    top: 0px;
+    left: 2000px;
+    z-index: -100;
+}
+
+/* Gen4 Movepool CSS */
+.gen-4 .g4movepool {
+    /* display: block; */
+    position: absolute;
+    /* border: 1px solid #00ff0d00; */
+    background-color: #e3212100;
+    font-size: 22px;
+    width: 476px;
+    /* height: 160px; */
+    font-family: play;
+    opacity: .9;
+    border: none;
+    table-layout: fixed;
+}
+
+.gen-4 .g4movepool_header {
+    font-size: 15px;
+    line-height: 12px;
+}
+
+.gen-4 .g4movepool th,
+.gen-4 .g4movepool td {
+    border: 1px solid #b2111100;
+
+}
+
+.gen-4 .centered-content {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.gen-4 .dropshadow {
+    filter: drop-shadow(0px 1px 2px #000);
+}
+
+.gen-4 .align_left {
+    text-align: left;
+    padding-right: 4px;
+}
+
+.gen-4 .align_center {
+    text-align: center;
+}
+
+.gen-4 .align_right {
+    text-align: right;
+}
+
+.gen-4 .g4mp_type {
+    width: 55px;
+    padding-right: 4px;
+}
+
+.gen-4 .g4mp_move {
+    width: 145px;
+}
+
+.gen-4 .g4mp_category {
+    width: 65px;
+    /* padding-left: 2px;
+    padding-right: 2px; */
+}
+
+.gen-4 .g4mp_power {
+    width: 46px;
+}
+
+.gen-4 .g4mp_accuracy {
+    width: 62px;
+}
+
+.gen-4 .g4mp_pp {
+    width: 42px;
+}
+
+.gen-4 .g4mp_spacer {
+    width: 50px;
+}
+
+.gen-4 .gametimeClock {
+    font-size: 68px;
+    display: block;
+    position: absolute;
+    text-align: right;
+    right: 1550px;
+    top: 46px;
+    line-height: 60px;
+    font-family: oseb;
+    font-weight: 700;
+    /* filter: drop-shadow(1px 1px 1px #000000) */
+}
+
+.gen-4 .gametimeFrames {
+    font-size: 35px;
+    top: 60px;
+    right: 1500px;
+    position: absolute;
+    text-align: right;
+    line-height: 60px;
+    font-family: oseb;
+    font-weight: 700;
+    /* filter: drop-shadow(1px 1px 1px #000000) */
+}
+
+.gen-4 .movepool_header {
+    line-height: 17px;
+}
+
+.gen-4 .movepoolBorder {
+    z-index: 1;
+}
+
+.gen-4 .pokemon_art {
+    display: block;
+    image-rendering: optimizeQuality;
+    border: 4px solid #ff000000;
+    padding: 8px;
+    position: absolute;
+    font-family: play;
+    font-size: 24px;
+    line-height: 26px;
+    top: 360px;
+    left: -10px;
+    width: 420px;
+    height: 420px;
+}
+
+.gen-4 .colored-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    opacity: 0.9;
+    background-image: var(--url);
+    background-size: 1920px 1080px;
+    /* filter: drop-shadow(1px 1px 1px #000000c5); */
+    /* background-image: url(images/gen4/enemy_area/Electric.png); */
+    pointer-events: none; /* optional: this makes the image not clickable, so you can click the elements behind it */
+    isolation: isolate; /* optional: this restricts the color blending only to this layer, just to be safe */
+}
+
+.gen-4 .colored-image::after { /* ::after generates a pseudo element inside the div */
+    content: ''; /* content of the pseudo element, needs to be provided */
+    position: absolute;
+    inset: 0; /* sets top/left/bottom/right to 0 */
+    background-color: var(--overlay-color);
+    filter: saturate(.6);
+    background-size: 1920px 1080px;
+    -webkit-mask-size: 1920px 1080px;
+    -webkit-mask-image: var(--url); /* fallback, just to be safe */
+    mask-image: var(--url); /* use the alpha channel of provided image as a mask of this layer */
+    mix-blend-mode: color; /* color blend mode, I'm not sure if 'color' is the right one - might need to be changed */
+    transition: background-color 750ms ease-in-out; /* smooth overlay color changes (species swaps, evolutions, color picker) */
+}
+
+.gen-4 .ds {
+    filter: drop-shadow(0px 0px 1px #000000c5);
+}
+
+.gen-4 .movepoolTable {
+    font-size: 17px;
+}
+
+.gen-4 .movepoolDemo tr:nth-child(odd) {
+    background-color: #cfcfcf;
+}
+
+.gen-4 .gametimeLabel {
+    top: 637px;
+    left: 149px;
+    width: 150px;
+    text-align: center;
+    border: 1px solid #ff000000;
+}
+
+/* CSS BOTTOM LAYERS - OVERLAY ELEMENTS (-100 to -50) */
+.gen-4 .overlay {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: -100;
+}
+
+.gen-4 .defaultTexture {
+	display: block;
+    width:1920px;
+    position: fixed;
+    /* filter: blur(4px); */
+    top: 0px;
+    left: 0px;
+    z-index: -95;
+}
+
+.gen-4 .frame {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    opacity: 1;
+    filter: blur(0px);
+    top: 0px;
+    left: 0px;
+    z-index: -90;
+}
+
+.gen-4 .pokeball {
+	display: block;
+    position: fixed;
+    top: 605px;
+    left: -32px;
+    z-index: -85;
+}
+
+.gen-4 .gameArea {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: -80;
+}
+
+.gen-4 .pokemon {
+	display: block;
+    position: fixed;
+    top: 460px;
+    left: 60px;
+    z-index: -75;
+}
+
+.gen-4 .statsContainer {
+    display: block;
+    position: relative;
+    top: 460px;
+    left: 60px;
+    z-index: -75;
+}
+
+.gen-4 .stats_container {
+    display: block;
+    position: relative;
+    border: 1px solid #ff000000;
+    top: 794px;
+    left: 0px;
+    height: 260px;
+    width: 448px;
+}
+
+.gen-4 .typeIconContainer {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 20;
+    grid-row-end: 22;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    align-content: center;
+    filter: drop-shadow(2px 1px 2px #000)
+}
+
+.gen-4 .monoType {
+    position: absolute;
+    transform: scale(.095);
+    top: 300px;
+    left: -625px;
+    z-index: -70;
+}
+
+.gen-4 .type_icons_boundingBox {
+    /* second screen */
+    /* top: 411px;  */
+    top: 704px; 
+    left: 0px;
+    height: 50px;
+    width: 448px;
+    border: 1px solid #ff000000;
+}
+
+.gen-4 .vertical_center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gen-4 .movepoolLabel {
+    position: absolute;
+    font-family: titan;
+    font-size: 24px;
+    top: 24px;
+    left: 1487px;
+    text-align: center;
+    width: 418px;
+    border: 1px solid #df2c2c00;
+    z-index: 10101;
+}
+
+.gen-4 .type_icons {
+    width: 125px;
+    filter: drop-shadow(2px 1px 2px #000);
+    border: 1px solid #ff000000;
+}
+
+.gen-4 .center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gen-4 .type_icons {
+    margin: 0 0x; /* adjust as needed */
+}
+
+.gen-4 .type1 {
+    position: absolute;
+    transform: scale(.095);
+    top: 300px;
+    left: -705px;
+    z-index: -70;
+}
+
+.gen-4 .type2 {
+    position: absolute;
+    transform: scale(.095);
+    top: 300px;
+    left: -545px;
+    z-index: -70;
+}
+
+.gen-4 .heldItemStyle {
+    font-size: 36px;
+    position: fixed;
+    text-align: center;
+    z-index: 30000;
+    font-family: osb;
+    top: 832px;
+}
+
+.gen-4 .labelAbility {
+    left: 18px;
+    top: -15px;
+    font-size: 32px;
+    opacity: 0.6;
+}
+
+.gen-4 .labelHeldItem {
+    left: 18px;
+    top: -15px;
+    font-size: 36px;
+    opacity: 0.6;
+}
+
+.gen-4 .ability {
+    position: absolute;
+    font-family: play;
+    left: 645px;
+    top: 811px;
+    font-size: 32px;
+    border: 1px solid #ff000000;
+    width: 307px;
+    text-align: center;
+}
+
+.gen-4 .heldItem {
+    position: absolute;
+    font-family: play;
+    left: 1153px;
+    top: 811px;
+    font-size: 32px;
+    border: 1px solid #ff000000;
+    width: 307px;
+    text-align: center;
+}
+
+.gen-4 .labelHeldItem {
+    left: 970px;
+}
+
+.gen-4 .labelNature {
+    font-size: 30px;
+    position: fixed;
+    line-height: 37.3px;
+    top: 842px;
+    left: 24px;
+    opacity: .6;
+    z-index: 30001;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .labelGametime {
+    font-size: 19px;
+    position: fixed;
+    line-height: 37.3px;
+    top: 15px;
+    left: 133px;
+    opacity: .7;
+    z-index: 30002;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500
+}
+
+/* STATS (INDEX 0 to 10) */
+.gen-4 .statsGraphic {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 0;
+}
+
+.gen-4 .statsheader {
+    font-size: 38px;
+    line-height: 60px;
+    font-family: play;
+    font-weight: 700;
+    position: absolute;
+    text-align: center;
+    width: 400px;
+    left: -80px;
+    top: 320px;
+    z-index: 1;
+    /* filter: drop-shadow(1px 1px 0px rgb(0, 0, 0)); */
+}
+
+.gen-4 .expMeterStyle {
+    border-radius: 4px;
+    width: 318px;
+}
+
+.gen-4 .expBar {
+    border: 1px solid rgba(255, 0, 0, 0);
+    position: absolute;
+    width: 448px;
+    height: 17px;
+    left: 0px;
+    top: 814px;
+}
+
+.gen-4 .expMeterOuter {
+    position: absolute;
+    /* border: 1px solid #00000000; */
+    background: var(--expBarBackground);
+    height: 17px;
+    width: 358px;
+    top: 0px;
+    left: 64px;
+    z-index: 0;
+}
+
+.gen-4 .expMeterInner {
+    position: relative;    
+    background: var(--expBarExperience);
+    height: 18px;
+    top: -1px;
+    border: 1px solid #00000023;
+}
+
+.gen-4 .exp_label {
+    position: absolute;
+    font-size: 14px;
+    font-family: play;
+    top: -2px;
+    left: 21px;
+    z-index: 1005;
+    opacity: .55;
+    text-align: center;
+    width: 42px;
+    border: 1px solid rgba(255, 0, 0, 0);
+}
+
+.gen-4 .statsLabelsColumn1 {
+    font-size: 30px;
+    position: absolute;
+    line-height: 58px;
+    top: 883px;
+    left: -25px;
+    z-index: 3;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .nature {
+    font-size: 28px;
+    text-align: center;
+    position: absolute;
+    left: 260px;
+    top: 1200px;
+    line-height: 34px;
+    letter-spacing: -1.5px;
+    text-transform: lowercase;
+    font-family: osb;
+    font-weight: 700;
+    display:block;
+    z-index: 4;
+}
+
+.gen-4 .statsLabelsColumn2 {
+    font-size: 30px;
+    position: absolute;
+    line-height: 59px;
+    top: 883px;
+    left: 184px;
+    z-index: 3;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .statsColumn1 {
+    display: block;
+    font-size: 54px;
+    position: absolute;
+    line-height: 62px;
+    top: 413px;
+    right: 968px;
+    z-index: 4;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .statsColumn2 {
+    display: block;
+    font-size: 54px;
+    position: absolute;
+    line-height: 62px;
+    top: 413px;
+    right: 801px;
+    z-index: 4;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+
+/* BACKUP STATS POSITIONS */
+/* .statsColumn1 {
+    font-size: 56px;
+    position: absolute;
+    line-height: 60px;
+    top: 881px;
+    right: 1743px;
+    z-index: 4;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+.statsColumn2 {
+    font-size: 56px;
+    position: absolute;
+    line-height: 60px;
+    top: 881px;
+    right: 1576px;
+    z-index: 4;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+} */
+.gen-4 .absolute {
+    position: absolute;
+}
+
+/* BADGES (AS A PART OF THE STATS BAR*/
+.gen-4 .badge {
+    position: absolute;
+    height: 1080px;
+    width: 1920px;
+}
+
+.gen-4 .badgeBoost {
+    position: absolute;
+    top: -460px;
+    left: -60px;
+    height: 1080px;
+    width: 1920px;
+    z-index: 15;
+}
+
+.gen-4 .badge1 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 129px;
+    left: 135px;
+    z-index: 12000;
+}
+
+.gen-4 .badge2 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 133px;
+    left: 188px;
+    z-index: 12000;
+}
+
+.gen-4 .badge3 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 129px;
+    left: 239px;
+    z-index: 12000;
+}
+
+.gen-4 .badge4 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 129px;
+    left: 284px;
+    z-index: 12000;
+}
+
+.gen-4 .badge5 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 176px;
+    left: 135px;
+    z-index: 12000;
+}
+
+.gen-4 .badge6 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 179px;
+    left: 190px;
+    z-index: 12000;
+}
+
+.gen-4 .badge7 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 179px;
+    left: 235px;
+    z-index: 12000;
+}
+
+.gen-4 .badge8 {
+    display: block;
+    max-width:100px;
+    max-height:100px;
+    position: absolute;
+    top: 179px;
+    left: 287px;
+    z-index: 12000;
+}
+
+.gen-4 .badges {
+    display: block;
+    max-width:192px;
+    max-height:94px;
+    position: absolute;
+    top: 993px;
+    left: 329px;
+    z-index: 2000;
+}
+
+/* PACKAGE CONTENTS */
+.gen-4 .overlayStarter {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -50;
+}
+
+.gen-4 .titles {
+    font-size: 35px;
+    position: absolute;
+    top: 1080px;
+    line-height: 60px;
+    font-family: oseb;
+    font-weight: 700;
+}
+
+.gen-4 .resets {
+    display: block;
+    max-width: 250;
+    position: fixed;
+    max-height: 250;
+    font-size: 68px;
+    z-index: 5;
+    /* top: 195px;
+    left: 295px; old coordinates*/
+    top: 158px;
+    left: 13px;
+    line-height: 60px;
+    text-align: center;
+    font-family: oseb;
+    font-weight: 700;
+    width: 102px;
+    /* border: 1px solid #000; */
+}
+
+.gen-4 .fault_label {
+    position: absolute;
+    text-align: center;
+    font-size: 15px;
+    width: 150px;
+    border: 1px solid #ff000000;
+    font-family: titan;
+    opacity: .7;
+}
+
+.gen-4 .timer_reset_label {
+    top: 166px;
+    left: 149px;
+}
+
+.gen-4 .timer_2_reset_label {
+    top: 166px;
+    left: 70px;
+}
+
+.gen-4 .blackout_2_reset_label {
+    top: 166px;
+    left: 227px;
+}
+
+.gen-4 .faults_value {
+    position: absolute;
+    font-size: 68px;
+    z-index: 5;
+    line-height: 60px;
+    text-align: center;
+    font-family: oseb;
+    font-weight: 700;
+    width: 150px;
+    border: 1px solid rgba(255, 0, 0, 0);
+    top: 186px;
+}
+
+.gen-4 .timer_reset_value {
+    left: 149px;
+}
+
+.gen-4 .timer_2_reset_value {
+    left: 70px;
+}
+
+.gen-4 .timer_2_blackout_value {
+    left: 227px;
+}
+
+.gen-4 .opacityTransition { transition: opacity 500ms ease-in-out;}
+
+.gen-4 .ePkmnMove1 { top: 12px; }
+
+.gen-4 .ePkmnMove2 { top: 48px; }
+
+.gen-4 .ePkmnMove3 { top: 84px; }
+
+.gen-4 .ePkmnMove4 { top: 119px; }
+
+.gen-4 .ePkmnRanges {
+    /* left: 148px;
+    width: 222px;
+    border: 1px solid #a8282800; */
+    left: 171px;
+    width: 199px;
+    border: 1px solid #a8282800;
+}
+
+.gen-4 .ePkmnPlayerRange { 
+    top: 13px; 
+}
+
+.gen-4 .ePkmnEnemyRange { 
+    top: 84px; 
+}
+
+.gen-4 .ePkmnStats {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    left: 145px;
+    width: 86px;
+    height: 145px;
+}
+
+.gen-4 .ePkmnMisc {
+    position: absolute;
+    width: 145px;
+    height: 145px;
+}
+
+.gen-4 .ePkmnTyping {
+    position: absolute;
+    top: 126px;
+    /* width: 150px;
+    height: 145px; */
+}
+
+.gen-4 img,
+.gen-4 span,
+.gen-4 div {
+    margin: 0;
+    padding: 0;
+}
+
+.gen-4 .ePkmnMoves {
+    top: -6px;
+    position: absolute;
+    left: 203px;
+    padding: 0;
+    margin: 0;
+}
+
+.gen-4 .moveWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+     /* Optional, if you want space between each move row. Adjust as needed. */
+}
+
+.gen-4 .enemyMovesetTable {
+    /* font-size: 18px; */
+    table-layout: fixed;
+    position: absolute;
+    border: 1px solid #008dc400;
+    line-height: 30.8px;
+    padding: 1px;
+    width: 163px;
+    top: 22px;
+    overflow: visible;
+}
+
+.gen-4 .ePkmnMoveType {
+    width: 30px;
+}
+
+.gen-4 .enemyMovesetTable tr:nth-child(2) {
+    width: 46px;
+}
+
+.gen-4 .enemyMovesetTable tr:nth-child(3) {
+    width: 10px;
+    padding-right: 2px;
+}
+
+/* .enemyMovesetTable th:nth-child(1) {
+    width: 26px;
+} */
+.gen-4 .enemyMovesetTable th:nth-child(1) {
+    width: 14px;
+    /* border: 1px solid #ff0000; */
+}
+
+.gen-4 .enemyMovesetTable th:nth-child(2) {
+    width: 55px;
+    /* border: 1px solid #9dff00; */
+}
+
+.gen-4 .enemyMovesetTable th:nth-child(3) {
+    width: 16px;
+    /* border: 1px solid #0051ff; */
+}
+
+.gen-4 .enemyStatTable {
+    position: absolute;
+    border: 1px solid rgba(0, 0, 0, 0);
+    padding: 0px;
+    top: 0px;
+    font-size: 18px;
+    height: 147px;
+}
+
+.gen-4 .enemyStatModTable {
+    position: absolute;
+    border: 1px solid rgba(0, 0, 0, 0);
+    padding: 0px;
+    top: 23px;
+    font-size: 18px;
+    height: 124px;
+}
+
+.gen-4 .enemyStatLabel {
+    opacity: .6; 
+    font-size: 13px; 
+    display: flex; 
+    vertical-align: middle;
+}
+
+.gen-4 .ePkmnStatsLabelsStyle {
+    position: absolute;
+    text-align: center;
+    line-height: 20px;
+    font-size: 11px;
+    opacity: .7;
+    width: 68px;
+    border: 1px solid rgba(255, 0, 0, 0);
+}
+
+.gen-4 .ePkmnStatsLabelColumn1 {
+    left: -19px;
+}
+
+.gen-4 .ePkmnStatsLabelColumn2 {
+    left: 51px;
+}
+
+.gen-4 .ePkmnHpLabel {
+    top: 35px;
+}
+
+.gen-4 .ePkmnAtkLabel {
+    top: 73px;
+}
+
+.gen-4 .ePkmnDefLabel {
+    top: 110px;
+}
+
+.gen-4 .ePkmnSpaLabel {
+    top: 73px;
+}
+
+.gen-4 .ePkmnSpdLabel {
+    top: 110px;
+}
+
+.gen-4 .ePkmnSpeLabel {
+    top: 35px;
+}
+
+.gen-4 .ePkmnStatsStyle {
+    position: absolute;
+    text-align: center;
+    line-height: 20px;
+    font-size: 19px;
+    width: 68px;
+    border: 1px solid rgba(255, 0, 0, 0);
+}
+
+.gen-4 .ePkmnHp {
+    top: 50px;
+}
+
+.gen-4 .ePkmnAtk {
+    top: 88px;
+}
+
+.gen-4 .ePkmnDef {
+    top: 125px;
+}
+
+.gen-4 .ePkmnSpa {
+    top: 88px;
+}
+
+.gen-4 .ePkmnSpd {
+    top: 125px;
+}
+
+.gen-4 .ePkmnSpe {
+    top: 50px;
+}
+
+.gen-4 .enemyStatTable th:nth-child(1) {
+    width: 58px;
+}
+
+.gen-4 .icons {
+    margin-right: 4px; /* space between the icon and move name */
+    transform-origin: top left;
+    display: inline-block; /* to ensure it's treated as an inline-level element */
+    vertical-align: middle; /* to align it with the text */
+    filter: drop-shadow(0px 0px 1px #000);
+}
+
+.gen-4 .typeIcon {
+    width: 60px;
+    height: 32px;
+}
+
+.gen-4 .moveIcon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+}
+
+.gen-4 .enemyMods {
+    position: absolute;
+    font-size: 20px;
+    width: 25px;
+    height: 25px;
+    line-height: 24px;
+    /* border: 1px solid #000; */
+    text-align: center;
+    border-radius: 15px;
+    background: #a1a1a1;
+    filter: drop-shadow(0px 0px 2px);
+    left: 192px;
+    opacity: 1;
+}
+
+.gen-4 .attackMod {
+    top: 34px;
+}
+
+.gen-4 .defenseMod {
+    top: 63px;
+}
+
+.gen-4 .specialMod {
+    top: 92px;
+}
+
+.gen-4 .speedMod {
+    top: 124px;
+}
+
+.gen-4 .popup {
+    position: absolute;
+    top: 250px;
+    left: 20px;
+    z-index: 900;
+    scale: 15;
+}
+
+.gen-4 .trainerLabel {
+    position: absolute;
+    font-family: titan;
+    border: 1px solid rgba(255, 0, 0, 0);
+    font-size: 26px;
+    top: 26px;
+    left: 1486px;
+    text-align: center;
+    width: 420px;
+    /* text-transform: capitalize; */
+    z-index: 10001;
+}
+
+/* ENEMY STATS */
+.gen-4 .enemyGraphic {
+    display: block;
+    position: relative;
+    font-family: play;
+    top: 21px;
+    left: 1488px;
+    width: 417px;
+    height: 1038px;
+    border: 1px solid rgba(255, 0, 0, 0);
+    z-index: 0;
+}
+
+.gen-4 .enemyPng {
+    position: absolute;
+    top: 0px;
+    width: 1920px;
+    object-fit: cover;
+    height: 1080px;
+    object-fit: cover;
+    object-position: top right;
+}
+
+.gen-4 .eAbilities {
+    display: block;
+    position: absolute;
+    top: 0px;
+    width: 1920px;
+    object-fit: cover;
+    object-position: top right;
+    height: 1080px;
+    z-index: 250;
+}
+
+.gen-4 .abilitiesPng {
+    display: block;
+    position: absolute;
+    top: 0px;
+    width: 1920px;
+    object-fit: cover;
+    object-position: top right;
+    height: 1080px;
+    opacity: .8;
+    z-index: 1;
+}
+
+.gen-4 .enemyPokemonName {
+    display: block;
+    font-size: 32px;
+    width: 400px;
+    text-align: center; /* need a fix */
+    position: fixed;
+    top: 40px;
+    left: 1518px;
+    font-family: titan;
+    z-index: 600;
+}
+
+.gen-4 .enemyMoves {
+    display: block;
+    width: 400px;
+    font-size: 42px;
+    position: fixed;
+    text-align: center;
+    top: 80px;
+    left: 1518px;
+    line-height: 60px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 720;
+}
+
+.gen-4 .enemyHpLabel {
+    font-size: 30px;
+    position: fixed;
+    text-align: left;
+    top: 320px;
+    left: 1558px;
+    line-height: 50px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 720;
+}
+
+.gen-4 .enemyHp {
+    font-size: 40px;
+    position: fixed;
+    text-align: right;
+    top: 320px;
+    left: 1664px;
+    line-height: 50px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 722;
+}
+
+.gen-4 .enemyPhysicalLabel {
+    font-size: 30px;
+    position: fixed;
+    text-align: left;
+    top: 368px;
+    left: 1558px;
+    line-height: 50px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 722;
+}
+
+.gen-4 .enemySpdSpcLabel {
+    font-size: 30px;
+    position: fixed;
+    text-align: left;
+    top: 368px;
+    left: 1734px;
+    line-height: 50px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 722;
+}
+
+.gen-4 .enemyPhysical {
+    font-size: 40px;
+    position: fixed;
+    text-align: right;
+    top: 368px;
+    left: 1664px;
+    line-height: 50px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 722;
+}
+
+.gen-4 .enemySpdSpc {
+    font-size: 40px;
+    position: fixed;
+    text-align: right;
+    top: 368px;
+    left: 1834px;
+    line-height: 50px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 722;
+}
+
+.gen-4 .slideR-enter-active {
+    transition: all 1s ease-out;
+}
+
+.gen-4 .slideR-leave-active {
+    transition: all .7s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.gen-4 .slideR-enter-from {
+    transform: translateX(2300px);
+}
+
+.gen-4 .slideR-leave-to {
+    opacity: 0;
+}
+
+.gen-4 .slideL-enter-active {
+    transition: all 1s ease-out;
+}
+
+.gen-4 .slideL-leave-active {
+    transition: all .7s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.gen-4 .slideL-enter-from {
+    transform: translateX(-400px);
+}
+
+.gen-4 .slideL-leave-to {
+    opacity: 0;
+}
+
+/* .encounterInfo {
+    font-size: 25px;
+    position: absolute;
+    top: 96px;
+    left: 1566px;
+    line-height: 26px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.encounterData {
+    font-size: 25px;
+    position: absolute;
+    top: 96px;
+    left: 1668px;
+    line-height: 26px;
+    font-family: play;
+    font-weight: 700;
+} */
+.gen-4 .encounterInfo {
+    font-size: 20px;
+    position: absolute;
+    top: 44px;
+    left: 414px;
+    line-height: 22px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .encounterData {
+    font-size: 20px;
+    position: absolute;
+    top: 44px;
+    left: 504px;
+    line-height: 22px;
+    font-family: play;
+    font-weight: 700;
+}
+
+/* MOVEPOOL */
+.gen-4 .movepoolWay {
+    font-size: 15px;
+    position: absolute;
+    top: 740px;
+    left: 1934px;
+    line-height: 16px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .movepoolMove {
+    font-size: 15px;
+    position: absolute;
+    top: 740px;
+    left: 2004px;
+    line-height: 16px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .movepoolType {
+    font-size: 15px;
+    position: absolute;
+    top: 740px;
+    left: 2114px;
+    line-height: 16px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .movepoolPower {
+    font-size: 15px;
+    position: absolute;
+    top: 740px;
+    left: 2114px;
+    line-height: 16px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .movepoolAccuracy {
+    font-size: 15px;
+    position: absolute;
+    top: 740px;
+    left: 2114px;
+    line-height: 16px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .movepoolPP {
+    font-size: 15px;
+    position: absolute;
+    top: 740px;
+    left: 2114px;
+    line-height: 16px;
+    font-family: play;
+    font-weight: 700;
+}
+
+/* BAG INFO BLOCK (BEHIND THE SCENES) */
+.gen-4 .bagLineLabelInfo {
+    font-size: 24px;
+    position: absolute;
+    top: 440px;
+    left: 1134px;
+    line-height: 26px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .bagItemInfo {
+    font-size: 24px;
+    position: absolute;
+    top: 440px;
+    left: 1230px;
+    line-height: 26px;
+    font-family: play;
+    font-weight: 700;
+}
+
+.gen-4 .bagQuantityInfo {
+    font-size: 24px;
+    position: absolute;
+    top: 440px;
+    left: 1470px;
+    line-height: 26px;
+    font-family: play;
+    font-weight: 700;
+}
+
+/* BAG OVERLAY */
+.gen-4 .movepoolTitle {
+    display: block;
+    border: 1px solid rgba(255, 0, 0, 0);
+    font-size: 24px;
+    width: 340px;
+    text-align: center; /* need a fix */
+    position: absolute;
+    top: 26px;
+    left: 1570px;
+    font-family: titan;
+    z-index: 600;
+}
+
+.gen-4 .bagLineLabel {
+    font-size: 38px;
+    position: absolute;
+    top: 112px;
+    left: 1556px;
+    line-height: 42px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 500;
+}
+
+.gen-4 .bagItem {
+    font-size: 38px;
+    position: absolute;
+    top: 112px;
+    left: 1556px;
+    line-height: 42px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 500;
+}
+
+.gen-4 .bagQuantity {
+    font-size: 38px;
+    position: absolute;
+    top: 112px;
+    left: 1856px;
+    line-height: 42px;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 500;
+}
+
+.gen-4 .parent {
+    text-align: right;
+    position: relative;
+}
+
+/* UI ELEMENTS */
+.gen-4 .timerUI {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    transform: scale(.2);
+    opacity: .8;
+    top: -160px;
+    left: -760px;
+    z-index: 3;
+}
+
+.gen-4 .moveset_typeIcons {
+    width: 60px;
+    height: 60px;
+}
+
+.gen-4 .movesetUI {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    transform: scale(.2);
+    opacity: .8;
+    top: -230px;
+    left: -760px;
+    z-index: 3;
+}
+
+.gen-4 .resetsUI {
+	display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    opacity: .8;
+    top: 333px;
+    left: 7px;
+    z-index: 3;
+}
+
+.gen-4 .barRight {
+	display: flex;
+    position: fixed;
+    opacity: .8;
+    top: 35px;
+    right: 14px;
+    z-index: 3;
+}
+
+.gen-4 .barLeft {
+	display: flex;
+    position: fixed;
+    left: 14px;
+    top: 35px;
+    z-index: 3;
+}
+
+.gen-4 .battleOverlay {
+	display: block;
+    position: fixed;
+    opacity: .8;
+    top: 0px;
+    right: 0px;
+    z-index: 100;
+}
+
+@keyframes blur-out {
+    0% {
+         transform: scale(1);
+         animation-timing-function: ease;
+    }
+    50% {
+        transform: scale(1.015);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0;
+        animation-timing-function: ease;
+    }
+}
+
+.gen-4 .fade1-enter-from {
+	opacity: 0;
+}
+
+.gen-4 .fade1-enter-to {
+	opacity: 1;
+}
+
+.gen-4 .fade1-enter-active {
+	transition: opacity .5s ease;
+}
+
+.gen-4 .fade1-leave-from {
+	opacity: 1;
+}
+
+.gen-4 .fade1-leave-to {
+	opacity: 0;
+}
+
+.gen-4 .fade1-leave-active {
+	transition: opacity .5s ease;
+}
+
+.gen-4 .fade1x-enter-from {
+	opacity: 0;
+}
+
+.gen-4 .fade1x-enter-to {
+	opacity: 1;
+}
+
+.gen-4 .fade1x-enter-active {
+	transition: opacity 2s ease;
+}
+
+.gen-4 .fade1x-leave-from {
+	opacity: 1;
+}
+
+.gen-4 .fade1x-leave-to {
+	opacity: 0;
+}
+
+.gen-4 .fade1x-leave-active {
+	transition: opacity .2s ease;
+}
+
+.gen-4 .fade2-enter-from {
+	opacity: 0;
+}
+
+.gen-4 .fade2-enter-to {
+	opacity: 1;
+}
+
+.gen-4 .fade2-enter-active {
+	transition: opacity 1s ease;
+}
+
+.gen-4 .fade2-leave-from {
+	opacity: 1;
+}
+
+.gen-4 .fade2-leave-to {
+	opacity: 0;
+}
+
+.gen-4 .fade2-leave-active {
+	transition: opacity .3s ease;
+}
+
+.gen-4 .fade3-enter-from {
+	opacity: 0;
+}
+
+.gen-4 .fade3-enter-to {
+	opacity: 1;
+}
+
+.gen-4 .fade3-enter-active {
+	transition: opacity .3s ease;
+}
+
+.gen-4 .fade3-leave-from {
+	opacity: 1;
+}
+
+.gen-4 .fade3-leave-to {
+	opacity: 0;
+}
+
+.gen-4 .fade3-leave-active {
+	transition: opacity 1.5s ease;
+}
+
+.gen-4 .righttitles {
+    font-size: 35px;
+    position: relative;
+    top: 1080px;
+    right: 0px;
+    text-align: right;
+    line-height: 60px;
+    font-family: oseb;
+    font-weight: 700;
+}
+
+.gen-4 .badges {
+    display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+/* .status {
+    display: block;
+    font-size: 100px;
+    position: fixed;
+    z-index: 9000;
+    top: 846px;
+    text-align: center;
+    font-family: osb;
+    font-weight: 500
+} */
+.gen-4 .hp {
+    font-size: 60px;
+    position: absolute;
+    line-height: 37.3px;
+    top: 845px;
+    right: 1743px;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .atk {
+    font-size: 60px;
+    position: absolute;
+    line-height: 37.3px;
+    top: 882px;
+    right: 1743px;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .def {
+    font-size: 60px;
+    position: absolute;
+    line-height: 37.3px;
+    top: 919px;
+    right: 1743px;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .spc {
+    font-size: 60px;
+    position: absolute;
+    line-height: 37.3px;
+    top: 956px;
+    right: 1743px;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .spd {
+    font-size: 60px;
+    position: absolute;
+    line-height: 37.3px;
+    top: 993px;
+    right: 1743px;
+    text-align: right;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .labelHp {
+    font-size: 24px;
+    position: fixed;
+    line-height: 37.3px;
+    color:rgb(68, 68, 68);
+    top: 886px;
+    left: 20px;
+    opacity: 1;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .labelAtk {
+    font-size: 24px;
+    position: fixed;
+    line-height: 37.3px;
+    color:rgb(68, 68, 68);
+    top: 948px;
+    left: 20px;
+    opacity: 1;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500;
+    z-index: 10;
+}
+
+.gen-4 .labelDef {
+    font-size: 24px;
+    position: fixed;
+    line-height: 37.3px;
+    color:rgb(68, 68, 68);
+    top: 1009px;
+    left: 20px;
+    opacity: 1;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500;
+    z-index: 50;
+
+}
+
+.gen-4 .labelSpcAtk {
+    font-size: 24px;
+    position: fixed;
+    line-height: 27px;
+    color:rgb(68, 68, 68);
+    top: 877px;
+    left: 187px;
+    opacity: 1;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500;
+    z-index: 50;
+
+}
+
+.gen-4 .labelSpcDef {
+    font-size: 24px;
+    position: fixed;
+    line-height: 27px;
+    color:rgb(68, 68, 68);
+    top: 939px;
+    left: 187px;
+    opacity: 1;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500;
+    z-index: 50;
+
+}
+
+.gen-4 .labelSpcAtk2 {
+    font-size: 24px;
+    position: fixed;
+    line-height: 27px;
+    color:rgb(68, 68, 68);
+    top: 891px;
+    left: 187px;
+    opacity: 1;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500;
+    z-index: 50;
+
+}
+
+.gen-4 .labelSpcDef2 {
+    font-size: 24px;
+    position: fixed;
+    line-height: 27px;
+    color:rgb(68, 68, 68);
+    top: 953px;
+    left: 187px;
+    opacity: 1;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500;
+    z-index: 50;
+}
+
+.gen-4 .labelSpd {
+    font-size: 24px;
+    position: fixed;
+    line-height: 37.3px;
+    color:rgb(68, 68, 68);
+    z-index: 1000;
+    top: 1009px;
+    left: 187px;
+    opacity: .75;
+    text-align: left;
+    font-family: osb;
+    font-weight: 500;
+    z-index: 50;
+
+}
+
+.gen-4 .statusConditions {
+    position: absolute;
+    border: 1px solid #ff000000;
+    font-family: play;
+    font-size: 28px;
+    width: 65px;
+    height: 59px;
+    vertical-align: middle;
+    text-align: center;
+    opacity: .7;
+    display: flex;
+    align-items: center;
+}
+
+.gen-4 .playerMods {
+    position: absolute;
+    border: 1px solid #ff000000;
+    font-family: play;
+    font-size: 38px;
+    width: 65px;
+    height: 58px;
+    text-align: center;
+    vertical-align: middle;
+    opacity: .7;
+    display: flex;        /* Add this line */
+    align-items: center;  /* Add this line */
+    justify-content: center; /* Add this line if you also want to center text horizontally */
+}
+
+.gen-4 .modColumn1 { left: 23px; }
+
+.gen-4 .modColumn2 { left: 227px; }
+
+.gen-4 .status { top: 866px; left: 30px; }
+
+.gen-4 .hp_spd_atkMod { position: absolute; left: 23px; top: 134px; }
+
+.gen-4 .hp_spd_defMod { position: absolute; left: 23px; top: 197px; }
+
+.gen-4 .hp_spd_spDMod { position: absolute; left: 226px; top: 197px; }
+
+.gen-4 .hp_spd_spAMod { position: absolute; left: 226px; top: 134px; }
+
+.gen-4 .hp_spd_speMod { position: absolute; left: 226px; top: 71px; }
+
+.gen-4 .hp_spe_atkMod { position: absolute; left: 23px; top: 134px; }
+
+.gen-4 .hp_spe_defMod { position: absolute; left: 23px; top: 197px; }
+
+.gen-4 .hp_spe_spAMod { position: absolute; left: 226px; top: 134px; }
+
+.gen-4 .hp_spe_spDMod { position: absolute; left: 226px; top: 197px; }
+
+.gen-4 .hp_spe_speMod { position: absolute; left: 226px; top: 71px; }
+
+.gen-4 .aDMods {
+    font-size: 40px;
+    color: rgb(54, 54, 54);
+    position: absolute;
+    line-height: 61.5px;
+    z-index: 1000;
+    top: 476px;
+    left: -114px;
+    width: 200px;
+    text-align: center;
+    font-family: play;
+    font-weight: 500
+}
+
+.gen-4 .sSASDMods {
+    font-size: 40px;
+    color: rgb(54, 54, 54);
+    position: fixed;
+    line-height: 61.5px;
+    z-index: 1000;
+    top: 875px;
+    left: 108px;
+    width: 200px;
+    text-align: center;
+    font-family: osb;
+    font-weight: 500
+}
+
+.gen-4 .statusCond {
+    display: block;
+    position: fixed;
+    top: 250px;
+    left: 6px;
+    width: 150px;
+    filter: drop-shadow(3px 3px 7px #000)
+}
+
+.gen-4 .playerMoves {
+    font-size: 26px;
+    position: fixed;
+    left: 35px;
+    top: 188px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    line-height: 34px;
+    text-transform: capitalize;
+    text-align: left;
+    font-family: osb;
+    font-weight: 700
+}
+
+/* INFO AREA */
+.gen-4 .gamestate {
+    font-size: 22px;
+    position: fixed;
+    left: 380px;
+    top: 30px;
+    z-index: 5;
+    line-height: 23px;
+    text-transform: capitalize;
+    text-align: left;
+    font-family: osb;
+    font-weight: 700;
+    z-index: 20000;
+}
+
+/* .gametime {
+    font-size: 20px;
+    position: absolute;
+    left: -1369px;
+    top: 18px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    line-height: 34px;
+    text-transform: capitalize;
+    text-align: center;
+    font-family: osb;
+    font-weight: 700
+} */
+.gen-4 .genericLabels {
+    position: absolute;
+    font-family: titan;
+    font-size: 14px;
+    /* text-decoration: underline; */
+    opacity: .72;
+    border: 1px solid #da565600;
+}
+
+.gen-4 .timerLabel {
+    top: 24px;
+    left: 32px;
+}
+
+.gen-4 .resetsLabel {
+    top: 135px;
+    left: 30px;
+}
+
+.gen-4 .voltorb_flip_data {
+    border: 1px solid #ff000000;
+    left: 355px;
+    width: 74px;
+    text-align: center;
+}
+
+.gen-4 .coinsLabel {
+    top: 132px;
+    text-decoration: underline;
+}
+
+.gen-4 .coinsValue {
+    top: 154px;
+    opacity: 1;
+    font-size: 16px;
+}
+
+.gen-4 .roundLabel {
+    top: 175px;
+    text-decoration: underline;
+}
+
+.gen-4 .roundValue {
+    top: 197px;
+    opacity: 1;
+    font-size: 16px;
+}
+
+.gen-4 .mod_label {
+    position: absolute;
+    width: 124px;
+    top: 261px;
+    text-align: center;
+}
+
+.gen-4 .accuracyModLabel {
+    left: 30px;
+}
+
+.gen-4 .evasionModLabel {
+    left: 292px;
+}
+
+.gen-4 .popUpsStyle {
+    position: absolute;
+    font-family: play;
+    font-size: 36px;
+    border: 1px solid #ff000000;
+    width: 124px;
+    height: 40px;
+    text-align: center;
+    top: 277px;
+}
+
+.gen-4 .nature {
+    font-size: 20px;
+    position: absolute;
+    left: 235px;
+    width: 110px;
+    height: 32px;
+    border: 1px solid #ff000000;
+    top: 826px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    line-height: 34px;
+    text-transform: capitalize;
+    text-align: center;
+    font-family: osb;
+    font-weight: 700
+}
+
+.gen-4 .growth_rate {
+    font-size: 13px;
+    position: absolute;
+    left: 23px;
+    width: 400px;
+    height: 14px;
+    border: 1px solid #ff000000;
+    top: 815px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    text-transform: capitalize;
+    text-align: center;
+    font-family: play;
+    font-weight: 700
+}
+
+.gen-4 .nature_label {
+    font-size: 16px;
+    position: absolute;
+    left: 23px;
+    width: 80px;
+    height: 29px;
+    line-height: 29px;
+    border: 1px solid #ff000000;
+    top: 834px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    text-align: center;
+    vertical-align: middle;
+    font-family: play;
+    font-weight: 700;
+    opacity: .7;
+}
+
+.gen-4 .friendship_label {
+    font-size: 16px;
+    position: absolute;
+    left: 227px;
+    width: 125px;
+    height: 29px;
+    line-height: 29px;
+    padding-left: 10px;
+    border: 1px solid #ff000000;
+    top: 834px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    text-align: left;
+    vertical-align: middle;
+    font-family: play;
+    font-weight: 700;
+    opacity: .7;
+}
+
+.gen-4 .nature_value {
+    font-size: 18px;
+    position: absolute;
+    left: 102px;
+    width: 118px;
+    height: 29px;
+    line-height: 29px;
+    border: 1px solid #ff000000;
+    top: 833px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    text-align: center;
+    font-family: play;
+    font-weight: 700
+}
+
+.gen-4 .friendship_value {
+    font-size: 18px;
+    position: absolute;
+    left: 327px;
+    width: 96px;
+    height: 29px;
+    line-height: 29px;
+    border: 1px solid #ff000000;
+    top: 833px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    text-align: right;
+    padding-right: 12px;
+    font-family: play;
+    font-weight: 700
+}
+
+/* STATUS CONDITION */
+.gen-4 .statusCondition {
+    font-size: 26px;
+    position: fixed;
+    left: -1525px;
+    top: 664px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    line-height: 34px;
+    text-transform: capitalize;
+    text-align: center;
+    font-family: osb;
+    font-weight: 700
+}
+
+/* Unused currently */
+.gen-4 .abilityDescription { 
+    font-size: 24px;
+    position: fixed;
+    left: 579px;
+    top: 927px;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    line-height: 34px;
+    text-transform: capitalize;
+    text-align: center;
+    font-family: osb;
+    font-weight: 700
+}
+
+/* MOVESET */
+.gen-4 .moveStyle {
+    font-size: 50px;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    z-index: 5;
+    line-height: 34px;
+    text-transform: capitalize;
+    text-align: left;
+    font-family: osb;
+    font-weight: 700
+}
+
+.gen-4 .move1 {
+    left: 436px;
+    top: 940px;
+}
+
+.gen-4 .move2 {
+    left: 1030px;
+    top: 940px;
+}
+
+.gen-4 .move3 {
+    left: 436px;
+    top: 1012px;
+}
+
+.gen-4 .move4 {
+    left: 1030px;
+    top: 1012px;
+}
+
+.gen-4 .movePPStyle {
+    display: block;
+    position: fixed;
+    width: 52px;
+    z-index: 5;
+    text-align: right;
+    font-family: osb;
+    font-weight: 700
+}
+
+.gen-4 .move1pp {
+    left: 890px;
+    top: 940px;
+}
+
+.gen-4 .move2pp {
+    left: 1480px;
+    top: 940px;
+}
+
+.gen-4 .move3pp {
+    top: 1012px;
+    left: 890px;
+}
+
+.gen-4 .move4pp {
+    top: 1012px;
+    left: 1480px;
+}
+
+.gen-4 .movePowerStyle {
+    display: block;
+    position: absolute;
+    width: 100px;
+    z-index: 5;
+    text-align: right;
+    font-family: osb;
+    font-weight: 700
+}
+
+.gen-4 .move1power {
+    left: 670px;
+    top: 940px;
+}
+
+.gen-4 .move2power {
+    left: 1265px;
+    top: 940px;
+}
+
+.gen-4 .move3power {
+    left: 670px;
+    top: 1012px;
+}
+
+.gen-4 .move4power {
+    left: 1265px;
+    top: 1012px;
+}
+
+.gen-4 .move1icon {
+    display: block;
+    position: fixed;
+    left: 350px;
+    width: 100px;
+    top: 906px;
+    z-index: 5;
+    transform: scale(.61);
+    filter: drop-shadow(0px 0px 3px #000)
+}
+
+.gen-4 .move2icon {
+    display: block;
+    position: fixed;
+    left: 944px;
+    width: 100px;
+    top: 906px;
+    z-index: 5;
+    transform: scale(.61);
+    filter: drop-shadow(0px 0px 3px #000)
+
+}
+
+.gen-4 .move3icon {
+    display: block;
+    position: fixed;
+    left: 350px;
+    width: 100px;
+    top: 977px;
+    z-index: 5;
+    transform: scale(.61);
+    filter: drop-shadow(0px 0px 3px #000)
+
+}
+
+.gen-4 .move4icon {
+    display: block;
+    position: fixed;
+    left: 944px;
+    width: 100px;
+    top: 977px;
+    z-index: 5;
+    transform: scale(.61);
+    filter: drop-shadow(0px 0px 3px #000)
+
+}
+
+/* currently unused */
+.gen-4 .movesetBackground {
+    display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -100;
+}
+
+.gen-4 .leftBarFixed {
+    display: block;
+    position: fixed;
+    left: 12px;
+    top: 24px;
+    z-index: 10000;
+}
+
+.gen-4 .rightBarFixed {
+    display: block;
+    position: fixed;
+    right: 12px;
+    top: 24px;
+    z-index: 10000;
+}
+
+.gen-4 .slideInTop-enter-from {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.gen-4 .slideInTop-enter-active {
+    transition: transform .5s ease, opacity .3s ease;
+}
+
+.gen-4 .slideInTop-enter-to {
+    transform: translateY(0%);
+    opacity: 1;
+}
+
+.gen-4 .slideInTop-leave-active {
+    animation: blur-out 0.4s;
+}
+
+.gen-4 .slideInBottom-enter-from {
+    transform: translateY(+100%);
+    opacity: 0;
+}
+
+.gen-4 .slideInBottom-enter-active {
+    transition: transform .5s ease, opacity .3s ease;
+}
+
+.gen-4 .slideInBottom-enter-to {
+    transform: translateY(0%);
+    opacity: 1;
+}
+
+.gen-4 .slideInBottom-leave-active {
+    animation: blur-out 0.4s;
+}
+
+.gen-4 .slideInLeft-enter-from,
+.gen-4 .slideInLeft-leave-to {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+.gen-4 .slideInLeft-enter-active,
+.gen-4 .slideInLeft-leave-active {
+    transition: transform .5s ease, opacity .3s ease;
+}
+
+.gen-4 .slideInLeft-enter-to {
+    transform: translateX(0%);
+    opacity: 1;
+}
+
+.gen-4 .slideInRight-enter-from,
+.gen-4 .slideInRight-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.gen-4 .slideInRight-enter-active,
+.gen-4 .slideInRight-leave-active {
+    transition: transform .5s ease, opacity .3s ease;
+}
+
+.gen-4 .slideInRight-enter-to {
+    transform: translateX(0%);
+    opacity: 1;
+}
+
+.gen-4 .scaleResets-enter-from,
+.gen-4 .scaleResets-leave-to {
+    transform: scale(115%);
+}
+
+.gen-4 .scaleResets-enter-active {
+    transition: transform 1s ease;
+}
+
+.gen-4 .scaleResets-leave-active {
+    transition: transform 1s ease;
+}
+
+.gen-4 .scaleResets-enter-to {
+    transform: scale(115%);
+}
+
+@keyframes blur-out {
+    0% {
+         transform: scale(1);
+         animation-timing-function: ease;
+    }
+    50% {
+        transform: scale(1.015);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0;
+        animation-timing-function: ease;
+    }
+}
+
+.gen-4 .fadeScale-enter-from {
+    transform: scale(100%,100%);
+    opacity: 0;
+}
+
+.gen-4 .fadeScale-enter-active {
+    transition: transform 2s ease, opacity 1s ease;
+}
+
+.gen-4 .fadeScale-enter-to {
+    transform: scale(50%,50%);
+    opacity: 1;
+}
+
+.gen-4 .fadeScale-leave-active {
+    animation: blur-out 0.4s;
+}
+
+.gen-4 .status-enter-from {
+    filter: blur(25px);
+    opacity: 0;
+}
+
+.gen-4 .status-enter-active,
+.gen-4 .status-leave-active {
+    transition: all 1s ease;
+}
+
+.gen-4 .status-enter-to {
+    filter: blur(0px);
+    opacity: 1;
+}
+
+.gen-4 .status-leave-to {
+    filter: blur(25px);
+    opacity: 0;
+}
+
+/* TEXT UPDATES (MOVE, MOVE POWER, PP) */
+/* .fadeText-enter-from, .fadeText-leave-to {
+    opacity: 0;
+}
+.fadeText-enter-active {
+    transition: opacity .6s ease-in;
+}
+.fadeText-enter-to, .fadeText-leave-from {
+    opacity: 1;
+}
+.fadeText-leave-active {
+    transition: opacity .1s ease-in;
+}  */
+@keyframes blur-out {
+    0% {
+         transform: scale(1);
+         animation-timing-function: ease;
+    }
+    50% {
+        transform: scale(1.015);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0;
+        animation-timing-function: ease;
+    }
+}
+
+/* BATTLE GRAPHIC APPEARS */
+.gen-4 .battleGraphic-enter-active {
+    animation: battleIntroAnimationFull 2.7s;
+}
+
+.gen-4 .battleGraphic-leave-active {
+    transition: all .8s;
+}
+
+.gen-4 .battleGraphic-enter-from {
+    transform: translateX(100%);
+}
+
+.gen-4 .battleGraphic-leave-to {
+    opacity: 0;
+}
+
+/* There are roughly 2.65s from the black screen to when the player gains control of the Pokemon (637 frames @ 240fps) */
+/* DURATION: 2.65s */
+@keyframes battleIntroAnimationFull {
+    /* Black (from the first black frane to when the screen turns white) */
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    /* Grayscale Trainer Scroll (from the white frame until the first colour frame) */
+    13% {
+        opacity: 0;
+        transform: translateX(100%);
+        animation-timing-function: ease;
+    }
+    /* Trainers Send Their Pokemon In (starts with "TRAINER wants to fight!") */
+    36% {
+        opacity: 1;
+        transform: translateX(25%);
+        animation-timing-function: ease;
+    }
+    /* Opponent's Pokemon Fully Rendered (health bar appears) */
+    65% {
+        opacity: 1;
+        transform: translateX(0%);
+        animation-timing-function: ease;
+        }
+    /* Player Pokemon Text (player off screen, text scroll) */
+    73% {
+        opacity: 1;
+        transform: translateX(0%);
+    }
+    /* Player Pokemon Text (player off screen, text scroll) */
+    86% {
+        opacity: 1;
+        transform: translateX(0%);
+    }
+    /* Player Gains Control (fight, item, pkmn, run) */
+    100% {
+        opacity: 1;
+        transform: translateX(0%);
+    }
+}
+
+.gen-4 .battleEnemyText-enter-from,
+.gen-4 .battleEnemyText-leave-to {
+    opacity: 0;
+}
+
+.gen-4 .battleEnemyText-enter-active {
+    animation: battleTextIntroAnimationFull 3.7s;
+}
+
+.gen-4 .battleEnemyText-leave-active {
+    animation: blur-out 0.2s;
+}
+
+.gen-4 .battleEnemyText-enter-to {
+    opacity: 1;
+}
+
+/* There are roughly 2.65s from the black screen to when the player gains control of the Pokemon (637 frames @ 240fps) */
+/* DURATION: 2.65s */
+@keyframes battleTextIntroAnimationFull {
+    0% {
+        opacity: 0;
+        transform: translateX(25%);
+    }
+    /* Starts animating when the battle is starting */
+    72% {
+        opacity: 0;
+        transform: translateX(25%);
+        animation-timing-function: ease;
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0%);
+        animation-timing-function: ease;
+    }
+}
+
+.gen-4 .movepool-enter-from {
+    transform: translateY(+100%);
+    opacity: 0;
+}
+
+.gen-4 .movepool-enter-active {
+    transition: transform 2s ease, opacity .3s ease;
+}
+
+.gen-4 .movepool-enter-to {
+    transform: translateY(0%);
+    opacity: 1;
+}
+
+.gen-4 .movepool-leave-active {
+    animation: blur-out-movepool 0.42s;
+}
+
+@keyframes blur-out-movepool {
+    0% {
+         transform: scale(1);
+         animation-timing-function: ease;
+    }
+    24% {
+        transform: scale(1);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    50% {
+        transform: scale(1.015);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0;
+        animation-timing-function: ease;
+    }
+}
+
+/* Background texture / Pokemon art swaps: old and new render together and cross-fade.
+   Keyed on the texture path and the displayed species, so picking a texture, changing
+   starter, switching the evolution-family styling dropdown, and evolving mid-run all
+   fade instead of popping. Matches the 750ms overlay-color fade on .colored-image::after. */
+.gen-4 .styleFade-enter-from { opacity: 0; }
+
+.gen-4 .styleFade-enter-to { opacity: 1; }
+
+.gen-4 .styleFade-enter-active { transition: opacity 750ms ease-in-out; }
+
+.gen-4 .styleFade-leave-from { opacity: 1; }
+
+.gen-4 .styleFade-leave-to { opacity: 0; }
+
+.gen-4 .styleFade-leave-active { transition: opacity 750ms ease-in-out; }
+
+.gen-4 .fadeBattle-enter-from { opacity: 0; }
+
+.gen-4 .fadeBattle-enter-to { opacity: 1; }
+
+.gen-4 .fadeBattle-enter-active { transition: opacity 300ms ease-in-out 50ms; }
+
+.gen-4 .fadeBattle-leave-from { opacity: 1; }
+
+.gen-4 .fadeBattle-leave-to { opacity: 0; }
+
+.gen-4 .fadeBattle-leave-active { transition: opacity 300ms ease-in-out 50ms; }
+
+.gen-4 .fadeBattleEnemy-enter-from { opacity: 0; }
+
+.gen-4 .fadeBattleEnemy-enter-to { opacity: 1; }
+
+.gen-4 .fadeBattleEnemy-enter-active { transition: opacity 500ms ease-in-out 500ms; }
+
+.gen-4 .fadeBattleEnemy-leave-from { opacity: 1; }
+
+.gen-4 .fadeBattleEnemy-leave-to { opacity: 0; }
+
+.gen-4 .fadeBattleEnemy-leave-active { transition: opacity 500ms ease-in-out; }
+
+.gen-4 .fadeDelayed-enter-from { opacity: 0; }
+
+.gen-4 .fadeDelayed-enter-to { opacity: 1; }
+
+.gen-4 .fadeDelayed-enter-active { transition: opacity 500ms ease-in-out 0ms; }
+
+.gen-4 .fadeDelayed-leave-from { opacity: 1; }
+
+.gen-4 .fadeDelayed-leave-to { opacity: 0; }
+
+.gen-4 .fadeDelayed-leave-active { transition: opacity 200ms ease-in-out; }
+
+.gen-4 .fade2-enter-from { opacity: 0; }
+
+.gen-4 .fade2-enter-to { opacity: 1; }
+
+.gen-4 .fade2-enter-active { transition: opacity 500ms ease-in-out; }
+
+.gen-4 .fade2-leave-from { opacity: 1; }
+
+.gen-4 .fade2-leave-to { opacity: 0; }
+
+.gen-4 .fade2-leave-active { transition: opacity 500ms ease-in-out 400ms; }
+
+.gen-4 .fadeMod-enter-from { opacity: 0; }
+
+.gen-4 .fadeMod-enter-to { opacity: 1; }
+
+.gen-4 .fadeMod-enter-active { transition: opacity 400ms ease-in; }
+
+.gen-4 .fadeMod-leave-from { opacity: 1; }
+
+.gen-4 .fadeMod-leave-to { opacity: 0; }
+
+.gen-4 .fadeMod-leave-active { transition: opacity 400ms ease-out; }
+
+.gen-4 .opacityTransition { transition: opacity 500ms ease-in-out;}
+
+.gen-4 .border {
+    border: 1px solid rgba(255, 102, 0, 0);
+}
+
+.gen-4 .slots {
+    position: relative;
+    height: 153px;
+}
+
+.gen-4 .ePkmn0 { top: 51px; }
+
+.gen-4 .ePkmn1 { top: 64px; }
+
+.gen-4 .ePkmn2 { top: 78px; }
+
+.gen-4 .ePkmn3 { top: 91px; }
+
+.gen-4 .ePkmn4 { top: 105px; }
+
+.gen-4 .ePkmn5 { top: 118px; }
+
+.gen-4 .ePkmnSpecies {
+    position: absolute;
+    border: 1px solid rgba(0, 255, 149, 0);
+    font-size: 17px;
+    font-family: titan;
+    width: 130px;
+    text-align: center;
+    top: -1px;
+    left: 11px;
+    opacity: .7;
+}
+
+.gen-4 .ePkmnLvlSpecies {
+    position: absolute;
+    border: 1px solid rgba(0, 255, 149, 0);
+    font-size: 14px;
+    font-family: play;
+    width: 128px;
+    text-align: center;
+    top: -1px;
+    left: -2px;
+    opacity: .7;
+    filter: drop-shadow(1px 1px 1px #00000078)
+}
+
+.gen-4 .ePkmnLvl {
+    position: absolute;
+    border: 1px solid rgb(0, 255, 149);
+    font-size: 12px;
+    line-height: 17px;
+    font-family: play;
+    width: 140px;
+    text-align: center;
+    top: -1px;
+    opacity: .7;
+    width: 140px;
+    left: 126px;
+}
+
+.gen-4 .ePkmnAbility {
+    position: absolute;
+    text-align: right;
+    border: 1px solid rgba(255, 0, 0, 0);
+    /* color:rgb(70, 70, 70); */
+    font-size: 12px;
+    line-height: 17px;
+    text-align: center;
+    width: 109px;
+    top: 1px;
+    left: 283px;
+    opacity: .7;
+}
+
+.gen-4 .ePkmnLevel {
+    position: absolute;
+    text-align: right;
+    border: 1px solid rgba(255, 0, 0, 0);
+    /* color:rgb(70, 70, 70); */
+    font-size: 12px;
+    line-height: 17px;
+    text-align: center;
+    width: 138px;
+    top: 1px;
+    left: 128px;
+    opacity: .7;
+}
+
+.gen-4 .ePkmnSpeedComparison {
+    position: absolute;
+    border: 1px solid rgba(255, 0, 0, 0);
+    text-align: center;
+    color:rgb(70, 70, 70);
+    font-size: 12px;
+    line-height: 13px;
+    width: 140px;
+    top: 22px;
+    left: 127px;
+}
+
+.gen-4 .ePkmnSprite {
+    /* position: absolute;
+    border: 1px solid rgba(255, 0, 0, 0);
+    width: 104px;
+    height: 104px;
+    left: 16px;
+    top: 22px;
+    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out; */
+    position: absolute;
+    border: 1px solid rgba(255, 0, 0, 0);
+    transform-origin: 50% 50%;
+    display: inline-block; /* to ensure it's treated as an inline-level element */
+    vertical-align: middle; /* to align it with the text */
+    width: 122px;
+    height: 118px;
+    top: 18px;
+    left: 0px;
+    filter: drop-shadow(1px 1px 2px);
+}
+
+.gen-4 .ePkmnSpriteResizing {
+    outline: 2px dashed #00ffff;
+    outline-offset: 2px;
+}
+
+.gen-4 .ePkmnSpriteResizeHandle {
+    position: fixed;
+    width: 16px;
+    height: 16px;
+    background: #00ffff;
+    border: 2px solid #000;
+    border-radius: 50%;
+    cursor: nwse-resize;
+    z-index: 2147483647;
+    pointer-events: auto;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+}
+
+.gen-4 .ePkmnMoveStyle {
+    position: absolute;
+    border: 1px solid rgba(47, 0, 255, 0);
+    width: 128px;
+    font-size: 14px;
+    line-height: 31px;
+    text-align: left;
+    left: 94px;
+}
+
+.gen-4 .ePkmnMove1 {
+    top: 24px;
+}
+
+.gen-4 .ePkmnMove2 {
+    top: 57px;
+}
+
+.gen-4 .ePkmnMove3 {
+    top: 90px;
+}
+
+.gen-4 .ePkmnMove4 {
+    top: 123px;
+}
+
+.gen-4 .seHp {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    text-align: center;
+    font-size: 16px;
+    width: 100px;
+    left: 4px;
+    top: 858px;
+}
+
+.gen-4 .seAtk {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    text-align: center;
+    font-size: 16px;
+    width: 100px;
+    left: 4px;
+    top: 920px;
+}
+
+.gen-4 .seDef {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    text-align: center;
+    font-size: 16px;
+    width: 100px;
+    left: 3px;
+    top: 982px;
+}
+
+.gen-4 .seSpe {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    text-align: center;
+    font-size: 16px;
+    width: 100px;
+    left: 186px;
+    top: 858px;
+}
+
+.gen-4 .seSpc1 {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    text-align: center;
+    font-size: 16px;
+    width: 100px;
+    left: 187px;
+    top: 920px;
+}
+
+.gen-4 .seSpc2 {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    text-align: center;
+    font-size: 16px;
+    width: 100px;
+    left: 187px;
+    top: 982px;
+}
+
+.gen-4 .seHpVitamin {
+    position: absolute;
+    /* border: 1px solid rgb(255, 0, 0); */
+    text-align: center;
+    font-size: 42px;
+    width: 100px;
+    left: 1px;
+    top: 865px;
+}
+
+.gen-4 .movesetLabel {
+    position: absolute;
+    font-family: titan;
+    opacity: .72;
+    font-size: 21px;
+    top: 894px;
+}
+
+.gen-4 .movesetLabelColumn1 {
+    left: 720px;
+}
+
+.gen-4 .movesetLabelColumn2 {
+    left: 840px;
+}
+
+.gen-4 .movesetLabelColumn3 {
+    left: 910px;
+}
+
+.gen-4 .movesetLabelColumn4 {
+    left: 1310px;
+}
+
+.gen-4 .movesetLabelColumn5 {
+    left: 1434px;
+}
+
+.gen-4 .movesetLabelColumn6 {
+    left: 1504px;
+}
+
+.gen-4 .movesetFontSize {
+    font-size: 38px;
+}
+
+.gen-4 .movesetSmallFontSize {
+    font-size: 30px;
+}
+
+.gen-4 .movesetPercentage {
+    font-size: 24px;
+}
+
+.gen-4 .smallButtonStyle {
+    pointer-events: auto; 
+    position: relative; 
+    font-size: 16px; 
+    background: #72fd4f; 
+    font-family: Play;
+    border-radius: 12px;
+    padding-left: 4px;
+    padding-right: 4px;
+    width: 20px;
+    height: 20px;
+}
+
+.gen-4 .smallButtonStyle2 {
+    pointer-events: auto; 
+    position: relative; 
+    font-size: 16px; 
+    background: #cc5353; 
+    font-family: Play;
+    border-radius: 12px;
+    padding-left: 4px;
+    padding-right: 4px;
+    width: 20px;
+    height: 20px;
+}
+
+.gen-4 .increment {
+    background: #29c702;
+}
+
+.gen-4 .decrement {
+    background: #cc5353;
+}
+
+.gen-4 .smallButtonStyle:hover {
+    background: #14d61a; 
+}
+
+.gen-4 .smallButtonStyle2:hover {
+    background: #fd6e6e; 
+}
+
+.gen-4 .moveAccuracyStyle {
+    display: block;
+    position: fixed;
+    width: 100px;
+    z-index: 5;
+    text-align: right;
+    font-family: osb;
+    font-weight: 700;
+    border: 1px solid #ff000000;
+}
+
+.gen-4 .move1acc {
+    left: 784px;
+    top: 939px;
+}
+
+.gen-4 .move2acc {
+    left: 1374px;
+    top: 939px;
+}
+
+.gen-4 .move3acc {
+    left: 784px;
+    top: 1011px;
+}
+
+.gen-4 .move4acc {
+    left: 1374px;
+    top: 1011px;
+}
+
+.gen-4 .movepool_way {
+    text-align: left;
+    padding-right: 4px;
+    padding-left: 4px;
+    /* border: 1px solid #a6c400; */
+}
+
+.gen-4 .movepool_move {
+    text-align: left;
+    padding-right: 4px;
+    /* border: 1px solid #a6c400; */
+}
+
+.gen-4 .movepool_type {
+    text-align: center;
+    padding-right: 3px;
+    /* border: 1px solid #a6c400; */
+}
+
+.gen-4 .movepool_tableC {
+    text-align: center;
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
+.gen-4 .movepool_header {
+    line-height: 17px;
+}
+
+.gen-4 .eFaintTransition {
+    transition: opacity 500ms ease-in-out 50ms, filter 500ms ease-in-out 50ms;
+}
+
+.gen-4 .movepoolDemo {
+    display: block;
+    position: absolute;
+    /* border: 1px solid #00ff0d00; */
+    background-color: #ffffff;
+    font-size: 14px;
+    line-height: 16px;
+    width: 404px;
+    height: 1000px;
+    font-family: play;
+    left: 1494px;
+    top: 60px;
+    opacity: .9;
+    border: none;
+}
+
+.gen-4 .movepoolDemo td,
+.gen-4 .movepoolDemo th {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.gen-4 .movepoolDemo .first-row td {
+    padding-top: 2px;
+}
+
+.gen-4 .movepoolBorder {
+    z-index: 1;
+}
+
+.gen-4 .movepoolDemo th:nth-child(1) {
+    width: 50px;
+}
+
+.gen-4 .movepoolDemo th:nth-child(2) {
+    width: 124px;
+}
+
+.gen-4 .movepoolDemo th:nth-child(3) {
+    width: 71px;
+}
+
+.gen-4 .movepoolDemo th:nth-child(4) {
+    width: 71px;
+}
+
+.gen-4 .movepoolDemo th:nth-child(5) {
+    width: 40px;
+}
+
+.gen-4 .movepoolDemo th:nth-child(6) {
+    width: 40px;
+}
+
+.gen-4 .movepoolDemo th:nth-child(7) {
+    width: 30px;
+}
+
+.gen-4 .movepoolTable {
+    font-size: 17px;
+}
+
+.gen-4 .movepoolDemo tr:nth-child(odd) {
+    background-color: #cfcfcf;
+}
+
+.gen-4 .voltorb_flip {
+    position: absolute;
+    top: 268px;
+    left: 88px;
+}
+
+.gen-4 .enemyStatsArea {
+    display: block;
+    max-width:1920px;
+    max-height:1080px;
+    position: fixed;
+    top: 0px;
+    left: -1px;
+    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
+}
+
+.gen-4 .uiPngElement {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+.gen-4 .accEvaStyle {
+    font-family: play;
+    position: absolute;
+    border: 1px solid #ff000000;
+    text-align: center;
+    width: 114px;
+}
+
+.gen-4 .accEvaLabel {
+    text-decoration: underline;
+    opacity: .6;
+    font-size: 16px;
+}
+
+.gen-4 .accuracyLabel {
+    left: 10px;
+    top: 230px;
+}
+
+.gen-4 .accEvaMod {
+    font-size: 40px;
+    height: 50px;
+    top: 380px;
+}
+
+.gen-4 .accuracyMod {
+    left: 30px;
+}
+
+.gen-4 .evasionLabel {
+    left: 137px;
+    top: 230px;
+}
+
+.gen-4 .evasionMod {
+    left: 292px;
+}
+
+.gen-4 .playerFieldEffects {
+    position: absolute;
+    border: 1px solid #ff000000;
+    width: 102px;
+    height: 65px;
+    top: 441px;
+    left: 14px;
+    text-align: center;
+    font-family: play;
+    font-size: 14px;
+    line-height: 21px;
+    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
+}
+
+.gen-4 .playerFieldEffectsLarge {
+    position: absolute;
+    border: 1px solid #ff000000;
+    width: 240px;
+    height: 51px;
+    top: 660px;
+    left: 11px;
+    text-align: center;
+    font-family: play;
+    line-height: 23px;
+    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
+}
+
+.gen-4 .field_header {
+    font-size: 16px;
+    opacity: .6;
+    text-decoration: underline;
+}
+
+.gen-4 .field_effect {
+    font-size: 26px;
+}
+
+.gen-4 .enemyMods {
+    position: absolute;
+    font-size: 16px;
+    width: 23px;
+    height: 21px;
+    line-height: 22px;
+    /* border: 1px solid #000; */
+    text-align: center;
+    border-radius: 15px;
+    background: #a1a1a1;
+    filter: drop-shadow(0px 0px 2px);
+    /* left: 157px; */
+    left: 177px;
+    padding-left: 1px;
+}
+
+.gen-4 .enemyMod {
+    position: absolute;
+    border: 1px solid #00000000;
+    width: 68px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.gen-4 .stcd { top: 14px; width: 42px; height: 18px; left: -5px; font-size: 14px; }
+
+.gen-4 .e_attack { top: 51px; left: -20px; }
+
+.gen-4 .e_defense { top: 88px; left: -20px; }
+
+.gen-4 .e_special_attack { top: 51px; left: 50px; }
+
+.gen-4 .e_special_defense { top: 88px; left: 50px; }
+
+.gen-4 .e_speed { top: 13px; left: 50px; }
+
+.gen-4 .attackMod {
+    top: 32px;
+}
+
+.gen-4 .defenseMod {
+    top: 56px;
+}
+
+.gen-4 .specialAttackMod {
+    top: 80px;
+}
+
+.gen-4 .specialDefenseMod {
+    top: 105.5px;
+}
+
+.gen-4 .speedMod {
+    top: 129.5px;
+}
+
+.gen-4 .stats_header {
+    position: absolute;
+    width: 402px;
+    /* second screen */
+    /* top: 466px; */
+    top: 772px;
+    left: 21px;
+    text-align: center;
+    /* height: 42px; */
+    font-family: play;
+    font-size: 32px;
+}
+
+.gen-4 .stats_table_borders {
+    border: 1px solid #ff000000;
+}
+
+.gen-4 .stats_table {
+    position: absolute;
+    width: 200px;
+    height: 155px;
+    /* old stats top value */
+    /* top: 532px; */
+    top: 861px;
+    text-align: center;
+    font-family: play;
+    font-size: 51px;
+    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
+}
+
+.gen-4 .modifier_table {
+    border: 3px solid #1655a9;
+    position: absolute;
+    width: 402px;
+    height: 193px;
+    top: 533px;
+    text-align: center;
+    font-family: play;
+    font-size: 51px;
+    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
+}
+
+.gen-4 .modifier {
+    font-size: 40px;
+    width: 50px;
+    height: 50px;
+    /* background: #f86e6e85; */
+    border-radius: 50px;
+}
+
+.gen-4 .stats_table th:nth-child(1) {
+    opacity: .6;
+    padding-left: 5px;
+    text-align: left;
+    width: 65px;
+    font-size: 27px;
+}
+
+.gen-4 .stats_table th:nth-child(2) {
+    text-align: right;
+    padding-right: 5px;
+}
+
+.gen-4 .stats_table th:nth-child(3) {
+    opacity: .6;
+    padding-left: 15px;
+    text-align: left;
+    width: 65px;
+    font-size: 27px;
+}
+
+.gen-4 .stats_table th:nth-child(4) {
+    text-align: right;
+    width: 80px;
+    padding-right: 10px;
+}
+
+.gen-4 .stat_value_style {
+    position: absolute;
+    padding-left: 1px;
+    text-align: right; 
+    line-height: 58px;
+    width: 28px;
+    min-width: 120px;
+    max-width: 120px;
+    border: 1px solid #00000000;
+    font-size: 56px;
+    font-family: play;
+}
+
+.gen-4 .average_value_style {
+    position: absolute;
+    padding-left: 1px;
+    text-align: right; 
+    line-height: 58px;
+    width: 28px;
+    min-width: 120px;
+    max-width: 120px;
+    border: 1px solid #00000000;
+    font-size: 36px;
+    font-family: play;
+}
+
+.gen-4 .avrg_value_style {
+    position: absolute;
+    padding-left: 1px;
+    text-align: right; 
+    line-height: 58px;
+    width: 28px;
+    min-width: 120px;
+    max-width: 120px;
+    border: 1px solid #00000000;
+    font-size: 26px;
+    font-family: play;
+}
+
+.gen-4 .mdin_value_style {
+    position: absolute;
+    padding-left: 1px;
+    text-align: right; 
+    line-height: 58px;
+    width: 28px;
+    min-width: 120px;
+    max-width: 120px;
+    border: 1px solid #00000000;
+    font-size: 26px;
+    font-family: play;
+}
+
+.gen-4 .stat_label_style {
+    font-size: 24px;
+    position: absolute;
+    line-height: 58px;
+    white-space: nowrap;
+    z-index: 50;
+    opacity: .63;
+    text-align: left;
+    color: rgb(0, 0, 0);
+    font-family: play;
+    font-weight: 500;
+    width: 65px;
+    border: 1px solid #00000000;
+}
+
+.gen-4 .stat_row_1 { top: 70px; }
+
+.gen-4 .stat_row_2 { top: 132.5px; }
+
+.gen-4 .stat_row_3 { top: 196px; }
+
+.gen-4 .stat_column_1 { left: 26px; padding-top: 1px; padding-left: 1px; }
+
+.gen-4 .stat_column_2 { left: 88px; }
+
+.gen-4 .stat_column_3 { left: 230px; padding-top: 1px; padding-left: 1px; }
+
+.gen-4 .stat_column_4 { left: 291px; }
+
+.gen-4 .detailed_ev_stat_row_1 { top: 54px; }
+
+.gen-4 .detailed_ev_stat_row_2 { top: 116px; }
+
+.gen-4 .detailed_ev_stat_row_3 { top: 178px; }
+
+.gen-4 .dv {
+    font-size: 33px;
+}
+
+.gen-4 .stat_exp {
+    font-size: 25px;
+}
+
+.gen-4 .evs {
+    font-size: 33px;
+}
+
+.gen-4 .devs {
+    padding-top: 0px;
+    font-size: 18px;
+}
+
+.gen-4 .percentage_evs {
+    padding-top: 18px;
+    font-size: 18px;
+}
+
+.gen-4 .ev_stats_gained {
+    padding-top: 36px;
+    font-size: 18px;
+}
+
+.gen-4 .splits_table {
+    display: table;
+    position: absolute;
+    /* border: 1px solid #00ff0d00; */
+    background-color: #ffffff;
+    font-size: 12px;
+    line-height: 15.25px;
+    width: 405px;
+    height: 723px;  /* Add this line - adjust the value as needed */
+    font-family: play;
+    left: 1495px;
+    top: 57px;
+    opacity: .9;
+    border: none;
+}
+
+.gen-4 .splits_table tr:nth-child(odd) {
+    background-color: #cfcfcf;
+}
+
+.gen-4 .scaled_icon {
+    padding-top: 3px;
+    margin: 0; /* Remove any margin */
+    text-align: center; /* Center the content horizontally */
+    width: 48px;
+    filter: saturate(1.1) contrast(1.1) drop-shadow(0px 0px 1px);
+}
+
+/* Popup Modal Styles */
+.gen-4 .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50000;
+}
+
+.gen-4 .popup-content {
+    background-color: #f0f0f0;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.gen-4 .popup-header {
+    background-color: #333;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 6px 6px 0 0;
+}
+
+.gen-4 .popup-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-family: play;
+}
+
+.gen-4 .popup-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.gen-4 .popup-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.gen-4 .popup-body {
+    padding: 20px;
+    font-family: play;
+    line-height: 1.5;
+}
+
+.gen-4 .popup-body p {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+}
+
+.gen-4 .popup-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Popup Menu Styles */
+.gen-4 .popup-overlay {
+    font-family: play;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+}
+
+.gen-4 .popup-menu {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border: 2px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.gen-4 .popup-header {
+    background: linear-gradient(135deg, #0a9406 0%, #6aea66 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #333;
+}
+
+.gen-4 .popup-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.gen-4 .popup-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.gen-4 .popup-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.gen-4 .popup-content {
+    padding: 0;
+}
+
+.gen-4 .popup-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.2s;
+    font-size: 16px;
+    color: #333;
+}
+
+.gen-4 .popup-item:hover {
+    background-color: #e8f4f8;
+}
+
+.gen-4 .popup-item:last-child {
+    border-bottom: none;
+}
+
+.gen-4 .popup-item:active {
+    background-color: #d0e8f0;
+}
+
+/* RNG Modal Styles */
+.gen-4 .rng-modal {
+    min-width: 460px;
+    max-width: 640px;
+}
+
+.gen-4 .rng-modal-body {
+    padding: 12px 18px 18px 18px;
+    overflow-y: auto;
+    max-height: 70vh;
+    color: #222;
+}
+
+.gen-4 .rng-npc-block {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #bbb;
+}
+
+.gen-4 .rng-npc-block:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.gen-4 .rng-npc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.gen-4 .rng-npc-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.gen-4 .rng-trip-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+
+.gen-4 .rng-trip-label {
+    font-size: 12px;
+    width: 60px;
+}
+
+.gen-4 .rng-trip-select {
+    flex: 1;
+    min-width: 0;
+}
