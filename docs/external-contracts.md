@@ -29,6 +29,15 @@ matching queuer change (queuer changes are allowed, but must land in the same st
 and `detectGenContext` returning `genKey: "unified"` for every mapper. The `dev-window-state.json` handling must be
 kept verbatim in the unified `src/main` (it already exists in gen1's main).
 
+**Status (2026-09-11, plan 3.6):** the queuer-side change is `docs/queuer-unified.patch` -- the `unified` config
+entry, a `USE_UNIFIED_FRONTEND` switch that makes `detectGenContext` return `genKey: "unified"` while the
+`isGen1/2/4/5` flags keep steering the per-generation call shapes, and `detectRunningFrontendGen` recognising the
+unified overlay by `/status.app === "stp-overlay"`. It is **not applied**: the queuer's working tree carries
+uncommitted edits, so the patch is for Scott to apply (`git apply docs/queuer-unified.patch` in the queuer
+folder) and dry-run in Test Mode and Capture Fixtures mode before switching the default (decision 12). The
+unified app's `package.json` name is `stp-overlay` (3.0.0), so `%APPDATA%\stp-overlay` is where the queuer's
+window-state file goes; the app reads it in dev and, additively, when packaged.
+
 ## 2. Overlay control server — `http://127.0.0.1:30159`
 
 gen2–5 each run `http.createServer` **inside the renderer** (`frontend.js`). gen1 has **no** control server;

@@ -1,11 +1,11 @@
 import type { GameModule } from "~/core/game/GameModule";
+import { moduleBase } from "~/core/game/ModuleManifest";
+import { gen1Manifest } from "./manifest";
 import { autosplitter, deprecated_autosplitter, split_trainers } from "./data/splits";
 import { gen1ControlRoutes } from "./control";
 import { installGen1RunHooks } from "./hooks";
 import { gen1Hotkeys } from "./hotkeys";
 import { gen1ChapterMarkers } from "./markers";
-import { redBlueDeprecated } from "./mappers/red-blue-deprecated";
-import { yellowDeprecated } from "./mappers/yellow-deprecated";
 import { useGameStateSync } from "./state";
 import Overlay from "~/components/Overlay.vue";
 import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
@@ -27,16 +27,7 @@ import { useSettingsStore } from "~/stores/useSettingsStore";
  * today; the store stays the source of truth until Phase 3 routes it through here.
  */
 export const gen1: GameModule = {
-    id: "gen1",
-    generation: 1,
-    mappers: [yellowDeprecated, redBlueDeprecated],
-    games: ["Yellow", "Red and Blue"],
-    editions: [
-        { name: "Yellow", game: "Yellow", boxArt: "1-Yellow.png", splitFolder: "Yellow", splitPrefix: "Y", icon: "yellow.ico" },
-        { name: "Yellow Legacy", game: "Yellow", boxArt: "1-Yellow.png", splitFolder: "Yellow", splitPrefix: "Y", icon: "yellow.ico", devOnly: true },
-        { name: "Red", game: "Red and Blue", boxArt: "1-Red.png", splitFolder: "Red and Blue", splitPrefix: "R", icon: "red.ico" },
-        { name: "Blue", game: "Red and Blue", boxArt: "1-Blue.png", splitFolder: "Red and Blue", splitPrefix: "B", icon: "blue.ico" },
-    ],
+    ...moduleBase(gen1Manifest),
     features: {
         badgeBoosts: true,
         expBar: true,

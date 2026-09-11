@@ -1,10 +1,8 @@
 import type { GameModule } from "~/core/game/GameModule";
+import { moduleBase } from "~/core/game/ModuleManifest";
+import { gen5Manifest } from "./manifest";
 import { autosplitter } from "./data/autosplitter.js";
 import { gen5ControlRoutes } from "./control";
-import { black2Standard } from "./mappers/black-2";
-import { blackStandard } from "./mappers/black";
-import { white2Standard } from "./mappers/white-2";
-import { whiteStandard } from "./mappers/white";
 import Overlay from "./Overlay.vue";
 import { loadGen5StyleDefaults } from "./storage";
 
@@ -23,16 +21,7 @@ import { loadGen5StyleDefaults } from "./storage";
  * game letter, so `splitPrefix` is empty.
  */
 export const gen5: GameModule = {
-    id: "gen5",
-    generation: 5,
-    mappers: [blackStandard, whiteStandard, black2Standard, white2Standard],
-    games: ["Black", "White", "Black 2", "White 2"],
-    editions: [
-        { name: "Black", game: "Black", boxArt: "5-Black.png", splitFolder: "Black", splitPrefix: "", icon: "gen5/icon-black.ico" },
-        { name: "White", game: "White", boxArt: "5-White.png", splitFolder: "White", splitPrefix: "", icon: "gen5/icon-white.ico" },
-        { name: "Black 2", game: "Black 2", boxArt: "5-Black2.png", splitFolder: "Black 2", splitPrefix: "", icon: "gen5/icon-black2.ico" },
-        { name: "White 2", game: "White 2", boxArt: "5-White2.png", splitFolder: "White 2", splitPrefix: "", icon: "gen5/icon-white2.ico" },
-    ],
+    ...moduleBase(gen5Manifest),
     features: {
         abilities: true,
         natures: true,

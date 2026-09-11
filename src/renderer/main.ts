@@ -2,6 +2,7 @@ import { createApp } from "vue/dist/vue.esm-bundler.js";
 import { defineComponent } from "vue";
 import { GameHookMapperClient } from "~/packages/gameHookMapperClient";
 import no_mapper from "~/components/GameSelect.vue";
+import { gen1 } from "~/games/gen1";
 import keyhook from "~/core/hotkeys/Hotkeys.vue";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
@@ -10,7 +11,7 @@ import { flushUserState, loadUserState } from "~/core/persistence/userState";
 import { registerControlServer } from "~/core/control/useControlServer";
 import { buildCanonicalView } from "~/core/mapper/MapperAdapter";
 import type { GameModule } from "~/core/game/GameModule";
-import { detect, MODULES, type Detection } from "~/games/registry";
+import { detect, loadModule, type Detection } from "~/games/registry";
 import { setActiveModule } from "~/core/game/active";
 import { initEnv } from "~/core/env";
 import { installScaleToFit, removeScaleToFit } from "~/core/window/scaleToFit";
@@ -78,8 +79,8 @@ const main = defineComponent({
             overlayLoaded: null as Promise<void> | null,
             /** Detaches the control-server bridge; see `created`. */
             unregisterControl: null as (() => void) | null,
-            /** What `registry.detect` found for the loaded mapper (plan 1.4). */
-            session: null as Detection | null,
+            /** What `registry.detect` found for the loaded mapper (plan 1.4), with its module loaded (plan 3.1). */
+            session: null as (Detection & { module: GameModule }) | null,
             /** The `/mapper` path of a mapper no module claims -- every hack mapper (decision 8). */
             unsupportedMapper: null as string | null,
         }
@@ -87,7 +88,7 @@ const main = defineComponent({
     computed: {
         /** The active module, or gen1 for the pre-mapper screen (its styles and hotkeys, as today). */
         module(): GameModule {
-            return this.session?.module ?? MODULES[0];
+            return this.session?.module ?? gen1;
         },
         /**
          * The F-key table passed to <keyhook/> (plan 1.1). gen1's is bound before any
@@ -138,8 +139,8 @@ const main = defineComponent({
 
         // The pre-mapper screen is styled by gen1's stylesheet, as it always was, and
         // scaled to the window as gen1's index.html script did.
-        void applyModuleStyles(MODULES[0]);
-        applyScaleToFit(MODULES[0]);
+        void applyModuleStyles(gen1);
+        applyScaleToFit(gen1);
 
         // The user-state writes are debounced 250 ms; local storage was synchronous, so
         // without this a quit within that window would lose the last edit. Best-effort,
@@ -181,7 +182,9 @@ const main = defineComponent({
                 return;
             }
             this.unsupportedMapper = null;
-            const module = detection.module;
+            // The generation's module is a dynamic import (plan 3.1): gen1 is in the
+            // bundle already, the others arrive as their own chunk on first detection.
+            const module = await loadModule(detection.manifest);
             // gen4 and gen5 debounce four property groups by ten or fifteen frames (plan 2.4); the list is
             // the module's, applied now that the module is known and cleared for one
             // that declares none, so a mapper switch never inherits the previous list.
@@ -198,7 +201,7 @@ const main = defineComponent({
                 setActiveModule(module.id);
                 if (module.id !== "gen1") this.settings.releaseCss();
                 applyScaleToFit(module);
-                this.session = detection;
+                this.session = { ...detection, module };
                 module.activate?.(detection.game);
                 this.ready = true;
             } finally {
@@ -210,8 +213,8 @@ const main = defineComponent({
             this.session?.module.deactivate?.();
             this.session = null;
             setActiveModule(null);
-            applyScaleToFit(MODULES[0]);
-            void applyModuleStyles(MODULES[0]).then(() => this.settings.reapplyCss());
+            applyScaleToFit(gen1);
+            void applyModuleStyles(gen1).then(() => this.settings.reapplyCss());
         };
         this.mapper.connect();
 

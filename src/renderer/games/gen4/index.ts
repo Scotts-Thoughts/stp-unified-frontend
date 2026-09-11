@@ -1,9 +1,8 @@
 import type { GameModule } from "~/core/game/GameModule";
+import { moduleBase } from "~/core/game/ModuleManifest";
+import { gen4Manifest } from "./manifest";
 import { autosplitter } from "./data/autosplitter.js";
 import { gen4ControlRoutes } from "./control";
-import { diamondPearlStandard } from "./mappers/diamond-pearl";
-import { heartGoldSoulSilverStandard } from "./mappers/heartgold-soulsilver";
-import { platinumStandard } from "./mappers/platinum";
 import Overlay from "./Overlay.vue";
 import { loadGen4StyleDefaults } from "./storage";
 
@@ -23,15 +22,7 @@ import { loadGen4StyleDefaults } from "./storage";
  * evolution family), not a game letter, so `splitPrefix` is empty.
  */
 export const gen4: GameModule = {
-    id: "gen4",
-    generation: 4,
-    mappers: [platinumStandard, diamondPearlStandard, heartGoldSoulSilverStandard],
-    games: ["Platinum", "Diamond and Pearl", "HeartGold and SoulSilver"],
-    editions: [
-        { name: "Platinum", game: "Platinum", boxArt: "4-Platinum.png", splitFolder: "Platinum", splitPrefix: "", icon: "gen4/icon-platinum.ico" },
-        { name: "Diamond and Pearl", game: "Diamond and Pearl", boxArt: "4-DiamondandPearl.jpg", splitFolder: "DP", splitPrefix: "", icon: "gen4/icon-diamond.ico" },
-        { name: "HeartGold and SoulSilver", game: "HeartGold and SoulSilver", boxArt: "4-HeartGoldandSoulSilver.jpg", splitFolder: "HGSS", splitPrefix: "", icon: "gen4/icon-heartgold.ico" },
-    ],
+    ...moduleBase(gen4Manifest),
     features: {
         abilities: true,
         natures: true,

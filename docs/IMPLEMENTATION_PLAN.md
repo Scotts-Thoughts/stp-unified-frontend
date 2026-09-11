@@ -876,6 +876,27 @@ rule in the tools:
   Emerald mapper has no `meta.gameName` to correct it (#12); the party leader is the legacy default
   starter, Rayquaza, so the overlay is coherent.
 
+## 7d. Phase 3 status (fusion)
+
+Status as of 2026-09-11, evening.
+
+| step | status |
+|---|---|
+| 3.1 boot flow, lazy modules | ✅ `games/genN/manifest.ts` (profiles, editions, the edition key) is what the shell knows before loading; `games/registry.ts` detects over the manifests and `loadModule()` imports the generation on first detection (Vite splits gen2-5 into their own chunks: entry 10.4 MB with gen1, then 5.3 / 9.5 / 11.3 / 6.0 MB for gen2/3/4/5). The edition is a user setting per generation, stored where each lifted component reads it (`game_selection`, `gameSelection`, `selected_game`; gen1's store). `InstanceReset` tears down and returns to the grid, as before. |
+| 3.2 pre-mapper screen | ✅ the box-art grid (`components/GameSelect.vue`) for every generation, thirteen tiles, gen4's tile styling; a click stores the edition and sets the taskbar icon. gen1/gen2 tiles are the legacy window icons as placeholders (decision 16); "Yellow Legacy" shows in a dev build only. |
+| 3.3 one client | ✅ gen3's `disconnect()` (called on `beforeunload`, as gen3/4/5 did) and gen4's warn-not-throw on a failed write, folded into `packages/gameHookMapperClient.ts`; #24 handling as listed. |
+| 3.4 window and icon | ✅ `set-game-icon` for every generation; gen3/4/5's `.ico`s, gen1's and gen2's `icon.png` (a NativeImage from a PNG, no conversion needed). |
+| 3.5 packaging | ✅ `package.json`: `stp-overlay` 3.0.0, `asar: false`, `files: out/**` minus the image junction, `extraResources`: `storage/**`, `resources/**` and the image pool as `images/`; `npm start` runs the built app. `dev-window-state.json` is read in dev and when packaged, and written on close in both. A packaged build has not been produced yet (electron-builder on this machine is untested); `npm run build` + `npm start` is the shape the queuer will get. |
+| 3.6 queuer | ⏸ patch prepared (`docs/queuer-unified.patch`, `docs/external-contracts.md`); not applied -- the queuer tree has Scott's uncommitted edits, and decision 12 wants the change shown and dry-run. |
+| 3.7 splits | ✅ `tools/splits/consolidate.ts` copied the five trees into `splits/` (10,662 files, 228.6 MB, no conflicts; every folder name kept, gen3's four and gen5's gen4 leftovers included). |
+
+Also done on the way: a first-launch import of gen1's file-based user data from `%APPDATA%/stp-generation1-overlay/data`
+into `%APPDATA%/stp-overlay/data` (the package rename would otherwise have started gen1 empty; `src/main/importLegacy.ts`).
+The `localStorage` (LevelDB) half of the 2.6 importer is still to come.
+
+Verified after the wiring: every generation's parity run and the gen1 no-change check, unchanged (the lazy import is
+one more awaited step inside the boot barrier the harness already waits on).
+
 ## 8. Corrections the first implementation session made to the plan
 
 - **`known-legacy-bugs.md` #29 and #30** are new, both found by the harness: the mapper client's rAF

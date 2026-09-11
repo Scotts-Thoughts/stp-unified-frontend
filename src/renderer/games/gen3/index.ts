@@ -1,8 +1,8 @@
 import type { GameModule } from "~/core/game/GameModule";
+import { moduleBase } from "~/core/game/ModuleManifest";
+import { gen3Manifest } from "./manifest";
 import { autosplitter } from "./data/autosplitter.js";
 import { gen3ControlRoutes } from "./control";
-import { emeraldNe } from "./mappers/emerald-ne";
-import { fireRedLeafGreenNe } from "./mappers/firered-leafgreen-ne";
 import Overlay from "./Overlay.vue";
 import { loadGen3StyleDefaults } from "./storage";
 
@@ -23,14 +23,7 @@ import { loadGen3StyleDefaults } from "./storage";
  * mapper (`docs/mapper-matrix.md`), so they are not an edition.
  */
 export const gen3: GameModule = {
-    id: "gen3",
-    generation: 3,
-    mappers: [emeraldNe, fireRedLeafGreenNe],
-    games: ["Emerald", "FireRed and LeafGreen"],
-    editions: [
-        { name: "Emerald", game: "Emerald", boxArt: "3-emerald.png", splitFolder: "Emerald", splitPrefix: "", icon: "gen3/icon-emerald.ico" },
-        { name: "FireRed and LeafGreen", game: "FireRed and LeafGreen", boxArt: "3-firered.png", splitFolder: "FireRed and LeafGreen", splitPrefix: "", icon: "gen3/icon-firered.ico" },
-    ],
+    ...moduleBase(gen3Manifest),
     features: {
         abilities: true,
         natures: true,

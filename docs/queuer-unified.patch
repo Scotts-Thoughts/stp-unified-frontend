@@ -1,0 +1,38 @@
+--- a/main.js
++++ b/main.js
+@@ -26,8 +26,14 @@
+   gen3: { dir: "A:\\Programs\\gen3-stp-frontend", name: "stp-generation3-overlay" },
+   gen4: { dir: "A:\\Programs\\gen4-stp-frontend", name: "gen4-overlay-app" },
+   gen5: { dir: "A:\\Programs\\gen5-stp-frontend", name: "gen5-overlay-app" },
++  // The unified overlay (stp-unified-frontend) plays every generation: detectGenContext
++  // returns this key for every mapper, and the per-gen flags keep steering the call shapes.
++  unified: { dir: "A:\\Programs\\stp-unified-frontend", name: "stp-overlay" },
+ };
+ 
++// Set to false to launch the legacy per-generation overlays again.
++const USE_UNIFIED_FRONTEND = true;
++
+ const windowStatePath = () =>
+   path.join(app.getPath("userData"), "window-state.json");
+ 
+@@ -1073,6 +1079,8 @@
+   }
+ 
+   if (status && typeof status === "object") {
++    // The unified overlay names itself; its /status carries every generation's fields.
++    if (status.app === "stp-overlay") return "unified";
+     if ("bonk" in status || "repel_counter" in status || "hpType" in status) return "gen2";
+     if ("starterString" in status || "gameSelection" in status) return "gen3";
+     if ("right_ui" in status) {
+@@ -1330,7 +1338,10 @@
+     code === "bw" || code === "b2w2"
+   ));
+ 
+-  const genKey = isGen1 ? "gen1" : isGen2 ? "gen2" : isGen4 ? "gen4" : isGen5 ? "gen5" : "gen3";
++  const legacyGenKey = isGen1 ? "gen1" : isGen2 ? "gen2" : isGen4 ? "gen4" : isGen5 ? "gen5" : "gen3";
++  // One frontend for every generation: the launch config is the unified app's, while
++  // isGen1/2/4/5 keep selecting the per-generation call shapes below.
++  const genKey = USE_UNIFIED_FRONTEND ? "unified" : legacyGenKey;
+   const rightPanel = (isGen4 || isGen5) ? "Automatic" : "Battle Graphic";
+   return { isGen1, isGen2, isGen4, isGen5, genKey, rightPanel };
+ }

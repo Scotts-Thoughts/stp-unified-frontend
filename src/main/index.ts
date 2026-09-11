@@ -6,6 +6,7 @@ import fs from "fs";
 import { ControlServer } from "./control-server";
 import { registerIpc } from "./ipc";
 import { startKeyhook, stopKeyhook } from "./keyhook";
+import { importLegacyUserData } from "./importLegacy";
 
 /**
  * The one overlay window. The control server (port 30159) and the keyhook forwarder
@@ -47,7 +48,9 @@ function boundsOnScreen(bounds) {
 }
 
 function createWindow() {
-    const savedState = is.dev ? loadDevWindowState() : null
+    // The queuer pre-writes this file with the display it wants the overlay on (plan
+    // 3.5: honoured in dev as today and, additively, in a packaged build).
+    const savedState = loadDevWindowState()
     const useSaved = !!(savedState && boundsOnScreen(savedState.bounds))
 
     const windowOptions = {
@@ -112,14 +115,12 @@ function createWindow() {
         adjustWindowSize();
     }
 
-    if (is.dev) {
-        mainWindow.on('close', () => {
-            saveDevWindowState({
-                bounds: mainWindow.getNormalBounds(),
-                isFullScreen: mainWindow.isFullScreen(),
-            })
+    mainWindow.on('close', () => {
+        saveDevWindowState({
+            bounds: mainWindow.getNormalBounds(),
+            isFullScreen: mainWindow.isFullScreen(),
         })
-    }
+    })
 
     mainWindow.on('closed', () => {
         mainWindow = null;
@@ -173,6 +174,7 @@ app.whenReady().then(() => {
         // Set app user model id for windows
     electronApp.setAppUserModelId('com.electron');
 
+    importLegacyUserData();
     registerIpc(() => mainWindow);
     controlServer.start();
     startKeyhook(() => mainWindow);

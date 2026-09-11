@@ -40,7 +40,7 @@ export const useSpeciesMetricsStore = defineStore('species_metrics', {
 	},
 	actions: {
 		/**
-		 * Loads from `%APPDATA%/stp-generation1-overlay/data/${game}/${starter}/metrics.json`.
+		 * Loads from `%APPDATA%/stp-overlay/data/${game}/${starter}/metrics.json`.
 		 * When no file exists yet the counters are migrated from the old `Storage.json` file.
 		 */
 		async load(game: PokemonGame|null, starter: string|null) {
@@ -55,7 +55,7 @@ export const useSpeciesMetricsStore = defineStore('species_metrics', {
 			this.$patch((state) => { Object.assign(state, next); });
 			Timer.initialize(this);
 		},
-		/** Saves to `%APPDATA%/stp-generation1-overlay/data/${game}/${starter}/metrics.json` */
+		/** Saves to `%APPDATA%/stp-overlay/data/${game}/${starter}/metrics.json` */
 		async save(game: PokemonGame|null, starter: string|null) {
 			if (game && starter) {
 				await saveAppSettings<SpeciesMetrics>(dataPath(game, starter), METRICS_FILE_NAME, this.$state);

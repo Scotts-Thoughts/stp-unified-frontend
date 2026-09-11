@@ -11,7 +11,7 @@ const SETTINGS_FILE_NAME = "settings.json";
  * toggles, split labels) and the styling of the overlay (artwork position, background texture, UI colour).
  *
  * Everything in here is saved automatically by {@link useSettingsStore} whenever it changes, to
- * `%APPDATA%/stp-generation1-overlay/data/${game}/${starter}/settings.json`.
+ * `%APPDATA%/stp-overlay/data/${game}/${starter}/settings.json`.
  */
 export const useGameSpeciesData = defineStore("game_species_data", {
 	state: () => defaultGameSpeciesSettings(),

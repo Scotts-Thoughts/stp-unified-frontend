@@ -1,25 +1,31 @@
 {
-  "name": "stp-generation1-overlay",
-  "version": "1.5.0",
+  "name": "stp-overlay",
+  "version": "3.0.0",
   "description": "Scott's Thoughts Overlay.",
   "main": "./out/main/index.js",
   "build": {
     "electronLanguages": "en-US",
     "compression": "store",
-    "appId": "com.stp-generation1-overlay",
+    "appId": "com.scottsthoughts.stp-overlay",
+    "asar": false,
     "files": [
       "out/**",
-      "storage/**"
+      "!out/renderer/images/**"
     ],
     "extraResources": [
-      "storage/**"
+      "storage/**",
+      "resources/**",
+      {
+        "from": "src/renderer/public/images",
+        "to": "images"
+      }
     ],
-    "productName": "stp-generation1-overlay",
+    "productName": "stp-overlay",
     "linux": {
       "target": "AppImage"
     },
     "win": {
-      "executableName": "stp-generation1-overlay",
+      "executableName": "stp-overlay",
       "target": "zip",
       "icon": "./icon.png"
     },
@@ -27,6 +33,7 @@
   },
   "scripts": {
     "dev": "electron-vite dev",
+    "start": "electron .",
     "preview": "electron-vite preview",
     "typecheck": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
     "build": "electron-vite build",

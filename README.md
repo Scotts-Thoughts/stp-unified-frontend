@@ -1,49 +1,86 @@
-# How to develop
+# STP overlay (unified)
+
+One Electron app that plays the five Scott's Thoughts Pokémon overlays -- gen1 (Yellow, Red & Blue),
+gen2 (Crystal, Gold & Silver), gen3 (Emerald, FireRed & LeafGreen), gen4 (Platinum, Diamond & Pearl,
+HeartGold & SoulSilver) and gen5 (Black, White, Black 2, White 2) -- picking the generation from the
+mapper PokeAByte has loaded. The migration is documented in `docs/IMPLEMENTATION_PLAN.md`; the parts of
+it that are "why", not "what", are in the section headers of the source files themselves.
+
+## Run it
 
 1. `npm ci`
-2. `npm run dev`
+2. `npm run dev` -- the overlay opens and waits for PokeAByte (`http://localhost:8085`) to load a mapper.
+   Code changes apply to the running app.
+3. `npm run build` -- the packaged-shape build in `out/`; `npm run build:win` wraps it with electron-builder.
 
-The overlay should then open. You can make changes in the code and it will automatically apply to the running application.
+The recording queuer launches the app with `npm run dev` and drives it over `http://127.0.0.1:30159`
+(`docs/external-contracts.md` says exactly what it sends and expects; `docs/queuer-unified.patch` is the
+queuer-side change). Super Shuckie (`http://127.0.0.1:30158`) and OBS (`ws://localhost:4455`) are optional.
 
-## Code structure
+## How it is put together
 
-The source is split into 3 parts due to how electron applications work with vite (vite is the build system used).
+```
+src/main            Electron main process: the window, the control server (30159), the keyhook.exe
+                    forwarder, the file IPC (splits, user data, shipped defaults, dev-mode source writes)
+src/preload         the renderer's whole view of the main process (`window.api`)
+src/renderer
+  core/             what every generation shares: the mapper profile/adapter layer, the file-backed
+                    user state and layered style store, the OBS client, hotkeys, the control-server
+                    bridge, the fit-to-window scaling, the base stylesheet
+  games/genN/       one folder per generation: `manifest.ts` (what the shell knows before loading it:
+                    mapper profiles, editions), `index.ts` (the GameModule), the overlay, its data,
+                    stylesheet, storage rules, hotkeys, control routes, split-file writers
+  components/, stores/, logic/, autosplitter/, data/
+                    gen1's own code (the refactored generation; the others are lifted, see below)
+  public/images/    the image pool: gen1's files at the root, each other generation's tree under
+                    `images/genN/`
+  fonts/
+tools/parity        the parity harness: a mock PokeAByte, the replay runner, nine oracles
+tools/port          the port/lift tooling that produced games/gen2-5 from the legacy apps
+tools/assets        the image-pool manifest and merge
+tools/splits        the one-time consolidation of the legacy splits trees
+docs/               the plan, the external contracts, the harness, the per-generation mapper
+                    inventories, the known legacy bugs (preserved on purpose)
+```
 
-- `src/main`  contains the main electron process logic, which among other things is responsible for creating the browser window.
-- `src/preload` is for setting up communication between the main process and the "renderer" process.
-- `src/renderer` contains the UI code and all of the overlay logic.
+**gen1 is refactored code** (Vue SFCs, Pinia stores). **gen2-5 are lifted**: each `games/genN/Overlay.vue`
+is the legacy app's component object and template brought in verbatim with only the infrastructure
+swapped for `core/` (`tools/port/lift-genN.py` lists every seam). Decomposing them into the shared
+stores is later work, done with the harness as the net.
 
-Within `src/renderer`:
+Boot: the shell connects the one mapper client, `games/registry.ts` matches the loaded mapper to a
+generation's profile, the generation's module is imported on demand, its stylesheet is applied under
+`.gen-N`, and its overlay mounts. Unloading the mapper returns to the box-art game-select screen.
 
-- `autosplitter`  For autosplitter code and data.
-- `components`  contains the various vue components used to render the overlay.
-- `data` contains static data files (such as pokedex data or move information).
-- `logic` is for general purpose functions that are not specific to any one store or sub-system.
-- `methods`: obsolete*
-- `packages`: for external dependencies that have been pulled into the codebase.
-- `public`: For assets used in the UI. All the images go here.
-- `settings`: obsolete*
-- `stores`: For pinia stores. Stores allow data storage and manipulation accross component boundaries.
-- `utils`: For small utility functions such as formatting and simple calculations.
+## Adding or changing a game
 
-\*: Some more work is needed before they can be deleted.
+- A new mapper for an existing generation: add a `MapperProfile` under `games/genN/mappers/` (the path
+  patterns, the identity rule, the read and write tables) and list it in the generation's `manifest.ts`.
+- A new edition: an entry in the manifest's `editions` (name, mapper game, box art, split folder, icon).
+- Anything that changes what the overlay renders or writes: run the harness before and after.
 
-## Pinia stores
+## The parity harness
 
-The following stores deal with managing user settings and data collection:
+`docs/parity-harness.md` is the reference. The short version:
 
-- `useOverlaySettingsStore` holds general overlay settings that are not specific to one game or pokemon species.
-- `useGameSpeciesData` holds overlay settings relating to a game and pokemon species in that game. 
-- `useSpeciesMetricsStore` holds game and species specific metrics, such as number of resets, time played and so on.
-  It also is responsible for managing the `Timer`. 
-- `useBattleStore` collects statistics about trainer battles, such as length of battle, experience gained, turns used, ...
-- `useMetaStore` provides some general purpose high level information, such as the current starter, game state, enemy state
-  and current species.
-- `useSettingsStore` exists to manage the other stores, such as loading and saving their settings and ensuring that species
-  selection is communicated accross all relevant stores.
+```
+npm run parity:preflight                                   # who holds the ports
+npx tsx tools/parity/run.ts unified <fixture> --out=tools/reports/<name> --redirect-ports
+npx tsx tools/parity/run.ts legacy:gen3@37 <fixture> --out=tools/reports/<name> --redirect-ports
+npx tsx tools/parity/diff.ts tools/reports/<legacy> tools/reports/<unified>
+```
 
-All of these are written to `%APPDATA%/stp-generation1-overlay/data/` automatically whenever they change:
-`overlay_settings.json` for the overlay settings and `<game>/<species>/settings.json` plus `metrics.json` per species.
-The first time a species is loaded without such files, its styling preset and run counters are migrated from the old
-`storage/Storage.json` file (see `logic/legacyStorage.ts`), which is otherwise no longer written to.
+A fixture is a recording of PokeAByte's property stream (`tools/fixtures/`, made by the queuer's Capture
+Fixtures mode) or a synthetic one built from a mapper XML and a scenario (`tools/parity/make-fixture.ts`,
+`tools/parity/scenarios/`). The runner replays it into the app under a virtual clock and captures each
+checkpoint; the diff compares layout, pixels, split CSVs, persisted state, PokeAByte writes, OBS markers,
+Super Shuckie calls and console errors. `unified@<dir>` runs a built worktree of another commit with the
+same harness, which is how a refactor is shown not to change gen1.
 
+## Where the app keeps things
+
+- User state (what the legacy apps kept in `localStorage`): `%APPDATA%/stp-overlay/data/user_state.json`,
+  same key names.
+- gen1's per-species settings and metrics: `%APPDATA%/stp-overlay/data/<game>/<species>/`.
+- Shipped style defaults: `games/genN/data/style/<Game>_<Species>.json` (a dev-mode edit writes the file).
+- Split CSVs: `splits/` next to the app (the five legacy trees consolidated, every folder name kept).

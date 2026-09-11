@@ -1,10 +1,10 @@
 import type { GameModule } from "~/core/game/GameModule";
+import { moduleBase } from "~/core/game/ModuleManifest";
+import { gen2Manifest } from "./manifest";
 import { autosplitter } from "./data/autosplitter.js";
 import { split_trainers } from "./data/autosplitter/split_trainers.js";
 import { trainer_name_lookup } from "./data/autosplitter/trainer_name_lookup.js";
 import { gen2ControlRoutes } from "./control";
-import { crystalDeprecated } from "./mappers/crystal-deprecated";
-import { goldSilverDeprecated } from "./mappers/gold-silver-deprecated";
 import Overlay from "./Overlay.vue";
 import { loadGen2StyleDefaults } from "./storage";
 
@@ -23,14 +23,7 @@ import { loadGen2StyleDefaults } from "./storage";
  * split-folder rule and why the prefix letter is "c" for both today.
  */
 export const gen2: GameModule = {
-    id: "gen2",
-    generation: 2,
-    mappers: [crystalDeprecated, goldSilverDeprecated],
-    games: ["Crystal", "Gold and Silver"],
-    editions: [
-        { name: "Crystal", game: "Crystal", boxArt: "2-Crystal.png", splitFolder: "Crystal", splitPrefix: "c", icon: "crystal.ico" },
-        { name: "Gold & Silver", game: "Gold and Silver", boxArt: "2-GoldandSilver.png", splitFolder: "Gold & Silver", splitPrefix: "c", icon: "gold-silver.ico" },
-    ],
+    ...moduleBase(gen2Manifest),
     features: {
         badgeBoosts: true,
         expBar: true,
