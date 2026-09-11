@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Individual_Areas" data-name="Individual Areas" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="Neutral_Grade" data-name="Neutral Grade" x1="125" y1="340" x2="388" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#939598"/>
+      <stop offset=".17" stop-color="#a8aaac"/>
+      <stop offset=".35" stop-color="#b6b8bb"/>
+      <stop offset=".5" stop-color="#bcbec0"/>
+      <stop offset=".65" stop-color="#b6b8ba"/>
+      <stop offset=".83" stop-color="#a7a9ab"/>
+      <stop offset="1" stop-color="#939598"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".5"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Neutral_Grade-2" data-name="Neutral Grade" x1="124.5" x2="207.5" xlink:href="#Neutral_Grade"/>
+  </defs>
+  <g id="item_top" data-name="item top">
+    <rect id="Ability_Text_Area" data-name="Ability Text Area" x="125" y="325" width="263" height="30" rx="8" ry="8" style="fill: url(#Neutral_Grade); filter: url(#drop-shadow-1); stroke: #231f20; stroke-miterlimit: 10;"/>
+    <g id="Ability">
+      <rect x="124.5" y="324.5" width="83" height="31" rx="8.5" ry="8.5" style="fill: url(#Neutral_Grade-2); stroke-width: 0px;"/>
+      <path d="m199,325c4.42,0,8,3.58,8,8v14c0,4.42-3.58,8-8,8h-66c-4.42,0-8-3.58-8-8v-14c0-4.42,3.58-8,8-8h66m0-1h-66c-4.96,0-9,4.04-9,9v14c0,4.96,4.04,9,9,9h66c4.96,0,9-4.04,9-9v-14c0-4.96-4.04-9-9-9h0Z" style="fill: #231f20; stroke-width: 0px;"/>
+      <path d="m199,327c3.31,0,6,2.69,6,6v14c0,3.31-2.69,6-6,6h-66c-3.31,0-6-2.69-6-6v-14c0-3.31,2.69-6,6-6h66m0-2h-66c-4.42,0-8,3.58-8,8v14c0,4.42,3.58,8,8,8h66c4.42,0,8-3.58,8-8v-14c0-4.42-3.58-8-8-8h0Z" style="fill: #808285; stroke-width: 0px;"/>
+      <path d="m199,326c3.86,0,7,3.14,7,7v14c0,3.86-3.14,7-7,7h-66c-3.86,0-7-3.14-7-7v-14c0-3.86,3.14-7,7-7h66m0-1h-66c-4.42,0-8,3.58-8,8v14c0,4.42,3.58,8,8,8h66c4.42,0,8-3.58,8-8v-14c0-4.42-3.58-8-8-8h0Z" style="fill: #414042; stroke-width: 0px;"/>
+    </g>
+  </g>
+</svg>

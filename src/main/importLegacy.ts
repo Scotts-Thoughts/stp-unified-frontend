@@ -1,4 +1,4 @@
-import { cpSync, existsSync, readdirSync } from "node:fs";
+import { cpSync, existsSync, readdirSync, symlinkSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { app } from "electron";
 import { userDataRoot } from "./paths";
@@ -25,5 +25,24 @@ export function importLegacyUserData(): void {
         console.log(`[import] copied gen1's user data from ${legacy} to ${target}`);
     } catch (err) {
         console.error(`[import] could not copy gen1's user data from ${legacy}:`, err);
+    }
+}
+
+/**
+ * The image pool in a packaged build (plan 3.5 / Phase 4). The renderer addresses
+ * images relative to its document (`out/renderer/images/...`); in development that
+ * folder is a junction to `src/renderer/public/images` made by the build, and
+ * electron-builder ships the pool as `resources/images` instead (`extraResources`),
+ * so the packaged app makes the same junction once, on first launch.
+ */
+export function ensureImagePool(): void {
+    if (!app.isPackaged) return;
+    const link = join(app.getAppPath(), "out", "renderer", "images");
+    const pool = join(process.resourcesPath, "images");
+    if (existsSync(link) || !existsSync(pool)) return;
+    try {
+        symlinkSync(pool, link, "junction");
+    } catch (err) {
+        console.error(`[images] could not junction ${link} -> ${pool}:`, err);
     }
 }

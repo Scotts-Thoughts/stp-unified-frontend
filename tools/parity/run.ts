@@ -417,6 +417,13 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
     },
     timeout: 60000,
   });
+  // The main process's own output, for the launch that never shows a window.
+  app.process().stdout?.on("data", (d: Buffer) => log(`[app] ${String(d).trimEnd()}`));
+  app.process().stderr?.on("data", (d: Buffer) => {
+    const text = String(d).trimEnd();
+    // Chromium's INFO:CONSOLE lines duplicate what page.on("console") already records.
+    if (!/INFO:CONSOLE/.test(text)) log(`[app] ${text}`);
+  });
 
   const page = await app.firstWindow({ timeout: 60000 });
   // 1920x1080 content at zoom 1 is the parity claim; a display that cannot fit it

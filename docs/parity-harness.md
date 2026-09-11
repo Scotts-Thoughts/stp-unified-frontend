@@ -338,6 +338,21 @@ first background canvas -- the legacy wrapper, or the lifted component's root, w
 the overlay component as a direct child of `#app` with no wrapper of its own. The root element itself is
 keyed `""` and its rect is compared, so a shell that moved the overlay would still show.
 
+### Where a run's images come from
+
+Since Phase 4 the image pool is `src/renderer/public/images/` -- gen1's files at the root, each other generation's
+tree under `images/genN/` -- and a build junctions `out/renderer/images` to it (no copy: `copyPublicDir` is off).
+Before that, the runner junctioned `out/renderer/images/genN` to the legacy apps' trees; `junctionLegacyImages`
+still does so for a `unified@<dir>` worktree of a commit older than the pool, and finds the folders present
+otherwise. Either way the renderer reads the same bytes over the same `file://` transport.
+
+`resources/keyhook.exe` is copied into the sandbox for every run; when something outside git has quarantined it
+(it happens on this machine), the sandbox logs that and the run proceeds without hotkeys -- no oracle presses a
+key. The same scanner held the app's synchronous spawn of a freshly restored `keyhook.exe` for over a minute,
+which showed up as Playwright's 60 s `firstWindow` timeout with the main process alive and no window: the app
+now creates its window before it spawns the hook (`src/main/index.ts`), and the run log carries the main
+process's own output (`[app] ...`) so a launch that fails says why.
+
 ### `unified@<dir>`: the no-change check against the previous commit
 
 A refactor is proven not to change a generation by capturing the baseline from the commit before it with

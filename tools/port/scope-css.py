@@ -1,7 +1,7 @@
 """
 Scope a legacy stylesheet under `.gen-N` (plan 2.5; the tool Phase 1.5 did by hand).
 
-    python tools/port/scope-css.py <legacy style.css> <out style.css> <gen-class> [--fonts=../../fonts] [--asset-gen=gen2]
+    python tools/port/scope-css.py <legacy style.css> <out style.css> <gen-class> [--fonts=../../fonts] [--asset-gen=gen2] [--font-rename=a.ttf=b.ttf,...]
 
 Rules, in the plan's order -- port verbatim, verify, never edit a value:
 
@@ -110,7 +110,16 @@ def dead_font_face(body: str, src_text: str, legacy_dir) -> bool:
     return len(uses) <= 1
 
 
-def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = "", legacy_dir=None):
+def rename_fonts(body: str, fonts: str, font_renames: dict) -> str:
+    """`--font-rename=a.ttf=b.ttf`: the pool keeps one copy of each distinct font file (plan
+    4.5), so a generation whose `OpenSans-ExtraBold.ttf` is not gen1's points at the
+    file under its distinguishing name."""
+    for old, new in font_renames.items():
+        body = body.replace(f"url({fonts}/{old})", f"url({fonts}/{new})")
+    return body
+
+
+def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = "", legacy_dir=None, font_renames: dict | None = None):
     blocks, tail = parse(src_text)
     out = []
     dropped = []
@@ -122,7 +131,7 @@ def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = "", legacy
             dropped.append((sel, body))
             continue
         if sel.startswith("@font-face") or sel.startswith("@keyframes") or sel.startswith("@-webkit-keyframes"):
-            body2 = body.replace("url(fonts/", f"url({fonts}/")
+            body2 = rename_fonts(body.replace("url(fonts/", f"url({fonts}/"), fonts, font_renames or {})
             out.append(head + f"{sel} {{{body2}}}")
             continue
         if sel.startswith("@"):
@@ -186,11 +195,13 @@ def unscope(sel: str, gen_class: str) -> str:
     return ",\n".join(res)
 
 
-def verify(src_text: str, out_text: str, gen_class: str, fonts: str, dropped, asset_gen: str = ""):
+def verify(src_text: str, out_text: str, gen_class: str, fonts: str, dropped, asset_gen: str = "", font_renames: dict | None = None):
     src_blocks, _ = parse(src_text)
     out_blocks, _ = parse(out_text)
     src_rules = [(selector_of(p), b) for p, b in src_blocks]
     def unbase(b):
+        for old, new in (font_renames or {}).items():
+            b = b.replace(f"url({fonts}/{new})", f"url({fonts}/{old})")
         b = b.replace(f"url({fonts}/", "url(fonts/")
         return b.replace(f"url(images/{asset_gen}/", "url(images/") if asset_gen else b
     out_rules = [(unscope(selector_of(p), gen_class), unbase(b), "the non-custom-property half of :root" in p) for p, b in out_blocks]
@@ -225,20 +236,21 @@ def main():
     src_path, out_path, gen_class = args
     fonts = opts.get("fonts", "../../fonts")
     asset_gen = opts.get("asset-gen", "")
+    font_renames = dict(pair.split("=", 1) for pair in opts.get("font-rename", "").split(",") if pair)
     src_text = Path(src_path).read_text(encoding="utf-8")
-    out, dropped, tail = scope(src_text, gen_class, fonts, asset_gen, legacy_dir=Path(src_path).parent)
+    out, dropped, tail = scope(src_text, gen_class, fonts, asset_gen, legacy_dir=Path(src_path).parent, font_renames=font_renames)
     header = f"""/**
  * Scoped under `.{gen_class}` by tools/port/scope-css.py from {Path(src_path).as_posix()}
  * (plan 2.5). Values untouched; selectors prefixed; `:root` -> `.{gen_class}`;
  * `#app-container` -> `.{gen_class}#app-container`; `html`/`body` -> `:has(.{gen_class})`
  * variants; `*` dropped because core/styles/base.css carries the reset; a `@font-face` for a file the legacy app
- * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `{fonts}/`;
+ * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `{fonts}/`{" (" + ", ".join(f"{a} -> {b}" for a, b in font_renames.items()) + ")" if font_renames else ""};
  * `url(images/...)` -> `url(images/{asset_gen}/...)` (tools/port/lift_assets.py).
  * Do not edit by hand -- re-run the tool.
  */
 """
     out_text = header + "\n\n".join(out) + ("\n" + tail.strip() if tail.strip() else "") + "\n"
-    n = verify(src_text, out_text, gen_class, fonts, dropped, asset_gen)
+    n = verify(src_text, out_text, gen_class, fonts, dropped, asset_gen, font_renames)
     Path(out_path).write_text(out_text, encoding="utf-8")
     print(f"{n} rules scoped -> {out_path}")
     for sel, body in dropped:

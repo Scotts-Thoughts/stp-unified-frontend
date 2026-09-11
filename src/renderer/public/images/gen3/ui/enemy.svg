@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Individual_Areas" data-name="Individual Areas" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="1569" y1="985" x2="1911" y2="985" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="-1"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".4"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-2" y1="818" y2="818" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-2" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="-1"/>
+      <feGaussianBlur result="blur-2" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".4"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-3" y1="650" y2="650" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-3" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="-1"/>
+      <feGaussianBlur result="blur-3" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".4"/>
+      <feComposite in2="blur-3" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-4" y1="483" y2="483" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-4" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="-1"/>
+      <feGaussianBlur result="blur-4" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".4"/>
+      <feComposite in2="blur-4" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-5" y1="316" y2="316" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-5" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="-1"/>
+      <feGaussianBlur result="blur-5" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".4"/>
+      <feComposite in2="blur-5" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-6" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur result="blur-6" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".9"/>
+      <feComposite in2="blur-6" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-6" y1="149" y2="149" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-7" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="-1"/>
+      <feGaussianBlur result="blur-7" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".4"/>
+      <feComposite in2="blur-7" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-7" y1="41" y2="41" xlink:href="#linear-gradient"/>
+  </defs>
+  <g id="Main_Elements" data-name="Main Elements">
+    <g id="Enemy">
+      <g id="slot2_ui_6" data-name="slot2 ui 6">
+        <g id="_pkmn1moves_" data-name="&amp;lt;pkmn1moves&amp;gt;">
+          <g>
+            <rect x="1569" y="906" width="342" height="158" rx="6" ry="6" style="fill: url(#linear-gradient); stroke-width: 0px;"/>
+            <path d="m1905,908c2.21,0,4,1.79,4,4v146c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.79-4-4v-146c0-2.21,1.79-4,4-4h330m0-4h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: gray; stroke-width: 0px;"/>
+            <path d="m1905,906c3.31,0,6,2.69,6,6v146c0,3.31-2.69,6-6,6h-330c-3.31,0-6-2.69-6-6v-146c0-3.31,2.69-6,6-6h330m0-2h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+            <path d="m1905,904c4.42,0,8,3.58,8,8v146c0,4.42-3.58,8-8,8h-330c-4.42,0-8-3.58-8-8v-146c0-4.42,3.58-8,8-8h330m0-1h-330c-4.96,0-9,4.04-9,9v146c0,4.96,4.04,9,9,9h330c4.96,0,9-4.04,9-9v-146c0-4.96-4.04-9-9-9h0Z" style="stroke-width: 0px;"/>
+          </g>
+          <path id="Slot6_Highlight" data-name="Slot6 Highlight" d="m1571,1040.82l11.5,12.18h326.5v5c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.9-4-4.24h0v-16.94Z" style="fill: #939598; filter: url(#drop-shadow-1); opacity: .4; stroke-width: 0px;"/>
+        </g>
+      </g>
+      <g id="slot2_ui_5" data-name="slot2 ui 5">
+        <g id="_pkmn1moves_-2" data-name="&amp;lt;pkmn1moves&amp;gt;">
+          <g>
+            <rect x="1569" y="739" width="342" height="158" rx="6" ry="6" style="fill: url(#linear-gradient-2); stroke-width: 0px;"/>
+            <path d="m1905,741c2.21,0,4,1.79,4,4v146c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.79-4-4v-146c0-2.21,1.79-4,4-4h330m0-4h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: gray; stroke-width: 0px;"/>
+            <path d="m1905,739c3.31,0,6,2.69,6,6v146c0,3.31-2.69,6-6,6h-330c-3.31,0-6-2.69-6-6v-146c0-3.31,2.69-6,6-6h330m0-2h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+            <path d="m1905,737c4.42,0,8,3.58,8,8v146c0,4.42-3.58,8-8,8h-330c-4.42,0-8-3.58-8-8v-146c0-4.42,3.58-8,8-8h330m0-1h-330c-4.96,0-9,4.04-9,9v146c0,4.96,4.04,9,9,9h330c4.96,0,9-4.04,9-9v-146c0-4.96-4.04-9-9-9h0Z" style="stroke-width: 0px;"/>
+          </g>
+          <path id="Slot5_Highlight" data-name="Slot5 Highlight" d="m1571,873.82l11.5,12.18h326.5v5c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.9-4-4.24h0v-16.94Z" style="fill: #939598; filter: url(#drop-shadow-2); opacity: .4; stroke-width: 0px;"/>
+        </g>
+      </g>
+      <g id="slot2_ui_4" data-name="slot2 ui 4">
+        <g id="_pkmn1moves_-3" data-name="&amp;lt;pkmn1moves&amp;gt;">
+          <g>
+            <rect x="1569" y="571" width="342" height="158" rx="6" ry="6" style="fill: url(#linear-gradient-3); stroke-width: 0px;"/>
+            <path d="m1905,573c2.21,0,4,1.79,4,4v146c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.79-4-4v-146c0-2.21,1.79-4,4-4h330m0-4h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: gray; stroke-width: 0px;"/>
+            <path d="m1905,571c3.31,0,6,2.69,6,6v146c0,3.31-2.69,6-6,6h-330c-3.31,0-6-2.69-6-6v-146c0-3.31,2.69-6,6-6h330m0-2h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+            <path d="m1905,569c4.42,0,8,3.58,8,8v146c0,4.42-3.58,8-8,8h-330c-4.42,0-8-3.58-8-8v-146c0-4.42,3.58-8,8-8h330m0-1h-330c-4.96,0-9,4.04-9,9v146c0,4.96,4.04,9,9,9h330c4.96,0,9-4.04,9-9v-146c0-4.96-4.04-9-9-9h0Z" style="stroke-width: 0px;"/>
+          </g>
+          <path id="Slot4_Highlight" data-name="Slot4 Highlight" d="m1571,705.82l11.5,12.18h326.5v5c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.9-4-4.24h0v-16.94Z" style="fill: #939598; filter: url(#drop-shadow-3); opacity: .4; stroke-width: 0px;"/>
+        </g>
+      </g>
+      <g id="slot2_ui_3" data-name="slot2 ui 3">
+        <g id="_pkmn1moves_-4" data-name="&amp;lt;pkmn1moves&amp;gt;">
+          <g>
+            <rect x="1569" y="404" width="342" height="158" rx="6" ry="6" style="fill: url(#linear-gradient-4); stroke-width: 0px;"/>
+            <path d="m1905,406c2.21,0,4,1.79,4,4v146c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.79-4-4v-146c0-2.21,1.79-4,4-4h330m0-4h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: gray; stroke-width: 0px;"/>
+            <path d="m1905,404c3.31,0,6,2.69,6,6v146c0,3.31-2.69,6-6,6h-330c-3.31,0-6-2.69-6-6v-146c0-3.31,2.69-6,6-6h330m0-2h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+            <path d="m1905,402c4.42,0,8,3.58,8,8v146c0,4.42-3.58,8-8,8h-330c-4.42,0-8-3.58-8-8v-146c0-4.42,3.58-8,8-8h330m0-1h-330c-4.96,0-9,4.04-9,9v146c0,4.96,4.04,9,9,9h330c4.96,0,9-4.04,9-9v-146c0-4.96-4.04-9-9-9h0Z" style="stroke-width: 0px;"/>
+          </g>
+          <path id="Slot3_Highlight" data-name="Slot3 Highlight" d="m1571,538.82l11.5,12.18h326.5v5c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.9-4-4.24h0v-16.94Z" style="fill: #939598; filter: url(#drop-shadow-4); opacity: .4; stroke-width: 0px;"/>
+        </g>
+      </g>
+      <g id="slot2_ui_2" data-name="slot2 ui 2">
+        <g id="_pkmn1moves_-5" data-name="&amp;lt;pkmn1moves&amp;gt;">
+          <g>
+            <rect x="1569" y="237" width="342" height="158" rx="6" ry="6" style="fill: url(#linear-gradient-5); stroke-width: 0px;"/>
+            <path d="m1905,239c2.21,0,4,1.79,4,4v146c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.79-4-4v-146c0-2.21,1.79-4,4-4h330m0-4h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: gray; stroke-width: 0px;"/>
+            <path d="m1905,237c3.31,0,6,2.69,6,6v146c0,3.31-2.69,6-6,6h-330c-3.31,0-6-2.69-6-6v-146c0-3.31,2.69-6,6-6h330m0-2h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8v-146c0-4.42-3.58-8-8-8h0Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+            <path d="m1905,235c4.42,0,8,3.58,8,8v146c0,4.42-3.58,8-8,8h-330c-4.42,0-8-3.58-8-8v-146c0-4.42,3.58-8,8-8h330m0-1h-330c-4.96,0-9,4.04-9,9v146c0,4.96,4.04,9,9,9h330c4.96,0,9-4.04,9-9v-146c0-4.96-4.04-9-9-9h0Z" style="stroke-width: 0px;"/>
+          </g>
+          <path id="Slot2_Highlight" data-name="Slot2 Highlight" d="m1571,371.82l11.5,12.18h326.5v5c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.9-4-4.24h0v-16.94Z" style="fill: #939598; filter: url(#drop-shadow-5); opacity: .4; stroke-width: 0px;"/>
+        </g>
+      </g>
+      <g id="slot1_ui_1" data-name="slot1 ui 1">
+        <g id="_pkmn1moves_-6" data-name="&amp;lt;pkmn1moves&amp;gt;" style="filter: url(#drop-shadow-6);">
+          <g>
+            <rect x="1569" y="70" width="342" height="158" rx="6" ry="6" style="fill: url(#linear-gradient-6); stroke-width: 0px;"/>
+            <path d="m1905,72c2.21,0,4,1.79,4,4v146c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.79-4-4V76c0-2.21,1.79-4,4-4h330m0-4h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8V76c0-4.42-3.58-8-8-8h0Z" style="fill: gray; stroke-width: 0px;"/>
+            <path d="m1905,70c3.31,0,6,2.69,6,6v146c0,3.31-2.69,6-6,6h-330c-3.31,0-6-2.69-6-6V76c0-3.31,2.69-6,6-6h330m0-2h-330c-4.42,0-8,3.58-8,8v146c0,4.42,3.58,8,8,8h330c4.42,0,8-3.58,8-8V76c0-4.42-3.58-8-8-8h0Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+            <path d="m1905,68c4.42,0,8,3.58,8,8v146c0,4.42-3.58,8-8,8h-330c-4.42,0-8-3.58-8-8V76c0-4.42,3.58-8,8-8h330m0-1h-330c-4.96,0-9,4.04-9,9v146c0,4.96,4.04,9,9,9h330c4.96,0,9-4.04,9-9V76c0-4.96-4.04-9-9-9h0Z" style="stroke-width: 0px;"/>
+          </g>
+          <path id="Slot1_Highlight" data-name="Slot1 Highlight" d="m1571,204.82l11.5,12.18h326.5v5c0,2.21-1.79,4-4,4h-330c-2.21,0-4-1.9-4-4.24h0v-16.94Z" style="fill: #939598; filter: url(#drop-shadow-7); opacity: .4; stroke-width: 0px;"/>
+        </g>
+      </g>
+      <g id="Slot1">
+        <path d="m1575,61c-3.31,0-6-2.71-6-6.05v-13.63c0-1.58.6-3.07,1.68-4.2l12.49-14.34c1.06-1.11,2.64-1.78,4.25-1.78h317.57c3.31,0,6,2.71,6,6.05v27.9c0,3.34-2.69,6.05-6,6.05h-330Z" style="fill: url(#linear-gradient-7); opacity: .95; stroke-width: 0px;"/>
+        <path d="m1905,23c2.21,0,4,1.82,4,4.05v27.9c0,2.23-1.79,4.05-4,4.05h-330c-2.21,0-4-1.82-4-4.05v-13.63c0-1.06.4-2.06,1.13-2.82l.06-.07.06-.07,12.36-14.19c.75-.75,1.77-1.18,2.82-1.18h317.57m0-4h-317.57c-2.17,0-4.25.89-5.76,2.47l-12.43,14.27c-1.44,1.5-2.24,3.5-2.24,5.59v13.63c0,4.45,3.58,8.05,8,8.05h330c4.42,0,8-3.6,8-8.05v-27.9c0-4.45-3.58-8.05-8-8.05h0Z" style="fill: gray; stroke-width: 0px;"/>
+        <path d="m1905,21c3.31,0,6,2.71,6,6.05v27.9c0,3.34-2.69,6.05-6,6.05h-330c-3.31,0-6-2.71-6-6.05v-13.63c0-1.58.6-3.07,1.68-4.2l.03-.03.03-.04,12.4-14.23c1.12-1.16,2.68-1.82,4.29-1.82h317.57m0-2h-317.57c-2.17,0-4.25.89-5.76,2.47l-12.43,14.27c-1.44,1.5-2.24,3.5-2.24,5.59v13.63c0,4.45,3.58,8.05,8,8.05h330c4.42,0,8-3.6,8-8.05v-27.9c0-4.45-3.58-8.05-8-8.05h0Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+        <path d="m1905,19c4.42,0,8,3.6,8,8.05v27.9c0,4.45-3.58,8.05-8,8.05h-330c-4.42,0-8-3.6-8-8.05v-13.63c0-2.08.8-4.09,2.24-5.59l12.43-14.27c1.51-1.58,3.59-2.47,5.76-2.47h317.57m0-1h-317.57c-2.43,0-4.8,1.01-6.48,2.78l-12.46,14.3c-1.59,1.66-2.48,3.89-2.48,6.24v13.63c0,4.99,4.04,9.05,9,9.05h330c4.96,0,9-4.06,9-9.05v-27.9c0-4.99-4.04-9.05-9-9.05h0Z" style="stroke-width: 0px;"/>
+      </g>
+    </g>
+  </g>
+</svg>

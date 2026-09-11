@@ -3,7 +3,7 @@
  * (plan 2.5). Values untouched; selectors prefixed; `:root` -> `.gen-5`;
  * `#app-container` -> `.gen-5#app-container`; `html`/`body` -> `:has(.gen-5)`
  * variants; `*` dropped because core/styles/base.css carries the reset; a `@font-face` for a file the legacy app
- * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `../../fonts/gen45/`;
+ * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `../../fonts/` (OpenSans-ExtraBold.ttf -> OpenSans-ExtraBold-gen345.ttf);
  * `url(images/...)` -> `url(images/gen5/...)` (tools/port/lift_assets.py).
  * Do not edit by hand -- re-run the tool.
  */
@@ -440,7 +440,7 @@ body:has(.gen-5) {
 
 /* TIMER/RESETS */
 @font-face {
-    src: url(../../fonts/gen45/OpenSans-ExtraBold.ttf);
+    src: url(../../fonts/OpenSans-ExtraBold-gen345.ttf);
     font-family: oseb;
 }
 
@@ -451,12 +451,12 @@ body:has(.gen-5) {
 /* TITLES FONT */
 /* replace font to change - leave label */
 @font-face {
-    src: url(../../fonts/gen45/TitanOne-Regular.ttf);
+    src: url(../../fonts/TitanOne-Regular.ttf);
     font-family: titan;
 }
 
 @font-face { /* replace font to change - leave label */
-    src: url(../../fonts/gen45/Play-Bold.ttf);
+    src: url(../../fonts/Play-Bold.ttf);
     font-family: play;
 }
 

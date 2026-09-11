@@ -64,12 +64,14 @@ const LEGACY_APP_NAMES: Record<Generation, string> = {
 };
 
 /**
- * Where a lifted module's `images/genN/...` resolves during a run of the unified app:
- * a junction from the built renderer's `images/genN` to the legacy app's image tree,
- * read-only, so the template finds the same bytes the legacy app rendered, over the
- * same file:// transport (tools/port/lift_assets.py says why the transport matters).
- * Phase 4 replaces the junctions with the merged pool; a build empties `out/`, so
- * they are re-made for every run.
+ * Where a lifted module's `images/genN/...` resolved before the image pool (plan
+ * Phase 4): a junction from the built renderer's `images/genN` to the legacy app's
+ * image tree, read-only, so the template found the same bytes the legacy app
+ * rendered over the same file:// transport (tools/port/lift_assets.py says why the
+ * transport matters). Since Phase 4 the pool under `src/renderer/public/images/genN`
+ * holds those bytes and a build junctions `out/renderer/images` to it, so this finds
+ * the folders present and does nothing. It still serves a `unified@<dir>` worktree
+ * of a commit older than the pool, whose `out/` lacks them.
  */
 export function junctionLegacyImages(appRoot: string, log: (m: string) => void): void {
   const images = join(appRoot, "out", "renderer", "images");
@@ -178,9 +180,19 @@ export function prepareSandbox(target: Target, opts: SandboxOptions = {}): strin
 
   // Every app spawns keyhook.exe from its cwd; without it hotkeys are silently off
   // (known-legacy-bugs.md #23), which is a behaviour difference the oracles would see.
+  // Something outside git (an antivirus, by the look of it) quarantines the exe from
+  // the working tree now and then, and once failed the copy mid-run with EUNKNOWN;
+  // a run without hotkeys is still a run (no oracle presses a key), so this logs and
+  // goes on. `git checkout -- resources/keyhook.exe` brings the file back.
   const keyhook = join(REPO, "resources", "keyhook.exe");
   if (existsSync(keyhook) && !existsSync(join(target.cwd, "keyhook.exe"))) {
-    cpSync(keyhook, join(target.cwd, "keyhook.exe"));
+    try {
+      cpSync(keyhook, join(target.cwd, "keyhook.exe"));
+    } catch (err) {
+      log(`[sandbox] keyhook.exe not copied (${(err as Error).message}); the run has no hotkeys`);
+    }
+  } else if (!existsSync(keyhook)) {
+    log("[sandbox] resources/keyhook.exe is missing from the working tree (git checkout -- resources/keyhook.exe); the run has no hotkeys");
   }
 
   if (target.kind === "unified") junctionLegacyImages(target.appArg, log);

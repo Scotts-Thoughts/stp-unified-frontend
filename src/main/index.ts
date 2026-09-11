@@ -6,7 +6,7 @@ import fs from "fs";
 import { ControlServer } from "./control-server";
 import { registerIpc } from "./ipc";
 import { startKeyhook, stopKeyhook } from "./keyhook";
-import { importLegacyUserData } from "./importLegacy";
+import { ensureImagePool, importLegacyUserData } from "./importLegacy";
 
 /**
  * The one overlay window. The control server (port 30159) and the keyhook forwarder
@@ -175,9 +175,9 @@ app.whenReady().then(() => {
     electronApp.setAppUserModelId('com.electron');
 
     importLegacyUserData();
+    ensureImagePool();
     registerIpc(() => mainWindow);
     controlServer.start();
-    startKeyhook(() => mainWindow);
 
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
@@ -187,6 +187,11 @@ app.whenReady().then(() => {
         window._userData = app.getPath('userData');
     });
     createWindow();
+    // After the window: spawning keyhook.exe is a synchronous CreateProcess, and the
+    // antivirus on this machine has held that call for over a minute while it scanned
+    // a freshly restored copy of the exe (the parity harness then saw no window at all).
+    // The forwarder looks the window up per key event, so nothing needs it earlier.
+    startKeyhook(() => mainWindow);
 })
 
 app.on('will-quit', () => {

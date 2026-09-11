@@ -897,6 +897,51 @@ The `localStorage` (LevelDB) half of the 2.6 importer is still to come.
 Verified after the wiring: every generation's parity run and the gen1 no-change check, unchanged (the lazy import is
 one more awaited step inside the boot barrier the harness already waits on).
 
+## 7e. Phase 4 status (asset merge)
+
+Status as of 2026-09-11, night. `tools/assets/merge.ts --report` measured the five trees and `--apply` built the pool.
+
+| step | status |
+|---|---|
+| 4.1 manifest + size report | ✅ `tools/assets/manifest.json` (6,633 entries): gen1 919 files / 492 MB, gen2 685 / 511, gen3 1,186 / 1,083, gen4 969 / 676, gen5 4,384 / 712 -- **3,473 MB across the trees, 1,842 MB distinct bytes (6,164 distinct files), 1,631 MB byte-identical repetition**. The survey's "21 same-name/different-bytes pairs" undercounted by a lot: 655 relPaths carry different bytes in different trees, and there are 27 case-only name collisions. |
+| 4.2 copy rules | ✅ with one adjustment the lifted components force, below: gen1's files stay at `images/<relPath>`, and each other generation's whole tree sits under `images/genN/<relPath>` -- the same URL space the lifts already used, real files now instead of junctions to the legacy trees. Nothing renamed, nothing deleted (decision 13 keeps gen5's inventory sprites). The pool is `src/renderer/public/images/`; a build no longer copies it (`copyPublicDir: false`, 3.5 GB would turn a 10 s build into minutes) but junctions `out/renderer/images` to it (`electron.vite.config.js`), the dev server serves it as `public/`, and a packaged build ships it as `resources/images` with the main process making the same junction on first launch. |
+| 4.3 texture registry | ⏸ deferred to the decomposition of the lifted components: their texture tables (`games/genN/data/textures.js`) are the per-gen vocabularies the plan describes, and the code that reads them is the verbatim legacy code; a generated registry would have no consumer until that code is refactored (the 2.4 refactor proper). |
+| 4.4 sprite resolver | ⏸ deferred for the same reason. The lifted components build image URLs from template strings (`images/gen5/pokemon/${species}.png`); a per-file rename or alias cannot be applied through a dynamic URL, which is exactly why the generation tier stays a real folder. The resolver's three tiers (game, generation, shared) are the layout the pool already has; the resolver itself arrives with the code that will call it. |
+| 4.5 fonts | ✅ one `src/renderer/fonts/` with one copy of each distinct file (10 files for 17 references): gen2's four are gen1's bytes; gen3/4/5's `OpenSans-ExtraBold.ttf` is a different file from gen1/2's and is `OpenSans-ExtraBold-gen345.ttf` (`scope-css.py --font-rename`); gen3's `LeagueGothic`, `OpenSans-Bold` and `OpenSans-Regular` are its own. Every `@font-face` name per generation is unchanged. Vite already deduplicated identical fonts by content hash at build time, so this is source hygiene, verified pixel-identical. |
+| 4.6 inventory sprites | ✅ in the pool (3,441 files under `images/gen5/inventory_sprites/`). |
+| 4.7 outcome | the repo stores **1.84 GB** of image blobs for a 3.47 GB working tree (git keeps one object per distinct content, whatever the path); the working tree carries the repetition. Below the 2 GB the plan expected, without deleting anything: the dead folders the plan counted on removing are not separable from live ones without the reference analysis the decomposition will give. |
+
+Why the pool is tiered rather than flat: the plan's flat pool with `-genN` suffixes and aliases was written for
+refactored code addressing images through a resolver. The lifted components (Phase 2) address them with the legacy
+template-string URLs, so the only layout that keeps every generation's look byte-for-byte is one folder per
+generation -- which is the resolver's "generation tier" anyway. Same-name/different-bytes files (655 of them, mostly
+per-generation sprite art of the same species) never meet on disk, and the case-only collisions (27) never share a
+folder. Git deduplicates the identical 1.6 GB by content, which is what the size target was about.
+
+Also done on the way: the main process creates its window before it spawns `keyhook.exe`. The antivirus on this
+machine quarantines that exe from the working tree, fails the sandbox's copy of it, and -- the one that cost the
+most -- holds the synchronous spawn of a freshly restored copy for over a minute, which the harness saw as three
+consecutive "no window in 60 s" launches with the main process alive. With the window first the hook can take as
+long as it likes; the run log now carries the main process's own output so the next such launch says why.
+
+Verified after the merge: every generation's parity run and the gen1 no-change check, unchanged -- the lifted
+templates read the same bytes from the pool that they read through the junctions.
+
+## 7f. Phase 5 status (cleanup, performance, docs)
+
+| step | status |
+|---|---|
+| 5.1 performance | ✅ generation modules are lazy (plan 3.1; the entry bundle carries gen1 and core, the other four load on detection as their own chunks, data tables included). The rest of 5.1 -- deep watchers, fixed `<img>` sizes, `will-change` -- is gen1-refactor work and lifted-component work that the harness would have to re-verify per change; none of it is a measured problem today, so it is not done blind. |
+| 5.2 style defaults | ✅ since Phase 2.2: per-species JSON, dev-mode writes to the file, packaged builds write user overrides (decision 10). |
+| 5.3 README | ✅ rewritten for the unified layout: structure, how to add a game, the harness, where the app keeps things. |
+| 5.4 final parity run | ✅ every generation on its fixture after Phase 4 (this section's verification); manifest and size report in 4.1. `tools/sandbox/` copies are runtime artefacts (gitignored) and are left for the next harness run rather than deleted -- deleting them only makes the next run re-copy the legacy trees. |
+
+What remains open across the plan, all outside what this session could close: the `localStorage` (LevelDB) half of
+the 2.6 importer and gen2's backport importer stub (decision 15); oracle 6's control-script sessions (port 30159);
+real fixture recordings for gen1/3/4/5 (decision 6); the queuer patch to apply and dry-run (3.6); a packaged build
+to produce and try (3.5); and the decomposition of the four lifted components into the shared stores (the 2.4
+refactor proper), which is where 4.3 and 4.4 resume.
+
 ## 8. Corrections the first implementation session made to the plan
 
 - **`known-legacy-bugs.md` #29 and #30** are new, both found by the harness: the mapper client's rAF
