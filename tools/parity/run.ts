@@ -37,7 +37,7 @@ import { MockPokeAByte } from "./mock-pokeabyte/server.ts";
 import { ObsStub } from "./mock-pokeabyte/obs-stub.ts";
 import { ShuckieStub } from "./mock-pokeabyte/shuckie-stub.ts";
 import { ReplayDriver } from "./mock-pokeabyte/replay.ts";
-import { capture, flushRender, installEvalShims, settle, waitForRenderIdle, type ConsoleEntry } from "./capture.ts";
+import { capture, finishAnimations, flushRender, installEvalShims, settle, waitForRenderIdle, type ConsoleEntry } from "./capture.ts";
 import { scanFixture, type Checkpoint, type ScanResult } from "./scan-fixture.ts";
 import { parseTarget, prepareSandbox, REPO, type Target } from "./targets.ts";
 import { loadControlScript, runControlScript } from "./control-script.ts";
@@ -178,6 +178,12 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     // colours in the next. (0, 0) is the corner of the full-screen background canvas,
     // which nothing styles on hover. A synthetic move sets the position Chromium uses.
     await page.mouse.move(0, 0);
+    // ...and then stop listening to the desktop altogether. The run's window is a real,
+    // visible 1920x1080 window on the machine, and one run captured every panel's text
+    // *selected* for two checkpoints -- a click-drag or Ctrl+A from whoever was at the
+    // keyboard. Nothing in a run needs real input; the fixture is the only input.
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.setIgnoreInputEvents", { ignore: true });
     // The document before the reload is not part of the run; its failed connection
     // attempts to the real ports would otherwise leak into oracle 9 non-deterministically.
     consoleLog.length = 0;
@@ -235,6 +241,11 @@ export async function run(opts: RunOptions): Promise<RunResult> {
 
       while (pending.length && pending[0].tMs <= batch.tMs) {
         const cp = pending.shift()!;
+        if (await ensureContentSize(app, log)) {
+          await page.clock.runFor(32);
+          clockT += 32;
+          await flushRender(page);
+        }
         clockT += await settleFor(page, mock, opts, 1200);
         const dir = join(outDir, cp.id);
         await capture({
@@ -355,6 +366,13 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
     const win = BrowserWindow.getAllWindows()[0];
     win.setContentSize(1920, 1080);
     win.webContents.setZoomFactor(1);
+    // The window is taller than the display's work area, and Windows shrinks such a
+    // window when it is activated or moved -- a run captured two checkpoints at
+    // 1920x1067 with every rect scaled by 0.998. Lock it; the OS leaves a
+    // non-resizable window alone, and `ensureContentSize` re-asserts it anyway.
+    win.setResizable(false);
+    win.setMinimumSize(win.getSize()[0], win.getSize()[1]);
+    win.setMaximumSize(win.getSize()[0], win.getSize()[1]);
     return win.getContentBounds();
   });
   if (bounds.width !== 1920 || bounds.height !== 1080) {
@@ -364,6 +382,26 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
     );
   }
   return { app, page };
+}
+
+/**
+ * Re-asserts the 1920x1080 content size before a capture and says so if it had drifted.
+ * Returns true when it had to fix anything, so the caller can settle two more frames
+ * for the layout to catch up.
+ */
+async function ensureContentSize(app: ElectronApplication, log: (m: string) => void): Promise<boolean> {
+  const bounds = await app.evaluate(async ({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0];
+    const before = win.getContentBounds();
+    if (before.width !== 1920 || before.height !== 1080) {
+      win.setContentSize(1920, 1080);
+      win.webContents.setZoomFactor(1);
+    }
+    return { before, after: win.getContentBounds() };
+  });
+  if (bounds.before.width === 1920 && bounds.before.height === 1080) return false;
+  log(`[run] window content was ${bounds.before.width}x${bounds.before.height}; restored to ${bounds.after.width}x${bounds.after.height}`);
+  return true;
 }
 
 /** Fails every request that is not a stub, so hidden CDN/font loads become errors. */
@@ -483,6 +521,20 @@ async function installHubReceiptProbe(page: Page): Promise<void> {
   await page.addInitScript({
     content:
       "(function () {" +
+      // In-flight fetches, for the same reason as the preload's __pendingIpc: a
+      // /mapper or /stats response that lands mid-sweep anchors whatever the app
+      // starts from it (the timer's rAF chain, a poll) at an intermediate fake time.
+      "  window.__pendingFetch = 0;" +
+      "  var nativeFetch = window.fetch;" +
+      "  window.fetch = function () {" +
+      "    window.__pendingFetch++;" +
+      "    var done = function () { window.__pendingFetch--; };" +
+      "    try {" +
+      "      var p = nativeFetch.apply(this, arguments);" +
+      "      p.then(done, done);" +
+      "      return p;" +
+      "    } catch (e) { done(); throw e; }" +
+      "  };" +
       "  window.__hubRx = 0;" +
       "  var Native = window.WebSocket;" +
       "  function Counted(url, protocols) {" +
@@ -527,16 +579,17 @@ async function barrier(page: Page, mock?: MockPokeAByte, timeoutMs = 5000): Prom
       .evaluate(
         "({" +
           " ipc: (window.api && window.api.__pendingIpc) ? window.api.__pendingIpc() : 0," +
+          " fetch: window.__pendingFetch || 0," +
           " hub: window.__hubRx || 0" +
           "})",
       )
-      .catch(() => ({ ipc: 0, hub: Number.POSITIVE_INFINITY }))) as { ipc: number; hub: number };
+      .catch(() => ({ ipc: 0, fetch: 0, hub: Number.POSITIVE_INFINITY }))) as { ipc: number; fetch: number; hub: number };
     const wanted = mock ? mock.hubFramesSent : 0;
-    if (Number(state.ipc) === 0 && Number(state.hub) >= wanted) return;
+    if (Number(state.ipc) === 0 && Number(state.fetch) === 0 && Number(state.hub) >= wanted) return;
     if (Date.now() > deadline) {
       console.warn(
         `[run] barrier timed out after ${timeoutMs} ms ` +
-          `(${state.ipc} IPC pending, ${state.hub}/${wanted} hub frames); continuing`,
+          `(${state.ipc} IPC, ${state.fetch} fetch pending, ${state.hub}/${wanted} hub frames); continuing`,
       );
       return;
     }
@@ -574,6 +627,7 @@ async function settleFor(page: Page, mock: MockPokeAByte, opts: RunOptions, virt
   // with the clock paused a frame only happens when the clock moves.
   const extraFrame = 32;
   await page.clock.runFor(extraFrame);
+  await finishAnimations(page);
   await flushRender(page);
   // The caller tracks where the virtual clock is, so report everything that was added.
   return virtualMs + extraFrame;

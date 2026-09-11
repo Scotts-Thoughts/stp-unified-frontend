@@ -206,6 +206,7 @@ export async function settle(page: Page, virtualMs = 1200): Promise<void> {
   await page.clock.runFor(Math.max(0, virtualMs - twoFrames));
   await page.evaluate("0");
   await page.clock.runFor(Math.min(virtualMs, twoFrames));
+  await finishAnimations(page);
   await flushRender(page);
 }
 
@@ -230,6 +231,36 @@ export async function flushRender(page: Page): Promise<void> {
       "  ch.port1.onmessage = function () { resolve(); };" +
       "  ch.port2.postMessage(0);" +
       "})",
+  );
+}
+
+/**
+ * Runs every CSS transition and animation to its end state.
+ *
+ * `page.clock` fakes JS timers; it does not touch the compositor, and CSS transitions
+ * run on real time. gen2's battle graphic fades in over a `<transition>`, and a
+ * capture taken mid-fade recorded `opacity: 0.668895` in one run and `0.768907` in the
+ * next -- real time between two runs is never the same. `page.screenshot({animations:
+ * "disabled"})` already fast-forwards finite animations, but only after the styles were
+ * read, and not at all with --no-screenshots. So every capture settles them first,
+ * which makes the captured state "what the transition ends on", the same for the
+ * legacy app and the unified one. `transitionend` fires as a result, which is what Vue
+ * waits for to drop its `-enter-active` classes -- also the same on both sides.
+ */
+export async function finishAnimations(page: Page): Promise<void> {
+  await page.evaluate(
+    "(function () {" +
+      "  if (!document.getAnimations) return 0;" +
+      "  var list = document.getAnimations();" +
+      "  for (var i = 0; i < list.length; i++) {" +
+      "    try {" +
+      "      var t = list[i].effect && list[i].effect.getTiming ? list[i].effect.getTiming() : null;" +
+      "      if (t && t.iterations === Infinity) continue;" +
+      "      list[i].finish();" +
+      "    } catch (e) {}" +
+      "  }" +
+      "  return list.length;" +
+      "})()",
   );
 }
 

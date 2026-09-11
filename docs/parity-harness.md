@@ -200,10 +200,10 @@ npm run parity:mock -- <fixture>             # serve a fixture by hand, no Playw
 
 `<target>` is `unified`, `legacy:genN@25` or `legacy:genN@37`.
 
-### Determinism is not free — nine things the runner has to do
+### Determinism is not free — ten things the runner has to do
 
-Getting two identical runs to agree took nine fixes; each is commented where it is handled, and any change to
-the runner has to keep all nine. Items 5–9 were added on 2026-09-10 during Phase 1, after the first four
+Getting two identical runs to agree took ten fixes; each is commented where it is handled, and any change to
+the runner has to keep all ten. Items 5–10 were added on 2026-09-10 during Phase 1, after the first four
 turned out to leave a flake that reproduced in roughly every other pair of runs: the on-screen timer's
 hundredths digit differed at 5 of 25 checkpoints (oracles 1 and 2), with an identical virtual clock at every
 capture. Each capture now records `virtualNow` (the renderer's `Date.now()`) and `hubRx` (hub frames it had
@@ -261,9 +261,21 @@ the cause instead of listing its symptoms.
    pointer. A range slider that happened to sit under the cursor was captured in its hover colours
    (`rgb(0,88,156)` fill, `rgb(229,229,229)` track) for six checkpoints of one run and its normal colours
    (`rgb(0,120,212)` / `rgb(239,239,239)`) in the next — a pixel-only difference with identical styles and text.
-   (0, 0) is the corner of the full-screen background canvas, which nothing styles on hover.
+   (0, 0) is the corner of the full-screen background canvas, which nothing styles on hover. Then
+   `Input.setIgnoreInputEvents` (CDP) makes the page ignore the desktop entirely: a later run captured every
+   panel's text *selected* for two checkpoints — someone at the keyboard, and the run's window is a real
+   1920×1080 window on their screen. Nothing in a run needs real input.
+10. **A clean legacy run refreshes the app tree, and every capture settles CSS transitions first**
+   (`prepareSandbox` in `targets.ts`, `finishAnimations()` in `capture.ts`). Legacy apps rewrite
+   `default_style_settings.js` inside the tree they run from (known-legacy-bugs.md #25), so the second run of a
+   sandbox started from the first run's edits — `attempt_number` 2, a different split file name. And
+   `page.clock` does not touch the compositor: gen2's battle graphic fades in over a `<transition>`, and a
+   capture mid-fade read `opacity: 0.668895` in one run and `0.768907` in the next. Every capture now finishes
+   finite animations before reading styles, on both sides of a comparison, so the captured state is the
+   transition's end state. The barrier also waits for in-flight `fetch`es (`window.__pendingFetch`), which is the
+   third real-time pipe after IPC and the hub socket.
 
-Collecting the whole `userData` tree is a tenth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
+Collecting the whole `userData` tree is an eleventh trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
 DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between
 identical runs. `run.ts` collects only what the app writes, and `localStorage` is compared from the page dump.
 

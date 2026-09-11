@@ -154,8 +154,14 @@ export function prepareSandbox(target: Target, opts: SandboxOptions = {}): strin
 
   if (target.kind === "legacy") {
     const appTree = join(target.cwd, "app-tree");
-    if (!existsSync(appTree)) {
-      log(`[sandbox] copying ${LEGACY_DIRS[target.generation]} -> ${appTree}`);
+    // Re-run the copy on every clean run, not just the first: a legacy app in dev mode
+    // rewrites app/lib/default_style_settings.js (and enemy_sprite_scales.js) inside
+    // the tree it runs from (known-legacy-bugs.md #25), so the second run of a sandbox
+    // otherwise starts from the first run's edits -- attempt_number 2, and a different
+    // split file name. robocopy only copies files whose size or time differs, so the
+    // refresh costs the rewritten files and nothing else.
+    if (!existsSync(appTree) || opts.clean) {
+      log(`[sandbox] ${existsSync(appTree) ? "refreshing" : "copying"} ${LEGACY_DIRS[target.generation]} -> ${appTree}`);
       copyLegacyTree(LEGACY_DIRS[target.generation], appTree, log);
     }
   }
