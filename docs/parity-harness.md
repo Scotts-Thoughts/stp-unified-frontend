@@ -196,6 +196,8 @@ gets gen3's call shape; `$expectedGame` and `$rightPanel` in a query are compute
 queuer computes them per item (`control-script.ts`).
 
 ```
+npm run parity:all                           # every fixture under tools/fixtures/, run + diff, one line each
+npm run parity:all -- --baselines            # (re)capture the legacy baselines (gen1: --gen1-worktree=<dir>)
 npm run parity:preflight -- unified          # which single-tenant port is held, and by what
 npm run parity:selftest                      # 32 checks: the mock vs gen1's real GameHookMapperClient
 npm run parity:scan -- <fixture> --out=tools/reports

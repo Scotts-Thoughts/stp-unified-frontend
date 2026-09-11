@@ -66,6 +66,14 @@ generation's profile, the generation's module is imported on demand, its stylesh
 `docs/parity-harness.md` is the reference. The short version:
 
 ```
+npm run parity:all                                         # every fixture vs its baseline, one line each
+npm run parity:all -- --only=gen3                          # a subset
+npm run parity:all -- --baselines [--gen1-worktree=<dir>]  # (re)capture the legacy baselines
+```
+
+and, one run at a time:
+
+```
 npm run parity:preflight                                   # who holds the ports
 npx tsx tools/parity/run.ts unified <fixture> --out=tools/reports/<name> --redirect-ports --control
 npx tsx tools/parity/run.ts legacy:gen3@37 <fixture> --out=tools/reports/<name> --redirect-ports --control
@@ -73,7 +81,9 @@ npx tsx tools/parity/diff.ts tools/reports/<legacy> tools/reports/<unified>
 ```
 
 `--redirect-ports` keeps the run off the ports a live PokeAByte, Super Shuckie, OBS or overlay hold;
-`--control` adds the queuer's control-server session for one queue item (oracle 6).
+`--control` adds the queuer's control-server session for one queue item (oracle 6). Baselines are local
+(`tools/baselines/`, gitignored): gen2-5's come from the legacy apps in their sandboxes, gen1's from this app
+at the previous commit (a built `git worktree`), since no legacy gen1 can be driven.
 
 A fixture is a recording of PokeAByte's property stream (`tools/fixtures/`, made by the queuer's Capture
 Fixtures mode) or a synthetic one built from a mapper XML and a scenario (`tools/parity/make-fixture.ts`,
