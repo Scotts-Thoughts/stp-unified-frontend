@@ -23,8 +23,13 @@ const SKIP_FILE = /(pokedex|trainers?|moves|tmhm|default_style_settings|cross_ge
  * Directories and files the plan deletes in Phase 1.3 because nothing imports them.
  * Paths that only appear here are reported separately: they do not belong in a
  * MapperProfile, and they must not be mistaken for coverage gaps.
+ *
+ * This is gen1's rule. gen3's `methods/` is live -- its functions are mixed into the
+ * component's `methods` (tools/port/lift-gen3.py step 13) -- so for gen3 only the
+ * files it has no equivalent of count as dead (`isDeadOnly` takes the generation).
  */
 const DEAD_SOURCE = /^(methods\/|logic\/temp\/|settings\/pokemon_settings|createWatchedObject|data\/deprecated_autosplitter|data\/keyhook|battle_summaries\/)/;
+const DEAD_SOURCE_GEN3 = /^(logic\/temp\/|createWatchedObject|data\/deprecated_autosplitter|data\/keyhook|battle_summaries\/)/;
 
 export type Access = "read" | "write-value" | "write-bytes" | "write-bits" | "freeze" | "subscribe";
 
@@ -35,8 +40,9 @@ export interface PathUse {
 }
 
 /** True when every site is in a file the plan deletes. */
-export function isDeadOnly(use: PathUse): boolean {
-  return use.sites.every((s) => DEAD_SOURCE.test(s.file));
+export function isDeadOnly(use: PathUse, gen = "gen1"): boolean {
+  const rule = gen === "gen3" ? DEAD_SOURCE_GEN3 : DEAD_SOURCE;
+  return use.sites.every((s) => rule.test(s.file));
 }
 
 export interface Inventory {
@@ -222,8 +228,8 @@ export function isWrite(use: PathUse): boolean {
 }
 
 export function toMarkdown(inv: Inventory, gen: string): string {
-  const live = inv.paths.filter((p) => !isDeadOnly(p));
-  const dead = inv.paths.filter(isDeadOnly);
+  const live = inv.paths.filter((p) => !isDeadOnly(p, gen));
+  const dead = inv.paths.filter((p) => isDeadOnly(p, gen));
   const reads = live.filter((p) => !isWrite(p));
   const writes = live.filter(isWrite);
   const subscriptions = live.filter((p) => p.accesses.has("subscribe"));

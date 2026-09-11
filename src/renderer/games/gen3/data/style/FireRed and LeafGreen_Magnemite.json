@@ -1,0 +1,8 @@
+{
+  "pkmn_ability": "Magnet Pull",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Electric",
+  "overlay_color": "#f3d230",
+  "evolution": true,
+  "selected_evolution_species": "Magnemite"
+}

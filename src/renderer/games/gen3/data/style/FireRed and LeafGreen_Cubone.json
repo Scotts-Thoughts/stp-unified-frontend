@@ -1,0 +1,8 @@
+{
+  "pkmn_ability": "Rock Head",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Ground",
+  "overlay_color": "#e0c068",
+  "evolution": true,
+  "selected_evolution_species": "Cubone"
+}

@@ -1,0 +1,18 @@
+{
+  "pkmn_ability": "Chlorophyll",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Dark Grass",
+  "overlay_color": "#748ec8",
+  "imageFlip": true,
+  "imageScale": "0.8",
+  "imageYOffset": "168",
+  "imageXOffset": "27",
+  "backgroundScale": "133",
+  "backgroundYOffset": "125",
+  "backgroundXOffset": "61",
+  "backgroundContrast": "120",
+  "backgroundBrightness": "39",
+  "backgroundSaturation": "126",
+  "ui_saturation": "1",
+  "backgroundFlip": true
+}

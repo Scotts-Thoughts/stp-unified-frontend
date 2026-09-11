@@ -269,7 +269,11 @@ export class MockPokeAByte {
 
       const changed: string[] = ["bytes", "value"];
       if (endpoint === "set-property-bytes" || endpoint === "set-properties-by-bits") {
-        if (Array.isArray(item.bytes)) prop.bytes = item.bytes.slice();
+        if (Array.isArray(item.bytes)) {
+          prop.bytes = item.bytes.slice();
+          const decoded = decodeBytes(prop, prop.bytes, this.state.header?.glossary);
+          if (decoded !== undefined) prop.value = decoded;
+        }
         if ("value" in item) prop.value = item.value;
       } else if (endpoint === "set-property-value") {
         prop.value = item.value;
@@ -284,6 +288,26 @@ export class MockPokeAByte {
     }
     json(res, 200, {});
   }
+}
+
+/**
+ * PokeAByte writes the bytes to the emulator and, on its next read, decodes them into
+ * the value again, so a client sees new bytes *and* a new value. The mock decodes the
+ * one shape the overlays write with `setBytes`: an integer over the property's bytes
+ * (little-endian, the memory order), through the glossary when the property has a
+ * reference. gen3 resets its five stage modifiers with `setBytes([6])`, which
+ * PokeAByte reads back as "0"; left undecoded the value stayed null, and gen3's
+ * `stageMultiplier` threw on both sides -- a stand-in artefact, not the app. Anything
+ * else (a string, a bit field) keeps its value: no overlay writes those as bytes.
+ */
+function decodeBytes(prop: PropertyDto, bytes: number[], glossary: Record<string, { key: unknown; value: unknown }[]> | undefined): unknown {
+  if ((prop.type !== "int" && prop.type !== "uint") || bytes.length === 0 || bytes.length > 6) return undefined;
+  let n = 0;
+  for (let i = bytes.length - 1; i >= 0; i--) n = n * 256 + (bytes[i] & 0xff);
+  if (prop.type === "int" && bytes[bytes.length - 1] & 0x80) n -= 2 ** (8 * bytes.length);
+  if (!prop.reference) return n;
+  const entry = glossary?.[prop.reference]?.find((e) => Number(e.key) === n);
+  return entry ? entry.value : null;
 }
 
 function stripEndingRoute(route: string): string {

@@ -1,0 +1,18 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.55",
+  "imageYOffset": "-30",
+  "imageXOffset": "41",
+  "overlay_color": "#f1a142",
+  "backgroundScale": "155",
+  "backgroundContrast": "122",
+  "backgroundBrightness": "71",
+  "backgroundYOffset": "-103",
+  "pkmn_ability": "Blaze",
+  "pkmnNature": "Rash",
+  "hidden_power_type": "Grass",
+  "hidden_power_index": "4",
+  "attempt_number": 3,
+  "finished_run_count": 2,
+  "backgroundTexture": "Fire"
+}

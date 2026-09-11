@@ -2,7 +2,7 @@
  * Copies a legacy app's `<script src="lib/...">` data files into
  * `src/renderer/games/genN/data/` as ES modules (plan 2.2).
  *
- *   npx tsx tools/port/port-data.ts <legacy-app-dir> <gen> [--only=a.js,b.js] [--skip=x.js] [--asset-gen=gen2]
+ *   npx tsx tools/port/port-data.ts <legacy-app-dir> <gen> [--only=a.js,b.js] [--skip=x.js] [--asset-gen=gen2] [--strip=lib/]
  *
  * The legacy files are classic scripts that define globals (`const g2MoveData = {...}`)
  * and are loaded by `<script>` tags in the legacy index.html; the unified app imports
@@ -35,6 +35,11 @@ if (!legacyDir || !gen) {
 const only = argv.find((a) => a.startsWith("--only="))?.slice(7).split(",").filter(Boolean) ?? null;
 const skip = new Set(argv.find((a) => a.startsWith("--skip="))?.slice(7).split(",").filter(Boolean) ?? []);
 const assetGen = argv.find((a) => a.startsWith("--asset-gen="))?.slice("--asset-gen=".length) ?? "";
+// The leading folder(s) dropped from the output path: gen2/gen4/gen5 keep everything
+// under lib/, gen3 spreads its files over data/, lib/, methods/, settings/... and
+// `--strip=data/,lib/` folds the first two into the data root.
+const stripList = (argv.find((a) => a.startsWith("--strip="))?.slice("--strip=".length) ?? "lib/").split(",").filter(Boolean);
+const stripPrefix = new RegExp(`^(${stripList.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`);
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const outDir = join(REPO, "src", "renderer", "games", gen, "data");
@@ -47,7 +52,7 @@ const dataScripts = scripts.filter((s) => !/^https?:/.test(s) && !/^packages\//.
 const TOP_LEVEL = /^(const|let|var)\s+([A-Za-z_$][\w$]*)/gm;
 const TOP_FUNC = /^function\s+([A-Za-z_$][\w$]*)\s*\(/gm;
 
-const manifest: { file: string; out: string; globals: string[]; lines: number; rebased: number; imports: string[] }[] = [];
+const manifest: { file: string; out: string; globals: string[]; lines: number; rebased: number; imports: string[]; shadowed: number }[] = [];
 const seen = new Map<string, string>();
 for (const rel of dataScripts) {
   const name = basename(rel);
@@ -56,7 +61,7 @@ for (const rel of dataScripts) {
   // The path under lib/ is kept: gen4 ships lib/pokedex/platinum.js *and*
   // lib/trainers/platinum.js, and flattening to the basename silently overwrote one
   // with the other (found when the pokedex export vanished from the manifest).
-  const sub = rel.replace(/^lib\//, "");
+  const sub = rel.replace(stripPrefix, "");
   if (seen.has(sub)) throw new Error(`${rel} and ${seen.get(sub)} would both land at data/${sub}`);
   seen.set(sub, rel);
   const src = join(legacyDir, rel);
@@ -70,7 +75,21 @@ for (const rel of dataScripts) {
     globals.push(id);
     return `export ${kw} ${id}`;
   });
+  // A classic script hoists function declarations and the last one of a name wins for
+  // the whole file; a module treats the repeat as a SyntaxError. gen3's
+  // methods/time_functions.js declares `gameTimeHM` twice. The earlier declarations
+  // are renamed in place, unexported -- exactly as unreachable as they were.
+  const declared = new Map<string, number>();
+  for (const m of text.matchAll(TOP_FUNC)) declared.set(m[1], (declared.get(m[1]) ?? 0) + 1);
+  const seenFunc = new Map<string, number>();
+  let shadowed = 0;
   text = text.replace(TOP_FUNC, (m, id) => {
+    const n = (seenFunc.get(id) ?? 0) + 1;
+    seenFunc.set(id, n);
+    if (n < (declared.get(id) ?? 1)) {
+      shadowed++;
+      return `function ${id}__shadowed_${n}(`;
+    }
     globals.push(id);
     return `export function ${id}(`;
   });
@@ -100,11 +119,11 @@ for (const rel of dataScripts) {
   }
   if (imports.length) text = imports.join("\n") + "\n" + text;
   writeFileSync(out, text);
-  manifest.push({ file: rel, out: `games/${gen}/data/${sub}`, globals, lines: text.split("\n").length, rebased, imports });
+  manifest.push({ file: rel, out: `games/${gen}/data/${sub}`, globals, lines: text.split("\n").length, rebased, imports, shadowed });
 }
 
 for (const m of manifest) {
-  console.log(`${m.file.padEnd(40)} -> ${m.out.padEnd(44)} ${String(m.lines).padStart(8)} lines  exports: ${m.globals.join(", ") || "(none!)"}${m.rebased ? `  (${m.rebased} asset path(s) rebased)` : ""}${m.imports.length ? `  imports: ${m.imports.join(" ")}` : ""}`);
+  console.log(`${m.file.padEnd(40)} -> ${m.out.padEnd(44)} ${String(m.lines).padStart(8)} lines  exports: ${m.globals.join(", ") || "(none!)"}${m.rebased ? `  (${m.rebased} asset path(s) rebased)` : ""}${m.imports.length ? `  imports: ${m.imports.join(" ")}` : ""}${m.shadowed ? `  (${m.shadowed} shadowed declaration(s) renamed)` : ""}`);
 }
 writeFileSync(join(outDir, "_manifest.json"), JSON.stringify(manifest, null, 1));
 console.log(`\n${manifest.length} file(s) written to ${outDir}; manifest in _manifest.json`);

@@ -3,6 +3,8 @@ import { redBlueDeprecated } from "./gen1/mappers/red-blue-deprecated";
 import { yellowDeprecated } from "./gen1/mappers/yellow-deprecated";
 import { crystalDeprecated } from "./gen2/mappers/crystal-deprecated";
 import { goldSilverDeprecated } from "./gen2/mappers/gold-silver-deprecated";
+import { emeraldNe } from "./gen3/mappers/emerald-ne";
+import { fireRedLeafGreenNe } from "./gen3/mappers/firered-leafgreen-ne";
 import { diamondPearlStandard } from "./gen4/mappers/diamond-pearl";
 import { heartGoldSoulSilverStandard } from "./gen4/mappers/heartgold-soulsilver";
 import { platinumStandard } from "./gen4/mappers/platinum";
@@ -23,6 +25,7 @@ import { whiteStandard } from "./gen5/mappers/white";
 export const PROFILES: Readonly<Record<string, readonly MapperProfile[]>> = {
     gen1: [yellowDeprecated, redBlueDeprecated],
     gen2: [crystalDeprecated, goldSilverDeprecated],
+    gen3: [emeraldNe, fireRedLeafGreenNe],
     gen4: [platinumStandard, diamondPearlStandard, heartGoldSoulSilverStandard],
     gen5: [blackStandard, whiteStandard, black2Standard, white2Standard],
 };

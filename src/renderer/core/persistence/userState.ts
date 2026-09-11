@@ -78,6 +78,14 @@ export function getUserState<T>(key: string, fallback: T): T {
 }
 
 /**
+ * Every saved key, in insertion order -- `localStorage.key(i)` for the managers that
+ * sweep the store (gen3's `resetAllToDefaults`/`exportCurrentAsDefaults`).
+ */
+export function userStateKeys(): string[] {
+    return Object.keys(cache);
+}
+
+/**
  * Stores `value` under `key` and schedules the file write.
  *
  * `null` and `undefined` delete the key, which is what assigning them to

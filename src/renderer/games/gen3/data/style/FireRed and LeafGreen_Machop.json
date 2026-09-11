@@ -1,0 +1,9 @@
+{
+  "pkmn_ability": "Guts",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fighting",
+  "overlay_color": "#c03028",
+  "evolution": false,
+  "selected_evolution_species": "Machop",
+  "attempt_number": 3
+}

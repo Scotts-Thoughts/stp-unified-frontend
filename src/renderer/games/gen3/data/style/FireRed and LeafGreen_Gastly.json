@@ -1,0 +1,8 @@
+{
+  "pkmn_ability": "Levitate",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Ghost",
+  "overlay_color": "#705898",
+  "evolution": true,
+  "selected_evolution_species": "Gastly"
+}

@@ -36,8 +36,32 @@ async function applyModuleStyles(module: GameModule): Promise<void> {
     }
     if (style.textContent !== css) style.textContent = css;
 
+    // The legacy pages had their fonts in hand before the overlay's first render (the
+    // loading screen already used them); a `<style>` swapped in late has not fetched
+    // its faces yet. Chromium laid gen3's `<select>`s out with the fallback font's
+    // baseline and did not revisit it when `play` arrived -- a half-pixel in the rect
+    // of every `<br>` after a select, with the pixels themselves identical. So the
+    // sheet's faces are loaded before the module is `ready`, as they were.
+    const families = [...css.matchAll(/@font-face\s*\{[^}]*font-family:\s*([^;}]+)/g)].map((m) => m[1].trim().replace(/^["']|["']$/g, ""));
+    await Promise.all([...new Set(families)].map((family) => document.fonts.load(`12px "${family}"`).catch(() => [])));
+
     const container = document.getElementById("app-container");
     if (container && container.className !== module.cssClass) container.className = module.cssClass;
+    const app = document.getElementById("app");
+    if (app && app.className !== (module.appClass ?? "")) app.className = module.appClass ?? "";
+}
+
+/**
+ * The fit-to-window scaling is a module flag (gen1, gen2, gen4 and gen5 had the
+ * script; gen3 did not): a transformed `#app-container`, even at `scale(1)`, is a
+ * composited layer whose text and inline boxes Chromium snaps to whole pixels, and
+ * gen3's legacy DOM -- no scaling container at all -- lays its panels out on half
+ * pixels. The stylesheet's `scale(1)` fallback is therefore switched off for a module
+ * without the flag (`core/window/scaleToFit.ts`), not left in place.
+ */
+function applyScaleToFit(module: GameModule): void {
+    if (module.scaleToFit) installScaleToFit();
+    else removeScaleToFit();
 }
 
 const main = defineComponent({
@@ -112,13 +136,18 @@ const main = defineComponent({
             .then(() => this.settings.overlay.load())
             .catch((err) => console.error("[main] Failed to load the overlay settings:", err));
 
-        // The pre-mapper screen is styled by gen1's stylesheet, as it always was.
+        // The pre-mapper screen is styled by gen1's stylesheet, as it always was, and
+        // scaled to the window as gen1's index.html script did.
         void applyModuleStyles(MODULES[0]);
+        applyScaleToFit(MODULES[0]);
 
         // The user-state writes are debounced 250 ms; local storage was synchronous, so
         // without this a quit within that window would lose the last edit. Best-effort,
         // the same trade gen4 makes with its own beforeunload flush.
         window.addEventListener("beforeunload", () => { void flushUserState(); });
+        // gen3/4/5 stopped their hub connection on unload so a reload (the queuer's
+        // /reload) did not leave PokeAByte a dangling client (plan 3.3, gen3's disconnect()).
+        window.addEventListener("beforeunload", () => { void this.mapper?.disconnect(); });
 
         // The boot counter is for the parity harness: from connect() to `ready` the
         // app is driven by real-time pipes the harness cannot all see -- the SignalR
@@ -168,8 +197,7 @@ const main = defineComponent({
                 await applyModuleStyles(module);
                 setActiveModule(module.id);
                 if (module.id !== "gen1") this.settings.releaseCss();
-                if (module.scaleToFit) installScaleToFit();
-                else removeScaleToFit();
+                applyScaleToFit(module);
                 this.session = detection;
                 module.activate?.(detection.game);
                 this.ready = true;
@@ -182,7 +210,7 @@ const main = defineComponent({
             this.session?.module.deactivate?.();
             this.session = null;
             setActiveModule(null);
-            removeScaleToFit();
+            applyScaleToFit(MODULES[0]);
             void applyModuleStyles(MODULES[0]).then(() => this.settings.reapplyCss());
         };
         this.mapper.connect();
@@ -208,8 +236,14 @@ const pinia = createPinia();
 export const app = createApp(main);
 app.use(pinia);
 
-app.config.errorHandler = ((err: any) => {
-    console.error(err);
-});
+// Every legacy overlay ran a *development* Vue (gen1 under Vite's dev server, gen2-5 a
+// vendored `vue.global.js` dev build), and dev Vue rethrows an unhandled error: a
+// render that throws aborts the patch, so the overlay froze at its last good frame
+// with the error in the console. Production Vue would instead log it and replace the
+// component's tree with a comment -- a blank overlay on a stream -- and an
+// `errorHandler` (which this app had) does the same. This keeps the legacy
+// semantics, and the harness sees the error as the same `pageerror` on both sides
+// (gen3's `stageMultiplier` on a null stage was where the difference showed).
+app.config.throwUnhandledErrorInProduction = true;
 
 app.mount('#app');

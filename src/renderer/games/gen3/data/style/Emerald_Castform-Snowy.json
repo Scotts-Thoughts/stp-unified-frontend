@@ -1,0 +1,10 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.45",
+  "imageYOffset": "175",
+  "imageXOffset": "34",
+  "backgroundBrightness": "34",
+  "backgroundContrast": "170",
+  "backgroundBlur": "2",
+  "backgroundScale": "105"
+}

@@ -1,0 +1,8 @@
+{
+  "pkmn_ability": "Poison Point",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Poison",
+  "overlay_color": "#a040a0",
+  "evolution": true,
+  "selected_evolution_species": "NidoranM"
+}

@@ -1,0 +1,23 @@
+{
+  "selected_evolution_species": "Nidoking",
+  "evolution": false,
+  "imageFlip": true,
+  "imageScale": "1.12",
+  "imageYOffset": "20",
+  "imageXOffset": "13",
+  "overlay_color": "#b884b1",
+  "ui_saturation": "1.9",
+  "backgroundScale": "126",
+  "backgroundTexture": "Ground",
+  "backgroundContrast": "142",
+  "backgroundBrightness": "37",
+  "backgroundHue": "0",
+  "backgroundSaturation": "136",
+  "backgroundBlur": "2",
+  "hidden_power_type": "Grass",
+  "hidden_power_index": "4",
+  "attempt_number": 4,
+  "pkmn_ability": "Poison Point",
+  "pkmnNature": "Hardy",
+  "finished_run_count": 3
+}

@@ -1,0 +1,11 @@
+{
+  "file": "A:\\Programs\\stp-unified-frontend\\tools\\fixtures\\gen3\\gen3-firered-smoke.fixture.jsonl.gz",
+  "synthetic": true,
+  "mapperId": "ST/gen3/pokemon_firered_leafgreen_ne.xml",
+  "replayName": "gen3-firered-smoke",
+  "events": 229,
+  "properties": 2221,
+  "lastFrame": 5700,
+  "durationSec": 95,
+  "bytes": 80560
+}

@@ -1,7 +1,7 @@
 node_modules/
 out/
 dist/
-splits/
+/splits/
 tools/fixtures/raw/
 tools/reports/
 # Baselines are re-captured, never reviewed as text: one checkpoint's styles.json is

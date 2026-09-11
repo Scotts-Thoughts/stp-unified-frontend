@@ -65,6 +65,16 @@ export function readSplitCsv(relative: string): Promise<string | null> {
   return enqueue(() => window.api.splits.read(relative).catch(() => null));
 }
 
+/**
+ * The entries of a folder under the splits root, files and folders alike, by name --
+ * gen3's `logCopy` numbers a finished run by listing `finishes/` (`fs.readdirSync`).
+ * A missing folder lists as empty, which is what its `existsSync` guard made it.
+ * Queued like the writes, so a copy issued earlier is on disk before it is counted.
+ */
+export function listSplitFolder(relative: string): Promise<string[]> {
+  return enqueue(async () => (await window.api.splits.list(relative)).map((entry: { name: string }) => entry.name));
+}
+
 /** Creates a folder under the splits root (gen5 makes three at load, known-legacy-bugs.md #17). */
 export function ensureSplitFolder(relative: string): Promise<unknown> {
   return enqueue(() => window.api.splits.mkdir(relative));

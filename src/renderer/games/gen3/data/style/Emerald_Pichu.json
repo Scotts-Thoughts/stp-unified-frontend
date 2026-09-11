@@ -1,0 +1,16 @@
+{
+  "pkmn_ability": "Static",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Electric",
+  "overlay_color": "#fef397",
+  "imageScale": "0.51",
+  "imageYOffset": "-37",
+  "imageXOffset": "6",
+  "ui_saturation": "1.3",
+  "backgroundScale": "195",
+  "backgroundXOffset": "83",
+  "backgroundYOffset": "76",
+  "backgroundContrast": "165",
+  "backgroundBrightness": "46",
+  "backgroundHue": "76"
+}

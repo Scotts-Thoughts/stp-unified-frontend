@@ -1,0 +1,19 @@
+{
+  "pkmn_ability": "Pressure",
+  "hidden_power_type": "Dark",
+  "backgroundTexture": "Dark Ice",
+  "backgroundContrast": "147",
+  "backgroundBrightness": "53",
+  "backgroundBlur": "2",
+  "backgroundScale": "113",
+  "backgroundHue": "345",
+  "imageFlip": true,
+  "imageScale": "1",
+  "imageYOffset": "76",
+  "imageXOffset": "48",
+  "overlay_color": "#74b4df",
+  "ui_saturation": "1.5",
+  "pkmnNature": "Hardy",
+  "attempt_number": 1,
+  "finished_run_count": 2
+}

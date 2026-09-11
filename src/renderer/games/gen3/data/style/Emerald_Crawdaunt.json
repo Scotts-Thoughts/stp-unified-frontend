@@ -1,0 +1,23 @@
+{
+  "pkmn_ability": "Hyper Cutter",
+  "pkmnNature": "Naive",
+  "backgroundTexture": "Dark",
+  "overlay_color": "#128ec1",
+  "imageFlip": true,
+  "imageScale": "0.8",
+  "imageYOffset": "20",
+  "imageXOffset": "13",
+  "backgroundFlip": true,
+  "backgroundScale": "129",
+  "backgroundYOffset": "56",
+  "ui_saturation": "1.3",
+  "backgroundContrast": "152",
+  "backgroundHue": "200",
+  "backgroundSaturation": "5",
+  "backgroundBrightness": "81",
+  "hidden_power_type": "Ice",
+  "hidden_power_index": "1",
+  "attempt_number": 3,
+  "finished_run_count": 2,
+  "splits_display": "Followup"
+}

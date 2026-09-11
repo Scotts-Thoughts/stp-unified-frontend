@@ -1,0 +1,21 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.88",
+  "imageYOffset": "55",
+  "imageXOffset": "27",
+  "overlay_color": "#a3a3ab",
+  "ui_saturation": "1.7",
+  "backgroundScale": "124",
+  "backgroundFlip": true,
+  "backgroundYOffset": "90",
+  "backgroundContrast": "112",
+  "backgroundBrightness": "67",
+  "backgroundBlur": "2",
+  "pkmn_ability": "Rock Head",
+  "pkmnNature": "Adamant",
+  "hidden_power_type": "Rock",
+  "hidden_power_index": "3",
+  "attempt_number": 2,
+  "finished_run_count": 2,
+  "backgroundTexture": "Rock"
+}

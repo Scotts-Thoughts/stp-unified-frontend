@@ -98,6 +98,18 @@ export interface GameModule {
     overlay: Component;
     /** The class on `#app-container` while this module is active: `gen-N`. */
     cssClass: string;
+    /**
+     * The class the legacy page had on `#app` itself, if any. gen3's `#app` *is* its
+     * `.mainContainer` -- the 3x30 CSS grid every overlay element is placed in -- where
+     * gen2/4/5 nest that grid one level down. main.ts sets it with the stylesheet.
+     */
+    appClass?: string;
+    /**
+     * gen1's legacy keyhook was a Vue component that rendered an empty `<div>` as
+     * `#app`'s first child, and the layout oracle sees it (core/hotkeys/Hotkeys.vue).
+     * Only gen1 sets this: under gen3 that div would take the grid's first cell.
+     */
+    keyhookElement?: boolean;
     /** The generation's stylesheet text (`games/genN/style.css?inline`), applied by main.ts before the overlay mounts. */
     styles(): Promise<string>;
     /**
@@ -118,8 +130,10 @@ export interface GameModule {
     /** How many frames the client holds a debounced update: gen4 left the client's 10, gen5 set 15. */
     debounceFrames?: number;
     /**
-     * The 16:9 fit-to-window script gen2/gen4/gen5's index.html ran (`core/window/
-     * scaleToFit.ts`); the shell installs it while the module is active.
+     * The 16:9 fit-to-window script gen1/gen2/gen4/gen5's index.html ran (`core/window/
+     * scaleToFit.ts`); the shell installs it while the module is active. gen3 had none,
+     * and for it `#app-container` carries no transform at all -- a `scale(1)` container
+     * is a composited, pixel-snapped layer to Chromium, not "no transform".
      */
     scaleToFit?: boolean;
     /**

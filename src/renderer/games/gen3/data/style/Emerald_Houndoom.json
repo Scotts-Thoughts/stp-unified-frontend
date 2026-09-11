@@ -1,0 +1,19 @@
+{
+  "imageScale": "0.84",
+  "imageYOffset": "41",
+  "overlay_color": "#e28856",
+  "ui_saturation": "1.4",
+  "imageFlip": false,
+  "backgroundFlip": true,
+  "backgroundScale": "139",
+  "backgroundYOffset": "21",
+  "backgroundContrast": "140",
+  "backgroundHue": "333",
+  "pkmn_ability": "Early Bird",
+  "pkmnNature": "Rash",
+  "backgroundTexture": "Dark",
+  "hidden_power_type": "Water",
+  "hidden_power_index": "3",
+  "attempt_number": 2,
+  "finished_run_count": 2
+}

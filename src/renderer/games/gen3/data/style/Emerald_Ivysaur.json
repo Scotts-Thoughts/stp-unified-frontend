@@ -1,0 +1,13 @@
+{
+  "imageScale": "0.65",
+  "imageYOffset": "-4",
+  "imageXOffset": "-40",
+  "overlay_color": "#6aa37e",
+  "ui_saturation": "1.6",
+  "backgroundTexture": "Jungle Swamp",
+  "backgroundScale": "190",
+  "backgroundYOffset": "-89",
+  "backgroundBlur": "2",
+  "backgroundContrast": "112",
+  "backgroundXOffset": "19"
+}

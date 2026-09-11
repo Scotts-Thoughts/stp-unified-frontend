@@ -1,0 +1,19 @@
+{
+  "pkmn_ability": "Early Bird",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Ground",
+  "overlay_color": "#c3a799",
+  "backgroundBlur": "3",
+  "backgroundBrightness": "27",
+  "backgroundScale": "112",
+  "backgroundFlip": true,
+  "backgroundContrast": "119",
+  "backgroundSaturation": "133",
+  "imageFlip": true,
+  "imageScale": "0.94",
+  "imageYOffset": "48",
+  "imageXOffset": "13",
+  "ui_saturation": "1.9",
+  "attempt_number": 3,
+  "finished_run_count": 2
+}

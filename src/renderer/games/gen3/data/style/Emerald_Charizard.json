@@ -1,0 +1,19 @@
+{
+  "pkmn_ability": "Blaze",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fire",
+  "overlay_color": "#faa96e",
+  "attempt_number": 3,
+  "splits_display": "First",
+  "imageScale": "0.98",
+  "imageYOffset": "27",
+  "imageXOffset": "-23",
+  "ui_saturation": "1.4",
+  "backgroundScale": "152",
+  "backgroundContrast": "140",
+  "backgroundBrightness": "55",
+  "backgroundXOffset": "70",
+  "backgroundXFlip": false,
+  "backgroundFlip": true,
+  "backgroundYOffset": "61"
+}

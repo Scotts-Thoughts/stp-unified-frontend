@@ -1,0 +1,20 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.71",
+  "imageYOffset": "27",
+  "imageXOffset": "34",
+  "overlay_color": "#3d9ccc",
+  "ui_saturation": "1.5",
+  "backgroundTexture": "Dark Water",
+  "backgroundContrast": "138",
+  "backgroundBrightness": "80",
+  "backgroundBlur": "0",
+  "backgroundScale": "156",
+  "pkmn_ability": "Huge Power",
+  "pkmnNature": "Naughty",
+  "backgroundYOffset": "37",
+  "hidden_power_type": "Ground",
+  "hidden_power_index": "3",
+  "attempt_number": 3,
+  "finished_run_count": 2
+}

@@ -1,0 +1,19 @@
+{
+  "pkmn_ability": "Own Tempo",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Poison",
+  "overlay_color": "#f5bac0",
+  "imageFlip": true,
+  "imageScale": "0.78",
+  "imageYOffset": "6",
+  "imageXOffset": "20",
+  "backgroundScale": "140",
+  "backgroundContrast": "113",
+  "backgroundHue": "117",
+  "backgroundBrightness": "48",
+  "backgroundBlur": "3",
+  "backgroundYOffset": "8",
+  "backgroundXOffset": "90",
+  "attempt_number": 2,
+  "finished_run_count": 4
+}

@@ -1,0 +1,17 @@
+{
+  "overlay_color": "#668eb2",
+  "backgroundFlip": true,
+  "backgroundScale": "126",
+  "backgroundContrast": "131",
+  "backgroundBrightness": "55",
+  "backgroundBlur": "2",
+  "imageScale": "0.82",
+  "imageYOffset": "41",
+  "imageFlip": true,
+  "imageXOffset": "13",
+  "pkmnNature": "Quiet",
+  "pkmn_ability": "Poison Point",
+  "attempt_number": 2,
+  "finished_run_count": 2,
+  "backgroundTexture": "Poison"
+}

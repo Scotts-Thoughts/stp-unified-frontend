@@ -1,0 +1,15 @@
+{
+  "pkmn_ability": "Keen Eye",
+  "pkmnNature": "Adamant",
+  "backgroundTexture": "Flying",
+  "overlay_color": "#8b724f",
+  "backgroundBrightness": "96",
+  "imageScale": "0.88",
+  "imageYOffset": "140",
+  "imageXOffset": "-23",
+  "hidden_power_type": "Dark",
+  "hidden_power_index": "3",
+  "attempt_number": 11,
+  "finished_run_count": 5,
+  "splits_display": "Followup"
+}

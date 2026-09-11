@@ -85,7 +85,32 @@ DROP = {"*"}
 DOCUMENT = {"html", "body"}
 
 
-def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = ""):
+FONT_SRC = re.compile(r"url\(fonts/([^)]+)\)")
+FONT_FAMILY = re.compile(r"font-family\s*:\s*([^;}]+)")
+
+
+def dead_font_face(body: str, src_text: str, legacy_dir) -> bool:
+    """A `@font-face` whose file the legacy app does not ship and whose family no rule
+    uses: gen4 and gen5 declare `lgothic` for a `fonts/LeagueGothic.ttf` that is not in
+    their trees, and nothing sets `font-family: lgothic`. The legacy page never fetched
+    it (a face loads on first use); the shell now loads every declared face before the
+    overlay renders (main.ts, the `<select>` baseline), which would fetch it and log a
+    404 the legacy never logged. Dropped, with the same outcome: no rule resolves to it."""
+    if legacy_dir is None:
+        return False
+    src = FONT_SRC.search(body)
+    family = FONT_FAMILY.search(body)
+    if not src or not family:
+        return False
+    if (legacy_dir / "fonts" / src.group(1)).exists():
+        return False
+    name = family.group(1).strip().strip("\"\'")
+    uses = [m for m in re.finditer(r"font-family\s*:\s*([^;}]+)", src_text) if name in [x.strip().strip("\"\'") for x in m.group(1).split(",")]]
+    # One use is this declaration itself.
+    return len(uses) <= 1
+
+
+def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = "", legacy_dir=None):
     blocks, tail = parse(src_text)
     out = []
     dropped = []
@@ -93,6 +118,9 @@ def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = ""):
         sel = selector_of(prelude)
         lead = comments_of(prelude)
         head = (lead + "\n") if lead else ""
+        if sel.startswith("@font-face") and dead_font_face(body, src_text, legacy_dir):
+            dropped.append((sel, body))
+            continue
         if sel.startswith("@font-face") or sel.startswith("@keyframes") or sel.startswith("@-webkit-keyframes"):
             body2 = body.replace("url(fonts/", f"url({fonts}/")
             out.append(head + f"{sel} {{{body2}}}")
@@ -177,7 +205,7 @@ def verify(src_text: str, out_text: str, gen_class: str, fonts: str, dropped, as
             continue
         folded.append((sel, body))
     out_rules = folded
-    kept = [(s, b) for s, b in src_rules if s not in DROP]
+    kept = [(s, b) for s, b in src_rules if s not in DROP and (s, b) not in dropped]
     kept_norm = [(",\n".join(x.strip() for x in s.split(",")), b) for s, b in kept]
     out_norm = [(",\n".join(x.strip() for x in s.split(",")), b) for s, b in out_rules]
     assert len(kept_norm) == len(out_norm), f"rule count: {len(kept_norm)} vs {len(out_norm)}"
@@ -198,12 +226,13 @@ def main():
     fonts = opts.get("fonts", "../../fonts")
     asset_gen = opts.get("asset-gen", "")
     src_text = Path(src_path).read_text(encoding="utf-8")
-    out, dropped, tail = scope(src_text, gen_class, fonts, asset_gen)
+    out, dropped, tail = scope(src_text, gen_class, fonts, asset_gen, legacy_dir=Path(src_path).parent)
     header = f"""/**
  * Scoped under `.{gen_class}` by tools/port/scope-css.py from {Path(src_path).as_posix()}
  * (plan 2.5). Values untouched; selectors prefixed; `:root` -> `.{gen_class}`;
  * `#app-container` -> `.{gen_class}#app-container`; `html`/`body` -> `:has(.{gen_class})`
- * variants; `*` dropped because core/styles/base.css carries the reset. `url(fonts/...)` re-based to `{fonts}/`;
+ * variants; `*` dropped because core/styles/base.css carries the reset; a `@font-face` for a file the legacy app
+ * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `{fonts}/`;
  * `url(images/...)` -> `url(images/{asset_gen}/...)` (tools/port/lift_assets.py).
  * Do not edit by hand -- re-run the tool.
  */

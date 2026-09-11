@@ -1,0 +1,490 @@
+{
+  "_comment": [
+    "Synthetic gen3 FireRed scenario (plan 2.7 for gen3; decision 6 says a recording needs Scott):",
+    "a new game, the starter, a route change, one wild battle, the Brock fight with a party switch,",
+    "a level up with a new move, a badge, a blackout and a reset. FireRed rather than Emerald because a",
+    "fresh profile's game is 'FireRed and LeafGreen' in the legacy app and the Emerald mapper carries no",
+    "meta.gameName to correct it (known-legacy-bugs.md #12); the starter is the legacy default, Rayquaza,",
+    "so the party leader is Rayquaza too (synthetic: values are chosen, not played).",
+    "It is built to touch the hooks in gen3's mounted() on the non-legacy (sStpCallback) state path:",
+    "  pointers.sStpCallback2 CB2_MainMenu -> CB2_NewGameScene   new run (attempt++, ROM starter writes)",
+    "  overworld.mapName change                  OBS 'Map Change - <map>' marker",
+    "  patch.sStpTextBoxOpen 1 / 0               'Text Box - true' / 'Text Box - false' markers",
+    "  sStpCallback2 CB2_InitBattle / BattleMainCB2 / CB2_Overworld",
+    "                                            To Battle, 'IN - <trainer>' / 'OUT - <trainer>' markers",
+    "  battle.turnInfo.battleDialogue 6          Battle (FRLG's dialogue is a bare int; 6 is player control)",
+    "  battle.turnInfo.battleOutcome 1 + battle.type.trainer",
+    "                                            From Battle, Full/Deprecated/Simple split CSVs, 'LABEL - VICTORY'",
+    "  battle.trainer.party_position change      'Next Pokemon' marker",
+    "  player.team.0.level / move2 change        level-up handling, 'New Move - <name>' marker",
+    "  player.badges.badge1 true                 badge boosts",
+    "  sStpCallback2 CB2_WhiteOut                blackout (blackout_counter++, 'BLACKOUT')",
+    "  sStpCallback2 CB2_InitCopyrightScreenAfterBootup, then both callbacks null",
+    "                                            reset (playerResets++, Base Stats, 'RESET')",
+    "The Pewter part starts at 62 s so the Brock split lands after the timer's first minute, as gen4's",
+    "does. Referenced properties carry the glossary value the recorder would have written. Every path is",
+    "checked against the mapper XML at build time. Values are plausible, not a real run: this fixture",
+    "proves determinism and no-change-under-refactor, never correctness (see make-fixture.ts)."
+  ],
+  "replayName": "gen3-firered-smoke",
+  "recordedAt": "2026-01-01T12:00:00.000Z",
+  "item": {
+    "replayName": "gen3-firered-smoke",
+    "mapperId": "ST/gen3/pokemon_firered_leafgreen_ne.xml",
+    "gameCode": "fr",
+    "species": "Rayquaza",
+    "number": "1",
+    "starter": "Rayquaza"
+  },
+  "framesPerSecond": 60,
+  "frameIntervalMs": 250,
+  "initial": {
+    "player.name": "",
+    "player.playerId": 0,
+    "player.teamCount": 0,
+    "player.team.0.level": 0,
+    "player.team.0.expPoints": 0,
+    "player.team.0.personalityValue": 0,
+    "pointers.sStpCallback1": null,
+    "pointers.sStpCallback2": "CB2_InitTitleScreen",
+    "overworld.mapName": "PALLET_TOWN",
+    "battle.type.is_battle": false,
+    "battle.type.trainer": false,
+    "battle.turnInfo.battleDialogue": 0,
+    "battle.turnInfo.battleOutcome": 0,
+    "battle.trainer.totalPokemon": 0,
+    "battle.trainer.party_position": 0,
+    "patch.sStpTextBoxOpen": 0,
+    "gameTime.hours": 0,
+    "gameTime.minutes": 0,
+    "gameTime.seconds": 0,
+    "gameTime.frames": 0
+  },
+  "steps": [
+    {
+      "tMs": 2000,
+      "comment": "Title screen to the main menu.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_MainMenu"
+      }
+    },
+    {
+      "tMs": 3000,
+      "comment": "New game: CB2_MainMenu -> CB2_NewGameScene is gen3's new-run trigger for FRLG.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_NewGameScene"
+      }
+    },
+    {
+      "tMs": 5000,
+      "comment": "Into the overworld; the player exists, the party is still empty (Base Stats).",
+      "set": {
+        "pointers.sStpCallback2": "CB2_Overworld",
+        "pointers.sStpCallback1": "CB1_Overworld",
+        "player.name": "SCOTT",
+        "player.playerId": 44910
+      }
+    },
+    {
+      "tMs": 7000,
+      "comment": "The starter. Rayquaza is the legacy app's default starterString, so the party leader matches it.",
+      "set": {
+        "player.teamCount": 1,
+        "player.team.0.species": "Rayquaza",
+        "player.team.0.speciesArray": "Rayquaza",
+        "player.team.0.nickname": "RAYQUAZA",
+        "player.team.0.level": 5,
+        "player.team.0.expPoints": 156,
+        "player.team.0.personalityValue": 123456789,
+        "player.team.0.nature": "Adamant",
+        "player.team.0.ability": "AIR LOCK",
+        "player.team.0.friendship": 70,
+        "player.team.0.hp": 26,
+        "player.team.0.maxHp": 26,
+        "player.team.0.attack": 20,
+        "player.team.0.defense": 14,
+        "player.team.0.speed": 15,
+        "player.team.0.specialAttack": 19,
+        "player.team.0.specialDefense": 14,
+        "player.team.0.ivHp": 20,
+        "player.team.0.ivAttack": 25,
+        "player.team.0.ivDefense": 12,
+        "player.team.0.ivSpeed": 9,
+        "player.team.0.ivSpecialAttack": 3,
+        "player.team.0.ivSpecialDefense": 30,
+        "player.team.0.move1": "TWISTER",
+        "player.team.0.move1pp": 20,
+        "gameTime.seconds": 7
+      }
+    },
+    {
+      "tMs": 8000,
+      "comment": "A text box opens and closes: two markers.",
+      "set": {
+        "patch.sStpTextBoxOpen": 1
+      }
+    },
+    {
+      "tMs": 8500,
+      "set": {
+        "patch.sStpTextBoxOpen": 0
+      }
+    },
+    {
+      "tMs": 9000,
+      "comment": "Walking to Route 1: a map change marker.",
+      "set": {
+        "overworld.mapName": "ROUTE 1",
+        "gameTime.seconds": 9
+      }
+    },
+    {
+      "tMs": 11000,
+      "comment": "Wild Pidgey: the battle callbacks first (To Battle), the battle structures with them.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_InitBattle",
+        "pointers.sStpCallback1": "BattleMainCB1",
+        "battle.type.is_battle": true,
+        "battle.type.trainer": false,
+        "battle.trainer.totalPokemon": 1,
+        "battle.yourPokemon.species": "Rayquaza",
+        "battle.yourPokemon.level": 5,
+        "battle.yourPokemon.expPoints": 156,
+        "battle.yourPokemon.personalityValue": 123456789,
+        "battle.yourPokemon.hp": 26,
+        "battle.yourPokemon.maxHp": 26,
+        "battle.yourPokemon.attack": 20,
+        "battle.yourPokemon.defense": 14,
+        "battle.yourPokemon.speed": 15,
+        "battle.yourPokemon.specialAttack": 19,
+        "battle.yourPokemon.specialDefense": 14,
+        "battle.yourPokemon.move1": "TWISTER",
+        "battle.yourPokemon.move1pp": 20,
+        "battle.yourPokemon.type1": "Dragon",
+        "battle.yourPokemon.type2": "Flying",
+        "battle.enemyPokemon.species": "Pidgey",
+        "battle.enemyPokemon.level": 3,
+        "battle.enemyPokemon.hp": 15,
+        "battle.enemyPokemon.maxHp": 15,
+        "battle.enemyPokemon.attack": 8,
+        "battle.enemyPokemon.defense": 7,
+        "battle.enemyPokemon.speed": 9,
+        "battle.enemyPokemon.specialAttack": 7,
+        "battle.enemyPokemon.specialDefense": 7,
+        "battle.enemyPokemon.move1": "TACKLE",
+        "battle.enemyPokemon.type1": "Normal",
+        "battle.enemyPokemon.type2": "Flying",
+        "battle.enemyPokemon.partyPos": 0
+      }
+    },
+    {
+      "tMs": 12000,
+      "comment": "BattleMainCB2 is the IN marker ('IN - NOT_MAJOR_BATTLE' for a wild fight); dialogue 6 is player control, which is Battle.",
+      "set": {
+        "pointers.sStpCallback2": "BattleMainCB2",
+        "battle.turnInfo.battleDialogue": 6
+      }
+    },
+    {
+      "tMs": 14000,
+      "comment": "Pidgey faints.",
+      "set": {
+        "battle.enemyPokemon.hp": 0,
+        "gameTime.seconds": 14
+      }
+    },
+    {
+      "tMs": 15000,
+      "comment": "Outcome 1 is WON (FRLG's outcome is a bare int); no trainer flag, so no split.",
+      "set": {
+        "battle.turnInfo.battleOutcome": 1
+      }
+    },
+    {
+      "tMs": 16000,
+      "comment": "Back to the overworld: the OUT marker, then the battle state clears.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_Overworld",
+        "pointers.sStpCallback1": "CB1_Overworld",
+        "battle.type.is_battle": false,
+        "battle.turnInfo.battleOutcome": 0,
+        "battle.turnInfo.battleDialogue": 0,
+        "player.team.0.expPoints": 200,
+        "gameTime.seconds": 16
+      }
+    },
+    {
+      "tMs": 19000,
+      "comment": "Level up, and a second move learned: 'New Move - Scary Face'.",
+      "set": {
+        "player.team.0.level": 6,
+        "player.team.0.expPoints": 270,
+        "player.team.0.hp": 30,
+        "player.team.0.maxHp": 30,
+        "player.team.0.attack": 23,
+        "player.team.0.defense": 16,
+        "player.team.0.speed": 17,
+        "player.team.0.specialAttack": 22,
+        "player.team.0.specialDefense": 16,
+        "player.team.0.move2": "SCARY FACE",
+        "player.team.0.move2pp": 10,
+        "gameTime.seconds": 19
+      }
+    },
+    {
+      "tMs": 62000,
+      "comment": "Pewter City.",
+      "set": {
+        "overworld.mapName": "PEWTER_CITY",
+        "gameTime.minutes": 1,
+        "gameTime.seconds": 2
+      }
+    },
+    {
+      "tMs": 64000,
+      "comment": "The gym.",
+      "set": {
+        "overworld.mapName": "PEWTER_CITY - GYM",
+        "gameTime.seconds": 4
+      }
+    },
+    {
+      "tMs": 66000,
+      "comment": "Leader Brock: the trainer (class and id share an address), the team, the flags, then the callbacks.",
+      "set": {
+        "battle.trainer.opponent": "LEADER_BROCK",
+        "battle.trainer.opponentId": 414,
+        "battle.trainer.totalPokemon": 2,
+        "battle.trainer.party_position": 0,
+        "battle.trainer.team.0.species": "Geodude",
+        "battle.trainer.team.0.speciesArray": "Geodude",
+        "battle.trainer.team.0.level": 12,
+        "battle.trainer.team.0.hp": 31,
+        "battle.trainer.team.0.maxHp": 31,
+        "battle.trainer.team.0.personalityValue": 987654321,
+        "battle.trainer.team.1.species": "Onix",
+        "battle.trainer.team.1.speciesArray": "Onix",
+        "battle.trainer.team.1.level": 14,
+        "battle.trainer.team.1.hp": 40,
+        "battle.trainer.team.1.maxHp": 40,
+        "battle.trainer.team.1.personalityValue": 192837465,
+        "battle.type.is_battle": true,
+        "battle.type.trainer": true,
+        "pointers.sStpCallback2": "CB2_InitBattle",
+        "pointers.sStpCallback1": "BattleMainCB1",
+        "battle.yourPokemon.level": 6,
+        "battle.yourPokemon.expPoints": 270,
+        "battle.yourPokemon.hp": 30,
+        "battle.yourPokemon.maxHp": 30,
+        "battle.yourPokemon.attack": 23,
+        "battle.yourPokemon.defense": 16,
+        "battle.yourPokemon.speed": 17,
+        "battle.yourPokemon.specialAttack": 22,
+        "battle.yourPokemon.specialDefense": 16,
+        "battle.yourPokemon.move2": "SCARY FACE",
+        "battle.yourPokemon.move2pp": 10,
+        "battle.enemyPokemon.species": "Geodude",
+        "battle.enemyPokemon.level": 12,
+        "battle.enemyPokemon.hp": 31,
+        "battle.enemyPokemon.maxHp": 31,
+        "battle.enemyPokemon.attack": 22,
+        "battle.enemyPokemon.defense": 27,
+        "battle.enemyPokemon.speed": 11,
+        "battle.enemyPokemon.specialAttack": 11,
+        "battle.enemyPokemon.specialDefense": 11,
+        "battle.enemyPokemon.ability": "STURDY",
+        "battle.enemyPokemon.move1": "TACKLE",
+        "battle.enemyPokemon.move2": "ROCK THROW",
+        "battle.enemyPokemon.type1": "Rock",
+        "battle.enemyPokemon.type2": "Ground",
+        "battle.enemyPokemon.partyPos": 0,
+        "battle.enemyPokemon.personalityValue": 987654321,
+        "gameTime.seconds": 6
+      }
+    },
+    {
+      "tMs": 67000,
+      "comment": "'IN - LEADER_BROCK', then Battle with the trainer flag set: the split timer starts.",
+      "set": {
+        "pointers.sStpCallback2": "BattleMainCB2",
+        "battle.turnInfo.battleDialogue": 6
+      }
+    },
+    {
+      "tMs": 70000,
+      "comment": "Geodude faints.",
+      "set": {
+        "battle.enemyPokemon.hp": 0,
+        "gameTime.seconds": 10
+      }
+    },
+    {
+      "tMs": 71000,
+      "comment": "Onix comes out: a party_position change in Battle is the 'Next Pokemon' marker.",
+      "set": {
+        "battle.trainer.party_position": 1,
+        "battle.enemyPokemon.species": "Onix",
+        "battle.enemyPokemon.level": 14,
+        "battle.enemyPokemon.hp": 40,
+        "battle.enemyPokemon.maxHp": 40,
+        "battle.enemyPokemon.attack": 20,
+        "battle.enemyPokemon.defense": 50,
+        "battle.enemyPokemon.speed": 25,
+        "battle.enemyPokemon.specialAttack": 13,
+        "battle.enemyPokemon.specialDefense": 17,
+        "battle.enemyPokemon.ability": "STURDY",
+        "battle.enemyPokemon.move1": "TACKLE",
+        "battle.enemyPokemon.move2": "ROCK THROW",
+        "battle.enemyPokemon.partyPos": 1,
+        "battle.enemyPokemon.personalityValue": 192837465,
+        "gameTime.seconds": 11
+      }
+    },
+    {
+      "tMs": 75000,
+      "comment": "Onix faints.",
+      "set": {
+        "battle.enemyPokemon.hp": 0,
+        "gameTime.seconds": 15
+      }
+    },
+    {
+      "tMs": 76000,
+      "comment": "WON with the trainer flag: the autosplitter writes the three split files and marks 'LABEL - VICTORY'.",
+      "set": {
+        "battle.turnInfo.battleOutcome": 1
+      }
+    },
+    {
+      "tMs": 78000,
+      "comment": "'OUT - LEADER_BROCK', the Boulder Badge, and the exp from the fight.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_Overworld",
+        "pointers.sStpCallback1": "CB1_Overworld",
+        "battle.type.is_battle": false,
+        "battle.type.trainer": false,
+        "battle.turnInfo.battleOutcome": 0,
+        "battle.turnInfo.battleDialogue": 0,
+        "player.badges.badge1": true,
+        "player.team.0.level": 8,
+        "player.team.0.expPoints": 640,
+        "player.team.0.hp": 38,
+        "player.team.0.maxHp": 38,
+        "player.team.0.attack": 29,
+        "player.team.0.defense": 21,
+        "player.team.0.speed": 22,
+        "player.team.0.specialAttack": 28,
+        "player.team.0.specialDefense": 21,
+        "gameTime.seconds": 18
+      }
+    },
+    {
+      "tMs": 82000,
+      "comment": "A wild Geodude on the way out.",
+      "set": {
+        "overworld.mapName": "ROUTE 3",
+        "pointers.sStpCallback2": "CB2_InitBattle",
+        "pointers.sStpCallback1": "BattleMainCB1",
+        "battle.type.is_battle": true,
+        "battle.trainer.totalPokemon": 1,
+        "battle.trainer.party_position": 0,
+        "battle.yourPokemon.level": 8,
+        "battle.yourPokemon.expPoints": 640,
+        "battle.yourPokemon.hp": 38,
+        "battle.yourPokemon.maxHp": 38,
+        "battle.yourPokemon.attack": 29,
+        "battle.yourPokemon.defense": 21,
+        "battle.yourPokemon.speed": 22,
+        "battle.yourPokemon.specialAttack": 28,
+        "battle.yourPokemon.specialDefense": 21,
+        "battle.enemyPokemon.species": "Geodude",
+        "battle.enemyPokemon.level": 9,
+        "battle.enemyPokemon.hp": 26,
+        "battle.enemyPokemon.maxHp": 26,
+        "battle.enemyPokemon.attack": 18,
+        "battle.enemyPokemon.defense": 22,
+        "battle.enemyPokemon.speed": 9,
+        "battle.enemyPokemon.specialAttack": 9,
+        "battle.enemyPokemon.specialDefense": 9,
+        "battle.enemyPokemon.ability": "STURDY",
+        "battle.enemyPokemon.move1": "TACKLE",
+        "battle.enemyPokemon.move2": "ROCK THROW",
+        "battle.enemyPokemon.partyPos": 0,
+        "battle.enemyPokemon.personalityValue": 55555,
+        "gameTime.seconds": 22
+      }
+    },
+    {
+      "tMs": 83000,
+      "set": {
+        "pointers.sStpCallback2": "BattleMainCB2",
+        "battle.turnInfo.battleDialogue": 6
+      }
+    },
+    {
+      "tMs": 86000,
+      "comment": "Rayquaza goes down.",
+      "set": {
+        "battle.yourPokemon.hp": 0,
+        "player.team.0.hp": 0,
+        "gameTime.seconds": 26
+      }
+    },
+    {
+      "tMs": 87000,
+      "comment": "Outcome 2 is LOST.",
+      "set": {
+        "battle.turnInfo.battleOutcome": 2
+      }
+    },
+    {
+      "tMs": 88000,
+      "comment": "CB2_WhiteOut: blackout_counter++ and the 'BLACKOUT' marker.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_WhiteOut"
+      }
+    },
+    {
+      "tMs": 89000,
+      "comment": "Back at the Pokemon Center.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_Overworld",
+        "pointers.sStpCallback1": "CB1_Overworld",
+        "overworld.mapName": "PEWTER_CITY - POKEMON_CENTER_1F",
+        "battle.type.is_battle": false,
+        "battle.turnInfo.battleOutcome": 0,
+        "battle.turnInfo.battleDialogue": 0,
+        "player.team.0.hp": 38,
+        "gameTime.seconds": 29
+      }
+    },
+    {
+      "tMs": 92000,
+      "comment": "Reset: the copyright screen is in gen3's reset and Base Stats lists, and the save data is gone.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_InitCopyrightScreenAfterBootup",
+        "player.teamCount": 0,
+        "player.team.0.level": 0,
+        "player.team.0.personalityValue": 0,
+        "gameTime.hours": 0,
+        "gameTime.minutes": 0,
+        "gameTime.seconds": 0
+      }
+    },
+    {
+      "tMs": 93000,
+      "comment": "Both callbacks read as null while the ROM boots: the 'RESET' marker.",
+      "set": {
+        "pointers.sStpCallback1": null,
+        "pointers.sStpCallback2": null
+      }
+    },
+    {
+      "tMs": 95000,
+      "comment": "The title screen again.",
+      "set": {
+        "pointers.sStpCallback2": "CB2_InitTitleScreen"
+      }
+    }
+  ]
+}

@@ -3,12 +3,13 @@ import type { MapperProfile } from "~/core/mapper/MapperProfile";
 import { matchesIdentity, matchesPath, readIdentity } from "~/core/mapper/MapperAdapter";
 import { gen1 } from "./gen1";
 import { gen2 } from "./gen2";
+import { gen3 } from "./gen3";
 import { gen4 } from "./gen4";
 import { gen5 } from "./gen5";
 
 /**
- * Mapper -> GameModule (plan 1.4; the fusion in plan 3.1 adds the other four entries
- * and makes the import lazy per generation).
+ * Mapper -> GameModule (plan 1.4; the fusion in plan 3.1 makes the import lazy per
+ * generation).
  *
  * Detection order, from `docs/mapper-matrix.md`: the `/mapper` response's `meta.path`
  * against each profile's patterns first, then the profile's identity rule (a property
@@ -16,7 +17,7 @@ import { gen5 } from "./gen5";
  * have no meta properties). A mapper nothing claims -- every hack mapper, by decision 8
  * -- yields `null`, and `main.ts` shows the unsupported-mapper state.
  */
-export const MODULES: readonly GameModule[] = [gen1, gen2, gen4, gen5];
+export const MODULES: readonly GameModule[] = [gen1, gen2, gen3, gen4, gen5];
 
 export interface Detection {
     module: GameModule;

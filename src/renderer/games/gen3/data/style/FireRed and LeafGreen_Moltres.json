@@ -1,0 +1,17 @@
+{
+  "pkmn_ability": "Pressure",
+  "imageScale": "1.26",
+  "imageYOffset": "147",
+  "imageXOffset": "-37",
+  "overlay_color": "#f9c673",
+  "ui_saturation": "1.6",
+  "backgroundTexture": "Fire",
+  "backgroundScale": "188",
+  "backgroundYOffset": "-43",
+  "backgroundXOffset": "-70",
+  "backgroundContrast": "112",
+  "backgroundBrightness": "85",
+  "pkmnNature": "Hardy",
+  "attempt_number": 1,
+  "finished_run_count": 2
+}

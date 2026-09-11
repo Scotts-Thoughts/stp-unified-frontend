@@ -1,0 +1,16 @@
+{
+  "pkmn_ability": "Levitate",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Ghost",
+  "overlay_color": "#a7a0cc",
+  "imageScale": "0.57",
+  "imageYOffset": "206",
+  "imageXOffset": "-26",
+  "ui_saturation": "1.9",
+  "backgroundContrast": "115",
+  "backgroundScale": "137",
+  "backgroundYOffset": "-76",
+  "backgroundXOffset": "96",
+  "evolution": true,
+  "selected_evolution_species": "Koffing"
+}

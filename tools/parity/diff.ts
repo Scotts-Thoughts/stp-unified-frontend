@@ -87,7 +87,7 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
   // contents are compared per checkpoint (diffPersisted), so the file's mere presence
   // is not a finding against a legacy baseline that never had one.
   diffTree(join(baselineDir, "files", "appdata"), join(candidateDir, "files", "appdata"), 4, differences, ["data/user_state.json"]);
-  diffJsonFile(join(baselineDir, "writes.json"), join(candidateDir, "writes.json"), 5, "write log", undefined, differences, stripTiming);
+  diffJsonFile(join(baselineDir, "writes.json"), join(candidateDir, "writes.json"), 5, "write log", undefined, differences, canonicalWrites);
   diffProfileCheck(join(candidateDir, "profile-check.json"), differences);
   diffJsonFile(join(baselineDir, "status.json"), join(candidateDir, "status.json"), 6, "control server", undefined, differences);
   diffJsonFile(join(baselineDir, "obs-markers.json"), join(candidateDir, "obs-markers.json"), 7, "chapter markers", undefined, differences, stripTiming);
@@ -396,6 +396,38 @@ function diffPersisted(basePath: string, candPath: string, checkpoint: string, o
   }
 }
 
+/**
+ * Oracle 5's normaliser: the write log in replay order, with the writes of one virtual
+ * instant sorted. `tMs` is the fixture time the replay had reached when the mock took
+ * the request, so two writes with the same `tMs` were issued in the same step of the
+ * replay -- and when the overlay issues them concurrently (gen3 resets the five stat
+ * stages with five `setBytes` in one `Promise.all`), Chromium's connection pool and
+ * the server decide the arrival order, differently between two runs of the *same*
+ * app. The claim is "the same writes at the same instant"; the order within an
+ * instant is not one either side can make.
+ */
+function canonicalWrites(value: unknown): unknown {
+  if (!Array.isArray(value)) return value;
+  const groups = new Map<unknown, Record<string, unknown>[]>();
+  const order: unknown[] = [];
+  for (const entry of value) {
+    const record = (entry && typeof entry === "object" ? entry : { value: entry }) as Record<string, unknown>;
+    const t = record.tMs;
+    if (!groups.has(t)) {
+      groups.set(t, []);
+      order.push(t);
+    }
+    groups.get(t)!.push(record);
+  }
+  const out: unknown[] = [];
+  for (const t of order) {
+    const stripped = groups.get(t)!.map(({ tMs: _drop, ...rest }) => rest);
+    stripped.sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : JSON.stringify(a) > JSON.stringify(b) ? 1 : 0));
+    out.push(...stripped);
+  }
+  return out;
+}
+
 /** Timing columns are wall-clock even under the fake clock, so the sequence is the claim. */
 function stripTiming(value: unknown): unknown {
   if (!Array.isArray(value)) return value;
@@ -420,12 +452,17 @@ function diffConsole(basePath: string, candPath: string, checkpoint: string | un
   // errorHandler with one).
   // ...and by its message with the app's own location folded away: a failed load names
   // the file's absolute URL, and the same app built in a worktree (`unified@<dir>`)
-  // lives somewhere else.
+  // lives somewhere else. An image URL is folded further, to the path under the image
+  // root: the legacy apps load `<sandbox>/app-tree/app/images/x.png` and the unified
+  // app `<app>/out/renderer/images/genN/x.png` (the generation's tree, plan 2.4), and
+  // "the same missing image" is the claim -- gen3 asks for
+  // `elements/type-icons/undefined.png` on both sides.
   const message = (text: string): string =>
     text
       .split("\n")
       .filter((line) => !/^\s+at\s/.test(line))
       .join("\n")
+      .replace(/file:\/\/\/\S*?\/(?:app-tree\/app|out\/renderer)\/images\/(?:gen[1-5]\/)?/g, "<images>/")
       .replace(/file:\/\/\/\S*?\/out\/renderer\//g, "<app>/out/renderer/")
       .trim();
   const baseline = new Set(a.filter((e) => e.type !== "warning").map((e) => message(e.text)));

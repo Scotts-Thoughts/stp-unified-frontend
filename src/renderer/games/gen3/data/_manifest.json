@@ -1,0 +1,505 @@
+[
+ {
+  "file": "data/gen1data.js",
+  "out": "games/gen3/data/gen1data.js",
+  "globals": [
+   "gen1data"
+  ],
+  "lines": 2268,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/g3MovesData.js",
+  "out": "games/gen3/data/g3MovesData.js",
+  "globals": [
+   "g3MoveData"
+  ],
+  "lines": 3224,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/dexDataFireRedLeafGreen.js",
+  "out": "games/gen3/data/dexDataFireRedLeafGreen.js",
+  "globals": [
+   "dexDataFireRedLeafGreen"
+  ],
+  "lines": 43800,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/g3tmhmmapping.js",
+  "out": "games/gen3/data/g3tmhmmapping.js",
+  "globals": [
+   "g3tmhmMapping"
+  ],
+  "lines": 60,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/gen1dataGrowthMovepool.js",
+  "out": "games/gen3/data/gen1dataGrowthMovepool.js",
+  "globals": [
+   "gen1dataGrowthMovepool"
+  ],
+  "lines": 9273,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/gen1moves.js",
+  "out": "games/gen3/data/gen1moves.js",
+  "globals": [
+   "gen1moves"
+  ],
+  "lines": 1672,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/gen3data.js",
+  "out": "games/gen3/data/gen3data.js",
+  "globals": [
+   "gen3data"
+  ],
+  "lines": 13002,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/stageModifiers.js",
+  "out": "games/gen3/data/stageModifiers.js",
+  "globals": [
+   "stageModifiersData"
+  ],
+  "lines": 51,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/natures.js",
+  "out": "games/gen3/data/natures.js",
+  "globals": [
+   "natures"
+  ],
+  "lines": 432,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/gen3abilities.js",
+  "out": "games/gen3/data/gen3abilities.js",
+  "globals": [
+   "gen3abilities"
+  ],
+  "lines": 80,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/dexDataRubySapphireEmerald.js",
+  "out": "games/gen3/data/dexDataRubySapphireEmerald.js",
+  "globals": [
+   "dexDataRubySapphireEmerald"
+  ],
+  "lines": 46933,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/gen3moves.js",
+  "out": "games/gen3/data/gen3moves.js",
+  "globals": [
+   "gen3moves"
+  ],
+  "lines": 2866,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/type-effectiveness.js",
+  "out": "games/gen3/data/type-effectiveness.js",
+  "globals": [
+   "typeData"
+  ],
+  "lines": 342,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/typeBoostingItems.js",
+  "out": "games/gen3/data/typeBoostingItems.js",
+  "globals": [
+   "typeBoostingItems"
+  ],
+  "lines": 21,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/emerald_trainers.js",
+  "out": "games/gen3/data/emerald_trainers.js",
+  "globals": [
+   "emeraldTrainers"
+  ],
+  "lines": 50451,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/firered_leafgreen_trainers.js",
+  "out": "games/gen3/data/firered_leafgreen_trainers.js",
+  "globals": [
+   "remakeTrainers"
+  ],
+  "lines": 43576,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/hiddenPowerTypeSelector.js",
+  "out": "games/gen3/data/hiddenPowerTypeSelector.js",
+  "globals": [
+   "g3hiddenPowerTypeSelector"
+  ],
+  "lines": 20,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/textures.js",
+  "out": "games/gen3/data/textures.js",
+  "globals": [
+   "textures"
+  ],
+  "lines": 44,
+  "rebased": 42,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/default_colors.js",
+  "out": "games/gen3/data/default_colors.js",
+  "globals": [
+   "default_colors"
+  ],
+  "lines": 21,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/hiddenpower-all.js",
+  "out": "games/gen3/data/hiddenpower-all.js",
+  "globals": [
+   "hiddenpowers"
+  ],
+  "lines": 99,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/split_trainers_simple.js",
+  "out": "games/gen3/data/split_trainers_simple.js",
+  "globals": [
+   "split_trainers_simple"
+  ],
+  "lines": 48,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/cross_generation_moves.js",
+  "out": "games/gen3/data/cross_generation_moves.js",
+  "globals": [
+   "cross_generation_moves"
+  ],
+  "lines": 24750,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/autosplitter.js",
+  "out": "games/gen3/data/autosplitter.js",
+  "globals": [
+   "autosplitter"
+  ],
+  "lines": 127,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/generation_3_moves.js",
+  "out": "games/gen3/data/generation_3_moves.js",
+  "globals": [
+   "generation_3_moves"
+  ],
+  "lines": 7102,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "settings/application_settings.js",
+  "out": "games/gen3/data/settings/application_settings.js",
+  "globals": [
+   "application_settings"
+  ],
+  "lines": 161,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "settings/pokemon_settings.js",
+  "out": "games/gen3/data/settings/pokemon_settings.js",
+  "globals": [
+   "pokemon_settings"
+  ],
+  "lines": 62,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "autosplitter/autosplitter_functions.js",
+  "out": "games/gen3/data/autosplitter/autosplitter_functions.js",
+  "globals": [
+   "log_split",
+   "autosplitter_process"
+  ],
+  "lines": 418,
+  "rebased": 0,
+  "imports": [
+   "import { autosplitter } from \"../autosplitter.js\";"
+  ],
+  "shadowed": 0
+ },
+ {
+  "file": "autosplitter/trainer_name_lookup.js",
+  "out": "games/gen3/data/autosplitter/trainer_name_lookup.js",
+  "globals": [
+   "trainer_name_lookup"
+  ],
+  "lines": 79,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "methods/attacking_functions.js",
+  "out": "games/gen3/data/methods/attacking_functions.js",
+  "globals": [
+   "enemy_move_power",
+   "enemy_effective_power",
+   "typeEffectiveness",
+   "type_effectiveness"
+  ],
+  "lines": 211,
+  "rebased": 0,
+  "imports": [
+   "import { typeData } from \"../type-effectiveness.js\";",
+   "import { generation_3_moves } from \"../generation_3_moves.js\";"
+  ],
+  "shadowed": 0
+ },
+ {
+  "file": "methods/move_power_functions.js",
+  "out": "games/gen3/data/methods/move_power_functions.js",
+  "globals": [
+   "movePower",
+   "hiddenPowerTypeCalc",
+   "hiddenPowerPowerCalc",
+   "weatherBallTypeCalc",
+   "g3ReturnPowerCalc",
+   "g3FrustrationPowerCalc"
+  ],
+  "lines": 142,
+  "rebased": 0,
+  "imports": [
+   "import { gen3moves } from \"../gen3moves.js\";"
+  ],
+  "shadowed": 0
+ },
+ {
+  "file": "methods/modifier_functions.js",
+  "out": "games/gen3/data/methods/modifier_functions.js",
+  "globals": [
+   "determineSTAB",
+   "determineItemBoost",
+   "abilityModifier",
+   "burnModifier",
+   "stageMultiplier",
+   "weatherModifier"
+  ],
+  "lines": 116,
+  "rebased": 0,
+  "imports": [
+   "import { stageModifiersData } from \"../stageModifiers.js\";",
+   "import { typeBoostingItems } from \"../typeBoostingItems.js\";"
+  ],
+  "shadowed": 0
+ },
+ {
+  "file": "methods/text_functions.js",
+  "out": "games/gen3/data/methods/text_functions.js",
+  "globals": [
+   "move_name",
+   "camelCase",
+   "capitalization_format",
+   "pascalCaseSpace",
+   "pascalCaseDot",
+   "titleCaseNoUnderscores",
+   "itemCheck",
+   "ifZero",
+   "nullToNone",
+   "nullToSpace"
+  ],
+  "lines": 92,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "methods/time_functions.js",
+  "out": "games/gen3/data/methods/time_functions.js",
+  "globals": [
+   "padTime",
+   "gameTimeM",
+   "gameTimeHM",
+   "gameTimeHMS",
+   "leadZero",
+   "formatDuration"
+  ],
+  "lines": 48,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 1
+ },
+ {
+  "file": "pokedex/emerald.js",
+  "out": "games/gen3/data/pokedex/emerald.js",
+  "globals": [
+   "pokedex_emerald"
+  ],
+  "lines": 38494,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "pokedex/firered_leafgreen.js",
+  "out": "games/gen3/data/pokedex/firered_leafgreen.js",
+  "globals": [
+   "pokedex_frlg"
+  ],
+  "lines": 35544,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "autosplitter/split_trainers.js",
+  "out": "games/gen3/data/autosplitter/split_trainers.js",
+  "globals": [
+   "split_trainers_emerald",
+   "split_trainers_frlg",
+   "split_trainers_by_game",
+   "split_trainers"
+  ],
+  "lines": 94,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/hiddenpower.js",
+  "out": "games/gen3/data/hiddenpower.js",
+  "globals": [
+   "hiddenpower_type_selector"
+  ],
+  "lines": 19,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/pokedex_indexes.js",
+  "out": "games/gen3/data/pokedex_indexes.js",
+  "globals": [
+   "pokedex_indexes"
+  ],
+  "lines": 392,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/unobtainable_moves.js",
+  "out": "games/gen3/data/unobtainable_moves.js",
+  "globals": [
+   "unobtainable_moves"
+  ],
+  "lines": 425,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "data/firered_leafgreen.js",
+  "out": "games/gen3/data/firered_leafgreen.js",
+  "globals": [
+   "evolution_data_pokedex"
+  ],
+  "lines": 35544,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/evolution_family_data/emerald.js",
+  "out": "games/gen3/data/evolution_family_data/emerald.js",
+  "globals": [
+   "evolution_family_data_emerald"
+  ],
+  "lines": 39839,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ },
+ {
+  "file": "lib/evolution_family_data/firered_leafgreen.js",
+  "out": "games/gen3/data/evolution_family_data/firered_leafgreen.js",
+  "globals": [
+   "evolution_family_data_firered_leafgreen"
+  ],
+  "lines": 37066,
+  "rebased": 0,
+  "imports": [],
+  "shadowed": 0
+ }
+]

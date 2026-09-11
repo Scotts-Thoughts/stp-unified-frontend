@@ -1,0 +1,12 @@
+{
+  "pkmn_ability": "Torrent",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Water",
+  "overlay_color": "#6890f0",
+  "imageFlip": true,
+  "imageScale": "0.82",
+  "selected_evolution_species": "Squirtle",
+  "evolution": false,
+  "finished_run_count": 2,
+  "attempt_number": 3
+}

@@ -1,0 +1,19 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.65",
+  "imageYOffset": "-2",
+  "imageXOffset": "27",
+  "overlay_color": "#6795c9",
+  "ui_saturation": "1.9",
+  "backgroundScale": "140",
+  "backgroundBlur": "2",
+  "backgroundHue": "0",
+  "backgroundContrast": "123",
+  "backgroundBrightness": "27",
+  "backgroundSaturation": "112",
+  "evolution": false,
+  "selected_evolution_species": "Wartortle",
+  "pkmn_ability": "Torrent",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Water"
+}

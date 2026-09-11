@@ -1,0 +1,22 @@
+{
+  "pkmn_ability": "Inner Focus",
+  "pkmnNature": "Brave",
+  "backgroundTexture": "Dark",
+  "overlay_color": "#598a98",
+  "imageFlip": true,
+  "imageScale": "0.61",
+  "imageYOffset": "-2",
+  "imageXOffset": "48",
+  "ui_saturation": "2",
+  "backgroundFlip": true,
+  "backgroundScale": "137",
+  "backgroundYOffset": "25",
+  "backgroundXOffset": "14",
+  "backgroundContrast": "133",
+  "backgroundHue": "54",
+  "backgroundSaturation": "42",
+  "hidden_power_type": "Ground",
+  "hidden_power_index": "3",
+  "attempt_number": 4,
+  "finished_run_count": 2
+}

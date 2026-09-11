@@ -1,0 +1,18 @@
+{
+  "pkmn_ability": "Run Away",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fire",
+  "overlay_color": "#ec892c",
+  "imageFlip": true,
+  "imageScale": "0.69",
+  "imageYOffset": "6",
+  "imageXOffset": "41",
+  "ui_saturation": "1",
+  "backgroundScale": "187",
+  "backgroundContrast": "108",
+  "backgroundBrightness": "83",
+  "backgroundYOffset": "114",
+  "backgroundXOffset": "21",
+  "evolution": true,
+  "selected_evolution_species": "Ponyta"
+}

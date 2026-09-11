@@ -1,0 +1,19 @@
+{
+  "pkmn_ability": "Vital Spirit",
+  "pkmnNature": "Adamant",
+  "backgroundTexture": "Fighting",
+  "overlay_color": "#9e7c63",
+  "imageFlip": true,
+  "imageScale": "0.83",
+  "imageYOffset": "68",
+  "imageXOffset": "17",
+  "ui_saturation": "1.7",
+  "backgroundBrightness": "35",
+  "backgroundContrast": "99",
+  "backgroundSaturation": "164",
+  "backgroundBlur": "0",
+  "backgroundScale": "100",
+  "attempt_number": 7,
+  "hidden_power_type": "Ghost",
+  "hidden_power_index": "3"
+}

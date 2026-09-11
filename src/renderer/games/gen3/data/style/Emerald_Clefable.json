@@ -1,0 +1,19 @@
+{
+  "imageScale": "0.71",
+  "imageFlip": true,
+  "imageYOffset": "20",
+  "imageXOffset": "27",
+  "overlay_color": "#cb9ca6",
+  "ui_saturation": "1.9",
+  "backgroundTexture": "Psychic",
+  "backgroundScale": "177",
+  "backgroundContrast": "172",
+  "backgroundBrightness": "64",
+  "backgroundBlur": "1",
+  "backgroundYOffset": "19",
+  "pkmn_ability": "Cute Charm",
+  "pkmnNature": "Rash",
+  "backgroundHue": "244",
+  "attempt_number": 2,
+  "finished_run_count": 2
+}

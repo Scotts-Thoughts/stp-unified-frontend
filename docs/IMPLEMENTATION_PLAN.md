@@ -666,7 +666,14 @@ Status as of 2026-09-11, third implementation session (continued).
 | 2 | ✅ 256 paths / 60 writes | ✅ 25 files + 40 style JSON | ✅ Crystal, Gold & Silver | ✅ `games/gen2/Overlay.vue` | ✅ 706 rules | ✅ (import deferred) | ✅ **all nine oracles green** on the recorded Crystal run (`c-wigglytuff-2-11311`, 22 checkpoints), three unified runs against a legacy baseline that two legacy runs agree on (2026-09-11) |
 | 4 | ✅ 231 paths / 79 writes | ✅ 31 files + 383 style JSON + 506 sprite scales | ✅ Platinum, D&P, HG&SS (`ST/gen4/*_ne` and `STANDARD/gen4/*`) | ✅ `games/gen4/Overlay.vue` (10,607 lines) | ✅ 569 rules | ✅ gen4's key rule, style-field filter, 500 ms debounced write | ✅ **all nine oracles green, pixel-exact** on the synthetic Platinum fixture (`gen4-platinum-smoke`, 19 checkpoints), two unified runs against a legacy baseline two legacy runs agree on (2026-09-11) |
 | 5 | ✅ 241 paths / 83 writes | ✅ 26 files + 327 style JSON + 669 sprite scales | ✅ Black, White, Black 2, White 2 (`STANDARD/gen5/*`) | ✅ `games/gen5/Overlay.vue` (10,641 lines) + its Timer/PubSub/timer components and form tables as ES modules | ✅ 570 rules | ✅ gen5's key rule, style-field filter, three-layer read, 1 s debounced write without flush | ✅ **all nine oracles green, pixel-exact** on the synthetic Black fixture (`gen5-black-smoke`, 14 checkpoints), two unified runs against a legacy baseline two legacy runs agree on (2026-09-11) |
-| 3 | | | | | | | |
+| 3 | ✅ 212 paths / 76 writes | ✅ 42 files (+ `gameVariables.js`) + 303 style JSON + 387 sprite scales | ✅ Emerald, FireRed & LeafGreen (`ST/gen3/*_ne`) | ✅ `games/gen3/Overlay.vue` (8,990 lines) + its Timer/PubSub/timer component as ES modules | ✅ 490 rules | ✅ gen3's own store: `<Game>_` key rule, no `user_` layer, replace-on-write defaults | ✅ **all nine oracles green, pixel-exact** on the synthetic FireRed fixture (`gen3-firered-smoke`, 15 checkpoints), a unified run against a legacy baseline two legacy runs agree on (2026-09-11) |
+
+**Phase 2 as of 2026-09-11 (evening): every generation is lifted and green** -- gen2 on the one real recording,
+gen3/gen4/gen5 on synthetic fixtures, gen1 unchanged by the whole phase (the `unified@<worktree>` check). What
+Phase 2 still owes, carried into the later phases: the LevelDB importer (2.6, decision 3) and gen2's backport
+importer stub (decision 15); oracle 6's control-script sessions (`--control`, blocked on port 30159); real
+recordings for gen1/3/4/5 (decision 6, Scott); and `npm run dev` for the lifted generations, whose images sit
+behind the `out/renderer/images/genN` junctions until Phase 4 merges the pools.
 
 **What the harness found while lifting gen2**, each of which would have been invisible to review and is now a
 rule in the tools:
@@ -791,13 +798,83 @@ rule in the tools:
   on the legacy side, the `spawn keyhook.exe ENOENT` page error when the exe is missing (both sides spawn it
   from the sandbox cwd; the unified app from its main process, which logs instead of throwing).
   `STP_PARITY_KEEP_SANDBOX=1` skips the sandbox refresh so an instrumented legacy copy survives a run.
+- **gen3's `ready` gates its `game` computed, and the template reads it at its top level.** The legacy
+  `mounted` awaited `connect()`, which resolved only after the client's onMapperLoaded callback had raised
+  `ready` and Vue had rendered the `v-else` overlay -- and the watchers `created()` queued had flushed before
+  that with `ready` still false. A lift whose root is the `v-else` content renders before `mounted`, with
+  `ready` false, and `this.game_data.region` throws from the first render; a lift that raises `ready` before
+  the render runs the queued `evolution` watcher a step early; a lift that runs the post-connect code
+  synchronously reads `#reset_counter_single` before it exists. So the lifted root is
+  `<div v-if="ready">` -- the `v-else` gate, where it was -- and `mounted` keeps the legacy's two async hops
+  (`await this.$nextTick()` before raising `ready`, and again after): the queued watchers, then `ready` and
+  the render, then the callback's next-tick work, then the rest against a rendered overlay. gen3's `#app` is
+  also the overlay grid itself (`class="mainContainer"` on `#app`, where gen2/4/5 nest the grid a level
+  down), so `GameModule.appClass` puts the class on `#app` and the shell's `<keyhook>` renders nothing for
+  it (`GameModule.keyhookElement`, set only by gen1, whose legacy keyhook *was* a component with an empty
+  div): an extra element there would take the grid's first cell.
+- gen3's `style_settings_manager.js` is a fourth, earlier model with no `user_` layer: a style key reads as
+  the bare key merged over the shipped default, a write lands on the bare key and in dev mode *replaces* the
+  default (not merges), and `exportCurrentAsDefaults` folds every bare style key in. It is its own store
+  (`games/gen3/storage.ts`, sharing only the per-species file writer) because those are different rules, not
+  a different configuration of the shared one. Its `logCopy` numbers a finished run by listing `finishes/`
+  (`fs.readdirSync`), which is a queued `splits:list` now; `logData` read the game folder off the mounted
+  instance's computed (`app.game.gameName`), which both call sites also pass as `gameName_path`. F20 is
+  registered twice in its hotkey block (#6): a table has one entry per key, so that entry runs both bodies in
+  registration order, which is what two listeners did. `lib/gameVariables.js` was the one legacy ES module
+  (loaded by `import()`) and still read four classic-script globals off `window`; it is imported statically
+  with those as imports, and assigned in `created()` where the promise used to land. `methods/
+  time_functions.js` declares `gameTimeHM` twice (#36), which a classic script hoists and a module refuses;
+  `port-data.ts` renames the shadowed one. The OBS method is gen2's exchange plus a `GetRecordStatus` probe
+  and log lines, which is the shared client's `probeStatus` variant.
+- **gen3's `methods/*.js` and `autosplitter/autosplitter_functions.js` are component code, not data.**
+  Their functions are mixed into the component's `methods` and run with `this` bound to it, reading
+  `this.mapper.properties` and the page's `MyStorage` and assigning names they never declare. port-data.ts
+  had copied them verbatim as tables; the first unified run threw `Cannot read properties of null (reading
+  'properties')` from `hiddenPowerPowerCalc` on its first render. The lift now gives those four files the
+  component's seams in place (step 13) and `check-undefined.ts` runs over them too (#37 is what it found).
+  The inventory's "paths only reached from dead code" section was wrong for gen3 for the same reason: the
+  `methods/` rule is gen1's.
+- **Every legacy overlay ran a development build of Vue, and dev Vue rethrows an unhandled error.** A render
+  that throws aborts the patch, so the overlay froze at its last good frame with the error in the console.
+  Production Vue -- or an `app.config.errorHandler`, which the shell had -- logs it and replaces the
+  component's tree with a comment: a blank overlay. The mock's undecoded `setBytes` (below) made gen3's
+  `stageMultiplier` throw on both sides, and the two recoveries showed up as a stale legacy DOM against an
+  empty unified one. The shell now sets `throwUnhandledErrorInProduction` and has no error handler, so a
+  render error freezes the overlay exactly as it did, and the harness sees the same `pageerror` on both
+  sides. (gen4's #33 fixture placement had kept this out of sight.)
+- **A `scale(1)` container is not "no transform".** gen3's legacy page has no fit-to-window script and no
+  scaling container; the shell's `#app-container` carried `transform: scale(1)` from base.css for it, and a
+  transformed container is a composited layer whose inline boxes and text Chromium snaps to whole pixels --
+  every `<br>` after a `<select>` sat at y+0.5 in the legacy and y+0 in the unified app, and every label
+  in the settings panels rasterised differently (39,000 pixels a checkpoint). The fit-to-window script is
+  now a module flag for gen1 too (its own index.html carried it; `index.html` no longer does), and a module
+  without the flag runs with `transform: none` inline. Even with that, seven `<br>` rects sat half a pixel
+  apart with the pixels identical: Chromium had laid gen3's `<select>`s out with the fallback font's
+  baseline and did not revisit it when `play` arrived, because a `<style>` swapped in late has not fetched
+  its faces where the legacy page's loading screen already used them. The shell now loads a module's
+  declared faces before it is `ready`; that in turn found gen4 and gen5 declaring `lgothic` for a
+  `LeagueGothic.ttf` neither ships nor uses (a 404 the legacy never fetched), which `scope-css.py` now drops.
+- **The mock now decodes `set-property-bytes` into a value**, as PokeAByte's next read would (an integer,
+  through the glossary for a referenced property). Before, the value stayed `null` after gen3's stage reset
+  and the app crashed on it -- a stand-in artefact, found because the legacy crashed identically.
+- **Oracle 5 compares the writes of one virtual instant as a set.** gen3 resets its five stage modifiers
+  with five `setBytes` in one `Promise.all`; Chromium's connection pool and the server decide their arrival
+  order, and two runs of the *same* legacy app differed there. The claim is "the same writes at the same
+  instant".
 - gen4's parity fixture is synthetic (`tools/parity/scenarios/gen4-platinum-smoke.json`, built from the
   shipped `ST/gen4/pokemon_platinum_ne.xml`): a new game, the starter, a route change, a wild battle, Leader
   Roark, a level-up, a blackout and a reset, 21 checkpoints over 90 s. It proves determinism and no-change
   under the lift, not correctness (decision 6 still stands). Its Roark split is placed after the timer's first
   minute on purpose: known-legacy-bugs.md #33. gen5's (`gen5-black-smoke.json`, from
   `STANDARD/gen5/pokemon_black.xml`) follows the same shape with gen5's own edges: `flags.new_game`, the
-  `player.name` reset, the `battle.other.battle` pointer for a blackout, and the Cilan split.
+  `player.name` reset, the `battle.other.battle` pointer for a blackout, and the Cilan split. gen3's
+  (`gen3-firered-smoke.json`, from `ST/gen3/pokemon_firered_leafgreen_ne.xml`) drives the `sStpCallback`
+  state path: `CB2_MainMenu -> CB2_NewGameScene` for the new run, `CB2_InitBattle`/`BattleMainCB2`/
+  `CB2_Overworld` for the IN/OUT markers, dialogue 6 and outcome 1 (FRLG's are bare ints) for Battle and
+  the Brock split, `CB2_WhiteOut` for the blackout and the copyright screen plus two null callbacks for the
+  reset. FireRed rather than Emerald because a fresh profile's game is `FireRed and LeafGreen` and the
+  Emerald mapper has no `meta.gameName` to correct it (#12); the party leader is the legacy default
+  starter, Rayquaza, so the overlay is coherent.
 
 ## 8. Corrections the first implementation session made to the plan
 

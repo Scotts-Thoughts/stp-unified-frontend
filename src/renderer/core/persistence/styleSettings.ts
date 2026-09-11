@@ -71,6 +71,24 @@ export interface StyleSettingsStore {
     saveToDefaults(key: string, value: unknown): void;
 }
 
+/**
+ * Rewrites one species file under `sourceDir` (relative to `src/renderer`) over
+ * `source:write`; `undefined` writes `null`, which the loaders skip. The dev-mode
+ * write-back of this store and of gen3's own (`games/gen3/storage.ts`), and the
+ * only place that knows the file naming.
+ */
+export function writeStyleDefaultsFile(sourceDir: string, key: string, value: unknown, tag = "[StyleSettingsManager]", log = true): void {
+    const name = key.replace(/[<>:"/\|?*]/g, "_");
+    const relative = `${sourceDir}/${name}.json`;
+    const promise =
+        value === undefined
+            ? window.api.source.write(relative, "null\n")
+            : window.api.source.write(relative, JSON.stringify(value, null, 2) + "\n");
+    promise
+        .then(() => { if (log) console.log(`${tag} Saved default settings to file`); })
+        .catch((e) => { if (log) console.error(`${tag} Failed to write default settings file:`, e?.message ?? e); });
+}
+
 export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSettingsStore {
     const tag = options.tag ?? "[StyleSettingsManager]";
     const defaults = options.defaults;
@@ -78,18 +96,7 @@ export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSe
     const isDev = !isPackaged();
     console.log(`${tag} Initialized in ${isDev ? "DEVELOPMENT" : "PRODUCTION"} mode`);
 
-    const writeDefaultsFileNow = (key: string): void => {
-        const value = defaults[key];
-        const name = key.replace(/[<>:"/\|?*]/g, "_");
-        const relative = `${options.sourceDir}/${name}.json`;
-        const promise =
-            value === undefined
-                ? window.api.source.write(relative, "null\n")
-                : window.api.source.write(relative, JSON.stringify(value, null, 2) + "\n");
-        promise
-            .then(() => console.log(`${tag} Saved default settings to file`))
-            .catch((e) => console.error(`${tag} Failed to write default settings file:`, e?.message ?? e));
-    };
+    const writeDefaultsFileNow = (key: string): void => writeStyleDefaultsFile(options.sourceDir, key, defaults[key], tag);
 
     // gen4's `_scheduleWriteDefaultsFile`: one timer, reset by every edit, flushed on
     // unload. Per key here, because a key is a file; the legacy blob was one file.

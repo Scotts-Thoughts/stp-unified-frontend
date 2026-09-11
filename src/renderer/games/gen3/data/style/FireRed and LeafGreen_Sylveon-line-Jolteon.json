@@ -1,0 +1,17 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.81",
+  "imageYOffset": "32",
+  "imageXOffset": "32",
+  "overlay_color": "#fad570",
+  "ui_saturation": "1.3",
+  "backgroundScale": "200",
+  "backgroundFlip": true,
+  "backgroundXFlip": true,
+  "backgroundYOffset": "35",
+  "backgroundXOffset": "119",
+  "backgroundHue": "41",
+  "backgroundBrightness": "86",
+  "backgroundContrast": "151",
+  "finished_run_count": 1
+}

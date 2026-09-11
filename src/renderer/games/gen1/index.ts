@@ -57,6 +57,10 @@ export const gen1: GameModule = {
     chapterMarkers: gen1ChapterMarkers,
     overlay: Overlay,
     cssClass: "gen-1",
+    // The legacy keyhook component's empty <div> in #app (core/hotkeys/Hotkeys.vue).
+    keyhookElement: true,
+    // The 16:9 fit-to-window script at the bottom of the legacy index.html (core/window/scaleToFit.ts).
+    scaleToFit: true,
     // Applied by main.ts as a <style> element (plan 3.1), after core/styles/base.css,
     // which index.html still links -- the same cascade order the two files had.
     styles: () => import("./style.css?inline").then((m) => m.default),

@@ -442,40 +442,38 @@ export class GameHookMapperClient {
         return result
     }
 
+    // The three write paths are gen4's (plan 3.3): a failed write is a console.warn
+    // with PokeAByte's status and detail, not a thrown 'Unknown error' that no caller
+    // caught (gen1/2/3/5 let it surface as an unhandled rejection). The first-dot
+    // path replace stays: PokeAByte normalises both forms (known-legacy-bugs.md #24).
     async _editPropertyValue(path, value, freeze) {
         path = path.replace('.', '/')
 
-        await fetch(`${this._connectionString}/mapper/set-property-value/`, {
+        const response = await fetch(`${this._connectionString}/mapper/set-property-value/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path, value, freeze })
         })
-            .then(async (x) => { return { response: x } })
-            .then(x => {
-                if (x.response.status === 200) {
-                    return
-                } else {
-                    throw new Error('Unknown error')                    
-                }
-            })
+
+        if (!response.ok) {
+            const detail = await response.text().catch(() => '')
+            console.warn(`[GameHook Client] Failed to set ${path} = ${value}: ${response.status} ${response.statusText}${detail ? ` - ${detail}` : ''}`)
+        }
     }
 
     async _editPropertyBytes(path, bytes, freeze) {
         path = path.replace('.', '/')
 
-        await fetch(`${this._connectionString}/mapper/set-property-bytes/`, {
+        const response = await fetch(`${this._connectionString}/mapper/set-property-bytes/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path, bytes, freeze })
         })
-            .then(async (x) => { return { response: x } })
-            .then(x => {
-                if (x.response.status === 200) {
-                    return
-                } else {
-                    throw new Error('Unknown error')                    
-                }
-            })
+
+        if (!response.ok) {
+            const detail = await response.text().catch(() => '')
+            console.warn(`[GameHook Client] Failed to set bytes for ${path}: ${response.status} ${response.statusText}${detail ? ` - ${detail}` : ''}`)
+        }
     }
 
     //For setting multiple bits within the same byte at the same time
@@ -485,20 +483,35 @@ export class GameHookMapperClient {
             path: item.path.replace(/\./g, '/')
         }));
 
-        await fetch(`${this._connectionString}/mapper/set-properties-by-bits/`, {
+        const response = await fetch(`${this._connectionString}/mapper/set-properties-by-bits/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(modifiedArray)
         })
-            .then(async (x) => { return { response: x } })
-            .then(x => {
-                if (x.response.status === 200) {
-                    return
-                } else {
-                    console.log(x)
-                    throw new Error('Unknown error')                    
-                }
-            })
+
+        if (!response.ok) {
+            const detail = await response.text().catch(() => '')
+            console.warn(`[GameHook Client] Failed to set bits: ${response.status} ${response.statusText}${detail ? ` - ${detail}` : ''}`)
+        }
+    }
+
+    /**
+     * gen3's: stop the SignalR connection and drop the mapper (plan 3.3). The legacy
+     * gen3 called it from `beforeunload` so a reload did not leave PokeAByte a dangling
+     * hub connection; main.ts does the same for every generation.
+     */
+    async disconnect() {
+        this.connected = false;
+        if (this._signalrClient) {
+            try {
+                await this._signalrClient.stop();
+                console.debug('[GameHook Client] SignalR connection stopped.');
+            } catch (err) {
+                console.warn('[GameHook Client] Error stopping SignalR connection:', err);
+            }
+            this._signalrClient = null;
+        }
+        this._deconstructMapper();
     }
 
     onConnected() { /* Override this with your own function. */ }

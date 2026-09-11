@@ -1,0 +1,13 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.47",
+  "imageYOffset": "41",
+  "imageXOffset": "55",
+  "overlay_color": "#8fd1ed",
+  "ui_saturation": "2",
+  "selected_evolution_species": "Horsea",
+  "evolution": false,
+  "pkmn_ability": "Swift Swim",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Water"
+}

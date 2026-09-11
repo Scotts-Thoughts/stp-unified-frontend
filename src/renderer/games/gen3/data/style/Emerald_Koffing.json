@@ -1,0 +1,22 @@
+{
+  "imageScale": "0.61",
+  "imageYOffset": "211",
+  "imageXOffset": "-23",
+  "overlay_color": "#ada6d0",
+  "ui_saturation": "1.9",
+  "pkmn_ability": "Levitate",
+  "backgroundScale": "117",
+  "backgroundContrast": "131",
+  "backgroundBrightness": "58",
+  "backgroundBlur": "2",
+  "backgroundYOffset": "-3",
+  "pkmnNature": "Mild",
+  "hidden_power_type": "Ice",
+  "hidden_power_index": "3",
+  "attempt_number": 7,
+  "finished_run_count": 5,
+  "backgroundTexture": "Poison",
+  "selected_evolution_species": "Koffing",
+  "evolution": false,
+  "splits_display": "Followup"
+}

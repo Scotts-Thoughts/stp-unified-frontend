@@ -1,0 +1,19 @@
+{
+  "pkmn_ability": "Torrent",
+  "pkmnNature": "Rash",
+  "backgroundTexture": "Dark Water",
+  "overlay_color": "#6dcce9",
+  "imageFlip": true,
+  "imageYOffset": "48",
+  "imageXOffset": "6",
+  "ui_saturation": "1.6",
+  "backgroundContrast": "129",
+  "backgroundScale": "124",
+  "backgroundYOffset": "65",
+  "backgroundBrightness": "83",
+  "hidden_power_type": "Electric",
+  "attempt_number": 27,
+  "finished_run_count": 13,
+  "splits_display": "Followup",
+  "hidden_power_index": "3"
+}

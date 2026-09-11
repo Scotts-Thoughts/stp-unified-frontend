@@ -2,7 +2,8 @@
  * Scoped under `.gen-2` by tools/port/scope-css.py from A:/Programs/gen2-stp-frontend/app/style.css
  * (plan 2.5). Values untouched; selectors prefixed; `:root` -> `.gen-2`;
  * `#app-container` -> `.gen-2#app-container`; `html`/`body` -> `:has(.gen-2)`
- * variants; `*` dropped because core/styles/base.css carries the reset. `url(fonts/...)` re-based to `../../fonts/`;
+ * variants; `*` dropped because core/styles/base.css carries the reset; a `@font-face` for a file the legacy app
+ * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `../../fonts/`;
  * `url(images/...)` -> `url(images/gen2/...)` (tools/port/lift_assets.py).
  * Do not edit by hand -- re-run the tool.
  */

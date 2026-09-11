@@ -1,0 +1,18 @@
+{
+  "pkmn_ability": "Rock Head",
+  "pkmnNature": "Adamant",
+  "backgroundTexture": "Brushed Steel",
+  "overlay_color": "#62a8c4",
+  "imageFlip": true,
+  "imageYOffset": "41",
+  "imageXOffset": "20",
+  "backgroundContrast": "101",
+  "backgroundBrightness": "48",
+  "backgroundScale": "150",
+  "ui_saturation": "1.4",
+  "hidden_power_type": "Rock",
+  "hidden_power_index": "3",
+  "attempt_number": 4,
+  "finished_run_count": 2,
+  "splits_display": "Followup"
+}

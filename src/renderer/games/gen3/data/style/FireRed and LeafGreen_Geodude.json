@@ -1,0 +1,15 @@
+{
+  "pkmn_ability": "Rock Head",
+  "backgroundScale": "119",
+  "backgroundFlip": true,
+  "backgroundYOffset": "34",
+  "backgroundBlur": "2",
+  "backgroundContrast": "119",
+  "backgroundBrightness": "76",
+  "overlay_color": "#9d9b8c",
+  "ui_saturation": "1.7",
+  "imageScale": "0.78",
+  "imageYOffset": "-79",
+  "imageXOffset": "-16",
+  "selected_evolution_species": "Geodude"
+}

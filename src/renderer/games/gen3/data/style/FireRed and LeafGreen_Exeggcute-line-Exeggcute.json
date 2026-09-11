@@ -1,0 +1,23 @@
+{
+  "backgroundTexture": "Psychic",
+  "backgroundFlip": true,
+  "backgroundXFlip": true,
+  "backgroundContrast": "136",
+  "backgroundBrightness": "81",
+  "imageScale": "0.53",
+  "imageYOffset": "-108",
+  "imageXOffset": "27",
+  "imageFlip": true,
+  "overlay_color": "#89b758",
+  "ui_saturation": "1.3",
+  "backgroundScale": "127",
+  "imageSat": 100,
+  "imageRotation": 0,
+  "backgroundBlur": 0,
+  "backgroundHue": 0,
+  "backgroundUrl": "",
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": 0,
+  "backgroundSaturation": 100
+}

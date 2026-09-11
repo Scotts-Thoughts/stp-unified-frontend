@@ -1,0 +1,21 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.65",
+  "imageYOffset": "6",
+  "imageXOffset": "34",
+  "overlay_color": "#f9f0d2",
+  "ui_saturation": "1.9",
+  "backgroundTexture": "Dark Moon",
+  "backgroundFlip": false,
+  "backgroundScale": "105",
+  "backgroundYOffset": "8",
+  "backgroundXOffset": "-34",
+  "backgroundContrast": "119",
+  "backgroundHue": "38",
+  "pkmn_ability": "Pickup",
+  "pkmnNature": "Brave",
+  "hidden_power_type": "Dark",
+  "hidden_power_index": "3",
+  "attempt_number": 4,
+  "finished_run_count": 1
+}

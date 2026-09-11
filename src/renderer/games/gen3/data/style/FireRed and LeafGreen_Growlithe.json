@@ -1,0 +1,17 @@
+{
+  "pkmn_ability": "Intimidate",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fire",
+  "overlay_color": "#d19565",
+  "imageFlip": true,
+  "imageScale": "0.61",
+  "imageYOffset": "-9",
+  "imageXOffset": "13",
+  "backgroundScale": "112",
+  "backgroundYOffset": "43",
+  "ui_saturation": "2",
+  "evolution": true,
+  "selected_evolution_species": "Growlithe",
+  "finished_run_count": 1,
+  "attempt_number": 3
+}

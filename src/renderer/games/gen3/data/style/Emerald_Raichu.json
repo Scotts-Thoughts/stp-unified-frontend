@@ -1,0 +1,21 @@
+{
+  "imageFlip": true,
+  "imageScale": "1.12",
+  "imageYOffset": "62",
+  "imageXOffset": "90",
+  "overlay_color": "#f8c165",
+  "ui_saturation": "1.5",
+  "backgroundScale": "200",
+  "backgroundBlur": "0",
+  "backgroundYOffset": "125",
+  "backgroundXOffset": "125",
+  "backgroundContrast": "179",
+  "backgroundBrightness": "48",
+  "pkmn_ability": "Static",
+  "pkmnNature": "Quiet",
+  "hidden_power_type": "Ice",
+  "hidden_power_index": "3",
+  "attempt_number": 13,
+  "finished_run_count": 8,
+  "backgroundTexture": "Electric"
+}

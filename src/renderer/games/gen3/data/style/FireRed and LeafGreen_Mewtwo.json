@@ -1,0 +1,17 @@
+{
+  "pkmn_ability": "Pressure",
+  "imageScale": "1",
+  "imageYOffset": "48",
+  "imageXOffset": "-16",
+  "overlay_color": "#ab85aa",
+  "ui_saturation": "1.6",
+  "backgroundHue": "272",
+  "backgroundContrast": "138",
+  "backgroundSaturation": "142",
+  "backgroundBlur": "0",
+  "backgroundScale": "113",
+  "attempt_number": 1,
+  "finished_run_count": 3,
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Psychic"
+}

@@ -1,0 +1,20 @@
+{
+  "imageFlip": true,
+  "imageYOffset": "62",
+  "imageXOffset": "34",
+  "overlay_color": "#f7982f",
+  "ui_saturation": "1.1",
+  "backgroundScale": "173",
+  "backgroundYOffset": "-72",
+  "backgroundBrightness": "78",
+  "backgroundContrast": "117",
+  "pkmn_ability": "Blaze",
+  "pkmnNature": "Quiet",
+  "backgroundTexture": "Fire",
+  "hidden_power_type": "Grass",
+  "attempt_number": 12,
+  "finished_run_count": 11,
+  "imageScale": "0.96",
+  "hidden_power_index": "4",
+  "splits_display": "Followup"
+}

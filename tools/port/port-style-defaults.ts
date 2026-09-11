@@ -13,7 +13,8 @@
  * today, so it is what parity compares against; separating metrics from style is a
  * Phase 5.2 change for Scott to approve.
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 
 const [file, gen] = process.argv.slice(2);
@@ -24,11 +25,12 @@ if (!file || !gen) {
 const REPO = resolve(import.meta.dirname, "..", "..");
 const outDir = join(REPO, "src", "renderer", "games", gen, "data", "style");
 
-const text = readFileSync(file, "utf-8");
-const start = text.indexOf("= {");
-const end = text.lastIndexOf("};");
-if (start === -1 || end === -1) throw new Error("no object literal found");
-const blob = JSON.parse(text.slice(start + 2, end + 1)) as Record<string, unknown>;
+// Loaded with Node's own `require`, as the legacy style manager loaded it: gen2/4/5
+// export the table itself, gen3 exports `{ DEFAULT_STYLE_SETTINGS }`.
+const require = createRequire(import.meta.url);
+const loaded = require(resolve(file)) as Record<string, unknown> | { DEFAULT_STYLE_SETTINGS: Record<string, unknown> };
+const blob = ("DEFAULT_STYLE_SETTINGS" in loaded ? loaded.DEFAULT_STYLE_SETTINGS : loaded) as Record<string, unknown>;
+if (!blob || typeof blob !== "object") throw new Error("default_style_settings.js did not export a table");
 
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });

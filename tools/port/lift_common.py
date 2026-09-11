@@ -138,9 +138,11 @@ def implicit_globals_decl(names: list[str], gen: str) -> str:
     )
 
 
-def assemble_sfc(template: str, header: str, imports: list[str], implicit: str, options: str) -> str:
+def assemble_sfc(template: str, header: str, imports: list[str], implicit: str, options: str, root_open: str = "<div>") -> str:
+    """The wrapper div is the legacy `v-else` element whose content the template was;
+    gen3 gates it on the component's own `ready` (see tools/port/lift-gen3.py)."""
     return (
-        "<template>\n<div>\n" + template + "\n</div>\n</template>\n\n"
+        "<template>\n" + root_open + "\n" + template + "\n</div>\n</template>\n\n"
         + header + "\n".join(imports) + "\n\n" + implicit
         + "\nexport default defineComponent(" + options.rstrip() + ");\n</script>\n"
     )

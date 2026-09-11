@@ -1,0 +1,19 @@
+{
+  "imageFlip": true,
+  "imageYOffset": "69",
+  "imageScale": "1",
+  "imageXOffset": "20",
+  "overlay_color": "#b7d58c",
+  "ui_saturation": "1.6",
+  "backgroundTexture": "Dark Grass",
+  "backgroundBrightness": "69",
+  "backgroundContrast": "142",
+  "backgroundSaturation": "149",
+  "pkmn_ability": "Overgrow",
+  "pkmnNature": "Rash",
+  "hidden_power_type": "Water",
+  "hidden_power_index": "3",
+  "attempt_number": 20,
+  "finished_run_count": 7,
+  "splits_display": "Followup"
+}

@@ -1,0 +1,8 @@
+{
+  "evolution": true,
+  "pkmn_ability": "Swarm",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Normal",
+  "overlay_color": "#a8a878",
+  "selected_evolution_species": "Exeggutor-line-postgame"
+}

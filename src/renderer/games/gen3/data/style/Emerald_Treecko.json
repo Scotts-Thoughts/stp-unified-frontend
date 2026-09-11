@@ -1,0 +1,23 @@
+{
+  "backgroundUrl": false,
+  "pkmn_ability": "Overgrow",
+  "pkmnNature": "Quiet",
+  "backgroundTexture": "Dark Grass",
+  "overlay_color": "#cae184",
+  "imageFlip": true,
+  "imageScale": "0.53",
+  "imageYOffset": "-37",
+  "imageXOffset": "48",
+  "backgroundContrast": "150",
+  "backgroundScale": "127",
+  "backgroundYOffset": "-1",
+  "backgroundXOffset": "59",
+  "backgroundBrightness": "58",
+  "backgroundSaturation": "120",
+  "backgroundBlur": "2",
+  "backgroundHue": "16",
+  "finished_run_count": 2,
+  "attempt_number": 2,
+  "hidden_power_type": "Fire",
+  "hidden_power_index": "3"
+}

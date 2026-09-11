@@ -1,0 +1,12 @@
+{
+  "imageFlip": true,
+  "imageScale": "0.63",
+  "imageYOffset": "-2",
+  "imageXOffset": "48",
+  "overlay_color": "#be8b5b",
+  "ui_saturation": "1.6",
+  "backgroundTexture": "Bug",
+  "backgroundBrightness": "37",
+  "backgroundContrast": "120",
+  "attempt_number": 1
+}

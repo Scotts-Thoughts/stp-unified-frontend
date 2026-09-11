@@ -1,0 +1,8 @@
+{
+  "pkmn_ability": "Flash Fire",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fire",
+  "overlay_color": "#f08030",
+  "evolution": true,
+  "selected_evolution_species": "Vulpix"
+}

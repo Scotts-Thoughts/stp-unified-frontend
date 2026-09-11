@@ -1,0 +1,21 @@
+{
+  "imageScale": "0.82",
+  "imageYOffset": "-65",
+  "imageXOffset": "-9",
+  "overlay_color": "#bab8ab",
+  "ui_saturation": "1.6",
+  "backgroundTexture": "Ground",
+  "backgroundScale": "125",
+  "backgroundFlip": true,
+  "backgroundBrightness": "19",
+  "backgroundSaturation": "127",
+  "backgroundBlur": "4",
+  "selected_evolution_species": "Geodude",
+  "evolution": false,
+  "attempt_number": 9,
+  "finished_run_count": 10,
+  "pkmnNature": "Adamant",
+  "pkmn_ability": "Rock Head",
+  "hidden_power_type": "Rock",
+  "hidden_power_index": "3"
+}

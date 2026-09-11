@@ -1,0 +1,16 @@
+{
+  "pkmn_ability": "Oblivious",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Water",
+  "overlay_color": "#e5abba",
+  "imageFlip": true,
+  "imageScale": "0.59",
+  "imageYOffset": "-51",
+  "imageXOffset": "41",
+  "ui_saturation": "1.5",
+  "backgroundScale": "108",
+  "backgroundBrightness": "28",
+  "backgroundContrast": "138",
+  "backgroundSaturation": "150",
+  "evolution": true
+}

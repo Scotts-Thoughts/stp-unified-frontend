@@ -1,0 +1,18 @@
+{
+  "pkmn_ability": "Serene Grace",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Fairy",
+  "overlay_color": "#f7d7e6",
+  "imageFlip": true,
+  "imageScale": "0.78",
+  "imageYOffset": "-9",
+  "imageXOffset": "27",
+  "ui_saturation": "1.7",
+  "backgroundScale": "119",
+  "backgroundYOffset": "-81",
+  "backgroundSaturation": "163",
+  "backgroundContrast": "87",
+  "backgroundBrightness": "96",
+  "attempt_number": 2,
+  "finished_run_count": 1
+}

@@ -1,0 +1,22 @@
+{
+  "pkmn_ability": "Forecast",
+  "pkmnNature": "Rash",
+  "backgroundTexture": "Flying",
+  "overlay_color": "#d3d6df",
+  "imageFlip": true,
+  "imageScale": "0.39",
+  "imageYOffset": "218",
+  "imageXOffset": "62",
+  "ui_saturation": "1.6",
+  "backgroundContrast": "195",
+  "backgroundUrl": false,
+  "backgroundSaturation": "69",
+  "backgroundBrightness": "87",
+  "backgroundBlur": "2",
+  "backgroundScale": "104",
+  "hidden_power_type": "Dark",
+  "hidden_power_index": "0",
+  "attempt_number": 12,
+  "finished_run_count": 9,
+  "splits_display": "Followup"
+}

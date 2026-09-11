@@ -16,7 +16,7 @@ Verified inputs (2026-09-10): PokeAByte 0.11.2 source (`A:\Programs\PokeAByte\sr
 | 2 | **Pixels** | `page.screenshot()` of the 1920×1080 content | zero tolerance when both sides run the same Electron (§4); `pixelmatch` threshold 0.1 + AA-skip when comparing Electron 25 vs 37 |
 | 3 | **Split CSVs** | every file the app writes under `<sandbox>/splits/**` | byte-identical (wall clock is faked, §5) |
 | 4 | **App data** | `<sandbox>/APPDATA/<app>/data/**` (gen1 format) and, for gen2–5, a `localStorage` dump taken via `page.evaluate` at the end of the run | JSON-normalised deep-equal |
-| 5 | **PokeAByte writes** | every `POST /mapper/set-property-value|set-property-bytes|set-properties-by-bits` the app sends, in order, with body | exact sequence |
+| 5 | **PokeAByte writes** | every `POST /mapper/set-property-value|set-property-bytes|set-properties-by-bits` the app sends, in order, with body | exact sequence, the writes of one virtual instant compared as a set (an app that issues five `setBytes` in one `Promise.all` cannot order their arrival, and two runs of the *same* app differ there) |
 | 6 | **Control server** | `GET /status` after each scripted control call (`/set-game`, `/set-starter`, `/refresh`, …) | deep-equal on the fields the queuer reads (`external-contracts.md` §2) |
 | 7 | **OBS chapter markers** | every `CreateRecordChapter` received by the OBS stub | exact sequence of names |
 | 8 | **Super Shuckie calls** | every `POST /mark-start|mark-end|increment-counter` | exact sequence |
@@ -70,7 +70,10 @@ client and the vendored `gameHookMapperClient.js` in gen2–5, which are the sam
   the replay state, and echoed on the next tick as a `PropertiesChanged` entry with `fieldsChanged`
   `["bytes","value"]` (plus `"isFrozen","frozen"` when `freeze` is true — PokeAByte emits the duplicate token).
   A `--writes=ignore` mode keeps the log but does not apply, for fixtures where the recording already contains
-  the effect of the write.
+  the effect of the write. A `set-property-bytes` also *decodes* the bytes into the value, as PokeAByte's next
+  read would -- an integer over the property's bytes, through the glossary when it has a reference (gen3's
+  `setBytes([6])` on a stage modifier reads back as `"0"`). Left undecoded, the value stayed `null` after the
+  write and gen3's `stageMultiplier` threw on both sides: a stand-in artefact the apps never see.
 - `GET /mapper-service/get-metadata` (200 meta / 404), `GET /mapper-service/get-mappers` (one entry from the
   fixture header), `PUT /mapper-service/change-mapper` (200, then `MapperLoaded`) — so the queuer's own probes
   also work against the mock.
@@ -315,6 +318,11 @@ the real ports) is dropped the moment the new document is created (`framenavigat
 settles -- by then the new document has connected to the armed mock and run its boot, and a reset there
 erased every boot-time error on both sides for the first week of the harness's life. `STP_PARITY_KEEP_SANDBOX=1`
 skips the legacy sandbox refresh so an instrumented copy (a stashed trace in a legacy method) survives a run.
+Errors are compared by message, with stack frames dropped (bundle names and line numbers differ between any
+two builds by design) and file URLs folded: the app's own root to `<app>/out/renderer/`, and an image URL to
+its path under the image root -- `<sandbox>/app-tree/app/images/x.png` on the legacy side is
+`<app>/out/renderer/images/genN/x.png` on the unified side, and "the same missing image" is the claim (gen3
+requests `elements/type-icons/undefined.png` on both).
 
 Collecting the whole `userData` tree is a thirteenth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
 DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between

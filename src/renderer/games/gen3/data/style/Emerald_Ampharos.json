@@ -1,0 +1,22 @@
+{
+  "pkmn_ability": "Static",
+  "pkmnNature": "Rash",
+  "backgroundTexture": "Electric",
+  "overlay_color": "#f5cd55",
+  "imageFlip": true,
+  "imageYOffset": "62",
+  "imageXOffset": "13",
+  "backgroundScale": "177",
+  "backgroundBlur": "0",
+  "backgroundYOffset": "30",
+  "backgroundXOffset": "125",
+  "ui_saturation": "1.6",
+  "backgroundBrightness": "58",
+  "backgroundContrast": "149",
+  "backgroundHue": "41",
+  "hidden_power_type": "Ice",
+  "hidden_power_index": "1",
+  "attempt_number": 15,
+  "finished_run_count": 9,
+  "splits_display": "Followup"
+}

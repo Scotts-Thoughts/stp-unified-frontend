@@ -2,9 +2,12 @@
 	<!--
 		gen1's `components/keyhook.js` rendered `<div></div>` in exactly this position
 		inside #app, and the layout oracle compares every element under #app-container,
-		so the empty div stays even though the component is behaviour-only.
+		so the empty div stays for gen1 even though the component is behaviour-only
+		(`GameModule.keyhookElement`). The other generations bound their hotkeys without
+		a component, and gen3's #app is a CSS grid in which the div would take a cell,
+		so for them this renders nothing.
 	-->
-	<div></div>
+	<div v-if="placeholder"></div>
 </template>
 
 <script lang="ts">
@@ -17,6 +20,11 @@ export default defineComponent({
 		table: {
 			type: Object as () => HotkeyTable,
 			required: true,
+		},
+		/** Render the legacy empty div (gen1); see the template. */
+		placeholder: {
+			type: Boolean,
+			default: false,
 		},
 	},
 	data() {

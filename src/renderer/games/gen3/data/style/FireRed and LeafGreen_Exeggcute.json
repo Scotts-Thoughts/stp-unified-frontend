@@ -1,0 +1,8 @@
+{
+  "pkmn_ability": "Chlorophyll",
+  "pkmnNature": "Hardy",
+  "backgroundTexture": "Grass",
+  "overlay_color": "#78c850",
+  "evolution": true,
+  "selected_evolution_species": "Exeggcute"
+}
