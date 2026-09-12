@@ -1082,6 +1082,7 @@
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { sendObsChapterMarker } from "~/core/logic/obs";
+import { markReminderMoves } from "~/core/logic/moveReminder";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
@@ -3584,7 +3585,7 @@ export default defineComponent({
             else {
                 this.timer_formatted_time = [ s, "." + f(c), h + "h" + m + "m" + s + "s", ]
             }
-            if (this.timer_pause == false) {
+            if (this.timer_pause == false && !this._unmounted) {
                 requestAnimationFrame(this.updateTime)
             }
         },
@@ -3982,12 +3983,12 @@ export default defineComponent({
         getMovepool(gen2PkmnData, moveData, tmhmMapping, species) {
             const pkmn = this.dataSearch(gen2PkmnData, species)
             let obj = {
-                level: pkmn.levelup_moveset.map(x => {
+                level: markReminderMoves(pkmn.levelup_moveset.map(x => {
                     return {
                         ...{Level: x[0]},
                         ...this.dataSearch(moveData, x[1]) //searching for index 1
                     }
-                }),     
+                })),     
                 tmhm: pkmn.tm_hm_learnset.map(x => {
                     return {
                         ...{tmhm: tmhmMapping.find(y => y.Move == x)?.tmhmIndex??"TM01"},
@@ -5594,9 +5595,7 @@ export default defineComponent({
         },
         cancelEnemySpriteResize() {
             if (!this.enemyResize.species) return;
-            if (typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${this.enemyResize.species}`);
-            }
+            enemySpriteScaleManager.clearOverride(this.enemyResize.species);
             this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
             this.enemyScaleVersion++;
         },
@@ -5632,9 +5631,7 @@ export default defineComponent({
         },
         exitStyleMode() {
             const species = this.styleModeCurrentSpecies();
-            if (species && typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${species}`);
-            }
+            if (species) enemySpriteScaleManager.clearOverride(species);
             this.style_mode_active = false;
             this.style_mode_species_list = [];
             this.style_mode_index = 0;
@@ -5657,9 +5654,7 @@ export default defineComponent({
         styleModeBack() {
             if (!this.style_mode_active) return;
             const species = this.styleModeCurrentSpecies();
-            if (species && typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${species}`);
-            }
+            if (species) enemySpriteScaleManager.clearOverride(species);
             if (this.style_mode_index === 0) {
                 this._styleModeFocusCurrent();
                 return;
@@ -5670,6 +5665,22 @@ export default defineComponent({
     },
 
 //--------- PROGRAM MOUNTED ----------------------------------------------------//
+    unmounted() {
+        // The shell unmounts this component when the mapper unloads (plan 3.1: on
+        // InstanceReset, tear down) and mounts a fresh one on the next load; the state
+        // the legacy component kept across a mapper reload is what `load_all_settings`
+        // reads back from the store, as after its own `/reload`. The legacy component
+        // lived as long as its page and never had to undo anything; without this an
+        // unmounted instance kept its hotkeys, its 10 ms Super Shuckie poll, its timer
+        // loop and its dev-mode listeners, all driving dead state next to the live
+        // instance's. The mapper subscriptions are the client's; main.ts clears them
+        // at the same moment.
+        this._unmounted = true;
+        this.unbindHotkeys?.();
+        clearInterval(this.emulatorStatsInterval);
+        if (this._devKeydown) window.removeEventListener('keydown', this._devKeydown);
+        if (this._devMousedown) window.removeEventListener('mousedown', this._devMousedown, true);
+    },
     mounted: async function () {
         const that = this
         // main.ts owns the mapper client and mounts this component once the mapper is
@@ -7024,7 +7035,7 @@ export default defineComponent({
         // Enemy sprite resize tool — dev mode only. Packaged builds just read
         // enemy_sprite_scales.js and don't expose any resize UI.
         if (this.isInDevMode) {
-            window.addEventListener('keydown', (e) => {
+            window.addEventListener('keydown', this._devKeydown = (e) => {
                 // Style mode owns Enter/Backspace/Escape; arrows/F1 fall through to nudge/flip.
                 if (this.style_mode_active) {
                     if (e.key === 'Enter')     { e.preventDefault(); this.styleModeAdvance(); return; }
@@ -7040,7 +7051,7 @@ export default defineComponent({
                 else if (e.key === 'ArrowRight') { e.preventDefault(); this.nudgeEnemySpriteX(e.shiftKey ?  10 :  1); }
                 else if (e.key === 'F1')         { e.preventDefault(); this.toggleEnemySpriteFlip(); }
             });
-            window.addEventListener('mousedown', (e) => {
+            window.addEventListener('mousedown', this._devMousedown = (e) => {
                 if (!e.ctrlKey || e.button !== 0) return;
                 const els = document.elementsFromPoint(e.clientX, e.clientY);
                 const sprite = els.find((el) => el && el.classList && el.classList.contains('ePkmnSprite'));

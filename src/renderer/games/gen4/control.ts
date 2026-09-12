@@ -1,4 +1,3 @@
-import { readSplitCsv } from "~/core/persistence/splitFiles";
 import { setUserState } from "~/core/persistence/userState";
 import { missing, type ControlReply, type ControlRoutes } from "~/core/control/useControlServer";
 import { MyStorage } from "./storage";
@@ -15,9 +14,9 @@ import { MyStorage } from "./storage";
  * replies with it, `/set-splits` writes `split_type`, `/set-hidden-power` writes
  * `hidden_power_type`, `/set-show-tutor-moves`, and no `/set-counters`.
  *
- * Two routes differ in mechanism only: `/load-split-file` read the CSV with
- * `require("fs")` from an absolute path the queuer sent; it now goes through the
- * splits IPC, which resolves the path against the app root and refuses to escape it.
+ * `/load-split-file` read the CSV with `require("fs")` from the absolute path the queuer
+ * sent; the main process reads that path now (src/main/control-server.ts) and hands the
+ * parsed rows over, so the route only stores them.
  * `/set-evolution` wrote the bare `<game>_<starter>` key straight to `localStorage`,
  * past the style manager; it writes the same key to the user state, past the store.
  * `/reload` and `/quit` keep their 200 ms delay so the reply is written first.
@@ -95,15 +94,10 @@ export function gen4ControlRoutes(vm: () => any): ControlRoutes {
                 vm().split_type = query.mode;
                 return { ok: true, splits: vm().split_type };
             },
-            "/load-split-file": async (query) => {
-                if (!query.file) return missing("file");
-                const csvText = (await readSplitCsv(query.file)) ?? "";
-                const rows = csvText.split("\n").slice(1).filter((x) => x !== "");
-                const results: { trainer: string; time: string }[] = [];
-                for (const row of rows) {
-                    const columns = row.split(",");
-                    results.push({ trainer: columns[2], time: columns[3] });
-                }
+            /** Main reads and parses the CSV; `__splits` carries the parsed rows (src/main/control-server.ts). */
+            "/load-split-file": (query) => {
+                if (!query.__splits) return missing("file");
+                const results = JSON.parse(query.__splits) as { trainer: string; time: string }[];
                 vm().previous_splits = results;
                 return { ok: true, splits_loaded: results.length };
             },

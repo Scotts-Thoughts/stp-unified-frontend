@@ -514,6 +514,19 @@ export class GameHookMapperClient {
         this._deconstructMapper();
     }
 
+    /**
+     * Drops every `.change()` / `.once()` subscription. The shell calls this when the
+     * mapper unloads (`InstanceReset`): every subscriber lives in the overlay tree it
+     * unmounts at that moment, and the next mount registers its own. It is *not* part
+     * of `_deconstructMapper()`, which also runs on a SignalR reconnect -- there the
+     * overlay stays mounted and the legacy handlers survived, keyed by path, to fire
+     * on the reloaded properties.
+     */
+    clearSubscriptions() {
+        this._change = {};
+        this._once = {};
+    }
+
     onConnected() { /* Override this with your own function. */ }
     onDisconnected() { /* Override this with your own function. */ }
 

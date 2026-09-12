@@ -51,7 +51,6 @@ declare global {
         write: (relative: string, contents: string) => Promise<string>,
       },
       obsAuth: (password: string, salt: string, challenge: string) => Promise<string>,
-      setGameIcon: (iconName: string) => Promise<boolean>,
       onControlRequest: (handler: ControlHandler) => () => void,
       onKeyEvent: (handler: (key: KeyEvent) => void) => () => void,
     }

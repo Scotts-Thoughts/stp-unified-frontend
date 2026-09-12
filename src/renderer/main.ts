@@ -28,8 +28,18 @@ import { installScaleToFit, removeScaleToFit } from "~/core/window/scaleToFit";
  * gen1's own images. A `<base href>` was tried first and redirected every other URL
  * in the document too.
  */
+let styleSequence = 0;
+
 async function applyModuleStyles(module: GameModule): Promise<void> {
+    // Two calls can overlap: the pre-mapper screen's gen1 sheet is still loading its
+    // faces when a mapper is detected, and a mapper *switch* is an unload (gen1's
+    // sheet again) followed within milliseconds by a load. Each call awaits twice,
+    // so without this the earlier call could finish last and put gen1's class on
+    // the container under the later module's sheet. The latest call wins; a
+    // superseded one stops at its next await.
+    const sequence = ++styleSequence;
     const css = await module.styles();
+    if (sequence !== styleSequence) return;
     let style = document.getElementById("stp-gen-style") as HTMLStyleElement | null;
     if (!style) {
         style = document.createElement("style");
@@ -46,6 +56,7 @@ async function applyModuleStyles(module: GameModule): Promise<void> {
     // sheet's faces are loaded before the module is `ready`, as they were.
     const families = [...css.matchAll(/@font-face\s*\{[^}]*font-family:\s*([^;}]+)/g)].map((m) => m[1].trim().replace(/^["']|["']$/g, ""));
     await Promise.all([...new Set(families)].map((family) => document.fonts.load(`12px "${family}"`).catch(() => [])));
+    if (sequence !== styleSequence) return;
 
     const container = document.getElementById("app-container");
     if (container && container.className !== module.cssClass) container.className = module.cssClass;
@@ -84,6 +95,13 @@ const main = defineComponent({
             session: null as (Detection & { module: GameModule }) | null,
             /** The `/mapper` path of a mapper no module claims -- every hack mapper (decision 8). */
             unsupportedMapper: null as string | null,
+            /**
+             * Counts mapper loads and unloads. `onMapperLoaded` awaits the module's
+             * import, `prepare()` and styles; an `InstanceReset` (or another load) that
+             * lands in between makes that load stale, and a stale load must not mount
+             * an overlay over a client whose properties are gone.
+             */
+            loadSequence: 0 as number,
         }
     },
     computed: {
@@ -168,6 +186,7 @@ const main = defineComponent({
 
         this.mapper = new GameHookMapperClient();
         this.mapper.onMapperLoaded = async () => {
+            const sequence = ++this.loadSequence;
             // Which generation, which profile, which game -- from the mapper's path
             // first and its identity property second (plan 1.4). For gen1 the game is
             // the same `meta.gameName.value` this read directly before.
@@ -185,20 +204,24 @@ const main = defineComponent({
             this.unsupportedMapper = null;
             // The generation's module is a dynamic import (plan 3.1): gen1 is in the
             // bundle already, the others arrive as their own chunk on first detection.
-            const module = await loadModule(detection.manifest);
-            // gen4 and gen5 debounce four property groups by ten or fifteen frames (plan 2.4); the list is
-            // the module's, applied now that the module is known and cleared for one
-            // that declares none, so a mapper switch never inherits the previous list.
-            this.mapper!.setDebouncePaths([...(module.debouncePaths ?? [])], module.debounceFrames ?? 10);
-
-            // Everything the module needs in memory, then its presentation, then the
-            // session -- the overlay mounts on the next tick after `ready`. What gen1
-            // did here with its own data layer and settings store (PokeData.setGame,
-            // overlay.setGame) is gen1's activate(); a lifted module has its own.
-            //
+            let module: GameModule;
             try {
+                module = await loadModule(detection.manifest);
+                if (sequence !== this.loadSequence) return;
+                // gen4 and gen5 debounce four property groups by ten or fifteen frames (plan 2.4); the list is
+                // the module's, applied now that the module is known and cleared for one
+                // that declares none, so a mapper switch never inherits the previous list.
+                this.mapper!.setDebouncePaths([...(module.debouncePaths ?? [])], module.debounceFrames ?? 10);
+
+                // Everything the module needs in memory, then its presentation, then the
+                // session -- the overlay mounts on the next tick after `ready`. What gen1
+                // did here with its own data layer and settings store (PokeData.setGame,
+                // overlay.setGame) is gen1's activate(); a lifted module has its own.
+                //
                 await Promise.all([this.overlayLoaded, module.prepare?.()]);
+                if (sequence !== this.loadSequence) return;
                 await applyModuleStyles(module);
+                if (sequence !== this.loadSequence) return;
                 setActiveModule(module.id);
                 setActiveNamespace(module.id);
                 if (module.id !== "gen1") this.settings.releaseCss();
@@ -206,12 +229,24 @@ const main = defineComponent({
                 this.session = { ...detection, module };
                 module.activate?.(detection.game);
                 this.ready = true;
+            } catch (err) {
+                // The overlay stays on the pre-mapper screen; say why there rather than
+                // leaving "Please load a mapper" over a mapper that is loaded.
+                this.unsupportedMapper = `${detection.manifest.id} failed to load: ${err instanceof Error ? err.message : String(err)}`;
+                console.error(`[main] ${this.unsupportedMapper}`, err);
             } finally {
                 bootDone();
             }
         };
         this.mapper.onMapperUnloaded = () => {
+            this.loadSequence++;
             this.ready = false
+            // Plan 3.1: on InstanceReset, tear down. The overlay component unmounts with
+            // `ready`, and every `.change()` subscriber lives in it (gen1's hooks and
+            // child components, a lifted component's `mounted`), so the client's
+            // subscription tables go with it: the next mount registers its own. Kept,
+            // they would fire twice after a reload -- once into the unmounted instance.
+            this.mapper!.clearSubscriptions();
             this.session?.module.deactivate?.();
             this.session = null;
             setActiveModule(null);

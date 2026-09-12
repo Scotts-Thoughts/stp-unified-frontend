@@ -1,4 +1,3 @@
-import { readSplitCsv } from "~/core/persistence/splitFiles";
 import { missing, type ControlReply, type ControlRoutes } from "~/core/control/useControlServer";
 
 /**
@@ -12,9 +11,9 @@ import { missing, type ControlReply, type ControlRoutes } from "~/core/control/u
  * the family species without persisting them, `/refresh` also re-writes the solo
  * Pokemon to the mapper, `/set-splits` writes `toggle_compare_splits` (gen2's name).
  *
- * One route differs in mechanism only: `/load-split-file` read the CSV with
- * `require("fs")` from an absolute path the queuer sent; it now goes through the
- * splits IPC, which resolves the path against the app root and refuses to escape it.
+ * `/load-split-file` read the CSV with `require("fs")` from the absolute path the queuer
+ * sent; the main process reads that path now (src/main/control-server.ts) and hands the
+ * parsed rows over, so the route only stores them.
  * `/reload` and `/quit` keep their 200 ms delay so the reply is written first.
  */
 export function gen5ControlRoutes(vm: () => any): ControlRoutes {
@@ -79,15 +78,10 @@ export function gen5ControlRoutes(vm: () => any): ControlRoutes {
                 vm().toggle_compare_splits = query.mode;
                 return { ok: true, splits: vm().toggle_compare_splits };
             },
-            "/load-split-file": async (query) => {
-                if (!query.file) return missing("file");
-                const csvText = (await readSplitCsv(query.file)) ?? "";
-                const rows = csvText.split("\n").slice(1).filter((x) => x !== "");
-                const results: { trainer: string; time: string }[] = [];
-                for (const row of rows) {
-                    const columns = row.split(",");
-                    results.push({ trainer: columns[2], time: columns[3] });
-                }
+            /** Main reads and parses the CSV; `__splits` carries the parsed rows (src/main/control-server.ts). */
+            "/load-split-file": (query) => {
+                if (!query.__splits) return missing("file");
+                const results = JSON.parse(query.__splits) as { trainer: string; time: string }[];
                 vm().previous_splits = results;
                 return { ok: true, splits_loaded: results.length };
             },

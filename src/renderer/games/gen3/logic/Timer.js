@@ -23,10 +23,21 @@ class Timer {
 	}
 
 	updateLoop = () => {
+		if (this.stopped) return;
 		if (!this.storage.timer_pause) {
 			this.update();
 		}
 		window.requestAnimationFrame(this.updateLoop);
+	}
+
+	/**
+	 * Ends the loop. Not in the legacy file: its one Timer lived as long as the page,
+	 * where the unified overlay component -- and the Timer its `data()` creates --
+	 * is unmounted when the mapper unloads and made again on the next load. A loop
+	 * left running would keep publishing `time_update` from the discarded instance.
+	 */
+	stop = () => {
+		this.stopped = true;
 	}
 
 	/**

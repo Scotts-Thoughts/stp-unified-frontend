@@ -1097,6 +1097,7 @@
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { sendObsChapterMarker } from "~/core/logic/obs";
+import { markReminderMoves } from "~/core/logic/moveReminder";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { sendVirtualKey } from "~/core/window/virtualKeys";
 import { MyStorage, StyleSettingsUtils } from "./storage";
@@ -6801,12 +6802,12 @@ export default defineComponent({
         getMovepool(gen3PkmnData, moveData, tmhmMapping, species) {
             const pkmn = this.dataSearch(gen3PkmnData, species)
             let obj = {
-                level: pkmn.level_up_learnset.map(x => {
+                level: markReminderMoves(pkmn.level_up_learnset.map(x => {
                     return {
                         ...{Level: x[0]},
                         ...this.dataSearch(moveData, x[1]) //searching for index 1
                     }
-                }), 
+                })), 
                 tmhm: pkmn.tm_hm_learnset.map(x => {
                     return {
                         ...{tmhm: tmhmMapping.find(y => y.Move == x)?.tmhmIndex??"ERR"},
@@ -9154,9 +9155,7 @@ export default defineComponent({
         },
         cancelEnemySpriteResize() {
             if (!this.enemyResize.species) return;
-            if (typeof localStorage !== 'undefined' && this.enemyResize.species) {
-                localStorage.removeItem(`enemyScale_${this.enemyResize.species}`);
-            }
+            enemySpriteScaleManager.clearOverride(this.enemyResize.species);
             this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
             this.enemyScaleVersion++;
         },
@@ -9199,9 +9198,7 @@ export default defineComponent({
         exitStyleMode() {
             // Drop any uncommitted live edit on the current species.
             const species = this.styleModeCurrentSpecies();
-            if (species && typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${species}`);
-            }
+            if (species) enemySpriteScaleManager.clearOverride(species);
             this.style_mode_active = false;
             this.style_mode_species_list = [];
             this.style_mode_index = 0;
@@ -9225,9 +9222,7 @@ export default defineComponent({
             if (!this.style_mode_active) return;
             // Discard the live override on the current species (reverts unsaved drag/nudge edits).
             const species = this.styleModeCurrentSpecies();
-            if (species && typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${species}`);
-            }
+            if (species) enemySpriteScaleManager.clearOverride(species);
             if (this.style_mode_index === 0) {
                 // Already at the first species — just refresh focus so the handle stays attached.
                 this._styleModeFocusCurrent();
@@ -9239,6 +9234,24 @@ export default defineComponent({
     },
 
 //--------- PROGRAM MOUNTED ---------------------------------------------------------------------------------------------------------------//
+    unmounted() {
+        // The shell unmounts this component when the mapper unloads (plan 3.1: on
+        // InstanceReset, tear down) and mounts a fresh one on the next load; the state
+        // the legacy component kept across a mapper reload is what `load_all_settings`
+        // reads back from the store, as after its own `/reload`. The legacy component
+        // lived as long as its page and never had to undo anything; without this an
+        // unmounted instance kept its hotkeys, its 10 ms Super Shuckie poll, its timer
+        // loop and its dev-mode listeners, all driving dead state next to the live
+        // instance's. The mapper subscriptions are the client's; main.ts clears them
+        // at the same moment.
+        this._unmounted = true;
+        this.unbindHotkeys?.();
+        clearInterval(this.emulatorStatsInterval);
+        this.timer.stop();
+        clearInterval(this._ownedItemsInterval);
+        if (this._devKeydown) window.removeEventListener('keydown', this._devKeydown);
+        if (this._devMousedown) window.removeEventListener('mousedown', this._devMousedown, true);
+    },
     mounted: async function () {
         const that = this
         // main.ts owns the mapper client and mounts this component once the mapper is
@@ -10322,7 +10335,7 @@ export default defineComponent({
 
         // Periodic tick keeps timestamps fresh for items the player is currently sitting on with
         // no other activity. Without this, a long-held item taken off the Pokemon would look new.
-        setInterval(() => {
+        this._ownedItemsInterval = setInterval(() => {
             const now = Date.now();
             for (const name of readOwnedItems().keys()) {
                 if (lastSeenOwned.has(name)) lastSeenOwned.set(name, now);
@@ -10574,7 +10587,7 @@ export default defineComponent({
         // Enemy sprite resize tool is dev-only. Packaged builds consume
         // enemy_sprite_scales.js read-only — no listeners attached.
         if (this.isInDevMode) {
-            window.addEventListener('keydown', (e) => {
+            window.addEventListener('keydown', this._devKeydown = (e) => {
                 // Style mode owns Enter/Backspace/Escape: Enter commits + advances,
                 // Backspace discards + steps back, Escape exits.
                 if (this.style_mode_active) {
@@ -10623,7 +10636,7 @@ export default defineComponent({
             // Ctrl+Click on an enemy sprite enters resize mode. Listen in capture
             // phase at the window level so the click is received even if a higher
             // overlay (trainer graphic, canvas etc.) sits on top of the sprite.
-            window.addEventListener('mousedown', (e) => {
+            window.addEventListener('mousedown', this._devMousedown = (e) => {
                 if (!e.ctrlKey) return;
                 if (e.button !== 0) return;
                 const els = document.elementsFromPoint(e.clientX, e.clientY);

@@ -1726,6 +1726,7 @@
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { sendObsChapterMarker } from "~/core/logic/obs";
+import { markReminderMoves } from "~/core/logic/moveReminder";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
@@ -6097,12 +6098,12 @@ export default defineComponent({
                 }
             }
             let obj = {
-                level: levelup_set.map(x => {
+                level: markReminderMoves(levelup_set.map(x => {
                     return {
                         ...{Level: x[0]},
                         ...this.dataSearch(moveData, x[1]) //searching for index 1
                     }
-                }), 
+                })), 
                 tmhm: pkmn.tm_hm_learnset.map(x => {
                     return {
                         ...{tmhm: tmhmMapping.find(y => y.Move == x)?.tmhmIndex??"TM01"},
@@ -7464,9 +7465,7 @@ export default defineComponent({
         },
         cancelEnemySpriteResize() {
             if (!this.enemyResize.species) return;
-            if (typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${this.enemyResize.species}`);
-            }
+            enemySpriteScaleManager.clearOverride(this.enemyResize.species);
             this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
             this.enemyScaleVersion++;
         },
@@ -7503,9 +7502,7 @@ export default defineComponent({
         },
         exitStyleMode() {
             const species = this.styleModeCurrentSpecies();
-            if (species && typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${species}`);
-            }
+            if (species) enemySpriteScaleManager.clearOverride(species);
             this.style_mode_active = false;
             this.style_mode_species_list = [];
             this.style_mode_index = 0;
@@ -7528,9 +7525,7 @@ export default defineComponent({
         styleModeBack() {
             if (!this.style_mode_active) return;
             const species = this.styleModeCurrentSpecies();
-            if (species && typeof localStorage !== 'undefined') {
-                localStorage.removeItem(`enemyScale_${species}`);
-            }
+            if (species) enemySpriteScaleManager.clearOverride(species);
             if (this.style_mode_index === 0) {
                 this._styleModeFocusCurrent();
                 return;
@@ -7542,6 +7537,24 @@ export default defineComponent({
 
 
 //--------- PROGRAM MOUNTED ---------------------------------------------------------------------------------------------------------------//
+    unmounted() {
+        // The shell unmounts this component when the mapper unloads (plan 3.1: on
+        // InstanceReset, tear down) and mounts a fresh one on the next load; the state
+        // the legacy component kept across a mapper reload is what `load_all_settings`
+        // reads back from the store, as after its own `/reload`. The legacy component
+        // lived as long as its page and never had to undo anything; without this an
+        // unmounted instance kept its hotkeys, its 10 ms Super Shuckie poll, its timer
+        // loop and its dev-mode listeners, all driving dead state next to the live
+        // instance's. The mapper subscriptions are the client's; main.ts clears them
+        // at the same moment.
+        this._unmounted = true;
+        this.unbindHotkeys?.();
+        clearInterval(this.emulatorStatsInterval);
+        this.timer.stop();
+        clearInterval(this._ownedItemsInterval);
+        if (this._devKeydown) window.removeEventListener('keydown', this._devKeydown);
+        if (this._devMousedown) window.removeEventListener('mousedown', this._devMousedown, true);
+    },
     mounted: async function () {
         const that = this
         // main.ts owns the mapper client and mounts this component once the mapper is
@@ -7550,6 +7563,7 @@ export default defineComponent({
         // `v-else` overlay had rendered, and after the watchers `created()` queued had
         // flushed with `ready` still false. Two ticks keep that order (lift-gen3.py).
         await this.$nextTick()
+        if (this._unmounted) return
         {
             this.ready = true
             this.$nextTick(() => {
@@ -7572,6 +7586,7 @@ export default defineComponent({
         }
         // The render `ready` queued, then the callback above -- what the awaited connect covered.
         await this.$nextTick()
+        if (this._unmounted) return
 
         // In mounted hook (around line 6897)
         // Poll for emulator stats continuously
@@ -7845,7 +7860,7 @@ export default defineComponent({
         }
 
         // Keep timestamps fresh for items the player is sitting on (handles bag↔held moves).
-        setInterval(() => {
+        this._ownedItemsInterval = setInterval(() => {
             const now = Date.now();
             for (const name of readOwnedItemSet()) {
                 if (lastSeenOwned.has(name)) lastSeenOwned.set(name, now);
@@ -8959,7 +8974,7 @@ export default defineComponent({
 
         // Enemy sprite resize tool — dev mode only.
         if (this.isInDevMode) {
-            window.addEventListener('keydown', (e) => {
+            window.addEventListener('keydown', this._devKeydown = (e) => {
                 // Style mode owns Enter/Backspace/Escape; arrows/F1 fall through to nudge/flip.
                 if (this.style_mode_active) {
                     if (e.key === 'Enter')     { e.preventDefault(); this.styleModeAdvance(); return; }
@@ -8975,7 +8990,7 @@ export default defineComponent({
                 else if (e.key === 'ArrowRight') { e.preventDefault(); this.nudgeEnemySpriteX(e.shiftKey ?  10 :  1); }
                 else if (e.key === 'F1')         { e.preventDefault(); this.toggleEnemySpriteFlip(); }
             });
-            window.addEventListener('mousedown', (e) => {
+            window.addEventListener('mousedown', this._devMousedown = (e) => {
                 if (!e.ctrlKey || e.button !== 0) return;
                 const els = document.elementsFromPoint(e.clientX, e.clientY);
                 const sprite = els.find((el) => el && el.classList && el.classList.contains('ePkmnSprite'));

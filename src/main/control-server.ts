@@ -126,8 +126,11 @@ export class ControlServer {
         return { ok: true, message: "Reloading overlay..." };
       case "/load-split-file": {
         // gen2-5 read and parse the CSV in the renderer; here the file read stays in
-        // main (plan 1.6) and only the parsed rows cross to the renderer. The column
-        // layout is the legacy one: index 2 is the trainer, index 3 the time.
+        // main (plan 1.6) and only the parsed rows cross to the renderer, which every
+        // generation's route stores from `__splits`. The path is the absolute one the
+        // queuer sends (a file its user dragged in from anywhere on disk), read as the
+        // legacy `fs.readFileSync(query.file)` read it. The column layout is the legacy
+        // one: index 2 is the trainer, index 3 the time.
         if (!query.file) return { ok: false, status: 400, error: "Missing file parameter" };
         const text = readFileSync(query.file, "utf-8");
         const rows = text.split("\n").slice(1).filter((row) => row !== "");

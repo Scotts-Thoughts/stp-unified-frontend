@@ -69,7 +69,7 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 | `GET /set-evolution` | `enabled=true&species=` / `enabled=false&species=` | not gen2 (gen1 gets it like gen3/5; the unified gen1 answers `ok: false, unsupported: true`) | **gen4: after `/refresh`; gen1/gen3/gen5: before `/refresh`** |
 | `GET /set-right-panel` | `panel=Battle Graphic` (gen1/2/3) or `panel=Automatic` (gen4/5) | all | gen1 has no "Battle Graphic" mode: the unified app takes it as `Automatic` and reports `Automatic`, which the queuer's gen1 verification rejects -- `docs/queuer-unified.patch` sends gen1 `Automatic` |
 | `GET /set-splits` | `mode=First|Followup` | all | |
-| `GET /load-split-file` | `file=<name>` | only with `item.splitFile` | loads a previous-split CSV for comparison |
+| `GET /load-split-file` | `file=<absolute path>` (a CSV the queuer's user dragged in, `encodeURIComponent`ed) | only with `item.splitFile` | loads a previous-split CSV for comparison; the unified main process reads the path as it is (`fs.readFileSync`, as gen2-5 did) and hands the parsed rows to the active generation's route as `__splits` |
 | `GET /new-run` | – | all | same as the F23 hotkey / "New Run" button |
 | `GET /reload` | – | all | `location.reload()` after 200 ms |
 | `GET /quit` | – | gen2–5 | `window.close()` after 200 ms |

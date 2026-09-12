@@ -1,5 +1,5 @@
 import { isPackaged } from "~/core/env";
-import { getUserState, setUserState } from "./userState";
+import { getUserState, setUserState, userStateKeys } from "./userState";
 
 /**
  * The layered style store gen2-5 keep behind `MyStorage` (plan 2.6, decision 10;
@@ -38,6 +38,13 @@ export interface StyleSettingsOptions {
      * never filters with it, so it passes nothing here and the whole value goes through.
      */
     styleProperties?: readonly string[];
+    /**
+     * The fields `exportCurrentAsDefaults` keeps of a species value. gen2's manager
+     * has the same `stylePropertyKeys` list as gen4's but applies it *only* there --
+     * its dev-mode write-back takes the whole value -- so gen2 passes this and not
+     * `styleProperties`. Defaults to `styleProperties`.
+     */
+    exportProperties?: readonly string[];
     /**
      * gen4's debounced defaults write (500 ms after the last edit, flushed on
      * `beforeunload`); gen5's is 1 s with no flush; gen2 writes on every edit.
@@ -190,18 +197,29 @@ export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSe
             else setUserState(key, null);
         },
 
+        // The legacy manager swept `Object.keys(localStorage)`: every `user_` override
+        // whose key is a style key goes, whether or not a shipped default exists for it,
+        // and then every shipped default is restored to its bare key.
         resetAllToDefaults() {
-            for (const key of Object.keys(defaults)) store.resetToDefaults(key);
+            for (const key of userStateKeys()) {
+                if (key.startsWith("user_") && store.isStyleSettingsKey(key.replace("user_", ""))) setUserState(key, null);
+            }
+            for (const key of Object.keys(defaults)) setUserState(key, defaults[key]);
         },
 
+        // Also a sweep of the store, and of the *bare* keys -- what the last write
+        // left there, not the merged view `get` returns -- keeping the listed style
+        // fields and dropping a species that has none of them.
         exportCurrentAsDefaults() {
+            const keep = options.exportProperties ?? options.styleProperties;
             const exported: Record<string, unknown> = {};
-            for (const key of Object.keys(defaults)) {
-                const current = store.get(key);
-                if (current === null) continue;
-                // gen4 also drops a species whose value has no style field at all.
-                const value = styleOnly(current as Record<string, unknown>);
-                if (!options.styleProperties || Object.keys(value).length > 0) exported[key] = value;
+            for (const key of userStateKeys()) {
+                if (!store.isStyleSettingsKey(key) || key.startsWith("user_")) continue;
+                const value = getUserState<unknown>(key, null);
+                if (!value || typeof value !== "object") continue;
+                const styleValue: Record<string, unknown> = {};
+                for (const prop of keep ?? Object.keys(value)) if (prop in (value as Record<string, unknown>)) styleValue[prop] = (value as Record<string, unknown>)[prop];
+                if (Object.keys(styleValue).length > 0) exported[key] = styleValue;
             }
             return exported;
         },

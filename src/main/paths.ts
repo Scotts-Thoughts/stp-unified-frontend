@@ -52,8 +52,10 @@ export function userDataRoot(): string {
 
 /**
  * Resolves a caller-supplied relative path inside `root` and refuses anything that
- * escapes it. Every path the control server and the renderer send in crosses this,
- * because they arrive over IPC and, for `/load-split-file`, over an HTTP query string.
+ * escapes it. Every path the renderer sends over IPC crosses this. The one exception
+ * is the control server's `/load-split-file`, whose `file` is an absolute path to a
+ * CSV the queuer's user dragged in from anywhere on disk (legacy: `fs.readFileSync`
+ * on it, verbatim); `src/main/control-server.ts` reads it as it is.
  */
 export function resolveInside(root: string, relative: string): string {
   const target = isAbsolute(relative) ? resolve(relative) : resolve(root, relative);

@@ -142,14 +142,4 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     const secret = createHash("sha256").update(password + salt, "utf8").digest("base64");
     return createHash("sha256").update(secret + challenge, "utf8").digest("base64");
   });
-
-  // --- window ------------------------------------------------------------------
-  ipcMain.handle("set-game-icon", (_e, iconName: string) => {
-    const window = getWindow();
-    if (!window) return false;
-    const icon = join(appRoot(), "resources", "icons", iconName);
-    if (!existsSync(icon)) return false;
-    window.setIcon(icon);
-    return true;
-  });
 }

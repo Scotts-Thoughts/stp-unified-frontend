@@ -74,8 +74,6 @@ const api = {
   /** OBS WebSocket 5 auth string; the sha256 pair used to live in the renderer. */
   obsAuth: (password, salt, challenge) => invoke('obs:auth', password, salt, challenge),
 
-  setGameIcon: (iconName) => invoke('set-game-icon', iconName),
-
   /**
    * Control-server requests from the queuer. The handler returns the JSON body; the
    * reply id has to come back even on failure or the server answers with a timeout.

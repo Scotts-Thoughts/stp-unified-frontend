@@ -1004,6 +1004,43 @@ refactor proper), which is where 4.3 and 4.4 resume. Oracle 6 (the control-scrip
 build (3.5) closed on 2026-09-12 -- see 7d and the last bullets of 7c. `npm run parity:all` is the regression
 check for whatever comes next.
 
+**Review of the port as a whole (2026-09-12).** A read of every seam between the shell, the core and the
+five modules against the legacy sources, looking for what the harness cannot see (nothing in a fixture unloads
+a mapper, presses a hotkey, drags a sprite or sends `/load-split-file`). What it found, all corrected and
+re-verified with `npm run parity:all`:
+
+- **Mapper unload was not a teardown.** `InstanceReset` unmounts the overlay component, but the client's
+  `.change()`/`.once()` tables survived `_deconstructMapper()`, and the lifted components had no `unmounted()`
+  at all: after one emulator restart the old instance kept its hotkeys, its 10 ms Shuckie poll, its
+  animation-frame timer loop, its dev-mode window listeners and its property handlers -- so the next battle
+  wrote its split rows, OBS markers and ROM patches twice, once from a dead component. gen1 had half of this
+  in the legacy app too (known-legacy-bugs.md #38). Now `GameHookMapperClient.clearSubscriptions()` runs from
+  `onMapperUnloaded`, each lifted overlay has an `unmounted()` (hotkeys, intervals, listeners, the timer loop;
+  gen3/gen5's `Timer` got a `stop()`), and gen3's two-tick `mounted` bails out if unmounted in between.
+- **A stale load could mount over an unloaded client.** `onMapperLoaded` awaits the module import,
+  `prepare()` and the stylesheet; an `InstanceReset` during those awaits left it setting `session` and
+  `ready` over a client whose properties were `{}` (a render TypeError), and a second `MapperLoaded` could
+  interleave with the first. `loadSequence` in main.ts makes a superseded load stop at its next await; a
+  load that throws now reports itself on the pre-mapper screen instead of an unhandled rejection.
+- **Overlapping stylesheet applications could end with gen1's class under gen2's sheet.** `applyModuleStyles`
+  awaits the sheet and its font faces; the pre-mapper gen1 call and a detection's call overlap on a cold
+  start, and a mapper *switch* (unload, then load within milliseconds, everything cached) overlapped them
+  reliably. The latest call wins now (`styleSequence`).
+- **A cancelled enemy-sprite drag stayed persisted in gen2-5.** The lifts kept
+  `localStorage.removeItem("enemyScale_<species>")` in `cancelEnemySpriteResize`, `exitStyleMode` and
+  `styleModeBack`, but the shared manager keeps the override in the user state; the removal cleared nothing.
+  Those sites call `enemySpriteScaleManager.clearOverride()`, as gen1's store does.
+- **`/load-split-file` never reached gen2-5's `previous_splits`.** The main process reads the queuer's
+  absolute path and forwards the parsed rows as `__splits`; gen1's route used them, gen2-5's ignored them and
+  re-read `query.file` through the splits IPC, which refuses a path outside `<appRoot>/splits` -- every real
+  queuer file -- so the reply said `splits_loaded: N` while the panel got `[]`. All four routes take
+  `__splits` now, and the contract table says the path is absolute (`docs/external-contracts.md`).
+- Smaller: the dev-only `exportCurrentAsDefaults`/`resetAllToDefaults` of the shared style store swept the
+  shipped defaults where the legacy managers swept the store (and gen2's export applied its
+  `stylePropertyKeys` filter, which the port had left off); `keyhook.exe` output is line-buffered across
+  chunks (the legacy loops dropped an event a chunk boundary cut in two); a dead `set-game-icon` `invoke`
+  handler and its preload entry are gone (the `send` channel is the one in use).
+
 **Why the decomposition waits for the recordings, in that order.** The lifted components are 7-11 thousand
 lines each (250-340 methods, a 1,400-line `mounted`), and the net under them is the harness: gen2 has one real
 recording (a Crystal run), gen3/4/5 have synthetic smoke scenarios, gen1 a synthetic one. Moving that much

@@ -31,6 +31,30 @@ const NON_STYLE_KEYS = [
     'playerNameChoice', 'options', 'gametimeDisplay',
 ];
 
+/** gen2's `stylePropertyKeys`, verbatim and in order; its manager uses it in `exportCurrentAsDefaults` only. */
+export const GEN2_STYLE_PROPERTIES: readonly string[] = [
+    'overlay_color',
+    'ui_saturation',
+    'imageXOffset',
+    'imageYOffset',
+    'imageScale',
+    'imageFlip',
+    'imageSat',
+    'backgroundTexture',
+    'backgroundBlur',
+    'backgroundHue',
+    'backgroundScale',
+    'backgroundUrl',
+    'backgroundFlip',
+    'backgroundXFlip',
+    'use_custom_background',
+    'backgroundXOffset',
+    'backgroundYOffset',
+    'backgroundBrightness',
+    'backgroundContrast',
+    'backgroundSaturation',
+];
+
 export function isGen2StyleKey(key: string, defaults: Record<string, unknown>): boolean {
     if (NON_STYLE_KEYS.includes(key)) return false;
     if (key.startsWith('this.')) return false;
@@ -58,6 +82,7 @@ export async function loadGen2StyleDefaults(): Promise<StyleSettingsStore> {
         defaults,
         isStyleKey: isGen2StyleKey,
         sourceDir: "games/gen2/data/style",
+        exportProperties: GEN2_STYLE_PROPERTIES,
     });
     return styleSettingsManager;
 }

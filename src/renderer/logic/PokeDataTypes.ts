@@ -81,7 +81,8 @@ export type PokemonType = (
  * Data describing a pokemon move.
  */
 export type PokemonMove = {
-	Level?: number,
+	/** The learn level, or "Rem" for a level-1 move only the Move Reminder can teach. */
+	Level?: number | string,
 	tmhm?: string,
 	/** Set for moves that only exist through the backport ROM patch. */
 	backport?: boolean,

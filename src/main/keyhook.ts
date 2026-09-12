@@ -65,10 +65,15 @@ export function startKeyhook(getWindow: () => BrowserWindow | null): void {
     child = null;
   });
   child.stderr.on("data", (data: Buffer) => console.error(`${data}`));
+  // A chunk can end mid-line; the legacy loops parsed each chunk on its own and lost
+  // the event a chunk boundary cut in two. The tail is kept for the next chunk.
+  let remainder = "";
   child.stdout.on("data", (data: Buffer) => {
+    const lines = (remainder + data.toString()).split(/[\n\r]+/);
+    remainder = lines.pop() ?? "";
     const window = getWindow();
     if (!window || window.isDestroyed()) return;
-    for (const line of data.toString().split(/[\n\r]+/)) {
+    for (const line of lines) {
       const parts = line.split(",").map((x) => parseInt(x, 10));
       if (parts.length !== 3 || parts.some(Number.isNaN)) continue;
       const [down, keyCode, time] = parts;

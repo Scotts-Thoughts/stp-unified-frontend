@@ -1,4 +1,5 @@
 import moves from "~/data/moves.js";
+import { markReminderMoves } from "~/core/logic/moveReminder";
 import { GameDexes } from "~/data/pokedex";
 import { tmhm } from "~/data/tmhm";
 import { trainers } from "~/data/trainers/trainers";
@@ -228,12 +229,12 @@ class PokeData {
 			return movePool;
 		}
 		const lookup = (move: string) => this.findMove(move) ?? unknownMove(move);
-		movePool.level = (species.level_up_learnset ?? []).map(([level, move]) => {
+		movePool.level = markReminderMoves((species.level_up_learnset ?? []).map(([level, move]) => {
 			return {
 				...lookup(move),
 				Level: level,
 			}
-		});
+		}));
 		movePool.tmhm = (species.tm_hm_learnset ?? []).map(this.getMachineMove);
 		movePool.tutor = (species.tutor_learnset ?? []).map(lookup);
 		movePool.egg = (species.egg_moves ?? []).map(lookup);
