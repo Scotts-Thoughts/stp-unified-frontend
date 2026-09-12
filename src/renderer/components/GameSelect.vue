@@ -1,36 +1,57 @@
 <template>
     <div class="game-select">
-        <div>Game:</div>
-        <div v-for="manifest in manifests" :key="manifest.id" class="generation">
-            <div class="generationLabel">Generation {{ manifest.generation }}</div>
-            <div class="gameToggle">
-                <img
-                    v-for="edition in visibleEditions(manifest)"
-                    :key="edition.name"
-                    :src="`images/box_art/${edition.boxArt}`"
-                    :title="edition.name"
-                    :class="['gameToggleImg', { selected: isSelected(manifest, edition) }]"
-                    @click="select(manifest, edition)"
-                />
+        <header class="gs-header">
+            <h1 class="gs-title">Scott's Thoughts Overlay</h1>
+            <div class="gs-status">
+                <span class="gs-status-dot" aria-hidden="true"></span>
+                <span>Please load a mapper in PokeAByte...</span>
             </div>
+            <div v-if="unsupportedMapper" class="gs-warning">Unsupported mapper: {{ unsupportedMapper }}</div>
+        </header>
+
+        <div class="gs-generations">
+            <section v-for="manifest in manifests" :key="manifest.id" class="generation">
+                <h2 class="generationLabel">Generation {{ manifest.generation }}</h2>
+                <div class="gameToggle">
+                    <div
+                        v-for="edition in visibleEditions(manifest)"
+                        :key="edition.name"
+                        :class="['gs-tile', { selected: isSelected(manifest, edition) }]"
+                        @click="select(manifest, edition)"
+                    >
+                        <img
+                            :src="`images/box_art/${edition.boxArt}`"
+                            :title="edition.name"
+                            :alt="edition.name"
+                            class="gameToggleImg"
+                            draggable="false"
+                        />
+                        <div class="gs-caption">{{ edition.name }}</div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 /**
- * The pre-mapper screen: the box-art grid gen3-5 showed while PokeAByte had no mapper
- * loaded, for every generation (plan 3.2, decided 2026-09-02). It lists every edition
- * of every manifest, fourteen tiles, and a click stores the edition where that
- * generation reads it -- gen1's overlay settings store, or the lifted component's own
- * user-state key (`ModuleManifest.editionKey`) in that generation's section of the
- * user state -- and sets the taskbar icon to the
- * edition's. The streamed overlay is untouched: the edition is a user setting,
- * distinct from the game the mapper detects (plan 3.1).
+ * The pre-mapper screen (plan 3.2, decided 2026-09-02): the box-art grid gen3-5
+ * showed while PokeAByte had no mapper loaded, for every generation. It lists every
+ * edition of every manifest, fourteen tiles, and a click stores the edition where
+ * that generation reads it -- gen1's overlay settings store, or the lifted component's
+ * own user-state key (`ModuleManifest.editionKey`) in that generation's section of
+ * the user state -- and sets the taskbar icon to the edition's. The streamed overlay
+ * is untouched: the edition is a user setting, distinct from the game the mapper
+ * detects (plan 3.1).
  *
- * gen1 and gen2 tiles are placeholders (the legacy window icons) until Scott supplies
- * art in the gen3-5 style (decision 16). "Yellow Legacy" shows only in a dev build, as
- * gen1's dropdown did (known-legacy-bugs.md #22).
+ * The art is one file per edition under `images/box_art/` (the shell's own folder,
+ * not a generation's pool): a front box shot for a single game, and the two boxes
+ * side by side for an edition that covers a pair (Gold & Silver, FireRed and
+ * LeafGreen, Diamond and Pearl, HeartGold and SoulSilver), so a pair's tile is twice
+ * as wide and still one `.gameToggleImg` -- `tools/parity/packaged-probe.ts` counts
+ * those, and `screenshot-idle.ts` clicks by the `title`. "Yellow Legacy" shows only
+ * in a dev build, as gen1's dropdown did (known-legacy-bugs.md #22).
  */
 import { defineComponent } from "vue";
 import type { Edition } from "~/core/game/GameModule";
@@ -41,6 +62,10 @@ import { MANIFESTS } from "~/games/registry";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 
 export default defineComponent({
+    props: {
+        /** The `/mapper` path of a mapper no module claims (main.ts), shown as a warning. */
+        unsupportedMapper: { type: String as () => string | null, default: null },
+    },
     data() {
         return {
             settings: useOverlaySettingsStore(),
@@ -75,51 +100,131 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* gen4's `.gameToggle` rules, one row per generation; the labels are given a colour
-   because the shell's pre-mapper screen sits on the black body of base.css. */
+/* Laid out on the 1920x1080 canvas of #app-container (base.css), which scaleToFit
+   fits to the window; the screen sits on the black body with gen1's `play` face,
+   under `.gen-1`, so the screen's own classes carry a `gs-` prefix that no
+   generation's sheet uses (gen1 has a `.header`). Tiles are sized by height so a
+   pair's composite is simply twice as wide; the height, the side padding and the
+   group gap are set so gens 1-3 share the first row and gens 4-5 the second. */
 .game-select {
+    --tile-h: 160px;
+    --accent: #11ce18;
     pointer-events: auto;
-    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 48px 48px 56px;
     color: #ffffff;
     font-family: play, sans-serif;
+    user-select: none;
+}
+
+.gs-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+.gs-title {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px #000000c0;
+}
+.gs-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-size: 20px;
+    color: #c8c8c8;
+}
+.gs-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.8); }
+}
+.gs-warning {
+    font-size: 18px;
+    color: #ffb14a;
+}
+
+/* The generation groups flow left to right and wrap, centred as a block. */
+.gs-generations {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    gap: 40px 48px;
+    flex: 1;
+    margin-top: 24px;
 }
 .generation {
-    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 .generationLabel {
-    margin-bottom: 4px;
-    opacity: 0.85;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9a9a9a;
 }
 .gameToggle {
-    pointer-events: auto;
-    position: relative;
     display: flex;
-    gap: 4px;
-    filter: drop-shadow(0px 0px 2px #000000c5);
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.gs-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+.gs-tile:hover {
+    transform: translateY(-3px);
 }
 .gameToggleImg {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    cursor: pointer;
+    display: block;
+    height: var(--tile-h);
+    width: auto;
     border-radius: 6px;
-    opacity: 0.45;
-    filter: grayscale(70%);
-    transition: opacity 0.15s, filter 0.15s, transform 0.15s, box-shadow 0.15s;
-    box-sizing: border-box;
-    border: 2px solid transparent;
+    opacity: 0.6;
+    filter: saturate(0.7) drop-shadow(0 3px 6px #000000c0);
+    box-shadow: 0 0 0 2px transparent;
+    transition: opacity 0.15s, filter 0.15s, box-shadow 0.15s;
 }
-.gameToggleImg:hover {
-    opacity: 0.85;
-    filter: grayscale(20%);
-    transform: scale(1.05);
+.gs-tile:hover .gameToggleImg {
+    opacity: 0.9;
+    filter: saturate(1) drop-shadow(0 6px 10px #000000c0);
 }
-.gameToggleImg.selected {
+.gs-tile.selected .gameToggleImg {
     opacity: 1;
-    filter: none;
-    border-color: #11ce18;
-    box-shadow: 0 0 6px #11ce18;
-    transform: scale(1.05);
+    filter: saturate(1) drop-shadow(0 6px 10px #000000c0);
+    box-shadow: 0 0 0 3px var(--accent), 0 0 16px 2px #11ce1880;
+}
+.gs-caption {
+    font-size: 15px;
+    color: #8c8c8c;
+    transition: color 0.15s;
+}
+.gs-tile:hover .gs-caption {
+    color: #d0d0d0;
+}
+.gs-tile.selected .gs-caption {
+    color: var(--accent);
+    font-weight: 700;
 }
 </style>

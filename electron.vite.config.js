@@ -40,6 +40,18 @@ export default defineConfig({
     build: {
       copyPublicDir: false,
     },
+    server: {
+      watch: {
+        // gen2-5 write style edits back into `games/genN/data/style/*.json` in dev mode
+        // (`!app.isPackaged`, core/env.ts), and gen3 writes its species file on every
+        // mount. Those files are modules (`import.meta.glob` in each `storage.ts`), and
+        // nothing on the import chain accepts an HMR update, so under `electron-vite dev`
+        // each write was a full page reload: overlay -> "Please load a mapper" -> boot
+        // again. The in-memory table is already updated by the writer; the file only
+        // needs to be current for the next start.
+        ignored: ['**/src/renderer/games/*/data/style/**'],
+      },
+    },
     resolve: {
       alias: {
         '~': resolve('src/renderer'),

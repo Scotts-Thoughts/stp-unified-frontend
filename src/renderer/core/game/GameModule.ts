@@ -24,7 +24,7 @@ export interface Edition {
     name: string;
     /** The mapper game (a data key) this edition plays on: "Yellow", "Red and Blue"... */
     game: string;
-    /** Path under `images/box_art/`; gen1 and gen2 have placeholders (decision 16). */
+    /** Path under `images/box_art/`: the box front, or both boxes side by side for a paired edition. */
     boxArt: string;
     /** Folder under `splits/` the autosplitter writes to. */
     splitFolder: string;

@@ -14,8 +14,8 @@ export const gen4Manifest: ModuleManifest = {
     games: ["Platinum", "Diamond and Pearl", "HeartGold and SoulSilver"],
     editions: [
         { name: "Platinum", game: "Platinum", boxArt: "4-Platinum.png", splitFolder: "Platinum", splitPrefix: "", icon: "gen4/icon-platinum.ico" },
-        { name: "Diamond and Pearl", game: "Diamond and Pearl", boxArt: "4-DiamondandPearl.jpg", splitFolder: "DP", splitPrefix: "", icon: "gen4/icon-diamond.ico" },
-        { name: "HeartGold and SoulSilver", game: "HeartGold and SoulSilver", boxArt: "4-HeartGoldandSoulSilver.jpg", splitFolder: "HGSS", splitPrefix: "", icon: "gen4/icon-heartgold.ico" },
+        { name: "Diamond and Pearl", game: "Diamond and Pearl", boxArt: "4-DiamondPearl.png", splitFolder: "DP", splitPrefix: "", icon: "gen4/icon-diamond.ico" },
+        { name: "HeartGold and SoulSilver", game: "HeartGold and SoulSilver", boxArt: "4-HeartGoldSoulSilver.png", splitFolder: "HGSS", splitPrefix: "", icon: "gen4/icon-heartgold.ico" },
     ],
     editionKey: "selected_game",
     load: () => import("./index").then((m) => m.gen4),

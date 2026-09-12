@@ -12,8 +12,9 @@ import { yellowDeprecated } from "./mappers/yellow-deprecated";
  * loading that mapper lands on the unsupported-mapper state rather than the hang in
  * known-legacy-bugs.md #22. The split prefix letters and the folder (= the mapper game
  * name) are what `useOverlaySettingsStore.gameLetter` and `metaStore.game` compute
- * today. gen1's edition lives in that store (no `editionKey`), and its window icons
- * are the legacy `icon.png` until Scott supplies per-game art (decision 16).
+ * today. gen1's edition lives in that store (no `editionKey`). The box art is the
+ * front of each box (`images/box_art/`, from Scott's library, 2026-09-11); the window
+ * icons are still the legacy `icon.png` (decision 16).
  */
 export const gen1Manifest: ModuleManifest = {
     id: "gen1",

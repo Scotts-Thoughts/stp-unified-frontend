@@ -12,12 +12,8 @@
     <div id="app-container" class="gen-1">
         <div id="app">
             <keyhook :table="hotkeys" :placeholder="module.keyhookElement === true"></keyhook>
-            <div v-if="ready == false" class="pre-mapper">
-                <div>Please load a mapper in PokeAByte...</div>
-                <div v-if="unsupportedMapper">Unsupported mapper: {{ unsupportedMapper }}</div>
-                <br>
-                <no_mapper></no_mapper>
-            </div>
+            <!-- The pre-mapper screen (plan 3.2): the box-art grid with its own header. -->
+            <no_mapper v-if="ready == false" :unsupported-mapper="unsupportedMapper"></no_mapper>
             <!-- No wrapper: the overlay component's root is a direct child of #app, as
                  the legacy apps' v-else wrapper was, so the two trees line up from #app
                  down (tools/parity/capture.ts roots gen4's comparison there). -->

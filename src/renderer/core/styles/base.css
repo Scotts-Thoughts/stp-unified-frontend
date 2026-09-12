@@ -68,12 +68,3 @@ body {
     transform-origin: top left;
     transform: scale(1);
 }
-
-/* The shell's pre-mapper screen (index.html): its text and the box-art grid sit on
-   the black body above, before any generation's stylesheet is in play. */
-.pre-mapper {
-    padding: 16px 16px 0;
-    color: #ffffff;
-    font-family: play, sans-serif;
-    font-size: 20px;
-}

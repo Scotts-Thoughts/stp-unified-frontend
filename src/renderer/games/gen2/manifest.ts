@@ -4,9 +4,9 @@ import { goldSilverDeprecated } from "./mappers/gold-silver-deprecated";
 
 /**
  * gen2's manifest (plan 3.1): the shell's view of the generation before it is loaded.
- * The edition is the lifted component's `game_selection` key; the box art and the
- * window icon are the legacy `2-crystal.png` and `icon.png` until Scott supplies art
- * in the gen3-5 style (decision 16).
+ * The edition is the lifted component's `game_selection` key. The box art is Crystal's
+ * front and the Gold and Silver boxes side by side (`images/box_art/`, from Scott's
+ * library, 2026-09-11); the window icon is still the legacy `icon.png` (decision 16).
  */
 export const gen2Manifest: ModuleManifest = {
     id: "gen2",
@@ -15,7 +15,7 @@ export const gen2Manifest: ModuleManifest = {
     games: ["Crystal", "Gold and Silver"],
     editions: [
         { name: "Crystal", game: "Crystal", boxArt: "2-Crystal.png", splitFolder: "Crystal", splitPrefix: "c", icon: "gen2/icon.png" },
-        { name: "Gold & Silver", game: "Gold and Silver", boxArt: "2-Crystal.png", splitFolder: "Gold & Silver", splitPrefix: "c", icon: "gen2/icon.png" },
+        { name: "Gold & Silver", game: "Gold and Silver", boxArt: "2-GoldSilver.png", splitFolder: "Gold & Silver", splitPrefix: "c", icon: "gen2/icon.png" },
     ],
     editionKey: "game_selection",
     load: () => import("./index").then((m) => m.gen2),
