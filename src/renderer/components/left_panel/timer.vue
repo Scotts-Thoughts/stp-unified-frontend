@@ -9,13 +9,13 @@
 <script lang="ts">
 import PubSub from "~/logic/PubSub";
 import { defineComponent } from "vue";
-import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useEmulatorStatsStore, formatShuckieTime } from "~/core/stores/useEmulatorStatsStore";
 
 export default defineComponent({
     data() {
         return {
-            runConfig: useGameSpeciesData(),
+            settings: useOverlaySettingsStore(),
             emulator: useEmulatorStatsStore(),
             localTime: "0",
             localFrames: ".00",
@@ -23,13 +23,13 @@ export default defineComponent({
     },
     computed: {
         time(): string {
-            if (this.runConfig.advanced.shuckie_timer) {
+            if (this.settings.shuckie.timer) {
                 return formatShuckieTime(this.emulator.timeCurrent)[0];
             }
             return this.localTime;
         },
         frames(): string {
-            if (this.runConfig.advanced.shuckie_timer) {
+            if (this.settings.shuckie.timer) {
                 return formatShuckieTime(this.emulator.timeCurrent)[1];
             }
             return this.localFrames;

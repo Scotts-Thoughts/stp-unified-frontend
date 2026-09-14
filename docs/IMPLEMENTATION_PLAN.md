@@ -1100,3 +1100,33 @@ reads them.
   nth-child walking up to #app-container *exclusive*, so putting the class there keeps every key stable and
   every pre-scoping baseline comparable. 2.5 should do the same for each generation.
 
+## Post-migration fixes (2026-09-13, gen1 first)
+
+Four reports against the unified app, traced and fixed with the harness as the net (a gen1 fixture run of the
+untouched commit against the fix, `unified@<built copy>` vs `unified`; the diff lists exactly the intended
+differences and nothing else):
+
+1. **Bold text in the moveset** -- renderer drift, not a port error: known-legacy-bugs.md #40. Chromium 138
+   synthesises bold on a face declared at the default weight when a rule asks for 700, even when the file is
+   already bold; Chromium 114 did not. The stylesheet and the font files are byte-identical to the legacy copy
+   (verified against the pristine commit), and the same pattern exists in every lifted sheet, where the
+   harness could not see it (same-Electron baselines). Fixed by declaring the weight on every already-bold
+   face, all five generations, and `scope-css.py --font-weight` so a re-lift keeps it.
+2. **Splits on an Automatic right panel before the game starts** -- the post-battle override was persisted:
+   known-legacy-bugs.md #39. Transient now, and cleared on New Run and when a new run starts.
+3. **The pre-mapper screen showed one green tile per generation** -- five selections at once, and a click on a
+   sixth added another. The grid now remembers which generation was picked last (`selected_generation`, a
+   global user-state key) and highlights one tile; a "Selected: ..." line and a one-sentence hint say what the
+   screen is for. Each generation's stored edition is untouched.
+4. **Super Shuckie in gen1** -- the timer and counters were wired (poll, display, `mark-start`/`mark-end`,
+   counter increments, split rows) but the two switches were dev-only, so a packaged gen1 could not turn them
+   on, and they were stored per game and species. They are `useOverlaySettingsStore.shuckie` now (once per
+   install, as gens 2-5 keep them per generation), shown in the Interface panel of every build; with the
+   timer switch on, Play/Pause and Set Timer drive the emulator (`/mark-start`, gen3's mapping), the split
+   rows and the metrics panel carry the emulator's counters when the counters switch is on (gen4's rule),
+   and `/set-shuckie-timer` joins `/set-shuckie-counters` on gen1's control server. A species file that still
+   has the old flags is read and ignored; tick the switches once.
+
+Harness note: `tools/parity/targets.ts` resolves the Electron binary through `require("electron")` now, so the
+runner and `screenshot-idle.ts` launch on macOS and Linux as well as Windows.
+

@@ -8,6 +8,7 @@
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { createRequire } from "node:module";
 import { basename, join, resolve } from "node:path";
 
 export const REPO = resolve(import.meta.dirname, "..", "..");
@@ -90,7 +91,9 @@ export function junctionLegacyImages(appRoot: string, log: (m: string) => void):
 }
 
 export function unifiedElectron(): string {
-  return join(REPO, "node_modules", "electron", "dist", "electron.exe");
+  // The platform binary this repo's electron package resolves to: electron.exe on
+  // Windows, Electron.app/Contents/MacOS/Electron on macOS, electron on Linux.
+  return createRequire(import.meta.url)("electron") as string;
 }
 
 export function legacyElectron(gen: Generation): string {

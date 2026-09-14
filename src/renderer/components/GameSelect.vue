@@ -7,16 +7,27 @@
                 <span>Please load a mapper in PokeAByte...</span>
             </div>
             <div v-if="unsupportedMapper" class="gs-warning">Unsupported mapper: {{ unsupportedMapper }}</div>
+            <p class="gs-hint">
+                Pick the game you are about to play. The overlay starts by itself when PokeAByte loads that game's mapper.
+            </p>
+            <div class="gs-selection">
+                <template v-if="selected">
+                    Selected: <strong>{{ selected.edition.name }}</strong> <span class="gs-selection-gen">(Generation {{ selected.manifest.generation }})</span>
+                </template>
+                <template v-else>No game selected yet</template>
+            </div>
         </header>
 
         <div class="gs-generations">
-            <section v-for="manifest in manifests" :key="manifest.id" class="generation">
+            <section v-for="manifest in manifests" :key="manifest.id" :class="['generation', { 'gs-current': manifest.id === selectedGeneration }]">
                 <h2 class="generationLabel">Generation {{ manifest.generation }}</h2>
                 <div class="gameToggle">
                     <div
                         v-for="edition in visibleEditions(manifest)"
                         :key="edition.name"
                         :class="['gs-tile', { selected: isSelected(manifest, edition) }]"
+                        role="radio"
+                        :aria-checked="isSelected(manifest, edition)"
                         @click="select(manifest, edition)"
                     >
                         <img
@@ -38,12 +49,21 @@
 /**
  * The pre-mapper screen (plan 3.2, decided 2026-09-02): the box-art grid gen3-5
  * showed while PokeAByte had no mapper loaded, for every generation. It lists every
- * edition of every manifest, fourteen tiles, and a click stores the edition where
- * that generation reads it -- gen1's overlay settings store, or the lifted component's
- * own user-state key (`ModuleManifest.editionKey`) in that generation's section of
- * the user state -- and sets the taskbar icon to the edition's. The streamed overlay
- * is untouched: the edition is a user setting, distinct from the game the mapper
- * detects (plan 3.1).
+ * edition of every manifest, fourteen tiles. A click stores the edition where that
+ * generation reads it -- gen1's overlay settings store, or the lifted component's own
+ * user-state key (`ModuleManifest.editionKey`) in that generation's section of the
+ * user state -- and sets the taskbar icon to the edition's. The streamed overlay is
+ * untouched: the edition is a user setting, distinct from the game the mapper detects
+ * (plan 3.1).
+ *
+ * One tile is highlighted, not one per generation (2026-09-13). Every generation keeps
+ * its own stored edition, and the first version of this screen showed all five of
+ * them selected at once -- five green borders, and a click on a sixth tile added
+ * another instead of moving the selection. The grid now also remembers *which*
+ * generation the user picked last (`selected_generation`, a global user-state key),
+ * and only that generation's edition is drawn as selected; the other generations'
+ * stored editions are untouched, so each still opens on the edition it was last set
+ * to when its mapper loads.
  *
  * The art is one file per edition under `images/box_art/` (the shell's own folder,
  * not a generation's pool): a front box shot for a single game, and the two boxes
@@ -61,6 +81,8 @@ import { getUserState, setUserState } from "~/core/persistence/userState";
 import { MANIFESTS } from "~/games/registry";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 
+const SELECTED_GENERATION_KEY = "selected_generation";
+
 export default defineComponent({
     props: {
         /** The `/mapper` path of a mapper no module claims (main.ts), shown as a warning. */
@@ -74,6 +96,22 @@ export default defineComponent({
             revision: 0,
         };
     },
+    computed: {
+        /** The generation whose tile is highlighted: the one the user picked last, or none yet. */
+        selectedGeneration(): string | null {
+            void this.revision;
+            const id = getUserState<string | null>(SELECTED_GENERATION_KEY, null);
+            return this.manifests.some((m) => m.id === id) ? id : null;
+        },
+        /** The highlighted tile, for the header line. */
+        selected(): { manifest: ModuleManifest; edition: Edition } | null {
+            const manifest = this.manifests.find((m) => m.id === this.selectedGeneration);
+            if (!manifest) return null;
+            const name = this.currentEdition(manifest);
+            const edition = this.visibleEditions(manifest).find((e) => e.name === name);
+            return edition ? { manifest, edition } : null;
+        },
+    },
     methods: {
         visibleEditions(manifest: ModuleManifest): Edition[] {
             return manifest.editions.filter((edition) => !edition.devOnly || !IS_RELEASE);
@@ -84,15 +122,16 @@ export default defineComponent({
             return manifest.editionKey ? getUserState<string | null>(manifest.editionKey, null, manifest.id) : null;
         },
         isSelected(manifest: ModuleManifest, edition: Edition): boolean {
-            return this.currentEdition(manifest) === edition.name;
+            return manifest.id === this.selectedGeneration && this.currentEdition(manifest) === edition.name;
         },
         select(manifest: ModuleManifest, edition: Edition): void {
             if (manifest.id === "gen1") {
                 this.settings.edition = edition.name as typeof this.settings.edition;
             } else if (manifest.editionKey) {
                 setUserState(manifest.editionKey, edition.name, manifest.id);
-                this.revision++;
             }
+            setUserState(SELECTED_GENERATION_KEY, manifest.id);
+            this.revision++;
             window.api.set_game_icon(edition.icon);
         },
     },
@@ -156,6 +195,22 @@ export default defineComponent({
     font-size: 18px;
     color: #ffb14a;
 }
+.gs-hint {
+    margin-top: 6px;
+    font-size: 17px;
+    color: #8c8c8c;
+}
+.gs-selection {
+    font-size: 19px;
+    color: #d0d0d0;
+}
+.gs-selection strong {
+    color: var(--accent);
+    font-weight: 700;
+}
+.gs-selection-gen {
+    color: #9a9a9a;
+}
 
 /* The generation groups flow left to right and wrap, centred as a block. */
 .gs-generations {
@@ -178,6 +233,9 @@ export default defineComponent({
     letter-spacing: 2px;
     text-transform: uppercase;
     color: #9a9a9a;
+}
+.generation.gs-current .generationLabel {
+    color: var(--accent);
 }
 .gameToggle {
     display: flex;

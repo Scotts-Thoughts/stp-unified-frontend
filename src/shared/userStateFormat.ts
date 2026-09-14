@@ -16,9 +16,13 @@ export const GLOBAL_NAMESPACE = "global";
 
 export type UserStateSections = Record<string, Record<string, unknown>>;
 
-/** Keys every generation shares; everything else is per generation. */
+/**
+ * Keys every generation shares; everything else is per generation. `selected_generation`
+ * is the box-art grid's one highlighted tile (components/GameSelect.vue): which
+ * generation's stored edition the user picked last.
+ */
 export function isGlobalKey(key: string): boolean {
-    return key === "obs_websocket_url" || key === "obs_websocket_password" || key.startsWith("enemyScale_");
+    return key === "obs_websocket_url" || key === "obs_websocket_password" || key === "selected_generation" || key.startsWith("enemyScale_");
 }
 
 /** Turns the parsed file into sections: format 2 as is; a flat pre-namespace file as gen1's plus the globals. */

@@ -108,13 +108,13 @@ export default defineComponent({
         // When the Shuckie timer toggle is on and the emulator reports no running timer,
         // kick it off. Covers replays (no 0→positive playerId flip) and users enabling
         // the flag mid-session. Store self-throttles repeated calls.
-        "runConfig.advanced.shuckie_timer"(enabled) {
+        "settings.shuckie.timer"(enabled) {
             if (enabled) {
                 this.emulator.ensureStarted();
             }
         },
         "emulator.stats"() {
-            if (this.runConfig.advanced.shuckie_timer) {
+            if (this.settings.shuckie.timer) {
                 this.emulator.ensureStarted();
             }
         },
@@ -140,6 +140,8 @@ export default defineComponent({
         clear_run() {
             this.current_splits = []
             this.battle_summary_header = "Battle Summary"
+            // The post-battle splits override belongs to the run being cleared.
+            this.settings.clearRightPanelOverride();
             this.metrics.resetTimer();
             this.metrics.update("player_id", 0);
             this.metrics.update("run_finished", false);

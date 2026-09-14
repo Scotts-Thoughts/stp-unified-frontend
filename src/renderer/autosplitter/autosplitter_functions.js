@@ -7,7 +7,7 @@ import { appendSplitCsv, copySplitFile, splitPath } from "~/core/persistence/spl
 export function log_split() {
     const {formatted: time } = this.metrics.getTime();
     const opponent = this.game.properties.battle.trainer.class.value;
-    const shuckieEnabled = this.runConfig.advanced.shuckie_timer
+    const shuckieEnabled = this.settings.shuckie.timer
         && this.emulator?.stats?.time_current != null;
     const [t0, t1] = shuckieEnabled
         ? formatShuckieTime(this.emulator.stats.time_current)
@@ -37,7 +37,7 @@ export function autosplitter_process() {
         let { raw: time, formatted: formattedTime } = this.metrics.getTime();
         // When the Shuckie timer is enabled, every time field uses the emulator's timer instead of the local one,
         // so on-disk logs and the splits panel match the displayed overlay time.
-        const shuckieEnabled = this.runConfig.advanced.shuckie_timer
+        const shuckieEnabled = this.settings.shuckie.timer
             && this.emulator?.stats?.time_current != null;
         if (shuckieEnabled) {
             const shuckie_ms = this.emulator.stats.time_current;
@@ -47,9 +47,13 @@ export function autosplitter_process() {
         let real_time_total = formattedTime[0] + formattedTime[1]
         let real_time_hmmss = shuckieEnabled ? formattedTime[0] + formattedTime[1] : formattedTime[0]
         let real_time_file_label = formattedTime[2]
-        let resets = this.metrics.resets.toString()
-        let blackouts = this.metrics.blackouts.toString()
-        let failures = this.metrics.resets + this.metrics.blackouts
+        // With the Shuckie Counters switch on the rows carry the emulator's counters, which
+        // are what the overlay shows (gen4 logs the same way).
+        const resets_value = this.settings.shuckie.counters ? this.emulator.playerResets : this.metrics.resets
+        const blackouts_value = this.settings.shuckie.counters ? this.emulator.blackoutCounter : this.metrics.blackouts
+        let resets = resets_value.toString()
+        let blackouts = blackouts_value.toString()
+        let failures = resets_value + blackouts_value
         let level = this.game.properties.player.team[0].level.value.toString()
         let game_time = this.gametimeSplit.toString()
         let battle_duration = (battle_end - this.battle.statistics.battle_start)/1000 
@@ -212,7 +216,7 @@ export function autosplitter_process() {
             playerTurns, enemyTurns, itemsInBag, money, rivalTeam,
             statusCondition, type1, type2, experience,
             runIdentifier, this.meta.starter, trainerName,
-            startTime, realTime, gameTime, level, this.metrics.resets,
+            startTime, realTime, gameTime, level, resets_value,
             RTHours, RTMinutes, RTSeconds, RTMilliseconds,
             move1, move2, move3, move4, move1pp, move2pp, move3pp, move4pp, move1ppUp, move2ppUp, move3ppUp, move4ppUp,
             hp, maxHp, atk, def, spA, spD, spe,
@@ -245,7 +249,7 @@ export function autosplitter_process() {
         ]
         let deprecated_data = [
             runIdentifier, this.meta.starter, trainerName,
-            startTime, realTime, gameTime, level, this.metrics.resets,
+            startTime, realTime, gameTime, level, resets_value,
             RTHours, RTMinutes, RTSeconds, RTMilliseconds,
             move1, move2, move3, move4,
             atk, def, spA, spD, spe,

@@ -8,9 +8,17 @@
     </select><br>
     <br>
     <div>Timer Setting:</div>
-    <button class="buttonStyle buttonStyle_column3" @click="metrics.toggleTimer">Play/Pause</button>
-    <button class="buttonStyle set_button_style" @click="metrics.resetTimer">Set Timer</button>
+    <button class="buttonStyle buttonStyle_column3" @click="toggle_timer">Play/Pause</button>
+    <button class="buttonStyle set_button_style" @click="set_timer">Set Timer</button>
     <input type="text" class="inputContainer" v-model="metrics.timer_override" placeholder="00:00:00.00"/><br>
+    <br>
+    <div>Super Shuckie:</div>
+    <table>
+        <tbody>
+            <tr><td>Shuckie Timer:</td><td>   <input class="checkBoxStyle" type="checkbox" v-model="settings.shuckie.timer"/></td></tr>
+            <tr><td>Shuckie Counters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="settings.shuckie.counters"/></td></tr>
+        </tbody>
+    </table>
     <br>
     <button class="buttonStyle buttonStyle_column3" @click="open_splits_folder">Open Splits Folder</button>
     <br>
@@ -21,8 +29,6 @@
                 <tr><td>Test run:</td><td>        <input class="checkBoxStyle" type="checkbox" v-model="runConfig.advanced.test_run"/></td></tr>
                 <tr><td>Refilming mode:</td><td>  <input class="checkBoxStyle" type="checkbox" v-model="runConfig.advanced.refilming_mode"/></td></tr>
                 <tr><td>No attempt/split:</td><td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.advanced.no_attempt"/></td></tr>
-                <tr><td>Shuckie Timer:</td><td>   <input class="checkBoxStyle" type="checkbox" v-model="runConfig.advanced.shuckie_timer"/></td></tr>
-                <tr><td>Shuckie Counters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.advanced.shuckie_counters"/></td></tr>
                 <tr title="Dev only. Packaged builds always apply enemy sprite styles."><td>Enemy Sprite Styles:</td><td><input class="checkBoxStyle" type="checkbox" :checked="enemyResize.styles_enabled" @change="enemyResize.setStylesEnabled($event.target.checked)"/></td></tr>
                 <tr><td>Style Mode:</td><td>
                     <button v-if="!enemyResize.style_mode_active" class="buttonStyle" style="font-size: 11px;" @click="enemyResize.enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
@@ -60,8 +66,14 @@
 
 <script>
 /**
- * The Interface settings panel: game and species pickers, the splits folder button and
- * the dev-only style controls (plan 1.1).
+ * The Interface settings panel: game and species pickers, the timer and Super Shuckie
+ * switches, the splits folder button and the dev-only style controls (plan 1.1).
+ *
+ * The two Super Shuckie switches (2026-09-13) are what gens 2-5 show under "Show
+ * Advanced Settings": they were dev-only here, so a packaged gen1 could not use the
+ * emulator's timer or counters at all. With the timer switch on, Play/Pause and Set
+ * Timer drive the emulator's timer (`/mark-start`, as gen3's buttons do) instead of the
+ * overlay's own, which the panel would otherwise silently keep changing.
  *
  * Converted from a template-string component. Plain JavaScript rather than `lang="ts"`
  * for the same reason as `left_panel/exp_bar.vue`: the template reads `$event.target.checked`
@@ -75,6 +87,7 @@ import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
 import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
+import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { defineComponent } from "vue";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { IS_RELEASE } from "~/core/env";
@@ -92,10 +105,27 @@ export default defineComponent({
             runConfig: useGameSpeciesData(),
             metrics: useSpeciesMetricsStore(),
             enemyResize: useEnemySpriteResizeStore(),
+            emulator: useEmulatorStatsStore(),
             isRelease: IS_RELEASE,
         }
     },
     methods: {
+        /** Play/Pause: the overlay's timer, or the emulator's when the Shuckie Timer switch is on. */
+        toggle_timer() {
+            if (this.settings.shuckie.timer) {
+                this.emulator.sendStart();
+                return;
+            }
+            this.metrics.toggleTimer();
+        },
+        /** Set Timer: the overlay's timer to the offset, or the emulator's timer started (gen3's mapping). */
+        set_timer() {
+            if (this.settings.shuckie.timer) {
+                this.emulator.sendStart();
+                return;
+            }
+            this.metrics.resetTimer();
+        },
         open_splits_folder() {
             // Was methods/file_system_functions.openFolder, which built the path with
             // require("fs") in the renderer; the folder is still created before opening.

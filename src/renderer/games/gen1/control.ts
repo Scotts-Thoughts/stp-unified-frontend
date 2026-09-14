@@ -58,7 +58,7 @@ export function gen1ControlRoutes(isReady: () => boolean): ControlRoutes {
         hpType: config.hidden_power,
         bonk: s.pop_ups.bonks.enabled,
         repel_counter: s.pop_ups.repel.enabled,
-        shuckie_counters: config.advanced.shuckie_counters,
+        shuckie_counters: s.shuckie.counters,
         automatic_post_battle_splits: s.visualization.right_panel.post_battle_splits,
         current_species: meta().currentSpecies,
       };
@@ -118,8 +118,16 @@ export function gen1ControlRoutes(isReady: () => boolean): ControlRoutes {
       "/set-shuckie-counters": (query) => {
         const enabled = asBoolean(query.enabled);
         if (enabled === null) return missing("enabled");
-        runConfig().config.advanced.shuckie_counters = enabled;
+        settings().shuckie.counters = enabled;
         return { ok: true, shuckie_counters: enabled };
+      },
+
+      /** gen1 only (the queuer sends none of the generations a timer switch): the same shape as the counters route. */
+      "/set-shuckie-timer": (query) => {
+        const enabled = asBoolean(query.enabled);
+        if (enabled === null) return missing("enabled");
+        settings().shuckie.timer = enabled;
+        return { ok: true, shuckie_timer: enabled };
       },
 
       "/set-automatic-post-battle-splits": (query) => {

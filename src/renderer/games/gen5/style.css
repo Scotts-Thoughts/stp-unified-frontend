@@ -6,6 +6,13 @@
  * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `../../fonts/` (OpenSans-ExtraBold.ttf -> OpenSans-ExtraBold-gen345.ttf);
  * `url(images/...)` -> `url(images/gen5/...)` (tools/port/lift_assets.py).
  * Do not edit by hand -- re-run the tool.
+ *
+ * One edit after the lift (2026-09-13, re-run the tool with --font-weight to keep it):
+ * every `@font-face` whose file is already bold declares `font-weight: 700`. Chromium
+ * 138 (Electron 37) synthesises bold on a face declared at the default weight whenever
+ * a rule asks for 700 -- even when the file is bold -- where the legacy Electron 25 did
+ * not, so those rules rendered heavier than the legacy app; games/gen1/style.css says
+ * more. The descriptor restores the legacy glyphs and changes no lighter request.
  */
 .gen-5 {
     /* Base design size - 16:9 aspect ratio */
@@ -442,6 +449,7 @@ body:has(.gen-5) {
 @font-face {
     src: url(../../fonts/OpenSans-ExtraBold-gen345.ttf);
     font-family: oseb;
+    font-weight: 700;
 }
 
 /* @font-face {
@@ -458,6 +466,7 @@ body:has(.gen-5) {
 @font-face { /* replace font to change - leave label */
     src: url(../../fonts/Play-Bold.ttf);
     font-family: play;
+    font-weight: 700;
 }
 
 /*  ------------------------------------  */

@@ -41,6 +41,7 @@ import { FaultMode } from "~/stores/types/FaultMode";
 import { defineComponent } from "vue";
 import { useMetaStore } from "~/stores/metaStore.js";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData.js";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 export default defineComponent({
     inject: [ "game_properties" ],
@@ -49,15 +50,16 @@ export default defineComponent({
             meta: useMetaStore(),
             metrics: useSpeciesMetricsStore(),
             runConfig: useGameSpeciesData(),
+            settings: useOverlaySettingsStore(),
             emulator: useEmulatorStatsStore(),
         }
     },
     computed: {
         reset_count() {
-            return this.runConfig.advanced.shuckie_counters ? this.emulator.playerResets : this.metrics.resets;
+            return this.settings.shuckie.counters ? this.emulator.playerResets : this.metrics.resets;
         },
         blackout_count() {
-            return this.runConfig.advanced.shuckie_counters ? this.emulator.blackoutCounter : this.metrics.blackouts;
+            return this.settings.shuckie.counters ? this.emulator.blackoutCounter : this.metrics.blackouts;
         },
         top_left_ui_selector() {
             const allow_none = true // Toggle that allows for the UI to display no border if there are no faults
@@ -84,7 +86,7 @@ export default defineComponent({
             this.metrics.update("blackout_pending", false);
             this.metrics.update("resets", this.metrics.resets + 1);
             sendObsChapterMarker(gen1ChapterMarkers.reset());
-            if (this.runConfig.advanced.shuckie_counters) {
+            if (this.settings.shuckie.counters) {
                 this.emulator.incrementCounter("playerResets");
             }
         },
@@ -94,7 +96,7 @@ export default defineComponent({
                 if (this.runConfig.advanced.count_blackouts) {
                     sendObsChapterMarker(gen1ChapterMarkers.blackout());
                     this.metrics.update("blackouts", this.metrics.blackouts + 1);
-                    if (this.runConfig.advanced.shuckie_counters) {
+                    if (this.settings.shuckie.counters) {
                         this.emulator.incrementCounter("blackout_counter");
                     }
                 }

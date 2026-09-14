@@ -50,7 +50,12 @@ export const useOverlaySettingsStore = defineStore('overlay_settings', {
 	},
 	actions: {
 		async save() {
-			await saveAppSettings<OverlaySettings>("", SETTINGS_FILE, this.$state);
+			// The post-battle splits override is state of the *run*, not a setting: written
+			// out with the rest it came back on the next launch and put the splits over an
+			// Automatic right panel before the game had even started (2026-09-13).
+			const snapshot = JSON.parse(JSON.stringify(this.$state)) as OverlaySettings;
+			snapshot.visualization.right_panel.mode_override = null;
+			await saveAppSettings<OverlaySettings>("", SETTINGS_FILE, snapshot);
 		},
 		async load() {
 			const loaded = await loadAppSettings<Partial<OverlaySettings>>("", SETTINGS_FILE);
@@ -58,6 +63,8 @@ export const useOverlaySettingsStore = defineStore('overlay_settings', {
 				return;
 			}
 			const merged = deepMerge(defaultOverlaySettings(), loaded);
+			// A file written before save() dropped the override still carries it.
+			merged.visualization.right_panel.mode_override = null;
 			// Replace the state in one go so that subscribers get a single, synchronous notification.
 			this.$patch((state) => { Object.assign(state, merged); });
 		},
@@ -103,6 +110,17 @@ function defaultOverlaySettings() {
 		edition: "Yellow" as GameEdition,
 		/** The starter chosen for the run. */
 		starter: "Venomoth",
+		/**
+		 * Super Shuckie (`core/stores/useEmulatorStatsStore`, http://127.0.0.1:30158): show the
+		 * emulator's run timer instead of the overlay's, and its reset/blackout counters instead
+		 * of the overlay's. gens 2-5 keep the same two switches once per generation; gen1 kept
+		 * them per game and species in `useGameSpeciesData.advanced` until 2026-09-13, which
+		 * meant re-ticking them for every species.
+		 */
+		shuckie: {
+			timer: false as boolean,
+			counters: false as boolean,
+		},
 		starter_search: "",
 		keyboard_shortcuts: {},
 		visualization: {
@@ -123,7 +141,11 @@ function defaultOverlaySettings() {
 				speed_comparison: true as boolean,
 				/** The preferred mode for the right-hand panel. */
 				mode: RightPanelMode.automatic,
-				/** Temporary override for the right hand panel, used for post-battle splits. */
+				/**
+				 * Temporary override for the right hand panel, used for post-battle splits. Set
+				 * after a key trainer battle, cleared when the next trainer battle starts, on
+				 * New Run and when a new run starts; never saved to disk (see save()).
+				 */
 				mode_override: null as RightPanelMode | null,
 				/** When true the F17-F19 hotkeys are NOT allowed to change the right hand panel mode. */
 				hotkeys: true as boolean,

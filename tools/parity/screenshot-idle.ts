@@ -10,6 +10,7 @@
 import { mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { _electron as electron } from "playwright-core";
+import { unifiedElectron } from "./targets.ts";
 
 const argv = process.argv.slice(2);
 const out = argv.find((a) => a.startsWith("--out="))?.slice(6) ?? "tools/reports/idle.png";
@@ -19,7 +20,7 @@ const sandbox = join(REPO, "tools", "sandbox", "idle");
 mkdirSync(join(sandbox, "userData"), { recursive: true });
 
 const app = await electron.launch({
-  executablePath: join(REPO, "node_modules", "electron", "dist", "electron.exe"),
+  executablePath: unifiedElectron(),
   args: [REPO, `--user-data-dir=${join(sandbox, "userData")}`],
   cwd: sandbox,
   env: { ...process.env, STP_APP_ROOT: sandbox, STP_CONTROL_PORT: "30259" },

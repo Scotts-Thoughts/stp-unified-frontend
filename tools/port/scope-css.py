@@ -1,7 +1,7 @@
 """
 Scope a legacy stylesheet under `.gen-N` (plan 2.5; the tool Phase 1.5 did by hand).
 
-    python tools/port/scope-css.py <legacy style.css> <out style.css> <gen-class> [--fonts=../../fonts] [--asset-gen=gen2] [--font-rename=a.ttf=b.ttf,...]
+    python tools/port/scope-css.py <legacy style.css> <out style.css> <gen-class> [--fonts=../../fonts] [--asset-gen=gen2] [--font-rename=a.ttf=b.ttf,...] [--font-weight=family=700,...]
 
 Rules, in the plan's order -- port verbatim, verify, never edit a value:
 
@@ -26,7 +26,10 @@ Rules, in the plan's order -- port verbatim, verify, never edit a value:
   * `url(fonts/...)` is re-based with --fonts, because the file moves, and
     `url(images/...)` becomes `url(images/<gen>/...)` with --asset-gen, because the
     generation's tree sits next to gen1's images until Phase 4 merges them
-    (tools/port/lift_assets.py); nothing else inside a body is touched.
+    (tools/port/lift_assets.py);
+  * `--font-weight=family=700,...` adds a `font-weight` descriptor to the named
+    `@font-face` (the one value edit, see declare_font_weight); nothing else inside a
+    body is touched.
 
 After writing, it re-parses both files and proves: same rules (minus the dropped
 ones), byte-identical bodies (minus the font re-base), same relative order.
@@ -119,7 +122,42 @@ def rename_fonts(body: str, fonts: str, font_renames: dict) -> str:
     return body
 
 
-def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = "", legacy_dir=None, font_renames: dict | None = None):
+FONT_WEIGHT_DECL = re.compile(r"font-weight\s*:")
+FONT_FAMILY_LINE = re.compile(r"(\n([ \t]*))font-family\s*:\s*([^;}]+);")
+
+
+def declare_font_weight(body: str, font_weights: dict) -> str:
+    """`--font-weight=play=700`: declare the face at the weight its file carries.
+
+    The legacy sheets leave the descriptor out, so every face is registered at the
+    default 400. Chromium 114 (the legacy apps' Electron 25) skipped synthetic bold on a
+    web font whose file was already bold; Chromium 138 (Electron 37) emboldens whenever
+    the declared weight is below the request, so every `font-weight: 700` rule on
+    Play-Bold or OpenSans-ExtraBold rendered heavier than the legacy app (2026-09-13,
+    games/gen1/style.css). Declared at its real weight, a 700 request matches the face
+    and a lighter request still resolves to it unchanged. A face that already declares
+    a weight is left alone."""
+    family = FONT_FAMILY_LINE.search(body)
+    if not family or FONT_WEIGHT_DECL.search(body):
+        return body
+    weight = font_weights.get(family.group(3).strip().strip("\"'"))
+    if not weight:
+        return body
+    return body[: family.end()] + f"{family.group(1)}font-weight: {weight};" + body[family.end():]
+
+
+def strip_font_weight(body: str, font_weights: dict) -> str:
+    """The inverse, for verify(): the descriptor the tool added, and only that one."""
+    family = FONT_FAMILY_LINE.search(body)
+    if not family:
+        return body
+    weight = font_weights.get(family.group(3).strip().strip("\"'"))
+    if not weight:
+        return body
+    return body.replace(f"{family.group(1)}font-weight: {weight};", "", 1)
+
+
+def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = "", legacy_dir=None, font_renames: dict | None = None, font_weights: dict | None = None):
     blocks, tail = parse(src_text)
     out = []
     dropped = []
@@ -132,6 +170,8 @@ def scope(src_text: str, gen_class: str, fonts: str, asset_gen: str = "", legacy
             continue
         if sel.startswith("@font-face") or sel.startswith("@keyframes") or sel.startswith("@-webkit-keyframes"):
             body2 = rename_fonts(body.replace("url(fonts/", f"url({fonts}/"), fonts, font_renames or {})
+            if sel.startswith("@font-face"):
+                body2 = declare_font_weight(body2, font_weights or {})
             out.append(head + f"{sel} {{{body2}}}")
             continue
         if sel.startswith("@"):
@@ -195,16 +235,16 @@ def unscope(sel: str, gen_class: str) -> str:
     return ",\n".join(res)
 
 
-def verify(src_text: str, out_text: str, gen_class: str, fonts: str, dropped, asset_gen: str = "", font_renames: dict | None = None):
+def verify(src_text: str, out_text: str, gen_class: str, fonts: str, dropped, asset_gen: str = "", font_renames: dict | None = None, font_weights: dict | None = None):
     src_blocks, _ = parse(src_text)
     out_blocks, _ = parse(out_text)
     src_rules = [(selector_of(p), b) for p, b in src_blocks]
-    def unbase(b):
+    def unbase(b, sel):
         for old, new in (font_renames or {}).items():
             b = b.replace(f"url({fonts}/{new})", f"url({fonts}/{old})")
         b = b.replace(f"url({fonts}/", "url(fonts/")
         return b.replace(f"url(images/{asset_gen}/", "url(images/") if asset_gen else b
-    out_rules = [(unscope(selector_of(p), gen_class), unbase(b), "the non-custom-property half of :root" in p) for p, b in out_blocks]
+    out_rules = [(unscope(selector_of(p), gen_class), unbase(b, selector_of(p)), "the non-custom-property half of :root" in p) for p, b in out_blocks]
     # A split `:root` is two output rules for one source rule: fold the marked
     # html:has() half back into the `:root` before it, and compare their lines as a
     # multiset.
@@ -224,6 +264,9 @@ def verify(src_text: str, out_text: str, gen_class: str, fonts: str, dropped, as
         if a[0] == ":root" and b[0] == ":root":
             assert sorted(l.strip() for l in a[1].split("\n") if l.strip()) == sorted(l.strip() for l in b[1].split("\n") if l.strip()), f"rule {k} (:root) lost a line"
             continue
+        if a[0].startswith("@font-face") and b[0].startswith("@font-face") and a != b:
+            # The one value edit: a descriptor --font-weight added to a face that had none.
+            b = (b[0], strip_font_weight(b[1], font_weights or {}))
         assert a == b, f"rule {k} differs:\n  {a[0][:80]!r}\n  {b[0][:80]!r}"
     return len(out_norm)
 
@@ -237,8 +280,9 @@ def main():
     fonts = opts.get("fonts", "../../fonts")
     asset_gen = opts.get("asset-gen", "")
     font_renames = dict(pair.split("=", 1) for pair in opts.get("font-rename", "").split(",") if pair)
+    font_weights = dict(pair.split("=", 1) for pair in opts.get("font-weight", "").split(",") if pair)
     src_text = Path(src_path).read_text(encoding="utf-8")
-    out, dropped, tail = scope(src_text, gen_class, fonts, asset_gen, legacy_dir=Path(src_path).parent, font_renames=font_renames)
+    out, dropped, tail = scope(src_text, gen_class, fonts, asset_gen, legacy_dir=Path(src_path).parent, font_renames=font_renames, font_weights=font_weights)
     header = f"""/**
  * Scoped under `.{gen_class}` by tools/port/scope-css.py from {Path(src_path).as_posix()}
  * (plan 2.5). Values untouched; selectors prefixed; `:root` -> `.{gen_class}`;
@@ -246,11 +290,11 @@ def main():
  * variants; `*` dropped because core/styles/base.css carries the reset; a `@font-face` for a file the legacy app
  * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `{fonts}/`{" (" + ", ".join(f"{a} -> {b}" for a, b in font_renames.items()) + ")" if font_renames else ""};
  * `url(images/...)` -> `url(images/{asset_gen}/...)` (tools/port/lift_assets.py).
- * Do not edit by hand -- re-run the tool.
+ * Do not edit by hand -- re-run the tool.{chr(10) + " *" + chr(10) + " * The one value edit (--font-weight=" + ",".join(f"{a}={b}" for a, b in font_weights.items()) + "): every `@font-face` whose file is already" + chr(10) + " * bold declares its weight, because Chromium 138 (Electron 37) synthesises bold on a face declared at the" + chr(10) + " * default weight whenever a rule asks for 700 where the legacy Electron 25 did not (games/gen1/style.css)." if font_weights else ""}
  */
 """
     out_text = header + "\n\n".join(out) + ("\n" + tail.strip() if tail.strip() else "") + "\n"
-    n = verify(src_text, out_text, gen_class, fonts, dropped, asset_gen, font_renames)
+    n = verify(src_text, out_text, gen_class, fonts, dropped, asset_gen, font_renames, font_weights)
     Path(out_path).write_text(out_text, encoding="utf-8")
     print(f"{n} rules scoped -> {out_path}")
     for sel, body in dropped:

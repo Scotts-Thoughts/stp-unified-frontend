@@ -36,7 +36,7 @@
             </tr>
             <tr>
                 <td style="text-align: left;">Resets:</td>
-                <td>{{metrics.resets}}</td>
+                <td>{{resets}}</td>
                 <td>
                     <button @click="increment('resets')" class="smallButtonStyle increment">+</button>
                     <button @click="decrement('resets')" class="smallButtonStyle decrement">-</button>
@@ -44,7 +44,7 @@
             </tr>
             <tr>
                 <td style="text-align: left;">Blackouts:</td>
-                <td>{{metrics.blackouts}}</td>
+                <td>{{blackouts}}</td>
                 <td>
                     <button @click="increment('blackouts')" class="smallButtonStyle increment">+</button>
                     <button @click="decrement('blackouts')" class="smallButtonStyle decrement">-</button>
@@ -64,6 +64,7 @@
 import PubSub from "~/logic/PubSub";
 import { SpeciesMetrics, useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.ts";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData.ts";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { defineComponent } from "vue";
 
@@ -77,14 +78,21 @@ export default defineComponent({
     data() {
         return {
             runConfig: useGameSpeciesData(),
+            settings: useOverlaySettingsStore(),
             metrics: useSpeciesMetricsStore(),
             emulator: useEmulatorStatsStore(),
         }
     },
     computed: {
-        faults() {
-
-            return this.metrics.resets + this.metrics.blackouts;
+        /** What the overlay shows: the emulator's counters when the Shuckie Counters switch is on (as gen4 reports its faults). */
+        resets(): number {
+            return this.settings.shuckie.counters ? this.emulator.playerResets : this.metrics.resets;
+        },
+        blackouts(): number {
+            return this.settings.shuckie.counters ? this.emulator.blackoutCounter : this.metrics.blackouts;
+        },
+        faults(): number {
+            return this.resets + this.blackouts;
         }
     },
     methods: {
@@ -96,7 +104,7 @@ export default defineComponent({
             if (typeof value === "number") {
                 this.metrics.update(property, (value + 1) as any);
                 const counter = EMULATOR_COUNTERS[property];
-                if (counter && this.runConfig.advanced.shuckie_counters) {
+                if (counter && this.settings.shuckie.counters) {
                     this.emulator.incrementCounter(counter);
                 }
             }
@@ -109,7 +117,7 @@ export default defineComponent({
                 }
                 this.metrics.update(property, (value - 1) as any);
                 const counter = EMULATOR_COUNTERS[property];
-                if (counter && this.runConfig.advanced.shuckie_counters) {
+                if (counter && this.settings.shuckie.counters) {
                     const emulatorValue = this.emulator.stats?.counters?.[counter];
                     if (emulatorValue != null && emulatorValue > 0) {
                         this.emulator.incrementCounterBy(counter, -1);

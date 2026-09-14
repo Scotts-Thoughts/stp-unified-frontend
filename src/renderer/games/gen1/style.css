@@ -14,7 +14,20 @@
  */
 
 /* gen1's faces, from base.css (one generation's faces at a time, see there). The
-   families keep their names; the paths are relative to this file. */
+   families keep their names; the paths are relative to this file.
+
+   `osb` and `play` are both Play-Bold, and since 2026-09-13 they say so with a
+   `font-weight: 700` descriptor. The legacy sheet left it out, and under the legacy
+   Electron 25 (Chromium 114) that cost nothing: a rule asking for 700 got the file
+   as it is, because Blink skipped synthetic bold on a font whose file was already
+   bold. Chromium 138 (Electron 37) no longer checks the file -- it emboldens
+   whenever the *declared* weight (the default, 400) is below the request -- so
+   every `font-weight: 700` rule on these faces (the moveset, the PP column, the
+   encounter popups, the inventory, the player's moves in battle) came out heavier
+   than it ever did. Declared at 700, a 700 request matches the face exactly and a
+   400/500 request still gets the same glyphs (there is no lighter face to fall to);
+   measured pixel-identical to the Electron 25 rendering in both cases. `oseb`
+   already carried the descriptor. */
 /* @font-face {
     src: url(../../fonts/OpenSans-VariableFont_wdth\,wght.ttf);
     font-family: oseb;
@@ -28,6 +41,7 @@
 @font-face {
     src: url(../../fonts/Play-Bold.ttf);
     font-family: osb;
+    font-weight: 700;
 }
 
 @font-face {
@@ -38,6 +52,7 @@
 @font-face {
     src: url(../../fonts/Play-Bold.ttf);
     font-family: play;
+    font-weight: 700;
 }
 
 @font-face {

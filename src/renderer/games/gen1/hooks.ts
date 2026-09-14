@@ -53,11 +53,14 @@ export function installGen1RunHooks(vm: any): void {
                 return
             }
             PubSub.publish("@run/new_run_started", vm.metrics.player_id);
+            // The previous run's post-battle splits (or its summary) stay up until the
+            // next run starts; from here the right panel is the setting's again.
+            vm.settings.clearRightPanelOverride();
             vm.metrics.update("splits_logged", false);
             if (vm.runConfig.advanced.test_run == false && vm.runConfig.advanced.refilming_mode == false) {
                 vm.metrics.update("attempts", vm.metrics.attempts + 1);
             };
-            if (vm.runConfig.advanced.shuckie_timer && vm.emulator.timeCurrent == null) {
+            if (vm.settings.shuckie.timer && vm.emulator.timeCurrent == null) {
                 vm.emulator.sendStart();
             }
             vm.metrics.startTime();
@@ -151,7 +154,7 @@ export function installGen1RunHooks(vm: any): void {
                     vm.settings.setRightPanelOverride(RightPanelMode.splits);
                 }
                 vm.metrics.stopTimer();
-                if (vm.runConfig.advanced.shuckie_timer) {
+                if (vm.settings.shuckie.timer) {
                     vm.emulator.sendEnd();
                 }
                 logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, "Simple", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish) //log a simple split

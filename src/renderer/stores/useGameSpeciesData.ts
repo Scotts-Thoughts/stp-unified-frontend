@@ -158,8 +158,9 @@ export function defaultGameSpeciesSettings() {
 				/** Finish number to log to when refilming. */
 				refilmed_finish: 0,
 				no_attempt: false,
-				shuckie_timer: false,
-				shuckie_counters: false,
+				// `shuckie_timer` / `shuckie_counters` lived here until 2026-09-13; they are
+				// `useOverlaySettingsStore.shuckie` now (once per install, as gens 2-5 keep them).
+				// A species file that still has them is read and ignored.
 				/** Whether a blackout (returning to the overworld after fainting) counts as a fault. */
 				count_blackouts: true,
 				editor: {
