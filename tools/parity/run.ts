@@ -89,6 +89,7 @@ export interface RunResult {
   writes: number;
   obsMarkers: number;
   shuckieCalls: number;
+  shuckieBookmarks: number;
   consoleErrors: number;
 }
 
@@ -346,6 +347,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     writeFileSync(join(outDir, "writes.json"), JSON.stringify(mock.writeLog, null, 1));
     writeFileSync(join(outDir, "obs-markers.json"), JSON.stringify(obs?.markers ?? [], null, 1));
     writeFileSync(join(outDir, "shuckie-calls.json"), JSON.stringify(shuckie?.calls ?? [], null, 1));
+    writeFileSync(join(outDir, "shuckie-bookmarks.json"), JSON.stringify(shuckie?.bookmarks ?? [], null, 1));
     writeFileSync(join(outDir, "console-tail.json"), JSON.stringify(consoleLog, null, 1));
 
     // Oracle 5, second half: every write must be one the mapper profile declares
@@ -396,6 +398,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     writes: mock.writeLog.length,
     obsMarkers: obs?.markers.length ?? 0,
     shuckieCalls: shuckie?.calls.length ?? 0,
+    shuckieBookmarks: shuckie?.bookmarks.length ?? 0,
     consoleErrors: consoleLog.filter((c) => c.type !== "warning").length,
   };
 }
@@ -786,7 +789,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   });
   console.log(
     `\n${result.target} x ${result.fixture}: ${result.checkpoints.length} captures, ${result.writes} writes, ` +
-      `${result.obsMarkers} OBS markers, ${result.shuckieCalls} Shuckie calls, ${result.consoleErrors} console errors`,
+      `${result.obsMarkers} OBS markers, ${result.shuckieCalls} Shuckie calls, ${result.shuckieBookmarks} Shuckie bookmarks, ${result.consoleErrors} console errors`,
   );
   console.log(`captures in ${result.outDir}`);
 }

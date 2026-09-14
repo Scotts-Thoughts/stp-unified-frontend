@@ -17,6 +17,7 @@
         <tbody>
             <tr><td>Shuckie Timer:</td><td>   <input class="checkBoxStyle" type="checkbox" v-model="settings.shuckie.timer"/></td></tr>
             <tr><td>Shuckie Counters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="settings.shuckie.counters"/></td></tr>
+            <tr><td>Shuckie Bookmarks:</td><td><input class="checkBoxStyle" type="checkbox" :checked="shuckieBookmarks" @change="set_shuckie_bookmarks($event.target.checked)"/></td></tr>
         </tbody>
     </table>
     <br>
@@ -73,7 +74,9 @@
  * Advanced Settings": they were dev-only here, so a packaged gen1 could not use the
  * emulator's timer or counters at all. With the timer switch on, Play/Pause and Set
  * Timer drive the emulator's timer (`/mark-start`, as gen3's buttons do) instead of the
- * overlay's own, which the panel would otherwise silently keep changing.
+ * overlay's own, which the panel would otherwise silently keep changing. The third switch,
+ * Shuckie Bookmarks, is global user state rather than a gen1 setting: every generation's
+ * chapter markers become replay bookmarks through core (`core/logic/shuckieBookmarks.ts`).
  *
  * Converted from a template-string component. Plain JavaScript rather than `lang="ts"`
  * for the same reason as `left_panel/exp_bar.vue`: the template reads `$event.target.checked`
@@ -88,6 +91,7 @@ import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
 import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
 import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
+import { shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { defineComponent } from "vue";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { IS_RELEASE } from "~/core/env";
@@ -106,10 +110,15 @@ export default defineComponent({
             metrics: useSpeciesMetricsStore(),
             enemyResize: useEnemySpriteResizeStore(),
             emulator: useEmulatorStatsStore(),
+            shuckieBookmarks: shuckieBookmarksEnabled(),
             isRelease: IS_RELEASE,
         }
     },
     methods: {
+        set_shuckie_bookmarks(enabled) {
+            this.shuckieBookmarks = enabled;
+            setShuckieBookmarksEnabled(enabled);
+        },
         /** Play/Pause: the overlay's timer, or the emulator's when the Shuckie Timer switch is on. */
         toggle_timer() {
             if (this.settings.shuckie.timer) {

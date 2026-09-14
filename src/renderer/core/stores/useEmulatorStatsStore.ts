@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-const EMULATOR_BASE_URL = "http://127.0.0.1:30158";
+export const EMULATOR_BASE_URL = "http://127.0.0.1:30158";
 const POLL_INTERVAL_MS = 10;
 
 export interface EmulatorCounters {

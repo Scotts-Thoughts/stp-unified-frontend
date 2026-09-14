@@ -1130,3 +1130,32 @@ differences and nothing else):
 Harness note: `tools/parity/targets.ts` resolves the Electron binary through `require("electron")` now, so the
 runner and `screenshot-idle.ts` launch on macOS and Linux as well as Windows.
 
+
+## Super Shuckie bookmarks at every chapter marker (2026-09-14)
+
+Super Shuckie's `replay-bookmarks` branch (commit `e994c95`) adds replay bookmarks and a REST API for them.
+Every chapter marker, in every generation, now also becomes a bookmark in the replay Super Shuckie is recording
+or playing back: `core/logic/shuckieBookmarks.ts`, contract in `external-contracts.md` §3.
+
+- **One funnel.** `sendChapterMarker` sends the OBS chapter and adds the bookmark. gen1's two call sites (the
+  battle hooks and `left_panel/faults.vue`) and gens 2-5's `sendObsChapterMarker` methods call it, so a
+  bookmark goes out exactly where a chapter does, with the same name. The OBS exchange is unchanged.
+- **Typed by kind** (BATTLE for `IN`/`OUT`, ITEM, MAP CHANGE, TEXT BOX, NEW MOVE, ...), so the bookmark window
+  can color and tell them apart. Super Shuckie creates each type the first time it is used.
+- **Playback adds too, without duplicates.** A marker is skipped when the replay already has a bookmark with
+  that name within 300 frames that has not answered for another marker in this pass. Playing a replay again
+  adds nothing, while the first playback of an older replay fills it in, repeats included. The list is
+  fetched once per replay; the module then applies its own adds to its copy, including the generation bumps
+  they cause, and fetches again only at a generation those adds do not explain. Without that, filling in a
+  long replay downloaded the whole list once per marker.
+- **Switch:** Shuckie Bookmarks (global user state `shuckie_bookmarks`, default on), in gen1's Interface panel
+  and under Show Advanced Settings in gens 2-5.
+- **Harness:** the Super Shuckie stub plays a replay with no bookmarks. Its `/add-bookmark` calls are logged
+  to `shuckie-bookmarks.json`, apart from oracle 8's call log, because the legacy baselines add none.
+  `diff.ts` checks that a unified candidate's bookmark names match its own OBS marker names.
+  `npm run parity:bookmarks` (tools/parity/bookmarks-selftest.ts) drives the module through recording,
+  playback dedupe, seeks, replay switches, outside edits, the switch and a dead server, against a fake
+  Super Shuckie on a spare port (a `fetch` shim rewrites 30158, as --redirect-ports does in the renderer).
+- **Verified** on the gen1/3/4/5 fixtures against a build of the previous commit: one bookmark per OBS marker
+  in every run; the only intended differences are gen1's new settings row. Not yet run against a real
+  Super Shuckie build, and gen2 has no fixture here, so it is typechecked only.

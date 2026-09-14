@@ -112,6 +112,7 @@
                         <!-- <tr v-if="show_advanced_settings"><td>Test Run:</td><td><input class="checkBoxStyle" type="checkbox" v-model="testRun"/></td></tr> -->
                         <tr v-if="show_advanced_settings"><td>Shuckie Timer</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_timer"></td></tr>
                         <tr v-if="show_advanced_settings"><td>Shuckie Counters</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_counters"></td></tr>
+                        <tr v-if="show_advanced_settings"><td>Shuckie Bookmarks</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_bookmarks"></td></tr>
                         <!-- <tr v-if="show_advanced_settings"><td>Refilming-Mode:</td><td><input class="checkBoxStyle" type="checkbox" v-model="refilming_mode"/></td></tr> -->
                         <tr v-if="show_advanced_settings"><td>Debugging-Mode:</td><td><input class="checkBoxStyle" type="checkbox" v-model="debugging_mode"></td></tr>
                         <tr><td>Automatic Post Battle Splits:</td><td><input class="checkBoxStyle" type="checkbox" v-model="automatic_post_battle_splits"></td></tr>
@@ -1315,7 +1316,7 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendObsChapterMarker } from "~/core/logic/obs";
+import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { MyStorage, StyleSettingsUtils } from "./storage";
@@ -1397,6 +1398,7 @@ export default defineComponent({
 
             shuckie_timer                : MyStorage['shuckie_timer']                ?? false,
             shuckie_counters             : MyStorage['shuckie_counters']             ?? false,
+            shuckie_bookmarks            : shuckieBookmarksEnabled(),
 
             selected_evolution_species   : null,  // Currently selected species in evolution family for styling
             evolution_family_list        : [],    // List of species in the current evolution family
@@ -2043,6 +2045,10 @@ export default defineComponent({
         }
     },
     watch: {
+        shuckie_bookmarks(enabled) {
+            // Global, not this generation's MyStorage: the bookmarks are core's (core/logic/shuckieBookmarks.ts).
+            setShuckieBookmarksEnabled(enabled);
+        },
         iconGameName: {
             immediate: true,
             handler(newValue) {
@@ -3724,8 +3730,9 @@ export default defineComponent({
          */
         sendObsChapterMarker(chapterName) {
             // Byte-for-byte the same obs-websocket v5 exchange as gen1's and gen2's; the
-            // shared client reads the url/password from the same key names (plan 1.9).
-            sendObsChapterMarker(chapterName);
+            // shared client reads the url/password from the same key names (plan 1.9). The
+            // same marker goes to Super Shuckie as a replay bookmark (core/logic/shuckieBookmarks.ts).
+            sendChapterMarker(chapterName);
         },
         // ============ Style Settings Management Methods ============
         /**

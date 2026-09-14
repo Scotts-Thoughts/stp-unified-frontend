@@ -107,6 +107,21 @@ Used by gen1 (`useEmulatorStatsStore`, poll every **10 ms**) and by gen5's `Shuc
 | `POST /mark-start` (optionally `?offset=`) | start the emulator-side timer |
 | `POST /mark-end` | end it |
 | `POST /increment-counter?name=X[&by=Y]` | bump a counter |
+| `GET /bookmarks` | `{ replay, state: "none"\|"recording"\|"playback", generation, editable, bookmarks: [{ id, name, in_frame, … }], … }` |
+| `POST /add-bookmark?name=X&type=T&frame=F` | a replay bookmark; `T` is created on first use. Needs Super Shuckie's `replay-bookmarks` branch (format v5); older builds 404 |
+
+**Bookmarks at every chapter marker** (all generations, `core/logic/shuckieBookmarks.ts`): each OBS chapter
+marker (§4) is also added to the replay being recorded or played back, named exactly like the chapter, on the
+`total_elapsed_frames` read from `/stats` when the marker fired. Types are by kind of marker: `IN`/`OUT` →
+BATTLE, `Map Change` → MAP CHANGE, `Text Box` → TEXT BOX, `MENU`, `Item` → ITEM, `Held Item` → HELD ITEM,
+`New Move` → NEW MOVE, `Move Change` → MOVE CHANGE, `Level Up`/`Battle Level Up` → LEVEL UP, `Rare Candy Used`
+→ RARE CANDY, `Special` → SPECIAL, `Turn`, `Next Pokemon`, `Enemy Fainted`, `RESET`, `BLACKOUT`, gen3's
+`LABEL - MOVE` → TM MOVE and `LABEL - VICTORY` → VICTORY; anything new gets its kind in capitals. During
+playback a marker is skipped when the replay already has a bookmark of that name within 300 frames that has
+not answered for another marker in this pass (a seek back starts a new pass), so playing a replay again adds no
+duplicates. Playback writes change the replay file and upgrade a pre-v5 replay in place. The **Shuckie
+Bookmarks** switch (global user state `shuckie_bookmarks`, default on; gen1's Interface panel, gens 2-5 under
+Show Advanced Settings) turns it off.
 
 Failures are swallowed and throttled, so the app runs without Shuckie. The harness stubs this server
 (replaying the fixture's `F` frame samples as `total_elapsed_frames`) and logs every POST as an oracle.

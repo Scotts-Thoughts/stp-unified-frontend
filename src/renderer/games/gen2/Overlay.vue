@@ -69,6 +69,7 @@
                             <tr v-if="show_advanced_settings"><td>Re-filming Mode:</td><td><input class="checkBoxStyle" type="checkbox" v-model="refilming_mode"></td></tr>
                             <tr v-if="show_advanced_settings"><td>Shuckie Timer:</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_timer"></td></tr>
                             <tr v-if="show_advanced_settings"><td>Shuckie Counters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_counters"></td></tr>
+                            <tr v-if="show_advanced_settings"><td>Shuckie Bookmarks:</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_bookmarks"></td></tr>
                             <tr v-if="show_advanced_settings && refilming_mode"><td>Attempt Number:</td><td><input class="inputContainer" style="width: 50px; text-align: center;" type="text" v-model="refilmed_attempt"></td></tr>
                             <tr v-if="show_advanced_settings && refilming_mode"><td>Finish Number:</td><td> <input class="inputContainer" style="width: 50px; text-align: center;" type="text" v-model="refilmed_finish"></td></tr>
                             <tr v-if="show_advanced_settings"><td>Debugging:</td><td><input class="checkBoxStyle" type="checkbox" v-model="debugging"></td></tr>
@@ -1081,7 +1082,7 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendObsChapterMarker } from "~/core/logic/obs";
+import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { MyStorage, StyleSettingsUtils } from "./storage";
@@ -1158,6 +1159,7 @@ export default defineComponent({
 
             shuckie_timer                : MyStorage['this.shuckie_timer']                ?? false,
             shuckie_counters             : MyStorage['this.shuckie_counters']             ?? false,
+            shuckie_bookmarks            : shuckieBookmarksEnabled(),
 
         //USER CONFIG ------------------------//
             starter                : MyStorage["starter"] ?? "Aipom",
@@ -1701,6 +1703,10 @@ export default defineComponent({
     },
 
     watch: {
+        shuckie_bookmarks(enabled) {
+            // Global, not this generation's MyStorage: the bookmarks are core's (core/logic/shuckieBookmarks.ts).
+            setShuckieBookmarksEnabled(enabled);
+        },
         toggle_wEarlyEncounters(newValue) {
             if (newValue == true) {
                 this.game.properties.patch.wEarlyEncounters.set("On", false)
@@ -2537,8 +2543,9 @@ export default defineComponent({
         },
         sendObsChapterMarker(chapterName) {
             // Byte-for-byte the same obs-websocket v5 exchange as gen1's; the shared
-            // client reads the url/password from the same key names (plan 1.9).
-            sendObsChapterMarker(chapterName);
+            // client reads the url/password from the same key names (plan 1.9). The same
+            // marker goes to Super Shuckie as a replay bookmark (core/logic/shuckieBookmarks.ts).
+            sendChapterMarker(chapterName);
         },
         // ============ Style Settings Management Methods ============
         /**

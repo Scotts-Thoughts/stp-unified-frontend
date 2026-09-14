@@ -178,6 +178,10 @@
                             <td>Shuckie Counters:</td>
                             <td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_counters"></td>
                         </tr>
+                        <tr v-if="show_advanced_settings">
+                            <td>Shuckie Bookmarks:</td>
+                            <td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_bookmarks"></td>
+                        </tr>
                         <!-- <tr v-if="show_advanced_settings">
                             <td>No counters</td>
                             <td><input class="checkBoxStyle" type="checkbox" v-model="no_counters" /></td>
@@ -1725,7 +1729,7 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendObsChapterMarker } from "~/core/logic/obs";
+import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { MyStorage, StyleSettingsUtils } from "./storage";
@@ -1847,6 +1851,7 @@ export default defineComponent({
             emulatorStats        : null,
             shuckie_timer        : MyStorage['shuckie_timer']    ?? false,
             shuckie_counters     : MyStorage['shuckie_counters'] ?? false,
+            shuckie_bookmarks    : shuckieBookmarksEnabled(),
             
             set_rom_starter_automatically : true,
             legacy_state          : MyStorage['legacy_state'] ?? false,
@@ -2670,6 +2675,10 @@ export default defineComponent({
     },
 
     watch: {
+        shuckie_bookmarks(enabled) {
+            // Global, not this generation's MyStorage: the bookmarks are core's (core/logic/shuckieBookmarks.ts).
+            setShuckieBookmarksEnabled(enabled);
+        },
         gameSelection(newValue) {
             // Update the taskbar/window icon to match the selected game (games/gen3/icons.ts).
             try {
@@ -4003,8 +4012,9 @@ export default defineComponent({
         sendObsChapterMarker(chapterName) {
             // gen3's obs-websocket v5 exchange -- Identify, a GetRecordStatus probe, then
             // CreateRecordChapter, with its log lines -- is the shared client's `probeStatus`
-            // variant (core/logic/obs.ts, plan 1.9); it reads the same url/password keys.
-            sendObsChapterMarker(chapterName, { probeStatus: true });
+            // variant (core/logic/obs.ts, plan 1.9); it reads the same url/password keys. The
+            // same marker goes to Super Shuckie as a replay bookmark (core/logic/shuckieBookmarks.ts).
+            sendChapterMarker(chapterName, { probeStatus: true });
         },
 
         /**

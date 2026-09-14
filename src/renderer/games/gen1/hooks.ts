@@ -1,7 +1,7 @@
 import PubSub from "~/logic/PubSub";
 import { logData, logCopy } from "~/autosplitter/autosplitter_functions.js";
 import { autosplitter } from "~/games/gen1/data/splits";
-import { sendObsChapterMarker } from "~/core/logic/obs";
+import { sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
 import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
 
@@ -39,11 +39,11 @@ export function installGen1RunHooks(vm: any): void {
         if (newProp.value == "To Battle" && vm.game.properties.battle.type.value == "Trainer") {
             vm.settings.clearRightPanelOverride();
             if (oldProp.value == "Overworld") {
-                sendObsChapterMarker(gen1ChapterMarkers.battleIn(vm.game.properties.battle.trainer.class.value));
+                sendChapterMarker(gen1ChapterMarkers.battleIn(vm.game.properties.battle.trainer.class.value));
             }
         }
         else if (newProp.value == "Overworld" && oldProp.value == "From Battle") {
-            sendObsChapterMarker(gen1ChapterMarkers.battleOut(vm.game.properties.battle.trainer.class.value));
+            sendChapterMarker(gen1ChapterMarkers.battleOut(vm.game.properties.battle.trainer.class.value));
         }
     });
     // NEW_RUN_STARTED - Determines if the player has pressed 'New Game' and started a new playthrough

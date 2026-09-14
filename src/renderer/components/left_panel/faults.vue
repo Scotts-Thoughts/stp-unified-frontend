@@ -34,7 +34,7 @@
 
 <script>
 import PubSub from "~/logic/PubSub";
-import { sendObsChapterMarker } from "~/core/logic/obs";
+import { sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.js";
 import { FaultMode } from "~/stores/types/FaultMode";
@@ -85,7 +85,7 @@ export default defineComponent({
         reset_occurred() {
             this.metrics.update("blackout_pending", false);
             this.metrics.update("resets", this.metrics.resets + 1);
-            sendObsChapterMarker(gen1ChapterMarkers.reset());
+            sendChapterMarker(gen1ChapterMarkers.reset());
             if (this.settings.shuckie.counters) {
                 this.emulator.incrementCounter("playerResets");
             }
@@ -94,7 +94,7 @@ export default defineComponent({
             if (newProp?.value == "Overworld" && oldProp?.value == "Battle" && this.metrics.blackout_pending == true) {
                 this.metrics.update("blackout_pending", false);
                 if (this.runConfig.advanced.count_blackouts) {
-                    sendObsChapterMarker(gen1ChapterMarkers.blackout());
+                    sendChapterMarker(gen1ChapterMarkers.blackout());
                     this.metrics.update("blackouts", this.metrics.blackouts + 1);
                     if (this.settings.shuckie.counters) {
                         this.emulator.incrementCounter("blackout_counter");

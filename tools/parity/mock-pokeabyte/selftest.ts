@@ -213,6 +213,10 @@ try {
   await fetch(`${SHUCKIE_BASE}/mark-start`, { method: "POST" });
   await fetch(`${SHUCKIE_BASE}/increment-counter?name=blackout_counter`, { method: "POST" });
   check("shuckie logs POSTs in order", shuckie.calls.map((c) => c.route).join(",") === "/mark-start,/increment-counter");
+  const added = (await (await fetch(`${SHUCKIE_BASE}/add-bookmark?name=IN+-+BROCK&type=BATTLE&frame=4242`, { method: "POST" })).json()) as Record<string, unknown>;
+  const listed = (await (await fetch(`${SHUCKIE_BASE}/bookmarks`)).json()) as { state: string; bookmarks: { name: string; in_frame: number }[] };
+  check("shuckie bookmarks kept out of the call log", shuckie.calls.length === 2 && shuckie.bookmarks.length === 1 && added.name === "IN - BROCK", JSON.stringify(added));
+  check("shuckie /bookmarks lists what was added", listed.state === "playback" && listed.bookmarks[0]?.name === "IN - BROCK" && listed.bookmarks[0]?.in_frame === 4242, JSON.stringify(listed));
 
   const marker = await sendChapterMarker("IN - BROCK");
   check("obs stub records CreateRecordChapter", marker && obs.markers.at(-1)?.chapterName === "IN - BROCK");

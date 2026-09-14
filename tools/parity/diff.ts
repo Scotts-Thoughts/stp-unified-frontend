@@ -92,6 +92,7 @@ export function diff(baselineDir: string, candidateDir: string, opts: { outDir?:
   diffControl(join(baselineDir, "status.json"), join(candidateDir, "status.json"), differences);
   diffJsonFile(join(baselineDir, "obs-markers.json"), join(candidateDir, "obs-markers.json"), 7, "chapter markers", undefined, differences, stripTiming);
   diffJsonFile(join(baselineDir, "shuckie-calls.json"), join(candidateDir, "shuckie-calls.json"), 8, "shuckie calls", undefined, differences, stripTiming);
+  diffBookmarks(candidateDir, differences);
   diffConsole(join(baselineDir, "console-tail.json"), join(candidateDir, "console-tail.json"), undefined, differences);
 
   const report: DiffReport = {
@@ -166,6 +167,32 @@ function diffProfileCheck(file: string, out: Difference[]): void {
   for (const v of result.violations) {
     out.push({ oracle: 5, name: `${ORACLE_NAMES[5]} (profile)`, detail: v });
   }
+}
+
+/**
+ * Oracle 8, bookmarks: the unified app adds a Super Shuckie bookmark named like every
+ * chapter marker it sends (core/logic/shuckieBookmarks.ts), so a unified candidate that
+ * ran with both stubs must have the same names in both logs. Compared as multisets: each
+ * OBS marker is its own socket exchange and can overtake the one fired just before it,
+ * while the bookmarks keep firing order. A legacy candidate adds no bookmarks, so only
+ * unified runs are checked.
+ */
+function diffBookmarks(candidateDir: string, out: Difference[]): void {
+  const run = readJson<{ target?: string; shuckie?: boolean; obs?: boolean }>(join(candidateDir, "run.json"));
+  if (!run?.target?.startsWith("unified") || !run.shuckie || !run.obs) return;
+  const bookmarks = readJson<{ name: string }[]>(join(candidateDir, "shuckie-bookmarks.json"));
+  const markers = readJson<{ chapterName: string }[]>(join(candidateDir, "obs-markers.json"));
+  if (!bookmarks || !markers) return;
+  const a = markers.map((m) => m.chapterName).sort();
+  const b = bookmarks.map((m) => m.name).sort();
+  if (JSON.stringify(a) === JSON.stringify(b)) return;
+  out.push({
+    oracle: 8,
+    name: `${ORACLE_NAMES[8]} (bookmarks vs chapter markers)`,
+    detail: `${markers.length} chapter marker(s), ${bookmarks.length} bookmark(s)`,
+    baseline: trim(JSON.stringify(markers.map((m) => m.chapterName))),
+    candidate: trim(JSON.stringify(bookmarks.map((m) => m.name))),
+  });
 }
 
 // ---------------------------------------------------------------- oracle 1

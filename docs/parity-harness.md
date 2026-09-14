@@ -19,7 +19,7 @@ Verified inputs (2026-09-10): PokeAByte 0.11.2 source (`A:\Programs\PokeAByte\sr
 | 5 | **PokeAByte writes** | every `POST /mapper/set-property-value|set-property-bytes|set-properties-by-bits` the app sends, in order, with body | exact sequence, the writes of one virtual instant compared as a set (an app that issues five `setBytes` in one `Promise.all` cannot order their arrival, and two runs of the *same* app differ there) |
 | 6 | **Control server** | every scripted control call (the queuer's order for one item: `/set-game`, `/set-starter`, `/refresh`, …), its HTTP status and body, and the `GET /status` after each | route, query, status and body exact; a `/status` body key by key -- every baseline field present with the same value, and only the documented union extras (`app`, `generation`, `mapper_path`, `starter`/`starterString`, `right_panel`/`right_ui`) allowed beyond them (`external-contracts.md` §2) |
 | 7 | **OBS chapter markers** | every `CreateRecordChapter` received by the OBS stub | exact sequence of names |
-| 8 | **Super Shuckie calls** | every `POST /mark-start|mark-end|increment-counter` | exact sequence |
+| 8 | **Super Shuckie calls** | every `POST /mark-start|mark-end|increment-counter`; and, for a unified candidate with both stubs up, every `POST /add-bookmark` (`shuckie-bookmarks.json`, a log of its own because the legacy apps add none) | exact sequence; the bookmark names are the candidate's own oracle-7 names, as a multiset |
 | 9 | **Console** | renderer `console.error` / uncaught exceptions | none allowed that the baseline did not also have |
 
 A step passes only when every oracle for every fixture of the affected generation is green.
@@ -98,7 +98,8 @@ client and the vendored `gameHookMapperClient.js` in gen2–5, which are the sam
 - `play(from, to, speed)`: emit batches grouped by `tMs`; `speed` = realtime multiplier or `virtual` (§5).
 - `F` samples feed the Super Shuckie stub (`total_elapsed_frames`); `M` records trigger `MapperLoaded`/`InstanceReset`.
 - Also stubs: **Super Shuckie** on `127.0.0.1:30158` (`/stats` returns `{time_current, total_elapsed_frames,
-  is_playing_back:true, is_playback_finished:false, counters:{}}`, POSTs logged) and **OBS WebSocket 5** on
+  is_playing_back:true, is_playback_finished:false, counters:{}, bookmark_generation}`, POSTs logged; `/bookmarks` and
+  `/add-bookmark` play a replay with no bookmarks yet, logged apart from the POSTs) and **OBS WebSocket 5** on
   `ws://localhost:4455` (Hello op 0 → Identify op 1 → Identified op 2; log every `CreateRecordChapter` op 6,
   reply op 7). Both are optional per run (`--no-shuckie`, `--no-obs`) so the "not running" code paths are
   also covered.
@@ -200,6 +201,7 @@ npm run parity:all                           # every fixture under tools/fixture
 npm run parity:all -- --baselines            # (re)capture the legacy baselines (gen1: --gen1-worktree=<dir>)
 npm run parity:preflight -- unified          # which single-tenant port is held, and by what
 npm run parity:selftest                      # 32 checks: the mock vs gen1's real GameHookMapperClient
+npm run parity:bookmarks                     # 22 checks: core/logic/shuckieBookmarks.ts vs a fake Super Shuckie, then vs the stub
 npm run parity:scan -- <fixture> --out=tools/reports
 npm run parity:run  -- <target> <fixture> --out=<dir> [--control]
 npm run parity:diff -- <baseline-dir> <candidate-dir>
