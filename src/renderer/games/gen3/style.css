@@ -754,6 +754,12 @@ body:has(.gen-3) {
     width: 130px;
 }
 
+/* Manual IVs: six two-digit fields on one row of the hidden_power_values table. */
+.gen-3 .manual_iv_input {
+    font-size: 11px;
+    width: 26px;
+}
+
 .gen-3 .timerOffsetControls {
     display: inline-flex;
     width: 169px;

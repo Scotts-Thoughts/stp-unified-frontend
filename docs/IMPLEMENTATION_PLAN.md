@@ -1159,3 +1159,57 @@ or playing back: `core/logic/shuckieBookmarks.ts`, contract in `external-contrac
 - **Verified** on the gen1/3/4/5 fixtures against a build of the previous commit: one bookmark per OBS marker
   in every run; the only intended differences are gen1's new settings row. Not yet run against a real
   Super Shuckie build, and gen2 has no fixture here, so it is typechecked only.
+
+
+## Manual DVs and IVs in every generation (2026-09-17)
+
+Every generation could already ask for the starter's genes before the game handed it over, but only
+through a Hidden Power type: gen2 wrote an Atk/Def nibble byte to the ROM patch (`wStarterHiddenPowerType`,
+Spe/Spc fixed at 15 by the patch), gens 3-5 wrote one of the perfect-or-near-perfect spreads for the type
+(`hiddenpowers[type][index]`) at level 5 in the lab, and gen1 had nothing (no Hidden Power, the patch's
+own spread). Scott's ask: keep that as the default, and add a way to dial in every value for a run that
+needs a particular spread. `core/logic/starterIvs.ts` holds the shared pieces; each generation keeps its
+own write path.
+
+- **One dropdown, two modes.** `DVs:` (gens 1-2) / `IVs:` (gens 3-5), `Automatic` or `Manual`, placed where
+  the Hidden Power dropdown was. Automatic shows the Hidden Power dropdown(s) and does exactly what the
+  generation did before -- the default, so a run that never opens it is unchanged. Manual replaces them
+  with one field per stat (Atk/Def/Spe/Spc, 0-15; HP/Atk/Def/SpA/SpD/Spe, 0-31), clamped on entry (an
+  emptied or unreadable field is the perfect value), with a readout of the Hidden Power type and base
+  power the spread yields, the derived HP DV (gens 1-2) and the gender the Attack DV decides (gen2).
+- **Formulas from the games**, checked against every table row: pokecrystal `HiddenPowerDamage` and
+  `GetGender`, pokeemerald `Cmd_hiddenpowercalc`, pokered `CalcStat` (`gen12Stat`). All 208 spreads in
+  gens 3-5's tables and the 16 gen2 selector bytes yield their own type at 70.
+- **Where the spread lands.** gen1: `games/gen1/starterDvs.ts`, run by a new hook when the party slot's
+  level goes 0 -> 5 in Oak's Lab -- four nibbles by `setBits` (two calls, the nibbles share bytes) plus
+  the level-5 stats, since the game only recomputes stats on a level-up; Automatic writes nothing.
+  gen2: the fields' Atk/Def go into the patch byte through the female path's `setBytes` (and are
+  re-asserted by the existing `wStarterHiddenPowerType.change` hook); Spe/Spc cannot ride on the byte, so
+  `write_manual_starter_dvs` writes all four nibbles and the stats when the starter arrives (level 0 -> 5
+  in Elm's Lab, NEW BARK map 5). `calculate_stat`, `update_pokemon`, the stats header and the movepool row
+  read the effective spread (`starterDVs`); the inert gender dropdown is hidden in Manual. gens 3-5:
+  `starter_ivs()` feeds the existing lab write (gen3 `setStartingAttributes`, gen4 `setStartingStats`,
+  gen5 `set_starter_stats_object.ivs` via `apply_starter_ivs`, which the four watchers and the starter
+  loaders call); a stale Hidden Power index reads as the type's first row instead of `undefined`.
+- **Stored** where each generation keeps its Hidden Power choice: gen1 in the species file
+  (`config.dvs`), gen2 once per install (`dv_mode`, `manual_dvs`), gens 3-5 per starter and shared across
+  an evolution family (`iv_mode`, `manual_ivs`, in `pokemon_settings` and the shared-family lists). A
+  loaded spread is assigned only when it differs, so a starter switch does not re-save it.
+- **Profiles**: gen1 declares the four DV nibbles (bits) and six stats (value); gen2 adds `dvSpeed` and
+  `dvSpecial` (bits). The control server is untouched: `/set-hidden-power` still sets the type, which
+  Manual ignores until the dropdown goes back to Automatic.
+- **Removed**: gen3's dead `Automatic IVs` toggle (known-legacy-bugs.md #41). gen2's movepool shows the
+  spread's real Hidden Power power instead of a fixed 70 (#42).
+- **Verified** three ways. `npm run typecheck` and the formula check over every table row. The no-change
+  check: baselines captured from a built worktree of the previous commit (`unified@wt-1b4f880`) on all five
+  fixtures, the final build diffed against them -- every difference is oracle 1/2 inside the settings
+  column (gen1 `testingArea2`, gen2 `div.demo`, gens 3-5 `div.ui2`) plus gen1's species file gaining
+  `config.dvs`; writes, control, OBS, Super Shuckie and console are identical. (`npm run parity:all` shows
+  the same plus what the standing baselines already carried: font drift on bold text against
+  `legacy_genN@37` (#40) and, for gen1, the pre-#39 `unified@wt-f9cb0fa`.) Manual mode:
+  `npm run parity:manual-ivs` (`tools/parity/manual-ivs-check.ts`) switches each generation to Manual
+  through the runner's new `beforeReplay` hook and checks the readout and the writes -- gen2's recording
+  (Wigglytuff in Elm's Lab: the 0x96 patch byte, the four nibbles by bits, the six stats pokecrystal's
+  formula gives), gen3's scenario (the six IV bits), and gen1 on a lab variant of its scenario the script
+  synthesises (nibbles and Pikachu's L5 stats); gen4/gen5's scenarios never reach their lab, so there the
+  readout and the profile check are what is covered. Not yet run against a live game.

@@ -3,6 +3,7 @@ import { logData, logCopy } from "~/autosplitter/autosplitter_functions.js";
 import { autosplitter } from "~/games/gen1/data/splits";
 import { sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
+import { applyManualStarterDvs, OAKS_LAB } from "~/games/gen1/starterDvs";
 import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
 
 /**
@@ -210,5 +211,14 @@ export function installGen1RunHooks(vm: any): void {
         if (vm.meta.game == "Yellow" && vm.meta.starter == "Alakazam" && newValue.value == true) {
             vm.game.properties.patch.wEarlyEncounters.set("On", false)
         }
+    });
+
+    // MANUAL DVs (2026-09-17) - the starter arriving in Oak's Lab is the party slot's level
+    // going from empty to 5 there. With the species file on `Manual`, the spread it holds is
+    // written then, stats included (games/gen1/starterDvs.ts); `Automatic` writes nothing.
+    vm.game.properties.player.team[0].level.change(async (newProp, oldProp) => {
+        if (newProp.value != 5 || (oldProp?.value ?? 0) != 0) return;
+        if (vm.game.properties.overworld.map.value != OAKS_LAB) return;
+        await applyManualStarterDvs(vm.game, vm.runConfig.config.dvs, vm.meta.starter);
     });
 }

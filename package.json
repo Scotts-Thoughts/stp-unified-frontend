@@ -45,6 +45,7 @@
     "build:linux": "npm run build && electron-builder --linux",
     "parity:selftest": "tsx tools/parity/mock-pokeabyte/selftest.ts",
     "parity:bookmarks": "tsx --tsconfig tsconfig.web.json tools/parity/bookmarks-selftest.ts",
+    "parity:manual-ivs": "tsx tools/parity/manual-ivs-check.ts",
     "parity:mock": "tsx tools/parity/mock-pokeabyte/cli.ts",
     "parity:scan": "tsx tools/parity/scan-fixture.ts",
     "parity:run": "tsx tools/parity/run.ts",

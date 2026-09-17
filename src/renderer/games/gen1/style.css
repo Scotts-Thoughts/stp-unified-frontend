@@ -479,6 +479,11 @@
     width: 40px;
 }
 
+/* Manual DVs (settings/dvs.vue): a two-digit field. */
+.gen-1 .manual_dv_input {
+    width: 32px;
+}
+
 .gen-1 .save_pb_splits {
     position: absolute;
     top: 780px;

@@ -4,6 +4,8 @@
 		<interface_2/>
 		<metrics />
 		<encounters />
+		<br>
+		<dvs />
 	</div>
 	<div class="testingArea4" style="z-index: 50000;"><interface_3 /></div>
 	<div class="testingArea3" style="z-index: 50000;"><interface_4 /></div>
@@ -15,6 +17,7 @@ import interface_1 from "./settings/interface_1.vue";
 import interface_2 from "./settings/interface_2.vue";
 import metrics from "./settings/metrics.vue";
 import encounters from "./settings/encounters.vue";
+import dvs from "./settings/dvs.vue";
 import interface_3 from "./settings/interface_3.vue";
 import Interface_4 from "./settings/interface_4.vue";
 
@@ -24,6 +27,7 @@ export default defineComponent({
 		interface_2,
 		metrics,
 		encounters,
+		dvs,
 		interface_3,
 		Interface_4
 	}

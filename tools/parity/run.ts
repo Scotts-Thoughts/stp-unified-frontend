@@ -19,6 +19,13 @@
  *   --keep-open         leave the app running after the replay (manual inspection)
  *   --redirect-ports    bind the stubs to spare ports and rewrite the app's URLs to match
  *
+ * A script that imports `run()` can also pass `beforeReplay` / `afterReplay` (RunOptions):
+ * the page, between the warm-up and the first batch, and after the captures are on disk.
+ * That is how a setting with no control route (the Manual DVs/IVs fields, 2026-09-17) is
+ * put in place before the fixture hands the starter over, with every oracle still
+ * recording. Real input is ignored by then (Input.setIgnoreInputEvents), so a hook drives
+ * the DOM through page.evaluate / selectOption, not the mouse or keyboard.
+ *
  * Ports 8085, 30158, 30159 and 4455 are single-tenant: close PokeAByte, Super Shuckie
  * and any running overlay first. The run fails fast and says so if one is taken.
  *
@@ -78,6 +85,9 @@ export interface RunOptions {
   redirectPorts?: boolean;
   /** Path to a control script, or true for the default queuer session. */
   control?: string | boolean;
+  /** Inspection hooks for a script that imports `run()`; see the header. */
+  beforeReplay?: (page: Page) => Promise<void>;
+  afterReplay?: (page: Page) => Promise<void>;
   log?: (msg: string) => void;
 }
 
@@ -251,6 +261,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     const cdp = await page.context().newCDPSession(page);
     await cdp.send("Input.setIgnoreInputEvents", { ignore: true });
     await warmUp(page, mock, opts);
+    if (opts.beforeReplay) await opts.beforeReplay(page);
 
     const pending = [...wanted].sort((a, b) => a.tMs - b.tMs);
     let nextPing = SIGNALR_PING_MS;
@@ -381,6 +392,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
       ),
     );
 
+    if (opts.afterReplay) await opts.afterReplay(page);
     if (opts.keepOpen) {
       log("[run] --keep-open: the app is still running. Ctrl-C to stop.");
       await new Promise(() => {});

@@ -449,6 +449,15 @@ body:has(.gen-4) {
     padding-right: 4px;
 }
 
+/* Manual IVs: six two-digit fields on one row of the Hidden Power table. */
+.gen-4 .manual_iv_input {
+    font-size: 11px;
+    height: 14px;
+    width: 22px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
 .gen-4 .timerOffsetControls {
     display: inline-flex;
     width: 169px;

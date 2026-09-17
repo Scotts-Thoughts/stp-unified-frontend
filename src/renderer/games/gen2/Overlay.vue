@@ -250,12 +250,21 @@
                     </tbody></table>
                     <br>
                     <div class="demo">
+                        <!-- In Manual the Attack DV field decides the gender (the readout below the fields says which). -->
+                        <div v-if="dv_mode == 'Automatic'">
                         <div>Gender:</div>
                         <select v-model="pokemon_gender" class="dropdownMenu dropdown_menu_column3">
                             <option v-for="key in pokemon_gender_list" :value="`${key}`">{{key}}</option>
                         </select>
                         <div style="opacity: .7;">Ratio: {{pokemon_gender_ratio}}</div>
                         <br>
+                        </div>
+                        <div>DVs:</div>
+                        <select v-model="dv_mode" class="dropdownMenu dropdown_menu_column3">
+                            <option>Automatic</option>
+                            <option>Manual</option>
+                        </select>
+                        <div v-if="dv_mode == 'Automatic'">
                         <div>Hidden Power:</div>
                         <select v-model="hpType" class="dropdownMenu dropdown_menu_column3">
                             <option>Dark</option>
@@ -281,6 +290,16 @@
                             <tr><td>Def:</td><td style="padding-left: 3px;">{{currentHpDVs.def}}</td>                                                              </tr>
                         </tbody></table>
                         <div style="opacity: .7;">Base Power: {{currentHpPower}}</div>
+                        </div>
+                        <div v-else>
+                        <table>
+                            <tbody><tr><td>Atk:</td><td style="padding-left: 3px;"><input style="width: 30px;" type="text" class="inputContainer manual_dv_input" :value="manual_dvs.atk" @change="set_manual_dv('atk', $event)"></td><td style="padding-left: 18px;">Spe:</td><td style="padding-left: 3px;"><input style="width: 30px;" type="text" class="inputContainer manual_dv_input" :value="manual_dvs.spe" @change="set_manual_dv('spe', $event)"></td></tr>
+                            <tr><td>Def:</td><td style="padding-left: 3px;"><input style="width: 30px;" type="text" class="inputContainer manual_dv_input" :value="manual_dvs.def" @change="set_manual_dv('def', $event)"></td><td style="padding-left: 18px;">Spc:</td><td style="padding-left: 3px;"><input style="width: 30px;" type="text" class="inputContainer manual_dv_input" :value="manual_dvs.spc" @change="set_manual_dv('spc', $event)"></td></tr>
+                            <tr><td>HP: </td><td style="padding-left: 3px;">{{starterDVs.hp}}</td></tr>
+                        </tbody></table>
+                        <div style="opacity: .7;">Hidden Power: {{manualHiddenPower.type}} ({{manualHiddenPower.power}})</div>
+                        <div style="opacity: .7;">Gender from Atk DV: {{manualGender}}</div>
+                        </div>
                     </div>
                     <br>
                     <div>Encounter Settings:</div>
@@ -1084,6 +1103,7 @@ import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
+import { clampDvs, clampStat, DV_MAX, gen12Stat, gen2Gender, gen2HiddenPower, hpDv as hpDvOf, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
@@ -1164,6 +1184,10 @@ export default defineComponent({
         //USER CONFIG ------------------------//
             starter                : MyStorage["starter"] ?? "Aipom",
             hpType                 : MyStorage["hpType"]  ?? "Dark",
+            // The starter's DVs (2026-09-17, core/logic/starterIvs.ts): `Automatic` is the Hidden
+            // Power dropdown above, `Manual` the four fields. Kept once per install, as hpType is.
+            dv_mode                : MyStorage["dv_mode"] ?? IV_MODE.automatic,
+            manual_dvs             : clampDvs(MyStorage["manual_dvs"]),
             pokemon_gender         : MyStorage["pokemon_gender"] ?? "Male",
             scott_mode             : true,
             secondPlaythrough      : false,
@@ -1862,6 +1886,21 @@ export default defineComponent({
                 this.updateHiddenPowerDVs()
             })
         },
+        dv_mode(newValue) {
+            MyStorage["dv_mode"] = newValue
+            this.$nextTick(() => {
+                this.updateHiddenPowerDVs()
+            })
+        },
+        manual_dvs: {
+            handler(newValue) {
+                MyStorage["manual_dvs"] = newValue
+                this.$nextTick(() => {
+                    this.updateHiddenPowerDVs()
+                })
+            },
+            deep: true,
+        },
         //timer functions
         timer_formatted_time(value) {
             MyStorage["timer_formatted_time"] = value
@@ -2131,6 +2170,34 @@ export default defineComponent({
             const x = dvs.def >> 3
             return 40 + (10 * x) + (20 * y)
         },
+        /**
+         * The DVs the starter is given (2026-09-17): the Hidden Power dropdown's Atk/Def with
+         * Spe/Spc at 15 in Automatic (what the patch byte plus its fixed nibbles produce), the
+         * four fields in Manual. `hp` is the derived nibble either way.
+         */
+        starterDVs() {
+            if (this.dv_mode == IV_MODE.manual) {
+                const dvs = clampDvs(this.manual_dvs)
+                return { ...dvs, hp: hpDvOf(dvs) }
+            }
+            const auto = this.currentHpDVs
+            const dvs = { atk: auto.atk, def: auto.def, spe: 15, spc: 15 }
+            return { ...dvs, hp: hpDvOf(dvs) }
+        },
+        /** The patch byte for the starter's Atk/Def DVs: high nibble Attack, low nibble Defense. */
+        starterDVByte() {
+            return ((this.starterDVs.atk & 0xF) << 4) | (this.starterDVs.def & 0xF)
+        },
+        manualHiddenPower() {
+            return gen2HiddenPower(clampDvs(this.manual_dvs))
+        },
+        /** The Hidden Power the starter's spread yields (the movepool row and the stats header). */
+        starterHiddenPower() {
+            return gen2HiddenPower(this.starterDVs)
+        },
+        manualGender() {
+            return gen2Gender(clampDvs(this.manual_dvs).atk, this.dexDataCrystal[this.starter]?.gender_ratio)
+        },
         hp_tracker_style() {
             const state = this.game.properties.meta.state.value
             const hp = this.game.properties.player.team[0].hp.value
@@ -2273,7 +2340,7 @@ export default defineComponent({
                 switch (stat_type) {
                     case "Base Stats":   return `Base Stats`
                     case "DVs":          return `DVs`
-                    case "Hidden Power": return `Hidden Power ${this.hpType}`
+                    case "Hidden Power": return `Hidden Power ${this.starterHiddenPower.type}`
                     case "EVs":          return `Stat Experience`
                     case "Vitamins":     return `Vitamins`
                     case "Detailed EVs": return `Stat Experience`
@@ -2725,15 +2792,13 @@ export default defineComponent({
             const level = parseInt(this.recalculate_level)
             const experience = this.exp_table[growth_rate][level - 1]
             
-            // Use gender-aware DV calculation
-            const hpDVs = this.currentHpDVs
-            const dv_hp  = this.hpDv(hpDVs.atk, hpDVs.def, 15, 15)
-            // const dv_hp  = 8
-            const dv_atk = hpDVs.atk
-            // const dv_atk = 6
-            const dv_def = hpDVs.def
-            const dv_spe = 15
-            const dv_spc = 15
+            // The DVs the starter was given (gender-aware in Automatic, the fields' in Manual)
+            const starterDVs = this.starterDVs
+            const dv_hp  = starterDVs.hp
+            const dv_atk = starterDVs.atk
+            const dv_def = starterDVs.def
+            const dv_spe = starterDVs.spe
+            const dv_spc = starterDVs.spc
 
             const base_stat_hp  = pokedex_data.base_hp
             const base_stat_atk = pokedex_data.base_atk
@@ -2924,6 +2989,13 @@ export default defineComponent({
         //     // Open the folder
         //     require('child_process').exec(`start ${fullPath}`);
         // },
+        /** One Manual DV field: whole, 0-15, an emptied field is 15; the object is replaced so the watcher sees it. */
+        set_manual_dv(stat, event) {
+            const value = clampStat(event.target.value, DV_MAX)
+            this.manual_dvs = { ...clampDvs(this.manual_dvs), [stat]: value }
+            // A rejected entry (letters, 40, -1) is shown as what was kept.
+            event.target.value = String(value)
+        },
         async update_atk() {
             var dv_atk = this.dv_atk_replacement
             var dv_def = this.dv_def_replacement
@@ -3209,13 +3281,13 @@ export default defineComponent({
             let base_spc = this.dexDataCrystal[species].base_spc_atk
             let base_spe = this.dexDataCrystal[species].base_spd
             let base_hp  = this.dexDataCrystal[species].base_hp
-            //Assign DVs (gender-aware)
-            const hpDVs = this.currentHpDVs
-            let dv_atk = hpDVs.atk
-            let dv_def = hpDVs.def
-            let dv_spc = 15 //these DVs can always be 15
-            let dv_spe = 15 //these DVs can always be 15
-            let dv_hp  = this.hpDv(hpDVs.atk, hpDVs.def, 15, 15)
+            //Assign DVs (gender-aware in Automatic, the fields' in Manual)
+            const starterDVs = this.starterDVs
+            let dv_atk = starterDVs.atk
+            let dv_def = starterDVs.def
+            let dv_spc = starterDVs.spc
+            let dv_spe = starterDVs.spe
+            let dv_hp  = starterDVs.hp
             //Calculate stats
             let atk = Math.floor(((((base_atk + dv_atk) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_atk)) / 4)) * level) / 100)) + 5
             let def = Math.floor(((((base_def + dv_def) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_def)) / 4)) * level) / 100)) + 5
@@ -3886,7 +3958,7 @@ export default defineComponent({
                 return "Curse"
             }
             if (moveObject.Move == `Hidden Power`) {
-                return this.hpType
+                return this.starterHiddenPower.type
             }
             return moveObject.Type
         },
@@ -3895,13 +3967,15 @@ export default defineComponent({
                 return "???"
             }
             if (moveObject.Move == `Hidden Power`) {
-                return this.hpType
+                return this.starterHiddenPower.type
             }
             return moveObject.Type
         },
         movepoolPower(moveObject) {
             if (moveObject.Move == `Hidden Power`) {
-                return 70
+                // The spread's own power (2026-09-17): 70 for a perfect Atk/Def, less for a
+                // female spread or a Manual one.
+                return this.starterHiddenPower.power
             }
             if (moveObject.Move == `Return`) {
                 if (this.game.properties.player.teamCount.value == 0) {
@@ -5297,6 +5371,51 @@ export default defineComponent({
             return (((atk % 2) * 8) + ((def % 2) * 4) + ((spd % 2) * 2) + ((spc % 2) * 1))
         },
         /**
+         * Manual mode's party write (2026-09-17): all four DV nibbles -- two setBits calls, one
+         * per byte, because the nibbles share bytes -- and the stats they imply at the current
+         * level, computed as update_pokemon computes them. The game only recomputes stats on a
+         * level-up, so without this the Spe/Spc fields would not show until level 6.
+         */
+        async write_manual_starter_dvs() {
+            if (this.dv_mode != IV_MODE.manual) return
+            const mon = this.game.properties.player.team[0]
+            // A backported species reads as "Backport"; its data is under the starter's name.
+            const pokedex_data = this.dexDataCrystal[mon.species.value] ?? this.dexDataCrystal[this.starter]
+            if (!pokedex_data) {
+                console.warn(`Manual DVs: no pokedex data for ${mon.species.value} / ${this.starter}; nothing written`)
+                return
+            }
+            const dvs = this.starterDVs
+            const level = Number(mon.level.value) || 5
+            const statExp = (prop) => Number(prop?.value) || 0
+            const hp  = gen12Stat(pokedex_data.base_hp,      dvs.hp,  statExp(mon.statExpHp),      level, true)
+            const atk = gen12Stat(pokedex_data.base_atk,     dvs.atk, statExp(mon.statExpAttack),  level, false)
+            const def = gen12Stat(pokedex_data.base_def,     dvs.def, statExp(mon.statExpDefense), level, false)
+            const spa = gen12Stat(pokedex_data.base_spc_atk, dvs.spc, statExp(mon.statExpSpecial), level, false)
+            const spd = gen12Stat(pokedex_data.base_spc_def, dvs.spc, statExp(mon.statExpSpecial), level, false)
+            const spe = gen12Stat(pokedex_data.base_spd,     dvs.spe, statExp(mon.statExpSpeed),   level, false)
+            await this.game.setBits([
+                {path: 'player.team.0.dvAttack',  value: dvs.atk, freeze: false},
+                {path: 'player.team.0.dvDefense', value: dvs.def, freeze: false},
+            ])
+            await this.game.setBits([
+                {path: 'player.team.0.dvSpeed',   value: dvs.spe, freeze: false},
+                {path: 'player.team.0.dvSpecial', value: dvs.spc, freeze: false},
+            ])
+            // A fresh starter is at full health; keep it there after the max changes.
+            const atFullHealth = mon.hp.value == mon.maxHp.value
+            await Promise.all([
+                mon.maxHp.set(hp, false),
+                atFullHealth ? mon.hp.set(hp, false) : Promise.resolve(),
+                mon.attack.set(atk, false),
+                mon.defense.set(def, false),
+                mon.specialAttack.set(spa, false),
+                mon.specialDefense.set(spd, false),
+                mon.speed.set(spe, false),
+            ])
+            console.log(`Manual DVs written: Atk ${dvs.atk} Def ${dvs.def} Spe ${dvs.spe} Spc ${dvs.spc} (HP ${dvs.hp})`)
+        },
+        /**
          * Update Hidden Power DVs in the game based on current HP type and gender selection.
          * This writes the appropriate byte value to the patch properties.
          */
@@ -5305,7 +5424,17 @@ export default defineComponent({
             if (!this.game || !this.game.properties || !this.game.properties.patch) {
                 return
             }
-            
+
+            // Manual: the fields' Atk/Def go into the byte the patch reads (the female path's
+            // route); Spe/Spc cannot ride on it and are written to the party slot when the
+            // starter arrives (write_manual_starter_dvs).
+            if (this.dv_mode == IV_MODE.manual) {
+                const byteValue = this.starterDVByte & 0xFF
+                this.game.properties.patch.wStarterHiddenPowerType.setBytes([byteValue], false)
+                this.game.properties.patch.wOptionsHiddenPower.setBytes([byteValue], false)
+                return
+            }
+
             // Calculate DVs directly to avoid reactivity timing issues
             const starter = this.starter
             const genderRatio = this.dexDataCrystal[starter]?.gender_ratio
@@ -6129,14 +6258,32 @@ export default defineComponent({
             }
         })
 
+        // Manual DVs (2026-09-17): the patch byte carries Atk/Def only, so once the starter is in
+        // the party (the slot's level going from empty to 5 in Elm's Lab, NEW BARK map 5) the
+        // fields' Spe/Spc are written to the slot with the stats the whole spread implies.
+        // Automatic writes nothing here; the patch has already done its part.
+        this.game.properties.player.team[0].level?.change(async (newProp, oldProp) => {
+            if (newProp.value != 5 || (oldProp?.value ?? 0) != 0) return
+            if (this.game.properties.overworld.mapGroup.value != "NEW BARK" || this.game.properties.overworld.mapNumber.value != 5) return
+            await this.write_manual_starter_dvs()
+        })
+
         //Hidden Power
         //Sets hidden power to the type indicated by the overlay so that it is set correctly when the player receives their starter
         //Now uses gender-aware byte values for female Pokemon
         this.game.properties.patch.wStarterHiddenPowerType.change((newValue) => {
+            if (this.dv_mode == IV_MODE.manual) {
+                const expectedByte = this.starterDVByte & 0xFF
+                if ((newValue.bytes?.[0] ?? newValue.value) != expectedByte) {
+                    this.game.properties.patch.wStarterHiddenPowerType.setBytes([expectedByte], false)
+                    this.game.properties.patch.wOptionsHiddenPower.setBytes([expectedByte], false)
+                }
+                return
+            }
             const starter = this.starter
             const genderRatio = this.dexDataCrystal[starter]?.gender_ratio
             const hpDVs = this.getHiddenPowerDVs(this.hpType, this.pokemon_gender, genderRatio)
-            
+
             if (this.pokemon_gender === 'Female' && genderRatio !== 'GENDER_UNKNOWN' && genderRatio !== 'GENDER_F0') {
                 // For female, use setBytes with the byte value
                 const expectedByte = hpDVs.byte & 0xFF

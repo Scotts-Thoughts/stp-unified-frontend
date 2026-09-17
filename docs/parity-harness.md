@@ -202,6 +202,7 @@ npm run parity:all -- --baselines            # (re)capture the legacy baselines 
 npm run parity:preflight -- unified          # which single-tenant port is held, and by what
 npm run parity:selftest                      # 32 checks: the mock vs gen1's real GameHookMapperClient
 npm run parity:bookmarks                     # 22 checks: core/logic/shuckieBookmarks.ts vs a fake Super Shuckie, then vs the stub
+npm run parity:manual-ivs                    # Manual DVs/IVs on every fixture: readout + writes (tools/parity/manual-ivs-check.ts)
 npm run parity:scan -- <fixture> --out=tools/reports
 npm run parity:run  -- <target> <fixture> --out=<dir> [--control]
 npm run parity:diff -- <baseline-dir> <candidate-dir>
@@ -209,6 +210,11 @@ npm run parity:mock -- <fixture>             # serve a fixture by hand, no Playw
 ```
 
 `<target>` is `unified`, `legacy:genN@25` or `legacy:genN@37`.
+
+A script that imports `run()` can pass `beforeReplay` / `afterReplay` page hooks (2026-09-17): the page between
+the warm-up and the first batch, and after the captures are on disk. That is how a setting with no control route
+is put in place before the fixture acts, with every oracle still recording; real input is ignored during a run, so
+a hook drives the DOM through `page.evaluate`. `manual-ivs-check.ts` is the worked example.
 
 ### Determinism is not free — twelve things the runner has to do
 

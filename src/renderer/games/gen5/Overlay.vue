@@ -274,6 +274,12 @@
                         <br>
                     </div>
                     <br>
+                    <div>IVs:</div>
+                    <select v-model="iv_mode" class="dropdownMenu dropdown_menu_column3">
+                        <option>Automatic</option>
+                        <option>Manual</option>
+                    </select><br>
+                    <div v-if="iv_mode == 'Automatic'">
                     <div>Hidden Power:</div>
                     <select v-model="hidden_power_type" class="dropdownMenu dropdown_menu_column3">
                         <option disabled="" value="">Select a Hidden Power type</option>
@@ -293,6 +299,20 @@
                             <td style="padding-left: 8px;">Spe:</td><td style="padding-left: 3px;">{{hiddenpowers[hidden_power_type][hidden_power_index][3]}}</td>
                         </tr>
                     </tbody></table>
+                    </div>
+                    <div v-else>
+                    <table style="font-size: 11px; line-height: 14px;">
+                        <tbody><tr>
+                            <td>HP:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)"></td>
+                            <td style="padding-left: 8px;">Atk:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)"></td>
+                            <td style="padding-left: 8px;">Def:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.def" @change="set_manual_iv('def', $event)"></td>
+                            <td style="padding-left: 8px;">SpA:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)"></td>
+                            <td style="padding-left: 8px;">SpD:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)"></td>
+                            <td style="padding-left: 8px;">Spe:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)"></td>
+                        </tr>
+                    </tbody></table>
+                    <div style="font-size: 11px; line-height: 14px;">Hidden Power: {{manualHiddenPower.type}} ({{manualHiddenPower.power}})</div>
+                    </div>
                     <br>
                     <div style="display: flex; gap: 12px; align-items: flex-start;">
                         <div>
@@ -1099,6 +1119,7 @@ import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
+import { clampIvs, clampStat, gen3HiddenPower, IV_MAX, IV_MODE, ivsFromHiddenPowerRow } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { sendVirtualKey } from "~/core/window/virtualKeys";
 import { MyStorage, StyleSettingsUtils } from "./storage";
@@ -1275,6 +1296,11 @@ export default defineComponent({
             pkmn_ability           : null,
             hidden_power_type      : "Dark",
             hidden_power_index     : 0,
+            // The starter's IVs (2026-09-17, core/logic/starterIvs.ts): `Automatic` is the Hidden
+            // Power dropdowns, `Manual` the six fields. Per starter, shared across an evolution
+            // family, like hidden_power_type. Either way they land in set_starter_stats_object.ivs.
+            iv_mode                : IV_MODE.automatic,
+            manual_ivs             : clampIvs(null),
             overlayNew             : "Chimchar",
             overlayOld             : "Chimchar",
             scott_mode             : true,
@@ -1588,6 +1614,8 @@ export default defineComponent({
                 "pkmn_ability",
                 "hidden_power_type",
                 "hidden_power_index",
+                "iv_mode",
+                "manual_ivs",
                 "pkmn_gender",
                 "finished_run_count",
                 "evolution_splits_label",
@@ -1720,7 +1748,7 @@ export default defineComponent({
                     // Shared evolution family properties (ability, nature, gender, hidden power) 
                     // should be saved to the evolution family storage key when evolution is enabled
                     // These settings apply to all members of the evolution family
-                    const sharedEvolutionFamilyProperties = ['pkmnNature', 'pkmn_ability', 'pkmn_gender', 'hidden_power_type', 'hidden_power_index'];
+                    const sharedEvolutionFamilyProperties = ['pkmnNature', 'pkmn_ability', 'pkmn_gender', 'hidden_power_type', 'hidden_power_index', 'iv_mode', 'manual_ivs'];
                     const isSharedFamilyProperty = sharedEvolutionFamilyProperties.includes(propName);
                     
                     let storageKey;
@@ -1957,41 +1985,16 @@ export default defineComponent({
         },
         hidden_power_type(newValue) {
             this.hidden_power_index = 0
-            const ivs = this.hiddenpowers[newValue][0]
-            function translateIVsToObject(ivArray) {
-                const ivNames = ['hp', 'atk', 'def', 'spe', 'spa', 'spd'];
-                
-                if (ivArray.length !== 6) {
-                    throw new Error('IV array must have exactly 6 values');
-                }
-                
-                const ivs = {};
-                ivNames.forEach((name, index) => {
-                    ivs[name] = ivArray[index];
-                });
-                
-                return ivs;
-            }
-            this.set_starter_stats_object.ivs = translateIVsToObject(ivs)
+            this.apply_starter_ivs()
         },
         hidden_power_index(newValue) {
-            if (this.hiddenpowers[this.hidden_power_type].length < newValue) { newValue = 0}
-            const ivs = this.hiddenpowers[this.hidden_power_type][newValue]
-            function translateIVsToObject(ivArray) {
-                const ivNames = ['hp', 'atk', 'def', 'spe', 'spa', 'spd'];
-                
-                if (ivArray.length !== 6) {
-                    throw new Error('IV array must have exactly 6 values');
-                }
-                
-                const ivs = {};
-                ivNames.forEach((name, index) => {
-                    ivs[name] = ivArray[index];
-                });
-                
-                return ivs;
-            }
-            this.set_starter_stats_object.ivs = translateIVsToObject(ivs)
+            this.apply_starter_ivs()
+        },
+        iv_mode() {
+            this.apply_starter_ivs()
+        },
+        manual_ivs() {
+            this.apply_starter_ivs()
         },
         pkmnNature(newValue) {
             this.set_starter_stats_object.nature = newValue
@@ -2166,6 +2169,8 @@ export default defineComponent({
                 this.pkmn_gender = familyStored.pkmn_gender ?? MyStorage[`${game}_${starter}`]?.pkmn_gender ?? "Female";
                 this.hidden_power_type = familyStored.hidden_power_type ?? MyStorage[`${game}_${starter}`]?.hidden_power_type ?? "Dark";
                 this.hidden_power_index = familyStored.hidden_power_index ?? MyStorage[`${game}_${starter}`]?.hidden_power_index ?? 0;
+                this.iv_mode = familyStored.iv_mode ?? MyStorage[`${game}_${starter}`]?.iv_mode ?? IV_MODE.automatic;
+                this.load_manual_ivs(familyStored.manual_ivs ?? MyStorage[`${game}_${starter}`]?.manual_ivs);
             } else {
                 // Evolution is disabled, load from individual species storage
                 this.pkmnNature = MyStorage[`${game}_${starter}`]?.pkmnNature ?? "Hardy";
@@ -2173,7 +2178,10 @@ export default defineComponent({
                 this.pkmn_gender = MyStorage[`${game}_${starter}`]?.pkmn_gender ?? "Female";
                 this.hidden_power_type = MyStorage[`${game}_${starter}`]?.hidden_power_type ?? "Dark";
                 this.hidden_power_index = MyStorage[`${game}_${starter}`]?.hidden_power_index ?? 0;
+                this.iv_mode = MyStorage[`${game}_${starter}`]?.iv_mode ?? IV_MODE.automatic;
+                this.load_manual_ivs(MyStorage[`${game}_${starter}`]?.manual_ivs);
             }
+            this.apply_starter_ivs();
             
             //! FIX_LATER Fix this implementation later
             // this.ability           = MyStorage[`${game}_${starter}`]?.ability          ?? this.g5PokemonData[starter].abilities[0],
@@ -2297,6 +2305,14 @@ export default defineComponent({
         },
     },
     computed: {
+        /** The Hidden Power the Manual fields yield, for the readout under them (2026-09-17). */
+        manualHiddenPower() {
+            return gen3HiddenPower(clampIvs(this.manual_ivs))
+        },
+        /** The Hidden Power type the starter's spread yields, for the movepool row: the dropdown's in Automatic, the fields' in Manual. */
+        starterHiddenPowerType() {
+            return this.iv_mode == IV_MODE.manual ? this.manualHiddenPower.type : this.hidden_power_type
+        },
         /**
          * The game-name folder that splits are written into.
          * Mirrors the logic in logData/logCopy so the "Open Splits Folder"
@@ -5637,6 +5653,8 @@ export default defineComponent({
                 this.pkmn_gender = familyStored.pkmn_gender ?? MyStorage[`${game_name}_${this.starter}`]?.pkmn_gender ?? "Female";
                 this.hidden_power_type = familyStored.hidden_power_type ?? MyStorage[`${game_name}_${this.starter}`]?.hidden_power_type ?? "Dark";
                 this.hidden_power_index = familyStored.hidden_power_index ?? MyStorage[`${game_name}_${this.starter}`]?.hidden_power_index ?? 0;
+                this.iv_mode = familyStored.iv_mode ?? MyStorage[`${game_name}_${this.starter}`]?.iv_mode ?? IV_MODE.automatic;
+                this.load_manual_ivs(familyStored.manual_ivs ?? MyStorage[`${game_name}_${this.starter}`]?.manual_ivs);
                 
                 // Load selected evolution species from storage
                 const stored_evolution_species = MyStorage[`${game_name}_${this.starter}`]?.selected_evolution_species;
@@ -5698,6 +5716,7 @@ export default defineComponent({
             this.set_starter_stats_object.gender = this.pkmn_gender;
             this.set_starter_stats_object.nature = this.pkmnNature;
             this.set_starter_stats_object.ability = this.pkmn_ability;
+            this.apply_starter_ivs();
         },
         reset() {
             this.backgroundBlur =        0,
@@ -5861,6 +5880,12 @@ export default defineComponent({
                 }
                 if ('hidden_power_index' in familyStored) {
                     this.hidden_power_index = familyStored.hidden_power_index;
+                }
+                if ('iv_mode' in familyStored) {
+                    this.iv_mode = familyStored.iv_mode;
+                }
+                if ('manual_ivs' in familyStored) {
+                    this.load_manual_ivs(familyStored.manual_ivs);
                 }
             }
             
@@ -8207,9 +8232,45 @@ export default defineComponent({
             }
             else { return moveObject.power }
         },
+        /**
+         * The IVs the starter is written with (2026-09-17): the Hidden Power dropdowns' row
+         * in Automatic (a stale index after a type change reads as the type's first row),
+         * the six fields in Manual.
+         */
+        starter_ivs() {
+            if (this.iv_mode == IV_MODE.manual) {
+                return clampIvs(this.manual_ivs)
+            }
+            const rows = this.hiddenpowers[this.hidden_power_type]
+            return ivsFromHiddenPowerRow(rows?.[this.hidden_power_index] ?? rows?.[0])
+        },
+        /**
+         * Puts the current spread into set_starter_stats_object, which write_byte_data stamps on
+         * the starter at level 5. Called by the Hidden Power, mode and field watchers, and after
+         * a starter's settings load -- the watchers alone missed a stored choice equal to the
+         * one already on screen.
+         */
+        apply_starter_ivs() {
+            this.set_starter_stats_object.ivs = this.starter_ivs()
+        },
+        /** A stored spread, assigned only when it differs from the current one, so the settings watcher does not re-save an unchanged spread on every starter switch. */
+        load_manual_ivs(stored) {
+            const next = clampIvs(stored)
+            const current = clampIvs(this.manual_ivs)
+            if (Object.keys(next).some((stat) => next[stat] !== current[stat])) {
+                this.manual_ivs = next
+            }
+        },
+        /** One Manual IV field: whole, 0-31, an emptied field is 31; the object is replaced so the settings watcher sees it. */
+        set_manual_iv(stat, event) {
+            const value = clampStat(event.target.value, IV_MAX)
+            this.manual_ivs = { ...clampIvs(this.manual_ivs), [stat]: value }
+            // A rejected entry (letters, 40, -1) is shown as what was kept.
+            event.target.value = String(value)
+        },
         movepoolTypeColor(moveObject) {
             if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value == "No Pokemon") {
-                return this.hidden_power_type
+                return this.starterHiddenPowerType
             }
             if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value != "No Pokemon") {
                 return this.hiddenPowerTypeCalc(this.game.properties.player.team[0])
@@ -8224,7 +8285,7 @@ export default defineComponent({
         },
         movepoolType(moveObject) {
             if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value == "No Pokemon") {
-                return this.hidden_power_type
+                return this.starterHiddenPowerType
             }
             if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value != "No Pokemon") {
                 return this.hiddenPowerTypeCalc(this.game.properties.player.team[0])
@@ -8236,7 +8297,7 @@ export default defineComponent({
                 return "???"
             }
             if (moveObject.Move == `Hidden Power`) {
-                return this.hidden_power_type
+                return this.starterHiddenPowerType
             }
             return moveObject.type
         },

@@ -144,6 +144,16 @@ export function defaultGameSpeciesSettings() {
 				split_current: "Current",
 			},
 			hidden_power: "Dark",
+			/**
+			 * The starter's DVs (2026-09-17, `core/logic/starterIvs.ts`). `Automatic` leaves them
+			 * to the ROM patch, as every run before had; `Manual` writes `manual` to the party
+			 * slot when the starter arrives in Oak's Lab (`games/gen1/starterDvs.ts`). The HP DV
+			 * is derived from the other four and not stored.
+			 */
+			dvs: {
+				mode: "Automatic" as "Automatic" | "Manual",
+				manual: { atk: 15, def: 15, spe: 15, spc: 15 },
+			},
 			ability: "Intimidate",
 			nature: "Adamant",
 			gender: "Female",

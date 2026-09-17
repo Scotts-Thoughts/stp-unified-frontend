@@ -288,6 +288,16 @@ export const GEN1_DEPRECATED_WRITES: Readonly<Record<string, WriteKind[]>> = {
     "player.items.3.item": ["value"],
     "player.items.3.quantity": ["value"],
     "player.items.4.item": ["bytes"],
+    // Manual DVs (2026-09-17, games/gen1/starterDvs.ts): the four nibbles by bits, the
+    // level-5 stats they imply by value.
+    "player.team.0.attack": ["value"],
+    "player.team.0.defense": ["value"],
+    "player.team.0.dvAttack": ["bits"],
+    "player.team.0.dvDefense": ["bits"],
+    "player.team.0.dvSpecial": ["bits"],
+    "player.team.0.dvSpeed": ["bits"],
+    "player.team.0.hp": ["value"],
+    "player.team.0.maxHp": ["value"],
     "player.team.0.move1": ["value"],
     "player.team.0.move1pp": ["value"],
     "player.team.0.move2": ["value"],
@@ -296,4 +306,6 @@ export const GEN1_DEPRECATED_WRITES: Readonly<Record<string, WriteKind[]>> = {
     "player.team.0.move3pp": ["value"],
     "player.team.0.move4": ["value"],
     "player.team.0.move4pp": ["value"],
+    "player.team.0.special": ["value"],
+    "player.team.0.speed": ["value"],
 };

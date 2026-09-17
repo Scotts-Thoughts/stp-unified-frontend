@@ -311,6 +311,9 @@ export const GEN2_DEPRECATED_WRITES: Readonly<Record<string, WriteKind[]>> = {
     "player.team.0.defense": ["value"],
     "player.team.0.dvAttack": ["bits", "value"],
     "player.team.0.dvDefense": ["bits", "value"],
+    // Manual DVs (2026-09-17, write_manual_starter_dvs): the other two nibbles.
+    "player.team.0.dvSpecial": ["bits"],
+    "player.team.0.dvSpeed": ["bits"],
     "player.team.0.expPoints": ["value"],
     "player.team.0.hp": ["value"],
     "player.team.0.level": ["value"],
