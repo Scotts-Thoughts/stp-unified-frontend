@@ -10082,11 +10082,10 @@ export default defineComponent({
                     log_split()
                     logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
                     this.split_data.push(this.simple_data)
-                    MyStorage["split_data"] = this.split_data
-                    MyStorage[`${this.game.properties.meta.game_name.value}_${this.starter}`] = {
-                        ...MyStorage[`${this.game.properties.meta.game_name.value}_${this.starter}`],
-                        split_data: this.split_data
-                    }
+                    // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
+                    // CSV split files are the record, and storing the whole history under the bare key
+                    // and again inside every species' entry grew user_state.json to 324 MB, which every
+                    // settings write re-serialised (docs/performance-followups.md, known-legacy-bugs.md #43).
                 }
                 if (this.game_data && this.game_data.splits.includes(trainer) && !this.game_data.finalBattle.includes(trainer)) {
                     simpleSplit();
@@ -10116,11 +10115,10 @@ export default defineComponent({
                     }
                     log_split();
                     this.split_data.push(this.simple_data)
-                    MyStorage["split_data"] = this.split_data
-                    MyStorage[`${this.game.properties.meta.game_name.value}_${this.starter}`] = {
-                        ...MyStorage[`${this.game.properties.meta.game_name.value}_${this.starter}`],
-                        split_data: this.split_data
-                    }
+                    // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
+                    // CSV split files are the record, and storing the whole history under the bare key
+                    // and again inside every species' entry grew user_state.json to 324 MB, which every
+                    // settings write re-serialised (docs/performance-followups.md, known-legacy-bugs.md #43).
 
                     if (this.stop_timer_after_n_dialogue) {
                         // Toggle on: record the Ghetsis split now, but the run doesn't end until the
@@ -10198,11 +10196,10 @@ export default defineComponent({
                             console.error("Error:", error);
                         });
                     this.split_data.push(this.simple_data)
-                    MyStorage["split_data"] = this.split_data
-                    MyStorage[`${this.game.properties.meta.game_name.value}_${this.starter}`] = {
-                        ...MyStorage[`${this.game.properties.meta.game_name.value}_${this.starter}`],
-                        split_data: this.split_data
-                    }
+                    // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
+                    // CSV split files are the record, and storing the whole history under the bare key
+                    // and again inside every species' entry grew user_state.json to 324 MB, which every
+                    // settings write re-serialised (docs/performance-followups.md, known-legacy-bugs.md #43).
                 }
             });
         }

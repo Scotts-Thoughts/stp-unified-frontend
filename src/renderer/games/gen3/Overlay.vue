@@ -8857,11 +8857,10 @@ export default defineComponent({
                     this.log_split()
                     logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run)
                     this.split_data.push(this.simple_data)
-                    MyStorage["split_data"] = this.split_data
-                    MyStorage[this.starterString] = {
-                        ...MyStorage[this.starterString],
-                        split_data: this.split_data
-                    }
+                    // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
+                    // CSV split files are the record, and storing the whole history under the bare key
+                    // and again inside every species' entry grew user_state.json to 324 MB, which every
+                    // settings write re-serialised (docs/performance-followups.md, known-legacy-bugs.md #43).
                 }
                 // Debug logging for FireRed/LeafGreen splits
                 if (this.gameSelection == 'FireRed and LeafGreen') {
@@ -8932,11 +8931,10 @@ export default defineComponent({
                                 console.error("Error:", error);
                             });
                         this.split_data.push(this.simple_data)
-                        MyStorage["split_data"] = this.split_data
-                        MyStorage[this.starterString] = {
-                            ...MyStorage[this.starterString],
-                            split_data: this.split_data
-                        }
+                        // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
+                        // CSV split files are the record, and storing the whole history under the bare key
+                        // and again inside every species' entry grew user_state.json to 324 MB, which every
+                        // settings write re-serialised (docs/performance-followups.md, known-legacy-bugs.md #43).
                         console.log("Data transfer finished.")
                     }
                 }
@@ -8971,11 +8969,10 @@ export default defineComponent({
                             console.error("Error:", error);
                         });
                     this.split_data.push(this.simple_data)
-                    MyStorage["split_data"] = this.split_data
-                    MyStorage[this.starterString] = {
-                        ...MyStorage[this.starterString],
-                        split_data: this.split_data
-                    }
+                    // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
+                    // CSV split files are the record, and storing the whole history under the bare key
+                    // and again inside every species' entry grew user_state.json to 324 MB, which every
+                    // settings write re-serialised (docs/performance-followups.md, known-legacy-bugs.md #43).
                     console.log("Data transfer finished.")
                 }
             });

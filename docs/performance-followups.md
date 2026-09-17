@@ -74,6 +74,17 @@ Now there is one `_refreshTimer`, cleared before it is rescheduled and in
 through). The refresh itself is unchanged: once a minute after the latest load, as the
 reference client intended.
 
+### 4. `split_data` persisted into every species entry (found 2026-09-17, after the review)
+
+The lag Scott reported after the first three fixes had a different cause: gen2-5 persisted
+the autosplitter's ever-growing `split_data` array under a bare key *and* inside the running
+species' style entry, so `data/user_state.json` had reached 324 MB (237 arrays). Every
+settings write serialised it on the renderer's main thread (about a second), sent it over
+IPC and `writeFileSync`'d it in main; startup parsed it. Nothing read the arrays back.
+Fixed: the persistence sites are gone, `parseUserStateFile` strips the arrays from an old
+file, and the 31 shipped gen2 style defaults that carried them are cleaned
+(known-legacy-bugs.md #43). Without the arrays the file is 0.6 MB.
+
 ## Left for a second pass
 
 Ordered by expected gain. None changes behaviour by design, but each touches something the

@@ -1,7 +1,7 @@
 {
   "imageScale": "0.84",
   "imageYOffset": "41",
-  "overlay_color": "#e28856",
+  "overlay_color": "#705848",
   "ui_saturation": "1.4",
   "imageFlip": false,
   "backgroundFlip": true,
@@ -14,6 +14,6 @@
   "backgroundTexture": "Dark",
   "hidden_power_type": "Water",
   "hidden_power_index": "3",
-  "attempt_number": 2,
+  "attempt_number": 4,
   "finished_run_count": 2
 }
