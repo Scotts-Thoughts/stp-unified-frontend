@@ -2,7 +2,6 @@
     <div>Game:</div>
     <select v-model="settings.edition" class="dropdownMenu dropdown_menu_column3">
         <option>Yellow</option>
-        <option v-if="isRelease == false">Yellow Legacy</option>
         <option>Red</option>
         <option>Blue</option>
     </select><br>

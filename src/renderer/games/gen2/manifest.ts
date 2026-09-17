@@ -14,8 +14,8 @@ export const gen2Manifest: ModuleManifest = {
     mappers: [crystalDeprecated, goldSilverDeprecated],
     games: ["Crystal", "Gold and Silver"],
     editions: [
-        { name: "Crystal", game: "Crystal", boxArt: "2-Crystal.png", splitFolder: "Crystal", splitPrefix: "c", icon: "gen2/icon.png" },
         { name: "Gold & Silver", game: "Gold and Silver", boxArt: "2-GoldSilver.png", splitFolder: "Gold & Silver", splitPrefix: "c", icon: "gen2/icon.png" },
+        { name: "Crystal", game: "Crystal", boxArt: "2-Crystal.png", splitFolder: "Crystal", splitPrefix: "c", icon: "gen2/icon.png" },
     ],
     editionKey: "game_selection",
     load: () => import("./index").then((m) => m.gen2),

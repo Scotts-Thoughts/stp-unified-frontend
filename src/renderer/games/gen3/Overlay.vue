@@ -4069,10 +4069,17 @@ export default defineComponent({
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const stats = await response.json();
-                
-                // Store the stats object in Vue data
-                this.emulatorStats = stats;
+                const text = await response.text();
+                // The reactive assignment is skipped when the body is byte-identical to the
+                // previous poll: the new object would equal the old in every field, and
+                // replacing it re-evaluated every `emulatorStats` binding 100 times a second
+                // while the emulator sat idle (docs/performance-followups.md).
+                if (text !== this._lastEmulatorStatsText) {
+                    this._lastEmulatorStatsText = text;
+                    // Store the stats object in Vue data
+                    this.emulatorStats = JSON.parse(text);
+                }
+                const stats = this.emulatorStats;
                 
                 // Update timer without pausing - sync the timer's startTime to match emulator
                 if (stats.time) {
@@ -7670,7 +7677,11 @@ export default defineComponent({
         // In mounted hook (around line 6897)
         // Poll for emulator stats continuously
         this.emulatorStatsInterval = setInterval(async () => {
-            if (this.ready) { // Only poll when mapper is ready
+            // gen4's gate (Phase 2): every reader of `emulatorStats` -- the timer text, the
+            // fault counters, the split log -- is behind one of the two flags, so with both
+            // off nothing observes the pause and the idle overlay stops making 100 requests
+            // a second (docs/performance-followups.md).
+            if (this.ready && (this.shuckie_timer || this.shuckie_counters)) { // Only poll when mapper is ready and a shuckie feature is on
                 await this.fetchEmulatorStats();
             }
         }, 10); // 100ms = 10 times per second (adjust as needed)

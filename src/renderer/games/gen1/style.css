@@ -61,6 +61,17 @@
 }
 
 
+/* The two variables the settings store writes onto `<html>` (useSettingsStore
+   applyCssVariables). Their defaults must stay on `:root`: declared on `.gen-1`
+   they shadow the inline values on the ancestor, and the colour picker and
+   saturation slider stop reaching the tinted boxes. This sheet is only in the
+   document while gen1 is active, so nothing leaks to the other generations. */
+:root {
+    --overlay-color: #000000;
+    /* Saturation of the tinted UI boxes. */
+    --style_ui_saturation: 0.6;
+}
+
 /* The palette. It was on `:root`; on `.gen-1` it reaches exactly the same
    elements, because everything that reads these variables is inside
    #app-container, and no rule outside it uses var(). */
@@ -256,11 +267,6 @@
     --bulbapedia_stats_20240407-spe-light: #E46CCA;
     --bulbapedia_stats_20240407-spe-color: #D51DAD;
     --bulbapedia_stats_20240407-spe-heavy: #8B1370;
-
-    --overlay-color: #000000;
-    /* Saturation of the tinted UI boxes. Overwritten by the settings store once a style is loaded. */
-    --style_ui_saturation: 0.6;
-    /* default color */
 
     /* Exp Bar Colours */
     --expBarBackground: linear-gradient(rgba(239, 239, 239, rgba(157, 157, 157, 0)157));

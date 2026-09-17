@@ -23,7 +23,7 @@ import { useMetaStore } from "~/stores/metaStore";
 import { useOverlaySettingsStore, type GameEdition } from "~/stores/useOverlaySettingsStore";
 import { asBoolean, missing, type ControlReply, type ControlRoutes } from "~/core/control/useControlServer";
 
-const EDITIONS: GameEdition[] = ["Yellow", "Yellow Legacy", "Red", "Blue"];
+const EDITIONS: GameEdition[] = ["Yellow", "Red", "Blue"];
 
 const UNSUPPORTED = (route: string): ControlReply => ({
   ok: false,

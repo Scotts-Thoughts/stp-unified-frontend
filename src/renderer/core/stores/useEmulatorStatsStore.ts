@@ -16,6 +16,23 @@ export interface EmulatorStats {
 	[key: string]: unknown;
 }
 
+/** What a generation hands {@link startPolling}; both are read on every tick. */
+export interface PollingOptions {
+	/**
+	 * False skips the tick without a request. gen1 passes "the Shuckie timer or the
+	 * Shuckie counters are on": every reader of `stats` is behind one of the two flags,
+	 * so nothing observes the pause, and an idle overlay no longer makes 100 requests
+	 * a second (docs/performance-followups.md).
+	 */
+	enabled?: () => boolean;
+	/**
+	 * Runs after every successful poll, whether or not the body changed. gen1's
+	 * overlay used to watch `stats` for this; the watcher would have gone quiet once
+	 * unchanged bodies stopped replacing the object, so the hook fires from here.
+	 */
+	afterPoll?: () => void;
+}
+
 /**
  * Polls the Shuckie emulator HTTP server for timer/counter stats and exposes methods to control them.
  * The server is expected to expose:
@@ -31,6 +48,9 @@ export const useEmulatorStatsStore = defineStore("emulator_stats", {
 		_lastErrorLoggedAt: 0 as number,
 		_loggedFirstSuccess: false as boolean,
 		_lastStartAttemptAt: 0 as number,
+		_options: {} as PollingOptions,
+		/** The last `/stats` body, verbatim; an identical body leaves `stats` untouched. */
+		_lastStatsText: null as string | null,
 	}),
 	getters: {
 		timeCurrent(state): number | null {
@@ -44,12 +64,16 @@ export const useEmulatorStatsStore = defineStore("emulator_stats", {
 		},
 	},
 	actions: {
-		startPolling() {
+		startPolling(options: PollingOptions = {}) {
+			this._options = options;
 			if (this._interval != null) {
 				return;
 			}
 			console.log(`[emulator-stats] starting poll loop against ${EMULATOR_BASE_URL}/stats every ${POLL_INTERVAL_MS}ms`);
 			this._interval = setInterval(() => {
+				if (this._options.enabled && !this._options.enabled()) {
+					return;
+				}
 				this.fetchStats();
 			}, POLL_INTERVAL_MS);
 		},
@@ -58,6 +82,8 @@ export const useEmulatorStatsStore = defineStore("emulator_stats", {
 				clearInterval(this._interval);
 				this._interval = null;
 			}
+			this._options = {};
+			this._lastStatsText = null;
 		},
 		async fetchStats() {
 			try {
@@ -65,13 +91,21 @@ export const useEmulatorStatsStore = defineStore("emulator_stats", {
 				if (!response.ok) {
 					throw new Error(`HTTP ${response.status}`);
 				}
-				this.stats = await response.json();
-				if (!this._loggedFirstSuccess) {
-					this._loggedFirstSuccess = true;
-					console.log(
-						`[emulator-stats] first poll succeeded. time_current=${this.stats?.time_current} counters=${JSON.stringify(this.stats?.counters)} full=${JSON.stringify(this.stats)}`
-					);
+				const text = await response.text();
+				// A body identical to the previous one would parse to an object equal in
+				// every field; replacing `stats` with it re-ran every dependent computed and
+				// template binding 100 times a second while the emulator sat idle.
+				if (text !== this._lastStatsText) {
+					this._lastStatsText = text;
+					this.stats = JSON.parse(text);
+					if (!this._loggedFirstSuccess) {
+						this._loggedFirstSuccess = true;
+						console.log(
+							`[emulator-stats] first poll succeeded. time_current=${this.stats?.time_current} counters=${JSON.stringify(this.stats?.counters)} full=${JSON.stringify(this.stats)}`
+						);
+					}
 				}
+				this._options.afterPoll?.();
 			} catch (err) {
 				// Keep the last-known stats on transient failures to avoid display flicker.
 				// Log at most once every 5 seconds so we don't flood the console.

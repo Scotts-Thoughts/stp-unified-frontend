@@ -32,7 +32,7 @@ export interface Edition {
     splitPrefix: string;
     /** Icon under `resources/icons/` for the window and taskbar. */
     icon: string;
-    /** Only listed in a dev build -- gen1's "Yellow Legacy" (known-legacy-bugs.md #22). */
+    /** Only listed in a dev build. */
     devOnly?: boolean;
 }
 

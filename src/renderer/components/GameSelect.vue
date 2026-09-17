@@ -70,8 +70,7 @@
  * side by side for an edition that covers a pair (Gold & Silver, FireRed and
  * LeafGreen, Diamond and Pearl, HeartGold and SoulSilver), so a pair's tile is twice
  * as wide and still one `.gameToggleImg` -- `tools/parity/packaged-probe.ts` counts
- * those, and `screenshot-idle.ts` clicks by the `title`. "Yellow Legacy" shows only
- * in a dev build, as gen1's dropdown did (known-legacy-bugs.md #22).
+ * those, and `screenshot-idle.ts` clicks by the `title`.
  */
 import { defineComponent } from "vue";
 import type { Edition } from "~/core/game/GameModule";

@@ -18,7 +18,7 @@ export type OverlaySettings = ReturnType<typeof defaultOverlaySettings>;
  * The edition the user is playing. "Red" and "Blue" share the "Red and Blue" mapper, so this is only used for
  * labelling split files (the `Y`/`R`/`B` prefix) and for the game dropdown.
  */
-export type GameEdition = "Yellow" | "Yellow Legacy" | "Red" | "Blue";
+export type GameEdition = "Yellow" | "Red" | "Blue";
 
 const SETTINGS_FILE = "overlay_settings.json";
 
@@ -86,7 +86,7 @@ export const useOverlaySettingsStore = defineStore('overlay_settings', {
 		 */
 		setGame(value: PokemonGame | null) {
 			this.game = value;
-			if (value === "Yellow" && this.edition !== "Yellow" && this.edition !== "Yellow Legacy") {
+			if (value === "Yellow" && this.edition !== "Yellow") {
 				this.edition = "Yellow";
 			}
 			if (value === "Red and Blue" && this.edition !== "Red" && this.edition !== "Blue") {

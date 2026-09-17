@@ -121,6 +121,14 @@ export class GameHookMapperClient {
     glossary;
     _change: Record<string, any[]> = {};
     _once: Record<string, any[]> = {};
+    /**
+     * The one pending 60 s mapper refresh. `loadMapper()` used to schedule its next
+     * run without cancelling the previous timer, and it is called from every
+     * `MapperLoaded` event and every reconnect as well, so each of those left one more
+     * chain running for good -- and each chain's refresh rebuilds the whole property
+     * tree, which re-renders the whole overlay (docs/performance-followups.md).
+     */
+    _refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
     connected: boolean = false;
     private _options: { automaticRefreshMapperTimeMinutes: number; };
@@ -161,7 +169,15 @@ export class GameHookMapperClient {
         }
     }
 
+    _cancelRefresh() {
+        if (this._refreshTimer !== null) {
+            clearTimeout(this._refreshTimer)
+            this._refreshTimer = null
+        }
+    }
+
     _deconstructMapper() {
+        this._cancelRefresh()
         this.meta = null;
         this._properties = [];
         this._propertiesMap = null;
@@ -266,7 +282,11 @@ export class GameHookMapperClient {
             })
         })
 
-        setTimeout(() => this.loadMapper(), this._options.automaticRefreshMapperTimeMinutes * 60000)
+        this._cancelRefresh()
+        this._refreshTimer = setTimeout(() => {
+            this._refreshTimer = null
+            this.loadMapper()
+        }, this._options.automaticRefreshMapperTimeMinutes * 60000)
 
         return this
     }

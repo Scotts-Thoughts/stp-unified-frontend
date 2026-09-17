@@ -105,16 +105,13 @@ export default defineComponent({
             },
             deep: true,
         },
-        // When the Shuckie timer toggle is on and the emulator reports no running timer,
-        // kick it off. Covers replays (no 0→positive playerId flip) and users enabling
-        // the flag mid-session. Store self-throttles repeated calls.
+        // When the Shuckie timer toggle is turned on and the emulator reports no running
+        // timer, kick it off. The same check after every poll (which covers replays and
+        // a flag enabled mid-session) is the `afterPoll` hook games/gen1/index.ts hands
+        // the store: a watcher on `emulator.stats` no longer sees every poll, because an
+        // unchanged body leaves the object alone.
         "settings.shuckie.timer"(enabled) {
             if (enabled) {
-                this.emulator.ensureStarted();
-            }
-        },
-        "emulator.stats"() {
-            if (this.settings.shuckie.timer) {
                 this.emulator.ensureStarted();
             }
         },

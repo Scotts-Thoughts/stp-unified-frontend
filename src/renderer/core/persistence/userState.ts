@@ -83,9 +83,12 @@ let loaded: Promise<void> | null = null;
 
 const FILE = "user_state.json";
 const DEBOUNCE_MS = 250;
+/** While changes keep coming, the file is rewritten no more often than this. */
+const BURST_INTERVAL_MS = 1000;
 
 let pending: ReturnType<typeof setTimeout> | null = null;
 let inFlight: Promise<unknown> = Promise.resolve();
+let lastWriteAt = 0;
 
 /**
  * Reads the file into the cache. Safe to call repeatedly; only the first call reads.
@@ -142,14 +145,24 @@ function schedule(): void {
     // text are written on every animation frame, and a trailing-edge debounce would
     // create and cancel a timer 60 times a second. The write lands 250 ms after the
     // first change of a burst instead of the last, which no reader can tell apart.
+    //
+    // A burst that never ends -- gen2's timer text changes every frame for the whole
+    // run -- used to rewrite the file four times a second. Once a write has landed,
+    // the next one waits out BURST_INTERVAL_MS from it instead. Every in-app read is
+    // served from the cache, so nothing in the app can tell; a normal quit or reload
+    // flushes (`beforeunload`), so the file is complete at every exit. Only a hard
+    // crash sees the difference: up to a second of the last edits instead of 250 ms.
     if (pending) return;
+    const sinceLastWrite = Date.now() - lastWriteAt;
+    const delay = Math.max(DEBOUNCE_MS, BURST_INTERVAL_MS - sinceLastWrite);
     pending = setTimeout(() => {
         pending = null;
         write();
-    }, DEBOUNCE_MS);
+    }, delay);
 }
 
 function write(): Promise<unknown> {
+    lastWriteAt = Date.now();
     const snapshot = serializeUserState(cache);
     inFlight = inFlight
         .then(() => window.api.data.write(FILE, snapshot))

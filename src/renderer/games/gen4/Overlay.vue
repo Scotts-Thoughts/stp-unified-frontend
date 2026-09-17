@@ -3834,10 +3834,17 @@ export default defineComponent({
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const stats = await response.json();
-                
-                // Store the stats object in Vue data
-                this.emulatorStats = stats;
+                const text = await response.text();
+                // The reactive assignment is skipped when the body is byte-identical to the
+                // previous poll: the new object would equal the old in every field, and
+                // replacing it re-evaluated every `emulatorStats` binding 100 times a second
+                // while the emulator sat idle (docs/performance-followups.md).
+                if (text !== this._lastEmulatorStatsText) {
+                    this._lastEmulatorStatsText = text;
+                    // Store the stats object in Vue data
+                    this.emulatorStats = JSON.parse(text);
+                }
+                const stats = this.emulatorStats;
                 
                 // Update timer without pausing - sync the timer's startTime to match emulator
                 if (stats.time) {

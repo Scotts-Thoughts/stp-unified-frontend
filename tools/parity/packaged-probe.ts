@@ -96,8 +96,8 @@ try {
     })),
   );
   const unloaded = tiles.filter((t) => !t.loaded);
-  // gen1 Yellow/Red/Blue ("Yellow Legacy" is dev-only) + gen2 2 + gen3 2 + gen4 3 + gen5 4.
-  check(tiles.length === 14, `box-art grid shows ${tiles.length} tiles (14 expected)`);
+  // gen1 Yellow/Red/Blue + gen2 2 + gen3 2 + gen4 3 + gen5 4.
+  check(tiles.length === 13, `box-art grid shows ${tiles.length} tiles (13 expected)`);
   check(unloaded.length === 0, `every tile image loaded${unloaded.length ? `: ${unloaded.map((t) => t.src).join(", ")} did not` : ""}`);
 
   const storage = await page.evaluate(async () => {
