@@ -202,7 +202,9 @@ npm run parity:all -- --baselines            # (re)capture the legacy baselines 
 npm run parity:preflight -- unified          # which single-tenant port is held, and by what
 npm run parity:selftest                      # 32 checks: the mock vs gen1's real GameHookMapperClient
 npm run parity:bookmarks                     # 22 checks: core/logic/shuckieBookmarks.ts vs a fake Super Shuckie, then vs the stub
+npm run parity:debounce                      # 38 checks: the client's debounce frame loop survives every connection path (known-legacy-bugs.md #29), and disconnect() cancels an armed 5 s retry
 npm run parity:manual-ivs                    # Manual DVs/IVs on every fixture: readout + writes (tools/parity/manual-ivs-check.ts)
+npm run parity:drift                         # gens 2-5's overlays: a shared member whose bodies differ must be in drift-allowlist.json (--report, --update, --strict fails on UNREVIEWED entries); also duplicate members, overlays overriding a core/overlay mixin member, undeclared names in the mixins
 npm run parity:scan -- <fixture> --out=tools/reports
 npm run parity:run  -- <target> <fixture> --out=<dir> [--control]
 npm run parity:diff -- <baseline-dir> <candidate-dir>

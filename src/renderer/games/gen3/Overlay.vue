@@ -1745,10 +1745,17 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
-import { clampIvs, clampStat, gen3HiddenPower, IV_MAX, IV_MODE, ivsFromHiddenPowerRow } from "~/core/logic/starterIvs";
+import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
+import { enemySpriteStyleMixin } from "~/core/overlay/enemySpriteStyleMixin";
+import { formattersMixin } from "~/core/overlay/formattersMixin";
+import { naturesMixin } from "~/core/overlay/naturesMixin";
+import { manualIvsMixin } from "~/core/overlay/manualIvsMixin";
+import { speciesArtMixin } from "~/core/overlay/speciesArtMixin";
+import { overlayCommonMixin } from "~/core/overlay/overlayCommonMixin";
+import { battleMathMixin } from "~/core/overlay/battleMathMixin";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen3Hotkeys } from "./hotkeys";
@@ -1762,8 +1769,6 @@ import { application_settings } from "./data/settings/application_settings.js";
 import { autosplitter } from "./data/autosplitter.js";
 import { autosplitter_process } from "./data/autosplitter/autosplitter_functions.js";
 import { burnModifier } from "./data/methods/modifier_functions.js";
-import { camelCase } from "./data/methods/text_functions.js";
-import { capitalization_format } from "./data/methods/text_functions.js";
 import { cross_generation_moves } from "./data/cross_generation_moves.js";
 import { default_colors } from "./data/default_colors.js";
 import { determineItemBoost } from "./data/methods/modifier_functions.js";
@@ -1776,13 +1781,9 @@ import { enemy_move_power } from "./data/methods/attacking_functions.js";
 import { evolution_data_pokedex } from "./data/firered_leafgreen.js";
 import { evolution_family_data_emerald } from "./data/evolution_family_data/emerald.js";
 import { evolution_family_data_firered_leafgreen } from "./data/evolution_family_data/firered_leafgreen.js";
-import { formatDuration } from "./data/methods/time_functions.js";
-import { g3FrustrationPowerCalc } from "./data/methods/move_power_functions.js";
 import { g3MoveData } from "./data/g3MovesData.js";
-import { g3ReturnPowerCalc } from "./data/methods/move_power_functions.js";
 import { g3hiddenPowerTypeSelector } from "./data/hiddenPowerTypeSelector.js";
 import { g3tmhmMapping } from "./data/g3tmhmmapping.js";
-import { gameTimeHM } from "./data/methods/time_functions.js";
 import { gameTimeHMS } from "./data/methods/time_functions.js";
 import { gameTimeM } from "./data/methods/time_functions.js";
 import { gen3abilities } from "./data/gen3abilities.js";
@@ -1793,18 +1794,10 @@ import { hiddenPowerPowerCalc } from "./data/methods/move_power_functions.js";
 import { hiddenPowerTypeCalc } from "./data/methods/move_power_functions.js";
 import { hiddenpower_type_selector } from "./data/hiddenpower.js";
 import { hiddenpowers } from "./data/hiddenpower-all.js";
-import { ifZero } from "./data/methods/text_functions.js";
-import { itemCheck } from "./data/methods/text_functions.js";
-import { leadZero } from "./data/methods/time_functions.js";
 import { log_split } from "./data/autosplitter/autosplitter_functions.js";
 import { movePower } from "./data/methods/move_power_functions.js";
 import { move_name } from "./data/methods/text_functions.js";
 import { natures } from "./data/natures.js";
-import { nullToNone } from "./data/methods/text_functions.js";
-import { nullToSpace } from "./data/methods/text_functions.js";
-import { padTime } from "./data/methods/time_functions.js";
-import { pascalCaseDot } from "./data/methods/text_functions.js";
-import { pascalCaseSpace } from "./data/methods/text_functions.js";
 import { pokedex_emerald } from "./data/pokedex/emerald.js";
 import { pokedex_frlg } from "./data/pokedex/firered_leafgreen.js";
 import { pokedex_indexes } from "./data/pokedex_indexes.js";
@@ -1830,6 +1823,7 @@ import { weatherModifier } from "./data/methods/modifier_functions.js";
 let attack, damageMax, damageMin, defense, gamestate, h, level, m, mod, newColor, power, specialA, specialD, stab, starterType, timecode, type1, type2, usableVitamins, value_current, value_previous, vitaminsUsed;
 
 export default defineComponent({
+    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin],
     components: {
         "Timer": TimerComponent,
     },
@@ -2697,10 +2691,6 @@ export default defineComponent({
     },
 
     watch: {
-        shuckie_bookmarks(enabled) {
-            // Global, not this generation's MyStorage: the bookmarks are core's (core/logic/shuckieBookmarks.ts).
-            setShuckieBookmarksEnabled(enabled);
-        },
         gameSelection(newValue) {
             // Update the taskbar/window icon to match the selected game (games/gen3/icons.ts).
             try {
@@ -3165,9 +3155,6 @@ export default defineComponent({
             MyStorage["blackout_counter"] = 0
             this.blackout_counter         = 0;
         },    
-        overlay_color(newColor) {
-            document.documentElement.style.setProperty('--overlay-color', newColor);
-        }, 
         playerResets(newProp) {
             switch (this.playerResets.toString().length) {
                 case 1:
@@ -3260,14 +3247,6 @@ export default defineComponent({
     },
 
     computed: {
-        /** The Hidden Power the Manual fields yield, for the readout under them (2026-09-17). */
-        manualHiddenPower() {
-            return gen3HiddenPower(clampIvs(this.manual_ivs))
-        },
-        /** The Hidden Power type the starter's spread yields, for the movepool row: the dropdown's in Automatic, the fields' in Manual. */
-        starterHiddenPowerType() {
-            return this.iv_mode == IV_MODE.manual ? this.manualHiddenPower.type : this.hidden_power_type
-        },
         /**
          * Check if the current Pokemon has multiple evolution stages
          * Returns true if evolution family has more than one species
@@ -3599,15 +3578,6 @@ export default defineComponent({
         enemyTeam() {
             return this.game.properties.battle.trainer.team
         },
-        s1() {
-            return this.game?.properties?.player?.team[0]
-        },
-        map() {
-            return this.game?.properties
-        },
-        batt() {
-            return this.game?.properties?.battle
-        },
         battEn() {
             return this.game?.properties?.battle?.enemyPokemon
         },
@@ -3772,14 +3742,6 @@ export default defineComponent({
             }
             return maxArr
         },
-        weather_boolean() {
-            if (this.batt.field?.weather?.value == "Sun" || this.batt.field?.weather?.value == "Rain" || this.batt.field?.weather?.value == "Sandstorm") {
-                return true
-            }
-            else {
-                return false
-            }
-        },
         pkmnGrowthRate() {
             if (this.dexData[this.starterString].growth_rate == `GROWTH_MEDIUM_SLOW`) { return "Medium Slow" }
             if (this.dexData[this.starterString].growth_rate == `GROWTH_MEDIUM_FAST`) { return "Medium Fast" }
@@ -3806,18 +3768,6 @@ export default defineComponent({
                 effect_array[3][2] = this.batt.field.weatherCount?.value
             }
             return effect_array
-        },
-        field_effect_first_expiring() {
-            var field_effect_most_recent_array = ["Reflect", false, 6,]
-            for(var i = 0; i < this.field_effect_array.length; i++) {
-                if (this.field_effect_array[i][2] < field_effect_most_recent_array[2] && this.field_effect_array[i][2] != 0) {
-                    field_effect_most_recent_array = this.field_effect_array[i]
-                }
-            }
-            if (this.field_effect_array[0][2] == 0 && this.field_effect_array[1][2] == 0 && this.field_effect_array[2][2] == 0 && this.field_effect_array[3][2] == 0) {
-                field_effect_most_recent_array = [this.last_initiated_field_effect, false, 0]
-            }
-            return field_effect_most_recent_array
         },
         starter() {
             return this.dexData[this.starterString].dex_number
@@ -3907,43 +3857,6 @@ export default defineComponent({
             // return false;
             return true;
         },
-        pokemonArtOpacity() {
-            // Return opacity for Pokemon art during evolution transition
-            if (this.evolution_transitioning) {
-                // Fade out old, fade in new
-                return 1 - this.evolution_transition_progress;
-            }
-            return 1;
-        },
-        pokemonArtTransition() {
-            // Return transition style for Pokemon art
-            if (this.evolution_transitioning) {
-                return 'opacity 1s ease-in-out';
-            }
-            return '';
-        },
-        movepoolOpacity() {
-            // Return opacity for movepool during evolution transition only
-            // Battle transitions are handled by Vue's transition component
-            if (this.evolution_transitioning) {
-                return 1 - this.evolution_transition_progress;
-            }
-            
-            // For non-evolution transitions, don't set opacity (let Vue transition handle it)
-            // Return 1 so it's visible when rendered, Vue transition will handle fade in/out
-            return 1;
-        },
-        movepoolTransition() {
-            // Return transition style for movepool
-            // During evolution transitions, use longer transition
-            if (this.evolution_transitioning) {
-                return 'opacity 1s ease-in-out';
-            }
-            
-            // For battle state changes, return empty string to use default in template
-            // The template will fall back to 'opacity 0.5s ease-in-out' if this is empty
-            return '';
-        },
         statsDisplaySpecies() {
             // Return the species to display stats for
             // If showing evolved base stats (temporary after evolution), use the evolved species
@@ -3968,16 +3881,6 @@ export default defineComponent({
     },
 
     methods: {
-        vitamins_remaining(evs, label) { //statExp = mapper.properties.player.team[0].statExpAttack.value
-            vitaminsUsed = (evs / 10)
-            usableVitamins = Math.ceil(10 - vitaminsUsed)
-            if (usableVitamins < 0) {
-                return 0
-            }
-            else {
-                return usableVitamins
-            }
-        },
         get_player_move(x) {
             const state = this.g3stateVariable
             if (state == "Battle") {
@@ -4051,17 +3954,6 @@ export default defineComponent({
             sendChapterMarker(chapterName, { probeStatus: true });
         },
 
-        /**
-         * Get the current storage key for the active Pokemon
-         */
-        getCurrentStorageKey() {
-            if (this.evolution && this.selected_evolution_species) {
-                return this.getStorageKey(this.selected_evolution_species, true);
-            } else {
-                return this.getStorageKey(this.starterString, false);
-            }
-        },
-        
         // Add this method to your Vue app methods section (around line 4182)
         async fetchEmulatorStats() {
             try {
@@ -4183,30 +4075,6 @@ export default defineComponent({
                 // console.error('Error sending start command:', error);
                 return false;
             }
-        },
-        formatMilliseconds(ms) {
-            // Truncate milliseconds to seconds
-            const totalSeconds = Math.floor(ms / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            
-            // Helper function to pad with leading zero
-            const pad = (x) => x.toString().padStart(2, "0");
-            
-            // Progressive format: starts at "0" and grows as needed
-            if (hours > 0) {
-                return `${hours}:${pad(minutes)}:${pad(seconds)}`;
-            } else if (minutes > 0) {
-                return `${minutes}:${pad(seconds)}`;
-            } else {
-                return seconds.toString();
-            }
-        },
-        getCentiseconds(ms) {
-            // Convert milliseconds to centiseconds and extract only the centiseconds part
-            const centiseconds = Math.floor(ms / 10) % 100;
-            return centiseconds.toString().padStart(2, "0");
         },
         getUnobtainableMoveStyle(move_object, type_of_move) {
             const unobtainable_moves_toggle = this.unobtainable_moves_toggle
@@ -4768,15 +4636,6 @@ export default defineComponent({
                 ])
             }
         },
-        get_nested_property(obj, path) {
-            return path.split('.').reduce((o, p) => (o || {})[p], obj);
-        },
-        split_diff_color(difference_string) {
-            if (difference_string === "-")          { return "color: black" }
-            if (difference_string === "+0:00")      { return "color: black" }
-            if (difference_string.charAt(0) == "+") { return "color: red" }
-            if (difference_string.charAt(0) == "-") { return "color: green" }
-        },
         convertDurationToSeconds(duration) {
             const parts = duration.split(':').map(part => parseInt(part, 10));
             if (parts.length === 1) {
@@ -4785,21 +4644,6 @@ export default defineComponent({
                 return parts[0] * 60 + parts[1];
             } else if (parts.length === 3) {
                 return parts[0] * 3600 + parts[1] * 60 + parts[2];
-            }
-        },
-        convertSecondsToDuration(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const remainingSeconds = seconds % 60;
-        
-            if (hours > 0) {
-                return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-            } else if (minutes > 0) {
-                return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
-            } else {
-                var seconds = remainingSeconds
-                if (remainingSeconds < 10) { seconds = "0" + remainingSeconds.toString() }
-                return `0:${String(seconds)}`
             }
         },
         async load_temp_splits() {
@@ -5097,33 +4941,6 @@ export default defineComponent({
                 }
             }
         },
-        /**
-         * The IVs the starter is written with (2026-09-17): the Hidden Power dropdowns' row
-         * in Automatic (a stale index after a type change reads as the type's first row),
-         * the six fields in Manual.
-         */
-        starter_ivs() {
-            if (this.iv_mode == IV_MODE.manual) {
-                return clampIvs(this.manual_ivs)
-            }
-            const rows = this.hiddenpowers[this.hidden_power_type]
-            return ivsFromHiddenPowerRow(rows?.[this.hidden_power_index] ?? rows?.[0])
-        },
-        /** A stored spread, assigned only when it differs from the current one, so the settings watcher does not re-save an unchanged spread on every starter switch. */
-        load_manual_ivs(stored) {
-            const next = clampIvs(stored)
-            const current = clampIvs(this.manual_ivs)
-            if (Object.keys(next).some((stat) => next[stat] !== current[stat])) {
-                this.manual_ivs = next
-            }
-        },
-        /** One Manual IV field: whole, 0-31, an emptied field is 31; the object is replaced so the settings watcher sees it. */
-        set_manual_iv(stat, event) {
-            const value = clampStat(event.target.value, IV_MAX)
-            this.manual_ivs = { ...clampIvs(this.manual_ivs), [stat]: value }
-            // A rejected entry (letters, 40, -1) is shown as what was kept.
-            event.target.value = String(value)
-        },
         get_iv(stat_name) {
             const state = this.g3stateVariable
             let iv_hp  = this.game.properties.player.team[0].ivHp.value
@@ -5388,12 +5205,6 @@ export default defineComponent({
                     break;
                 }
             }
-        },
-        keys_function(object) {
-            return Object.keys(object)
-        },
-        values_function(object) {
-            return Object.values(object)
         },
 
         async newRun() {
@@ -5778,14 +5589,6 @@ export default defineComponent({
             this.backgroundContrast    = 100,
             this.backgroundSaturation  = 100
         },
-        resetPokemon() {
-            this.imageXOffset  = 0
-            this.imageYOffset  = 0
-            this.imageScale    = 1
-            this.imageFlip     = false
-            this.imageSat      = 100
-            this.imageRotation = 0
-        },
         increment(property) {
             this[property]++;
             if (this.shuckie_counters == true) { 
@@ -5804,9 +5607,6 @@ export default defineComponent({
                 }
                 this.incrementEmulatorCounterByAmount(property, -1) 
             }
-        },
-        async colorPick() {
-            return new EyeDropper().open().then(res => res.sRGBHex)
         },
         async color_picker() {
             var color = await this.colorPick()
@@ -6151,21 +5951,7 @@ export default defineComponent({
             return this.formatDuration(split)
         },
 
-        split(splitName, splits) {
-            // console.log(splits)
-            var split = splits.find(x => x.trainer_name === splitName)
-            if (split == undefined) return
-            return split["realtime.end.hours"] + ":" + split["realtime.end.minutes"] + ":" + split["realtime.end.seconds"]
-        },
 
-        curseType(x) {
-            if (x == `Curse`) {
-                return "???"
-            }
-            else {
-                return x
-            }
-        },
         //AUTOMATION MOVEPOOL GRAPHIC
         dataSearch(dataObject, pointerValue) {
             if (!pointerValue) return ""
@@ -6410,19 +6196,6 @@ export default defineComponent({
             }
         },
 
-        speedComparison(playerPkmnData, enemyPkmnData) {
-            var playerSpeed = playerPkmnData.speed.value
-            var enemySpeed = enemyPkmnData.speed.value
-            if (playerSpeed > enemySpeed) {
-                return "Outspeeds"
-            }
-            if (playerSpeed == enemySpeed) {
-                return "Speed-Tied"
-            }
-            if (playerSpeed < enemySpeed) {
-                return "Underspeeds"
-            }
-        },
         fade_enemy_mon(pkmnData) {
             const enemy_hp = pkmnData.hp.value
             if (enemy_hp > 0 || this.g3stateVariable == `To Battle`) {
@@ -6439,14 +6212,6 @@ export default defineComponent({
             }
             else {
                 return "opacity: 1"
-            }
-        },
-        enemyPkmnFaintCheck(pkmnData) {
-            if (pkmnData.hp == 0) {
-                return false
-            }
-            else {
-                return true
             }
         },
         enemyDropShadow(species) {
@@ -6764,24 +6529,11 @@ export default defineComponent({
 
         // text_functions.js
         move_name,
-        camelCase,
-        capitalization_format,
-        pascalCaseSpace,
-        pascalCaseDot,
         titleCaseNoUnderscores,
-        itemCheck,
-        ifZero,
-        nullToNone,
-        nullToSpace,
 
         // time_functions.js
-        padTime,
-        gameTimeHM,
-        gameTimeHM,
         gameTimeM,
         gameTimeHMS,
-        leadZero,
-        formatDuration,
 
         getPokemonImageUrl: function (x) {
             if (x != null)
@@ -6856,12 +6608,6 @@ export default defineComponent({
                     else
                         return ""
         },
-        species(x) {
-            if (x != null && x.value != null)
-                return x.value.name
-            else
-                return null
-        },
         natureCalculation(x) {
             var natureKey = (x % 25).toString()
             return this.camelCase(this.natures[natureKey])
@@ -6911,9 +6657,6 @@ export default defineComponent({
             return damageMin.toString() + "-" + damageMax.toString()
         },
     
-        sleep(ms) {
-            return new Promise((res) => setTimeout(res, ms))
-        },
         ability(ability, statname, statValue) {
             if (ability == `Hustle` && statname == `attack`) {
                 return Math.floor(statValue * 1.5)
@@ -6986,9 +6729,6 @@ export default defineComponent({
                 percent: (exp - currLvlExp) / (nextLvlExp - currLvlExp),
             };
         }, 
-        decimalToPercentage(decimal) {
-            return Math.round(decimal * 100);
-        },
 
         // MOVE MANAGEMENT
         movepoolPower(moveObject) {
@@ -7084,22 +6824,7 @@ export default defineComponent({
                 return null
             }
         },
-        // TYPE EFFECTIVENESS
-        checkTypes(x, y) { //x = type1.value, y = type2.value
-            if (x.value == y.value)
-                return true
-            else
-                return false
-        },
         
-        stageModColor(x) {
-            if (x == 0)
-                return "rgb(0, 0, 0);"
-            else if (x < 0)
-                return "rgb(107, 0, 0);"
-            else (x > 0)
-                return "rgb(0, 66, 14);"
-        },
 
 
         
@@ -7123,8 +6848,6 @@ export default defineComponent({
         hiddenPowerTypeCalc,
         hiddenPowerPowerCalc,
         weatherBallTypeCalc,
-        g3ReturnPowerCalc,
-        g3FrustrationPowerCalc,
 
         //modifier_functions.js
         determineSTAB,
@@ -7139,8 +6862,6 @@ export default defineComponent({
         enemy_effective_power,
         typeEffectiveness,
         type_effectiveness,
-        g3ReturnPowerCalc,
-        g3FrustrationPowerCalc,
 
         battlePokemonCrop() {
             const totalPokemon = this.enemyTrainerList?.[this.opponentId]?.pokemon?.length;
@@ -7345,80 +7066,6 @@ export default defineComponent({
                 }
             }
         },
-        natureLabels(nature) {
-            let output = nature + ": ";
-            // let pad = 7 - nature.length;
-            // output+="-".repeat(pad) + ": "
-            switch(this.natures[nature].raises) {
-                case "Attack":
-                    output+= "+Attack";
-                    break;
-                case "Defense":
-                    output+= "+Defense";
-                    break;
-                case "Special Attack":
-                    output+= "+Sp. Atk";
-                    break;
-                case "Special Defense":
-                    output+= "+Sp. Def";
-                    break;
-                case "Speed":
-                    output+= "+Speed";
-                    break;
-                default:
-                    output+= "Neutral";
-                    break;
-            }
-            switch(this.natures[nature].lowers) {
-                case "Attack":
-                    output+= " | -Attack";
-                    break;
-                case "Defense":
-                    output+= " | -Defense";
-                    break;
-                case "Special Attack":
-                    output+= " | -Sp. Atk";
-                    break;
-                case "Special Defense":
-                    output+= " | -Sp. Def";
-                    break;
-                case "Speed":
-                    output+= " | -Speed";
-                    break;
-                default:
-                    break;
-            }
-            return output;
-        },
-        // --- Button-grid nature selector (two-way synced with the pkmnNature dropdown) ---
-        // Stat currently raised by the selected nature (diagonal stat for neutral natures).
-        natureRaisedStat() {
-            const data = this.natures[this.pkmnNature];
-            if (!data) return null;
-            return data.raises === "Neutral" ? this.neutralStatByNature[this.pkmnNature] : data.raises;
-        },
-        // Stat currently lowered by the selected nature (diagonal stat for neutral natures).
-        natureLoweredStat() {
-            const data = this.natures[this.pkmnNature];
-            if (!data) return null;
-            return data.lowers === "Neutral" ? this.neutralStatByNature[this.pkmnNature] : data.lowers;
-        },
-        // Find the nature name matching a raised/lowered stat pair (same stat => neutral).
-        natureFromStats(raise, lower) {
-            if (raise === lower) return this.neutralNatureByStat[raise];
-            for (const [name, data] of Object.entries(this.natures)) {
-                if (data.raises === raise && data.lowers === lower) return name;
-            }
-            return this.pkmnNature;
-        },
-        // Clicking a "raises" button keeps the current lowered stat and updates the dropdown.
-        selectNatureRaise(stat) {
-            this.pkmnNature = this.natureFromStats(stat, this.natureLoweredStat());
-        },
-        // Clicking a "lowers" button keeps the current raised stat and updates the dropdown.
-        selectNatureLower(stat) {
-            this.pkmnNature = this.natureFromStats(this.natureRaisedStat(), stat);
-        },
         trashCans() {
             if(this.game_data.gameName != "FireRed and LeafGreen") {
                 return;
@@ -7453,109 +7100,6 @@ export default defineComponent({
             }
         },
 
-        /* === Enemy sprite resize tool ============================================
-         * Ctrl+Click an enemy sprite (wild or trainer team) to enter resize mode.
-         * Drag corner handle to scale, arrows to move (Shift = ±10), F1 to flip.
-         * Enter saves to enemy_sprite_scales.js (dev only); Escape cancels.
-         */
-        getEnemySpriteScale(species)   { this.enemyScaleVersion; return enemySpriteScaleManager.getScale(species); },
-        getEnemySpriteXOffset(species) { this.enemyScaleVersion; return enemySpriteScaleManager.getXOffset(species); },
-        getEnemySpriteYOffset(species) { this.enemyScaleVersion; return enemySpriteScaleManager.getYOffset(species); },
-        getEnemySpriteFlipped(species) { this.enemyScaleVersion; return enemySpriteScaleManager.getFlipped(species); },
-        enemyTransformFor(species) {
-            // Dev-mode escape hatch: when the styles toggle is off, render at native size/position
-            // so footage stays congruent with content filmed before the resize feature shipped.
-            // Packaged builds ignore the toggle and always apply styles. Style Mode also overrides
-            // the toggle so the user can see what they're editing.
-            if (this.isInDevMode && !this.enemy_sprite_styles_enabled && !this.style_mode_active) {
-                return 'none';
-            }
-            const s = this.getEnemySpriteScale(species);
-            const x = this.getEnemySpriteXOffset(species);
-            const y = this.getEnemySpriteYOffset(species);
-            const sx = this.getEnemySpriteFlipped(species) ? -s : s;
-            return `translate(${x}px, ${y}px) scale(${sx}, ${s})`;
-        },
-        nudgeEnemySpriteY(deltaPx) {
-            if (!this.enemyResize.species) return;
-            const cur = enemySpriteScaleManager.getYOffset(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { yOffset: cur + deltaPx });
-            this.enemyScaleVersion++;
-        },
-        nudgeEnemySpriteX(deltaPx) {
-            if (!this.enemyResize.species) return;
-            const cur = enemySpriteScaleManager.getXOffset(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { xOffset: cur + deltaPx });
-            this.enemyScaleVersion++;
-        },
-        toggleEnemySpriteFlip() {
-            if (!this.enemyResize.species) return;
-            const cur = enemySpriteScaleManager.getFlipped(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { flipped: !cur });
-            this.enemyScaleVersion++;
-        },
-        _getAppScale() {
-            const el = document.getElementById('app-container');
-            if (!el) return 1;
-            const t = getComputedStyle(el).transform;
-            if (!t || t === 'none') return 1;
-            const m = t.match(/matrix\(([^)]+)\)/);
-            if (m) {
-                const parts = m[1].split(',').map(s => parseFloat(s));
-                if (!Number.isNaN(parts[0]) && parts[0] > 0) return parts[0];
-            }
-            return 1;
-        },
-        enemySpriteHandlePosition() {
-            this.enemyScaleVersion;
-            const slot = this.enemyResize.slot;
-            if (slot == null) return null;
-            const sprite = document.querySelector(`.ePkmnSprite[data-enemy-slot="${slot}"]`);
-            if (!sprite) return null;
-            const rect = sprite.getBoundingClientRect();
-            return { left: (rect.right - 8) + 'px', top: (rect.bottom - 8) + 'px' };
-        },
-        onEnemyResizeHandleMouseDown(event) {
-            if (!this.enemyResize.species) return;
-            event.preventDefault();
-            event.stopPropagation();
-            const startX = event.clientX;
-            const startY = event.clientY;
-            const baseSize = this.enemyResize.baseSize;
-            const species = this.enemyResize.species;
-            const startScale = enemySpriteScaleManager.getScale(species);
-            const startWidth = baseSize * startScale;
-            const appScale = this._getAppScale();
-            const onMove = (ev) => {
-                const dx = ev.clientX - startX;
-                const dy = ev.clientY - startY;
-                const delta = (dx + dy) / 2;
-                const designDelta = appScale > 0 ? delta / appScale : delta;
-                const newWidth = Math.max(20, startWidth + designDelta);
-                const newScale = newWidth / baseSize;
-                enemySpriteScaleManager.setLive(species, { scale: newScale });
-                this.enemyScaleVersion++;
-            };
-            const onUp = () => {
-                window.removeEventListener('mousemove', onMove);
-                window.removeEventListener('mouseup', onUp);
-            };
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onUp);
-        },
-        commitEnemySpriteResize() {
-            if (!this.enemyResize.species) return;
-            enemySpriteScaleManager.commit(this.enemyResize.species);
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        cancelEnemySpriteResize() {
-            if (!this.enemyResize.species) return;
-            enemySpriteScaleManager.clearOverride(this.enemyResize.species);
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-
         /* === Style Mode (dev only) ==========================================
          * See gen5/app/frontend.js for the reference implementation. Gen 3
          * differs in two ways:
@@ -7563,61 +7107,9 @@ export default defineComponent({
          *     i.e. swaps between Ruby/Sapphire/Emerald and FRLG by game).
          *   - dummy slot uses class `ePkmn1` (1-indexed) instead of `ePkmn0`.
          */
-        styleModeCurrentSpecies() {
-            if (!this.style_mode_active) return null;
-            return this.style_mode_species_list[this.style_mode_index] ?? null;
-        },
         _styleModeBuildList() {
             const all = Object.keys(this.dexData || {});
             return all.filter((name) => name && name !== '—' && name !== 'Egg');
-        },
-        _styleModeFocusCurrent() {
-            const species = this.style_mode_species_list[this.style_mode_index];
-            if (!species) return;
-            this.enemyResize = { species, slot: 0, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        enterStyleMode() {
-            if (!this.isInDevMode) return;
-            const list = this._styleModeBuildList();
-            if (list.length === 0) return;
-            this.style_mode_species_list = list;
-            this.style_mode_index = 0;
-            this.style_mode_active = true;
-            this.$nextTick(() => this._styleModeFocusCurrent());
-        },
-        exitStyleMode() {
-            const species = this.styleModeCurrentSpecies();
-            if (species) enemySpriteScaleManager.clearOverride(species);
-            this.style_mode_active = false;
-            this.style_mode_species_list = [];
-            this.style_mode_index = 0;
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        styleModeAdvance() {
-            if (!this.style_mode_active) return;
-            const species = this.styleModeCurrentSpecies();
-            if (species) {
-                enemySpriteScaleManager.commit(species);
-            }
-            if (this.style_mode_index + 1 >= this.style_mode_species_list.length) {
-                this.exitStyleMode();
-                return;
-            }
-            this.style_mode_index++;
-            this.$nextTick(() => this._styleModeFocusCurrent());
-        },
-        styleModeBack() {
-            if (!this.style_mode_active) return;
-            const species = this.styleModeCurrentSpecies();
-            if (species) enemySpriteScaleManager.clearOverride(species);
-            if (this.style_mode_index === 0) {
-                this._styleModeFocusCurrent();
-                return;
-            }
-            this.style_mode_index--;
-            this.$nextTick(() => this._styleModeFocusCurrent());
         },
     },
 

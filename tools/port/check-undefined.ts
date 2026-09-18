@@ -1,7 +1,8 @@
 /**
  * Names a lifted component uses but never declares (plan 2.4).
  *
- *   npx tsx tools/port/check-undefined.ts src/renderer/games/gen4/Overlay.vue [more.vue|.js ...] [--allow=hash]
+ *   npx tsx tools/port/check-undefined.ts src/renderer/games/gen4/Overlay.vue [more.vue|.js|.ts ...] [--allow=hash]
+ *   npx tsx tools/port/check-undefined.ts src/renderer/core/overlay/*Mixin.ts
  *
  * A legacy classic `<script>` runs in sloppy mode, where an assignment to an
  * undeclared name silently creates a global and a read of one that was never
@@ -12,22 +13,23 @@
  * JavaScript with the DOM library, and every "Cannot find name" is printed. Imports
  * that cannot be resolved here (`~/...`, `./data/*.js`) still *declare* their names,
  * so they do not show; only genuinely undeclared identifiers do.
+ *
+ * The same check guards the shared mixins under `core/overlay/`: a member moved out of
+ * an overlay leaves behind the module-level `let`s the lift declared for its sloppy-mode
+ * globals (gen5's `shuckie_faults_check` did exactly that, and the harness caught it as
+ * a console `ReferenceError`). `tools/parity/drift-check.ts` calls `undeclaredNames`
+ * over every mixin it resolves.
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import ts from "typescript";
 
-const argv = process.argv.slice(2);
-const files = argv.filter((a) => !a.startsWith("--"));
-/** `--allow=hash,...`: names known to be undeclared in the legacy app too (a ReferenceError on both sides). */
-const allow = new Set((argv.find((a) => a.startsWith("--allow="))?.slice("--allow=".length) ?? "").split(",").filter(Boolean));
-if (!files.length) {
-  console.error("usage: check-undefined.ts <Overlay.vue|file.js> ...");
-  process.exit(2);
-}
+// Globals the Electron renderer has (nodeIntegration, Chromium) that lib.dom lacks.
+const RENDERER_GLOBALS = new Set(["EyeDropper", "setImmediate", "clearImmediate", "require", "process", "Buffer", "global"]);
 
-let problems = 0;
-for (const file of files) {
+/** Names `file` uses but never declares: name -> the 1-based lines of its uses, sorted by name. */
+export function undeclaredNames(file: string, allow: Set<string> = new Set()): Map<string, number[]> {
   const abs = resolve(file);
   let text = readFileSync(abs, "utf8");
   // Reported lines are 1-based in the file: for an SFC the script text starts on the
@@ -39,6 +41,12 @@ for (const file of files) {
     lineOffset = text.slice(0, m.index).split("\n").length;
     text = m[1];
   }
+  // A shared mixin under core/overlay/ is `@ts-nocheck` (its bodies are the verbatim legacy
+  // JS); the checker still has to see its undeclared names, so the directive is dropped here.
+  // Anchored loosely: an SFC's script text starts with the newline after its tag, and a
+  // directive the strip missed would make the checker report zero diagnostics for a file
+  // it never looked at.
+  text = text.replace(/^\s*\/\/ @ts-nocheck[^\n]*\n/, "\n");
   // The host hands file names to readFile/fileExists with forward slashes, whatever
   // `resolve` produced; compare in that form or the virtual file is never served.
   const virtualName = abs.replace(/\\/g, "/").replace(/\.vue$/, ".vue.js");
@@ -65,8 +73,6 @@ for (const file of files) {
     throw new Error(`${file}: the checker did not load the script (${all.length} diagnostics)`);
   }
   const diagnostics = all.filter((d) => d.code === 2304 || d.code === 2552 || d.code === 2448);
-  // Globals the Electron renderer has (nodeIntegration, Chromium) that lib.dom lacks.
-  const RENDERER_GLOBALS = new Set(["EyeDropper", "setImmediate", "clearImmediate", "require", "process", "Buffer", "global"]);
   const seen = new Map<string, number[]>();
   for (const d of diagnostics) {
     // Only the file under test: an imported data module is type-checked too (it is JS
@@ -78,10 +84,26 @@ for (const file of files) {
     if (RENDERER_GLOBALS.has(name) || allow.has(name)) continue;
     (seen.get(name) ?? seen.set(name, []).get(name)!).push(line + lineOffset);
   }
-  for (const [name, lines] of [...seen.entries()].sort()) {
-    problems++;
-    console.log(`${file}: '${name}' is never declared (${lines.length} use(s); first at line ${lines[0]})`);
-  }
-  if (!seen.size) console.log(`${file}: every name is declared`);
+  return new Map([...seen.entries()].sort());
 }
-process.exit(problems ? 1 : 0);
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const argv = process.argv.slice(2);
+  const files = argv.filter((a) => !a.startsWith("--"));
+  /** `--allow=hash,...`: names known to be undeclared in the legacy app too (a ReferenceError on both sides). */
+  const allow = new Set((argv.find((a) => a.startsWith("--allow="))?.slice("--allow=".length) ?? "").split(",").filter(Boolean));
+  if (!files.length) {
+    console.error("usage: check-undefined.ts <Overlay.vue|file.js|file.ts> ...");
+    process.exit(2);
+  }
+  let problems = 0;
+  for (const file of files) {
+    const seen = undeclaredNames(file, allow);
+    for (const [name, lines] of seen) {
+      problems++;
+      console.log(`${file}: '${name}' is never declared (${lines.length} use(s); first at line ${lines[0]})`);
+    }
+    if (!seen.size) console.log(`${file}: every name is declared`);
+  }
+  process.exit(problems ? 1 : 0);
+}

@@ -26,6 +26,12 @@ class PubSub {
         }
     }
 
+	// Whether anything is subscribed to the event. The gen1 timer loop uses it to skip
+	// formatting and publishing a time nobody is listening for.
+	hasSubscribers(event) {
+		return this.subscribers.has(event);
+	}
+
 	// Notify subscribers about an event.
 	publish(event, payload) {
         if (this.subscribers.has(event)) {

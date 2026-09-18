@@ -92,6 +92,11 @@ export class Timer {
 	/**
 	 * An array with formatted time information. First item is the general time as `hh:mm:ss`.
 	 * Second is the number of milliseconds elapsed as `.ms`
+	 *
+	 * Only current as of the last `update()`: the frame loop does not refresh it while
+	 * no `timer.vue` is subscribed (see `updateLoop`), so it is not a live value to poll.
+	 * Read the time through `SpeciesMetricStore.getTime()`, which formats from the store,
+	 * or subscribe to `@timer/update`.
 	 */
 	formatted_time: string[] = ["0", ".00"];
 	constructor(store: SpeciesMetricStore) {
@@ -102,8 +107,17 @@ export class Timer {
 		// We may be paused, so the update() is necessary, since the loop does no updates when paused.
 	}
 
+	/**
+	 * The one frame loop, alive for the life of the page (the singleton outlives the
+	 * overlay, which unmounts on `InstanceReset`). It only formats and publishes while
+	 * the timer is running *and* a `timer.vue` is subscribed; with the overlay gone
+	 * there is nobody to publish to, and `formatted_time` has no other reader (the
+	 * split log formats its own from the store). The explicit `update()` calls in
+	 * `set`/`start`/`toggle` and `initialize` are not gated, so a component that
+	 * mounts while the timer is paused still gets its value the way it always did.
+	 */
 	updateLoop = () => {
-		if (!this._store.timer.paused) {
+		if (!this._store.timer.paused && PubSub.hasSubscribers("@timer/update")) {
 			this.update();
 		}
 		window.requestAnimationFrame(this.updateLoop);

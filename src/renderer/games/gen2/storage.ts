@@ -13,7 +13,9 @@ import { createStyleSettingsStore, type StyleSettingsStore } from "~/core/persis
  * `user_`, and either exists in the defaults or starts with an uppercase letter.
  */
 
-const NON_STYLE_KEYS = [
+// A Set: `isStyleSettingsKey` runs on every `MyStorage` read and write, including the
+// timer text gen2 persists on every animation frame (docs/performance-followups.md D).
+const NON_STYLE_KEYS = new Set([
     'starter', 'selected_game', 'game_selection', 'playerName', 'playerId', 'playerResets',
     'blackout_counter', 'simple_data_str', 'full_data_str', 'deprecated_data_str',
     'simple_data', 'timer_startTimeOffset', 'timer_startTime', 'timer_pause',
@@ -29,7 +31,7 @@ const NON_STYLE_KEYS = [
     'ui_type_icons', 'ui_type_icons_modifier', 'ui_stats_styling', 'ui_stats_styling_modifier',
     'ui_stat_arrangement', 'ui_stat_arrangement_modifier',
     'playerNameChoice', 'options', 'gametimeDisplay',
-];
+]);
 
 /** gen2's `stylePropertyKeys`, verbatim and in order; its manager uses it in `exportCurrentAsDefaults` only. */
 export const GEN2_STYLE_PROPERTIES: readonly string[] = [
@@ -56,7 +58,7 @@ export const GEN2_STYLE_PROPERTIES: readonly string[] = [
 ];
 
 export function isGen2StyleKey(key: string, defaults: Record<string, unknown>): boolean {
-    if (NON_STYLE_KEYS.includes(key)) return false;
+    if (NON_STYLE_KEYS.has(key)) return false;
     if (key.startsWith('this.')) return false;
     if (key.startsWith('user_')) return false;
     if (defaults[key]) return true;

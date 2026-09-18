@@ -1213,3 +1213,157 @@ own write path.
   formula gives), gen3's scenario (the six IV bits), and gen1 on a lab variant of its scenario the script
   synthesises (nibbles and Pikachu's L5 stats); gen4/gen5's scenarios never reach their lab, so there the
   readout and the profile check are what is covered. Not yet run against a live game.
+
+
+## Cross-generation drift: the check and the shared mixins (2026-09-17)
+
+Scott's concern: a change asked for "everywhere" lands in one generation and the other three keep
+the old code, and nothing says so -- the method is still there under the same name, and the
+harness only sees the states its fixture reaches. Measured before doing anything: of the members
+the four lifted overlays (gens 2-5) share by name, 32 of 72 four-way names were byte-identical and
+the rest had drifted, and in twenty of those three generations agreed while one differed (gen5's
+`fetchEmulatorStats` stops polling a dead Super Shuckie after ten failures, gens 2-4 never; gen5's
+`load_splits` dedupes repeated trainer rows, gens 2-4 push every row; gen3 silenced three
+console lines the others print). The four commits of this week that touched all four overlays
+(`1b4f880`, `ecccee0`, `6088f94`, `ca5daf7`) were each the same edit applied by hand four times.
+
+The real fix is the decomposition into gen1's shared stores (2.4 proper, gated on decision 6's
+recordings, §7f). What is done now works on the monoliths as they are, in two tiers.
+
+**Tier 1 -- the drift check makes a missed generation a red build.** `npm run parity:drift`
+(`tools/parity/drift-check.ts`) extracts every `methods`/`computed`/`watch` member of the four
+overlays by name and compares bodies (comments and whitespace ignored; the member's own name and
+spelling stripped, so `padTime(t) {..}`, `padTime: function (t) {..}` and gen3's shorthand
+`padTime,` listing `export function padTime` from `data/methods/time_functions.js` read the
+same). A name shared by two or more generations whose bodies differ must have an entry in
+`tools/parity/drift-allowlist.json` with a one-line reason, and the entry pins a fingerprint of
+each generation's body: editing one copy of an allowlisted member fails the check until the edit
+reaches the others or the entry is re-reviewed (`--update` rewrites fingerprints and keeps
+reasons); an entry whose bodies have come to agree is stale and fails too. `--report [name]`
+prints the differences as diffs (`tools/reports/drift-report.md` is the full one). The
+allowlist was seeded with every current difference (169 entries): 14 reviewed with the reason
+written (the DV/IV split, the camelCase-vs-snake_case mapper shapes of gen2/3 vs gen4/5,
+gen3's OBS probe, gen3's dropdown labels, gen2's `'this.current_splits'` key, ...), 6 flagged
+`UNREVIEWED (omission?)` / `(console only)` for Scott to adjudicate -- the twenty-vs-one cases
+above and `convertDurationToSeconds`, where gen2 and gen5 each guard a non-string and gen3/4
+throw -- and 149 auto-described (`UNREVIEWED: gen2 | gen3 | gen4 | gen5 (...)`, mostly the
+game-specific logic: `get_stat`, `typeEffectiveness`, `load_all_settings`) that need a reason
+or a port when they are next touched. The check also reports a member defined twice in one
+overlay, which found known-legacy-bugs.md #44 (eight dead first definitions, three of them
+different from the live one; removed), and it is where #45 (gen2's typo'd split keys) and #46
+(gen2's SpDef badge rule compares the property object, so the game's 206-432/661+ rule never
+fires) came from.
+
+`GameModule.features` is `Record<Feature, boolean>` now, not `Partial`: every module answers
+every flag, and a new feature is a compile error in each `games/genN/index.ts` until that
+generation says true or false. The five tables were filled with the previous "absent = off"
+values, so nothing changed; nothing reads them yet.
+
+**Tier 2 -- what was already identical is one copy.** Eight Options-API mixins under
+`core/overlay/`, each holding members that were byte-identical in every overlay that defined
+them and moved out unchanged (the extraction asserted identity per member; the state in
+`data()` stays in each overlay, so no initialiser could drift; a generation that had no copy of
+a helper gains it unused):
+
+| mixin | overlays | members | what |
+|---|---|---|---|
+| `enemySpriteStyleMixin({ enemySpriteScaleManager })` | 2-5 | 19 | the resize handle, sprite transforms, Style Mode navigation; the manager is the generation's own table; `_styleModeBuildList` stays per gen |
+| `formattersMixin` | 2-5 | 29 | pure text/number/time/colour helpers; gen3's shorthand entries and their `data/methods/*` imports dropped |
+| `overlayCommonMixin` | 2-5 | 7 | `batt`/`map`/`s1`, the weather flag, first-expiring field effect, the overlay-colour and Shuckie Bookmarks watchers |
+| `battleMathMixin` | 2-5 | 8 | Curse type, species mapping, stage-mod colours, vitamins left, Return/Frustration power, speed comparison label |
+| `naturesMixin` | 3-5 | 6 | raised/lowered stat, nature from stats, labels |
+| `manualIvsMixin` | 3-5 | 5 | `starter_ivs`, the field setter and loader, the Hidden Power readouts (gen2 keeps its DV versions) |
+| `speciesArtMixin` | 3-5 | 5 | evolution-transition opacity/transition computeds, `resetPokemon` |
+| `dsPairMixin` | 4-5 | 37 | the battle-slot shortcuts, `damageCalculation`, status/ability/plate helpers, EV/IV readouts, RNG-trip modal, Voltorb Flip styling, the Shuckie fault check |
+
+2,909 lines left the four overlays (6,860 / 8,601 / 9,726 / 9,708 now). The mixins are
+`// @ts-nocheck`: the bodies are the verbatim legacy JS, and typing them is a rewrite to do
+when one is rewritten, not while it is moved. An overlay that defines a member one of its
+mixins also provides overrides it silently (Vue takes the component's own), so the drift check
+resolves each overlay's `mixins: [...]` and requires every such override to be listed under
+`overrides` in the allowlist with a reason, pinned the same way -- that is the mechanism for a
+generation that needs a different version, and it is visible (tried against a deliberate
+break -- a `padTime` added to gen5 -- before being trusted).
+
+**What the harness caught that the extraction did not.** The first no-change run was green
+and pixel-exact on gens 1-4 and failed oracle 9 on gen5: `ReferenceError: shuckie_resets is not
+defined`, twice. `shuckie_faults_check` assigns `shuckie_resets`/`shuckie_blackouts` without
+declaring them -- legacy sloppy-mode globals, which the lift declares as one module-level
+`let a, b, c...` per overlay (§7c) -- and the extraction's dependency scan read only the first
+name of that line. In the mixin module the assignment is a strict-mode ReferenceError.
+`tools/port/check-undefined.ts` (the lift's own checker for exactly this) run over the mixins
+found fourteen such names in four members (`damageCalculation`'s `part1-4`, `damageMin/Max`,
+`min/maxPercentage`; `getNature`'s `nature`; `getSoloNature`'s `pid`; `shuckie_faults_check`'s
+two; `vitamins_remaining`'s `vitaminsUsed`/`usableVitamins`). Every one is assigned before it is
+read, and the only other method still touching two of them (gen4/5's `damageRange`) assigns
+before reading too, so the sharing carries no state between methods: each mixin module now
+declares its names with the same `let`, as the lift did, and nothing observable changes. The
+gen4 fixture never evaluated `shuckie_faults_check`, which is the point of the drift check's
+premise (the harness sees only the states a fixture reaches): `check-undefined.ts` exports
+`undeclaredNames()` now and `parity:drift` runs it over every mixin it resolves, so this class
+fails at the check, not at the harness. Its `@ts-nocheck` line is dropped for the check.
+
+What stayed put and why: `increment`/`decrement` and the Shuckie poll (the poll's three
+copies differ only in the flagged ways; the whole cluster moves together once adjudicated);
+`load_temp_splits`, `exportStyleSettingsAsDefaults`, `closeRNGModal`, `isDevMode`,
+`playerName`/`playerNameChoice` (each reaches a per-generation module -- `splits.js`,
+`storage.ts` -- and would need a factory parameter for six lines); gen2/gen4's timer trio
+(gen3/gen5 use the Timer component instead).
+The next slices, in order: the Shuckie cluster after the six flagged entries are decided; the
+149 auto entries as they are touched (each is either a reason or a port); the four-way
+`gen2 | gen3 | gen4 | gen5` members whose difference is only the mapper path shape, which
+the `MapperProfile` canonical keys are the right tool for, not a mixin.
+
+**Verified**: `npm run typecheck`, `npm run parity:drift`, and the no-change check on all
+five fixtures -- the working tree as the previous session left it (its `.perf-final`
+captures, taken from the same tree before any of this) against the refactored build:
+gen1 (`gen1-yellow-smoke`), gen2 (the Crystal recording `c-wigglytuff-2-11311`, 22
+checkpoints), gen3, gen4 and gen5's smoke fixtures, each `unified` with `--redirect-ports
+--control`, diffed with `diff.ts` -- **all nine oracles green, pixels exact, on all five**
+(`tools/reports/<fixture>.mixins`, `.mixins-diff`; gen4 and gen5 re-run after the declaration
+fix above, the first gen5 run being the one that found it). The standing `tools/baselines`
+were not used: docs/parity-harness.md says why they mislead. Nothing here is committed; the
+working tree also carries the previous session's uncommitted performance pass, which the
+`.perf-final` captures include on both sides of the diff.
+
+**Review pass (same day).** Scott asked for the work to be checked for oversights. Probed rather than
+re-read: every mixin member against every overlay's `data()` keys, props and other sections (no
+collisions -- the only hits are the two watchers named after the key they watch); no name provided
+by two mixins; `check-undefined.ts` over all four overlays after the import trims (clean); every
+line the diff removes classified by the HEAD file's section (all inside `methods`/`computed`/
+`watch`, imports or comments); `parity:selftest`, `parity:debounce`, `parity:bookmarks` (pass).
+Found and fixed: the extraction captured a one-line `/** */` doc but not a multi-line one, so the
+`starter_ivs` doc block was left above an unrelated member in gens 3-5 and the dead
+`getCurrentStorageKey`'s above `fetchEmulatorStats` in gen3, and the "Enemy sprite resize tool"
+banner sat above nothing in all four (the text is in `enemySpriteStyleMixin`'s doc and on
+`starter_ivs` now); the removed watchers' `}, ` (trailing space) left a whitespace-only line in
+each overlay. The cleanup itself then cut a doc block from its second line, leaving the `/**`
+opener dangling -- an unterminated block comment that swallowed everything to the next `*/` --
+and the drift check caught it before any run did (gen3's method count fell from 160 to 31; the
+mixin members it then "missed" made the allowlist fail). The lesson is on the tool: a comment-only
+edit is not verified by reading it, and `parity:drift`'s per-generation counts are worth a glance
+on every run. The tokenizer is three-state now (code / string text / comment) so a comment that
+directly follows a string can no longer leak into a fingerprint; every pinned fingerprint still
+matches, which is the proof that no compared body changed across the whole pass. Verified again
+after the fixes: the no-change check on gens 2-5 against the same `.perf-final` captures (all nine oracles
+green, pixels exact, all four) and `npm run parity:manual-ivs` (all five cases pass; it is the
+only run that enters Manual mode, so it is what exercises `manualIvsMixin`'s `set_manual_iv`
+and `manualHiddenPower` directly), plus typecheck, `parity:drift` and `check-undefined` over
+the mixins and the overlays.
+
+**Peer review from the other session (same evening).** Agent 2's code review over the working tree
+raised three things here, all taken. (1) `GameHookMapperClient.disconnect()` did not cancel the
+5 s retry `_establishConnection()` arms when PokeAByte is down, nor clear `_debounceTick`: a
+retry landing after the shell tore the client down found no SignalR client to start, went
+straight to `connected = true`, `onConnected()`, a mapper GET and the frame loop -- so PokeAByte
+coming up later "reconnected" an overlay that no longer existed, and the self-test's "disconnect()
+stays disconnected" could flake if a retry landed in its window. The client keeps the handle
+(`_retryTimer`), `disconnect()` clears it and nulls the tick, the retry callback and
+`_establishConnection()` return on `_stopping`. `npm run parity:debounce` has a fifth scenario --
+PokeAByte down, `connect()` false, `disconnect()`, PokeAByte up, 6.5 s -- which failed on the old
+client exactly as described (connected, `onConnected` x1, 53 frames, mapper loaded) and passes
+now; 38 checks. (2) `parity:drift` was green with 155 UNREVIEWED entries: it now prints the
+flagged ones (`UNREVIEWED (...)`) by name on every run, and `--strict` fails on any UNREVIEWED
+entry for a CI that wants the allowlist adjudicated. (3) `check-undefined.ts`'s `@ts-nocheck`
+strip was anchored at the first character, so a directive it missed would have meant zero
+diagnostics for a file the checker never looked at; anchored with leading whitespace now.

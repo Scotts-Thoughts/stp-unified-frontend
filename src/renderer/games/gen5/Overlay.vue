@@ -1117,11 +1117,19 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
-import { clampIvs, clampStat, gen3HiddenPower, IV_MAX, IV_MODE, ivsFromHiddenPowerRow } from "~/core/logic/starterIvs";
+import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { sendVirtualKey } from "~/core/window/virtualKeys";
+import { enemySpriteStyleMixin } from "~/core/overlay/enemySpriteStyleMixin";
+import { formattersMixin } from "~/core/overlay/formattersMixin";
+import { naturesMixin } from "~/core/overlay/naturesMixin";
+import { manualIvsMixin } from "~/core/overlay/manualIvsMixin";
+import { speciesArtMixin } from "~/core/overlay/speciesArtMixin";
+import { overlayCommonMixin } from "~/core/overlay/overlayCommonMixin";
+import { battleMathMixin } from "~/core/overlay/battleMathMixin";
+import { dsPairMixin } from "~/core/overlay/dsPairMixin";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen5Hotkeys } from "./hotkeys";
@@ -1161,6 +1169,7 @@ import { unobtainable_moves_object } from "./data/moves/unobtainable_moves.js";
 let attack, basePower, battle_end, d, damageMax, damageMin, debugging_mode, defense, fling_power, gen3abilities, h, level, m, maxPercentage, minPercentage, nature, newColor, part1, part2, part3, part4, pid, power, shuckie_blackouts, shuckie_resets, specialA, specialD, stab, starterType, timecode, type, type1, type2, typeString, usableVitamins, vitaminsUsed;
 
 export default defineComponent({
+    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin],
     components: {
         "Timer": TimerComponent,
         "ShuckieTimer": ShuckieTimerComponent,
@@ -1793,10 +1802,6 @@ export default defineComponent({
         }
     },
     watch: {
-        shuckie_bookmarks(enabled) {
-            // Global, not this generation's MyStorage: the bookmarks are core's (core/logic/shuckieBookmarks.ts).
-            setShuckieBookmarksEnabled(enabled);
-        },
         selected_game: {
             immediate: true,
             handler(newValue) {
@@ -2243,9 +2248,6 @@ export default defineComponent({
             MyStorage["blackout_counter"] = 0
             this.blackout_counter = 0;
         },    
-        overlay_color(newColor) {
-            document.documentElement.style.setProperty('--overlay-color', newColor);
-        }, 
         async playerResets(newProp) {
             if ((newProp + this.blackout_counter).toString().length == 1) {
                 document.getElementById("reset_counter").style.fontSize = "68px"
@@ -2305,14 +2307,6 @@ export default defineComponent({
         },
     },
     computed: {
-        /** The Hidden Power the Manual fields yield, for the readout under them (2026-09-17). */
-        manualHiddenPower() {
-            return gen3HiddenPower(clampIvs(this.manual_ivs))
-        },
-        /** The Hidden Power type the starter's spread yields, for the movepool row: the dropdown's in Automatic, the fields' in Manual. */
-        starterHiddenPowerType() {
-            return this.iv_mode == IV_MODE.manual ? this.manualHiddenPower.type : this.hidden_power_type
-        },
         /**
          * The game-name folder that splits are written into.
          * Mirrors the logic in logData/logCopy so the "Open Splits Folder"
@@ -2330,43 +2324,6 @@ export default defineComponent({
             // Get the evolution family for the current starter
             const evolutionFamily = this.getEvolutionFamily(this.starter);
             return evolutionFamily && evolutionFamily.length > 1;
-        },
-        shuckie_faults_check() {
-            shuckie_resets    = this.emulatorStats?.counters?.playerResets
-            shuckie_blackouts = this.emulatorStats?.counters?.blackout_counter
-            if (shuckie_resets == undefined && shuckie_blackouts == undefined) {
-                return true
-            }
-            else if (shuckie_resets == 0 && shuckie_blackouts == 0) {
-                return true
-            }
-            else if (shuckie_resets == undefined && shuckie_blackouts == 0) {
-                return true
-            }
-            else if (shuckie_resets == 0 && shuckie_blackouts == undefined) {
-                return true
-            }
-            else if (shuckie_resets > 0 || shuckie_blackouts > 0) {
-                return false
-            }
-            else {
-                return false
-            }
-        },
-        not_valid_battle_state() {
-            const mod1 = this.game.properties.battle.player.active_pokemon.modifiers.attack.value
-            const mod2 = this.game.properties.battle.player.active_pokemon.modifiers.defense.value
-            const mod3 = this.game.properties.battle.player.active_pokemon.modifiers.special_attack.value
-            const mod4 = this.game.properties.battle.player.active_pokemon.modifiers.special_defense.value
-            const mod5 = this.game.properties.battle.player.active_pokemon.modifiers.speed.value
-            const mod6 = this.game.properties.battle.player.active_pokemon.modifiers.accuracy.value
-            const mod7 = this.game.properties.battle.player.active_pokemon.modifiers.evasion.value
-            if (mod1 == "-6" && mod2 == "-6" && mod3 == "-6" && mod4 == "-6" && mod5 == "-6" && mod6 == "-6" && mod7 == "-6") {
-                return true
-            }
-            else {
-                return false
-            }
         },
         pokemon_dynamic_ability() {
             const state = this.game.properties.meta.state.value
@@ -2885,17 +2842,6 @@ export default defineComponent({
             var data = this.trainers_hgss[trainer_id] ?? { name: "Unknown"}
             return data
         },
-        rival_starter() {
-            const game = this.game.properties.meta.game_name.value
-            if (game == 'Platinum' || game == 'Diamond' || game == 'Pearl' || game == 'Diamond and Pearl') {
-                let starter = this.starter_choice == 'Turtwig' ? 'Chimchar' : this.starter_choice == 'Chimchar' ? 'Piplup' : 'Turtwig'
-                return starter
-            }
-            else if (game == 'HeartGold' || game == 'SoulSilver' || game == 'HeartGold and SoulSilver') {
-                let starter = this.starter_choice == 'Chikorita' ? 'Cyndaquil' : this.starter_choice == 'Cyndaquil' ? 'Totodile' : 'Chikorita'
-                return starter
-            }
-        },
         stats_header() {
             const toggle    = true
             const stat_type = this.stats_setting
@@ -2996,20 +2942,6 @@ export default defineComponent({
                 return this.hgss_trainers.filter(pokemon => pokemon.toLowerCase().includes(this.search_trainers.toLowerCase()));
             }
         },
-        exp_label_percentage() {
-            switch (this.state) {
-                case "No Pokemon":
-                    return "0%";
-                case "Battle":
-                    return "0%";
-                case "From Battle":
-                    return "0%";
-                case "To Battle":
-                    return "0%";
-                case "Overworld":
-                    return "0%";
-            }
-        },
         gametimeSplit() {
             h = this.game.properties.game_time.hours.value
             m = this.game.properties.game_time.minutes.value
@@ -3094,17 +3026,6 @@ export default defineComponent({
             }
             return true
         },
-        wild_pokemon() {
-            if (this.wild_pokemon_display == false) { return false}
-            const state = this.game?.properties.meta.state.value
-            const id = this.game?.properties.battle.opponent.id.value
-            if (id == 0 && (state == `Battle` && state == `From Battle`)) {
-                return true
-            }
-            else {
-                return false
-            }
-        },
         battlePokemonCrop() {
             let totalPokemon = 0
             const heights = {
@@ -3134,36 +3055,6 @@ export default defineComponent({
                 this.right_ui = "Automatic"
             }
             return `height: ${heights[totalPokemon]}; filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`;
-        },
-        play() {
-            if (this.game.properties.battle.player) {
-                return this.game.properties.battle.player
-            }
-        },
-        wild() {
-            if (this.game.properties.battle.wild) {
-                return this.game.properties.battle.wild
-            }
-        },
-        oppA() {
-            if (this.game.properties.battle.opponent) {
-                return this.game.properties.battle.opponent
-            }
-        },
-        oppB() {
-            if (this.game.properties.battle.opponentB) {
-                return this.game.properties.battle.opponent_2
-            }
-        },
-        ally() {
-            if (this.game.properties.battle.ally) {
-                return this.game.properties.battle.ally
-            }
-        },
-        trainerData() {
-            if (this.game.properties.meta.game_name.value == "Platinum") { return this.platinum_trainers }
-            else if (this.game.meta.game_name == "HeartGold and SoulSilver") { return }
-            else { return }
         },
         solo_mon() {
             const state = this.game.properties.meta.state.value
@@ -3217,28 +3108,8 @@ export default defineComponent({
                 return team_moves
             }
         },
-        stats_location() {
-            if (this.game.properties.meta.state.value == "Battle") {
-                return "Battle Stats"
-            }
-            if (this.game.properties.meta.state.value == "Overworld") {
-                return "Party Stats"
-            }
-            if (this.game.properties.meta.state.value == "No Pokemon") {
-                return "No Pokemon"
-            }
-        },
         enemyTrainer() {
             return this.remakeTrainers[this.game.properties.battle.trainer.id.value]
-        },
-        s1() {
-            return this.game?.properties?.player?.team[0]
-        },
-        map() {
-            return this.game?.properties
-        },
-        batt() {
-            return this.game?.properties?.battle
         },
         battEn() {
             return this.game?.properties?.battle?.opponent?.active_pokemon
@@ -3320,14 +3191,6 @@ export default defineComponent({
             }
             return maxArr
         },
-        weather_boolean() {
-            if (this.batt.field?.weather?.value == "Sun" || this.batt.field?.weather?.value == "Rain" || this.batt.field?.weather?.value == "Sandstorm") {
-                return true
-            }
-            else {
-                return false
-            }
-        },
         pkmnGrowthRate() {
             if (this.g5PokemonData[this.starter].growth_rate == `GROWTH_MEDIUM_SLOW`) { return "Medium Slow" }
             if (this.g5PokemonData[this.starter].growth_rate == `GROWTH_MEDIUM_FAST`) { return "Medium Fast" }
@@ -3355,39 +3218,12 @@ export default defineComponent({
             }
             return effect_array
         },
-        field_effect_first_expiring() {
-            var field_effect_most_recent_array = ["Reflect", false, 6,]
-            for(var i = 0; i < this.field_effect_array.length; i++) {
-                if (this.field_effect_array[i][2] < field_effect_most_recent_array[2] && this.field_effect_array[i][2] != 0) {
-                    field_effect_most_recent_array = this.field_effect_array[i]
-                }
-            }
-            if (this.field_effect_array[0][2] == 0 && this.field_effect_array[1][2] == 0 && this.field_effect_array[2][2] == 0 && this.field_effect_array[3][2] == 0) {
-                field_effect_most_recent_array = [this.last_initiated_field_effect, false, 0]
-            }
-            return field_effect_most_recent_array
-        },
         starting_type_fix() {
             if (this.g5PokemonData[this.starter]?.type_1?.toLowerCase() != this.g5PokemonData[this.starter]?.type_2?.toLowerCase()) {
                 return this.g5PokemonData[this.starter]?.type_1?.toLowerCase()
             }
             else {
                 return this.g5PokemonData[this.starter]?.type_2?.toLowerCase()
-            }
-        },
-        effortValues() {
-            let evHp  = this.game.properties.player.team[0].evs.hp.value
-            let evAtk = this.game.properties.player.team[0].evs.attack.value
-            let evDef = this.game.properties.player.team[0].evs.defense.value
-            let evSpe = this.game.properties.player.team[0].evs.speed.value
-            let evSpA = this.game.properties.player.team[0].evs.special_attack.value
-            let evSpD = this.game.properties.player.team[0].evs.special_defense.value
-            let sum = evHp + evAtk + evDef + evSpe + evSpA + evSpD
-            return {
-                totalEvs: sum,
-                maximumEvs: 510,
-                remaining: 510 - sum,
-                percentage: this.decimalToPercentage(sum/510)
             }
         },
         dropdownDownMenuKeys() {
@@ -3400,49 +3236,6 @@ export default defineComponent({
                 return this.textures['Bug']?.path || '';
             }
             return this.textures[this.backgroundTexture].path;
-        },
-        // These two are no longer bound in the template: the art is keyed by
-        // displayedPokemonSpecies inside a <transition name="styleFade">, which cross-fades old
-        // and new together. They faded the old art out to 0 and let the new one pop back in, and
-        // an inline opacity would override the styleFade classes anyway. Left in place so this
-        // pair still matches gen3/gen4, where it is likewise unused. movepoolOpacity /
-        // movepoolTransition below are unaffected and still drive the movepool fade.
-        pokemonArtOpacity() {
-            // Return opacity for Pokemon art during evolution transition
-            if (this.evolution_transitioning) {
-                // Fade out old, fade in new
-                return 1 - this.evolution_transition_progress;
-            }
-            return 1;
-        },
-        pokemonArtTransition() {
-            // Return transition style for Pokemon art
-            if (this.evolution_transitioning) {
-                return 'opacity 1s ease-in-out';
-            }
-            return '';
-        },
-        movepoolOpacity() {
-            // Return opacity for movepool during evolution transition only
-            // Battle transitions are handled by Vue's transition component
-            if (this.evolution_transitioning) {
-                return 1 - this.evolution_transition_progress;
-            }
-            
-            // For non-evolution transitions, don't set opacity (let Vue transition handle it)
-            // Return 1 so it's visible when rendered, Vue transition will handle fade in/out
-            return 1;
-        },
-        movepoolTransition() {
-            // Return transition style for movepool
-            // During evolution transitions, use longer transition
-            if (this.evolution_transitioning) {
-                return 'opacity 1s ease-in-out';
-            }
-            
-            // For battle state changes, return empty string to use default in template
-            // The template will fall back to 'opacity 0.5s ease-in-out' if this is empty
-            return '';
         },
         statsDisplaySpecies() {
             // Return the species to display stats for
@@ -3540,16 +3333,6 @@ export default defineComponent({
     },
 
     methods: {
-        vitamins_remaining(evs, label) { //statExp = mapper.properties.player.team[0].statExpAttack.value
-            vitaminsUsed = (evs / 10)
-            usableVitamins = Math.ceil(10 - vitaminsUsed)
-            if (usableVitamins < 0) {
-                return 0
-            }
-            else {
-                return usableVitamins
-            }
-        },
                 /**
          * Send an OBS WebSocket 5 "CreateRecordChapter" request (Add Chapter Marker).
          * Connects to ws://localhost:4455 (or MyStorage.obs_websocket_url), identifies,
@@ -3899,9 +3682,6 @@ export default defineComponent({
                 this.game.properties.overworld.encounters_enabled.set(this.encounters_flocessy_ranch, false)
             }
         },
-        decimalToPercentage(decimal) {
-            return Math.round(decimal * 100);
-        },
         calculate_ev_benefit(stat_name) {
             const state = this.game.properties.meta.state.value
             if (state == 'No Pokemon') {
@@ -4012,21 +3792,6 @@ export default defineComponent({
             }
             return 0;
         },
-        convertSecondsToDuration(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const remainingSeconds = seconds % 60;
-        
-            if (hours > 0) {
-                return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-            } else if (minutes > 0) {
-                return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
-            } else {
-                var seconds = remainingSeconds
-                if (remainingSeconds < 10) { seconds = "0" + remainingSeconds.toString() }
-                return `0:${String(seconds)}`
-            }
-        },
         async load_splits() {
             const text = await loadCsvFile();
             const rows = text.split("\n").slice(1).filter(x => x !== '');
@@ -4061,12 +3826,6 @@ export default defineComponent({
         },
         clear_splits() {
             this.previous_splits = [];
-        },
-        split_diff_color(difference_string) {
-            if (difference_string === "-")          { return "color: black" }
-            if (difference_string === "+0:00")      { return "color: black" }
-            if (difference_string.charAt(0) == "+") { return "color: red" }
-            if (difference_string.charAt(0) == "-") { return "color: green" }
         },
         enemy_held_item(x) {
             const team   = this.game?.properties?.battle?.opponent?.team
@@ -4451,9 +4210,6 @@ export default defineComponent({
             }
             return [...encryptedData];
         },
-        padTime(time) {
-            return time.toString().padStart(2, "0")
-        },
         openFolder(folderName, game_name, path = "", path2 = "") {
             // Was require("fs") + `start ""` from the renderer; the main process creates
             // the folder under <appRoot>/splits and opens it (plan 1.6/1.7). The only
@@ -4477,37 +4233,9 @@ export default defineComponent({
         closePopup() {
             this.showPopup = false;
         },
-        openRNGModal() {
-            for (const npc of this.rng_npcs) {
-                if (!Array.isArray(this.rng_config[npc.key]) || this.rng_config[npc.key].length === 0) {
-                    this.rng_config[npc.key] = [npc.defaultItem];
-                }
-            }
-            this.showRNGModal = true;
-        },
         closeRNGModal() {
             this.showRNGModal = false;
             MyStorage['rng_config'] = this.rng_config;
-        },
-        addRNGTrip(npcKey) {
-            const npc = this.rng_npcs.find(n => n.key === npcKey);
-            if (!npc) return;
-            this.rng_config[npcKey].push(npc.defaultItem);
-        },
-        removeRNGTrip(npcKey, idx) {
-            if (idx <= 0) return;
-            this.rng_config[npcKey].splice(idx, 1);
-        },
-        rngPatchValueForTrip(npcKey, tripIdx) {
-            const npc = this.rng_npcs.find(n => n.key === npcKey);
-            if (!npc) return 0;
-            const itemName = this.rng_config[npcKey]?.[tripIdx];
-            if (itemName == null) return 0;
-            const lookup = this[npcKey];
-            return lookup?.[itemName] ?? 0;
-        },
-        rngOptionsFor(npcKey) {
-            return this[npcKey] ?? {};
         },
         async write_rng_initial_trips() {
             // Reset every NPC's trip index and write trip 1's patch value to PokeAByte.
@@ -4757,22 +4485,6 @@ export default defineComponent({
             }
             return 'red-svg';
         },
-        async disallow_faults_function() {
-            this.disallow_faults = true
-            await this.sleep(this.disallow_delay)
-            this.disallow_faults = false
-        },
-        enemy_status(status) {
-            switch (status) {
-                case "Paralyzed"     : return "PRZ"
-                case "Burned"        : return "BRN"
-                case "Frozen"        : return "FRZ"
-                case "Asleep"        : return "SLP"
-                case "Poisoned"      : return "PSN"
-                case "Badly Poisoned": return "PSN"
-                default: return ""
-            }
-        },
         // async update_rom_starter_and_intro_mon() {
         //     let starter = this.starter
         //     let game = this.selected_game
@@ -4847,35 +4559,6 @@ export default defineComponent({
                 return false
             }
         },
-        voltorb_flip_style(voltorb_flip_card_value) {
-            if (voltorb_flip_card_value == 2 || voltorb_flip_card_value == 3) {
-                return "opacity: .9; filter: saturate(150%);"
-            }
-            if (voltorb_flip_card_value == 1) {
-                return "opacity: .9; filter: grayscale(100%);"
-            }
-            if (voltorb_flip_card_value == 'Voltorb') {
-                return "opacity: .20; filter: grayscale(100%);"
-            }
-        },
-        stripBeforeUnderscore(inputString) {
-            const underscoreIndex = inputString.indexOf('_');
-            if (underscoreIndex === -1) {
-                return inputString; // Return the original string if no underscore is found
-            }
-            return inputString.substring(underscoreIndex + 1);
-        },
-        extractTrainerInfo(trainers) {
-            const result = [];
-            for (const key in trainers) {
-                if (trainers.hasOwnProperty(key)) {
-                    const trainer = trainers[key];
-                    const infoString = `${trainer.name}_${trainer.rom_id}`;
-                    result.push(infoString);
-                }
-            }
-            return result;
-        },
         average_median_stats(stat_label) {
             let sum = 0;
             let count = 0;
@@ -4915,80 +4598,6 @@ export default defineComponent({
                 average: Math.round(average),
                 median : Math.round(median),
             };
-        },
-        natureLabels(nature) {
-            let output = nature + ": ";
-            // let pad = 7 - nature.length;
-            // output+="-".repeat(pad) + ": "
-            switch(this.natures[nature].raises) {
-                case "Attack":
-                    output+= "+Attack";
-                    break;
-                case "Defense":
-                    output+= "+Defense";
-                    break;
-                case "Special Attack":
-                    output+= "+Sp. Atk";
-                    break;
-                case "Special Defense":
-                    output+= "+Sp. Def";
-                    break;
-                case "Speed":
-                    output+= "+Speed";
-                    break;
-                default:
-                    output+= "Neutral";
-                    break;
-            }
-            switch(this.natures[nature].lowers) {
-                case "Attack":
-                    output+= " | -Attack";
-                    break;
-                case "Defense":
-                    output+= " | -Defense";
-                    break;
-                case "Special Attack":
-                    output+= " | -Sp. Atk";
-                    break;
-                case "Special Defense":
-                    output+= " | -Sp. Def";
-                    break;
-                case "Speed":
-                    output+= " | -Speed";
-                    break;
-                default:
-                    break;
-            }
-            return output;
-        },
-        // --- Button-grid nature selector (two-way synced with the pkmnNature dropdown) ---
-        // Stat currently raised by the selected nature (diagonal stat for neutral natures).
-        natureRaisedStat() {
-            const data = this.natures[this.pkmnNature];
-            if (!data) return null;
-            return data.raises === "Neutral" ? this.neutralStatByNature[this.pkmnNature] : data.raises;
-        },
-        // Stat currently lowered by the selected nature (diagonal stat for neutral natures).
-        natureLoweredStat() {
-            const data = this.natures[this.pkmnNature];
-            if (!data) return null;
-            return data.lowers === "Neutral" ? this.neutralStatByNature[this.pkmnNature] : data.lowers;
-        },
-        // Find the nature name matching a raised/lowered stat pair (same stat => neutral).
-        natureFromStats(raise, lower) {
-            if (raise === lower) return this.neutralNatureByStat[raise];
-            for (const [name, data] of Object.entries(this.natures)) {
-                if (data.raises === raise && data.lowers === lower) return name;
-            }
-            return this.pkmnNature;
-        },
-        // Clicking a "raises" button keeps the current lowered stat and updates the dropdown.
-        selectNatureRaise(stat) {
-            this.pkmnNature = this.natureFromStats(stat, this.natureLoweredStat());
-        },
-        // Clicking a "lowers" button keeps the current raised stat and updates the dropdown.
-        selectNatureLower(stat) {
-            this.pkmnNature = this.natureFromStats(this.natureRaisedStat(), stat);
         },
         get_iv(stat_name) {
             const state = this.game.properties.meta.state.value
@@ -5336,26 +4945,6 @@ export default defineComponent({
                 "Special Defense": mod_spd,
             }
             return object
-        },
-        get_effort_values() {
-            const ev_hp  = this.game.properties.player.team[0].evs.hp.value
-            const ev_atk = this.game.properties.player.team[0].evs.attack.value
-            const ev_def = this.game.properties.player.team[0].evs.defense.value
-            const ev_spa = this.game.properties.player.team[0].evs.special_attack.value
-            const ev_spd = this.game.properties.player.team[0].evs.special_defense.value
-            const ev_spe = this.game.properties.player.team[0].evs.speed.value
-            const total = ev_hp + ev_atk + ev_def + ev_spa + ev_spd + ev_spe
-            return total + "/510"
-        },
-        get_iv_total() {
-            const iv_hp  = this.game.properties.player.team[0].ivs.hp.value
-            const iv_atk = this.game.properties.player.team[0].ivs.attack.value
-            const iv_def = this.game.properties.player.team[0].ivs.defense.value
-            const iv_spa = this.game.properties.player.team[0].ivs.special_attack.value
-            const iv_spd = this.game.properties.player.team[0].ivs.special_defense.value
-            const iv_spe = this.game.properties.player.team[0].ivs.speed.value
-            const total = iv_hp + iv_atk + iv_def + iv_spa + iv_spd + iv_spe
-            return total + "/186"
         },
         get_base_stat_total() {
             const starter = this.starter
@@ -5738,14 +5327,6 @@ export default defineComponent({
             this.backgroundContrast =    100,
             this.backgroundSaturation =  100
         },
-        resetPokemon() {
-            this.imageXOffset =  0
-            this.imageYOffset =  0
-            this.imageScale =    1
-            this.imageFlip =     false
-            this.imageSat =      100
-            this.imageRotation = 0
-        },
         increment(property) {
             this[property]++;
             if (this.shuckie_counters == true) { 
@@ -5764,9 +5345,6 @@ export default defineComponent({
                 }
                 this.incrementEmulatorCounterByAmount(property, -1) 
             }
-        },
-        async colorPick() {
-            return new EyeDropper().open().then(res => res.sRGBHex)
         },
         async color_picker() {
             var color = await this.colorPick()
@@ -5971,12 +5549,6 @@ export default defineComponent({
                 animate();
             });
         },
-        keys_function(object) {
-            return Object.keys(object)
-        },
-        values_function(object) {
-            return Object.values(object)
-        },
         species_function(object) {
             return Object.values(object).map(entry => entry.species);
         },
@@ -5998,18 +5570,6 @@ export default defineComponent({
             let fainted = false
             const enemy_hp = opponent == 2 ? this.game.properties.battle.opponent_2.team[slotIndex].stats.hp.value : this.game.properties.battle.opponent.team[slotIndex].stats.hp.value
             if (enemy_hp == 0) {
-                fainted = true
-            }
-            if (fainted == true) {
-                return "opacity: .35; filter: grayscale(100%);"
-            }
-            else {
-                return
-            }
-        },
-        enemy2Faint(slotIndex) {
-            let fainted = false
-            if (this.game.properties.battle.opponent_2.team[slotIndex].stats.hp.value == 0) {
                 fainted = true
             }
             if (fainted == true) {
@@ -6071,21 +5631,6 @@ export default defineComponent({
             // into a cloaked Wormadam arrives here that way) - re-stamping would also refill HP
             if (party_mon.flags?.alternate_form?.value === info.form) return
             this.write_byte_data(this.set_starter_stats_object)
-        },
-        //fixes species that contain special characters in their names
-        speciesSpecialCharacters(species) {
-            switch (species) {
-                case "Mr. Mime":   return "Mr. Mime"
-                case "MrMime":     return "Mr. Mime"
-                case "Mr Mime":    return "Mr. Mime"
-                case "Farfetchd":  return "Farfetch'd"
-                case "Mime Jr.":   return "Mime Jr."
-                case "Mime Jr":    return "Mime Jr."
-                case "MimeJr":     return "Mime Jr."
-                case "HoOh":       return "Ho-oh"
-                case "Ho Oh":      return "Ho-oh"
-                default:           return species
-            }
         },
         getSplitImageName(trainer) {
             if (!trainer) return ""
@@ -6385,15 +5930,6 @@ export default defineComponent({
                 }
             }
         },
-        getSoloNature() {
-            pid = this.game.properties.player.team[0].internals.personality_value
-            if (this.game.properties.meta.state.value == `No Pokemon`) {
-                return ""
-            }
-            else {
-                return this.getNature(pid)
-            }
-        },
         get_friendship() {
             if (this.game.properties.meta.state.value == "From Battle") {
                 return this.fix_friendship + "/255"
@@ -6402,59 +5938,6 @@ export default defineComponent({
             var return_value = pokemon_data.friendship.value
             this.fix_friendship = return_value
             return return_value + "/255"
-        },
-        statusConditionConverter(statusCondition) {
-            if (statusCondition) {
-                if (this.game.properties.meta.generation == 1) {
-                    return
-                }
-                if (this.game.properties.meta.generation == 2) {
-                    return
-                }
-                if (this.game.properties.meta.generation == 3) {
-                    return
-                }
-                if (this.game.properties.meta.generation == 4) {
-                    switch (statusCondition) {
-                        case "Asleep":         return "SLP"
-                        case "Poisoned":       return "PSN"
-                        case "Burned":         return "BRN"
-                        case "Frozen":         return "FRZ"
-                        case "Paralyzed":      return "PAR"
-                        case "Badly Poisoned": return "PSN"
-                        default:               return ""
-                    }
-                }
-                if (this.game.properties.meta.generation.value == 5) {
-                    return
-                }
-            }
-            else return ""
-        },
-        getTrainer(trainer) {
-            return this.trainerData.find(x => x.trainer_name === trainer)
-        },
-        getNature(pid) { //Pass ins the PID (Personality ID also known as the Personality Value)
-            let index = pid.value % 25
-            nature = Object.values(this.natures).find(x => x.index === index)
-            return nature
-        },
-        countSetBits(byte) { //Used to determine the number of badges the player has
-            let count = 0;
-            while (byte) {
-                count += byte & 1;
-                byte >>= 1;
-            }
-            return count;
-        },
-        decimalToPercentage(decimal) {
-            return Math.round(decimal * 100);
-        },
-        decimalToHex(decimal) {
-            if (typeof decimal !== 'number' || decimal !== parseInt(decimal)) {
-                throw new Error('Input must be a valid integer.');
-            }
-            return decimal.toString(16).toUpperCase();
         },
         getMoveCategory(category, move) {
             var move = move
@@ -6679,29 +6162,6 @@ export default defineComponent({
                 return this.black_moves[move][property]
             }
         },
-        arceus_plate_check() {
-            const held_item = this.game.properties.player.team[0].held_item.value 
-            switch (held_item) {
-                case "Dread Plate":  return "Dark"
-                case "Draco Plate":  return "Dragon"
-                case "Earth Plate":  return "Ground"
-                case "Fist Plate":   return "Fighting"
-                case "Flame Plate":  return "Fire"
-                case "Icicle Plate": return "Ice"
-                case "Insect Plate": return "Bug"
-                case "Iron Plate":   return "Steel"
-                case "Meadow Plate": return "Grass"
-                case "Mind Plate":   return "Psychic"
-                case "Pixie Plate":  return "Fairy"
-                case "Sky Plate":    return "Flying"
-                case "Splash Plate": return "Water"
-                case "Spooky Plate": return "Ghost"
-                case "Stone Plate":  return "Rock"
-                case "Toxic Plate":  return "Poison"
-                case "Zap Plate":    return "Electric"
-                default:             return "Normal"
-            }
-        },
         getSoloMonType(pkmn, type) { //type == type_1 or type_2
             // const species = pkmn
             // A battle-only form being displayed for styling shows its own typing outside battle
@@ -6777,55 +6237,7 @@ export default defineComponent({
             var split = splitData[splitNumber]["realtime.end"]
             return this.formatDuration(split)
         },
-        formatDuration(x) {
-            if (x.startsWith("00:")) {
-                x = x.substring(3)
-            }
-            if (x.startsWith(0)) {
-                x = x.substring(1)
-            }
-            x = x.substring(0, x.length-4)
-            return x
-        },
-        formatMilliseconds(ms) {
-            // Truncate milliseconds to seconds
-            const totalSeconds = Math.floor(ms / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            
-            // Helper function to pad with leading zero
-            const pad = (x) => x.toString().padStart(2, "0");
-            
-            // Progressive format: starts at "0" and grows as needed
-            if (hours > 0) {
-                return `${hours}:${pad(minutes)}:${pad(seconds)}`;
-            } else if (minutes > 0) {
-                return `${minutes}:${pad(seconds)}`;
-            } else {
-                return seconds.toString();
-            }
-        },
-        getCentiseconds(ms) {
-            // Convert milliseconds to centiseconds and extract only the centiseconds part
-            const centiseconds = Math.floor(ms / 10) % 100;
-            return centiseconds.toString().padStart(2, "0");
-        },
-        split(splitName, splits) {
-            // console.log(splits)
-            var split = splits.find(x => x.trainer_name === splitName)
-            if (split == undefined) return
-            return split["realtime.end.hours"] + ":" + split["realtime.end.minutes"] + ":" + split["realtime.end.seconds"]
-        },
 
-        curseType(x) {
-            if (x == `Curse`) {
-                return "???"
-            }
-            else {
-                return x
-            }
-        },
         //AUTOMATION MOVEPOOL GRAPHIC
         dataSearch(dataObject, pointerValue) {
             if (!pointerValue) return ""
@@ -7050,99 +6462,6 @@ export default defineComponent({
             else return Math.floor(accuracy)
         },
         
-        //DAMAGE CALCULATION
-        damageCalculation(userPkmnData, targetPkmnData, move) {
-            if (this.game.properties.meta.state.value != `Battle`) { return "" }
-            //Setup data for calculation
-            var lvl = userPkmnData.level.value
-            var userAttack = userPkmnData.attack.value
-            var userSpecial = userPkmnData.special.value
-            var userType1 = userPkmnData.type_1.value
-            var userType2 = userPkmnData.type_2.value
-            
-            var targetDefense = targetPkmnData.defense.value
-            var targetSpecial = targetPkmnData.special.value
-            var targetMaxHp = targetPkmnData.hp_max.value
-            var targetType1 = targetPkmnData.type_1.value
-            var targetType2 = targetPkmnData.type_2.value
-
-            var defenderScreen = undefined
-
-            var moveData = this.gen1moves.find(x => x.Move.toUpperCase() === move)
-            var moveType = moveData.Type
-            var movePower = moveData.Power
-            var moveCategory = moveData.Category
-            
-            var stab = 1
-            var AttackingTypeEffectiveness = this.typeData.find(x => x.moveType === moveType)
-            var critical = 1
-            var screens = 1
-
-            var userOffensiveStat = undefined
-            var targetDefensiveStat = undefined
-
-            var AttackingTypeEffectiveness = this.typeData.find(x => x.moveType === moveType)
-            var type1 = AttackingTypeEffectiveness[targetType1]
-            var type2 = AttackingTypeEffectiveness[targetType2]
-
-            //Check values & update modifiers
-            if (moveType == userType1 || moveType == userType2) {
-                stab = 1.5
-            }
-            if (moveCategory == "Physical") {
-                userOffensiveStat = userAttack
-                targetDefensiveStat = targetDefense
-                defenderScreen = targetPkmnData.effects.reflect.value
-            }
-            if (moveCategory == "Special") {
-                userOffensiveStat = userSpecial
-                targetDefensiveStat = targetSpecial
-                defenderScreen = targetPkmnData.effects.lightscreen.value
-            }
-            if (moveCategory == "Status") {
-                return ""
-            }
-            if (defenderScreen == true) {
-                screens = .5
-            }
-            //Run damage calculation
-            part1 = Math.floor(Math.floor((2 * lvl * critical)/5 + 2) * movePower * userOffensiveStat)
-            part2 = Math.floor(part1/targetDefensiveStat)
-            part3 = Math.floor(part2/50) + 2
-            part4 = undefined
-            if (targetType1 == targetType2) {
-                part4 = Math.floor(Math.floor(Math.floor(part3 * stab) * type1) * screens)
-            }
-            else {
-                part4 = Math.floor(Math.floor(Math.floor(Math.floor(part3 * stab) * type1) * type2) * screens)
-            }
-            //Results to return
-            damageMin = Math.floor(part4 * (217/255))
-            damageMax = part4
-            minPercentage = Math.round((damageMin/targetMaxHp) * 100)
-            maxPercentage = Math.round((damageMax/targetMaxHp) * 100)
-            var recoilMin = 0
-            var recoilMax = 0
-            if (move == "TAKE DOWN" || move == "SUBMISSION" || move == "DOUBLE-EDGE") {
-                recoilMin = Math.floor(damageMin * 0.25)
-                recoilMax = Math.floor(damageMax * 0.25)
-            }
-
-            return [damageMin, damageMax, minPercentage, maxPercentage, recoilMin, recoilMax,]
-        },
-        speedComparison(playerPkmnData, enemyPkmnData) {
-            var playerSpeed = playerPkmnData.speed.value
-            var enemySpeed = enemyPkmnData.speed.value
-            if (playerSpeed > enemySpeed) {
-                return "Outspeeds"
-            }
-            if (playerSpeed == enemySpeed) {
-                return "Speed-Tied"
-            }
-            if (playerSpeed < enemySpeed) {
-                return "Underspeeds"
-            }
-        },
         
         // STAGE MULTIPLIERS
         enemyStatModification(activePkmn, currentSlot, statLabel, stat, modifier, pkmnData) {
@@ -7200,11 +6519,6 @@ export default defineComponent({
                 return speed
             }
         },
-        martSelector() {
-            if (this.game.properties.overworld.map_name.value == "CELADON_CITY - DEPARTMENT_STORE_5F") { return "EVs"}
-            else {
-                return null }
-        },
         ability(ability, statname, statValue) {
             if (ability == `Hustle` && statname == `attack`) {
                 return Math.floor(statValue * 1.5)
@@ -7229,13 +6543,6 @@ export default defineComponent({
             }
         },
 
-        //REMOVES CAPITALIZATION (TACKLE -> Tackle) OR (Tail Whip -> Tail whip)
-        capitalization_format(str) {
-            if (str == null) { return "" }
-            return str.toLowerCase().replace(/(^|\s|\-|\.)(\w)/g, function(match, p1, p2) {
-              return p1 + p2.toUpperCase();
-            });
-        },
         getPokemonImageUrl: function (x) {
             if (x != null)
                 return `images/gen5/overlay/${x.pokedexNumber}.png`
@@ -7254,31 +6561,7 @@ export default defineComponent({
             else
                 return `images/gen5/elements/textures/normal.png`
         },
-        pascalCaseSpace(str) {
-            let words = str.split(' ');
-            for (let char of words) {
-                words[words.indexOf(char)] = char.charAt(0).toUpperCase() + char.slice(1);
-            }
-            return words.join(' ');
-        },
-        pascalCaseDot(str) {
-            let words = str.split('.');
-            for (let char of words) {
-                words[words.indexOf(char)] = char.charAt(0).toUpperCase() + char.slice(1);
-            }
-            return words.join(' ');
-        },
         
-        //TYPE ICONS FOR THE STARTER SELECTION
-        starterTypeCheck() {
-            if (this.pick == true)
-                var starterType1 = this.gen3data.find(y => y.dexNumber === this.starter)
-                var starterType2 = this.gen3data.find(y => y.dexNumber === this.starter)
-                if (starterType2.type2 == null)
-                    return true
-                else   
-                    return false
-        },
         getStarterType1() {
             if (this.pick == true)
                 var type = this.g5PokemonData[this.starter].type_1
@@ -7317,12 +6600,6 @@ export default defineComponent({
                     else
                         return ""
         },
-        species(x) {
-            if (x != null && x.value != null)
-                return x.value.name
-            else
-                return null
-        },
         abilityDescription(y) {
             return gen3abilities[y]
         },
@@ -7345,13 +6622,6 @@ export default defineComponent({
             return damageMin.toString() + "-" + damageMax.toString()
         },
         
-        //GAMETIME FUNCTIONS
-        gameTimeHM(h, m) {
-            if (h <= 0) return m;
-            if (m < 10) 
-                m = "0" + m.toString();
-            return `${h}:${m}`;
-        },
         gameTimeHMS(h, m, s) {
             if (h <= 0) {
                 if (m <= 0) return `${s}`;
@@ -7362,33 +6632,7 @@ export default defineComponent({
             if (m < 10) m = "0" + m.toString();
             return `${h}:${m}:${s}`;
         },
-        leadZero(y) {
-            if (y < 10) return "0" + y.toString();
-            return y;
-        },
         
-        //INVENTORY FUNCTIONS
-        itemCheck(y) {
-            if (y == "--End of list--") return " ";
-            return y;
-        },
-        ifZero(y) {
-            if (y != 0) return y;
-            return " ";
-        },
-        nullToNone(y) {
-            if (y == 0) 
-                return "None"
-            return y
-        },
-        nullToSpace(y) {
-            if (y == 0) 
-                return " "
-            return y
-        },
-        sleep(ms) {
-            return new Promise((res) => setTimeout(res, ms))
-        },
         
         //EXPERIENCE FUNCTIONS
         growthRate() {
@@ -7444,14 +6688,6 @@ export default defineComponent({
                 nextLvlExp: nextLvlExp,
             };
         }, 
-        expPercentageCalculation(x) {
-            if ((x*100) > 100)
-                return 100
-            else if ((x*100) < 0)
-                return 0
-            else
-                return x * 100
-        },
 
         // MOVE MANAGEMENT
         movePower(y) { //y = move1.value
@@ -8240,18 +7476,6 @@ export default defineComponent({
             else { return moveObject.power }
         },
         /**
-         * The IVs the starter is written with (2026-09-17): the Hidden Power dropdowns' row
-         * in Automatic (a stale index after a type change reads as the type's first row),
-         * the six fields in Manual.
-         */
-        starter_ivs() {
-            if (this.iv_mode == IV_MODE.manual) {
-                return clampIvs(this.manual_ivs)
-            }
-            const rows = this.hiddenpowers[this.hidden_power_type]
-            return ivsFromHiddenPowerRow(rows?.[this.hidden_power_index] ?? rows?.[0])
-        },
-        /**
          * Puts the current spread into set_starter_stats_object, which write_byte_data stamps on
          * the starter at level 5. Called by the Hidden Power, mode and field watchers, and after
          * a starter's settings load -- the watchers alone missed a stored choice equal to the
@@ -8259,21 +7483,6 @@ export default defineComponent({
          */
         apply_starter_ivs() {
             this.set_starter_stats_object.ivs = this.starter_ivs()
-        },
-        /** A stored spread, assigned only when it differs from the current one, so the settings watcher does not re-save an unchanged spread on every starter switch. */
-        load_manual_ivs(stored) {
-            const next = clampIvs(stored)
-            const current = clampIvs(this.manual_ivs)
-            if (Object.keys(next).some((stat) => next[stat] !== current[stat])) {
-                this.manual_ivs = next
-            }
-        },
-        /** One Manual IV field: whole, 0-31, an emptied field is 31; the object is replaced so the settings watcher sees it. */
-        set_manual_iv(stat, event) {
-            const value = clampStat(event.target.value, IV_MAX)
-            this.manual_ivs = { ...clampIvs(this.manual_ivs), [stat]: value }
-            // A rejected entry (letters, 40, -1) is shown as what was kept.
-            event.target.value = String(value)
         },
         movepoolTypeColor(moveObject) {
             if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value == "No Pokemon") {
@@ -8307,20 +7516,6 @@ export default defineComponent({
                 return this.starterHiddenPowerType
             }
             return moveObject.type
-        },
-        g3ReturnPowerCalc(slotNumber) {
-            if (slotNumber.friendship.value < 2.5) { var friendshipValue = 2.5 }
-            else { var friendshipValue = slotNumber.friendship.value }
-            var specialMovePower = Math.floor(friendshipValue/2.5)
-            return specialMovePower
-        },
-        g3FrustrationPowerCalc(slotNumber) {
-            var friendshipValue = slotNumber.friendship.value
-            var specialMovePower = Math.floor((255 - friendshipValue)/2.5)
-            if (specialMovePower == 0) {
-                specialMovePower = 1
-            }
-            return specialMovePower
         },
         weatherModifier(weather, move, moveType, player_ability) {
             if (weather == "Sun" && moveType == "Water") {
@@ -8419,22 +7614,7 @@ export default defineComponent({
                 return null
             }
         },
-        // TYPE EFFECTIVENESS
-        checkTypes(x, y) { //x = type1.value, y = type2.value
-            if (x.value == y.value)
-                return true
-            else
-                return false
-        },
         
-        stageModColor(x) {
-            if (x == 0)
-                return "rgb(0, 0, 0);"
-            else if (x < 0)
-                return "rgb(107, 0, 0);"
-            else (x > 0)
-                return "rgb(0, 66, 14);"
-        },
 
         //y = mod stage, x = stat value
         stageMultiplier(y,x) { 
@@ -8488,35 +7668,6 @@ export default defineComponent({
             }
             else
                 return
-        },
-        statusOpacityLabel(status) {
-            if (status) {
-                return `opacity: ${this.statLabelOpacityValue};`
-            }
-            else
-                return
-        },
-        getLSB(value) {
-            return value & 1;
-        },
-        getSecondLSB(value) {
-            return (value >> 1) & 1;
-        },
-        ivparser(fourByteIvBlock, ivName) { //ie: 0x00000000, "hp"
-            function getBits(a, b, d) {
-                return (a >> b) & ((1 << d) - 1);
-            }
-            switch (ivName) {
-                case "hp":  return getBits(fourByteIvBlock, 0, 5);
-                case "atk": return getBits(fourByteIvBlock, 5, 5);
-                case "def": return getBits(fourByteIvBlock, 10, 5);
-                case "spe": return getBits(fourByteIvBlock, 15, 5);
-                case "spa": return getBits(fourByteIvBlock, 20, 5);
-                case "spd": return getBits(fourByteIvBlock, 25, 5);
-                case "egg": return getBits(fourByteIvBlock, 30, 1);
-                case "ability": return getBits(fourByteIvBlock, 31, 1);
-                default: return "ERROR";
-            }
         },
         hiddenPowerTypeCalc(slot) {
             let ivHpBit  = slot.ivs.hp.value
@@ -9105,146 +8256,12 @@ export default defineComponent({
             }
         },
 
-        /* === Enemy sprite resize tool ============================================
-         * Ctrl+Click an enemy team sprite to enter resize mode. Drag the corner
-         * handle to scale it. Press Enter to commit (writes enemy_sprite_scales.js
-         * in dev mode). Press Escape to cancel.
-         */
-        getEnemySpriteScale(species) {
-            // Touch reactivity tick so live drags re-render.
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getScale(species);
-        },
-        getEnemySpriteYOffset(species) {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getYOffset(species);
-        },
-        getEnemySpriteXOffset(species) {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getXOffset(species);
-        },
-        getEnemySpriteFlipped(species) {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getFlipped(species);
-        },
-        enemyTransformFor(species) {
-            // Dev-mode escape hatch: when the styles toggle is off, render at native size/position
-            // so footage stays congruent with content filmed before the resize feature shipped.
-            // Packaged builds ignore the toggle and always apply styles. Style Mode also overrides
-            // the toggle so the user can see what they're editing.
-            if (this.isInDevMode && !this.enemy_sprite_styles_enabled && !this.style_mode_active) {
-                return 'none';
-            }
-            const s = this.getEnemySpriteScale(species);
-            const x = this.getEnemySpriteXOffset(species);
-            const y = this.getEnemySpriteYOffset(species);
-            const sx = this.getEnemySpriteFlipped(species) ? -s : s;
-            // translate before scale so the visible shift stays at design-space pixels regardless of scale.
-            return `translate(${x}px, ${y}px) scale(${sx}, ${s})`;
-        },
-        toggleEnemySpriteFlip() {
-            if (!this.enemyResize.species) return;
-            const current = enemySpriteScaleManager.getFlipped(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { flipped: !current });
-            this.enemyScaleVersion++;
-        },
-        nudgeEnemySpriteY(deltaPx) {
-            if (!this.enemyResize.species) return;
-            const current = enemySpriteScaleManager.getYOffset(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { yOffset: current + deltaPx });
-            this.enemyScaleVersion++;
-        },
-        nudgeEnemySpriteX(deltaPx) {
-            if (!this.enemyResize.species) return;
-            const current = enemySpriteScaleManager.getXOffset(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { xOffset: current + deltaPx });
-            this.enemyScaleVersion++;
-        },
-        _getAppScale() {
-            const el = document.getElementById('app-container');
-            if (!el) return 1;
-            const t = getComputedStyle(el).transform;
-            if (!t || t === 'none') return 1;
-            const m = t.match(/matrix\(([^)]+)\)/);
-            if (m) {
-                const parts = m[1].split(',').map(s => parseFloat(s));
-                if (!Number.isNaN(parts[0]) && parts[0] > 0) return parts[0];
-            }
-            return 1;
-        },
-        enemySpriteHandlePosition() {
-            // Touch reactive tick so this re-runs as the sprite scales / re-renders.
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            const slot = this.enemyResize.slot;
-            if (slot == null) return null;
-            // Re-query the DOM each tick in case Vue swapped the element on re-render.
-            const sprite = document.querySelector(`.ePkmnSprite[data-enemy-slot="${slot}"]`);
-            if (!sprite) return null;
-            const rect = sprite.getBoundingClientRect();
-            return {
-                left: (rect.right - 8) + 'px',
-                top:  (rect.bottom - 8) + 'px'
-            };
-        },
-        onEnemyResizeHandleMouseDown(event) {
-            if (!this.enemyResize.species) return;
-            event.preventDefault();
-            event.stopPropagation();
-            const startX = event.clientX;
-            const startY = event.clientY;
-            const baseSize = this.enemyResize.baseSize;
-            const species = this.enemyResize.species;
-            const startScale = enemySpriteScaleManager.getScale(species);
-            const startWidth = baseSize * startScale;
-            const appScale = this._getAppScale();
-            const onMove = (ev) => {
-                const dx = ev.clientX - startX;
-                const dy = ev.clientY - startY;
-                // Average the two axes so uniform scaling tracks either drag direction.
-                const delta = (dx + dy) / 2;
-                // Mouse delta is in viewport pixels; the app-container is itself scaled
-                // to fit, so convert back to design-space pixels before adjusting width.
-                const designDelta = appScale > 0 ? delta / appScale : delta;
-                const newWidth = Math.max(20, startWidth + designDelta);
-                const newScale = newWidth / baseSize;
-                enemySpriteScaleManager.setLive(species, { scale: newScale });
-                this.enemyScaleVersion++;
-            };
-            const onUp = () => {
-                window.removeEventListener('mousemove', onMove);
-                window.removeEventListener('mouseup', onUp);
-            };
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onUp);
-        },
-        commitEnemySpriteResize() {
-            if (!this.enemyResize.species) return;
-            enemySpriteScaleManager.commit(this.enemyResize.species);
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        cancelEnemySpriteResize() {
-            if (!this.enemyResize.species) return;
-            enemySpriteScaleManager.clearOverride(this.enemyResize.species);
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-
         /* === Style Mode (dev only) ==========================================
          * Iterate every species in g5PokemonData. Each species is shown in
          * slot 0 of the enemy graphic in resize mode. Enter commits and
          * advances; Backspace discards live edits and steps back. Existing
          * style settings load automatically per species.
          */
-        styleModeCurrentSpecies() {
-            if (!this.style_mode_active) return null;
-            return this.style_mode_species_list[this.style_mode_index] ?? null;
-        },
         _styleModeBuildList() {
             const all = Object.keys(this.g5PokemonData || {});
             return all.filter((name) => {
@@ -9252,59 +8269,6 @@ export default defineComponent({
                 if (name === '—' || name === 'Egg') return false;
                 return true;
             });
-        },
-        _styleModeFocusCurrent() {
-            const species = this.style_mode_species_list[this.style_mode_index];
-            if (!species) return;
-            // Drop any stale override from the previous species; we want to
-            // start from the bundled/saved value, not whatever was being edited.
-            this.enemyResize = { species, slot: 0, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        enterStyleMode() {
-            if (!this.isInDevMode) return;
-            const list = this._styleModeBuildList();
-            if (list.length === 0) return;
-            this.style_mode_species_list = list;
-            this.style_mode_index = 0;
-            this.style_mode_active = true;
-            this.$nextTick(() => this._styleModeFocusCurrent());
-        },
-        exitStyleMode() {
-            // Drop any uncommitted live edit on the current species.
-            const species = this.styleModeCurrentSpecies();
-            if (species) enemySpriteScaleManager.clearOverride(species);
-            this.style_mode_active = false;
-            this.style_mode_species_list = [];
-            this.style_mode_index = 0;
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        styleModeAdvance() {
-            if (!this.style_mode_active) return;
-            const species = this.styleModeCurrentSpecies();
-            if (species) {
-                enemySpriteScaleManager.commit(species);
-            }
-            if (this.style_mode_index + 1 >= this.style_mode_species_list.length) {
-                this.exitStyleMode();
-                return;
-            }
-            this.style_mode_index++;
-            this.$nextTick(() => this._styleModeFocusCurrent());
-        },
-        styleModeBack() {
-            if (!this.style_mode_active) return;
-            // Discard the live override on the current species (reverts unsaved drag/nudge edits).
-            const species = this.styleModeCurrentSpecies();
-            if (species) enemySpriteScaleManager.clearOverride(species);
-            if (this.style_mode_index === 0) {
-                // Already at the first species — just refresh focus so the handle stays attached.
-                this._styleModeFocusCurrent();
-                return;
-            }
-            this.style_mode_index--;
-            this.$nextTick(() => this._styleModeFocusCurrent());
         },
     },
 

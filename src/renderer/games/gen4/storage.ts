@@ -14,19 +14,21 @@ import { createStyleSettingsStore, type StyleSettingsStore } from "~/core/persis
  *     bloated gen4's defaults file into the megabytes are what those two rules fix).
  */
 
-const NON_STYLE_KEYS = [
+// A Set: `isStyleSettingsKey` runs on every `MyStorage` read and write
+// (docs/performance-followups.md D). The list is this generation's legacy one verbatim.
+const NON_STYLE_KEYS = new Set([
     'starter', 'selected_game', 'playerName', 'playerId', 'playerResets',
     'blackout_counter', 'simple_data_str', 'full_data_str', 'deprecated_data_str',
     'simple_data', 'timer_startTimeOffset', 'timer_startTime', 'timer_pause',
     'timer_formatted_time', 'timer_pause_time', 'time_h', 'time_m', 'time_s',
     'time_ms', 'time_split_start', 'battle_start', 'current_splits', 'previous_splits'
-];
+]);
 
 const GAME_PATTERN = /^(Platinum|HeartGold and SoulSilver|Diamond and Pearl)_/;
 const LINE_PATTERN = /-line$/;
 
 export function isGen4StyleKey(key: string): boolean {
-    if (NON_STYLE_KEYS.includes(key)) return false;
+    if (NON_STYLE_KEYS.has(key)) return false;
     return GAME_PATTERN.test(key) || LINE_PATTERN.test(key);
 }
 

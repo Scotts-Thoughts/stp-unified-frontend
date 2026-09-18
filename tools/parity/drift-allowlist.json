@@ -1,0 +1,1702 @@
+{
+  "$comment": "Members of games/gen{2,3,4,5}/Overlay.vue that share a name but not a body, each with the reason the difference is intended, and a fingerprint of every generation's body at review time. tools/parity/drift-check.ts fails on any difference not listed here, on a listed member whose bodies have changed since review, and on a listed member whose bodies now agree. A reason that starts with UNREVIEWED was written by --update and is still to be adjudicated: quirk (keep, say why) or omission (port the change to the other generations, then --update drops the entry).",
+  "entries": [
+    {
+      "section": "computed",
+      "name": "battEn",
+      "reason": "mapper shape: gen2/gen3's deprecated mappers expose battle.enemyPokemon, gen4/gen5's STANDARD mappers battle.opponent.active_pokemon -- the difference MapperProfile canonical keys will absorb.",
+      "bodies": {
+        "gen2": "fb58c8144b67",
+        "gen3": "fb58c8144b67",
+        "gen4": "8803bd348b95",
+        "gen5": "8803bd348b95"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "battlePokemonCrop",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 24L, gen5 30L)",
+      "bodies": {
+        "gen4": "b08e14f5ee2f",
+        "gen5": "effd6dd858f9"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "battle_fade",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 26L, gen3 23L, gen4 24L, gen5 24L)",
+      "bodies": {
+        "gen2": "060feebfe69b",
+        "gen3": "1d2f93f2320a",
+        "gen4": "4e6e04028908",
+        "gen5": "4e6e04028908"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "blackouts_resets",
+      "reason": "same logic, different spelling: gen4 selects the Shuckie/local counters with ternaries where gen2/gen3 use an if/else.",
+      "bodies": {
+        "gen2": "04fad202ebe6",
+        "gen3": "04fad202ebe6",
+        "gen4": "c7da097db84a"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "compare_splits",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 53L, gen3 85L, gen4 406L, gen5 243L)",
+      "bodies": {
+        "gen2": "35799a724b88",
+        "gen3": "0fe7511793a3",
+        "gen4": "dd3cb0ff482a",
+        "gen5": "c007e35b8c78"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "displayedPokemonSpecies",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 9L, gen4 28L, gen5 13L)",
+      "bodies": {
+        "gen3": "1bfba9ef2f21",
+        "gen4": "484c52a3053e",
+        "gen5": "a09fb4f45006"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "enemyTrainer",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 10L, gen4 3L, gen5 3L)",
+      "bodies": {
+        "gen3": "88819a3a2c25",
+        "gen4": "e300c02ad670",
+        "gen5": "e300c02ad670"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "enemy_2_mon_static",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 7L, gen5 5L)",
+      "bodies": {
+        "gen4": "b78eb14a203b",
+        "gen5": "3c90db584d12"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "enemy_graphic",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 48L, gen5 69L)",
+      "bodies": {
+        "gen4": "b040bb42407b",
+        "gen5": "fc42e812426f"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "enemy_mon_static",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 7L, gen5 8L)",
+      "bodies": {
+        "gen4": "8521f7c5ad9c",
+        "gen5": "2c29ce96167b"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "examined_trainer_data",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 (gen2 6L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen2": "6d67d57f8cf5",
+        "gen4": "737d0020a08a",
+        "gen5": "737d0020a08a"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "faults",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 7L, gen5 3L)",
+      "bodies": {
+        "gen4": "b6743de760f8",
+        "gen5": "f634903f00b8"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "field_effect_array",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 26L, gen3 19L, gen4 19L, gen5 19L)",
+      "bodies": {
+        "gen2": "9e9b901e8902",
+        "gen3": "9725af1949d8",
+        "gen4": "db67c157026d",
+        "gen5": "db67c157026d"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "field_selector",
+      "reason": "mapper shape: camelCase vs snake_case field paths as in screen_weather; gen2/gen3 also call the helper camelCase where gen4/gen5 call capitalization_format.",
+      "bodies": {
+        "gen2": "4a56d5f85b75",
+        "gen3": "4a56d5f85b75",
+        "gen4": "1074d71b3030",
+        "gen5": "1074d71b3030"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "filtered_trainer_list",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 (gen2 7L, gen4 7L, gen5 7L)",
+      "bodies": {
+        "gen2": "84ebcfea146d",
+        "gen4": "76e17d5881df",
+        "gen5": "76e17d5881df"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "game_data",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 8L, gen4 5L, gen5 17L)",
+      "bodies": {
+        "gen3": "37a8245f1818",
+        "gen4": "8d0f670d9ca1",
+        "gen5": "e74522bc227a"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "gametimeSplit",
+      "reason": "mapper shape: gameTime.hours (gen2/gen3, a bare value) vs game_time.hours.value (gen4/gen5).",
+      "bodies": {
+        "gen2": "d463dd72658f",
+        "gen3": "d463dd72658f",
+        "gen4": "5947f76ac4ff",
+        "gen5": "5947f76ac4ff"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "growth_rate",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 3L, gen4 3L, gen5 3L)",
+      "bodies": {
+        "gen2": "9c0bdf9adf44",
+        "gen4": "76acc1a240e8",
+        "gen5": "9fe7d08a680c"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "hasMultipleEvolutionStages",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 8L, gen4 5L, gen5 5L)",
+      "bodies": {
+        "gen3": "1dcc22228f74",
+        "gen4": "a3e0c0bc8d47",
+        "gen5": "a3e0c0bc8d47"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "heldItem",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 14L, gen5 13L)",
+      "bodies": {
+        "gen4": "2a422cbb5336",
+        "gen5": "9e5c22c34b26"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "hp_tracker_style",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 (gen2 16L, gen4 16L, gen5 16L)",
+      "bodies": {
+        "gen2": "b63f8733d974",
+        "gen4": "28931e4fe360",
+        "gen5": "28931e4fe360"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "moveRouting",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 20L, gen5 19L)",
+      "bodies": {
+        "gen4": "f93a20f16279",
+        "gen5": "2d8864376b41"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "pkmnGrowthRate",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 8L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen3": "0d1ef491769f",
+        "gen4": "4dbc01b6a698",
+        "gen5": "7b7576aef56c"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "s1dynamic",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 8L, gen3 22L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen2": "f2026f5cdd13",
+        "gen3": "bb57f582877c",
+        "gen4": "ff119200a2a6",
+        "gen5": "ff119200a2a6"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "s1dynamicReset",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 28L, gen3 61L)",
+      "bodies": {
+        "gen2": "dc7e0cfa530e",
+        "gen3": "65b2c78f99b1"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "screen_weather",
+      "reason": "mapper shape: camelCase field paths (weatherCount, statusReflect, lightScreenCount) in gen2/gen3's mappers, snake_case (weather_count, reflect, lightscreen_count) in gen4/gen5's.",
+      "bodies": {
+        "gen2": "05865f91ef6c",
+        "gen3": "05865f91ef6c",
+        "gen4": "08014728c601",
+        "gen5": "08014728c601"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "solo_mon",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 17L, gen5 17L)",
+      "bodies": {
+        "gen4": "c9d2aaa19f90",
+        "gen5": "6514a8cd4eaa"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "solo_mon_exp",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 16L, gen5 16L)",
+      "bodies": {
+        "gen4": "dbc54b1d7fbf",
+        "gen5": "87d954dcb9f4"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "starting_type_fix",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen4": "fafd2773e1eb",
+        "gen5": "2c86f20a424a"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "statsDisplaySpecies",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 12L, gen4 12L, gen5 16L)",
+      "bodies": {
+        "gen3": "95b678094928",
+        "gen4": "491faf8186b3",
+        "gen5": "a43882f5a253"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "stats_header",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 38L, gen3 38L, gen4 60L, gen5 83L)",
+      "bodies": {
+        "gen2": "21676d310f2b",
+        "gen3": "4e387a23dc20",
+        "gen4": "34632895aee1",
+        "gen5": "5680c045fcf0"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "typeHeaderColor",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 13L, gen4 9L, gen5 9L)",
+      "bodies": {
+        "gen3": "8038c39a02c9",
+        "gen4": "92901b22b7ee",
+        "gen5": "92901b22b7ee"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "voltorb_flip",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 11L, gen5 10L)",
+      "bodies": {
+        "gen4": "3d7e20a9b90e",
+        "gen5": "8075b3587f56"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "_styleModeBuildList",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 4L, gen3 4L, gen4 4L, gen5 8L)",
+      "bodies": {
+        "gen2": "05ae570aa0d5",
+        "gen3": "1ae440027d6b",
+        "gen4": "f77fd9bdd9ab",
+        "gen5": "439808113a62"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "ability",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 28L, gen4 25L, gen5 25L)",
+      "bodies": {
+        "gen3": "406812529afc",
+        "gen4": "b59ee9ad6f24",
+        "gen5": "b59ee9ad6f24"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "abilityModifier",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 23L, gen5 30L)",
+      "bodies": {
+        "gen3": "5a145013b256",
+        "gen4": "ae9642ee8367",
+        "gen5": "5a8740d59771"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "average_median_stats",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 28L, gen4 28L, gen5 40L)",
+      "bodies": {
+        "gen3": "d7869f75263d",
+        "gen4": "89c5dd5dbc67",
+        "gen5": "e029d6bef13d"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "badgeGraphic",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 (gen2 11L, gen3 11L, gen4 11L)",
+      "bodies": {
+        "gen2": "1f9360074438",
+        "gen3": "0b299b71a043",
+        "gen4": "835bc5c8ef65"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "badge_boost",
+      "reason": "quirk: gen2 applies the Glacier Badge's Special Defense rule (boost only when the unboosted SpAtk is 206-432 or 661+, pokecrystal BadgeStatBoosts) and the BadgeBoosts display toggle; gen3 is the plain 1.1x behind display_badge_boosts. gen2's comparison reads the property object, not .value, so the rule never fires -- known-legacy-bugs.md #46, preserved.",
+      "bodies": {
+        "gen2": "17d823f36882",
+        "gen3": "bd618dc97ddc"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "battlePokemonCrop",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 22L, gen3 12L)",
+      "bodies": {
+        "gen2": "ace9247927ac",
+        "gen3": "40f51bf9a82d"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "burnModifier",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 15L, gen4 10L, gen5 10L)",
+      "bodies": {
+        "gen3": "fab195a85baf",
+        "gen4": "6bd720b66249",
+        "gen5": "6bd720b66249"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "calcExpStats",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 27L, gen3 44L, gen4 27L, gen5 29L)",
+      "bodies": {
+        "gen2": "4d0d48f1b4d5",
+        "gen3": "0ce4d1350743",
+        "gen4": "087c1d589594",
+        "gen5": "6a5c5642554f"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "calculate_ev_benefit",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 68L, gen4 67L, gen5 67L)",
+      "bodies": {
+        "gen3": "70a5b4b39ed4",
+        "gen4": "96eb4fa54266",
+        "gen5": "c51f5eb4c284"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "clear_overlay_color",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 7L, gen3 7L, gen4 9L, gen5 6L)",
+      "bodies": {
+        "gen2": "7697b1fe20f9",
+        "gen3": "ab525b264832",
+        "gen4": "d822b1586976",
+        "gen5": "8aa53e0a0f80"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "convertDurationToSeconds",
+      "reason": "UNREVIEWED (omission?): gen2 and gen5 each guard a non-string duration (gen2 logs an error and returns 0, gen5 returns 0 silently); gen3 and gen4 have no guard and throw on undefined.",
+      "bodies": {
+        "gen2": "8d986b58eae2",
+        "gen3": "1df840b6b685",
+        "gen4": "1df840b6b685",
+        "gen5": "9e2e4d021012"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "copyCurrentStylesToAllFamilyMembers",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 98L, gen4 90L, gen5 98L)",
+      "bodies": {
+        "gen3": "b2ab9448d209",
+        "gen4": "df52d3df12a6",
+        "gen5": "c17177ba5138"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "copy_overlay_properties",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 32L, gen4 46L, gen5 78L)",
+      "bodies": {
+        "gen3": "626d0792a212",
+        "gen4": "2c54adc27ff2",
+        "gen5": "11cb1fc6d3cf"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "currentPokemonHasUserOverrides",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 5L, gen5 7L)",
+      "bodies": {
+        "gen4": "51ab0b3b2280",
+        "gen5": "f4e7c1e16a0f"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "damageRange",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 16L, gen4 18L, gen5 18L)",
+      "bodies": {
+        "gen3": "5226392b16fd",
+        "gen4": "e74969c66fe2",
+        "gen5": "e74969c66fe2"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "dataSearch",
+      "reason": "quirk: gen3 canonicalises the move name (move_name) before the case-insensitive key search; the others search the raw pointer value.",
+      "bodies": {
+        "gen2": "bfc6c7bc4bd3",
+        "gen3": "69aa94a34f5f",
+        "gen4": "bfc6c7bc4bd3",
+        "gen5": "bfc6c7bc4bd3"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "determineItemBoost",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 18L, gen4 13L, gen5 26L)",
+      "bodies": {
+        "gen2": "b4fe613f679f",
+        "gen3": "72c70542a643",
+        "gen4": "b8e9664bcc9d",
+        "gen5": "f121b1d4c325"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "determineSTAB",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 28L, gen4 14L, gen5 12L)",
+      "bodies": {
+        "gen2": "4611f3ac5f49",
+        "gen3": "30b9a78d4b22",
+        "gen4": "de684ee90904",
+        "gen5": "4386c1cbf32b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "eHPType",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 8L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen3": "1968a8ec0623",
+        "gen4": "6aa196e10b41",
+        "gen5": "6aa196e10b41"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyDynamic",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 8L, gen3 10L, gen4 10L, gen5 10L)",
+      "bodies": {
+        "gen2": "0980e563bc08",
+        "gen3": "7ceb315529a9",
+        "gen4": "bbb2e5d3b30b",
+        "gen5": "bbb2e5d3b30b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyFaint",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 12L, gen4 18L, gen5 19L)",
+      "bodies": {
+        "gen3": "044bd4292c15",
+        "gen4": "0cc75f57e368",
+        "gen5": "489eecb22736"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyMods",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 16L, gen3 21L)",
+      "bodies": {
+        "gen2": "2fad25d4bc3e",
+        "gen3": "dd79b87e5ac4"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyMove",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 8L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen3": "fb27b621f577",
+        "gen4": "8c4a068e8d6b",
+        "gen5": "aaef5790b443"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyPkmnFaint",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 12L, gen3 10L)",
+      "bodies": {
+        "gen2": "475bc168d763",
+        "gen3": "3f5739c7281f"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyPkmnFaintStats",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 10L, gen3 11L)",
+      "bodies": {
+        "gen2": "e3d914dcb7dc",
+        "gen3": "0a207d859f54"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyPkmnFaintTypes",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 11L, gen3 13L)",
+      "bodies": {
+        "gen2": "4737822d1d80",
+        "gen3": "0b870713287b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyPkmnSpecies",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 8L, gen3 9L)",
+      "bodies": {
+        "gen2": "d1751fad12f2",
+        "gen3": "7800906001e0"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyPkmnText",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 8L, gen3 9L)",
+      "bodies": {
+        "gen2": "789ae316e401",
+        "gen3": "60e42c10d624"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyPkmnUI",
+      "reason": "UNREVIEWED: gen3 | gen4 (gen3 9L, gen4 10L)",
+      "bodies": {
+        "gen3": "c7258b0e52df",
+        "gen4": "1c9745517c5c"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyStatLabelOpacity",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 19L, gen4 34L, gen5 13L)",
+      "bodies": {
+        "gen3": "481fdc2fec7d",
+        "gen4": "368e56c86b23",
+        "gen5": "9e1b46a57e47"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyStatModification",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 49L, gen4 47L, gen5 47L)",
+      "bodies": {
+        "gen3": "d10386abc2cb",
+        "gen4": "a8a6e9be3d50",
+        "gen5": "a8a6e9be3d50"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyStatusLabelOpacity",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 15L, gen5 13L)",
+      "bodies": {
+        "gen4": "297be79b6818",
+        "gen5": "d3ed552c08fd"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyType1",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 7L, gen3 10L)",
+      "bodies": {
+        "gen2": "709cdfd6c46f",
+        "gen3": "6de6de1a40eb"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemyType2",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 7L, gen3 10L)",
+      "bodies": {
+        "gen2": "11d0c78fdea7",
+        "gen3": "f1dddf7328d5"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemy_effective_power",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 29L, gen4 44L, gen5 44L)",
+      "bodies": {
+        "gen2": "541e4dddc2cb",
+        "gen3": "74d88b58b0d4",
+        "gen4": "adee0a664c96",
+        "gen5": "77881ea56e3b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "enemy_move_power",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 9L, gen4 66L, gen5 70L)",
+      "bodies": {
+        "gen2": "54beffbb25ca",
+        "gen3": "1d99d9f3326a",
+        "gen4": "c671de6f803e",
+        "gen5": "fe2bc3837877"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "fade_enemy_mon",
+      "reason": "UNREVIEWED: gen3 | gen5 (gen3 9L, gen5 10L)",
+      "bodies": {
+        "gen3": "4b6abdc21689",
+        "gen5": "d0dcab9ea1e9"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "fetchEmulatorStats",
+      "reason": "UNREVIEWED (omission?): gen5 counts failed /stats fetches and clears the poll interval after ten; gens 2-4 keep polling a dead Super Shuckie every tick.",
+      "bodies": {
+        "gen2": "325a1e4a0cba",
+        "gen3": "325a1e4a0cba",
+        "gen4": "325a1e4a0cba",
+        "gen5": "14c473250e10"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "freezeEncounters",
+      "reason": "UNREVIEWED: gen3 | gen4 (gen3 121L, gen4 8L)",
+      "bodies": {
+        "gen3": "f99d09007005",
+        "gen4": "d96e05492fde"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "gameTimeHMS",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 10L, gen4 10L, gen5 10L)",
+      "bodies": {
+        "gen3": "c21bef1fceeb",
+        "gen4": "09fb834e0317",
+        "gen5": "09fb834e0317"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getAccuracy",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 101L, gen5 105L)",
+      "bodies": {
+        "gen4": "db79b34bc140",
+        "gen5": "2e9cb9816e90"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getCurrentStorageKey",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 8L, gen4 7L, gen5 7L)",
+      "bodies": {
+        "gen3": "dc1e43f408f5",
+        "gen4": "ec2d3881be25",
+        "gen5": "ec2d3881be25"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getEnemyStat",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 59L, gen5 63L)",
+      "bodies": {
+        "gen4": "4a523ff407ed",
+        "gen5": "858dfc1b493c"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getEvolutionFamily",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 8L, gen4 11L, gen5 12L)",
+      "bodies": {
+        "gen3": "6d6e2d787c71",
+        "gen4": "977087c7d17e",
+        "gen5": "35c7de2ac7ad"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getEvolutionFamilyStorageKey",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 6L, gen4 6L, gen5 6L)",
+      "bodies": {
+        "gen3": "e39260df268e",
+        "gen4": "6a67624ee002",
+        "gen5": "6a67624ee002"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getFullyEvolvedSpecies",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 9L, gen4 24L, gen5 15L)",
+      "bodies": {
+        "gen3": "5eecc6644d9d",
+        "gen4": "58d9b8f829d0",
+        "gen5": "d7479207fa1b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getMove",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 21L, gen5 15L)",
+      "bodies": {
+        "gen4": "8147e5f146b2",
+        "gen5": "57b4021aa5e6"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getMoveCategory",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 9L, gen5 9L)",
+      "bodies": {
+        "gen4": "e336555ec5be",
+        "gen5": "676d066e1414"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getMoveObject",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 25L, gen5 25L)",
+      "bodies": {
+        "gen4": "7b12521108d6",
+        "gen5": "51175ee10048"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getMoveProperty",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 5L, gen5 5L)",
+      "bodies": {
+        "gen4": "dbec35e076d2",
+        "gen5": "c083ceff8253"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getMoveType",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 9L, gen5 9L)",
+      "bodies": {
+        "gen4": "b17bc299aa6e",
+        "gen5": "3af7feb0f47c"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getMovepool",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 27L, gen3 33L, gen4 32L, gen5 25L)",
+      "bodies": {
+        "gen2": "8c965d115398",
+        "gen3": "bf68535d8e23",
+        "gen4": "13d30116fc91",
+        "gen5": "a1ad8c1231ad"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getPP",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 15L, gen5 23L)",
+      "bodies": {
+        "gen4": "d809c6fcce45",
+        "gen5": "a2dad230febb"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getPokemonImageUrl",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 4L, gen4 4L, gen5 4L)",
+      "bodies": {
+        "gen3": "96a9fa09ca85",
+        "gen4": "3e6711ad772e",
+        "gen5": "c82b71f13af3"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getSoloMonType",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 29L, gen5 26L)",
+      "bodies": {
+        "gen4": "3123a8686784",
+        "gen5": "01661b0a8b01"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getSplitFileName",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 11L, gen4 10L, gen5 10L)",
+      "bodies": {
+        "gen3": "afc6e4a40387",
+        "gen4": "eea2df75c9d3",
+        "gen5": "eea2df75c9d3"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getStarterArt",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 3L, gen4 3L, gen5 3L)",
+      "bodies": {
+        "gen3": "0366bb54f58c",
+        "gen4": "4a6b52f44bbd",
+        "gen5": "abb56d043c17"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getStarterImageUrl",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 3L, gen4 3L, gen5 3L)",
+      "bodies": {
+        "gen3": "3430cd794efb",
+        "gen4": "7db5b1756cd5",
+        "gen5": "a8ce4eabb6a4"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getStarterType1",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 5L, gen4 5L, gen5 5L)",
+      "bodies": {
+        "gen2": "29a58d7e2451",
+        "gen4": "5869ab2410d1",
+        "gen5": "4f8b1630a174"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getStarterType2",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 5L, gen4 7L, gen5 7L)",
+      "bodies": {
+        "gen2": "f7eb33af06af",
+        "gen4": "c8655e71c490",
+        "gen5": "1d23e1f859d9"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getStarterTypeTexture",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 10L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen3": "aaa24df4bc01",
+        "gen4": "2abb51267555",
+        "gen5": "bfc423ee8da2"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getStat",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 62L, gen5 66L)",
+      "bodies": {
+        "gen4": "2ed876b6bac1",
+        "gen5": "b0289e5ecbfc"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getStorageKey",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 11L, gen4 11L, gen5 11L)",
+      "bodies": {
+        "gen3": "13fe932d0482",
+        "gen4": "87ef73f0eec7",
+        "gen5": "87ef73f0eec7"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getTrainerGraphic",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 190L, gen5 293L)",
+      "bodies": {
+        "gen4": "7d70970b009d",
+        "gen5": "edf3de67d6c9"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getUnobtainableMoveStyle",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 28L, gen3 27L, gen4 26L, gen5 25L)",
+      "bodies": {
+        "gen2": "a4bff1bdaf0c",
+        "gen3": "7bfdd218b19a",
+        "gen4": "e9b30786a70c",
+        "gen5": "99370c044c07"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "get_base_stat",
+      "reason": "UNREVIEWED: gen3 | gen4 (gen3 5L, gen4 5L)",
+      "bodies": {
+        "gen3": "6284e7497f06",
+        "gen4": "53dc27b94bed"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "get_base_stat_total",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 13L, gen4 14L, gen5 12L)",
+      "bodies": {
+        "gen3": "2f04db11d506",
+        "gen4": "dd1f9b2d3928",
+        "gen5": "4d40de90ec9a"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "get_bb_stat",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 82L, gen3 61L)",
+      "bodies": {
+        "gen2": "29ea8a616457",
+        "gen3": "cdec9863219b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "get_fling_power",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 630L, gen5 630L)",
+      "bodies": {
+        "gen4": "aca3037e431c",
+        "gen5": "1da94eeb0223"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "get_friendship",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 30L, gen5 9L)",
+      "bodies": {
+        "gen4": "54c2c76c84c5",
+        "gen5": "7cf3f44da2a3"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "get_iv",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 24L, gen4 23L, gen5 23L)",
+      "bodies": {
+        "gen3": "e362d07ffaa6",
+        "gen4": "7035bbc33e31",
+        "gen5": "7035bbc33e31"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "get_stat",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 33L, gen3 75L, gen4 319L, gen5 274L)",
+      "bodies": {
+        "gen2": "47da10fe5ea9",
+        "gen3": "2d853ec98cdc",
+        "gen4": "ece8b567ae2e",
+        "gen5": "266f5d741597"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "growthRate",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 22L, gen3 27L, gen4 24L, gen5 24L)",
+      "bodies": {
+        "gen2": "911ce1817e1b",
+        "gen3": "cb98a928a97a",
+        "gen4": "869b5c4bb8ee",
+        "gen5": "ace023832ed6"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "hgss_badge_check",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 12L, gen5 10L)",
+      "bodies": {
+        "gen4": "ca98a677ea5b",
+        "gen5": "76eea6c78174"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "hiddenPowerPowerCalc",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 16L, gen5 17L)",
+      "bodies": {
+        "gen3": "97c1d8716a1d",
+        "gen4": "2729296abdcf",
+        "gen5": "a3fee6d16793"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "hiddenPowerTypeCalc",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 10L, gen4 16L, gen5 16L)",
+      "bodies": {
+        "gen3": "ba6cd605dc26",
+        "gen4": "90709d041498",
+        "gen5": "90709d041498"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "incrementEmulatorCounter",
+      "reason": "UNREVIEWED (console only): gen3 commented out the success/error console lines the other three still print (oracle 9 sees them).",
+      "bodies": {
+        "gen2": "a481d003ecfb",
+        "gen3": "6fae601df005",
+        "gen4": "a481d003ecfb",
+        "gen5": "a481d003ecfb"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "incrementEmulatorCounterByAmount",
+      "reason": "UNREVIEWED (console only): gen3 commented out the success/error console lines the other three still print (oracle 9 sees them).",
+      "bodies": {
+        "gen2": "286757153a09",
+        "gen3": "839df83e6daf",
+        "gen4": "286757153a09",
+        "gen5": "286757153a09"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "loadEvolutionStyle",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 113L, gen4 91L, gen5 91L)",
+      "bodies": {
+        "gen3": "de27f703df0a",
+        "gen4": "23725418f5c8",
+        "gen5": "93d95cc7f293"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "load_all_settings",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 91L, gen3 198L, gen4 169L, gen5 155L)",
+      "bodies": {
+        "gen2": "6f0aa4ce34cd",
+        "gen3": "91d36c67fe64",
+        "gen4": "d25d21580456",
+        "gen5": "76273132542c"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "load_pokemon_sprite_settings",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 10L, gen3 15L)",
+      "bodies": {
+        "gen2": "405cc9782211",
+        "gen3": "6424d48f3a87"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "load_splits",
+      "reason": "UNREVIEWED (omission?): gen5 dedupes repeated trainer rows (first occurrence keeps the position, last time wins) and keeps only N's final battle; gens 2-4 push every CSV row.",
+      "bodies": {
+        "gen2": "6b15d49e4c0f",
+        "gen3": "6b15d49e4c0f",
+        "gen4": "6b15d49e4c0f",
+        "gen5": "172590d1ac2a"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "moveCategory",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 7L, gen5 7L)",
+      "bodies": {
+        "gen4": "f7ade7bb51b0",
+        "gen5": "560af998d66f"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "moveCategoryIcon",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 7L, gen5 7L)",
+      "bodies": {
+        "gen4": "8fc6084ba16d",
+        "gen5": "716c646e3b23"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "movePower",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 15L, gen4 114L, gen5 120L)",
+      "bodies": {
+        "gen2": "63745de1f740",
+        "gen3": "bca37ca531a0",
+        "gen4": "fe5f9dcd4ced",
+        "gen5": "524462120c88"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "moveType",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 11L, gen3 28L, gen4 27L, gen5 43L)",
+      "bodies": {
+        "gen2": "8bbd09c81de5",
+        "gen3": "81884f85a29a",
+        "gen4": "b2273b35f69b",
+        "gen5": "0a553a0d03c9"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "moveTypeIcon",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 6L, gen3 24L, gen4 26L, gen5 26L)",
+      "bodies": {
+        "gen2": "19c203598a98",
+        "gen3": "9305b68ad220",
+        "gen4": "5266e2d9ed8b",
+        "gen5": "cc5460fcdb5e"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "move_name",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 39L, gen4 28L, gen5 28L)",
+      "bodies": {
+        "gen2": "94b4ea620212",
+        "gen3": "3572fc6f20cd",
+        "gen4": "7a9337f3099e",
+        "gen5": "93c888e454db"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "movepoolPower",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 20L, gen3 18L, gen4 26L, gen5 26L)",
+      "bodies": {
+        "gen2": "ffb27ee8216c",
+        "gen3": "d8ecd9d96f30",
+        "gen4": "e7d1d7a97bff",
+        "gen5": "9c7682dbe0d7"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "movepoolResize",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 10L, gen4 12L, gen5 10L)",
+      "bodies": {
+        "gen3": "3ede1f1e4ab2",
+        "gen4": "478eb3c3b62f",
+        "gen5": "478eb3c3b62f"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "movepoolResizeCalc",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 62L, gen4 69L, gen5 72L)",
+      "bodies": {
+        "gen3": "b895b770647d",
+        "gen4": "e511dadb376b",
+        "gen5": "2f9e0d169273"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "movepoolType",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 9L, gen3 12L, gen4 18L, gen5 18L)",
+      "bodies": {
+        "gen2": "679b266aa39b",
+        "gen3": "92dc1f887f01",
+        "gen4": "e4272fa99168",
+        "gen5": "1300e6599947"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "movepoolTypeColor",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 9L, gen3 10L, gen4 15L, gen5 15L)",
+      "bodies": {
+        "gen2": "516c1965fe17",
+        "gen3": "56660d52b71a",
+        "gen4": "1be814255f47",
+        "gen5": "36c19f5bb606"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "newRun",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 75L, gen3 41L, gen4 26L, gen5 17L)",
+      "bodies": {
+        "gen2": "302cc90d4514",
+        "gen3": "bfb3f97e3a8d",
+        "gen4": "419ec85858a7",
+        "gen5": "01fecc821851"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "nullCheck",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 6L, gen3 6L, gen4 6L, gen5 6L)",
+      "bodies": {
+        "gen2": "4d7ba8544b3f",
+        "gen3": "6657516eafaf",
+        "gen4": "31fd05638181",
+        "gen5": "31fd05638181"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "openFolder",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 8L, gen3 6L, gen4 7L, gen5 6L)",
+      "bodies": {
+        "gen2": "d02f76ad05b5",
+        "gen3": "f23f2f14079e",
+        "gen4": "45809ab4e8f8",
+        "gen5": "250606fb710d"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "paralysis",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 9L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen3": "fcb6bf794453",
+        "gen4": "2aed8616df50",
+        "gen5": "2aed8616df50"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "performEvolutionTransition",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 58L, gen4 56L, gen5 56L)",
+      "bodies": {
+        "gen3": "ea134f463e07",
+        "gen4": "475f4c9c24fd",
+        "gen5": "ee9d2f8e8b24"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "pokemon",
+      "reason": "dead in gen2: no caller, and the body references an undeclared `y`; gens 3-5's version looks a field up by dex number.",
+      "bodies": {
+        "gen2": "d7292dbe3c9a",
+        "gen3": "cbec99438cdb",
+        "gen4": "cbec99438cdb",
+        "gen5": "cbec99438cdb"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "reset",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 13L, gen3 13L, gen4 13L, gen5 13L)",
+      "bodies": {
+        "gen2": "d9ccd9341bbe",
+        "gen3": "e17c5d97e263",
+        "gen4": "18764ffcc34a",
+        "gen5": "6e02a350ee2d"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "resetAllStyleSettingsToDefaults",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 6L, gen3 19L, gen4 14L, gen5 10L)",
+      "bodies": {
+        "gen2": "09e25d0d2308",
+        "gen3": "50f9cd8f70a5",
+        "gen4": "b97f654090e6",
+        "gen5": "49bbf9d9d547"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "resetCurrentPokemonToDefaults",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 31L, gen3 16L, gen4 15L, gen5 11L)",
+      "bodies": {
+        "gen2": "efbd8452148c",
+        "gen3": "4a6ac0256c4d",
+        "gen4": "7037e5227090",
+        "gen5": "53b0fd8655a5"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "resolveIncomingSpecies",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 14L, gen5 13L)",
+      "bodies": {
+        "gen4": "f74596ba4b58",
+        "gen5": "9fbc280d448c"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "sendEmulatorEnd",
+      "reason": "UNREVIEWED (console only): gen3 commented out the success/error console lines the other three still print (oracle 9 sees them).",
+      "bodies": {
+        "gen2": "4485f9d24079",
+        "gen3": "0bb24d18aed9",
+        "gen4": "4485f9d24079",
+        "gen5": "4485f9d24079"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "sendEmulatorStart",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 15L, gen3 34L, gen4 34L, gen5 34L)",
+      "bodies": {
+        "gen2": "70a2f06a67ac",
+        "gen3": "6fdacce1af2f",
+        "gen4": "4621963b4f8a",
+        "gen5": "4621963b4f8a"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "sendObsChapterMarker",
+      "reason": "quirk: gen3's legacy OBS exchange probed GetRecordStatus before CreateRecordChapter; the shared client's probeStatus variant reproduces it (core/logic/obs.ts, plan 1.9).",
+      "bodies": {
+        "gen2": "19aeec472adb",
+        "gen3": "e0f6575b5923",
+        "gen4": "19aeec472adb",
+        "gen5": "19aeec472adb"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "set_pokemon_prop",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 6L, gen3 11L, gen4 8L, gen5 8L)",
+      "bodies": {
+        "gen2": "4f1c3226c236",
+        "gen3": "fc708795bc96",
+        "gen4": "e50b0fa18fde",
+        "gen5": "2b7a2f002650"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "set_timer",
+      "reason": "UNREVIEWED: gen2 | gen4 (gen2 14L, gen4 18L)",
+      "bodies": {
+        "gen2": "d76612873782",
+        "gen4": "35577894a5d1"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "specialTrainerGraphics",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 30L, gen3 57L)",
+      "bodies": {
+        "gen2": "810af18df9f6",
+        "gen3": "e6275c7eaf91"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "speed_comparison",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 41L, gen3 39L, gen4 22L, gen5 28L)",
+      "bodies": {
+        "gen2": "549264008a52",
+        "gen3": "2f6d2f5ff0b7",
+        "gen4": "b47b57b3af53",
+        "gen5": "b870c682b5f3"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "stageModifiers",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 (gen2 15L, gen3 17L, gen4 15L)",
+      "bodies": {
+        "gen2": "a889f594f32b",
+        "gen3": "3ea4f6f76fd9",
+        "gen4": "0b3b30ee3e54"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "stageMultiplier",
+      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 10L, gen4 15L, gen5 15L)",
+      "bodies": {
+        "gen3": "70341896612a",
+        "gen4": "df0146e4753e",
+        "gen5": "df0146e4753e"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "statLabelOpacity",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 18L, gen3 37L, gen4 18L, gen5 33L)",
+      "bodies": {
+        "gen2": "0d1c3cd5262a",
+        "gen3": "107d4da1b980",
+        "gen4": "1560e9e18de5",
+        "gen5": "27f73f1402b9"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "stat_mod",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 28L, gen3 7L)",
+      "bodies": {
+        "gen2": "f9018f7e9e1c",
+        "gen3": "915b1464558b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "svgColorClass",
+      "reason": "quirk: gen4's speed_comparison vocabulary is Outspeeds/Speed-Tied/Underspeeds with no fainted check; gen5 reads the enemy hp under stats.hp (its mapper shape); gen2/gen3 share the Outsped/Speed-tie form.",
+      "bodies": {
+        "gen2": "2be3540aea80",
+        "gen3": "2be3540aea80",
+        "gen4": "913ba250f7ce",
+        "gen5": "f5b962a2883d"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "typeEffectiveness",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 79L, gen4 226L, gen5 367L)",
+      "bodies": {
+        "gen2": "b05e215a6b04",
+        "gen3": "47bc213ce0e3",
+        "gen4": "9642e3459e99",
+        "gen5": "3a908129c944"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "type_effectiveness",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 41L, gen3 42L)",
+      "bodies": {
+        "gen2": "b1ebaca32770",
+        "gen3": "cf5b340b84a1"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "updateEvolutionFamilyList",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 37L, gen4 31L, gen5 37L)",
+      "bodies": {
+        "gen3": "34120f25e2ec",
+        "gen4": "00ff28fc3877",
+        "gen5": "a3ca340511e6"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "updateTime",
+      "reason": "UNREVIEWED: gen2 | gen4 (gen2 28L, gen4 30L)",
+      "bodies": {
+        "gen2": "3f0237c4fa6f",
+        "gen4": "82d9d8b41cc8"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "update_battle_moveset",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 30L, gen3 30L, gen4 38L, gen5 38L)",
+      "bodies": {
+        "gen2": "a807ae8bf55b",
+        "gen3": "acd852f02d1c",
+        "gen4": "ad1a5fc0c911",
+        "gen5": "ad1a5fc0c911"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "update_items",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 18L, gen3 20L, gen4 14L, gen5 14L)",
+      "bodies": {
+        "gen2": "19e9026023dd",
+        "gen3": "6311d3cf8f14",
+        "gen4": "2be5cc46ac4e",
+        "gen5": "2be5cc46ac4e"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "update_moveset",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 27L, gen3 27L, gen4 27L, gen5 64L)",
+      "bodies": {
+        "gen2": "0499f2ac4428",
+        "gen3": "bd0ecafa6a96",
+        "gen4": "f467251e8491",
+        "gen5": "231526667d6b"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "update_rom_starter_and_intro_mon",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 24L, gen4 14L, gen5 10L)",
+      "bodies": {
+        "gen3": "337869f34adf",
+        "gen4": "c5745332b5e4",
+        "gen5": "cfcd53b74ea0"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "weatherModifier",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 24L, gen4 23L, gen5 29L)",
+      "bodies": {
+        "gen2": "4fa9730e1512",
+        "gen3": "ad31725da115",
+        "gen4": "9bd16738b94a",
+        "gen5": "330b63069b7e"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "blackout_counter",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 6L, gen3 23L, gen4 19L, gen5 19L)",
+      "bodies": {
+        "gen2": "f9546cac70c8",
+        "gen3": "7c45464ad803",
+        "gen4": "2ed10d75fe27",
+        "gen5": "ce81f77a8a31"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "catch_rate",
+      "reason": "UNREVIEWED: gen3 | gen4 (gen3 21L, gen4 8L)",
+      "bodies": {
+        "gen3": "8e4ef46c991e",
+        "gen4": "7f9ae2d63b5e"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "current_splits",
+      "reason": "quirk (consistent typo): gen2 persists under the key 'this.current_splits'; its data() reads the same key, so it round-trips, and renaming would orphan the stored value (the LevelDB importer carries it as is).",
+      "bodies": {
+        "gen2": "fc8e73169a95",
+        "gen3": "9310f403e906",
+        "gen4": "9310f403e906",
+        "gen5": "9310f403e906"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "evolution",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 76L, gen4 35L, gen5 51L)",
+      "bodies": {
+        "gen3": "23dea62b5586",
+        "gen4": "9d8d4fba7bf7",
+        "gen5": "dfde262f3159"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "playerId",
+      "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 12L, gen3 9L, gen4 9L, gen5 9L)",
+      "bodies": {
+        "gen2": "64eb2e08b55b",
+        "gen3": "747e392815f0",
+        "gen4": "3fdb5e5cdbd8",
+        "gen5": "3fdb5e5cdbd8"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "playerResets",
+      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 43L, gen3 14L, gen4 30L, gen5 30L)",
+      "bodies": {
+        "gen2": "6d4c44bc6233",
+        "gen3": "a586c8890d50",
+        "gen4": "f7e0483477fd",
+        "gen5": "c9096fa627a4"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "previous_splits",
+      "reason": "quirk (consistent typo): gen2 persists under the key 'this.previous_splits'; its data() reads the same key, so it round-trips, and renaming would orphan the stored value.",
+      "bodies": {
+        "gen2": "50506bcbd8a4",
+        "gen3": "3130a706902a",
+        "gen4": "3130a706902a",
+        "gen5": "3130a706902a"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "selected_evolution_species",
+      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 32L, gen4 77L, gen5 32L)",
+      "bodies": {
+        "gen3": "15a91362a07a",
+        "gen4": "04aa0c59b435",
+        "gen5": "b863aab8e690"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "starter",
+      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 29L, gen4 147L, gen5 117L)",
+      "bodies": {
+        "gen2": "a74be0ab03b1",
+        "gen4": "0297b3df99ef",
+        "gen5": "327a5ed50f3f"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "ui_stat_arrangement",
+      "reason": "quirk: gen3's dropdown labels are 'Speed: bottom right' / 'Speed: top right' where the others spell out the stat order; same modifiers.",
+      "bodies": {
+        "gen2": "2ae5d8a1be23",
+        "gen3": "7107339dddbb",
+        "gen4": "2ae5d8a1be23",
+        "gen5": "2ae5d8a1be23"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "ui_type_colors",
+      "reason": "quirk: gen3 has a third option, 'Legacy Stats & Current Type' (blended_), the others lack.",
+      "bodies": {
+        "gen2": "72c5ae18f0bb",
+        "gen3": "fd7434e70355",
+        "gen5": "72c5ae18f0bb"
+      }
+    }
+  ]
+}

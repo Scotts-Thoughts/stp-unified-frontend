@@ -1101,10 +1101,14 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendChapterMarker, shuckieBookmarksEnabled, setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampDvs, clampStat, DV_MAX, gen12Stat, gen2Gender, gen2HiddenPower, hpDv as hpDvOf, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
+import { enemySpriteStyleMixin } from "~/core/overlay/enemySpriteStyleMixin";
+import { formattersMixin } from "~/core/overlay/formattersMixin";
+import { overlayCommonMixin } from "~/core/overlay/overlayCommonMixin";
+import { battleMathMixin } from "~/core/overlay/battleMathMixin";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen2Hotkeys } from "./hotkeys";
@@ -1140,6 +1144,7 @@ import { unobtainable_moves_object } from "./data/unobtainable_moves.js";
 let backport_check_string, battle_end, d, damageMax, damageMin, g2HpType, g2gamestate, h, hpPower, ivAtkBit, ivDefBit, m, maxPercentage, minPercentage, newColor, part1, part2, part3, part4, starterType, string, timecode, upperZ, usableVitamins, v, vitaminsUsed, w, x, y;
 
 export default defineComponent({
+    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, overlayCommonMixin, battleMathMixin],
             
     //DATA & DEFINITIONS
     props: ["game"],
@@ -1727,10 +1732,6 @@ export default defineComponent({
     },
 
     watch: {
-        shuckie_bookmarks(enabled) {
-            // Global, not this generation's MyStorage: the bookmarks are core's (core/logic/shuckieBookmarks.ts).
-            setShuckieBookmarksEnabled(enabled);
-        },
         toggle_wEarlyEncounters(newValue) {
             if (newValue == true) {
                 this.game.properties.patch.wEarlyEncounters.set("On", false)
@@ -1926,9 +1927,6 @@ export default defineComponent({
                 this.blackout_counter = 0;
             }
         },    
-        overlay_color(newColor) {
-            document.documentElement.style.setProperty('--overlay-color', newColor);
-        }, 
         playerResets(newProp) {
             // Select the div
             // let resets = document.querySelector('#resets');
@@ -2430,15 +2428,6 @@ export default defineComponent({
                     return "g5State"
             }
         },
-        s1() {
-            return this.game?.properties?.player?.team[0]
-        },
-        map() {
-            return this.game?.properties
-        },
-        batt() {
-            return this.game?.properties?.battle
-        },
         battEn() {
             return this.game?.properties?.battle?.enemyPokemon
         },
@@ -2540,14 +2529,6 @@ export default defineComponent({
             }
             return maxArr
         },
-        weather_boolean() {
-            if (this.batt.field?.weather?.value == "Sun" || this.batt.field?.weather?.value == "Rain" || this.batt.field?.weather?.value == "Sandstorm") {
-                return true
-            }
-            else {
-                return false
-            }
-        },
         field_effect_array() {
             if (this.g2stateVariable == `Battle`) {
                 var reflect = this.batt.field.player.statusReflect?.value
@@ -2573,18 +2554,6 @@ export default defineComponent({
                     [weather, false, 0,],
                 ]
             }
-        },
-        field_effect_first_expiring() {
-            var field_effect_most_recent_array = ["Reflect", false, 6,]
-            for(var i = 0; i < this.field_effect_array.length; i++) {
-                if (this.field_effect_array[i][2] < field_effect_most_recent_array[2] && this.field_effect_array[i][2] != 0) {
-                    field_effect_most_recent_array = this.field_effect_array[i]
-                }
-            }
-            if (this.field_effect_array[0][2] == 0 && this.field_effect_array[1][2] == 0 && this.field_effect_array[2][2] == 0 && this.field_effect_array[3][2] == 0) {
-                field_effect_most_recent_array = [this.last_initiated_field_effect, false, 0]
-            }
-            return field_effect_most_recent_array
         },
     },
 
@@ -2664,30 +2633,6 @@ export default defineComponent({
         },
         // ============ End Style Settings Management Methods ============
 
-        formatMilliseconds(ms) {
-            // Truncate milliseconds to seconds
-            const totalSeconds = Math.floor(ms / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            
-            // Helper function to pad with leading zero
-            const pad = (x) => x.toString().padStart(2, "0");
-            
-            // Progressive format: starts at "0" and grows as needed
-            if (hours > 0) {
-                return `${hours}:${pad(minutes)}:${pad(seconds)}`;
-            } else if (minutes > 0) {
-                return `${minutes}:${pad(seconds)}`;
-            } else {
-                return seconds.toString();
-            }
-        },
-        getCentiseconds(ms) {
-            // Convert milliseconds to centiseconds and extract only the centiseconds part
-            const centiseconds = Math.floor(ms / 10) % 100;
-            return centiseconds.toString().padStart(2, "0");
-        },
         async fetchEmulatorStats() {
             try {
                 const response = await fetch('http://127.0.0.1:30158/stats');
@@ -3181,15 +3126,6 @@ export default defineComponent({
             ])
             console.log("Encounters should be set.")
         },
-        get_nested_property(obj, path) {
-            return path.split('.').reduce((o, p) => (o || {})[p], obj);
-        },
-        split_diff_color(difference_string) {
-            if (difference_string === "-")          { return "color: black" }
-            if (difference_string === "+0:00")      { return "color: black" }
-            if (difference_string.charAt(0) == "+") { return "color: red" }
-            if (difference_string.charAt(0) == "-") { return "color: green" }
-        },
         // convertDurationToSeconds(duration) {
         //     const parts = duration.split(':').map(part => parseInt(part, 10));
         //     if (parts.length === 1) {
@@ -3212,21 +3148,6 @@ export default defineComponent({
                 return parts[0] * 60 + parts[1];
             } else if (parts.length === 3) {
                 return parts[0] * 3600 + parts[1] * 60 + parts[2];
-            }
-        },
-        convertSecondsToDuration(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const remainingSeconds = seconds % 60;
-        
-            if (hours > 0) {
-                return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-            } else if (minutes > 0) {
-                return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
-            } else {
-                var seconds = remainingSeconds
-                if (remainingSeconds < 10) { seconds = "0" + remainingSeconds.toString() }
-                return `0:${String(seconds)}`
             }
         },
         convertMSToDuration(milliseconds) {
@@ -3568,9 +3489,6 @@ export default defineComponent({
             this.overlay_color = newColor;
             // this.load_pokemon_sprite_settings()
         },
-        async colorPick() {
-            return new EyeDropper().open().then(res => res.sRGBHex)
-        },
         async color_picker() {
             var color = await this.colorPick()
             this.set_pokemon_prop("overlay_color", color)
@@ -3596,9 +3514,6 @@ export default defineComponent({
             this.backgroundScale = MyStorage[pokemon_species]?.backgroundScale ?? 100
             this.backgroundUrl = MyStorage[pokemon_species]?.backgroundUrl ?? false
         },
-        keys_function(object) {
-            return Object.keys(object)
-        },
         //*timer methods
         //start the timer
         startTime() {
@@ -3613,26 +3528,10 @@ export default defineComponent({
             this.timer_pause = false
             this.updateTime()
         },
-        set_timer() {
-            const timeRegex = /(\d+):(\d{2}):(\d{2})\.(\d{2})/;
-            const timeOffsetArray = this.timer_startTimeOffset.match(timeRegex)?.slice(1,5).map(x => parseInt(x)) ?? [0,0,0,0];
-            const timeOffset = timeOffsetArray[0] * 3600000 + timeOffsetArray[1] * 60000 + timeOffsetArray[2] * 1000 + timeOffsetArray[3] * 10;
-
-            this.timer_pause = true
-            this.timer_startTime = Date.now() - timeOffset
-            this.timer_pause_time = Date.now()
-            this.timer_formatted_time = [ "0", ".00" ]
-            this.finished_logs = false
-
-            this.updateTime()
-        },
         //stop the timer
         stopTime() {
             this.timer_pause_time = Date.now()
             this.timer_pause = true
-        },
-        padTime(time) {
-            return time.toString().padStart(2, "0")
         },
         set_timer() {
             const timeRegex = /(\d+):(\d{2}):(\d{2})\.(\d{2})/;
@@ -4046,21 +3945,6 @@ export default defineComponent({
             var split = splitData[splitNumber]["realtime.end"]
             return this.formatDuration(split)
         },
-        formatDuration(x) {
-            if (x.startsWith("00:")) {
-                x = x.substring(3)
-            }
-            if (x.startsWith(0)) {
-                x = x.substring(1)
-            }
-            x = x.substring(0, x.length-4)
-            return x
-        },
-        split(splitName, splits) {
-            var split = splits.find(x => x.trainer_name === splitName)
-            if (split == undefined) return
-            return split["realtime.end.hours"] + ":" + split["realtime.end.minutes"] + ":" + split["realtime.end.seconds"]
-        },
 
         //AUTOMATION MOVEPOOL GRAPHIC
         dataSearch(dataObject, pointerValue) {
@@ -4316,27 +4200,6 @@ export default defineComponent({
                 move: move,
             }
         },
-        speedComparison(playerPkmnData, enemyPkmnData) {
-            var playerSpeed = playerPkmnData.speed.value
-            var enemySpeed = enemyPkmnData.speed.value
-            if (playerSpeed > enemySpeed) {
-                return "Outspeeds"
-            }
-            if (playerSpeed == enemySpeed) {
-                return "Speed-Tied"
-            }
-            if (playerSpeed < enemySpeed) {
-                return "Underspeeds"
-            }
-        },
-        enemyPkmnFaintCheck(pkmnData) {
-            if (pkmnData.hp == 0) {
-                return false
-            }
-            else {
-                return true
-            }
-        },
         enemyPkmnFaint(pkmnData) {
             // The sprite's flip lives in `transform: scale(-x, y)`, which CSS applies *after* the
             // filter — so a flipped sprite mirrors the drop-shadow's X offset onto the wrong side.
@@ -4550,32 +4413,6 @@ export default defineComponent({
             this.game.properties.time.start.hour.setBytes([hrs], false);
             this.game.properties.time.start.day.setBytes([day], false);
         },
-        camelCase: function (str) {
-            if (!str || !str.toString()) { return '' }
-            return str.toString().replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-                return index == 0 ? word.toUpperCase() : word.toLowerCase();
-            })
-        },
-        pascalCaseSpace(str) {
-            let words = str.split(' ');
-            for (let char of words) {
-                words[words.indexOf(char)] = char.charAt(0).toUpperCase() + char.slice(1);
-            }
-            return words.join(' ');
-        },
-        pascalCaseDot(str) {
-            let words = str.split('.');
-            for (let char of words) {
-                words[words.indexOf(char)] = char.charAt(0).toUpperCase() + char.slice(1);
-            }
-            return words.join(' ');
-        },
-        capitalization_format(str) {
-            if (str == null) { return "" }
-            return str.toLowerCase().replace(/(^|\s|\-|\.)(\w)/g, function(match, p1, p2) {
-              return p1 + p2.toUpperCase();
-            });
-        },
         //SHORTHANDS
         // s1() {
         //     return this.game?.properties?.player?.team[0]
@@ -4654,48 +4491,12 @@ export default defineComponent({
                 percent: (exp - currLvlExp) / (nextLvlExp - currLvlExp),
             };
         }, 
-        decimalToPercentage(decimal) {
-            return Math.round(decimal * 100);
-        },
 
         //ENEMY GRAPHIC MANAGEMENT
         g2trainer(x, y) {
             return (x + " " + y)
         },
 
-        g2trainerEnemySelector(trainerClass) {
-            if (this.showAllTrainers == false && (
-                trainerClass == "FALKNER" ||
-                trainerClass == "BUGSY" ||
-                trainerClass == "WHITNEY" ||
-                trainerClass == "MORTY" ||
-                trainerClass == "CHUCK" ||
-                trainerClass == "JASMINE" ||
-                trainerClass == "PRYCE" ||
-                trainerClass == "CLAIR" ||
-                trainerClass == "WILL" ||
-                trainerClass == "KOGA" ||
-                trainerClass == "BRUNO" ||
-                trainerClass == "KAREN" ||
-                trainerClass == "CHAMPION" ||
-                // trainerClass == "BROCK" ||
-                // trainerClass == "MISTY" ||
-                // trainerClass == "LT. SURGE" ||
-                // trainerClass == "JANINE" ||
-                // trainerClass == "ERIKA" ||
-                // trainerClass == "KOGA" ||
-                // trainerClass == "SABRINA" ||
-                // trainerClass == "BLAINE" ||
-                trainerClass == "BLUE" ||
-                trainerClass == "RED")
-                ) {
-                    return 1
-                }
-            else if (this.showAllTrainers == true && this.game.properties.battle.mode.value == "Trainer")
-                return 1
-            else
-                return 0
-        },
 
         fixTrainerName(trainerName, trainerNumber) {
             const rival1Teams = [
@@ -4866,12 +4667,6 @@ export default defineComponent({
                 if (move) return move.Type
             }
             return null
-        },
-        checkTypes(x, y) { //x = type1.value, y = type2.value
-            if (x.value == y.value)
-                return true
-            else
-                return false
         },
         weatherModifier(weather, move, moveType) {
             if (move) { move = move.toUpperCase() }
@@ -5590,9 +5385,6 @@ export default defineComponent({
                 return this.starter.toLowerCase()
             }
         },
-        sleep(ms) {
-            return new Promise((res) => setTimeout(res, ms))
-        },
         // sanitizeName(target) {
         //     //gamehook sets some bytes in ways that don't match the game, ie 00 for space instead of 7F
         //     //this function makes an array of characters that match a target character
@@ -5623,187 +5415,15 @@ export default defineComponent({
         //     })
         // },
 
-        /* === Enemy sprite resize tool ============================================
-         * Ctrl+Click an enemy team sprite to enter resize mode. Drag the corner
-         * handle to scale, arrow keys to move (Shift+arrow = ±10px), F1 to flip.
-         * Enter commits to enemy_sprite_scales.js (dev mode); Escape cancels.
-         */
-        getEnemySpriteScale(species) {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getScale(species);
-        },
-        getEnemySpriteXOffset(species) {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getXOffset(species);
-        },
-        getEnemySpriteYOffset(species) {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getYOffset(species);
-        },
-        getEnemySpriteFlipped(species) {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            return enemySpriteScaleManager.getFlipped(species);
-        },
-        enemyTransformFor(species) {
-            // Dev-mode escape hatch: when the styles toggle is off, render at native size/position
-            // so footage stays congruent with content filmed before the resize feature shipped.
-            // Packaged builds ignore the toggle and always apply styles. Style Mode also overrides
-            // the toggle so the user can see what they're editing.
-            if (this.isInDevMode && !this.enemy_sprite_styles_enabled && !this.style_mode_active) {
-                return 'none';
-            }
-            const s = this.getEnemySpriteScale(species);
-            const x = this.getEnemySpriteXOffset(species);
-            const y = this.getEnemySpriteYOffset(species);
-            const sx = this.getEnemySpriteFlipped(species) ? -s : s;
-            return `translate(${x}px, ${y}px) scale(${sx}, ${s})`;
-        },
-        nudgeEnemySpriteY(deltaPx) {
-            if (!this.enemyResize.species) return;
-            const cur = enemySpriteScaleManager.getYOffset(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { yOffset: cur + deltaPx });
-            this.enemyScaleVersion++;
-        },
-        nudgeEnemySpriteX(deltaPx) {
-            if (!this.enemyResize.species) return;
-            const cur = enemySpriteScaleManager.getXOffset(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { xOffset: cur + deltaPx });
-            this.enemyScaleVersion++;
-        },
-        toggleEnemySpriteFlip() {
-            if (!this.enemyResize.species) return;
-            const cur = enemySpriteScaleManager.getFlipped(this.enemyResize.species);
-            enemySpriteScaleManager.setLive(this.enemyResize.species, { flipped: !cur });
-            this.enemyScaleVersion++;
-        },
-        _getAppScale() {
-            const el = document.getElementById('app-container');
-            if (!el) return 1;
-            const t = getComputedStyle(el).transform;
-            if (!t || t === 'none') return 1;
-            const m = t.match(/matrix\(([^)]+)\)/);
-            if (m) {
-                const parts = m[1].split(',').map(s => parseFloat(s));
-                if (!Number.isNaN(parts[0]) && parts[0] > 0) return parts[0];
-            }
-            return 1;
-        },
-        enemySpriteHandlePosition() {
-            // eslint-disable-next-line no-unused-expressions
-            this.enemyScaleVersion;
-            const slot = this.enemyResize.slot;
-            if (slot == null) return null;
-            const sprite = document.querySelector(`.ePkmnSprite[data-enemy-slot="${slot}"]`);
-            if (!sprite) return null;
-            const rect = sprite.getBoundingClientRect();
-            return { left: (rect.right - 8) + 'px', top: (rect.bottom - 8) + 'px' };
-        },
-        onEnemyResizeHandleMouseDown(event) {
-            if (!this.enemyResize.species) return;
-            event.preventDefault();
-            event.stopPropagation();
-            const startX = event.clientX;
-            const startY = event.clientY;
-            const baseSize = this.enemyResize.baseSize;
-            const species = this.enemyResize.species;
-            const startScale = enemySpriteScaleManager.getScale(species);
-            const startWidth = baseSize * startScale;
-            const appScale = this._getAppScale();
-            const onMove = (ev) => {
-                const dx = ev.clientX - startX;
-                const dy = ev.clientY - startY;
-                const delta = (dx + dy) / 2;
-                const designDelta = appScale > 0 ? delta / appScale : delta;
-                const newWidth = Math.max(20, startWidth + designDelta);
-                const newScale = newWidth / baseSize;
-                enemySpriteScaleManager.setLive(species, { scale: newScale });
-                this.enemyScaleVersion++;
-            };
-            const onUp = () => {
-                window.removeEventListener('mousemove', onMove);
-                window.removeEventListener('mouseup', onUp);
-            };
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onUp);
-        },
-        commitEnemySpriteResize() {
-            if (!this.enemyResize.species) return;
-            enemySpriteScaleManager.commit(this.enemyResize.species);
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        cancelEnemySpriteResize() {
-            if (!this.enemyResize.species) return;
-            enemySpriteScaleManager.clearOverride(this.enemyResize.species);
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-
         /* === Style Mode (dev only) ==========================================
          * See gen5/app/frontend.js for the reference implementation. Gen 2
          * differs in two ways:
          *   - species source: dexDataCrystal (Crystal pokédex).
          *   - dummy slot uses class `ePkmn1` (1-indexed) instead of `ePkmn0`.
          */
-        styleModeCurrentSpecies() {
-            if (!this.style_mode_active) return null;
-            return this.style_mode_species_list[this.style_mode_index] ?? null;
-        },
         _styleModeBuildList() {
             const all = Object.keys(this.dexDataCrystal || {});
             return all.filter((name) => name && name !== '—' && name !== 'Egg');
-        },
-        _styleModeFocusCurrent() {
-            const species = this.style_mode_species_list[this.style_mode_index];
-            if (!species) return;
-            this.enemyResize = { species, slot: 0, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        enterStyleMode() {
-            if (!this.isInDevMode) return;
-            const list = this._styleModeBuildList();
-            if (list.length === 0) return;
-            this.style_mode_species_list = list;
-            this.style_mode_index = 0;
-            this.style_mode_active = true;
-            this.$nextTick(() => this._styleModeFocusCurrent());
-        },
-        exitStyleMode() {
-            const species = this.styleModeCurrentSpecies();
-            if (species) enemySpriteScaleManager.clearOverride(species);
-            this.style_mode_active = false;
-            this.style_mode_species_list = [];
-            this.style_mode_index = 0;
-            this.enemyResize = { species: null, slot: null, baseSize: 108, spriteEl: null };
-            this.enemyScaleVersion++;
-        },
-        styleModeAdvance() {
-            if (!this.style_mode_active) return;
-            const species = this.styleModeCurrentSpecies();
-            if (species) {
-                enemySpriteScaleManager.commit(species);
-            }
-            if (this.style_mode_index + 1 >= this.style_mode_species_list.length) {
-                this.exitStyleMode();
-                return;
-            }
-            this.style_mode_index++;
-            this.$nextTick(() => this._styleModeFocusCurrent());
-        },
-        styleModeBack() {
-            if (!this.style_mode_active) return;
-            const species = this.styleModeCurrentSpecies();
-            if (species) enemySpriteScaleManager.clearOverride(species);
-            if (this.style_mode_index === 0) {
-                this._styleModeFocusCurrent();
-                return;
-            }
-            this.style_mode_index--;
-            this.$nextTick(() => this._styleModeFocusCurrent());
         },
     },
 

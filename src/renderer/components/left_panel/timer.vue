@@ -44,7 +44,10 @@ export default defineComponent({
     created() {
         PubSub.subscribe("@timer/update", this.onTimeUpdate);
     },
-    onUnmounted() {
+    // Was `onUnmounted`, which the Options API never calls: every overlay unmount
+    // left the old instance subscribed, so the timer loop kept publishing into dead
+    // components and could never tell that nobody was listening (Timer.updateLoop).
+    unmounted() {
         PubSub.unsubscribe("@timer/update", this.onTimeUpdate);
     }
 });

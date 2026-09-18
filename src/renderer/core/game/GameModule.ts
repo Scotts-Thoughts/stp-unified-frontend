@@ -36,7 +36,12 @@ export interface Edition {
     devOnly?: boolean;
 }
 
-/** Everything a generation can switch on. Absent means off. */
+/**
+ * Everything a generation can switch on. Every module answers every flag (the record is
+ * not partial): adding a feature here is a compile error in each `games/genN/index.ts`
+ * until that generation says true or false, which is the point -- a feature that lands
+ * in one generation cannot be silently absent from the others' declarations.
+ */
 export type Feature =
     | "abilities" | "natures" | "physicalSpecialSplit" | "doubleBattles" | "badgeBoosts" | "expBar"
     | "repelCounter" | "bonkCounter" | "voltorbFlip" | "fling" | "inventorySprites" | "romPatching"
@@ -79,7 +84,7 @@ export interface GameModule {
     /** The mapper game-name strings this module accepts: the data keys. */
     games: string[];
     editions: Edition[];
-    features: Partial<Record<Feature, boolean>>;
+    features: Record<Feature, boolean>;
     hooks: RunHooks;
     /** Per-generation data. Typed loosely until Phase 2 settles the shared shapes. */
     data: {

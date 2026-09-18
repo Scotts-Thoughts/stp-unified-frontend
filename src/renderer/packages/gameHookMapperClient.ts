@@ -1,4 +1,14 @@
 import {HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from "@microsoft/signalr";
+import { markRaw, reactive, toRaw } from "vue";
+
+// main.ts keeps the client in its root component's data(), so Vue proxies the whole
+// instance. That is what the overlay needs from `meta`, `properties` and each
+// property object -- the templates read `game.properties.x.value` -- but it also
+// used to reach the four internal tables: every SignalR batch did its Map lookups
+// through instrumented proxies, and the debounce loop walked `_debouceMap` through
+// the reactive Map iterator every frame (docs/performance-followups.md A). The
+// tables are `markRaw`'d: nothing renders them, and the property objects they hold
+// are stored as their reactive proxies so a write through them still triggers.
 
 export enum GamePropertyType {
 	binaryCodedDecimal = "binaryCodedDecimal",
@@ -108,19 +118,69 @@ function createGameHookProperty(
     return instance;
 }
 
+/** The fields a `PropertiesChanged` entry (and a `/mapper` DTO) carries onto a property, `value` last. */
+const UPDATED_FIELDS = [
+    "memoryContainer", "address", "length", "size", "reference", "bits",
+    "description", "bytes", "isFrozen", "isReadOnly", "value",
+] as const;
+
+function sameBytes(a: number[] | null | undefined, b: number[] | null | undefined): boolean {
+    if (a === b) return true;
+    if (!a || !b || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+}
+
+/**
+ * Copies a DTO's fields onto a property, writing only the ones that differ. Every
+ * write goes through the property's reactive proxy and is a `trigger()`; a batch used
+ * to make eleven of them per changed property when usually one or two fields moved.
+ * `bytes` is a fresh array in every DTO, so it is compared by content; a `value` that
+ * is an array or object (bitArray, a struct) is assigned when its identity changed,
+ * as before.
+ */
+function applyPropertyFields(property: GameHookProperty, dto: GamehookPropertyData, deepValue = false): void {
+    const raw = toRaw(property) as GameHookProperty;
+    for (const field of UPDATED_FIELDS) {
+        const next = dto[field];
+        const current = raw[field];
+        if (field === "bytes") {
+            if (sameBytes(current as number[], next as number[])) continue;
+        } else if (current === next) {
+            continue;
+        } else if (deepValue && field === "value" && typeof next === "object" && next !== null && typeof current === "object" && current !== null) {
+            // The minute refresh: a bitArray or struct value that is equal by content
+            // is left alone, so it does not re-render its dependents once a minute.
+            if (JSON.stringify(current) === JSON.stringify(next)) continue;
+        }
+        (property as any)[field] = next;
+    }
+}
+
+/**
+ * The snapshot handlers receive as `oldProperty`, read off the raw object rather than
+ * through the proxy: every updated field, plus the three an update never touches.
+ */
+function snapshotProperty(property: GameHookProperty): GamehookPropertyData {
+    const raw = toRaw(property) as GameHookProperty;
+    const snapshot = { path: raw.path, type: raw.type, fieldsChanged: raw.fieldsChanged } as GamehookPropertyData;
+    for (const field of UPDATED_FIELDS) (snapshot as any)[field] = raw[field];
+    return snapshot;
+}
+
 export class GameHookMapperClient {
     _connectionString: string;
     _signalrClient: HubConnection | null = null;
-    _properties: GameHookProperty[] = [];
+    _properties: GameHookProperty[] = markRaw([]);
     _propertiesMap: Map<string, GameHookProperty> | null = null;
     _debouceTimeout = 10;
     _debouceList: string[] = [];
-    _debouceMap;
+    _debouceMap: Map<string, { property: GameHookProperty; timeoutFrames: number; newProperty: any }> | null = null;
     meta;
     properties: Record<string, GameHookProperty> = {};
     glossary;
-    _change: Record<string, any[]> = {};
-    _once: Record<string, any[]> = {};
+    _change: Record<string, any[]> = markRaw({});
+    _once: Record<string, any[]> = markRaw({});
     /**
      * The one pending 60 s mapper refresh. `loadMapper()` used to schedule its next
      * run without cancelling the previous timer, and it is called from every
@@ -129,6 +189,32 @@ export class GameHookMapperClient {
      * tree, which re-renders the whole overlay (docs/performance-followups.md).
      */
     _refreshTimer: ReturnType<typeof setTimeout> | null = null;
+    /**
+     * The debounce frame loop (`debouce` in `connect()`) and whether a chain of it is
+     * running. `connect()` used to start the loop exactly once, after its first
+     * `_establishConnection()`, so any path that reached a connection some other way
+     * left it dead for the session: a retry after PokeAByte came up late, a reconnect
+     * after it restarted, and -- until the null guard in the loop -- a first
+     * connection while PokeAByte had no mapper loaded, where the first tick threw. A
+     * dead loop parks every debounced property forever (the `PropertiesChanged` handler
+     * hands them to the loop), so `battle.opponent.team_count`, the enemy team and
+     * `battle.opponent.active_pokemon` stopped updating and the enemy team area drew
+     * the previous battle's slot count. Every successful `_establishConnection()` now
+     * starts the loop through {@link _startDebounceLoop}, which is a no-op while a
+     * chain is already running, so there is never more than one.
+     */
+    _debounceTick: (() => void) | null = null;
+    _debounceLoopRunning = false;
+    /** Set by `disconnect()`: the `onclose` that follows is ours, not a lost connection to reconnect. */
+    _stopping = false;
+    /**
+     * The 5 s retry `_establishConnection()` arms when PokeAByte is down, so that
+     * `disconnect()` can cancel it. Without the handle a retry landing after the shell
+     * tore the client down found no SignalR client to start, went straight to
+     * `connected = true`, `onConnected()`, a mapper GET and the frame loop -- and
+     * PokeAByte coming up later "reconnected" an overlay that no longer existed.
+     */
+    _retryTimer: ReturnType<typeof setTimeout> | null = null;
 
     connected: boolean = false;
     private _options: { automaticRefreshMapperTimeMinutes: number; };
@@ -179,11 +265,63 @@ export class GameHookMapperClient {
     _deconstructMapper() {
         this._cancelRefresh()
         this.meta = null;
-        this._properties = [];
+        this._properties = markRaw([]);
         this._propertiesMap = null;
         this._debouceMap = null;
         this.properties = {};
         this.glossary = null;
+    }
+
+    _scheduleRefresh() {
+        this._cancelRefresh()
+        this._refreshTimer = setTimeout(() => {
+            this._refreshTimer = null
+            // A transient failure (PokeAByte briefly unreachable, a non-JSON body) used
+            // to end the chain for the session as an unhandled rejection. It is logged
+            // and the next refresh is scheduled -- unless the fetch found no mapper, in
+            // which case `_fetchMapper` has already torn the mapper down.
+            this.refreshMapper().catch((err) => {
+                console.warn('[GameHook Client] Mapper refresh failed:', err)
+                if (this.mapperLoaded) this._scheduleRefresh()
+            })
+        }, this._options.automaticRefreshMapperTimeMinutes * 60000)
+    }
+
+    _buildDebounceMap(previous: typeof this._debouceMap = null) {
+        const map = markRaw(new Map<string, { property: GameHookProperty; timeoutFrames: number; newProperty: any }>())
+        this._debouceList.forEach(x => {
+            this._properties.forEach(y => {
+                if (y.path.startsWith(x)) {
+                    map.set(y.path, previous?.get(y.path) ?? {
+                        property: y,
+                        timeoutFrames: -1,
+                        newProperty: null
+                    })
+                }
+            })
+        })
+        this._debouceMap = map
+    }
+
+    /** `GET /mapper`, or a throw after `_deconstructMapper()` on any other status (as `loadMapper()` always did). */
+    async _fetchMapper() {
+        return fetch(`${this._connectionString}/mapper`)
+            .then(async (x) => {
+                return { response: x, body: await x.json() }
+            })
+            .then(x => {
+                if (x.response.status === 200) {
+                    return x.body
+                } else {
+                    this._deconstructMapper()
+
+                    if (x.body) {
+                        throw x.body
+                    } else {
+                        throw new Error('Unknown error.')
+                    }
+                }
+            })
     }
 
     get(path) {
@@ -207,19 +345,7 @@ export class GameHookMapperClient {
         this._debouceList = [...paths]
         this._debouceTimeout = frames
         if (!this._properties || this._properties.length === 0) return
-        const previous = this._debouceMap
-        this._debouceMap = new Map()
-        this._debouceList.forEach(x => {
-            this._properties.forEach(y => {
-                if (y.path.startsWith(x)) {
-                    this._debouceMap.set(y.path, previous?.get(y.path) ?? {
-                        property: y,
-                        timeoutFrames: -1,
-                        newProperty: null
-                    })
-                }
-            })
-        })
+        this._buildDebounceMap(this._debouceMap)
     }
 
     async loadMapper() {
@@ -240,58 +366,71 @@ export class GameHookMapperClient {
             target[path[lastKeyIndex]] = value
         }
 
-        let mapper = await fetch(`${this._connectionString}/mapper`)
-            .then(async (x) => {
-                return { response: x, body: await x.json() }
-            })
-            .then(x => {
-                if (x.response.status === 200) {
-                    return x.body
-                } else {
-                    this._deconstructMapper()
-
-                    if (x.body) {
-                        throw x.body
-                    } else {
-                        throw new Error('Unknown error.')
-                    }
-                }
-            })
+        let mapper = await this._fetchMapper()
 
         this.meta = mapper.meta
         this.glossary = mapper.glossary
 
-        // Translate properties from a flat array to a nested object.
-        this.properties = {};
-        this._properties = mapper.properties.map((x: GamehookPropertyData) => createGameHookProperty(this, x));
-        this._properties.forEach((x: { path: string; }) => assign(this.properties, x.path.split('.'), x));
+        // Translate properties from a flat array to a nested object. The tree is built
+        // plain and assigned once: `properties` is what main.ts's `game` computed
+        // depends on, and the overlay reads the property objects through it.
+        const properties = markRaw(mapper.properties.map((x: GamehookPropertyData) => createGameHookProperty(this, x))) as GameHookProperty[];
+        const tree: Record<string, GameHookProperty> = {};
+        properties.forEach((x: { path: string; }) => assign(tree, x.path.split('.'), x));
+        this._properties = properties;
+        this.properties = tree;
 
-        this._propertiesMap = new Map();
-        this._properties.forEach(x => this._propertiesMap?.set(x.path, x));
+        // The lookup table holds each property's reactive proxy (the same one the
+        // overlay sees through `properties`), so `updateProperty` writes trigger.
+        const map = markRaw(new Map<string, GameHookProperty>());
+        properties.forEach(x => map.set(x.path, reactive(x) as GameHookProperty));
+        this._propertiesMap = map;
 
-        this._debouceMap = new Map()
-        this._debouceList.forEach(x => {
-            this._properties.forEach(y => {
-                if (y.path.startsWith(x)) {
-                    this._debouceMap.set(y.path, {
-                        property: y,
-                        timeoutFrames: -1,
-                        newProperty: null
-                    })
-                }
-            })
-        })
+        this._buildDebounceMap()
 
-        this._cancelRefresh()
-        this._refreshTimer = setTimeout(() => {
-            this._refreshTimer = null
-            this.loadMapper()
-        }, this._options.automaticRefreshMapperTimeMinutes * 60000)
+        this._scheduleRefresh()
+
+        return this
+    }
+
+    /**
+     * The once-a-minute resync the reference GameHook client did by calling
+     * `loadMapper()` again (docs/performance-followups.md B). PokeAByte pushes
+     * `MapperLoaded` when the mapper changes and a lost connection reloads on
+     * reconnect, so the refresh only ever confirms what `PropertiesChanged` already
+     * delivered -- but a full reload replaced every property object and reassigned
+     * `properties`, which re-rendered the whole overlay each minute and left any
+     * property object a component had cached pointing at the old tree.
+     *
+     * Now the fetched values are written onto the *existing* objects, field by field
+     * and only where they differ, like a `PropertiesChanged` batch but without the
+     * change handlers (the old refresh fired none either). The tree, `properties`
+     * and the debounce map are untouched, so nothing re-renders unless a value really
+     * moved. A document whose property set differs from the loaded one -- which only a
+     * mapper change could produce, and that comes with its own `MapperLoaded` -- falls
+     * back to the full rebuild.
+     */
+    async refreshMapper() {
+        const mapper = await this._fetchMapper()
+        const map = this._propertiesMap
+        const dtos: GamehookPropertyData[] = mapper.properties ?? []
+        const samePropertySet = !!map && map.size === dtos.length && dtos.every(x => map.has(x.path))
+        if (!samePropertySet) return this.loadMapper()
+
+        for (const dto of dtos) applyPropertyFields(map!.get(dto.path)!, dto, true)
+        // `meta` is a handful of fields and `main.ts` depends on it, so it is compared;
+        // the glossary (thousands of entries on the DS mappers) only changes with the
+        // mapper, which arrives as a `MapperLoaded` and a full `loadMapper()`.
+        if (JSON.stringify(mapper.meta) !== JSON.stringify(toRaw(this.meta))) this.meta = mapper.meta
+
+        this._scheduleRefresh()
 
         return this
     }
 
     async _establishConnection() {
+        // A retry or reconnect that lands after disconnect() has nothing to connect.
+        if (this._stopping) return false
         try {
             if (this._signalrConnectionEstablished == false && this._signalrClient) {
                 await this._signalrClient.start()
@@ -307,6 +446,7 @@ export class GameHookMapperClient {
                 this.onMapperLoaded();
             } catch {}
 
+            this._startDebounceLoop()
             return true
         } catch (err) {
             this._deconstructMapper()
@@ -314,7 +454,10 @@ export class GameHookMapperClient {
             console.error(err)
             this.onMapperLoadError(err)
 
-            setTimeout(() => this._establishConnection(), 5000)
+            this._retryTimer = setTimeout(() => {
+                this._retryTimer = null
+                if (!this._stopping) this._establishConnection()
+            }, 5000)
 
             return false
         }
@@ -322,6 +465,7 @@ export class GameHookMapperClient {
 
     async connect() {
         var that = this
+        this._stopping = false
 
         this._signalrClient = new HubConnectionBuilder()
             .withUrl(`${this._connectionString}/updates`)
@@ -329,6 +473,9 @@ export class GameHookMapperClient {
             .build()
 
         this._signalrClient.onclose(async () => {
+            // A stop `disconnect()` asked for: nothing to recover, and reconnecting here
+            // would set `connected` again and start the loop on a client being torn down.
+            if (that._stopping) return
             console.debug('[GameHook Client] SignalR connection lost. Attempting to reconnect...')
 
             this._deconstructMapper()
@@ -345,34 +492,10 @@ export class GameHookMapperClient {
                 return;
             }
 
-            let oldProperty = {
-                path: property.path,
-                memoryContainer: property.memoryContainer,
-                address: property.address,
-                length: property.length,
-                size: property.size,
-                reference: property.reference,
-                bits: property.bits,
-                description: property.description,
-                value: property.value,
-                bytes: property.bytes,
-                isFrozen: property.isFrozen,
-                isReadOnly: property.isReadOnly,
-                type: property.type,
-                fieldsChanged: property.fieldsChanged,
-            }
-
-            property.memoryContainer = propertyChanged.memoryContainer
-            property.address = propertyChanged.address
-            property.length = propertyChanged.length
-            property.size = propertyChanged.size
-            property.reference = propertyChanged.reference
-            property.bits = propertyChanged.bits
-            property.description = propertyChanged.description
-            property.value = propertyChanged.value
-            property.bytes = propertyChanged.bytes
-            property.isFrozen = propertyChanged.isFrozen
-            property.isReadOnly = propertyChanged.isReadOnly
+            // Handlers receive the pre-update snapshot; it is taken off the raw
+            // object, and the fields are written only where they differ (A, H).
+            let oldProperty = snapshotProperty(property)
+            applyPropertyFields(property, propertyChanged)
 
             // Only trigger the property's change events when
             // the value has changed.
@@ -416,11 +539,15 @@ export class GameHookMapperClient {
                         let property = that._propertiesMap?.get(propertyChanged.path)
                         if (!property) {
                             console.warn(`[GameHook Client] Could not find a related property in PropertyUpdated event for: ${propertyChanged.path}`)
-                            return
+                            // Was `return`, which dropped the rest of the batch on the
+                            // floor -- a stale batch racing a mapper reload, or one path
+                            // the loaded tree lacks, left every later property unapplied.
+                            continue
                         }
-                        if (that._debouceMap.has(propertyChanged.path)) {
-                            this._debouceMap.get(propertyChanged.path).timeoutFrames = this._debouceTimeout
-                            this._debouceMap.get(propertyChanged.path).newProperty = propertyChanged
+                        const debounced = that._debouceMap?.get(propertyChanged.path)
+                        if (debounced) {
+                            debounced.timeoutFrames = that._debouceTimeout
+                            debounced.newProperty = propertyChanged
                         } else {
                             updateProperty(propertyChanged)
                         }
@@ -434,17 +561,25 @@ export class GameHookMapperClient {
         })
 
         function debouce() {
-            for (const value of that._debouceMap.values()) {
-                if (value.timeoutFrames > 0) {
-                    value.timeoutFrames--
-                } else if (value.timeoutFrames === 0) {
-                    updateProperty(value.newProperty)
-                    value.timeoutFrames = -1
+            // The map is null until a mapper is loaded (and again after it unloads);
+            // the walk is over a raw Map (A), not a reactive iterator.
+            const debounceMap = that._debouceMap
+            if (debounceMap) {
+                for (const value of debounceMap.values()) {
+                    if (value.timeoutFrames > 0) {
+                        value.timeoutFrames--
+                    } else if (value.timeoutFrames === 0) {
+                        updateProperty(value.newProperty)
+                        value.timeoutFrames = -1
+                    }
                 }
             }
             if (that.connected === true)
                 requestAnimationFrame(debouce)
+            else
+                that._debounceLoopRunning = false
         }
+        this._debounceTick = debouce
 
         this._signalrClient.on('MapperLoaded', async () => { 
             try {
@@ -457,9 +592,18 @@ export class GameHookMapperClient {
         this._signalrClient.on('Hello', () => { });
 
 
+        // A successful `_establishConnection()` has started the loop; this is the
+        // no-op the first connection always was, kept so the flow reads as before.
         const result = await this._establishConnection()
-        if (result === true) debouce()
+        if (result === true) this._startDebounceLoop()
         return result
+    }
+
+    /** Starts the debounce frame loop if connected and no chain of it is running. */
+    _startDebounceLoop() {
+        if (!this.connected || this._debounceLoopRunning || !this._debounceTick) return
+        this._debounceLoopRunning = true
+        this._debounceTick()
     }
 
     // The three write paths are gen4's (plan 3.3): a failed write is a console.warn
@@ -521,7 +665,15 @@ export class GameHookMapperClient {
      * hub connection; main.ts does the same for every generation.
      */
     async disconnect() {
+        this._stopping = true;
         this.connected = false;
+        // The armed 5 s retry (PokeAByte was down) and the frame loop's tick die with the
+        // client: a later _startDebounceLoop() finds no tick, a later retry finds _stopping.
+        if (this._retryTimer) {
+            clearTimeout(this._retryTimer);
+            this._retryTimer = null;
+        }
+        this._debounceTick = null;
         if (this._signalrClient) {
             try {
                 await this._signalrClient.stop();
@@ -543,8 +695,8 @@ export class GameHookMapperClient {
      * on the reloaded properties.
      */
     clearSubscriptions() {
-        this._change = {};
-        this._once = {};
+        this._change = markRaw({});
+        this._once = markRaw({});
     }
 
     onConnected() { /* Override this with your own function. */ }
