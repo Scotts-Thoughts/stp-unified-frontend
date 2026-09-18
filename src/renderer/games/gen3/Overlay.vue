@@ -1746,6 +1746,7 @@
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
@@ -3939,6 +3940,23 @@ export default defineComponent({
             }
         },
         
+        /**
+         * The OBS chapter markers hook mapper properties by path at mount time. If the
+         * mapper PokeAByte has loaded is missing one of them, that marker silently never
+         * fires for the whole session (e.g. pokemon_emerald_ne.xml without
+         * battle.trainer.party_position => no "Next Pokemon" markers). Shout about it.
+         * The walk is core's (core/logic/chapterMarkerProperties.ts); the table is gen3's.
+         */
+        checkMapperForChapterMarkerProperties() {
+            checkMapperForChapterMarkerProperties(this.game, {
+                'pointers.sStpCallback2':         'trainer IN / OUT, RESET and BLACKOUT markers',
+                'pointers.sStpCallback1':         'RESET marker',
+                'battle.trainer.party_position':  '"Next Pokemon" marker',
+                'patch.sStpTextBoxOpen':          '"Text Box" markers',
+                'overworld.mapName':              '"Map Change" markers',
+            });
+        },
+
         /**
          * Send an OBS WebSocket 5 "CreateRecordChapter" request (Add Chapter Marker).
          * Connects to ws://localhost:4455 (or MyStorage.obs_websocket_url), identifies,
@@ -7144,6 +7162,7 @@ export default defineComponent({
         if (this._unmounted) return
         {
             this.ready = true
+            this.checkMapperForChapterMarkerProperties()
             this.$nextTick(() => {
                 if (this.$refs.expBar) {
                     var species = this.game.properties.player.team[0].species.value ?? this.starterString;
@@ -7661,6 +7680,9 @@ export default defineComponent({
 
         // NEXT POKEMON CHAPTER MARKER (Battle only)
         // Fires "Next Pokemon" whenever battle.trainer.party_position changes during Battle.
+        if (!this.game.properties.battle.trainer.party_position) {
+            console.error('[OBS chapter marker] battle.trainer.party_position missing from mapper - "Next Pokemon" markers disabled for this session.');
+        }
         this.game.properties.battle.trainer.party_position?.change((newProp, oldProp) => {
             console.log("Chapter Detected: Next Pokemon - part 1");
             if (this.g3stateVariable !== 'Battle') return;

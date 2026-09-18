@@ -36,6 +36,7 @@ export function gen4ControlRoutes(vm: () => any): ControlRoutes {
                 selected_game: v?.selected_game,
                 right_ui: v?.right_ui,
                 hidden_power_type: v?.hidden_power_type,
+                nature: v?.pkmnNature,
                 splits: v?.split_type,
                 shuckie_counters: v?.shuckie_counters,
                 show_tutor_moves: v?.show_tutor_moves,
@@ -88,6 +89,13 @@ export function gen4ControlRoutes(vm: () => any): ControlRoutes {
                 if (!query.type) return missing("type");
                 vm().hidden_power_type = query.type;
                 return { ok: true, hidden_power_type: vm().hidden_power_type };
+            },
+            /** gen3's route (its 2026-09 working tree): the Nature dropdown, validated against `simple_natures`. */
+            "/set-nature": (query) => {
+                const v = vm();
+                if (!query.nature || !Object.values(v.simple_natures).includes(query.nature)) return bad("Missing or invalid nature parameter");
+                v.pkmnNature = query.nature;
+                return { ok: true, nature: v.pkmnNature };
             },
             "/set-splits": (query) => {
                 if (!query.mode) return missing("mode");

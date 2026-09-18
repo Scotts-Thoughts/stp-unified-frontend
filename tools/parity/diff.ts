@@ -404,7 +404,9 @@ function diffJsonFile(
  * extras beyond them. Any other extra field, a missing one, or a different value is a
  * finding, named by its key rather than as "sequence differs".
  */
-const STATUS_UNION_EXTRAS = new Set(["app", "generation", "mapper_path", "starter", "starterString", "right_panel", "right_ui"]);
+// `nature` joined gen3's `/status` in its 2026-09 working tree (after the `d3b7648` baselines were
+// captured) and gens 4-5 report it alongside (docs/external-contracts.md section 2).
+const STATUS_UNION_EXTRAS = new Set(["app", "generation", "mapper_path", "starter", "starterString", "right_panel", "right_ui", "nature"]);
 
 function diffControl(basePath: string, candPath: string, out: Difference[]): void {
   if (!existsSync(basePath) && !existsSync(candPath)) return;

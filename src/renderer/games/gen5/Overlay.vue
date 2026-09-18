@@ -1118,6 +1118,7 @@
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
@@ -3333,6 +3334,25 @@ export default defineComponent({
     },
 
     methods: {
+        /**
+         * The OBS chapter markers hook mapper properties by path at mount time. If the
+         * mapper PokeAByte has loaded is missing one of them, that marker silently never
+         * fires for the whole session (gen3's check, its 2026-09 working tree). The walk
+         * is core's (core/logic/chapterMarkerProperties.ts); the table is the paths this
+         * overlay's `mounted` subscribes for its markers.
+         */
+        checkMapperForChapterMarkerProperties() {
+            checkMapperForChapterMarkerProperties(this.game, {
+                'flags.new_game':                           'RESET marker',
+                'player.name':                              'RESET marker',
+                'battle.other.battle':                      'BLACKOUT markers',
+                'battle.opponent.trainer':                  'trainer IN / OUT markers',
+                'meta.state':                               '"Rare Candy Used" marker',
+                'player.team.0.level':                      '"Rare Candy Used" marker',
+                'battle.opponent.party_position':           '"Next Pokemon" marker',
+                'battle.opponent.active_pokemon.stats.hp':  '"Enemy Fainted" marker',
+            });
+        },
                 /**
          * Send an OBS WebSocket 5 "CreateRecordChapter" request (Add Chapter Marker).
          * Connects to ws://localhost:4455 (or MyStorage.obs_websocket_url), identifies,
@@ -8298,6 +8318,7 @@ export default defineComponent({
         // same order: ready, then the next-tick startup work, then the subscriptions.
         {
             this.ready = true
+            this.checkMapperForChapterMarkerProperties()
             this.$nextTick(() => {
                 if (this.$refs.expBar) {
                     const species = this.game.properties.player.team[0].species.value ?? this.starter;
@@ -9512,6 +9533,9 @@ export default defineComponent({
 
         // NEXT POKEMON CHAPTER MARKER (Battle only)
         // Fires "Next Pokemon" whenever battle.opponent.party_position changes during Battle.
+        if (!this.game.properties.battle.opponent.party_position) {
+            console.error('[OBS chapter marker] battle.opponent.party_position missing from mapper - "Next Pokemon" markers disabled for this session.');
+        }
         this.game.properties.battle.opponent.party_position?.change((newProp, oldProp) => {
             if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
             if (newProp?.value === oldProp?.value) return;

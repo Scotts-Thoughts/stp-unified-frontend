@@ -430,6 +430,16 @@
     },
     {
       "section": "methods",
+      "name": "checkMapperForChapterMarkerProperties",
+      "reason": "mapper shape: the shared walk is core/logic/chapterMarkerProperties.ts; each generation passes the table of mapper paths its own `mounted` subscribes for OBS markers (gen3 the sStp pointers/patch, gen4 the DPPt/HGSS reset flag by selected game, gen5 flags.new_game and player.name).",
+      "bodies": {
+        "gen3": "ed290a3f1ae8",
+        "gen4": "d06c97cd2ac7",
+        "gen5": "58643355ae40"
+      }
+    },
+    {
+      "section": "methods",
       "name": "clear_overlay_color",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 7L, gen3 7L, gen4 9L, gen5 6L)",
       "bodies": {

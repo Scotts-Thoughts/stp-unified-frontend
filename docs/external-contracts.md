@@ -60,6 +60,7 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 | `GET /set-game` | `game=<name>` (URL-encoded, may contain `&`) | gen2–5 | sets the game dropdown; queuer waits 1 s then re-reads `/status` |
 | `GET /set-starter` | `species=` | all (the legacy gen1 had no server: the fetch failed and the item stopped) | selects the solo species |
 | `GET /set-hidden-power` | `type=` | not gen1 | |
+| `GET /set-nature` | `nature=<Adamant|…>` (a `simple_natures` name) | gen3-5 (gen3's 2026-09 addition, ported to gen4/5; not yet called by the queuer) | sets the Nature dropdown; `/status` reports it as `nature` |
 | `GET /set-shuckie-counters` | `enabled=true|false` | not gen1 | |
 | `GET /set-show-tutor-moves` | `enabled=` | not gen1, not gen2 | |
 | `GET /set-unobtainable-moves` | `mode=<Always Cross Out|…>` | not gen1 | |
@@ -83,6 +84,7 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 | game | `selected_game` (`this.game_selection`) | `selected_game` (`this.gameSelection`) | `selected_game` | `selected_game` |
 | evolution | – (no concept) | yes | yes | yes |
 | hidden power | `hpType` | `hpType` | `hpType` | `hpType` |
+| nature | – | `nature` (`pkmnNature`) | `nature` | `nature` |
 
 **Unified `/status`:** return the union — `starter` **and** `starterString`, `right_panel` **and** `right_ui`,
 plus `app: "stp-overlay"`, `generation`, `mapper_path`. The queuer's existing per-gen branches then keep
