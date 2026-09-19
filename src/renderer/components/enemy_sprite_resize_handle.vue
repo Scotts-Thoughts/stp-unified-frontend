@@ -119,3 +119,21 @@ export default defineComponent({
     },
 });
 </script>
+
+<style>
+/* Unscoped on purpose: the handle is teleported to <body>, outside the
+   `#app-container.gen-N` wrapper, so the per-gen `.gen-N .ePkmnSpriteResizeHandle`
+   rules never reach it. */
+.ePkmnSpriteResizeHandle {
+    position: fixed;
+    width: 16px;
+    height: 16px;
+    background: #00ffff;
+    border: 2px solid #000;
+    border-radius: 50%;
+    cursor: nwse-resize;
+    z-index: 2147483647;
+    pointer-events: auto;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+}
+</style>

@@ -1367,3 +1367,31 @@ flagged ones (`UNREVIEWED (...)`) by name on every run, and `--strict` fails on 
 entry for a CI that wants the allowlist adjudicated. (3) `check-undefined.ts`'s `@ts-nocheck`
 strip was anchored at the first character, so a directive it missed would have meant zero
 diagnostics for a file the checker never looked at; anchored with leading whitespace now.
+
+## gen1: the ROM starter follows the solo Pokemon (2026-09-18)
+
+gens 2-5 write the chosen starter to the ROM patch whenever the solo Pokemon changes (gen2's
+`starter` watcher calls `set_rom_starter`, gen3-5's `update_rom_starter_and_intro_mon` hangs off
+the dropdown) and once more on mount, so the patch always carries what the dropdown shows. gen1
+still waited for the `Set ROM Starter` button (`components/settings/interface_2.vue`). Scott's
+ask: the same automatic assignment in gen1.
+
+- **The store is the one source.** The dropdown's `v-model` and the queuer's `/set-starter`
+  (`games/gen1/control.ts` -> `setStarter`) both land on `useOverlaySettingsStore.starter`, so one
+  watcher on it in `interface_2.vue` covers both; it calls the button's own `set_rom_starter`
+  (by value for the original 151, `setBytes([0xBF])` for a backport, unknown species warned and
+  skipped -- all unchanged). The overlay settings are read before the overlay mounts
+  (`main.ts` awaits `overlayLoaded` before `ready`), so the watcher never sees the persisted
+  starter arrive: `mounted()` writes it once, gen2's "sync solo pokemon dropdown to the game on
+  load". The button stays as a manual re-sync; the write stays unfrozen, as the legacy gen1
+  always had it (gen2 freezes; vanilla `Init` zeroes HRAM on a reset, so whether gen1's patch
+  needs the same is a question for Scott, not a change this made).
+- **Verified** against a HEAD worktree build on `gen1-yellow-smoke` with `--control`
+  (`tools/reports/starter-sync-gen1.{head,final}`): pixels exact; oracle 5 gains exactly the two
+  intended writes -- `patch/hChosenStarter = Venomoth` at t=0 (mount, the harness's persisted
+  starter) and `= Pikachu` at the control session's `/set-starter`; control, OBS, Shuckie and
+  console identical (the one console error is the fixture's `images/pokemon/null.png`, on both
+  sides). Oracle 0 reports `hubRx` one higher at every checkpoint: the mock echoes the mount-time
+  write as one change frame, so a pre-change capture is now one hub frame behind -- expected,
+  and deterministic (a second capture of the same build diffs all-green against the first).
+  `npm run typecheck` clean. Not yet run against a live game.

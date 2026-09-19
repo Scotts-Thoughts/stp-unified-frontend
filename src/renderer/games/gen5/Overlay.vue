@@ -761,7 +761,7 @@
                             <div v-if="x < game.properties.battle.opponent.team_count.value" :class="`border slots ePkmnStyle ePkmn${x}`">
                                 <div :style="fade_enemy_mon(x)" class="eFaintTransition">
                                     <div :style="fade_enemy_mon_text(x)" class="eFaintTransition">
-                                        <img class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemy_mon_static[x]?.species?.value" :style="{ transform: enemyTransformFor(enemy_mon_static[x]?.species?.value) }" :src="`images/gen5/pokemon/${speciesSpecialCharacters(enemy_mon_static[x]?.species)}${enemy_form(x, enemy_mon_static[x]?.species.value)}.png`">
+                                        <img class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemy_mon_static[x]?.species?.value" :style="{ transform: enemyTransformFor(enemy_mon_static[x]?.species?.value), filter: `drop-shadow(${getEnemySpriteFlipped(enemy_mon_static[x]?.species?.value) ? -1 : 1}px 1px 2px)` }" :src="`images/gen5/pokemon/${speciesSpecialCharacters(enemy_mon_static[x]?.species)}${enemy_form(x, enemy_mon_static[x]?.species.value)}.png`">
                                         <!-- <img class="canvas" :src="`images/gen5/ui/speed_comp/${x}.svg`" /> -->
                                         <div class="border ePkmnTyping">
                                             <!-- <img v-if="held_item_icon(enemy_held_item(x))"

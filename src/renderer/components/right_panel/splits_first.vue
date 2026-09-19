@@ -33,6 +33,7 @@
  */
 import { defineComponent, inject } from "vue";
 import { split_trainers } from "~/games/gen1/data/splits";
+import { formatSplitTime } from "~/utils/timehelpers";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import PokeData from "~/logic/PokeData";
 import { useMetaStore } from "~/stores/metaStore";
@@ -54,7 +55,7 @@ export default defineComponent({
             const optional = ["Rival1a-Route 22"];
             const completedSplits = this.current_splits
                 .filter(split => split_trainers[game].includes(split.trainer))
-                .map(split => { return { trainer: split.trainer, current_time: split.time } });
+                .map(split => { return { trainer: split.trainer, current_time: formatSplitTime(split.time) } });
             const upcomingSplits = split_trainers[game]
                 .filter(trainer => !optional.includes(trainer))
                 .filter(trainer => !completedSplits.some(split => split.trainer === trainer))

@@ -2,6 +2,7 @@ import { deprecated_autosplitter } from "~/games/gen1/data/splits";
 import { capitalize_words } from "../methods/text_functions";
 import { formatShuckieTime } from "~/core/stores/useEmulatorStatsStore";
 import { splitMilliseconds } from "~/logic/Timer";
+import { convertSecondsToDuration } from "~/utils/timehelpers";
 
 import { appendSplitCsv, copySplitFile, splitPath } from "~/core/persistence/splitFiles";
 export function log_split() {
@@ -45,7 +46,8 @@ export function autosplitter_process() {
             formattedTime = [...formatShuckieTime(shuckie_ms), `${time.hours}h${time.minutes}m${time.seconds}s`];
         }
         let real_time_total = formattedTime[0] + formattedTime[1]
-        let real_time_hmmss = shuckieEnabled ? formattedTime[0] + formattedTime[1] : formattedTime[0]
+        // Splits always display as [h:]m:ss (minutes shown even when 0, never centiseconds).
+        let real_time_hmmss = convertSecondsToDuration(time.hours * 3600 + time.minutes * 60 + time.seconds)
         let real_time_file_label = formattedTime[2]
         // With the Shuckie Counters switch on the rows carry the emulator's counters, which
         // are what the overlay shows (gen4 logs the same way).

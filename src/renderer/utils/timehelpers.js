@@ -39,3 +39,14 @@ export function convertMSToDuration(milliseconds) {
 		return `${remainingSeconds}`;
 	}
 }
+
+/**
+ * Normalises a stored split time (e.g. "45", "1:05.23", "0:45") to the display form
+ * `[h:]m:ss` - minutes always shown, centiseconds never. Non-time strings pass through.
+ */
+export function formatSplitTime(time) {
+	if (typeof time !== "string" || !/^\d+(:\d+)*(\.\d+)?$/.test(time)) {
+		return time;
+	}
+	return convertSecondsToDuration(convertDurationToSeconds(time));
+}

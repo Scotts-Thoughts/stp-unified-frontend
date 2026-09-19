@@ -10,5 +10,47 @@
         "xOffset": 0,
         "yOffset": 0,
         "flipped": false
+    },
+    "Geodude": {
+        "scale": 0.9120370370370371,
+        "xOffset": -1,
+        "yOffset": 2,
+        "flipped": true
+    },
+    "Machop": {
+        "scale": 0.8842592592592593,
+        "xOffset": 0,
+        "yOffset": 1,
+        "flipped": false
+    },
+    "Weedle": {
+        "scale": 0.7037037037037037,
+        "xOffset": -1,
+        "yOffset": 4,
+        "flipped": true
+    },
+    "Caterpie": {
+        "scale": 0.7592592592592593,
+        "xOffset": -2,
+        "yOffset": 0,
+        "flipped": true
+    },
+    "Venonat": {
+        "scale": 0.9027777777777778,
+        "xOffset": -5,
+        "yOffset": -2,
+        "flipped": true
+    },
+    "Cubone": {
+        "scale": 0.8472222222222222,
+        "xOffset": 1,
+        "yOffset": 5,
+        "flipped": true
+    },
+    "Slowpoke": {
+        "scale": 1.0092592592592593,
+        "xOffset": -1,
+        "yOffset": 3,
+        "flipped": false
     }
 }

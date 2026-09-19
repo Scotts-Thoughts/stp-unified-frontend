@@ -39,7 +39,7 @@ Every one of these must appear in the profile's `writes` map; the harness compar
 | `patch.encounter_flags.EVENT_ENCOUNTER_ROUTE3_SPEAROW` | write-bits | `components/settings/encounters.vue:184` |
 | `patch.encounter_flags.EVENT_ENCOUNTER_ROUTE6_CUT_USER` | write-bits | `components/settings/encounters.vue:193` |
 | `patch.encounter_flags.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY` | write-bits | `components/settings/encounters.vue:183` |
-| `patch.hChosenStarter` | write-bytes, write-value | `components/settings/interface_2.vue:51` |
+| `patch.hChosenStarter` | write-bytes, write-value | `components/settings/interface_2.vue:61` |
 | `patch.wEarlyEncounters` | write-value | `components/settings/encounters.vue:161` |
 | `player.itemCount` | write-value | `components/settings/battle_testing.vue:62` |
 | `player.items.0.item` | write-value | `components/settings/battle_testing.vue:52` |

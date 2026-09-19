@@ -9,6 +9,7 @@
         </select><br>
         <div>Search Pokemon:</div>
         <input type="text" v-model="search_term" placeholder="Search for a species">
+        <!-- The ROM starter follows the dropdown (see the watcher); the button is a manual re-sync. -->
         <button class="buttonStyle set_starter_button" @click="set_rom_starter">Set ROM Starter</button>
     </div>
 </template>
@@ -39,6 +40,16 @@ export default defineComponent({
             }
         },
     },
+    watch: {
+        /**
+         * The ROM starter follows the solo Pokemon, as in gens 2-5 (2026-09-18): every change of
+         * the store's `starter` -- the dropdown here or the queuer's `/set-starter` -- is written
+         * to the patch, where gen1 used to wait for the button.
+         */
+        "overlaySettings.starter"() {
+            this.set_rom_starter();
+        },
+    },
     methods: {
         async set_rom_starter() {
             const starter = this.overlaySettings.starter;
@@ -53,6 +64,11 @@ export default defineComponent({
             }
             await this.game_properties.patch.hChosenStarter.set(starter, false);
         },
-    }
+    },
+    mounted() {
+        // Sync the ROM starter to the dropdown on load, as gens 2-5 do: the overlay settings are
+        // read before the overlay mounts, so the watcher never sees the persisted starter arrive.
+        this.set_rom_starter();
+    },
 });
 </script>
