@@ -1370,9 +1370,9 @@
     {
       "section": "methods",
       "name": "resolveIncomingSpecies",
-      "reason": "UNREVIEWED: gen4 | gen5 (gen4 14L, gen5 13L)",
+      "reason": "quirk: same rule in both (the selection wins when it is a form of the reported species, else the form byte the game holds, else the default form); the bodies differ only in the mapper's flag name (gen4 alternate_forms, gen5 alternate_form), the dex (g4PokemonData / g5PokemonData) and gen4's bare-name alias for the default form (\"Wormadam\" -> \"Wormadam (Plant)\", gen5 keys the default form by the bare name).",
       "bodies": {
-        "gen4": "f74596ba4b58",
+        "gen4": "c3c839aea954",
         "gen5": "9fbc280d448c"
       }
     },
@@ -1683,7 +1683,7 @@
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 29L, gen4 147L, gen5 117L)",
       "bodies": {
         "gen2": "a74be0ab03b1",
-        "gen4": "0297b3df99ef",
+        "gen4": "9101fe70e2f5",
         "gen5": "327a5ed50f3f"
       }
     },

@@ -1,0 +1,13 @@
+{
+  "overlay_color": "#66c1cc",
+  "backgroundTexture": "water",
+  "backgroundHue": "0",
+  "imageFlip": true,
+  "imageScale": "0.6",
+  "imageYOffset": "-10",
+  "imageXOffset": "0",
+  "backgroundScale": "164",
+  "backgroundYOffset": "32",
+  "backgroundContrast": "136",
+  "backgroundXFlip": false
+}

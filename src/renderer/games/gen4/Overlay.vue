@@ -1373,6 +1373,7 @@ import { platinum_trainers } from "./data/platinum_trainers.js";
 import { pokedex_dp } from "./data/pokedex/diamond_pearl.js";
 import { pokedex_hgss } from "./data/pokedex/heartgold_soulsilver.js";
 import { pokedex_plat } from "./data/pokedex/platinum.js";
+import { POKEMON_FORMS, POKEMON_FORM_INFO, DEFAULT_FORM_ALIASES } from "./forms.js";
 import { post_game_moves } from "./data/post_game_moves.js";
 import { stageModifiersData } from "./data/stageModifiers.js";
 import { textures } from "./data/textures.js";
@@ -2422,7 +2423,7 @@ export default defineComponent({
             const state = this.game?.properties.meta.state.value
             MyStorage['starter'] = newValue
 
-            this.syncWormadamFormByte(newValue);
+            this.syncFormByte(newValue);
 
             // Update evolution family list when starter changes
             this.updateEvolutionFamilyList();
@@ -5267,41 +5268,52 @@ export default defineComponent({
             });
         },
         speciesNameAliases() {
-            // Map from the ROM/legacy species name to the canonical pokedex key.
-            return { "Wormadam": "Wormadam (Plant)" };
+            // Map from the ROM/legacy species name to the canonical pokedex key: the bare name
+            // the mapper reports means the default form ("Wormadam" -> "Wormadam (Plant)").
+            return DEFAULT_FORM_ALIASES;
         },
         normalizeSpeciesName(name) {
             if (name == null) return name;
             const aliases = this.speciesNameAliases();
             return aliases[name] || name;
         },
-        resolveIncomingSpecies(rawName) {
-            // The emulator can hand us an ambiguous bare name (e.g. "Wormadam") whose actual
-            // cloak isn't carried in the species name. The user's Solo Pokemon selection is
-            // the source of truth: if it's already a Wormadam variant, preserve it; otherwise
-            // default to Plant and let the existing write paths sync the form byte.
-            if (rawName == null) return rawName;
-            if (rawName !== "Wormadam") return this.normalizeSpeciesName(rawName);
-
-            const wormadamVariants = ["Wormadam (Plant)", "Wormadam (Sandy)", "Wormadam (Trash)"];
-            if (wormadamVariants.includes(this.starter)) {
-                return this.starter;
-            }
-            return "Wormadam (Plant)";
+        formFromGame(rawName) {
+            // The pokedex key for the form the game holds on the lead party slot, or null when
+            // `rawName` has no forms, the byte isn't readable (mapper not loaded) or it names
+            // a form the dex in play lacks
+            const forms = POKEMON_FORMS[rawName];
+            if (!forms) return null;
+            const form_byte = this.game?.properties?.player?.team?.[0]?.flags?.alternate_forms?.value;
+            const from_game = Object.keys(forms).find(species => forms[species] === form_byte);
+            return from_game && this.g4PokemonData?.[from_game] ? from_game : null;
         },
-        syncWormadamFormByte(species) {
-            // Whenever the user picks a Wormadam variant, push the matching cloak byte to the
-            // emulator so the in-game form follows the dropdown selection without waiting for
+        resolveIncomingSpecies(rawName) {
+            // The emulator reports species by name and keeps the form in a separate byte, so every
+            // cloaked Wormadam arrives as a bare "Wormadam". The user's Solo Pokemon selection wins
+            // when it is a form of the reported species (a fresh hand-over of the starter they
+            // picked; syncFormByte stamps its byte onto the game); otherwise the form byte the game
+            // holds picks the entry, which is how a Burmy that evolved wearing a Sandy cloak lands
+            // on "Wormadam (Sandy)" instead of Plant - the evolution toggle's family list then
+            // follows the cloak the game actually produced. Species without forms pass through.
+            if (rawName == null) return rawName;
+            if (!POKEMON_FORMS[rawName]) return this.normalizeSpeciesName(rawName);
+            if (POKEMON_FORM_INFO[this.starter]?.base === rawName) return this.starter;
+            return this.formFromGame(rawName) ?? this.normalizeSpeciesName(rawName);
+        },
+        syncFormByte(species) {
+            // Whenever the user picks a form in the dropdown, push the matching form byte to the
+            // emulator so the in-game form follows the selection without waiting for
             // setStartingStats (which only fires when level becomes 5 at the starter map).
-            const wormadam_forms = {
-                "Wormadam (Plant)": 0,
-                "Wormadam (Sandy)": 1,
-                "Wormadam (Trash)": 2,
-            };
-            if (!(species in wormadam_forms)) return;
-            const prop = this.game?.properties?.player?.team?.[0]?.flags?.alternate_forms;
+            // A byte the game already holds is left alone: after Burmy evolves, the starter lands
+            // on the cloak the game chose, and re-stamping the same value would be a no-op write.
+            const info = POKEMON_FORM_INFO[species];
+            if (!info) return;
+            const party_mon = this.game?.properties?.player?.team?.[0];
+            const prop = party_mon?.flags?.alternate_forms;
             if (!prop?.set) return;
-            prop.set(wormadam_forms[species], false);
+            if (party_mon.species?.value !== info.base) return;
+            if (prop.value === info.form) return;
+            prop.set(info.form, false);
         },
         applySpeciesAliases() {
             // Make each pokedex resolve both the legacy/ROM name and the canonical name
@@ -8196,11 +8208,12 @@ export default defineComponent({
                     }
                 }
 
-                // Push the Wormadam cloak byte to the emulator on every Wormadam appearance,
+                // Push the form byte to the emulator on every appearance of a species with forms,
                 // so a fresh Wormadam (e.g. just-received starter) reflects the user's variant
-                // even when this.starter didn't change.
-                if (newProp.value === "Wormadam") {
-                    this.syncWormadamFormByte(this.starter);
+                // even when this.starter didn't change. syncFormByte only writes when the
+                // selection is a form of the species the game holds and the byte differs.
+                if (POKEMON_FORMS[newProp.value]) {
+                    this.syncFormByte(this.starter);
                 }
             }
         })
@@ -8970,14 +8983,9 @@ export default defineComponent({
                     await this.game.properties.player.team[0].flags.fateful_encounter.set(true, false),
                 ])
             }
-            const wormadam_forms = {
-                "Wormadam (Plant)": 0,
-                "Wormadam (Sandy)": 1, 
-                "Wormadam (Trash)": 2, 
-            }
-            if (species.includes('Wormadam')) {
+            if (POKEMON_FORM_INFO[species]) {
                 await Promise.all([
-                    await this.game.properties.player.team[0].flags.alternate_forms.set(wormadam_forms[species], false),
+                    await this.game.properties.player.team[0].flags.alternate_forms.set(POKEMON_FORM_INFO[species].form, false),
                 ])
             }
         }
