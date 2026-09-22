@@ -7,6 +7,14 @@ import { ControlServer } from "./control-server";
 import { registerIpc } from "./ipc";
 import { startKeyhook, stopKeyhook } from "./keyhook";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
+import { cutterArgs, runCutter } from "./cutter";
+
+/**
+ * Started by the Cutter editor (`--cutter-frame-server` / `--cutter-configure`,
+ * src/main/cutter.ts): none of the ordinary app below runs — no control server,
+ * no key hook, no legacy import, no window of the usual kind.
+ */
+const cutter = cutterArgs();
 
 /**
  * The one overlay window. The control server (port 30159) and the keyhook forwarder
@@ -161,10 +169,12 @@ function createWindow() {
     }
 }
 
+if (cutter) runCutter(cutter);
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+if (!cutter) app.whenReady().then(() => {
     if (is.dev) {
         const { default: installExtension, VUEJS_DEVTOOLS } = require('electron-devtools-installer');
         installExtension(VUEJS_DEVTOOLS)
@@ -195,7 +205,7 @@ app.whenReady().then(() => {
     startKeyhook(() => mainWindow);
 })
 
-app.on('will-quit', () => {
+if (!cutter) app.on('will-quit', () => {
     controlServer.stop();
     stopKeyhook();
 })

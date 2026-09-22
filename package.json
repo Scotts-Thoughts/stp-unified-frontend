@@ -58,7 +58,9 @@
     "parity:all": "tsx tools/parity/verify-all.ts",
     "import:selftest": "tsx tools/import/selftest.ts",
     "import:dump": "tsx tools/import/dump-localstorage.ts",
-    "packaged:probe": "tsx tools/parity/packaged-probe.ts"
+    "packaged:probe": "tsx tools/parity/packaged-probe.ts",
+    "cutter:describe": "tsx tools/cutter/describe.ts",
+    "cutter:selftest": "tsx tools/cutter/selftest.ts"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.2",

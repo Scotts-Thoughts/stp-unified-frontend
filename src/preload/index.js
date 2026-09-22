@@ -31,9 +31,23 @@ const invoke = (channel, ...args) => {
   })
 }
 
+/**
+ * Set when the Cutter editor started this overlay (src/main/cutter.ts): the
+ * memory tool's address for this chain, which the renderer uses in place of
+ * its constant. Passed on the renderer's command line, the only thing it has
+ * before its first line runs.
+ */
+const cutterArg = (name) => {
+  const found = process.argv.find((a) => a.startsWith(`--${name}=`))
+  return found ? found.slice(name.length + 3) : null
+}
+
 const api = {
   /** Number of main-process calls still in flight; see `pendingInvokes`. */
   __pendingIpc: () => pendingInvokes,
+
+  /** `{ toolUrl }` when the Cutter editor runs this overlay, otherwise null. */
+  cutter: cutterArg('cutter-tool') ? { toolUrl: cutterArg('cutter-tool') } : null,
 
   settings_dir: () => invoke('settings_dir'),
   /** The folder `./splits` and `./storage` are resolved against (plan 1.7). */

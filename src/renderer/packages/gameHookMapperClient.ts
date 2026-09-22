@@ -247,8 +247,35 @@ export class GameHookMapperClient {
         return parseInt(x, 16)
     }
 
+    /**
+     * Set only when the Cutter editor runs this overlay (src/main/cutter.ts): the
+     * bytes of every property as the tool last sent them, whether applied yet or
+     * still held by the debounce, and how many batches have arrived. Nothing else
+     * reads it, and the ordinary app never makes it.
+     */
+    _received: Map<string, number[] | null> | null = null
+    _receivedBatches = 0
+
     constructor(connectionString = 'http://localhost:8085') {
         this._connectionString = connectionString
+        if (typeof window !== 'undefined' && (window as any).api?.cutter) {
+            this._received = new Map()
+            const client = this
+            ;(window as any).__cutterProbe = (paths: string[]) => ({
+                batches: client._receivedBatches,
+                // The overlay is mounted on a loaded mapper (main.ts).
+                ready: (window as any).__cutterOverlayReady === true,
+                // Finite animations still running: what a pre-roll waits out.
+                animations: document.getAnimations().filter((a) => {
+                    const end = a.effect?.getComputedTiming().endTime
+                    return a.playState === 'running' && typeof end === 'number' && Number.isFinite(end)
+                }).length,
+                bytes: paths.map((path) =>
+                    client._received!.has(path)
+                        ? client._received!.get(path)
+                        : (client._propertiesMap?.get(path)?.bytes ?? null)),
+            })
+        }
 
         this._options = {
             automaticRefreshMapperTimeMinutes: 1
@@ -535,6 +562,14 @@ export class GameHookMapperClient {
         this._signalrClient.on('PropertiesChanged', (propertiesChanged) => {
             try {       
                 if (that._properties && that._properties.length > 0) {
+                    // What arrived, before any debounce holds it back: the evidence
+                    // the Cutter editor's export waits on (cutterProbe below).
+                    if (that._received) {
+                        that._receivedBatches++
+                        for (const changed of propertiesChanged) {
+                            if (changed && changed.path) that._received.set(changed.path, changed.bytes ?? null)
+                        }
+                    }
                     for (const propertyChanged of propertiesChanged) {
                         let property = that._propertiesMap?.get(propertyChanged.path)
                         if (!property) {

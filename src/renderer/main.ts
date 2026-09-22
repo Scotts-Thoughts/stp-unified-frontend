@@ -184,7 +184,10 @@ const main = defineComponent({
             (window as any).__stpPendingBoot -= 1;
         };
 
-        this.mapper = new GameHookMapperClient();
+        // The memory tool's own address, unless the Cutter editor is running this
+        // overlay against an instance of it (src/main/cutter.ts).
+        const cutterTool: string | undefined = (window as any).api?.cutter?.toolUrl ?? undefined;
+        this.mapper = new GameHookMapperClient(cutterTool);
         this.mapper.onMapperLoaded = async () => {
             const sequence = ++this.loadSequence;
             // Which generation, which profile, which game -- from the mapper's path
@@ -229,6 +232,9 @@ const main = defineComponent({
                 this.session = { ...detection, module };
                 module.activate?.(detection.game);
                 this.ready = true;
+                // What the Cutter editor's export waits for before it takes a
+                // picture (src/main/cutter.ts): an overlay, not a loading screen.
+                (window as any).__cutterOverlayReady = true;
             } catch (err) {
                 // The overlay stays on the pre-mapper screen; say why there rather than
                 // leaving "Please load a mapper" over a mapper that is loaded.
@@ -240,7 +246,8 @@ const main = defineComponent({
         };
         this.mapper.onMapperUnloaded = () => {
             this.loadSequence++;
-            this.ready = false
+            this.ready = false;
+            (window as any).__cutterOverlayReady = false;
             // Plan 3.1: on InstanceReset, tear down. The overlay component unmounts with
             // `ready`, and every `.change()` subscriber lives in it (gen1's hooks and
             // child components, a lifted component's `mounted`), so the client's
