@@ -20,6 +20,7 @@ import { missing, type ControlReply, type ControlRoutes } from "~/core/control/u
  */
 export function gen3ControlRoutes(vm: () => any): ControlRoutes {
     const bad = (error: string): ControlReply => ({ ok: false, status: 400, error });
+    const abilityKey = (s: unknown) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
     return {
         status: () => {
             const v = vm();
@@ -34,6 +35,7 @@ export function gen3ControlRoutes(vm: () => any): ControlRoutes {
                 right_panel: v?.right_panel,
                 hidden_power_type: v?.hidden_power_type,
                 nature: v?.pkmnNature,
+                ability: v?.pkmn_ability,
                 splits: v?.splits_display,
                 shuckie_counters: v?.shuckie_counters,
                 show_tutor_moves: v?.tutor_moves,
@@ -80,6 +82,21 @@ export function gen3ControlRoutes(vm: () => any): ControlRoutes {
                 if (!query.nature || !Object.values(v.simple_natures).includes(query.nature)) return bad("Missing or invalid nature parameter");
                 v.pkmnNature = query.nature;
                 return { ok: true, nature: v.pkmnNature };
+            },
+            /**
+             * The Abilities dropdown (legacy 2026-09-20 addition, ported to gen3/4/5). The name is
+             * matched against the current starter's abilities ignoring case and spacing
+             * ("Lightning Rod" == "Lightningrod" == the queuer's pokedex spelling) and stored
+             * under this overlay's own spelling, so the per-starter storage and the
+             * evolution-line slot remap keep working. Set before `/refresh`, like the nature.
+             */
+            "/set-ability": (query) => {
+                const v = vm();
+                const abilities: string[] = v.game_data?.dexData?.[v.starterString]?.abilities ?? [];
+                const ability = query.ability ? abilities.find((a) => abilityKey(a) === abilityKey(query.ability)) : undefined;
+                if (!ability) return bad(`Missing or invalid ability parameter (${v.starterString} has: ${abilities.join(", ") || "no abilities listed"})`);
+                v.pkmn_ability = ability;
+                return { ok: true, ability: v.pkmn_ability };
             },
             "/set-splits": (query) => {
                 if (!query.mode) return missing("mode");

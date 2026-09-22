@@ -4417,11 +4417,19 @@ export default defineComponent({
                 const weather = this.game.properties.battle.field.weather.value
                 // const ability = this.game.properties.battle.player.active_pokemon.ability.value
 
-                const mod_atk = this.game.properties.battle.player.active_pokemon.modifiers.attack.value
-                const mod_def = this.game.properties.battle.player.active_pokemon.modifiers.defense.value
-                const mod_spa = this.game.properties.battle.player.active_pokemon.modifiers.special_attack.value
-                const mod_spd = this.game.properties.battle.player.active_pokemon.modifiers.special_defense.value
-                const mod_spe = this.game.properties.battle.player.active_pokemon.modifiers.speed.value
+                // Simple doubles every stat stage, clamped to the -6..+6 range
+                function simple_stage(modifier) {
+                    let stage = Number(modifier) || 0
+                    if (ability == 'Simple') {
+                        stage = Math.max(-6, Math.min(6, stage * 2))
+                    }
+                    return stage
+                }
+                const mod_atk = simple_stage(this.game.properties.battle.player.active_pokemon.modifiers.attack.value)
+                const mod_def = simple_stage(this.game.properties.battle.player.active_pokemon.modifiers.defense.value)
+                const mod_spa = simple_stage(this.game.properties.battle.player.active_pokemon.modifiers.special_attack.value)
+                const mod_spd = simple_stage(this.game.properties.battle.player.active_pokemon.modifiers.special_defense.value)
+                const mod_spe = simple_stage(this.game.properties.battle.player.active_pokemon.modifiers.speed.value)
                 HP  = this.game.properties.battle.player.active_pokemon.stats.hp_max.value
                 Atk = this.game.properties.battle.player.active_pokemon.stats.attack.value
                 Def = this.game.properties.battle.player.active_pokemon.stats.defense.value
@@ -5106,6 +5114,12 @@ export default defineComponent({
             const oldAbilities = this.g4PokemonData?.[oldSpecies]?.abilities;
             const newAbilities = this.g4PokemonData?.[newSpecies]?.abilities;
             if (!newAbilities?.length) {
+                return previousAbilityName;
+            }
+            // Already one of the new species' abilities (e.g. the queuer's /set-ability landed
+            // before /set-evolution switched the family from last run's species): keep it, as
+            // gen3's mapAbilityToSpecies does, rather than sliding it to slot 0.
+            if (newAbilities.includes(previousAbilityName)) {
                 return previousAbilityName;
             }
             let slot = 0;
