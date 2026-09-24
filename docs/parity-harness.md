@@ -19,7 +19,7 @@ Verified inputs (2026-09-10): PokeAByte 0.11.2 source (`A:\Programs\PokeAByte\sr
 | 5 | **PokeAByte writes** | every `POST /mapper/set-property-value|set-property-bytes|set-properties-by-bits` the app sends, in order, with body | exact sequence, the writes of one virtual instant compared as a set (an app that issues five `setBytes` in one `Promise.all` cannot order their arrival, and two runs of the *same* app differ there) |
 | 6 | **Control server** | every scripted control call (the queuer's order for one item: `/set-game`, `/set-starter`, `/refresh`, …), its HTTP status and body, and the `GET /status` after each | route, query, status and body exact; a `/status` body key by key -- every baseline field present with the same value, and only the documented union extras (`app`, `generation`, `mapper_path`, `starter`/`starterString`, `right_panel`/`right_ui`) allowed beyond them (`external-contracts.md` §2) |
 | 7 | **OBS chapter markers** | every `CreateRecordChapter` received by the OBS stub | exact sequence of names |
-| 8 | **Super Shuckie calls** | every `POST /mark-start|mark-end|increment-counter`; and, for a unified candidate with both stubs up, every `POST /add-bookmark` (`shuckie-bookmarks.json`, a log of its own because the legacy apps add none) | exact sequence; the bookmark names are the candidate's own oracle-7 names, as a multiset |
+| 8 | **Super Shuckie calls** | every `POST /mark-start|mark-end|increment-counter`; and, for a unified candidate with both stubs up, every `POST /add-bookmark` (`shuckie-bookmarks.json`, a log of its own because the legacy apps add none) | exact sequence; the bookmark names are the candidate's own oracle-7 names, as a multiset -- split bookmarks (`SPLIT - <trainer> - HH:MM:SS`, no chapter of their own) set aside and counted in the detail |
 | 9 | **Console** | renderer `console.error` / uncaught exceptions | none allowed that the baseline did not also have |
 
 A step passes only when every oracle for every fixture of the affected generation is green.
@@ -202,6 +202,7 @@ npm run parity:all -- --baselines            # (re)capture the legacy baselines 
 npm run parity:preflight -- unified          # which single-tenant port is held, and by what
 npm run parity:selftest                      # 32 checks: the mock vs gen1's real GameHookMapperClient
 npm run parity:bookmarks                     # 22 checks: core/logic/shuckieBookmarks.ts vs a fake Super Shuckie, then vs the stub
+npm run parity:replay-splits                 # 50 checks: split bookmark names and rows, the .replay bookmark-section reader (vs the recorder's encoding and a converter-written fixture), the comparison loader, the playback store vs a fake Super Shuckie
 npm run parity:debounce                      # 38 checks: the client's debounce frame loop survives every connection path (known-legacy-bugs.md #29), and disconnect() cancels an armed 5 s retry
 npm run parity:manual-ivs                    # Manual DVs/IVs on every fixture: readout + writes (tools/parity/manual-ivs-check.ts)
 npm run parity:drift                         # gens 2-5's overlays: a shared member whose bodies differ must be in drift-allowlist.json (--report, --update, --strict fails on UNREVIEWED entries); also duplicate members, overlays overriding a core/overlay mixin member, undeclared names in the mixins

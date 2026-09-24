@@ -2,7 +2,7 @@
 <div>
     <button class="buttonStyle new_run_button" @click="clear_run">New Run</button>
     <br>
-    <button class="buttonStyle comparison_button" @click="load_splits()">Split Comparison</button><br>
+    <button class="buttonStyle comparison_button" @click="load_splits()">Load replay / split file</button><br>
     <table>
         <tbody>
             <tr>
@@ -66,6 +66,7 @@ import { SpeciesMetrics, useSpeciesMetricsStore } from "~/stores/useSpeciesMetri
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData.ts";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
+import { pickSplitComparison } from "~/core/logic/splitComparison";
 import { defineComponent } from "vue";
 
 /** Counters that are mirrored to the Shuckie emulator when the "Shuckie Counters" option is on. */
@@ -125,29 +126,14 @@ export default defineComponent({
                 }
             }
         },
-        async load_csv_file() {
-            // @ts-expect-error
-            const file = await window.showOpenFilePicker({
-                id: "Gen1SplitsFolder",
-                types: [{
-                    description: "Split files",
-                    accept: { "text/csv": [".csv"] }
-                }]
-            });
-            const contents = await file[0].getFile();
-            const text = await contents.text();
-            return text;
-        },
+        /**
+         * The comparison: a replay's SPLIT bookmarks or a split CSV, picked and parsed in
+         * main (core/logic/splitComparison.ts, 2026-09-23); the overlay takes the rows
+         * off the same event the queuer's /load-split-file publishes.
+         */
         async load_splits() {
-            const text = await this.load_csv_file();
-            const rows = text.split("\n").slice(1).filter(x => x !== '');
-            const results: any[] = []
-            for (const row of rows) {
-                const columns = row.split(",");
-                results.push({trainer: columns[2], time: columns[3]})
-            }
-            // @ts-expect-error
-            this.$parent.$parent.previous_splits = results;
+            const comparison = await pickSplitComparison();
+            if (comparison) PubSub.publish("@splits/previous_loaded", { rows: comparison.rows, name: comparison.name });
         },
     },
 });

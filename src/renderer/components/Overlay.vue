@@ -8,7 +8,7 @@
 
         <left_panel />
 
-        <right_panel :current_splits :previous_splits :collect_split_data />
+        <right_panel :current_splits="displayed_current_splits" :previous_splits :collect_split_data />
         <game_area />
         <enemy_sprite_resize_handle />
     </div>
@@ -38,6 +38,7 @@ import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.js";
 import { useMetaStore } from "~/stores/metaStore";
 import { useBattleStore } from "~/stores/useBattleStore";
 import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
+import { useReplaySplitsStore } from "~/core/stores/useReplaySplitsStore";
 
 // vue components:
 import graphics from "./graphics.vue";
@@ -67,6 +68,7 @@ export default defineComponent({
             settings: useOverlaySettingsStore(),
             runConfig: useGameSpeciesData(),
             emulator: useEmulatorStatsStore(),
+            replaySplits: useReplaySplitsStore(),
 
             // Static Data
             autosplitter_toggle: true,
@@ -79,6 +81,8 @@ export default defineComponent({
             deprecated_data_str: "",
             simple_data: "",
             previous_splits: [],
+            /** The file `previous_splits` came from (a replay or a CSV), for the settings panels. */
+            previous_splits_source: null,
             current_splits: [],
         }
     },
@@ -105,6 +109,9 @@ export default defineComponent({
             },
             deep: true,
         },
+        previous_splits_source(newVal) {
+            setUserState("previous_splits_source", newVal)
+        },
         // When the Shuckie timer toggle is turned on and the emulator reports no running
         // timer, kick it off. The same check after every poll (which covers replays and
         // a flag enabled mid-session) is the `afterPoll` hook games/gen1/index.ts hands
@@ -117,6 +124,14 @@ export default defineComponent({
         },
     },
     computed: {
+        /**
+         * What the right panel shows as the current run: the autosplitter's rows, or --
+         * while Super Shuckie plays a replay back -- that replay's SPLIT bookmarks up to
+         * the playback frame (core/stores/useReplaySplitsStore.ts, 2026-09-23).
+         */
+        displayed_current_splits() {
+            return this.replaySplits.playingBack ? this.replaySplits.currentSplits : this.current_splits;
+        },
         gametimeSplit() {
             const h = this.game.properties.gameTime.hours
             const m = this.game.properties.gameTime.minutes
@@ -144,13 +159,16 @@ export default defineComponent({
             this.metrics.update("run_finished", false);
             this.metrics.update("splits_logged", false);
         },
-        /** Replaces the split comparison shown in the right panel. */
-        set_previous_splits(splits) {
-            this.previous_splits = Array.isArray(splits) ? splits : [];
+        /** Replaces the split comparison shown in the right panel: the rows, or `{ rows, name }` with the file they came from. */
+        set_previous_splits(payload) {
+            const rows = Array.isArray(payload) ? payload : payload?.rows;
+            this.previous_splits = Array.isArray(rows) ? rows : [];
+            this.previous_splits_source = Array.isArray(payload) ? null : (payload?.name ?? null);
         },
         load_split_settings() {
             this.current_splits = getUserState("current_splits", [])
             this.previous_splits = getUserState("previous_splits", [])
+            this.previous_splits_source = getUserState("previous_splits_source", null)
         },
         padTime(time) {
             return !time

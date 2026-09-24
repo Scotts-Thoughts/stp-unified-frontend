@@ -14,6 +14,7 @@ import type { GameModule } from "~/core/game/GameModule";
 import { detect, loadModule, type Detection } from "~/games/registry";
 import { setActiveModule } from "~/core/game/active";
 import { setActiveNamespace } from "~/core/persistence/userState";
+import { useReplaySplitsStore } from "~/core/stores/useReplaySplitsStore";
 import { initEnv } from "~/core/env";
 import { installScaleToFit, removeScaleToFit } from "~/core/window/scaleToFit";
 
@@ -231,6 +232,9 @@ const main = defineComponent({
                 applyScaleToFit(module);
                 this.session = { ...detection, module };
                 module.activate?.(detection.game);
+                // Every generation: the run's splits from the replay Super Shuckie is
+                // playing back (core/stores/useReplaySplitsStore.ts, 2026-09-23).
+                useReplaySplitsStore().startPolling();
                 this.ready = true;
                 // What the Cutter editor's export waits for before it takes a
                 // picture (src/main/cutter.ts): an overlay, not a loading screen.
@@ -255,6 +259,7 @@ const main = defineComponent({
             // they would fire twice after a reload -- once into the unmounted instance.
             this.mapper!.clearSubscriptions();
             this.session?.module.deactivate?.();
+            useReplaySplitsStore().stopPolling();
             this.session = null;
             setActiveModule(null);
             setActiveNamespace(null);

@@ -47,10 +47,10 @@
       "name": "compare_splits",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 53L, gen3 85L, gen4 406L, gen5 243L)",
       "bodies": {
-        "gen2": "35799a724b88",
-        "gen3": "0fe7511793a3",
-        "gen4": "dd3cb0ff482a",
-        "gen5": "c007e35b8c78"
+        "gen2": "4830d11aab78",
+        "gen3": "913b4b35e5c9",
+        "gen4": "940e46a8771d",
+        "gen5": "e45a4056384c"
       }
     },
     {
@@ -1149,10 +1149,10 @@
       "name": "load_splits",
       "reason": "UNREVIEWED (omission?): gen5 dedupes repeated trainer rows (first occurrence keeps the position, last time wins) and keeps only N's final battle; gens 2-4 push every CSV row.",
       "bodies": {
-        "gen2": "6b15d49e4c0f",
-        "gen3": "6b15d49e4c0f",
-        "gen4": "6b15d49e4c0f",
-        "gen5": "172590d1ac2a"
+        "gen2": "51a84afc6ccf",
+        "gen3": "51a84afc6ccf",
+        "gen4": "51a84afc6ccf",
+        "gen5": "e87ae95749fc"
       }
     },
     {

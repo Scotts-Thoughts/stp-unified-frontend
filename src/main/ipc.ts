@@ -1,8 +1,9 @@
 import { createHash } from "crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { app, ipcMain, nativeImage, shell, type BrowserWindow } from "electron";
+import { app, dialog, ipcMain, nativeImage, shell, type BrowserWindow } from "electron";
 import { appRoot, rendererSourceRoot, resolveInside, splitsRoot, storageRoot, userDataRoot } from "./paths";
+import { loadSplitComparison } from "./splitComparison";
 
 /**
  * Everything the renderer used to do with `require("fs")`, `require("path")`,
@@ -85,6 +86,32 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     mkdirSync(target, { recursive: true });
     await shell.openPath(target);
     return target;
+  });
+
+  // --- the split comparison: a replay's SPLIT bookmarks, or a legacy CSV ------------
+  // The file is anywhere on disk (the legacy pickers were the File System Access API,
+  // whose `File` has no path), so the picker runs here and returns the parsed rows
+  // with the file's name. The folder it last opened is remembered for the session, as
+  // the legacy pickers' `id: "SplitsFolder"` did across sessions.
+  let comparisonFolder: string | undefined;
+  ipcMain.handle("splits:load-comparison", (_e, file: string) => loadSplitComparison(file));
+  ipcMain.handle("splits:pick-comparison", async () => {
+    const window = getWindow();
+    const options = {
+      title: "Load a replay or split file to compare",
+      defaultPath: comparisonFolder ?? splitsRoot(),
+      properties: ["openFile" as const],
+      filters: [
+        { name: "Replays and split files", extensions: ["replay", "csv"] },
+        { name: "Super Shuckie replays", extensions: ["replay"] },
+        { name: "Split CSVs", extensions: ["csv"] },
+      ],
+    };
+    const picked = window && !window.isDestroyed() ? await dialog.showOpenDialog(window, options) : await dialog.showOpenDialog(options);
+    if (picked.canceled || picked.filePaths.length === 0) return null;
+    const file = picked.filePaths[0];
+    comparisonFolder = dirname(file);
+    return loadSplitComparison(file);
   });
 
   // --- user data: %APPDATA%/<app>/data/** --------------------------------------

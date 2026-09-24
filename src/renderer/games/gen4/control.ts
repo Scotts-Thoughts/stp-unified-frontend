@@ -124,6 +124,7 @@ export function gen4ControlRoutes(vm: () => any): ControlRoutes {
                 if (!query.__splits) return missing("file");
                 const results = JSON.parse(query.__splits) as { trainer: string; time: string }[];
                 vm().previous_splits = results;
+                vm().previous_splits_source = query.__source ?? null;
                 return { ok: true, splits_loaded: results.length };
             },
             "/set-shuckie-counters": (query) => {

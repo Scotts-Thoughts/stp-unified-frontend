@@ -6,14 +6,32 @@
  * colour, the Shuckie Bookmarks switch).
  *
  * Byte-identical across the four overlays and moved out unchanged
- * (tools/parity/drift-check.ts). The state stays in each overlay's `data()`.
+ * (tools/parity/drift-check.ts). The state stays in each overlay's `data()` -- apart
+ * from `replaySplits`, which is core's store and lives here with the one computed that
+ * reads it: `effective_current_splits`, what every `compare_splits` takes as the current
+ * run (2026-09-23).
  */
 
 import { setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { useReplaySplitsStore } from "~/core/stores/useReplaySplitsStore";
 import type { ComponentOptionsMixin } from "vue";
 
 export const overlayCommonMixin = {
+    data() {
+        return {
+            /** The run's splits from the replay Super Shuckie is playing back (core/stores/useReplaySplitsStore.ts). */
+            replaySplits: useReplaySplitsStore(),
+        };
+    },
     computed: {
+        /**
+         * What the splits panel shows as the current run: the autosplitter's rows, or --
+         * while Super Shuckie plays a replay back -- that replay's SPLIT bookmarks up to
+         * the playback frame, so a scrub to any point shows the splits reached by then.
+         */
+        effective_current_splits() {
+            return this.replaySplits.playingBack ? this.replaySplits.currentSplits : this.current_splits
+        },
         batt() {
             return this.game?.properties?.battle
         },

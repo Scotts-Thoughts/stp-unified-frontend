@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
+import type { SplitComparison } from '../main/splitComparison'
 
 /** One entry of a directory listing returned by the splits/data IPC helpers. */
 export interface DirectoryEntry {
@@ -37,6 +38,8 @@ declare global {
         copy: (from: string, to: string) => Promise<string>,
         mkdir: (relative: string) => Promise<string>,
         reveal: (relative: string) => Promise<string>,
+        pickComparison: () => Promise<SplitComparison | null>,
+        loadComparison: (file: string) => Promise<SplitComparison>,
       },
       data: {
         read: (relative: string) => Promise<string | null>,

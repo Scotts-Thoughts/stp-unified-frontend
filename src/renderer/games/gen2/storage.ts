@@ -20,7 +20,7 @@ const NON_STYLE_KEYS = new Set([
     'blackout_counter', 'simple_data_str', 'full_data_str', 'deprecated_data_str',
     'simple_data', 'timer_startTimeOffset', 'timer_startTime', 'timer_pause',
     'timer_formatted_time', 'timer_pause_time', 'time_h', 'time_m', 'time_s',
-    'time_ms', 'time_split_start', 'battle_start', 'current_splits', 'previous_splits',
+    'time_ms', 'time_split_start', 'battle_start', 'current_splits', 'previous_splits', 'previous_splits_source',
     'overlay_color', 'imageXOffset', 'imageYOffset', 'imageScale', 'imageFlip', 'imageSat',
     'backgroundBlur', 'backgroundScale', 'backgroundUrl', 'backgroundFlip', 'backgroundXFlip',
     'use_custom_background', 'backgroundXOffset', 'backgroundYOffset', 'backgroundTexture',

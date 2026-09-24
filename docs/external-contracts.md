@@ -71,7 +71,7 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 | `GET /set-evolution` | `enabled=true&species=` / `enabled=false&species=` | not gen2 (gen1 gets it like gen3/5; the unified gen1 answers `ok: false, unsupported: true`) | **gen4: after `/refresh`; gen1/gen3/gen5: before `/refresh`** |
 | `GET /set-right-panel` | `panel=Battle Graphic` (gen1/2/3) or `panel=Automatic` (gen4/5) | all | gen1 has no "Battle Graphic" mode: the unified app takes it as `Automatic` and reports `Automatic`, which the queuer's gen1 verification rejects -- `docs/queuer-unified.patch` sends gen1 `Automatic` |
 | `GET /set-splits` | `mode=First|Followup` | all | |
-| `GET /load-split-file` | `file=<absolute path>` (a CSV the queuer's user dragged in, `encodeURIComponent`ed) | only with `item.splitFile` | loads a previous-split CSV for comparison; the unified main process reads the path as it is (`fs.readFileSync`, as gen2-5 did) and hands the parsed rows to the active generation's route as `__splits` |
+| `GET /load-split-file` | `file=<absolute path>` (a CSV the queuer's user dragged in, `encodeURIComponent`ed; since 2026-09-23 also a Super Shuckie `.replay`, by extension) | only with `item.splitFile` | loads a previous run's splits for comparison; the unified main process reads the path as it is (`src/main/splitComparison.ts`: a CSV as `fs.readFileSync` + the legacy columns, as gen2-5 did; a `.replay` through its bookmark section, section 5) and hands the rows to the active generation's route as `__splits`, the file's name as `__source`. A replay it cannot read (format v3/v4, never closed) is a 500 with the reason. The reply body is unchanged: `{ ok, splits_loaded }` |
 | `GET /new-run` | – | all | same as the F23 hotkey / "New Run" button |
 | `GET /reload` | – | all | `location.reload()` after 200 ms |
 | `GET /quit` | – | gen2–5 | `window.close()` after 200 ms |
@@ -127,6 +127,26 @@ duplicates. Playback writes change the replay file and upgrade a pre-v5 replay i
 Bookmarks** switch (global user state `shuckie_bookmarks`, default on; gen1's Interface panel, gens 2-5 under
 Show Advanced Settings) turns it off.
 
+**Split bookmarks** (2026-09-23, all generations, `src/shared/splitBookmarks.ts`,
+`addSplitBookmark` in `core/logic/shuckieBookmarks.ts`): every simple split the autosplitter writes to
+its CSV is also added to the replay, typed `SPLIT` and named `SPLIT - <trainer> - HH:MM:SS`, or
+`SPLIT - <trainer> (<instance>) - HH:MM:SS` where a generation tells repeat fights apart (gen4's n-th
+Rival / Cyrus / HGSS Elite Four rematch, gen5's trainer id). `<trainer>` is the key the overlay keeps in
+`current_splits` for the split (gen1 "Rival3-SS Anne", gen5's normalised "Cress"), the time is the CSV's
+`real_time_hmmss` to the second (the Shuckie timer when that is on), hours always present, no
+centiseconds. No OBS chapter goes with it (the battle's OUT marker is the chapter; oracle 8 sets split
+bookmarks aside). On playback a split bookmark dedupes by its name less the time, so a replay played back
+on the local timer does not double it. Under the same switch as the chapter-marker bookmarks.
+
+**The panel during playback** (`core/stores/useReplaySplitsStore.ts`): while `/stats` reports
+`is_playing_back`, the right panel's current-run column is the playing replay's `SPLIT` bookmarks at or
+before `total_elapsed_frames` -- the last per trainer(+instance), in frame order -- instead of the
+autosplitter's `current_splits`, so a scrub to any point shows the splits reached by then. The store
+polls `/stats` every 250 ms and `/bookmarks` when `bookmark_generation` moves, retries a dead server
+every 5 s, and does nothing with the Shuckie Bookmarks switch off. The autosplitter's own pushes and
+CSVs are unchanged. The harness stub always reports `is_playing_back: true`, so under the harness the
+panel is bookmark-driven from the bookmarks the app itself adds.
+
 Failures are swallowed and throttled, so the app runs without Shuckie. The harness stubs this server
 (replaying the fixture's `F` frame samples as `total_elapsed_frames`) and logs every POST as an oracle.
 
@@ -163,6 +183,17 @@ the per-gen inventories, Phase 2.1).
 
 Consumers: `compare_gym_splits` reads `<Species>-<N>-simple.csv` and requires columns `trainer_name` and
 `real_time_hmmss`; the overlay's own "Split Comparison" / `previous_splits`; the queuer's `/load-split-file`.
+
+**A replay as the comparison** (2026-09-23): the overlay's "Load replay / split file to compare" button
+(gen1: the right-panel settings; gens 2-5: the button that loaded a CSV) and `/load-split-file` accept a
+Super Shuckie `.replay` as well as a CSV. Its `SPLIT` bookmarks (section 3) are the rows, read from the
+file's bookmark section without Super Shuckie: `src/shared/replayBookmarks.ts` reads the 2048-byte header
+(`NIDO`...`RINA`, `replay_version` at 0x004, `packet_stream_end` at 0x3A8) and the `SSBM` section at
+`packet_stream_end` -- format v5 and later, closed files only; the recorder's `UnsignedInteger`,
+`ByteVec`/`String` and raw `u32` encodings, the blake3 hash unverified. A v3/v4 replay or one whose
+recording was never closed is refused with the reason (open it in Super Shuckie and add a bookmark, or
+convert it, first). The loaded file's name is kept beside the rows (`previous_splits_source`, per
+generation) and shown under the button.
 Byte-identical output for a replayed fixture is the behavioural oracle (wall-clock columns handled by the
 fake clock, see `parity-harness.md` §5).
 

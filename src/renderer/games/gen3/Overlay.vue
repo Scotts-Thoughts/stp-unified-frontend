@@ -382,8 +382,8 @@
                     <!-- <button class="buttonStyle set_starter_button" @click="update_rom_starter_and_intro_mon">Set ROM
                         Starter</button>
                     <br> -->
-                    <button class="buttonStyle comparison_button" @click="load_splits()">Load split file to compare
-                        splits</button><br>
+                    <button class="buttonStyle comparison_button" @click="load_splits()">Load replay / split file to compare</button><br>
+                    <div v-if="previous_splits_source" style="font-size: 12px;">Comparing against: {{ previous_splits_source }}</div>
                     <table>
                         <tbody><tr>
                             <td>Attempt Number:</td>
@@ -1745,7 +1745,8 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { pickSplitComparison } from "~/core/logic/splitComparison";
 import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
@@ -1761,6 +1762,7 @@ import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen3Hotkeys } from "./hotkeys";
 import { gen3GameIcon } from "./icons";
+// loadCsvFile: only `load_temp_splits` (legacy, unreferenced) still uses it; the comparison picker is core's.
 import { loadCsvFile, logData, logCopy } from "./splits.js";
 import { Timer } from "./logic/Timer.js";
 import TimerComponent from "./components/Timer.js";
@@ -2259,6 +2261,7 @@ export default defineComponent({
             show_wild_battles:   MyStorage['show_wild_battles']   ?? true,
 
             previous_splits: MyStorage['previous_splits'] ?? [],
+            previous_splits_source: MyStorage['previous_splits_source'] ?? null,
             current_splits:  MyStorage['current_splits']  ?? [],
 
             //movepool starting parameters. set to -1 if not initialized
@@ -2962,6 +2965,9 @@ export default defineComponent({
             },
             deep: true,
         },
+        previous_splits_source(newVal) {
+            MyStorage['previous_splits_source'] = newVal
+        },
         ui_stat_arrangement(newValue) {
             if (newValue == 'Speed: bottom right') {
                 this.ui_stat_arrangement_modifier = "hp_spe_"
@@ -3396,7 +3402,7 @@ export default defineComponent({
                     const completedTrainers = new Set()
                     const completedNormalizedNames = new Set()
                     // Add completed splits first, in the order they were completed
-                    for (const cur_split of this.current_splits) {
+                    for (const cur_split of this.effective_current_splits) {
                         if (gameTrainerSet.has(cur_split.trainer) && !completedTrainers.has(cur_split.trainer)) {
                             result.push({trainer: cur_split.trainer, current_time: this.convertSecondsToDuration(this.convertDurationToSeconds(cur_split.time))})
                             completedTrainers.add(cur_split.trainer)
@@ -3433,7 +3439,7 @@ export default defineComponent({
                         const default_string = "-"
                         // Match by normalized display name so rival variants (e.g. different starters) are treated as the same split
                         const normalizedName = getNormalizedName(x.trainer);
-                        const cur_split = this.current_splits.find(y => y.trainer === x.trainer || getNormalizedName(y.trainer) === normalizedName)
+                        const cur_split = this.effective_current_splits.find(y => y.trainer === x.trainer || getNormalizedName(y.trainer) === normalizedName)
                         const prev = this.convertDurationToSeconds(x.time)
                         if (cur_split == undefined) {
                             if (x.trainer !== lastPushedTrainer && !(this.league_rematches == false && this.gameSelection === "FireRed and LeafGreen" && trainersToSkip.includes(x.trainer))) { // Check if the current trainer is the same as the last pushed one and if it should be skipped
@@ -4675,14 +4681,11 @@ export default defineComponent({
             return results
         },
         async load_splits() {
-            const text = await loadCsvFile();
-            const rows = text.split("\n").slice(1).filter(x => x !== '');
-            const results = []
-            for (const row of rows) {
-                const columns = row.split(",");
-                results.push({trainer: columns[2], time: columns[3]})
-            }
-            this.previous_splits = results;
+            // A replay's SPLIT bookmarks or a split CSV, picked and parsed in main (2026-09-23).
+            const comparison = await pickSplitComparison();
+            if (!comparison) return;
+            this.previous_splits = comparison.rows;
+            this.previous_splits_source = comparison.name;
         },
         stat_label_opacity() {
             const state = this.g3stateVariable
@@ -8369,6 +8372,8 @@ export default defineComponent({
                 const simpleSplit = () => {
                     this.sendObsChapterMarker('LABEL - VICTORY');
                     this.log_split()
+                    // The same split into the replay (2026-09-23): simple_data[2] is the trainer key, [3] real_time_hmmss.
+                    addSplitBookmark(this.simple_data[2], this.simple_data[3])
                     logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run)
                     this.split_data.push(this.simple_data)
                     // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
@@ -8436,6 +8441,7 @@ export default defineComponent({
                         simpleSplit();
                     }
                     else {
+                        addSplitBookmark(this.simple_data[2], this.simple_data[3])
                         logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run)
                         .then(() => {
                                 console.log("Run complete - moving attempt files to finished folder.")
@@ -8474,6 +8480,7 @@ export default defineComponent({
                     
                     //write simple split data
                     //use then so that logCopy doesn't touch any files until logData finishes
+                    addSplitBookmark(this.simple_data[2], this.simple_data[3])
                     logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run)
                     .then(() => {
                             console.log("Run complete - moving attempt files to finished folder.")

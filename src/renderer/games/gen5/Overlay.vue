@@ -208,7 +208,8 @@
                     </select>
                     <div>Search Pokemon:</div>
                     <input type="text" class="inputContainer" style="width: 280px;" v-model="search_term" placeholder="Search for a species">
-                    <button class="buttonStyle comparison_button" @click="load_splits()">Load split file to compare splits</button>
+                    <button class="buttonStyle comparison_button" @click="load_splits()">Load replay / split file to compare</button>
+                    <div v-if="previous_splits_source" style="font-size: 12px;">Comparing against: {{ previous_splits_source }}</div>
                     <button class="buttonStyle comparison_button" @click="clear_splits()" v-if="previous_splits.length > 0">Clear loaded splits</button><br>
                     <table>
                         <tbody><tr>
@@ -1117,7 +1118,8 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { pickSplitComparison } from "~/core/logic/splitComparison";
 import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
@@ -1135,7 +1137,7 @@ import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen5Hotkeys } from "./hotkeys";
 import { gen5GameIcon } from "./icons";
-import { loadCsvFile, logData, logCopy, transition } from "./splits.js";
+import { logData, logCopy, transition } from "./splits.js";
 import { Timer } from "./logic/Timer.js";
 import TimerComponent from "./components/Timer.js";
 import ShuckieTimerComponent from "./components/ShuckieTimer.js";
@@ -1267,7 +1269,10 @@ export default defineComponent({
             current_label                : MyStorage['current_label']          ?? "Current",
             collect_split_data           : MyStorage['collect_split_data']     ?? true,
             previous_splits              : MyStorage['previous_splits']         ?? [],
+            previous_splits_source       : MyStorage['previous_splits_source']  ?? null,
             current_splits               : MyStorage['current_splits']          ?? [],
+            /** The row the last battle's simple split would be (trainer key, time, id), for its replay bookmark. */
+            last_simple_split            : null,
             toggle_compare_splits        : MyStorage['toggle_compare_splits']   ?? 'First',
             demo_splits                  : false,
             automatic_post_battle_splits : MyStorage['automatic_post_battle_splits'] ?? true,
@@ -1851,6 +1856,9 @@ export default defineComponent({
                 MyStorage['previous_splits'] = newVal
             },
             deep: true,
+        },
+        previous_splits_source(newVal) {
+            MyStorage['previous_splits_source'] = newVal
         },
         encounters_route_1(newValue) {
             if (this.game.properties.overworld.map_index.value == 317) {
@@ -2591,7 +2599,7 @@ export default defineComponent({
                     let trioHandled = false
 
                     // Add completed splits first, in the order they were completed
-                    for (const cur_split of this.current_splits) {
+                    for (const cur_split of this.effective_current_splits) {
                         if (!this.game_data.splits.includes(cur_split.trainer)) continue
                         if (trainersToSkip.includes(cur_split.trainer)) continue
                         if (completedTrainers.has(cur_split.trainer)) continue
@@ -2644,9 +2652,9 @@ export default defineComponent({
                 
                 // Check if any trio trainer (Chili/Cilan/Cress) exists in current or previous splits
                 // Treat all three as equivalent - they're the same gym leader slot
-                const chiliInCurrent = this.current_splits.find(y => y.trainer === "Chili")
-                const cilanInCurrent = this.current_splits.find(y => y.trainer === "Cilan")
-                const cressInCurrent = this.current_splits.find(y => y.trainer === "Cress")
+                const chiliInCurrent = this.effective_current_splits.find(y => y.trainer === "Chili")
+                const cilanInCurrent = this.effective_current_splits.find(y => y.trainer === "Cilan")
+                const cressInCurrent = this.effective_current_splits.find(y => y.trainer === "Cress")
                 const chiliInPrevious = isUsingDefaultSplits ? null : previous_splits_data.find(y => y.trainer === "Chili")
                 const cilanInPrevious = isUsingDefaultSplits ? null : previous_splits_data.find(y => y.trainer === "Cilan")
                 const cressInPrevious = isUsingDefaultSplits ? null : previous_splits_data.find(y => y.trainer === "Cress")
@@ -2693,7 +2701,7 @@ export default defineComponent({
                     // Process all trainers, but only process N if his current split ID is 587
                     if (this.game_data.splits.includes(trainer)) {
                         const default_string = "-"
-                        let cur_split = this.current_splits.find(y => y.trainer === trainer)
+                        let cur_split = this.effective_current_splits.find(y => y.trainer === trainer)
                         let displayTrainerName = trainer // Default to the trainer name
                         let imageTrainerName = trainer // For image lookup - use base trainer name
                         
@@ -2708,7 +2716,7 @@ export default defineComponent({
                             // Determine what to show and use
                             if (currentTrioTrainer) {
                                 // Player has defeated a trio trainer - always show that one
-                                cur_split = this.current_splits.find(y => y.trainer === currentTrioTrainer)
+                                cur_split = this.effective_current_splits.find(y => y.trainer === currentTrioTrainer)
                                 imageTrainerName = currentTrioTrainer
                                 
                                 if (previousTrioTrainer && previousTrioTrainer !== currentTrioTrainer) {
@@ -2741,7 +2749,7 @@ export default defineComponent({
                         
                         // Debug logging for N
                         if (trainer === "N") {
-                            cur_split = this.current_splits.find(y => y.trainer === trainer && y.id === final_n_battle_id)
+                            cur_split = this.effective_current_splits.find(y => y.trainer === trainer && y.id === final_n_battle_id)
                         }
 
                         // Ensure x.time is valid before converting
@@ -3813,12 +3821,11 @@ export default defineComponent({
             return 0;
         },
         async load_splits() {
-            const text = await loadCsvFile();
-            const rows = text.split("\n").slice(1).filter(x => x !== '');
-            const parsedRows = rows.map(row => {
-                const columns = row.split(",");
-                return {trainer: columns[2], time: columns[3]};
-            });
+            // A replay's SPLIT bookmarks or a split CSV, picked and parsed in main (2026-09-23).
+            const comparison = await pickSplitComparison();
+            if (!comparison) return;
+            this.previous_splits_source = comparison.name;
+            const parsedRows = comparison.rows;
 
             // For N, only keep the final battle row (last N occurrence in the CSV).
             // Position is anchored at that row so N lands in its natural place (e.g. before Ghetsis in B/W).
@@ -3846,6 +3853,7 @@ export default defineComponent({
         },
         clear_splits() {
             this.previous_splits = [];
+            this.previous_splits_source = null;
         },
         enemy_held_item(x) {
             const team   = this.game?.properties?.battle?.opponent?.team
@@ -8954,20 +8962,22 @@ export default defineComponent({
                 this.full_data_str = full_data_str
                 this.simple_data = simple_data
                 this.deprecated_data_str = deprecated_data_str
-                if (this.collect_split_data == true && this.game.properties.meta.state.value == "From Battle" && this.game.properties.battle.opponent.trainer.value != '--') {
-                    // Normalize trainer name: convert "Leader Cress" to "Cress" using autosplitter mapping
-                    let normalizedTrainerName = trainer_name
-                    if (this.game_data && this.game_data.gameName && autosplitter[this.game_data.gameName]) {
-                        // Find the simple split name that maps to this trainer name
-                        const simpleSplits = autosplitter["Simple Splits"]
-                        for (const simpleName of simpleSplits) {
-                            if (autosplitter[this.game_data.gameName][simpleName] === trainer_name) {
-                                normalizedTrainerName = simpleName
-                                break
-                            }
+                // Normalize trainer name: convert "Leader Cress" to "Cress" using autosplitter mapping
+                let normalizedTrainerName = trainer_name
+                if (this.game_data && this.game_data.gameName && autosplitter[this.game_data.gameName]) {
+                    // Find the simple split name that maps to this trainer name
+                    const simpleSplits = autosplitter["Simple Splits"]
+                    for (const simpleName of simpleSplits) {
+                        if (autosplitter[this.game_data.gameName][simpleName] === trainer_name) {
+                            normalizedTrainerName = simpleName
+                            break
                         }
                     }
-                    
+                }
+                // The row this battle's simple split would be, with the key and time current_splits
+                // gets; the simple-split sites write it into the replay (2026-09-23).
+                this.last_simple_split = { trainer: normalizedTrainerName, time: this.shuckie_timer ? shuckie_rt : real_time_hmmss, id: trainer_id }
+                if (this.collect_split_data == true && this.game.properties.meta.state.value == "From Battle" && this.game.properties.battle.opponent.trainer.value != '--') {
                     if (this.shuckie_timer) { 
                         this.current_splits.push({
                             trainer: normalizedTrainerName, 
@@ -9073,6 +9083,8 @@ export default defineComponent({
                 //write simple split data
                 const simpleSplit = () => {
                     log_split()
+                    // The same split into the replay (2026-09-23), keyed like current_splits (gen5's trainer id marks the instance).
+                    addSplitBookmark(this.last_simple_split?.trainer, this.last_simple_split?.time, this.last_simple_split?.id)
                     logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
                     this.split_data.push(this.simple_data)
                     // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
@@ -9107,6 +9119,7 @@ export default defineComponent({
                         // this.right_ui = "Splits"
                     }
                     log_split();
+                    addSplitBookmark(this.last_simple_split?.trainer, this.last_simple_split?.time, this.last_simple_split?.id)
                     this.split_data.push(this.simple_data)
                     // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
                     // CSV split files are the record, and storing the whole history under the bare key
@@ -9174,6 +9187,8 @@ export default defineComponent({
                         this.finished_run_count++
                     };
                     log_split();
+                    // The run's end as its own split in the replay, under the relabelled name.
+                    addSplitBookmark(this.simple_data[2], this.simple_data[3])
                     
                     //use then so that logCopy doesn't touch any files until logData finishes
                     const splitFileName = this.getSplitFileName();

@@ -1,6 +1,7 @@
 import { getUserState, setUserState } from "~/core/persistence/userState";
 import { EMULATOR_BASE_URL } from "~/core/stores/useEmulatorStatsStore";
 import { sendObsChapterMarker } from "~/core/logic/obs";
+import { splitBookmarkKey, splitBookmarkName, splitTimeToHms } from "../../../shared/splitBookmarks";
 
 /**
  * Super Shuckie replay bookmarks at every chapter marker.
@@ -126,6 +127,25 @@ export function addShuckieBookmark(chapterName: string): void {
 		.catch(() => { /* ignore */ });
 }
 
+/**
+ * A simple split as a replay bookmark (2026-09-23): `SPLIT - <trainer> - HH:MM:SS`, typed
+ * SPLIT (`src/shared/splitBookmarks.ts`). `trainer` is the key the overlay pushes into
+ * `current_splits` for the split and `time` the split's real time in any of the panels'
+ * spellings (the CSV's `real_time_hmmss`); `instance` tells repeat fights of one trainer
+ * apart where a generation does. No OBS chapter goes with it: the battle's OUT marker is
+ * already there. A time that is not a time (the "-" placeholder) adds nothing.
+ */
+export function addSplitBookmark(trainer: string, time: string, instance?: number | null): void {
+	const hms = splitTimeToHms(time);
+	if (!trainer || hms === null) return;
+	addShuckieBookmark(splitBookmarkName(trainer, hms, instance));
+}
+
+/** What makes two bookmarks the same marker on playback: the name, less a split's time. */
+function dedupeKey(name: string): string {
+	return splitBookmarkKey(name) ?? name;
+}
+
 async function place(name: string, stats: ShuckieStats): Promise<void> {
 	const frame = stats.total_elapsed_frames;
 	if (stats.is_recording) {
@@ -155,9 +175,12 @@ async function place(name: string, stats: ShuckieStats): Promise<void> {
 		pass.frame = Math.max(pass.frame, frame);
 	}
 
+	// A split bookmark is the same split whatever time its name carries: a replay played
+	// back on the local timer stamps the split a little differently than the recording did.
+	const key = dedupeKey(name);
 	let nearest: ShuckieBookmark | null = null;
 	for (const bookmark of list.bookmarks) {
-		if (bookmark.name !== name || pass.matched.has(bookmark.id)) continue;
+		if (dedupeKey(bookmark.name) !== key || pass.matched.has(bookmark.id)) continue;
 		const distance = Math.abs(bookmark.in_frame - frame);
 		if (distance <= DUPLICATE_WINDOW_FRAMES && (!nearest || distance < Math.abs(nearest.in_frame - frame))) nearest = bookmark;
 	}

@@ -146,11 +146,11 @@ export function gen1ControlRoutes(isReady: () => boolean): ControlRoutes {
         return { ok: true, bonk: s.pop_ups.bonks.enabled, repel_counter: s.pop_ups.repel.enabled };
       },
 
-      /** Main reads and parses the CSV; `__splits` carries the parsed rows. */
+      /** Main reads and parses the file, a replay or a CSV; `__splits` carries the rows, `__source` the file's name. */
       "/load-split-file": (query) => {
         if (!query.__splits) return missing("file");
         const splits = JSON.parse(query.__splits) as { trainer: string; time: string }[];
-        PubSub.publish("@splits/previous_loaded", splits);
+        PubSub.publish("@splits/previous_loaded", { rows: splits, name: query.__source ?? null });
         return { ok: true, splits_loaded: splits.length };
       },
 

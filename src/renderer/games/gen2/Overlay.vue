@@ -207,7 +207,8 @@
                     <div>Search Pokemon:</div>
                     <input type="text" class="inputContainer" v-model="search_term" placeholder="Search for a species">
                     <!-- <button class="buttonStyle" @click="set_rom_starter">Set ROM Starter</button> -->
-                    <button class="buttonStyle" @click="load_splits()">Split Comparison</button><br>
+                    <button class="buttonStyle" @click="load_splits()">Load replay / split file to compare</button><br>
+                    <div v-if="previous_splits_source" style="font-size: 12px;">Comparing against: {{ previous_splits_source }}</div>
                     <table>
                         <tbody><tr>
                             <td>Previous:</td>
@@ -1101,7 +1102,8 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { pickSplitComparison } from "~/core/logic/splitComparison";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampDvs, clampStat, DV_MAX, gen12Stat, gen2Gender, gen2HiddenPower, hpDv as hpDvOf, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
@@ -1112,6 +1114,7 @@ import { battleMathMixin } from "~/core/overlay/battleMathMixin";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen2Hotkeys } from "./hotkeys";
+// loadCsvFile: only `load_temp_splits` (legacy, unreferenced) still uses it; the comparison picker is core's.
 import { loadCsvFile, logData, logCopy, transition } from "./splits.js";
 import { buildMoveLookup, parseBackportMoves, parseBackportPokemon } from "./backports.js";
 import { recordBackport } from "./backportOverrides";
@@ -1432,6 +1435,7 @@ export default defineComponent({
             blackout:            false,
 
             previous_splits: MyStorage['this.previous_splits'] ?? [],
+            previous_splits_source: MyStorage['previous_splits_source'] ?? null,
             current_splits:  MyStorage['this.current_splits']  ?? [],
 
             stat_exp_hp_replacement: null,
@@ -1819,6 +1823,9 @@ export default defineComponent({
                 MyStorage['this.previous_splits'] = newVal
             },
             deep: true,
+        },
+        previous_splits_source(newVal) {
+            MyStorage['previous_splits_source'] = newVal
         },
         ui_stat_arrangement(newValue) {
             if (newValue == 'HP, Atk, Def, SpA, SpD, Spe') {
@@ -2265,7 +2272,7 @@ export default defineComponent({
                     const result = []
                     const completedTrainers = new Set()
                     // Add completed splits first, in the order they were completed
-                    for (const cur_split of this.current_splits) {
+                    for (const cur_split of this.effective_current_splits) {
                         if (this.default_split_order.includes(cur_split.trainer) && !completedTrainers.has(cur_split.trainer)) {
                             result.push({trainer: cur_split.trainer, current_time: cur_split.time})
                             completedTrainers.add(cur_split.trainer)
@@ -2285,7 +2292,7 @@ export default defineComponent({
                 for (const x of this.previous_splits) {
                     if (this.split_trainers.includes(x.trainer)) {
                         const default_string = "-"
-                        const cur_split = this.current_splits.find(y => y.trainer === x.trainer)
+                        const cur_split = this.effective_current_splits.find(y => y.trainer === x.trainer)
                         const prev = this.convertDurationToSeconds(x.time)
                         if (cur_split == undefined) {
                             if (!addedTrainers.has(x.trainer)) {
@@ -3175,14 +3182,11 @@ export default defineComponent({
             return results
         },
         async load_splits() {
-            const text = await loadCsvFile();
-            const rows = text.split("\n").slice(1).filter(x => x !== '');
-            const results = []
-            for (const row of rows) {
-                const columns = row.split(",");
-                results.push({trainer: columns[2], time: columns[3]})
-            }
-            this.previous_splits = results;
+            // A replay's SPLIT bookmarks or a split CSV, picked and parsed in main (2026-09-23).
+            const comparison = await pickSplitComparison();
+            if (!comparison) return;
+            this.previous_splits = comparison.rows;
+            this.previous_splits_source = comparison.name;
         },
         calculate_stat(species, level) {
             let include_badge_boost = true
@@ -6321,6 +6325,8 @@ export default defineComponent({
                 //write simple split data
                 const simpleSplit = () => {
                     log_split()
+                    // The same split into the replay (2026-09-23): simple_data[2] is the trainer key, [3] real_time_hmmss.
+                    addSplitBookmark(this.simple_data[2], this.simple_data[3])
                     logData(gameName, this.simple_data_str, this.attempt_number, this.starter, "Simple", this.testRun, this.scott_mode, this.refilming_mode)
                     this.split_data.push(this.simple_data)
                     // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
@@ -6368,6 +6374,7 @@ export default defineComponent({
                 //stop timer
                 if (trainer == "RED") {
                     log_split()
+                    addSplitBookmark(this.simple_data[2], this.simple_data[3])
                     if (this.testRun == false && this.refilming_mode == false) {
                         if (this.no_increment == false) { this.finished_run_count++ }
                     };

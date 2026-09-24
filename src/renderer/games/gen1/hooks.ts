@@ -1,7 +1,7 @@
 import PubSub from "~/logic/PubSub";
 import { logData, logCopy } from "~/autosplitter/autosplitter_functions.js";
 import { autosplitter } from "~/games/gen1/data/splits";
-import { sendChapterMarker } from "~/core/logic/shuckieBookmarks";
+import { addSplitBookmark, sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
 import { applyManualStarterDvs, OAKS_LAB } from "~/games/gen1/starterDvs";
 import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
@@ -112,6 +112,9 @@ export function installGen1RunHooks(vm: any): void {
                 vm.log_split()
                 logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, "Simple", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
                 vm.split_data.push(vm.simple_data)
+                // The same split into the replay (2026-09-23): simple_data[2] is the trainer
+                // key current_splits holds, [3] the CSV's real_time_hmmss.
+                addSplitBookmark(vm.simple_data[2], vm.simple_data[3])
             }
             //log simple data for only these trainers
             switch (trainer) {
@@ -151,6 +154,7 @@ export function installGen1RunHooks(vm: any): void {
             //stop timer
             if (trainer == "RIVAL3") { //this is the champion in gen1
                 vm.log_split() //log the final split
+                addSplitBookmark(vm.simple_data[2], vm.simple_data[3])
                 if (vm.settings.right_panel.post_battle_splits === true) {
                     vm.settings.setRightPanelOverride(RightPanelMode.splits);
                 }

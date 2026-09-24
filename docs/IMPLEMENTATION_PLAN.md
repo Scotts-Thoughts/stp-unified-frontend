@@ -1395,3 +1395,89 @@ ask: the same automatic assignment in gen1.
   write as one change frame, so a pre-change capture is now one hub frame behind -- expected,
   and deterministic (a second capture of the same build diffs all-green against the first).
   `npm run typecheck` clean. Not yet run against a live game.
+
+## Split bookmarks and the replay as split comparison (2026-09-23)
+
+Scott's ask: write each simple split into the replay Super Shuckie is recording, as a bookmark
+typed `SPLIT` carrying the trainer and the time to the second; then compare the current run against
+another run's `.replay` instead of a CSV, and while a replay is played back read the current run's
+splits from its bookmarks, so a scrub to any point shows the splits reached by then without playing
+the run through. Decisions taken with Scott before building: all five generations; the panel's
+current column comes from the playing replay's bookmarks (last split per trainer at or before the
+frame); CSV loading stays as a fallback by extension; the name is `SPLIT - <trainer> - HH:MM:SS`,
+with an `(<instance>)` marker where a generation tells repeat fights apart; gen1's button goes under
+the Compare-splits dropdown.
+
+- **One shared vocabulary** (`src/shared/splitBookmarks.ts`, no imports, used by the renderer and
+  main): the name, its parsing from the end (a trainer key may contain ` - `), the time spellings
+  (`45`, `5:12`, `1:05:12`, `.cs` dropped) to `HH:MM:SS` and back to the panels' `[h:]m:ss`, and
+  `splitsFromBookmarks(bookmarks, upToFrame)`: split bookmarks at or before the frame, sorted by
+  `(in_frame, id)`, the last per trainer(+instance) kept in the position of that last bookmark. A
+  bookmark counts as a split when its name parses and it is untyped or typed SPLIT.
+- **Writing** (`addSplitBookmark` in `core/logic/shuckieBookmarks.ts`): at every site that writes the
+  Simple CSV, with the key `current_splits` gets for that split -- gen1 `simple_data[2]` in
+  `games/gen1/hooks.ts` (the `simpleSplit` closure and the champion; not the Hall of Fame re-log,
+  which is the champion's key at a later time and would overwrite it under last-per-trainer); gens
+  2-4 `simple_data[2]`; gen4's n-th Rival / Cyrus / HGSS rematch as the instance (the count in
+  `current_splits` after the push); gen5 the normalised key and trainer id, stashed by
+  `autosplitter_process` as `last_simple_split` (the normalisation moved out of the
+  `collect_split_data` guard so it is always there), plus its relabelled Hall of Fame split. The type
+  falls out of `bookmarkTypeFor` (the kind before the first ` - `, in capitals). No OBS chapter. On
+  playback the dedupe compares names less a split's time, since a replay played back on the local
+  timer stamps a slightly different second.
+- **Reading a replay** (`src/shared/replayBookmarks.ts`, `src/main/replayFile.ts`): the 2048-byte
+  header and the `SSBM` bookmark section at `packet_stream_end`, nothing else -- two ranged reads for
+  a 370 MB file. Ground truth is `supershuckie-replay-recorder` (`header.rs`, `bookmark_section.rs`,
+  `bookmarks.rs`, `packet/io.rs`); the first guess at the patch-length offset (0x018) was wrong, the
+  struct says 0x110, and the parser was then checked against a v6 file the converter wrote (three
+  legacy bookmarks decode to the frames and millis decoded by hand from the bytes:
+  `checkpoint@7/166`, `late@76/1754`, `checkpoint@165/3873`). `u32` is raw little-endian, everything
+  else the length-prefixed `UnsignedInteger`; a type id can exceed 2^53 so ids read as bigint and
+  format as the REST API's 16 hex digits; the blake3 hash is not verified. v3/v4 files and unclosed
+  recordings (`packet_stream_end` 0) are refused with the reason.
+- **Loading** (`src/main/splitComparison.ts`): one loader for the queuer's `/load-split-file` and the
+  in-app button, by extension: a `.replay` gives `splitsFromBookmarks` of its table, a `.csv` the
+  legacy columns 2 and 3. The picker moved to main (`splits:pick-comparison`, `dialog.showOpenDialog`
+  with a `.replay`/`.csv` filter): the legacy `showOpenFilePicker` gives a `File` with no path, and the
+  file is read by main anyway. The file's base name rides along as `previous_splits_source` (gen1 user
+  state; gens 2-5 `MyStorage`, added to the non-style key lists) and shows under the button. The
+  control route's reply body is unchanged (oracle 6).
+- **The panel during playback** (`core/stores/useReplaySplitsStore.ts`, started and stopped with the
+  module in `main.ts`): polls `/stats` at 250 ms while the Shuckie Bookmarks switch is on, fetches
+  `/bookmarks` when `bookmark_generation` moves, keeps only the split bookmarks, and exposes
+  `currentSplits` for the current frame. gen1's overlay passes `displayed_current_splits` to
+  `right_panel`; gens 2-5 read `effective_current_splits` from `overlayCommonMixin` (the mixin gained
+  its first `data()`, the store) in every `compare_splits`. The autosplitter's pushes and CSVs are
+  untouched. Under the harness the stub always reports playback, so the panel there is driven by the
+  bookmarks the app itself adds; a captured screenshot at a split can differ from an older baseline by
+  the round trip.
+- **Harness:** oracle 8 sets split bookmarks aside from the marker/bookmark multiset (they have no
+  chapter) and counts them in the detail; `npm run parity:replay-splits`
+  (tools/parity/replay-splits-selftest.ts) covers the names, the rows, a copy of the recorder's
+  encoder against the decoder, the converter-written fixture `tools/fixtures/replays/legacy-bookmarks-v6.replay`,
+  the loader on replays and CSVs, and the store against a fake Super Shuckie (frames, scrubs,
+  generation changes, the switch, a dead server). `parity:drift` re-pinned `compare_splits` and
+  `load_splits` (reasons kept); `get_stat` was already drifting in gen4/gen5 at HEAD before this change
+  and is left flagged for Scott.
+- **Verified** (2026-09-23) `npm run typecheck` clean; `parity:replay-splits` 50/50, `parity:bookmarks` 22/22,
+  `parity:debounce` green; `parity:drift` green apart from the pre-existing `get_stat` entry. gen1 end to end:
+  `gen1-yellow-smoke` on this build vs the same fixture on a built worktree of HEAD `3ab2582`
+  (`tools/reports/split-bookmarks-gen1.{head,final,diff}`): the run adds `SPLIT - Brock - 00:00:33` typed
+  SPLIT at frame 2100, between the battle's `IN - BROCK` and `OUT - BROCK` (the four chapter markers and
+  the simple CSV row `Brock,0:33` unchanged); oracles 3-9 identical (CSVs, user state, writes, the control
+  session, OBS, Shuckie calls and bookmarks with the split set aside, console -- the one error is the
+  fixture's `images/pokemon/null.png` on both sides). Oracles 1/2 differ in two places: the settings
+  column at every checkpoint (the renamed metrics button, the new button and label in interface_4 shift
+  what follows) and, from the checkpoint after the Brock split, the splits panel: the baseline lists
+  Brock twice (0:33 and 0:34 -- gen1's `autosplitter_process` pushes a `current_splits` row on every
+  `lowHealthAlarm` change of the battle, and First mode does not dedupe), the candidate once, because
+  the harness stub reports playback and the panel is then the bookmarks' last-per-trainer list. Live
+  recording is unchanged; the duplicate-row quirk is worth a look of its own.
+  gen5 end to end, the same way (`tools/reports/split-bookmarks-gen5.{head,final,diff}`): the run adds
+  `SPLIT - Cilan (12) - 490908:01:14` typed SPLIT at frame 4320, between the last `Enemy Fainted` and
+  `OUT - Cilan` -- the normalised key, the trainer id as the instance, and the fixture's own absurd timer
+  value exactly as its CSV row carries it (`490908:01:14.30`, centiseconds dropped); the eight chapter
+  markers and the CSV unchanged; oracles 3-9 identical; oracles 1/2 differ only in the button's text
+  (x 787-1038, y 111-124 at every checkpoint). Not yet run against a live Super Shuckie: the fake server
+  and the stub speak the `replay-bookmarks` REST API; a build older than that 404s `/add-bookmark` and
+  everything degrades to the autosplitter's own rows, as before.

@@ -241,7 +241,8 @@
                             <li v-for="key in filtered_starter_options" :key="key" @mousedown.prevent="select_starter_option(key)">{{ key }}</li>
                         </ul>
                     </div>
-                    <button class="buttonStyle comparison_button" @click="load_splits()">Load split file to compare splits</button><br>
+                    <button class="buttonStyle comparison_button" @click="load_splits()">Load replay / split file to compare</button><br>
+                    <div v-if="previous_splits_source" style="font-size: 12px;">Comparing against: {{ previous_splits_source }}</div>
                     <table>
                         <tbody><tr>
                             <td>Attempt Number:</td>
@@ -1336,7 +1337,8 @@
  */
 import { defineComponent } from "vue";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
-import { sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
+import { pickSplitComparison } from "~/core/logic/splitComparison";
 import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
@@ -1353,6 +1355,7 @@ import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen4Hotkeys } from "./hotkeys";
 import { gen4GameIcon } from "./icons";
+// loadCsvFile: only `load_temp_splits` (legacy, unreferenced) still uses it; the comparison picker is core's.
 import { loadCsvFile, logData, logCopy, transition } from "./splits.js";
 import { auto_save_settings } from "./data/auto_save_settings.js";
 import { autosplitter } from "./data/autosplitter.js";
@@ -1459,6 +1462,7 @@ export default defineComponent({
             legacy_starter_assignment    : MyStorage['legacy_starter_assignment']     ?? false,
             catch_rate                   : MyStorage['catch_rate'] ?? false,
             previous_splits              : MyStorage['previous_splits']     ?? [],
+            previous_splits_source       : MyStorage['previous_splits_source'] ?? null,
             current_splits               : MyStorage['current_splits']      ?? [],
             collect_split_data           : MyStorage["collect_split_data"]  ?? true,
             previous_label               : MyStorage['previous_label'] ?? "Previous",
@@ -2241,6 +2245,9 @@ export default defineComponent({
             },
             deep: true,
         },
+        previous_splits_source(newVal) {
+            MyStorage['previous_splits_source'] = newVal
+        },
         catch_rate(newValue) {
             if (newValue == true) {
                 this.game.properties.patch.stpCatchRate.set(1,false); 
@@ -2666,7 +2673,7 @@ export default defineComponent({
             // For HGSS with "First" split type, return hardcoded default list
             if (isHGSS && this.split_type === "First") {
                 const default_string = "-"
-                const currentSplits = Array.isArray(this.current_splits) ? this.current_splits : []
+                const currentSplits = Array.isArray(this.effective_current_splits) ? this.effective_current_splits : []
 
                 // Default list of trainers in order for HGSS
                 const hgssDefaultTrainers = [
@@ -2771,7 +2778,7 @@ export default defineComponent({
                         return result
                     }
                     const default_string = "-"
-                    const currentSplits = Array.isArray(this.current_splits) ? this.current_splits : []
+                    const currentSplits = Array.isArray(this.effective_current_splits) ? this.effective_current_splits : []
                     const completedTrainers = new Set()
 
                     // Add completed splits first, in the order they were completed
@@ -2815,7 +2822,7 @@ export default defineComponent({
                         return result
                     }
                     const default_string = "-"
-                    const currentSplits = Array.isArray(this.current_splits) ? this.current_splits : []
+                    const currentSplits = Array.isArray(this.effective_current_splits) ? this.effective_current_splits : []
                     let currentRivalIndex = 0
                     let currentCyrusIndex = 0
                     
@@ -2937,7 +2944,7 @@ export default defineComponent({
                         
                         // Find matching split in current_splits by order for Rival/Cyrus, by name for others
                         let cur_split = undefined
-                        const currentSplits = Array.isArray(this.current_splits) ? this.current_splits : []
+                        const currentSplits = Array.isArray(this.effective_current_splits) ? this.effective_current_splits : []
                         if (x.trainer === "Rival") {
                             // Find the Nth Rival in current_splits based on order
                             const rivalsInCurrent = currentSplits.filter(s => s.trainer === "Rival")
@@ -7997,14 +8004,11 @@ export default defineComponent({
             return results
         },
         async load_splits() {
-            const text = await loadCsvFile();
-            const rows = text.split("\n").slice(1).filter(x => x !== '');
-            const results = []
-            for (const row of rows) {
-                const columns = row.split(",");
-                results.push({trainer: columns[2], time: columns[3]})
-            }
-            this.previous_splits = results;
+            // A replay's SPLIT bookmarks or a split CSV, picked and parsed in main (2026-09-23).
+            const comparison = await pickSplitComparison();
+            if (!comparison) return;
+            this.previous_splits = comparison.rows;
+            this.previous_splits_source = comparison.name;
         },
 
         /* === Style Mode (dev only) ==========================================
@@ -9448,6 +9452,8 @@ export default defineComponent({
                     if (multiInstanceTrainers.includes(trainerName)) {
                         // Always add as new entry to track multiple instances
                         this.current_splits.push({trainer: trainerName, time: timeStr})
+                        // The same split into the replay (2026-09-23), the n-th fight of this trainer marked.
+                        addSplitBookmark(trainerName, timeStr, this.current_splits.filter(s => s.trainer === trainerName).length)
                     } else {
                         // Check if this trainer already exists in current_splits and update it, or add new
                         const existingIndex = this.current_splits.findIndex(s => s.trainer === trainerName)
@@ -9456,6 +9462,7 @@ export default defineComponent({
                         } else {
                             this.current_splits.push({trainer: trainerName, time: timeStr})
                         }
+                        addSplitBookmark(trainerName, timeStr)
                     }
                     console.log("simpleSplit: Updated current_splits with", {trainer: trainerName, time: timeStr}, "Total splits:", this.current_splits.length)
                 }
@@ -9547,6 +9554,8 @@ export default defineComponent({
                     if (trainerName === "Rival" || trainerName === "Cyrus") {
                         // Always add as new entry to track multiple instances
                         this.current_splits.push({trainer: trainerName, time: timeStr})
+                        // The same split into the replay (2026-09-23), the n-th fight of this trainer marked.
+                        addSplitBookmark(trainerName, timeStr, this.current_splits.filter(s => s.trainer === trainerName).length)
                     } else {
                         // Check if this trainer already exists in current_splits and update it, or add new
                         const existingIndex = this.current_splits.findIndex(s => s.trainer === trainerName)
@@ -9555,6 +9564,7 @@ export default defineComponent({
                         } else {
                             this.current_splits.push({trainer: trainerName, time: timeStr})
                         }
+                        addSplitBookmark(trainerName, timeStr)
                     }
                     // Show splits after final battle if automatic_post_battle_splits is enabled
                     if (this.automatic_post_battle_splits == true) {
@@ -9601,6 +9611,8 @@ export default defineComponent({
                     if (trainerName === "Rival" || trainerName === "Cyrus") {
                         // Always add as new entry to track multiple instances
                         this.current_splits.push({trainer: trainerName, time: timeStr})
+                        // The same split into the replay (2026-09-23), the n-th fight of this trainer marked.
+                        addSplitBookmark(trainerName, timeStr, this.current_splits.filter(s => s.trainer === trainerName).length)
                     } else {
                         // Check if this trainer already exists in current_splits and update it, or add new
                         const existingIndex = this.current_splits.findIndex(s => s.trainer === trainerName)
@@ -9609,6 +9621,7 @@ export default defineComponent({
                         } else {
                             this.current_splits.push({trainer: trainerName, time: timeStr})
                         }
+                        addSplitBookmark(trainerName, timeStr)
                     }
                 }
                 simpleSplit()

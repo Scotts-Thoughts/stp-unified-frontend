@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "http";
-import { readFileSync } from "fs";
 import type { BrowserWindow } from "electron";
 import { ipcMain } from "electron";
+import { loadSplitComparison } from "./splitComparison";
 
 /**
  * The overlay control server on http://127.0.0.1:30159.
@@ -129,17 +129,18 @@ export class ControlServer {
         // main (plan 1.6) and only the parsed rows cross to the renderer, which every
         // generation's route stores from `__splits`. The path is the absolute one the
         // queuer sends (a file its user dragged in from anywhere on disk), read as the
-        // legacy `fs.readFileSync(query.file)` read it. The column layout is the legacy
-        // one: index 2 is the trainer, index 3 the time.
+        // legacy `fs.readFileSync(query.file)` read it. Since 2026-09-23 the file may be
+        // a Super Shuckie `.replay`, whose SPLIT bookmarks are the rows
+        // (src/main/splitComparison.ts); a CSV parses as it always did. `__source`
+        // names the file for the settings panel. The reply body is unchanged (oracle 6).
         if (!query.file) return { ok: false, status: 400, error: "Missing file parameter" };
-        const text = readFileSync(query.file, "utf-8");
-        const rows = text.split("\n").slice(1).filter((row) => row !== "");
-        const splits = rows.map((row) => {
-          const columns = row.split(",");
-          return { trainer: columns[2], time: columns[3] };
+        const comparison = await loadSplitComparison(query.file);
+        const reply = await this.askRenderer("/load-split-file", {
+          ...query,
+          __splits: JSON.stringify(comparison.rows),
+          __source: comparison.name,
         });
-        const reply = await this.askRenderer("/load-split-file", { ...query, __splits: JSON.stringify(splits) });
-        return reply.ok ? { ok: true, splits_loaded: splits.length } : reply;
+        return reply.ok ? { ok: true, splits_loaded: comparison.rows.length } : reply;
       }
       default:
         return { ok: false, error: "Unknown endpoint" };

@@ -67,6 +67,10 @@ const api = {
     copy: (from, to) => invoke('splits:copy', from, to),
     mkdir: (relative) => invoke('splits:mkdir', relative),
     reveal: (relative) => invoke('splits:reveal', relative),
+    /** A file dialog for the split comparison (.replay or .csv); null when cancelled. */
+    pickComparison: () => invoke('splits:pick-comparison'),
+    /** The split comparison in the file at `file` (the queuer's route uses the same loader in main). */
+    loadComparison: (file) => invoke('splits:load-comparison', file),
   },
 
   data: {

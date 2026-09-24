@@ -15,6 +15,7 @@ import { pathToFileURL } from "node:url";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import type { StyleEntry } from "./capture.ts";
+import { parseSplitBookmarkName } from "../../src/shared/splitBookmarks.ts";
 
 export interface Difference {
   oracle: number;
@@ -183,13 +184,17 @@ function diffBookmarks(candidateDir: string, out: Difference[]): void {
   const bookmarks = readJson<{ name: string }[]>(join(candidateDir, "shuckie-bookmarks.json"));
   const markers = readJson<{ chapterName: string }[]>(join(candidateDir, "obs-markers.json"));
   if (!bookmarks || !markers) return;
+  // A split bookmark (`SPLIT - <trainer> - HH:MM:SS`, src/shared/splitBookmarks.ts) has no
+  // chapter marker of its own: the battle's OUT marker is the chapter. It is set aside here
+  // and counted in the detail; the split CSV oracle (3) covers the splits themselves.
+  const splits = bookmarks.filter((m) => parseSplitBookmarkName(m.name) !== null).length;
   const a = markers.map((m) => m.chapterName).sort();
-  const b = bookmarks.map((m) => m.name).sort();
+  const b = bookmarks.map((m) => m.name).filter((name) => parseSplitBookmarkName(name) === null).sort();
   if (JSON.stringify(a) === JSON.stringify(b)) return;
   out.push({
     oracle: 8,
     name: `${ORACLE_NAMES[8]} (bookmarks vs chapter markers)`,
-    detail: `${markers.length} chapter marker(s), ${bookmarks.length} bookmark(s)`,
+    detail: `${markers.length} chapter marker(s), ${bookmarks.length} bookmark(s) (${splits} split bookmark(s) set aside)`,
     baseline: trim(JSON.stringify(markers.map((m) => m.chapterName))),
     candidate: trim(JSON.stringify(bookmarks.map((m) => m.name))),
   });
