@@ -1,17 +1,16 @@
-// gen5's `components/ShuckieTimer.js`, verbatim as an ES module (tools/port/lift-gen5.py): the
-// template string is compiled at runtime, exactly as the legacy page compiled it.
-import { computed } from "vue";
-// How the component will render:
-const template = `
-    <div class="gametime">
-        <!-- <div class="timerTitle">time played at 4x game-speed</div> -->
-        <div class="gametimeClock">{{time}}</div>
-        <div class="gametimeFrames">{{frames}}</div>
-    </div>
-`
+// gen5's `components/ShuckieTimer.js`, verbatim as an ES module (tools/port/lift-gen5.py) --
+// with its template string turned into the render function the compiler would have made
+// from it (2026-09-25); see components/Timer.js. The overlay does not mount it today (the
+// <shuckie-timer> tag in its template is commented out), but it stays registered.
+import { computed, h } from "vue";
 
 export default {
-    template,
+    render() {
+        return h("div", { class: "gametime" }, [
+            h("div", { class: "gametimeClock" }, this.time),
+            h("div", { class: "gametimeFrames" }, this.frames),
+        ]);
+    },
     props: {
         emulatorStats: {
             type: Object,

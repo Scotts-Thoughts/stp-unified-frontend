@@ -66,28 +66,28 @@
                         <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/new_ui/timer.svg)"></div>
                         <div class="fault_label timer_reset_label">faults</div>
                         <div id="reset_counter_single" class="faults_value timer_reset_value">
-                            {{emulatorStats?.counters?.playerResets ?? 0}}</div>
+                            {{shuckie_player_resets ?? 0}}</div>
                     </div>
                     <div v-show="blackouts_resets == 'Blackouts'">
                         <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/new_ui/timer.svg)"></div>
                         <div class="fault_label timer_reset_label">blackouts</div>
                         <div id="reset_counter_single" class="faults_value timer_reset_value">
-                            {{emulatorStats?.counters?.blackout_counter ?? 0}}</div>
+                            {{shuckie_blackout_counter ?? 0}}</div>
                     </div>
                     <div v-show="blackouts_resets == 'Resets'">
                         <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/new_ui/timer.svg)"></div>
                         <div class="fault_label timer_reset_label">resets</div>
                         <div id="reset_counter_single" class="faults_value timer_reset_value">
-                            {{emulatorStats?.counters?.playerResets ?? 0}}</div>
+                            {{shuckie_player_resets ?? 0}}</div>
                     </div>
                     <div v-show="blackouts_resets == 'Both'">
                         <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/new_ui/timer_2.svg)"></div>
                         <div class="fault_label timer_2_reset_label">resets</div>
                         <div class="fault_label blackout_2_reset_label">blackouts</div>
                         <div id="reset_counter" class="faults_value timer_2_reset_value">
-                            {{emulatorStats?.counters?.playerResets ?? 0}}</div>
+                            {{shuckie_player_resets ?? 0}}</div>
                         <div id="blackout_counter" class="faults_value timer_2_blackout_value">
-                            {{emulatorStats?.counters?.blackout_counter ?? 0}}</div>
+                            {{shuckie_blackout_counter ?? 0}}</div>
                     </div>
                 </div>
                 <div v-else="">
@@ -138,8 +138,8 @@
                 </div>
                 <div v-if="shuckie_timer == true" class="gametime">
                     <div class="timerTitle">time played at 4x game-speed</div>
-                    <div class="gametimeClock">{{formatMilliseconds(emulatorStats?.time_current)}}</div>
-                    <div class="gametimeFrames">.{{getCentiseconds(emulatorStats?.time_current)}}</div>
+                    <live-text class="gametimeClock" source="shuckie_clock"></live-text>
+                    <live-text class="gametimeFrames" source="shuckie_frames"></live-text>
                 </div>
                 <div v-else="">
                     <timer></timer>
@@ -1107,7 +1107,7 @@
                             <th class="movepool_header movepool_tableC">Acc.</th>
                             <th class="movepool_header movepool_tableC">PP</th>
                         </tr>
-                        <tr v-for="(x, index) in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
+                        <tr v-for="(x, index) in movepoolRows.level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
                             <td class="movepool_way">{{x.Level}}</td>
                             <td class="movepool_move">{{move_name(x.Move)}}</td>
                             <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">
@@ -1116,7 +1116,7 @@
                             <td class="movepool_tableC">{{x.Accuracy}}%</td>
                             <td class="movepool_tableC">{{x.PP}}</td>
                         </tr>
-                        <tr v-for="x in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).tmhm" :style="getUnobtainableMoveStyle(x, gameSelection)">
+                        <tr v-for="x in movepoolRows.tmhm" :style="getUnobtainableMoveStyle(x, gameSelection)">
                             <td class="movepool_way">{{x.tmhm}}</td>
                             <td class="movepool_move">{{move_name(x.Move)}}</td>
                             <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">
@@ -1125,7 +1125,7 @@
                             <td class="movepool_tableC">{{x.Accuracy}}%</td>
                             <td class="movepool_tableC">{{x.PP}}</td>
                         </tr>
-                        <tr v-for="x in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).tutor" :style="getUnobtainableMoveStyle(x, gameSelection)">
+                        <tr v-for="x in movepoolRows.tutor" :style="getUnobtainableMoveStyle(x, gameSelection)">
                             <td v-if="tutor_moves" class="movepool_way">Tutor</td>
                             <td v-if="tutor_moves" class="movepool_move">{{move_name(x.Move)}}</td>
                             <td v-if="tutor_moves" class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${x.Type?.toLowerCase()})`}">
@@ -1149,7 +1149,7 @@
                                 <th class="movepool_header movepool_tableC">Acc.</th>
                                 <th class="movepool_header movepool_tableC">PP</th>
                             </tr>
-                            <tr v-for="(x, index) in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
+                            <tr v-for="(x, index) in movepoolRows.level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
                                 <td class="movepool_way">{{x.Level}}</td>
                                 <td class="movepool_move">{{move_name(x.Move)}}</td>
                                 <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">
@@ -1158,7 +1158,7 @@
                                 <td class="movepool_tableC">{{x.Accuracy}}%</td>
                                 <td class="movepool_tableC">{{x.PP}}</td>
                             </tr>
-                            <tr v-for="x in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).tmhm" :style="getUnobtainableMoveStyle(x, gameSelection)">
+                            <tr v-for="x in movepoolRows.tmhm" :style="getUnobtainableMoveStyle(x, gameSelection)">
                                 <td class="movepool_way">{{x.tmhm}}</td>
                                 <td class="movepool_move">{{move_name(x.Move)}}</td>
                                 <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">
@@ -1167,7 +1167,7 @@
                                 <td class="movepool_tableC">{{x.Accuracy}}%</td>
                                 <td class="movepool_tableC">{{x.PP}}</td>
                             </tr>
-                            <tr v-for="x in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).tutor" :style="getUnobtainableMoveStyle(x, gameSelection)">
+                            <tr v-for="x in movepoolRows.tutor" :style="getUnobtainableMoveStyle(x, gameSelection)">
                                 <td v-if="tutor_moves" class="movepool_way">Tutor</td>
                                 <td v-if="tutor_moves" class="movepool_move">{{move_name(x.Move)}}</td>
                                 <td v-if="tutor_moves" class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${x.Type?.toLowerCase()})`}">
@@ -1597,7 +1597,7 @@
                             <th class="movepool_header movepool_tableC">Acc.</th>
                             <th class="movepool_header movepool_tableC">PP</th>
                         </tr>
-                        <tr v-for="(x, index) in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
+                        <tr v-for="(x, index) in movepoolRows.level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
                             <td class="movepool_way">{{x.Level}}</td>
                             <td class="movepool_move">{{move_name(x.Move)}}</td>
                             <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">
@@ -1606,7 +1606,7 @@
                             <td class="movepool_tableC">{{x.Accuracy}}%</td>
                             <td class="movepool_tableC">{{x.PP}}</td>
                         </tr>
-                        <tr v-for="x in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).tmhm" :style="getUnobtainableMoveStyle(x, gameSelection)">
+                        <tr v-for="x in movepoolRows.tmhm" :style="getUnobtainableMoveStyle(x, gameSelection)">
                             <td class="movepool_way">{{x.tmhm}}</td>
                             <td class="movepool_move">{{move_name(x.Move)}}</td>
                             <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">
@@ -1615,7 +1615,7 @@
                             <td class="movepool_tableC">{{x.Accuracy}}%</td>
                             <td class="movepool_tableC">{{x.PP}}</td>
                         </tr>
-                        <tr v-for="x in getMovepool(dexData, g3MoveData, g3tmhmMapping, displayedPokemonSpecies).tutor" :style="getUnobtainableMoveStyle(x, gameSelection)">
+                        <tr v-for="x in movepoolRows.tutor" :style="getUnobtainableMoveStyle(x, gameSelection)">
                             <td v-if="tutor_moves" class="movepool_way">Tutor</td>
                             <td v-if="tutor_moves" class="movepool_move">{{move_name(x.Move)}}</td>
                             <td v-if="tutor_moves" class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${x.Type?.toLowerCase()})`}">
@@ -1743,7 +1743,9 @@
  * is the Phase 2.4 refactor proper, to be done with the harness as the net, exactly
  * as gen1's was in Phase 1.
  */
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
+import { LiveText } from "~/core/overlay/LiveText";
+import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -1828,9 +1830,22 @@ let attack, damageMax, damageMin, defense, gamestate, h, level, m, mod, newColor
 export default defineComponent({
     mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin],
     components: {
+        LiveText,
         "Timer": TimerComponent,
     },
     props: ["game"],
+    provide() {
+        // What <live-text> shows (core/overlay/LiveText.ts): the Super Shuckie time,
+        // which changes every poll. Read here through computeds the child renders, so
+        // this component's own render is not a dependent of them and does not re-run at
+        // that rate (docs/performance-followups.md, third pass).
+        return {
+            liveText: {
+                shuckie_clock:  computed(() => this.formatMilliseconds(this.emulatorStats?.time_current)),
+                shuckie_frames: computed(() => "." + this.getCentiseconds(this.emulatorStats?.time_current)),
+            },
+        };
+    },
     data() {
         return {
             ready        : false,
@@ -3254,6 +3269,27 @@ export default defineComponent({
     },
 
     computed: {
+        /**
+         * The Super Shuckie counters as primitives (2026-09-25): the template used to read
+         * `emulatorStats?.counters?.x` directly, which made every poll that replaced
+         * `emulatorStats` a re-render of this whole component. A computed that yields the
+         * same primitive as before triggers nothing.
+         */
+        shuckie_player_resets() {
+            return this.emulatorStats?.counters?.playerResets
+        },
+        shuckie_blackout_counter() {
+            return this.emulatorStats?.counters?.blackout_counter
+        },
+        /**
+         * The movepool table's rows, computed once per displayed species. The template
+         * called getMovepool() once per row group on every render, and each call resolved
+         * every learnset entry against the moves table by a case-insensitive key scan
+         * (docs/performance-followups.md, third pass).
+         */
+        movepoolRows() {
+            return this.getMovepool(this.dexData, this.g3MoveData, this.g3tmhmMapping, this.displayedPokemonSpecies)
+        },
         /**
          * Check if the current Pokemon has multiple evolution stages
          * Returns true if evolution family has more than one species
@@ -5976,7 +6012,7 @@ export default defineComponent({
         //AUTOMATION MOVEPOOL GRAPHIC
         dataSearch(dataObject, pointerValue) {
             if (!pointerValue) return ""
-            const key = Object.keys(dataObject).find(x => x.toLowerCase() == this.move_name(pointerValue).toLowerCase())
+            const key = findKeyIgnoringCase(dataObject, this.move_name(pointerValue))
             return dataObject[key] || "ERROR"
         },
         getMovepool(gen3PkmnData, moveData, tmhmMapping, species) {
@@ -6013,14 +6049,11 @@ export default defineComponent({
             return obj
         }, 
         movepoolResize() {
-            let out = this.movepoolResizeCalc();
-            if(this.g3stateVariable == "From Battle") {
-                return out;
-            }
-            this.game.properties.player.team[0].species.change((newProp, oldProp) => {
-                out = this.movepoolResizeCalc();
-            })
-            return out;
+            // Was: the calc, then a `.change()` handler on the party slot's species that only
+            // re-ran the calc into a local nothing read again. Bound in the movepool table's
+            // :style, this runs on every render, so each render left one more handler on the
+            // property until the mapper unloaded (docs/performance-followups.md, third pass).
+            return this.movepoolResizeCalc();
         },
         movepoolResizeCalc() {
             if(!this.dexData){ 

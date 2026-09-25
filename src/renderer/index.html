@@ -10,15 +10,12 @@
 </head>
 <body>
     <div id="app-container" class="gen-1">
-        <div id="app">
-            <keyhook :table="hotkeys" :placeholder="module.keyhookElement === true"></keyhook>
-            <!-- The pre-mapper screen (plan 3.2): the box-art grid with its own header. -->
-            <no_mapper v-if="ready == false" :unsupported-mapper="unsupportedMapper"></no_mapper>
-            <!-- No wrapper: the overlay component's root is a direct child of #app, as
-                 the legacy apps' v-else wrapper was, so the two trees line up from #app
-                 down (tools/parity/capture.ts roots gen4's comparison there). -->
-            <component v-else :is="overlayComponent" :game="game" ref="overlay"></component>
-        </div>
+        <!-- The root component's render function in main.ts draws here: the keyhook,
+             then the pre-mapper screen (plan 3.2) or the detected module's overlay as a
+             direct child of #app with no wrapper of its own (tools/parity/capture.ts
+             roots gen4's comparison there). It was an in-DOM template until 2026-09-25,
+             which kept Vue's runtime template compiler in the entry chunk. -->
+        <div id="app"></div>
     </div>
 
     <!-- Imports -->

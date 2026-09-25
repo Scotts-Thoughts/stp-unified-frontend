@@ -48,7 +48,8 @@ docs/               the plan, the external contracts, the harness, the per-gener
 **gen1 is refactored code** (Vue SFCs, Pinia stores). **gen2-5 are lifted**: each `games/genN/Overlay.vue`
 is the legacy app's component object and template brought in verbatim with only the infrastructure
 swapped for `core/` (`tools/port/lift-genN.py` lists every seam). Decomposing them into the shared
-stores is later work, done with the harness as the net.
+stores is Phase 6 of `docs/IMPLEMENTATION_PLAN.md` (its status table is section 7g; the detailed plan is the
+last section), done with the harness as the net.
 
 Boot: the shell connects the one mapper client, `games/registry.ts` matches the loaded mapper to a
 generation's profile, the generation's module is imported on demand, its stylesheet is applied under

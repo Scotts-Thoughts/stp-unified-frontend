@@ -9,8 +9,8 @@
                 <div :style="{ opacity: statLabelOpacity()[stat.name]}" class="stat_label">{{stat.label}}</div>
 
                 <div v-if="display_mode == 'Base Stats'"   class="stat_value">{{base_stats(stat.base_stat_key)}}</div>
-                <div v-if="display_mode == 'Averages'"     class="stat_value">{{average_stats(stat.base_stat_key).mean}}</div>
-                <div v-if="display_mode == 'Medians'"      class="stat_value">{{average_stats(stat.base_stat_key).median}}</div>
+                <div v-if="display_mode == 'Averages'"     class="stat_value">{{stat_averages[stat.base_stat_key].mean}}</div>
+                <div v-if="display_mode == 'Medians'"      class="stat_value">{{stat_averages[stat.base_stat_key].median}}</div>
                 <div v-if="display_mode == 'DVs'"          class="stat_value dv">{{get_dv(stat.name)}}/15</div>
                 <div v-if="display_mode == 'EVs'"          class="stat_value stat_exp">{{game_properties.player.team[0]['statExp' + stat.name].value}}</div>
                 <div v-if="display_mode == 'Automatic'"    class="stat_value">{{get_stat(stat.name)}}</div>
@@ -136,6 +136,19 @@ export default defineComponent({
         /** Provides the growth rate of the current pokemon. */
         growthRate(): GrowthRate {
             return this.current_species_data?.growth_rate ?? "Medium Fast";
+        },
+        /**
+         * Mean and median of every base stat, once per game: the Averages and Medians modes
+         * used to call `average_stats()` from the template, ten times per render, each
+         * filtering and sorting the whole dex (docs/performance-followups.md, third pass).
+         */
+        stat_averages(): Record<keyof BaseStats, { mean: number, median: number }> {
+            void this.meta.game;
+            const result = {} as Record<keyof BaseStats, { mean: number, median: number }>;
+            for (const stat of this.stat_object) {
+                result[stat.base_stat_key] = this.average_stats(stat.base_stat_key);
+            }
+            return result;
         },
     },
     methods: {

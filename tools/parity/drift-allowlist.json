@@ -222,6 +222,17 @@
     },
     {
       "section": "computed",
+      "name": "movepoolRows",
+      "reason": "same shape, each generation's own tables: movepoolRows memoises getMovepool() over the generation's dex, move and TM/HM tables for the displayed species (gen2 the party lead's species, gens 3-5 displayedPokemonSpecies), so the template reads it instead of calling getMovepool() per row group per render (docs/performance-followups.md, third pass).",
+      "bodies": {
+        "gen2": "dd08483e703f",
+        "gen3": "3f35f08909e0",
+        "gen4": "daa23668450b",
+        "gen5": "0804579302d5"
+      }
+    },
+    {
+      "section": "computed",
       "name": "pkmnGrowthRate",
       "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 8L, gen4 8L, gen5 8L)",
       "bodies": {
@@ -504,10 +515,10 @@
       "name": "dataSearch",
       "reason": "quirk: gen3 canonicalises the move name (move_name) before the case-insensitive key search; the others search the raw pointer value.",
       "bodies": {
-        "gen2": "bfc6c7bc4bd3",
-        "gen3": "69aa94a34f5f",
-        "gen4": "bfc6c7bc4bd3",
-        "gen5": "bfc6c7bc4bd3"
+        "gen2": "434caa7eed95",
+        "gen3": "54d72a06956d",
+        "gen4": "434caa7eed95",
+        "gen5": "434caa7eed95"
       }
     },
     {
@@ -1048,8 +1059,8 @@
       "bodies": {
         "gen2": "47da10fe5ea9",
         "gen3": "2d853ec98cdc",
-        "gen4": "ece8b567ae2e",
-        "gen5": "266f5d741597"
+        "gen4": "f41643044718",
+        "gen5": "cf7e20d89dc5"
       }
     },
     {
@@ -1226,16 +1237,6 @@
         "gen3": "d8ecd9d96f30",
         "gen4": "e7d1d7a97bff",
         "gen5": "9c7682dbe0d7"
-      }
-    },
-    {
-      "section": "methods",
-      "name": "movepoolResize",
-      "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 10L, gen4 12L, gen5 10L)",
-      "bodies": {
-        "gen3": "3ede1f1e4ab2",
-        "gen4": "478eb3c3b62f",
-        "gen5": "478eb3c3b62f"
       }
     },
     {

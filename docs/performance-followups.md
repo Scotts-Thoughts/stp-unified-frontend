@@ -259,3 +259,159 @@ that cannot be confirmed from source.
 2. Apply the change, run `npm run parity:run` for the affected generation(s), `npm run
    parity:diff` against the worktree capture.
 3. `npm run typecheck`.
+
+## Third pass (2026-09-25)
+
+The first two passes worked on the timers, the mapper client, the Shuckie poll and the
+persistence layer. What was left sits in the two places they did not touch: the eager
+renderer bundle, and what one render of a lifted overlay costs times how often it runs.
+Everything below is behaviour-identical by design, and was verified the way "How to
+verify" says: a `HEAD` (`ca9df80`) tree built in the scratchpad and captured per fixture
+(`tools/reports/<fixture>.perf3-head`), the working tree captured the same way
+(`.perf3`), `diff.ts` between them -- see "Verification" at the end.
+
+### 1. The entry chunk carried every generation's pokedex
+
+`src/renderer/data/pokedex.ts` imported all ten dex tables statically, and gen1's
+`logic/PokeData.ts` imported it together with the one `data/moves.js` that held gens
+1-4. `main.ts` imports gen1 eagerly (it styles the pre-mapper screen), so the whole of
+it was in the entry chunk Chromium parses before the box-art screen can appear --
+3,561 species and 1,263 moves, where gen1's `activate()` only ever selects Yellow or
+Red and Blue, and gens 2-5 carry their own tables in their own lazily loaded chunks.
+
+Now `pokedex.ts` imports the two gen1 tables and maps the other games to `{}` (as it
+already did for gen5), `data/moves.js` is split verbatim into `data/moves/gen{1,2,3,4}.js`
+and `PokeData` bundles gen1's. The eight other dex files and the three other move files
+stay on disk, unreferenced, for the day a generation moves onto this data layer -- the
+comments in both files say to bring one back with an `import()` from `setGame`, not a
+static import. The parity harness cannot see a bundle's size, so the numbers are from
+the build (`out/renderer/index.html`'s script):
+
+| | before | after |
+|---|---|---|
+| entry chunk | 10.5 MB | 2.7 MB |
+| species entries in it | 3,561 | 384 |
+| moves in it | 1,263 | 191 |
+
+### 2. The lifted overlays re-rendered whole, every frame or every poll
+
+Each of gens 2-5 is one component with a template over a thousand lines long. gen2 and
+gen4's own timer wrote `timer_formatted_time` (a fresh array) and four more fields onto
+it on every animation frame, and the template read the array directly, so the entire
+render function ran at 60 Hz for the length of a run; gen3 and gen5 were spared only
+because their timer is a child component. All four assign `emulatorStats` on every
+10 ms Super Shuckie poll whose body changed -- with the Shuckie timer running, every
+poll -- and the template read `emulatorStats?.time_current` and the two counters
+directly, so up to 100 whole renders a second on top.
+
+What one render cost was dominated by the movepool table: `getMovepool()` called
+inline in `v-for` once per row group (three to nine calls per render), each resolving
+the species and then every learnset entry through `dataSearch`, a case-insensitive
+scan of the table's keys. Measured on the Platinum tables the component actually uses
+(`pokedex_plat`, `platinum_moves`; a `tsx` micro-benchmark of the methods verbatim):
+0.63-0.88 ms per `getMovepool()` and 12,000-18,000 lower-cased key comparisons, so at
+three calls per render and 60 renders a second about 110-160 ms of CPU per second
+went into the lookups alone; gen2's Crystal tables 0.2 ms per call. With the lookup
+indexed the same call is 0.02-0.03 ms.
+
+Three changes, the DOM untouched:
+
+- **`core/overlay/LiveText.ts`**: a component that renders one `<div>` whose text is
+  a value it `inject`s. Each overlay `provide`s the per-frame / per-poll values as
+  computeds under `liveText` (`shuckie_clock`, `shuckie_frames`, and in gen2/gen4
+  `timer_clock`, `timer_frames`), and where the template said
+  `<div class="gametimeClock">{{timer_formatted_time[0]}}</div>` it says
+  `<live-text class="gametimeClock" source="timer_clock">`. The dependency belongs to
+  the child's render, so a frame re-renders that one div. The DOM is the same (the
+  class falls through onto the root div, the value goes through `toDisplayString`
+  exactly as an interpolation does, and the `.` before the centiseconds is part of
+  the computed), and so is the per-frame mutation -- the div's text set as a whole,
+  as the compiled interpolation set it. That last point was found the hard way: a
+  first version rendered a bare text node into the parent's div and updated its
+  `nodeValue` in place, and gen4's captures then varied between two runs of the
+  *same* build by a few levels in filtered images elsewhere on the page (HEAD's did
+  not), which the whole-text form does not do.
+- **`shuckie_player_resets` / `shuckie_blackout_counter`** computeds return the raw
+  counter values, and the template keeps its `?? 0` / `== undefined` logic on them. A
+  computed that yields the same primitive as before triggers nothing (Vue 3.4+), so a
+  poll that only moved the time no longer reaches the overlay's render at all.
+- **`movepoolRows`** computed memoises `getMovepool()` per displayed species, and
+  `dataSearch` resolves through `core/logic/caseInsensitiveLookup.ts`: the lower-cased
+  keys of a table indexed once, returning the *first* matching key in key order as
+  `find` did. Two tables grow after the index is built (gen4's `applySpeciesAliases()`
+  mirrors alias keys from `mounted()`, gen2's backport importer adds species), so a
+  miss re-checks the key count and rebuilds; a hit cannot be stale, since keys are
+  only appended. gen3's `dataSearch` keeps its `move_name()` canonicalisation.
+
+`emulatorStats` itself is still assigned per changed poll, and gen2's watcher still
+persists `timer_formatted_time` per frame (D above): those are the legacy contracts.
+
+### 3. `movepoolResize()` registered a change handler on every render
+
+gen3, gen4 and gen5 bind `:style="movepoolResize()"` on the movepool table, and the
+method computed the style and then registered a `.change()` handler on the party
+slot's species that re-ran the calc into a local nothing read again. One handler per
+render -- in gen4 one per frame while the movepool showed -- kept in the client's
+subscription table until the mapper unloaded, and all of them firing on the next
+species change. The method is the calc now; the handler had no effect to lose. The
+three bodies agree, so the allowlist entry is gone.
+
+### 4. gen1's settings saves are coalesced; the user-data write is asynchronous
+
+`useSettingsStore` saves a store on every mutation, and a style slider or a counter
+button mutates once per input event: one `JSON.stringify`, one IPC round trip and one
+synchronous `writeFileSync` in the main process per pointer move. `stores/helper/
+files.ts` now coalesces: the JSON is still taken at the moment of the call (the last
+snapshot of a 250 ms window is what lands, the same bytes the last immediate write
+would have written), every read of a file with a pending write flushes it first (so
+`reloadStyle` after a slider edit reads the edit back, as before), and `beforeunload`
+flushes everything alongside `flushUserState`. `src/main/ipc.ts`'s `data:write` is
+`fs/promises` now, serialised per file so writes land in the order sent; the invoke
+still resolves when the bytes are on disk, which is what the harness's IPC barrier
+waits for. Oracle 4 compares the files at the end of a run, after a 1,200 ms settle,
+so the windows are closed by then.
+
+### 5. gen4 loaded the same trainer table twice
+
+`platinum_trainers.js` was byte-identical to `trainers/platinum.js` apart from the
+export name (known-legacy-bugs.md #15 asked for exactly this hash check before
+dropping); the overlay imports the one file under both names and the copy is gone --
+1.5 MB of source and one parsed table less in gen4's chunk. gen3's near-twin
+(`pokedex/firered_leafgreen.js` vs `firered_leafgreen.js`) was *not* merged: the two
+differ in the Nidoran key spelling (`Nidoran_F` vs `NidoranF`) and in the order of a
+few evolution lists, and `dataSearch` resolves by key, so they are not the same data.
+
+### 6. gen1's stat averages are a computed
+
+`stats.vue` called `average_stats()` from the template in the Averages and Medians
+modes, ten times per render, each filtering and sorting the whole dex. `stat_averages`
+does it once per game.
+
+### 7. The runtime template compiler is out of the bundle
+
+`main.ts` took `createApp` from `vue/dist/vue.esm-bundler.js` because the root template
+was the markup inside `#app` in `index.html`, compiled at runtime, and gen3/gen5's
+`Timer.js` and gen5's `ShuckieTimer.js` were template strings. The root is a render
+function now (same three nodes, same order, `ref="overlay"` kept for the control
+bridge; `#app` is empty in `index.html`, which Vue cleared on mount anyway), the three
+timer components are render functions, and `createApp` comes from `vue`. The entry
+chunk has no `compileToFunction` in it.
+
+### Left alone
+
+- **Merging the three `/stats` pollers** (the 10 ms emulator poll, the 250 ms
+  replay-splits poll, the bookmark module's read per marker). The replay store's
+  `frame` decides which SPLIT bookmarks the panel shows; feeding it from the fast
+  poll would take its sample at a different virtual instant than its own tick does,
+  which can move a row at a checkpoint near a split. Four localhost GETs a second are
+  not worth a timing change the harness can see.
+- gen3's dex pair (5 above), and everything in "Left alone" of the second pass.
+
+### Drift allowlist
+
+`parity:drift --update` after the edits: `movepoolRows` added with its reason,
+`dataSearch` re-pinned (gen2=gen4=gen5 | gen3, as before), `movepoolResize` dropped
+because the three bodies now agree. `get_stat` was already stale at `HEAD` -- gen4 and
+gen5's copies were edited after the last review (the form-support and ability commits)
+-- and the check was failing on it before this pass; it is re-pinned with its reason
+unchanged.

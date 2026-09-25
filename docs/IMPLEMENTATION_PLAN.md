@@ -483,6 +483,45 @@ launches the app.
 
 ---
 
+### Phase 6 — Decomposition of the lifted overlays (the 2.4 refactor proper) **[added 2026-09-25]**
+
+Goal: `games/gen{2,3,4,5}/Overlay.vue` (6,860 / 8,614 / 9,775 / 9,743 lines) become composition roots the size of
+gen1's `components/Overlay.vue` (203 lines) over the shared stores, `core/logic` and shared components, every
+generation difference living in the `GameModule` (features, data tables, hooks, mapper profiles) or in a
+per-generation component variant -- with zero functional or visual change, proven the way every phase before it was:
+the nine oracles on every fixture of the affected generations, gen1's no-change check whenever `core/` moves, and
+`parity:drift` + `typecheck` green at every commit. The detailed plan is the last section of this document
+("Phase 6 plan"); the status table is 7g.
+
+6.0 **The net**: the decision-6 recordings, one per generation, alongside the first slices; the synthetic scenarios
+extended meanwhile; `beforeReplay` hooks and self-tests for the dev-mode paths no fixture reaches.
+6.1 **Inventory, coverage, ledger**: `parity:members` (every data key, computed, watch and method with its class,
+readers, cluster and drift status), per-member coverage per fixture, the quirk ledger; the seven flagged drift
+entries were adjudicated on 2026-09-25 (§5, decisions 17-21).
+6.2 **Template split, no DOM change**: fragment components cut at the legacy section comments, reading the overlay
+instance through `inject` at first.
+6.3 **Persistence**: the `MyStorage`-seeded data keys into a per-generation settings store and a species-settings
+store, on the same user-state keys and the same write rules.
+6.4 **`mounted` out**: `games/genN/hooks.ts` and `state.ts` (verbatim, order preserved), hotkeys through
+`GameModule.hotkeys()`, intervals and listeners into `activate`/`deactivate`.
+6.5 **Splits**: gen1's autosplitter engine in `core/autosplitter/` with each `splits.js` as a variant; a shared
+`useSplitsStore` that gen1 adopts too.
+6.6 **Shuckie and timer** onto `useEmulatorStatsStore` and `logic/Timer.ts` + `left_panel/timer.vue`; the four
+template-string Timer/PubSub copies deleted.
+6.7 **Canonical keys** for the mapper-shape drift (DEPRECATED vs STANDARD spellings); the members that only
+differed by path then collapse into shared ones.
+6.8 **Battle math** as typed `core/logic/battle/` functions over `GameModule.data` tables; the identical tables to
+`core/data/`.
+6.9 **Feature modules behind flags**: evolution families, forms, ROM patching and encounters, Voltorb Flip, the RNG
+helper, the second screen, Style Mode, the backport importer, the item watchers.
+6.10 **Right panel and movepool** components; the movepool's indexed lookup and the `movepoolResize` handler leak.
+6.11 **Control routes and hotkeys on stores** (`/status` names per generation unchanged).
+6.12 **Texture registry and sprite resolver** (4.3 and 4.4 resume here).
+6.13 **Retire the monoliths**, the `MyStorage` shim and the mixins; `parity:drift` retargeted at the components.
+6.14 **Exit**: `parity:all` on every fixture including the recordings, performance re-measured, docs.
+
+---
+
 ## 4. Rules for the CSS refactor
 
 - Port verbatim, scope with `.gen-N`, verify, then dedupe. Never the other way round.
@@ -521,6 +560,7 @@ Nothing in this section blocks any phase any more.
 2. Texture display-name collisions → other gens' entries get a `"(Gen N)"` suffix in the picker. (4.3)
 3. Legacy settings → imported from each old app's localStorage on first launch. (2.6)
 4. Known legacy bugs (`known-legacy-bugs.md`) → preserved and listed; the harness proves the preservation.
+   **Amended by decision 25 (2026-09-25):** game quirks are kept, code quirks are fixed.
 5. Games with data but no selection (Ruby/Sapphire, gen2's Gold/Silver trainer table, Diamond/Pearl in gen4) → unchanged.
 7. Hotkeys → per-gen F-key tables preserved including their quirks; a single unified table is a later feature.
 9. gen5 second-screen toggle → ported behind `features.secondScreen`, documented as probably broken (#16).
@@ -530,6 +570,40 @@ Nothing in this section blocks any phase any more.
 14. Data provenance → per-gen data verbatim now; `data_objects` consolidation after parity as its own change.
 15. gen2 backport importer → writes userData overrides, never shipped files.
 16. gen1/gen2 box art → `icon.png` / `2-crystal.png` as placeholders until Scott supplies art in the gen3–5 style. **Done 2026-09-11:** every edition's tile is the box front from Scott's library (`A:\Dropbox\stp-projects\librariesox art`), resized to 400 px tall into `images/box_art/`; a paired edition (Gold & Silver, FireRed and LeafGreen, Diamond and Pearl, HeartGold and SoulSilver) is the two boxes side by side in one file. The window icons are still the legacy ones.
+
+**Resolved by Scott (2026-09-25, the Phase 6 interview):**
+
+17. Shuckie poll on a dead Super Shuckie → **keep polling, throttled** (gen1's store: every 10 ms while a Shuckie toggle
+    is on, the error logged at most every few seconds, the timer picked up the moment Shuckie appears); gen5's
+    stop-after-ten is not ported. (6.6)
+18. Split rows → **no general dedupe**. gen5's `load_splits` rule exists for N, who is fought several times and whose
+    final battle alone should register; it is gen5 data on the module, and gens 2-4 keep every row. (6.5)
+19. Shuckie call logging → **errors only, everywhere**: `console.error` on a failed call, no success lines. (6.6)
+20. `convertDurationToSeconds` → **guards a non-string and returns 0 silently** (gen5's), everywhere. (6.5)
+21. `get_stat` → **a per-generation variant by design** (DVs and badges in gen2; IVs, natures, abilities, items and
+    stages in gens 3-5); re-pinned with that reason, sharing only the pure helpers. (6.8)
+22. gen4's `setImmediate` hop → **dropped**: one shared timer loop, gen4's fixtures re-baselined if the hundredths digit
+    moves. (6.6)
+23. Recordings → **alongside 6.1-6.3**, not before: the behaviour-free slices start now, a logic slice waits per member
+    until a fixture covers it. (6.0)
+24. Fixture storage → **committed under `tools/fixtures/`**, plain git (decision 11); about 20 MB per run. (6.0)
+25. Legacy quirks (amends decision 4) → **two kinds**. *Game quirks* -- anything that mirrors a feature of the game, the
+    game's own code, or how the game presents information (gen2's Special Defense badge rule is the model: pokecrystal's
+    `BadgeStatBoosts` does exactly that and no other generation has it) -- are kept exactly, verified against the
+    decompilations listed in `CLAUDE.md`. *Code quirks* -- inconsistencies that exist only because the five apps were
+    written at different stages -- are technical debt and are streamlined and standardised whenever possible, each fix
+    its own commit after the no-change one. Approved now: the crash class (#32, #34, #35, #37), the split-row data
+    class (#33, #36) and the persistence and folder class (#45 with a key migration, #2, #11). The rule is in `CLAUDE.md`.
+26. Visual scope → **none**: visuals stay per generation through Phase 6; §4's value differences are a later phase.
+27. Pilot generation → **gen2**, then gen4, gen5, gen3; the recordings still to make follow that order after gen2's.
+
+**Resolved by me at Scott's request (2026-09-25; say so if either should change):**
+
+28. `features.forms` → **true for gen3** (Castform, Deoxys) **and gen4** (`forms.js`). Nothing reads the flags yet, and a
+    flag that lies is worse than one nothing reads. (6.1)
+29. Shared tables → a table **identical after whitespace normalisation** may move to `core/data/` (`natures.js`, gen3 =
+    gen4); the inventory records the normalisation and the normalised fingerprint. Anything differing beyond whitespace
+    stays per generation. (6.8)
 
 ## 6. Risks
 
@@ -1002,7 +1076,8 @@ What remains open across the plan: real fixture recordings for gen1/3/4/5 (decis
 apply and dry-run (3.6); and the decomposition of the four lifted components into the shared stores (the 2.4
 refactor proper), which is where 4.3 and 4.4 resume. Oracle 6 (the control-script sessions) and the packaged
 build (3.5) closed on 2026-09-12 -- see 7d and the last bullets of 7c. `npm run parity:all` is the regression
-check for whatever comes next.
+check for whatever comes next. **2026-09-25:** Scott made the decomposition the next step; it is Phase 6
+(§3), with its status in 7g and the detailed plan in the last section of this document.
 
 **Review of the port as a whole (2026-09-12).** A read of every seam between the shell, the core and the
 five modules against the legacy sources, looking for what the harness cannot see (nothing in a fixture unloads
@@ -1054,6 +1129,31 @@ always were. When the recordings exist, the first slices are the ones with a sha
 autosplitter engine, then the natures/abilities/type tables gen3-5 share byte-for-byte (2.2's rule: to `core/`
 only when identical), then the texture vocabularies (4.3) and the sprite resolver (4.4) once a style picker
 reads them.
+
+## 7g. Phase 6 status (decomposition of the lifted overlays)
+
+Status as of 2026-09-25: planned (the last section of this document), nothing started. Legend: ⬜ not started,
+◐ partial, ✅ done, ⏸ waiting on Scott. A cell turns ✅ only when the recipe (Phase 6 plan, §5) passed for that
+generation -- the no-change run green on every fixture of the generation, `typecheck`, `parity:drift`, the slice's
+self-tests -- and the cell names the commit.
+
+| slice | gen2 | gen3 | gen4 | gen5 | core / gen1 |
+|---|---|---|---|---|---|
+| 6.0 the net: recordings, extended scenarios, dev-mode hooks | ◐ one real Crystal recording (`tools/fixtures/raw/`, gitignored); no synthetic scenario | ⬜ synthetic smoke only | ⬜ synthetic smoke only | ⬜ synthetic smoke only | ⬜ gen1 synthetic smoke only |
+| 6.1 inventory, coverage map, quirk ledger, adjudication | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ tooling; the seven flagged drift entries were adjudicated 2026-09-25 (§5, decisions 17-21) |
+| 6.2 template split, no DOM change | ⬜ | ⬜ | ⬜ | ⬜ | – |
+| 6.3 persistence: `MyStorage` keys to stores | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ settings-store factory, species-settings store |
+| 6.4 `mounted` out: hooks, state machine, hotkeys, lifecycle | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ `main.ts` installs hooks and state for every module |
+| 6.5 splits: engine + `useSplitsStore` | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ `core/autosplitter/`; gen1 adopts the store |
+| 6.6 Shuckie and timer | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ runtime-only Vue once no template-string component is left |
+| 6.7 canonical keys | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ vocabulary extended from gen1's |
+| 6.8 battle math + shared tables | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ `core/logic/battle/`, `core/data/`, `parity:battle-math` |
+| 6.9 feature modules behind flags | ⬜ backport importer, ROM patches | ⬜ Castform/Deoxys forms, evolution families, trash cans | ⬜ Voltorb Flip, RNG helper, `setBits` encounters | ⬜ forms, second screen, party and bag rewrite | ⬜ `features.forms` for gen3 and gen4 |
+| 6.10 right panel and movepool | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ `core/logic/moves.ts` index |
+| 6.11 control routes and hotkeys on stores | ⬜ | ⬜ | ⬜ | ⬜ | – |
+| 6.12 texture registry, sprite resolver | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ `core/assets/resolver.ts` |
+| 6.13 retire the monoliths, the shim and the mixins | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ `parity:drift` retargeted |
+| 6.14 exit | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
 ## 8. Corrections the first implementation session made to the plan
 
@@ -1481,3 +1581,468 @@ the Compare-splits dropdown.
   (x 787-1038, y 111-124 at every checkpoint). Not yet run against a live Super Shuckie: the fake server
   and the stub speak the `replay-bookmarks` REST API; a build older than that 404s `/add-bookmark` and
   everything degrades to the autosplitter's own rows, as before.
+
+## Phase 6 plan: decomposing the gen2-5 overlays (2026-09-25)
+
+Scott's decision: the decomposition of the four lifted overlays into gen1's shape is the next step. This section is
+the plan for it -- what is being decomposed, measured against the tree on 2026-09-25; the target; where each part of
+a lifted overlay goes; the order of the slices; the recipe every commit follows; the rules; the risks; and what Scott
+decides up front. §3 has the one-page summary and 7g the status table.
+
+**The gate, and how the order honours it.** §7f said the decomposition waits for decision 6's recordings, because
+the net under the lifted components is the harness and a smoke net proves only the states it reaches. That reasoning
+still holds; it is built into the order below instead of postponing the phase. The recordings are slice 6.0 and run
+alongside the first slices. The slices that move no behaviour go first -- a template cut into fragment components
+with the same DOM, a data key moved to a store on the same persisted key, a byte-identical helper moved out -- and
+are provable by construction plus the no-change check. A slice that moves *logic* through a state no fixture reaches
+waits for the recording, or for a synthetic scenario that reaches it. The coverage map (6.1) says which case each
+member is in, so the call is made on evidence per member, not once for the whole phase.
+
+### 1. What is being decomposed
+
+Measured on 2026-09-25 (HEAD `ca9df80`), after the 2026-09-17 mixins took 2,909 identical lines out:
+
+| | gen2 | gen3 | gen4 | gen5 |
+|---|---|---|---|---|
+| `Overlay.vue` lines | 6,860 | 8,614 | 9,775 | 9,743 |
+| of which template | 1,067 | 1,691 | 1,298 | 1,075 |
+| `data()` keys | 242 (93 of them `battle_summary_*`) | 141 | 114 (109 seeded from `MyStorage`) | 90 |
+| computed / watch / methods | 32 / 39 / 135 | 41 / 33 / 144 | 38 / 48 / 145 | 51 / 33 / 152 |
+| `created` / `mounted` lines (≈) | 58 / 1,409 | 279 / 1,457 | 107 / 1,732 | 102 / 1,413 |
+| `.change()` subscriptions | 60 | 56 | 38 | 31 |
+| `MyStorage` reads and writes | 356 | 407 | 394 | 337 |
+| `game.properties` reads, whole file / of which in the template | 609 / 61 | 586 / 144 | 711 / 120 | 710 / 68 |
+| `:style` bindings, `v-if`+`v-show`, `v-for` in the template | 66, 153, 32 | 117, 196, 40 | 115, 144, 41 | 57, 132, 30 |
+| mixins applied / members they hold | 4 / 63 | 7 / 79 | 8 / 116 | 8 / 116 |
+| companions (lines) | `splits.js` 141, `storage.ts` 142, `control.ts` 108, `hotkeys.ts` 74, `backports.js` 199, `backportOverrides.ts` 118 | `splits.js` 222, `storage.ts` 145, `control.ts` 150, `hotkeys.ts` 62, `logic/Timer.js` 133, `logic/PubSub.js` 39, `components/Timer.js` 36 | `splits.js` 200, `storage.ts` 140, `control.ts` 166, `hotkeys.ts` 65, `forms.js` 37 | `splits.js` 203, `storage.ts` 148, `control.ts` 150, `hotkeys.ts` 60, `forms.js` 75, `logic/Timer.js` 133, `logic/PubSub.js` 39, `components/Timer.js` 36, `components/ShuckieTimer.js` 70 |
+
+The four `Timer.js`/`PubSub.js` copies (gen3, gen5) are not identical to each other or to gen1's `logic/Timer.ts`
+and `logic/PubSub.js`. The drift check's view of the same code: 192 members shared by two or more generations, 22
+identical, 169 allowlisted differences of which 153 are unreviewed, 6 flagged for Scott, and `get_stat` failing
+since 2026-09-23 (the note in 7f). Every one of those 169 is a decision the decomposition has to take anyway --
+one shared body, or a per-generation variant with a reason -- which is why 6.1 starts with them.
+
+The other session's performance pass of the same day (in progress, uncommitted, while this was written) is changing
+the Timer components, the movepool lookup and the `movepoolResize` handler in these files. The numbers above are
+HEAD's; 6.6 and 6.10 take whatever of that pass landed as their starting point and re-measure.
+
+### 2. The target
+
+gen1's shape, by name, so that a slice can say where a thing lands:
+
+- **Composition root**: `games/genN/Overlay.vue` becomes what `components/Overlay.vue` is for gen1 (203 lines): the
+  panels, the `provide()` of `game` and `game_properties`, and nothing else. Its `props: ["game"]` interface to
+  `main.ts` is unchanged throughout.
+- **Components**: shared where the markup is the same once the generation's classes and asset paths are parameters;
+  per-generation variants under `games/genN/components/` where the DOM differs, plugged in through
+  `GameModule.components` (typed since Phase 1, never used). gen1's tree is the naming scheme: `left_panel/{stats,
+  move_set, exp_bar, badges, badge_boosts, faults, timer, type_icons, battle_popups, bonk_counter, repel_counter,
+  pop_ups}`, `right_panel/{enemy_graphic, move_pool, splits_first, splits_followup, splits_summary, wild_pokemon}`,
+  `settings/*`, `graphics`, `game_area`, `state`, `enemy_sprite_resize_handle`.
+- **Stores** (singular and generation-agnostic, §2): `metaStore` (game state, current species, enemy state),
+  `useOverlaySettingsStore` (settings, per generation namespace), `useGameSpeciesData` (per game+species config
+  and styling -- for gens 2-5 the layered style store already holds this behind `MyStorage[<Game>_<Species>]`),
+  `useSpeciesMetricsStore` (timer, faults, attempt, player id), `useBattleStore` (the battle summary),
+  `useEnemySpriteResizeStore`, core's `useEmulatorStatsStore` and `useReplaySplitsStore`, and one new store,
+  `useSplitsStore` (6.5), which gen1 adopts as well.
+- **Logic**: `core/logic/*` pure functions, typed and self-tested; `core/autosplitter/` (the engine);
+  `logic/Timer.ts` and `logic/PubSub.js` as the one timer and the one bus.
+- **Per generation**: `games/genN/{index,manifest,hooks,state,control,hotkeys,markers,patches,settings}.ts`,
+  `mappers/`, `data/`, `style.css`, `components/`. gen1 has the first seven today; `patches` and `settings` are new
+  names for what gen1 keeps in `starterDvs.ts` and its stores.
+- **Rules carried over from §2**: `core/` never imports `games/genN/`; stores and shared components read canonical
+  keys, never mapper paths; a generation difference is data on the module (`features`, `data`, `hooks`, a profile)
+  or a variant component, never a generation conditional in `core/`.
+- **CSS does not change**: the class names and ids stay on the same elements and `games/genN/style.css` stays
+  scoped under `.gen-N`, so every rule keeps matching. §4's fold-into-`base.css` work is not part of this phase, and
+  visuals stay per generation throughout (decision 26).
+
+### 3. Where each part of a lifted overlay goes
+
+**`data()` keys** fall into five classes; 6.1's inventory assigns every key of every generation to one.
+
+| class | what it looks like today | where it goes | slice |
+|---|---|---|---|
+| (a) settings | `key: MyStorage['key'] ?? default` seeds (109 of gen4's 114 keys): `shuckie_timer`, `selected_game`, `stats_setting`, `right_ui`/`right_panel`, `split_type`, `unobtainable_moves_toggle`, `ui_*`, `encounters_*`, `hm_*`, `toggle_EVENT_*`... | a per-generation settings store built from a declared key table (`games/genN/settings.ts`: key, default, kind) on the same user-state namespace under the same names -- oracle 4 dumps that section flat, so nothing on disk moves; the store autosaves (gen1's `useSettingsStore` pattern) and the 39 / 33 / 48 / 33 persistence watchers go | 6.3 |
+| (b) per-species style and config | `MyStorage[<Game>_<Species>]` (gen4/5), `MyStorage[starter]` (gen2), `<Game>_`-prefixed keys (gen3), `castform_style_settings`, `visual_style_settings`: `overlay_color`, `image*`, `background*`, `pkmnNature`, `pkmn_ability`, `hidden_power_type`, `evolution`, `frame`, the species' own counters | the layered style store (`core/persistence/styleSettings.ts`, already shared; each generation's key rule and debounce already in `storage.ts`) read through a species-settings store shaped like `useGameSpeciesData`; `created()`'s field-by-field `this.x = MyStorage[key].x ?? d` (58-279 lines) becomes its `load()` on a starter or game change | 6.3 |
+| (c) run state | `playerId`, `playerName`, `playerResets`, `blackout_counter`, `resetCounter`, `game_over`, `run_complete`, `finished_run_count`, `attempt_number`, `pb_time`, `split_logStr`, `simple_data*`, `full_data_str`, `deprecated_data_str`, `split_data`, `current_splits`, `previous_splits[_source]`, `timer_*`, `time_*`, `battle_start`, `time_split_start`, gen2's 93 `battle_summary_*` keys | `useSpeciesMetricsStore` (metrics, timer, attempt), `useBattleStore` (the summary), `useSplitsStore` | 6.4-6.6 |
+| (d) transient UI state | `showPopup`, `showRNGModal`, `rng_*`, `starter_dropdown_open`, `search_term`, `enemyResize`, `style_mode_*`, `evolution_transition_progress`, `expBarAnimation`, `slotTimingFix`, `field_array`, `last_initiated_field_effect`, `second_screen_mode`, `enemyState`, `enemyModColour` | local state of the component that owns the region (or `useEnemySpriteResizeStore`, where gen1 already keeps it) | 6.2, 6.9, 6.10 |
+| (e) data tables held as reactive state | `trainers_plat`, `trainers_hgss`, `moves`, `badges`, `natureStats`, `simple_natures`, `unobtainable_moves_object`, `hiddenpower_type_selector`, `dexDataRubySapphireEmerald`, `gameVariables`, `typeCalcs`, `stat_object`, `pkmnSlots` | module-level imports reached through `GameModule.data`, not reactive (performance-followups.md A: the client's tables stopped being proxies on 09-17; these are the last large ones) | 6.8 |
+
+**`computed`** members become getters of the store that owns their inputs, or computeds of the owning component;
+the pure ones (`typeHeaderColor`, `field_selector`, `screen_weather`, `battle_fade`, `stats_header`,
+`growth_rate`, `blackouts_resets`, `hp_tracker_style`, `dropdownDownMenuKeys`...) become `core/logic` functions
+the component calls with explicit inputs.
+
+**`watch`** members are of three kinds: persistence writers (`current_splits`, `ui_stat_arrangement`, `starter`,
+`playerName`... -- replaced by the stores' autosave, classes a and b); ROM and encounter writers (gen2's 14
+`toggle_EVENT_ENCOUNTER_*`, gen3's 12 `hm_*`, gen4's 33 `encounters_*`/`hm_*`, gen5's 11 `encounters_*`, plus
+`catch_rate`, `evolution`, `starter`, `pkmnNature`, `manual_ivs` -- to `games/genN/patches.ts`, their writes
+already declared in the profile's `writes` with oracle 5 watching); and derived-state watchers (`playerId`,
+`playerResets`, `blackout_counter`, `emulatorStats`, `playerNameChoice`, `selected_game`, `enemy_graphic`... --
+store subscriptions or watchers in the owning component). #32 (`hash()` undefined in the `playerNameChoice`
+watcher of gens 2-4) is a code quirk (decision 25): the watcher moves failing exactly as it does today, and the fix
+is its own commit after the move.
+
+**`methods`** cluster as follows (names as they are in the overlays; the inventory lists every member of every
+generation with its cluster):
+
+| cluster | members | destination | slice |
+|---|---|---|---|
+| Shuckie | `fetchEmulatorStats`, `sendEmulatorStart`, `sendEmulatorEnd`, `incrementEmulatorCounter`, `incrementEmulatorCounterByAmount` (all four generations; three of the five are flagged in the allowlist) | `core/stores/useEmulatorStatsStore.ts` | 6.6 |
+| timer | gen2/gen4: `startTime`, `stopTime`, `updateTime`, `pauseUnpauseTime`, `set_timer`, `setStartTime`; gen3/gen5: the `Timer` component and `logic/Timer.js` | `logic/Timer.ts`, `useSpeciesMetricsStore`, `left_panel/timer.vue` | 6.6 |
+| splits | `currentSplit`, `lastSplit`, `load_splits`, `load_temp_splits`, `clear_splits`, `getSplitFileName`, `getFinishFileName`, `generateUniqueRunIdentifier`, `autosplitter_trainer`, `convertDurationToSeconds`, `convertMSToDuration`; `splits.js`'s `logData`, `logCopy`, `transition`, `loadCsvFile` | `core/autosplitter/` (the engine), `useSplitsStore`, `games/genN/splits.ts` (the variant) | 6.5 |
+| OBS and markers | `sendObsChapterMarker`, `checkMapperForChapterMarkerProperties`, gen2's `rareCandyStatus*` | already `core/logic/obs.ts` and `chapterMarkerProperties.ts`; each generation's marker names are on `GameModule.chapterMarkers` and move to `games/genN/markers.ts` | 6.4 |
+| style and settings management | `load_all_settings`, `set_pokemon_prop`, `set_setting_prop`, `copy_overlay_properties`, `copyCurrentStylesToAllFamilyMembers`, `saveCurrentStyles`, `exportStyleSettingsAsDefaults`, `resetCurrentPokemonToDefaults`, `resetAllStyleSettingsToDefaults`, `currentPokemonHasUserOverrides`, `isDevMode`, `getStorageKey`, `getCurrentStorageKey`, `getStyleStorageKey`, `getEvolutionFamilyStorageKey`, `getEvolutionStateStorageKey`, `getCastformStyleStorageKey`, `loadDisplayedStyles`, `color_picker`, `clear_overlay_color`, `load_pokemon_sprite_settings`, `load_deoxys_sprite_settings`, `print_texture_settings`, `default_texture_settings` | the species-settings store over `core/persistence/styleSettings.ts` | 6.3 |
+| species, evolution, forms | `getEvolutionFamily`, `getEvolutionFamilyForSpecies`, `getFullyEvolvedSpecies`, `updateEvolutionFamilyList`, `loadEvolutionStyle`, `performEvolutionTransition`, `mapAbilityByEvolutionSlot`, `mapAbilityToSpecies`, `speciesNameAliases`, `normalizeSpeciesName`, `formFromGame`, `resolveIncomingSpecies`, `syncFormByte`, `applySpeciesAliases`, `applyPokemonForm`, `battleFormVariants`, `formVariants`, `formChangeMoves`, `calculate_zoroark`, `species_function`, `getPokemonImageUrl`, `getStarterArt`, `getStarterImageUrl`, `getStarterTypeTexture`, `getStarterType1`, `getStarterType2`, `pokemon` | `core/logic/species/` over `GameModule.data` (the families, `forms.js`); `features.evolutionSplits`, `features.forms` | 6.9 |
+| battle math | `damageRange`, `damage_calculation`, `get_stat`, `getStat`, `getEnemyStat`, `get_iv`, `get_dv`, `get_base_stat`, `get_base_stat_total`, `calculate_stat`, `calcExpStats`, `growthRate`, `growthRateCheck`, `stageModifiers`, `stage_modifiers`, `stageMultiplier`, `stat_mod`, `enemyStatModification`, `typeEffectiveness`, `typeEffectivenessCheck`, `type_effectiveness`, `determineSTAB`, `determineItemBoost`, `abilityModifier`, `burnModifier`, `weatherModifier`, `movePower`, `moveType`, `moveCategory`, `getMoveCategory`, `getAccuracy`, `moveAccuracyStatic`, `moveAccuracyDynamic`, `moveAccuracyEvasionDynamic`, `get_fling_power`, `hiddenPowerTypeCalc`, `hiddenPowerPowerCalc`, the `g2*PowerCalc` family, `enemy_move_power`, `enemy_effective_power`, `speed_comparison`, `paralysis`, `ability`, `natureCalculation`, `badge_boost`, `badgeBoost`, `badgeBoostType`, `get_bb_stat`, `g2spcDefCheck`, `calculate_ev_benefit`, `average_median_stats`, `status_stat_change`, `metal_powder`, `light_ball`, `macho_brace`, `maxStat`, `statExp`, `get_start_exp_ev_equivalent`, `get_stat_exp_increase` | `core/logic/battle/`, typed, parameterised by the `GameModule.data` tables; `battleMathMixin`, `dsPairMixin`, `naturesMixin` and `manualIvsMixin` dissolve into it | 6.8 |
+| movepool, moveset, items | `getMovepool`, `dataSearch`, `movepoolResize`, `movepoolResizeSpecies`, `movepoolResizeCalc`, `movepoolPower`, `movepoolType`, `movepoolTypeColor`, `getUnobtainableMoveStyle`, `post_game_move_style`, `update_moveset`, `update_battle_moveset`, `update_items`, `update_held_item`, `update_buffer_moves`, `getPlayerTeamMoveSet`, `playerTeamMovesChanged`, `updateLastKnownMoves`, `scheduleMoveSetChangeCheck`, `get_player_move`, `get_player_move_pp`, `getMove`, `getMoveType`, `getMoveObject`, `getMoveProperty`, `getPP`, `move_name`, `get_backport_move`, `enemyMove`, `moveTypeIcon`, `moveCategoryIcon`, `enemy_held_item`, `held_item_icon`, `getRolloutCounter` | the `right_panel/move_pool` and `left_panel/move_set` components; `core/logic/moves.ts` (indexed lookups) | 6.10 |
+| enemy graphic | `enemyPkmnUI`, `enemyPkmnFaint`, `enemyPkmnFaintWild`, `enemyPkmnFaintStats`, `enemyPkmnFaintStatsBackground`, `enemyPkmnFaintTypes`, `enemyPkmnText`, `enemyPkmnHP`, `enemyPkmnSpecies`, `enemyDynamic`, `enemyMods`, `enemyType`, `enemyType1`, `enemyType2`, `enemyFaint`, `eHPType`, `fade_enemy_mon`, `fade_enemy_mon_text`, `fade_enemy_mon_comparison`, `fade_stats`, `enemyDropShadow`, `enemyStatLabelOpacity`, `enemyHpOpacity`, `enemyStatusLabelOpacity`, `getTrainerGraphic`, `g2trainerEnemySelector`, `g3trainerEnemySelector`, `specialTrainerGraphics`, `special_trainer_names`, `g2martSelector`, `statLabelMartOpacity`, `battlePokemonCrop`, `battlePokemonCropWild`, `split_image`, `getSplitImageName`, `format_display_name`, `get_trainer_name`, `fixTrainerName`, `format_trainer_name`, `enemy_form`, `activeSlot`, `soloPkmn` | `right_panel/enemy_graphic` variants (gen4/gen5's two-slot team display, gen2's single enemy) | 6.10 |
+| ROM patching, encounters, starter | `update_rom_starter_and_intro_mon`, `set_rom_starter`, `set_manual_dv`, `write_manual_starter_dvs`, `apply_starter_ivs`, `set_encounters`, `freezeEncounters`, `disable_encounters`, `toggle_encounters`, `set_hm_encounters`, `checkedEncounters`, `trashCans`, `write_byte_data`, `encrypt_byte_data`, `set_options`, `add_testing_items`, `update_nature`, `commit_starter_input`, `select_starter_option`, `close_starter_dropdown`, `update_atk`, `update_def`, `updateHiddenPowerDVs`, `getHiddenPowerDVs`, `hpDv`, `hpDvCalculation` | `games/genN/patches.ts` (with `core/logic/starterIvs.ts`, already shared); `features.romPatching`, `features.encounterFlags` | 6.9 |
+| run and game state | `reset`, `increment`, `decrement`, `newRun`, `newGame`, `setGamestate`, `displayState`, `g2state`, `g3state`, `versionCheck`, `currentBattleState`, `statusHealedFix`, `statusCheck`, `hgss_badge_check`, `toggle_pokedex`, `toggle_national_dex`, `unlocked_difficulty_keys`, `transfer_metrics`, `q1`, `bat`, `batp`, `starterProp` | `games/genN/state.ts` (the state machine, like gen1's) and `useSpeciesMetricsStore` | 6.4 |
+| UI only | `togglePopup`, `closePopup`, `closeRNGModal`, `popupAction`, `write_rng_initial_trips`, `setup_rng_bag_watchers`, `openFolder`, `openCurrentSplitsFolder`, `openSplitsFolder`, `battle_testing_ui_toggle`, `statLabelOpacity`, `stat_label_opacity`, `svgColorClass`, `nullCheck`, `customFormats`, `importBackports`, `_styleModeBuildList`, `clearInterval`, `badgeGraphic` | the owning component; `features.rngHelper`, `features.backportImporter` | 6.2, 6.9 |
+| formatters | the 29 already in `formattersMixin` | `core/logic/format.ts`, typed, when the mixin dissolves | 6.13 |
+
+**`created()`** becomes the species-settings store's `load()` (class b) plus, for gen3, the icon call moved into
+`activate()`. **`mounted()`** (1,409-1,732 lines each) has four homes: the `.change()` subscriptions go to
+`games/genN/hooks.ts` `installRunHooks(vm)`, verbatim at first with the instance as context exactly as gen1's did
+in Phase 1.1, registration order preserved; the state-machine subscriptions (`meta.state`, gen3's `pointers.*`,
+gen2's `g2stateVariable`, gen5's `battle.other.battle`) go to `games/genN/state.ts`, installed from a `state`
+child so they register before the overlay's own handlers -- the ordering `components/state.vue` exists for;
+`bindHotkeys(genNHotkeys(this))` becomes `GameModule.hotkeys()` bound by `main.ts` as gen1's is; and the
+`setInterval`s (the 10 ms Shuckie poll; gen3/gen5's 500 ms owned-item tick), the two `addEventListener`s per
+generation and the dev-mode listeners go to `activate()`/`deactivate()` and the stores' own start and stop.
+`unmounted()` shrinks as they leave. `splits.js` is 6.5, `storage.ts`'s `MyStorage` a shim until 6.13,
+`control.ts` and `hotkeys.ts` 6.11; `enemySprites.ts` and `icons.ts` stay as they are.
+
+### 4. The order
+
+Slices are **horizontal**: one shared thing lands and all four generations adopt it before the slice closes, so
+the drift check shrinks monotonically and a slice cannot land in three generations and not the fourth. Within a
+slice the pilot is **gen2** (decision 27: the one real recording, and the vocabulary closest to gen1), then gen4, gen5, and
+gen3 last (the outlier: its `#app` is the grid, its state path is `pointers.*`, its game identity has three
+sources). Features unique to one generation (6.9) are vertical. Each slice is one or more commits, every commit
+passing the recipe in §5.
+
+**6.0 The net** (Scott records; in parallel with 6.1-6.3):
+- The decision-6 recordings, one per generation at minimum, each with the mapper `mapper-matrix.md` names, from New
+  Game through the Hall of Fame, covering: the starter; at least two trainer battles including a gym leader and the
+  rival; a wild battle; a level-up; an evolution (gens 3-5, with evolution splits on); a blackout; a reset and the
+  second attempt; an item pickup and a new move (gen2's Item and New Move markers); a menu (gen4/5's MENU marker);
+  a Rare Candy (gen4/5); a Voltorb Flip visit (gen4); a form change (gen3 Castform or Deoxys; gen5 a form species);
+  a held-item change; the champion and the Hall of Fame (the finish CSV, `logCopy`). Coverage is then measured by
+  6.1's map, not assumed. A recording is about 20 MB gzipped per two-hour run (0.2) and is committed under
+  `tools/fixtures/<gen>/` in plain git (decision 24). They are made alongside 6.1-6.3, not before (decision 23);
+  gen2's exists, and the rest follow the slice order: gen4, gen5, gen3, then gen1 (decision 27).
+- Until they exist: the synthetic scenarios (`tools/parity/scenarios/*.json`, `make-fixture.ts`) are extended with
+  the states above that the mapper XML can script -- a second battle, an evolution, an item pickup, the Hall of
+  Fame -- each a checkpoint. They stay in the matrix after the recordings arrive; they are cheap and deterministic.
+- The dev-mode paths no fixture drives (Style Mode, the defaults write-back, gen2's backport importer, Manual
+  DVs/IVs) get `beforeReplay` hooks (`tools/parity/manual-ivs-check.ts` is the worked example) and self-tests.
+
+**6.1 Inventory, coverage, ledger** (tooling, before any move):
+- `npm run parity:members` (`tools/parity/member-inventory.ts`, on `drift-check.ts`'s `extractMembers` and
+  `loadOverlays`, extended to `data()` keys): for every overlay and every member -- its section, its class (a-e)
+  or cluster (§3), its readers (`this.<name>` sites in the script, references in the template), its drift status
+  (identical / allowlisted with a reason / allowlisted unreviewed / unique to this generation), the mixin that
+  holds it if any, the `known-legacy-bugs.md` rows that name it. Output: `tools/reports/members-<gen>.md` and one
+  JSON the slices tick off, regenerated at every commit.
+- Coverage per member per fixture: V8 coverage through Playwright on the Electron page
+  (`page.coverage.startJSCoverage()`, Chromium's API, over the dev build so line ranges map back to the SFC), a
+  `--coverage` flag on `run.ts`, and `parity:members --coverage` marking each member with the fixtures that
+  executed it. If the Electron driver will not expose the API, a Vite plugin in the harness build counts entries
+  per member instead. The rule it enforces: a member no fixture reaches moves only verbatim (identity proven by
+  fingerprint), or after 6.0 gives a scenario or recording that reaches it.
+- The quirk ledger: `known-legacy-bugs.md` rows mapped to members (#32 `hash()`, #33 gen4's numeric
+  `real_time_hmmss` under a minute, #34/#35 bare reads, #36/#37 gen3's time functions, #43 `split_data`, #44 the
+  removed duplicates, #45 gen2's `'this.*'` keys, #46 gen2's SpDef rule; `check-undefined`'s `--allow=hash`), each
+  row classified under decision 25: a **game quirk** (it mirrors the game's features, code or presentation -- #46 is
+  the model, pokecrystal's `BadgeStatBoosts`; verified against the decompilations in `CLAUDE.md`) is carried
+  verbatim; a **code quirk** (an artefact of when the app was written) is fixed in its own commit after the move.
+  Approved for fixing already: the crash class (#32, #34, #35, #37), the split-row data class (#33, #36) and the
+  persistence and folder class (#45 with a key migration, #2, #11). Every slice states which rows it carries and
+  which it fixes; 6.1 also sets `features.forms` to true for gen3 and gen4 (decision 28).
+- Adjudicated on 2026-09-25 (§5, decisions 17-21): `fetchEmulatorStats` keeps polling, throttled, everywhere (gen5's
+  stop-after-ten is not ported); `load_splits` keeps every row in gens 2-4 and gen5's N rule becomes gen5 data; the
+  three Shuckie calls log errors only, everywhere; `convertDurationToSeconds` returns 0 silently everywhere;
+  `get_stat` is a per-generation variant and is re-pinned with that reason. The first four are ports (one shared
+  body lands in 6.5 / 6.6 and the entries are deleted); the fifth keeps its entry. From then on `parity:drift
+  --strict` is the target: the remaining unreviewed entries are worked off slice by slice -- an entry a slice
+  dissolves is deleted, one it keeps gets its reason -- and a slice that leaves an unreviewed entry among the
+  members it touched is not done.
+
+**6.2 Template split, no DOM change** (each generation, all four):
+- Cut each template at the legacy section comments the lifts kept (`GRAPHICS`; `DEBUGGING`, which is the settings
+  panel; `Badges`, `TYPE ICONS`, `BADGE ICONS`, `STATS`, `MOVESET`; `RIGHT BAR` / `Right Hand Information Area`
+  with `Enemy Team Display`, `Splits`, `Movepool`, `Inventory`, `Second Screen Mode`; `LABELS`, `EXP BAR`;
+  `BATTLE POP UPS` with `ACCURACY`, `EVASION`, `SCREENS`, `BONKS`, `REPEL COUNTER`; `Resets` / `FAULTS COUNTERS`;
+  `HELD ITEM`, `Gametime`, `Voltorb Flip`, `Popup Menu`, `RNG Configuration Modal`) into components under
+  `games/genN/components/`, named after gen1's.
+- **Multi-root fragment components, no wrapper element** (gen1's `left_panel.vue` is the model): oracle 1 keys
+  every element by its `tag.class:nth-child` chain, so a wrapper would shift every sibling after it. A region
+  inside a `<transition>` keeps a single root there. Elements that render nothing stay (`state.vue` and
+  `Hotkeys.vue` keep their empty `<div>` for the same reason). gen3's `#app` *is* the grid: its direct children
+  keep their order.
+- The component reads the overlay instance through `inject` (the root `provide()`s itself) at first, so this slice
+  moves markup and nothing else: the `:style` bindings (57-117 per generation) and the template's
+  `game.properties` reads (61-144) move unchanged. Each later slice replaces `overlay.<key>` with a store read in
+  the owning component, one class of key at a time -- which is also how the perf items land: once the timer text
+  and the Shuckie stats live in small components (6.6), a per-frame write re-renders a few nodes, not the page.
+- Proof: the no-change run on every fixture of the generation (oracles 1 and 2 identical), `typecheck` (vue-tsc
+  parses every new template), `parity:drift` (the extraction does not read templates; the component files' script
+  members join its inventory in 6.13).
+
+**6.3 Persistence: `MyStorage` keys to stores** (horizontal; classes a and b):
+- `games/genN/settings.ts` declares the generation's setting keys with their defaults (generated from the `data()`
+  seeds by 6.1's inventory; the same table `control.ts`'s `status` and the hotkeys read).
+  `core/stores/createSettingsStore.ts` builds the store over `userState` for the active namespace under the same
+  key names, so oracle 4 is byte-identical and the 2.6 importer keeps working.
+- The species-settings store over `styleSettings.ts` with each generation's rules exactly as `storage.ts` passes
+  them today (gen2 whole-value writes, immediate; gen3 `<Game>_` keys, replace-on-write defaults; gen4 the
+  26-field filter and the 500 ms debounce; gen5 the three-layer read and the 1 s write with no unload flush, #25),
+  replacing `created()`'s field-by-field load and the `set_pokemon_prop` / `load_all_settings` cluster.
+- The persistence watchers go; the stores autosave with the generation's own write rules, and the dev-mode source
+  writes (`source:write`) stay behind the same debounce. Quirks: #45 (gen2's `'this.current_splits'` /
+  `'this.previous_splits'` keys) moves verbatim first and is then fixed in its own commit (decision 25): the keys
+  become `current_splits` / `previous_splits` and a one-time migration renames them in gen2's section of
+  `user_state.json`; #43 stays fixed (`split_data` is not persisted into species entries).
+- `MyStorage` stays as a shim forwarding to the stores until its last reader goes (6.13), so the slice lands one
+  key class at a time; `parity:members` reports the remaining readers.
+
+**6.4 `mounted` out: hooks, state machine, hotkeys, lifecycle** (horizontal; verbatim first):
+- `games/genN/hooks.ts` `installRunHooks(vm)`: the `.change()` block moved verbatim with `vm` as context
+  (`games/gen1/hooks.ts` is the model; Phase 1.1 did exactly this for gen1), registration order preserved. The
+  state-machine subscriptions go to `games/genN/state.ts` behind a `state` child component so they register first,
+  as their position in `mounted` makes them today. `GameModule.hooks.installRunHooks` and `installStateSync` stop
+  being no-ops for gens 2-5, and `main.ts` calls them for every module.
+- `hotkeys()` returns the generation's table (the tables in `games/genN/hotkeys.ts` already take `vm`; they take
+  stores from 6.11) and `main.ts` binds it, so `bindHotkeys` leaves `mounted`; gen1's pre-mapper binding is
+  unchanged.
+- The `setInterval`s, the `addEventListener`s and the dev-mode listeners go to `activate(game)` / `deactivate()`
+  and the stores' start and stop; `unmounted()` shrinks accordingly. Under the fake clock the same periods and the
+  same registration instant relative to `ready` (the `__stpPendingBoot` barrier) are behaviour: the hundredths
+  flake (7c) is what a moved timer looks like when they are not.
+- As the clusters land (6.5-6.9) each hook is rewritten against the stores in its own commit; the hooks file is
+  where a generation's run logic reads as one page.
+
+**6.5 Splits: the engine and a store** (horizontal; every fixture reaches a split):
+- `core/autosplitter/` from gen1's `autosplitter/autosplitter_functions.js` (`log_split`, `autosplitter_process`,
+  `format_trainer_name`, `logData`, `logCopy`), with the per-generation differences as parameters: the header sets
+  and column lists; the folder rules (gen2's `Crystal` attempts vs edition finishes, #2; gen3's four folders, #11;
+  gen4's `finishFileName`, #21; gen5's refilming variant -- #2 and #11 are code quirks, carried by the variant
+  first and fixed in their own commits afterwards, decision 25); the file-name rules (`splitPrefix`, species or family
+  names); the `transition()` helper. Each `games/genN/splits.js` becomes a `SplitWriterVariant` selected by
+  `logCopyVariant`. Oracle 3 is byte-identical or the slice fails.
+- `useSplitsStore` (core): `current_splits`, `previous_splits`, `previous_splits_source`, `split_data`,
+  `simple_data`, `simple_data_str`, `full_data_str`, `deprecated_data_str`, `split_logStr`, `collect_split_data`;
+  `effective_current_splits` / `displayed_current_splits` become its getter over `useReplaySplitsStore`; the
+  right-panel components read it; `/load-split-file` and `pickSplitComparison` write to it. gen1's
+  `components/Overlay.vue` adopts it too, closing its own "untangling is plan 1.4's job" note. The store keeps
+  every row (decision 18); gen5's `load_splits` rule -- N is fought several times and only his final battle
+  registers -- is gen5 data on the module (`data.splits.collapseFinalBattleOf`), not a shared dedupe.
+  `convertDurationToSeconds` is one shared helper that returns 0 for a non-string, silently (decision 20).
+- `addSplitBookmark` and `sendChapterMarker` stay where the hooks call them; each generation's marker-name table
+  moves from `index.ts` to `games/genN/markers.ts` (gen1's shape).
+
+**6.6 Shuckie and timer** (horizontal; after 6.1's adjudication of the three Shuckie entries):
+- The five Shuckie methods go to `useEmulatorStatsStore` (`startPolling` with the generation's predicate,
+  `shuckie_timer || shuckie_counters`, as gen1's); the `emulatorStats` data key and its watcher go; `faults`, the
+  timer and the counters read the store. That ends the 10 ms re-render of the monolith (perf review 2026-09-25;
+  performance-followups.md A/B). Decided (§5, decisions 17 and 19): the store keeps polling, throttled, in every generation -- gen5's
+  stop-after-ten is not ported -- and the three Shuckie calls log errors only. Oracle 8 sees the calls and oracle 9
+  the console, so both land as approved congruence commits after the verbatim move.
+- Timer: gen2/gen4's `timer_*` trio and `updateTime` (a formatted array written onto the component every frame) and
+  gen3/gen5's `Timer` component + `logic/Timer.js` become `logic/Timer.ts` + `useSpeciesMetricsStore.timer` +
+  `left_panel/timer.vue` (which already switches between the Shuckie time and the local timer). gen4's
+  `setImmediate` hop (perf E) is dropped (decision 22): one shared loop, and gen4's fixtures are re-baselined if
+  the hundredths digit moves. #33 (gen4's numeric `real_time_hmmss` under a minute) travels with gen4's split
+  variant first and is then fixed in its own commit (decision 25), as is #36 (gen3's shadowed `gameTimeHM`).
+- The `PubSub` copies become gen1's `logic/PubSub.js`; the four `Timer.js` / `PubSub.js` files and the
+  `components/Timer.js` / `ShuckieTimer.js` template-string components are deleted. With `main.ts`'s root template
+  moved into an SFC, nothing needs Vue's runtime compiler and the bundle switches to runtime-only Vue (the perf
+  review's last item).
+
+**6.7 Canonical keys** (horizontal; gen2+gen3's DEPRECATED spellings vs gen4+gen5's STANDARD ones):
+- The reviewed "mapper shape" drift entries and their kin -- `battle.enemyPokemon` vs
+  `battle.opponent.active_pokemon` (`battEn`); `gameTime.hours` vs `game_time.hours.value`; `weatherCount` /
+  `statusReflect` / `lightScreenCount` vs `weather_count` / `reflect_count` / ...; `expPoints` vs `exp`;
+  `personalityValue` vs `internals.personality_value`; `yourPokemon.modStage*` vs `active_pokemon.modifiers.*` vs
+  gen5's `pkmn_ram.pokemon_0_ram.modifiers.*` -- become canonical keys in the profiles: gen1's vocabulary extended
+  (§2's rule), the DEPRECATED profiles identity where they already share gen1's names, the STANDARD profiles
+  mapping. `buildCanonicalView` aliases the client's own objects, so `.value`, `.change()` and their timing are
+  untouched (its header says why).
+- The members whose only difference was the path then collapse into one body, the drift check sees them identical,
+  and they move to `core/`. The template's direct reads (61-144 per generation) are renamed to the canonical
+  spelling in the same slice, one mechanical rename per key, oracles 1/2 catching a wrong key (it renders
+  `undefined`).
+- gen3's `pointers.*` / `sStpCallback*` state path and gen5's `battle.other.*` have no gen1 equivalent: new,
+  generation-specific canonical keys, declared `unsupported` in the other profiles (§2's rule for the feature
+  flags; nothing reads `features` yet -- this is where something starts to).
+
+**6.8 Battle math and the shared tables** (horizontal):
+- `core/logic/battle/`: damage range, stat and stage math, type effectiveness, STAB / item / ability / burn /
+  weather modifiers, exp and growth, natures, hidden power, badge boosts -- pure, typed functions over explicit
+  inputs and the generation's tables on `GameModule.data` (`typeChart`, `stageModifiers`, `typeBoostingItems`,
+  `natures`, `hiddenPower`, `badgeBoosts`, the growth tables). `battleMathMixin`, `dsPairMixin`, `naturesMixin`
+  and `manualIvsMixin` dissolve into it as each member is typed; `npm run parity:battle-math` is a self-test per
+  function family, its cases taken from the fixtures' checkpoints and from the decompilations (`CLAUDE.md`: game
+  internals come from the source, never guessed).
+- Tables move to `core/data/` only when identical (2.2's rule). Measured 2026-09-25: `type-effectiveness.js`
+  gen3 = gen4 = gen5 (gen2's is the Gen 2 chart and stays); `hiddenpower-all.js` gen3 = gen4 = gen5;
+  `default_colors.js` gens 2-5; `cross_generation_moves.js` gen2 = gen3 = gen5 with gen4's differing by four lines
+  (a diff to review, then one file or two); gen4 = gen5 for `hiddenpower.js`, `hiddenPowerTypes.js`,
+  `natureDefinitions.js`, `post_game_moves.js`, `misc/tmhm.js`, `moves/natural_gift.js`; `natures.js` gen3 = gen4
+  after whitespace only, and gen5's is the same table without the 25 index entries -- "identical after
+  whitespace normalisation" counts (decision 29): the inventory records the normalisation and the normalised
+  fingerprint, and anything differing beyond whitespace stays per generation. Different
+  everywhere and staying per generation: `stageModifiers.js`, `typeBoostingItems.js`,
+  `type effectiveness array.js`, `autosplitter.js`, `auto_save_settings.js`, `textures.js`,
+  `unobtainable_moves.js`, the dex, trainer and move tables. The duplicated imports (gen4's `platinum_trainers.js`
+  = `trainers/platinum.js`; gen3's `pokedex/firered_leafgreen.js` ≈ `firered_leafgreen.js`) are aliased, one file
+  per commit (decision 14: consolidation after parity).
+
+**6.9 Feature modules behind flags** (vertical where a feature is one generation's):
+
+| feature | generations | today | destination |
+|---|---|---|---|
+| evolution splits and families | 3, 4, 5 | `getEvolutionFamily*`, the `evolution` / `selected_evolution_species` watchers, gen3's `evolution_family_data/*`, `hasMultipleEvolutionStages` | `core/logic/species/evolution.ts` over `GameModule.data.evolutionFamilies`; `features.evolutionSplits` |
+| forms | 3 (Castform, Deoxys), 4 (`forms.js`, 2026-09-20), 5 (`POKEMON_FORMS`, battle-only forms, Zoroark) | per-generation tables and methods | `core/logic/species/forms.ts` over `GameModule.data.forms`; `features.forms` -- gen3 and gen4 say `false` today although both carry forms; set to `true` in 6.1 (decision 28) |
+| ROM patching, encounters, starter | 2 (value writes, DVs, hidden power, `hStpCatchRate`), 3 (dual `stp_vars.*` / `patch.*`, trash cans), 4 (`setBits` flags, `hm_*` / `encounters_*`), 5 (`patch.encounter_*`, the party byte rewrite, bag, options) | watchers and methods in the overlay | `games/genN/patches.ts` `installPatchWatchers(stores, game)`, writes declared in the profiles (oracle 5); `features.romPatching`, `features.encounterFlags` |
+| Voltorb Flip | 4 | the `voltorb_flip` computed and the template grid | `games/gen4/components/voltorb_flip.vue`; `features.voltorbFlip` |
+| RNG NPC helper | 4, 5 | `rng_*` state, the modal, `write_rng_initial_trips`, `setup_rng_bag_watchers` | `games/genN/components/rng_modal.vue`, `core/logic/rng.ts` if the two bodies agree |
+| second screen | 5 | `second_screen_mode`, `sendVirtualKey` | `games/gen5/components/second_screen.vue`; `features.secondScreen` (#16: probably broken, preserved as is) |
+| Style Mode and the enemy sprite resize | 2-5 | `enemySpriteStyleMixin` + the per-generation `_styleModeBuildList`, `isInDevMode` | gen1's `useEnemySpriteResizeStore` + `enemy_sprite_resize_handle.vue`, the species list from `GameModule.data` |
+| backport importer | 2 | `importBackports`, `backports.js`, `backportOverrides.ts` | `games/gen2/backports/` behind `features.backportImporter` (decision 15) |
+| item and held-item watchers, Item / New Move markers | 2 (the markers), 3 and 5 (the 500 ms owned-item tick, perf F) | blocks in `mounted` | `games/genN/hooks.ts`, then `core/logic/items.ts` where the bodies agree |
+| vitamins, Rare Candy status (2), Fling (4, 5), badge boosts (2, 3), the exp bar, the bonk and repel counters | mixed | methods and template | the owning component and `core/logic/battle/` |
+
+**6.10 Right panel and movepool** (per generation; shared where the DOM agrees):
+- The enemy team display and trainer graphic, the splits (First, Followup, summary), the movepool (level-up,
+  TM/HM, tutor and egg -- four tables in gen4/gen5) and the inventory become components. The trainer-team and
+  movepool tables are where the per-frame cost lives: `getMovepool` is called three times per render from `v-for`
+  and each call does a case-insensitive linear scan (0.6-0.9 ms per call on gen4's tables, perf review
+  2026-09-25); it becomes a computed keyed on the displayed species over a lower-cased index built once
+  (`core/logic/moves.ts`). `movepoolResize()` leaves the table's `:style`: it registers a `.change()` handler on
+  the party slot's species on every render, never removed until the mapper unloads; it is registered once in the
+  component's `mounted` and the method made pure. Both are behaviour-preserving: oracles 1/2 prove the same rows
+  and the same styles, and the frame cost is measured before and after (performance-followups.md, "How to verify").
+  The same-day performance pass may have landed both already; if so this slice inherits them and only moves them
+  into the components.
+
+**6.11 Control routes and hotkeys on stores** (horizontal):
+- `games/genN/control.ts` reads and writes the stores instead of the instance; the `/status` field names per
+  generation (`starter` / `starterString`, `right_panel` / `right_ui`, `selected_game`, `hpType`, `nature`,
+  `ability`, `evolution`...) and every reply body stay exactly as they are -- oracle 6 compares key by key and
+  `external-contracts.md` §2 is the contract. `/set-evolution`'s write past the style manager (the bare
+  `<game>_<starter>` key) becomes a store action that performs the same write.
+- The hotkey tables target the stores and drop `vm` from their signature; `GameModule.hotkeys()` no longer needs
+  the instance, and `ControlContext.overlay()` goes.
+
+**6.12 Texture registry and sprite resolver** (4.3 and 4.4 resume here):
+- With images addressed through functions (`getPokemonImageUrl`, `getStarterTypeTexture`, `badgeGraphic`,
+  `split_image`, `getTrainerGraphic`, `held_item_icon` are the seams), `core/assets/resolver.ts` provides the three
+  tiers (game, generation, shared) over the pool's existing layout, and each generation's texture vocabulary is
+  registered (`textures.js` has five shapes; gen5's entries carry default background settings applied on pick --
+  behaviour, kept). Decision 2's "(Gen N)" suffix in the picker. Oracle 2 proves every URL still resolves to the
+  same bytes.
+
+**6.13 Retire the monoliths**:
+- `games/genN/Overlay.vue` at or under about 200 lines: components, `provide()`, nothing else. The `MyStorage` and
+  `StyleSettingsUtils` shims deleted; the mixins dissolved (their `@ts-nocheck` bodies were typed as 6.6-6.9
+  rewrote them); the module-level `let` declarations of the legacy sloppy-mode globals gone, each having become
+  state or a local; `check-undefined` clean over every module.
+- `parity:drift` retargeted: it extracts members from `games/genN/**/*.vue` and `games/genN/*.ts` by file role (a
+  member of the same name in the same role compared across generations) and asserts the four overlays' `methods`,
+  `computed` and `watch` are empty. The allowlist ends at zero unreviewed entries, or the residue is a documented
+  per-generation variant with its reason.
+- README's "gen2-5 are lifted" paragraph is replaced with the decomposed shape.
+
+**6.14 Exit**: `npm run parity:all` green on every fixture, recordings included; gen1's `unified@<dir>` check on
+every core change; `typecheck`, `parity:drift --strict`, every self-test; performance re-measured (renders per
+second with the Shuckie timer on, the entry chunk, the movepool cost) and `docs/performance-followups.md` updated;
+7g complete.
+
+### 5. The recipe, every commit
+
+1. **Scope** from the inventory: the members, data keys and template lines the slice moves, per generation; their
+   coverage per fixture; the quirk-ledger rows they touch; the drift entries they dissolve or keep.
+2. **Baseline**: a built worktree of HEAD (`git worktree add <dir> HEAD`, a `node_modules` junction,
+   `npm run build`) and `unified@<dir>` on every fixture of the affected generations, `--redirect-ports
+   --control`; gen1's fixtures too whenever `core/` changes.
+3. **Move verbatim.** Never move and rewrite in one commit (the mixins' rule); a rewrite is its own commit against
+   the moved code as its baseline.
+4. `npm run typecheck`; `npm run parity:drift` (entries the slice dissolves deleted, entries it keeps re-reviewed
+   with a reason, `--update` only after reading the diff it reports); `tools/port/check-undefined.ts` over every
+   new module; the relevant self-tests (`parity:bookmarks`, `parity:replay-splits`, `parity:debounce`,
+   `parity:manual-ivs`, `parity:battle-math` once it exists); `parity:members` regenerated.
+5. **Candidate** run on the same fixtures and `diff.ts` against step 2: all nine oracles green. A difference is a
+   bug unless Scott approves it as a congruence change (the hard rule at the head of this document), and an approved
+   change is its own commit after the no-change one.
+6. **Commit** named for the slice and generation; the 7g row updated.
+
+### 6. Rules (in addition to §2 and §4)
+
+- **DOM identity**: fragment components, no wrapper elements, every legacy element kept including the empty ones
+  and the `v-if` conditions that remove them; a `<transition>` keeps a single root.
+- **Persisted names**: the same key names in the same user-state namespace, the same style-key rules and write
+  debounces per generation. The 2.6 importer and oracle 4 both depend on it.
+- **Order of effects**: `.change()` registration order; `setInterval`, `setTimeout` and `requestAnimationFrame`
+  counts and periods; the instant relative to `ready` -- all behaviour under the fake clock.
+- **Differences are data**: `features`, `data`, `hooks`, a profile, or a variant component; never
+  `if (generation === 4)` in `core/`. Mapper-shape differences are canonical keys, not conditionals.
+- **Console lines are oracle 9**: a `console.log` moved, added or removed is a diff (gen3's silenced Shuckie lines
+  need Scott's call before 6.6).
+- **Game quirks are kept, code quirks are fixed** (decision 25, amending decision 4): every quirk a slice touches is
+  classified in the ledger; a game quirk is carried verbatim and named in the commit; a code quirk is fixed in its
+  own commit after the no-change one, never inside the move. Standardising the implementation is the goal wherever
+  the harness can prove the result.
+- **Tables move to `core/data/` only when identical**, or identical after whitespace normalisation with the
+  normalised fingerprint recorded (decision 29).
+- **No logic moves through a state no fixture reaches**: verbatim moves only there, until 6.0 delivers the
+  recording or scenario. The coverage map is the go/no-go per member.
+- **Read `parity:drift`'s per-generation counts on every run** (the 2026-09-17 lesson: a comment edit hid a
+  hundred members from the check).
+
+### 7. Risks
+
+- **Coverage** (§6's first risk, still the ceiling): 6.0 and 6.1's map; a member is moved as logic only when a
+  fixture executes it.
+- **Reactivity shifts**: a `data()` key on the component and a Pinia state field batch and watch differently
+  (`$patch`, flush timing), and `MyStorage` returns a fresh object per read where a store returns the same reactive
+  object -- `control.ts` mutates `MyStorage[key].evolution` and writes it back, which a store must not double-apply.
+  Oracles 1 and 4 catch it; the pilot generation finds it first.
+- **Fragments**: a multi-root component inside `<transition>` or beside keyed `v-for` siblings; gen3's grid
+  placing direct children. Oracle 1 catches every misplaced element.
+- **Options API `this` everywhere**: a moved key breaks every reader; the inventory's reader lists make the rename
+  mechanical, and `typecheck` reaches template reads only once the components are typed.
+- **Timing**: gen4's `setImmediate`, the 10 ms poll, `debouncePaths` / `debounceFrames`, the boot barrier --
+  parity-harness.md's "Determinism is not free" lists what breaks and how each was found.
+- **Dev-mode-only paths** without fixtures: `beforeReplay` hooks and self-tests, not review.
+- **Concurrent work in the same files**: the performance pass of 2026-09-25 edits the overlays while this plan is
+  written; 6.1's inventory is regenerated from whatever is committed when the phase starts, and every measurement
+  above is re-taken then.
+- **Scale**: four generations times a dozen slices; the drift check is what keeps a slice from landing in three
+  generations and not the fourth, and horizontal slices are the discipline that keeps it shrinking.
+
+### 8. Decisions taken (2026-09-25)
+
+Scott answered the open questions on 2026-09-25; §5 holds them as decisions 17-29 and the slices above cite them.
+In one place, what each changes:
+
+| decision | effect on the plan |
+|---|---|
+| 17 the Shuckie poll keeps polling, throttled | 6.6 uses `useEmulatorStatsStore` as it is; gen5's stop-after-ten goes, its allowlist entry with it |
+| 18 no general split dedupe; gen5's N rule is data | 6.5's store keeps every row; `data.splits.collapseFinalBattleOf` on gen5's module |
+| 19 Shuckie calls log errors only | 6.6; gen3's silenced lines and the others' success lines both go |
+| 20 `convertDurationToSeconds` returns 0 silently | 6.5, one shared helper |
+| 21 `get_stat` stays per generation | 6.8: one variant per generation over shared pure helpers; the entry re-pinned |
+| 22 `setImmediate` dropped | 6.6: one timer loop; gen4 re-baselined if the frame grid moves |
+| 23 recordings alongside 6.1-6.3 | 6.0 runs in parallel; a logic slice waits per member for coverage |
+| 24 recordings committed | `tools/fixtures/<gen>/`, plain git |
+| 25 game quirks kept, code quirks fixed | the ledger classifies every row; three groups approved; the rule is in `CLAUDE.md` |
+| 26 visuals stay per generation | no §4 unification inside Phase 6 |
+| 27 gen2 pilots | slice order gen2, gen4, gen5, gen3; the remaining recordings in that order |
+| 28 `features.forms` true for gen3 and gen4 | 6.1 flips the flags |
+| 29 whitespace-normalised identity counts | 6.8's table moves |
+
+Nothing in this plan now waits on a decision; what remains is work.

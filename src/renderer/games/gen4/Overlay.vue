@@ -47,38 +47,38 @@
                 <div v-show="blackouts_resets == 'None'">   
                     <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen4/new_ui/timer.svg)"></div>
                     <div class="fault_label timer_reset_label">faults</div>
-                    <div v-if="shuckie_counters == true" id="reset_counter_single" class="faults_value timer_reset_value">{{emulatorStats?.counters?.playerResets ?? 0}}</div>
+                    <div v-if="shuckie_counters == true" id="reset_counter_single" class="faults_value timer_reset_value">{{shuckie_player_resets ?? 0}}</div>
                     <div v-else="" id="reset_counter_single" class="faults_value timer_reset_value">{{playerResets}}</div>
                 </div>
                 <div v-show="blackouts_resets == 'Blackouts'">
                     <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen4/new_ui/timer.svg)"></div>
                     <div class="fault_label timer_reset_label">blackouts</div>
-                    <div v-if="shuckie_counters == true" id="reset_counter_single" class="faults_value timer_reset_value">{{emulatorStats?.counters?.blackout_counter ?? 0}}</div>
+                    <div v-if="shuckie_counters == true" id="reset_counter_single" class="faults_value timer_reset_value">{{shuckie_blackout_counter ?? 0}}</div>
                     <div v-else="" id="reset_counter_single" class="faults_value timer_reset_value">{{blackout_counter}}</div>
                 </div>
                 <div v-show="blackouts_resets == 'Resets'">   
                     <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen4/new_ui/timer.svg)"></div>
                     <div class="fault_label timer_reset_label">resets</div>
-                    <div v-if="shuckie_counters == true" id="reset_counter_single" class="faults_value timer_reset_value">{{emulatorStats?.counters?.playerResets ?? 0}}</div>
+                    <div v-if="shuckie_counters == true" id="reset_counter_single" class="faults_value timer_reset_value">{{shuckie_player_resets ?? 0}}</div>
                     <div v-else="" id="reset_counter_single" class="faults_value timer_reset_value">{{playerResets}}</div>
                 </div>
                 <div v-show="blackouts_resets == 'Both'">   
                     <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen4/new_ui/timer_2.svg)"></div>
                     <div class="fault_label timer_2_reset_label">resets</div>
                     <div class="fault_label blackout_2_reset_label">blackouts</div>
-                    <div v-if="shuckie_counters == true" id="reset_counter" class="faults_value timer_2_reset_value">{{emulatorStats?.counters?.playerResets ?? 0}}</div>
+                    <div v-if="shuckie_counters == true" id="reset_counter" class="faults_value timer_2_reset_value">{{shuckie_player_resets ?? 0}}</div>
                     <div v-else="" id="reset_counter" class="faults_value timer_2_reset_value">{{playerResets}}</div>
-                    <div v-if="shuckie_counters == true" id="blackout_counter" class="faults_value timer_2_blackout_value">{{emulatorStats?.counters?.blackout_counter ?? 0}}</div>
+                    <div v-if="shuckie_counters == true" id="blackout_counter" class="faults_value timer_2_blackout_value">{{shuckie_blackout_counter ?? 0}}</div>
                     <div v-else="" id="blackout_counter" class="faults_value timer_2_blackout_value">{{blackout_counter}}</div>
                 </div>
             </div>
             <div v-if="shuckie_timer == true">
-                <div class="gametimeClock">{{formatMilliseconds(emulatorStats?.time_current)}}</div>
-                <div class="gametimeFrames">.{{getCentiseconds(emulatorStats?.time_current)}}</div>
+                <live-text class="gametimeClock" source="shuckie_clock"></live-text>
+                <live-text class="gametimeFrames" source="shuckie_frames"></live-text>
             </div>
             <div v-else="">
-                <div class="gametimeClock">{{timer_formatted_time[0]}}</div>
-                <div class="gametimeFrames">{{timer_formatted_time[1]}}</div>
+                <live-text class="gametimeClock" source="timer_clock"></live-text>
+                <live-text class="gametimeFrames" source="timer_frames"></live-text>
             </div>
 
             <div>
@@ -1034,7 +1034,7 @@
                             <th class="movepool_header movepool_tableC">Acc.</th>
                             <th class="movepool_header movepool_tableC">PP</th>
                         </tr>
-                        <tr v-for="(x, index) in getMovepool(g4PokemonData, platinum_moves, g4tmhmMapping, displayedPokemonSpecies).level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
+                        <tr v-for="(x, index) in movepoolRows.level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
                             <td class="movepool_way">{{x.Level}}</td>
                             <td class="movepool_move">{{x.Move}}</td>
                             <td class="movepool_type" :style="{'background-color': `var(--${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
@@ -1059,7 +1059,7 @@
                             <th class="movepool_header movepool_tableC">Acc.</th>
                             <th class="movepool_header movepool_tableC">PP</th>
                         </tr>
-                        <tr v-for="(x, index) in getMovepool(g4PokemonData, platinum_moves, g4tmhmMapping, displayedPokemonSpecies).tmhm" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, selected_game)">
+                        <tr v-for="(x, index) in movepoolRows.tmhm" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, selected_game)">
                             <td v-if="x.Move == 'Whirlpool'" class="movepool_way">HM05</td>
                             <td v-else="" class="movepool_way">{{x.tmhm}}</td>
                             <td class="movepool_move">{{x.Move}}</td>
@@ -1085,7 +1085,7 @@
                             <th class="movepool_header movepool_tableC">Acc.</th>
                             <th class="movepool_header movepool_tableC">PP</th>
                         </tr>
-                        <tr v-for="(x, index) in getMovepool(g4PokemonData, platinum_moves, g4tmhmMapping, displayedPokemonSpecies).tutor" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, selected_game)">
+                        <tr v-for="(x, index) in movepoolRows.tutor" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, selected_game)">
                             <td class="movepool_way">Tutor</td>
                             <td class="movepool_move">{{x.Move}}</td>
                             <td :style="{'background-color': `var(--${x.Type?.toLowerCase()})`}" class="movepool_type">{{x.Type}}</td>
@@ -1110,7 +1110,7 @@
                             <th class="movepool_header movepool_tableC">Acc.</th>
                             <th class="movepool_header movepool_tableC">PP</th>
                         </tr>
-                        <tr v-for="(x, index) in getMovepool(g4PokemonData, platinum_moves, g4tmhmMapping, displayedPokemonSpecies).level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
+                        <tr v-for="(x, index) in movepoolRows.level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
                             <td class="movepool_way">{{x.Level}}</td>
                             <td class="movepool_move">{{x.Move}}</td>
                             <td class="movepool_type" :style="{'background-color': `var(--${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
@@ -1119,7 +1119,7 @@
                             <td class="movepool_tableC">{{x.Accuracy}}%</td>
                             <td class="movepool_tableC">{{x.PP}}</td>
                         </tr>
-                        <tr v-for="x in getMovepool(g4PokemonData, platinum_moves, g4tmhmMapping, displayedPokemonSpecies).tmhm" :style="getUnobtainableMoveStyle(x, selected_game)">
+                        <tr v-for="x in movepoolRows.tmhm" :style="getUnobtainableMoveStyle(x, selected_game)">
                             <td v-if="x.Move == 'Whirlpool'" class="movepool_way">HM05</td>
                             <td v-else="" class="movepool_way">{{x.tmhm}}</td>
                             <td class="movepool_move">{{x.Move}}</td>
@@ -1129,7 +1129,7 @@
                             <td class="movepool_tableC">{{x.Accuracy}}%</td>
                             <td class="movepool_tableC">{{x.PP}}</td>
                         </tr>
-                        <tr v-for="x in getMovepool(g4PokemonData, platinum_moves, g4tmhmMapping, displayedPokemonSpecies).tutor" :style="getUnobtainableMoveStyle(x, selected_game)">
+                        <tr v-for="x in movepoolRows.tutor" :style="getUnobtainableMoveStyle(x, selected_game)">
                             <td v-if="show_tutor_moves == true" class="movepool_way">Tutor</td>
                             <td v-if="show_tutor_moves == true" class="movepool_move">{{x.Move}}</td>
                             <td v-if="show_tutor_moves == true" :style="{'background-color': `var(--${x.Type?.toLowerCase()})`}" class="movepool_type">{{x.Type}}</td>
@@ -1335,7 +1335,9 @@
  * is the Phase 2.4 refactor proper, to be done with the harness as the net, exactly
  * as gen1's was in Phase 1.
  */
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
+import { LiveText } from "~/core/overlay/LiveText";
+import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -1372,7 +1374,9 @@ import { hiddenpowers } from "./data/hiddenpower-all.js";
 import { natural_gift } from "./data/moves/natural_gift.js";
 import { natures } from "./data/natures.js";
 import { platinum_moves } from "./data/platinum_moves.js";
-import { platinum_trainers } from "./data/platinum_trainers.js";
+// `platinum_trainers.js` was a byte-identical copy of `trainers/platinum.js` (known-legacy-bugs.md #15),
+// both loaded; the one table serves both names (docs/performance-followups.md, third pass).
+import { trainers_plat as platinum_trainers } from "./data/trainers/platinum.js";
 import { pokedex_dp } from "./data/pokedex/diamond_pearl.js";
 import { pokedex_hgss } from "./data/pokedex/heartgold_soulsilver.js";
 import { pokedex_plat } from "./data/pokedex/platinum.js";
@@ -1394,7 +1398,22 @@ let attack, basePower, battle_end, calculated_stats, d, damageMax, damageMin, de
 
 export default defineComponent({
     mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin],
+    components: { LiveText },
     props: ["game"],
+    provide() {
+        // What <live-text> shows (core/overlay/LiveText.ts): the Super Shuckie time and the timer text,
+        // which change every poll or frame. Read here through computeds the child renders, so
+        // this component's own render is not a dependent of them and does not re-run at
+        // that rate (docs/performance-followups.md, third pass).
+        return {
+            liveText: {
+                shuckie_clock:  computed(() => this.formatMilliseconds(this.emulatorStats?.time_current)),
+                shuckie_frames: computed(() => "." + this.getCentiseconds(this.emulatorStats?.time_current)),
+                timer_clock:    computed(() => this.timer_formatted_time[0]),
+                timer_frames:   computed(() => this.timer_formatted_time[1]),
+            },
+        };
+    },
     data() {
         return {
             ready                        : false,
@@ -2629,6 +2648,27 @@ export default defineComponent({
         // },
     },
     computed: {
+        /**
+         * The Super Shuckie counters as primitives (2026-09-25): the template used to read
+         * `emulatorStats?.counters?.x` directly, which made every poll that replaced
+         * `emulatorStats` a re-render of this whole component. A computed that yields the
+         * same primitive as before triggers nothing.
+         */
+        shuckie_player_resets() {
+            return this.emulatorStats?.counters?.playerResets
+        },
+        shuckie_blackout_counter() {
+            return this.emulatorStats?.counters?.blackout_counter
+        },
+        /**
+         * The movepool table's rows, computed once per displayed species. The template
+         * called getMovepool() once per row group on every render, and each call resolved
+         * every learnset entry against the moves table by a case-insensitive key scan
+         * (docs/performance-followups.md, third pass).
+         */
+        movepoolRows() {
+            return this.getMovepool(this.g4PokemonData, this.platinum_moves, this.g4tmhmMapping, this.displayedPokemonSpecies)
+        },
         /**
          * The game whose cartridge icon should be shown in the taskbar:
          * the connected mapper's game if available, otherwise the manual selection.
@@ -6086,7 +6126,7 @@ export default defineComponent({
         //AUTOMATION MOVEPOOL GRAPHIC
         dataSearch(dataObject, pointerValue) {
             if (!pointerValue) return ""
-            const key = Object.keys(dataObject).find(x => x.toLowerCase() == pointerValue.toLowerCase())
+            const key = findKeyIgnoringCase(dataObject, pointerValue)
             return dataObject[key] || "ERROR"
         },
         getMovepool(gen3PkmnData, moveData, tmhmMapping, species) {
@@ -6123,15 +6163,11 @@ export default defineComponent({
         }, 
 
         movepoolResize() {
-            // console.log("movepool")
-            let out = this.movepoolResizeCalc();
-            if(this.game.properties.meta.state.value == "From Battle") {
-                return out;
-            }
-            this.game.properties.player.team[0].species.change((newProp, oldProp) => {
-                out = this.movepoolResizeCalc();
-            })
-            return out;
+            // Was: the calc, then a `.change()` handler on the party slot's species that only
+            // re-ran the calc into a local nothing read again. Bound in the movepool table's
+            // :style, this runs on every render, so each render left one more handler on the
+            // property until the mapper unloaded (docs/performance-followups.md, third pass).
+            return this.movepoolResizeCalc();
         },
         /** Species used for movepool display (and sizing) - same source as getMovepool in template */
         movepoolResizeSpecies() {

@@ -1,5 +1,4 @@
-import { createApp } from "vue/dist/vue.esm-bundler.js";
-import { defineComponent } from "vue";
+import { createApp, defineComponent, h } from "vue";
 import { GameHookMapperClient } from "~/packages/gameHookMapperClient";
 import no_mapper from "~/components/GameSelect.vue";
 import { gen1 } from "~/games/gen1";
@@ -8,6 +7,7 @@ import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { loadLegacyStorage } from "~/logic/Storage";
 import { flushUserState, loadUserState } from "~/core/persistence/userState";
+import { flushAppSettings } from "~/stores/helper/files";
 import { registerControlServer } from "~/core/control/useControlServer";
 import { buildCanonicalView } from "~/core/mapper/MapperAdapter";
 import type { GameModule } from "~/core/game/GameModule";
@@ -79,9 +79,22 @@ function applyScaleToFit(module: GameModule): void {
 }
 
 const main = defineComponent({
-    components: {
-        no_mapper,
-        keyhook,
+    /**
+     * The root template used to be the markup inside `#app` in index.html, compiled at
+     * runtime -- which is why `createApp` came from the full build, and the template
+     * compiler shipped in the entry chunk for these three nodes and the two gen3/gen5
+     * timer components (now render functions too). Same elements in the same order:
+     * the keyhook, then either the pre-mapper screen or the detected module's overlay,
+     * a direct child of `#app` with no wrapper of its own (tools/parity/capture.ts roots
+     * gen4's comparison there). `ref="overlay"` is what the control-server bridge reads.
+     */
+    render() {
+        return [
+            h(keyhook, { table: this.hotkeys, placeholder: this.module.keyhookElement === true }),
+            this.ready == false
+                ? h(no_mapper, { key: "no_mapper", unsupportedMapper: this.unsupportedMapper })
+                : h(this.overlayComponent as any, { key: "overlay", game: this.game, ref: "overlay" }),
+        ];
     },
     data() {
         return {
@@ -165,7 +178,7 @@ const main = defineComponent({
         // The user-state writes are debounced 250 ms; local storage was synchronous, so
         // without this a quit within that window would lose the last edit. Best-effort,
         // the same trade gen4 makes with its own beforeunload flush.
-        window.addEventListener("beforeunload", () => { void flushUserState(); });
+        window.addEventListener("beforeunload", () => { void flushUserState(); void flushAppSettings(); });
         // gen3/4/5 stopped their hub connection on unload so a reload (the queuer's
         // /reload) did not leave PokeAByte a dangling client (plan 3.3, gen3's disconnect()).
         window.addEventListener("beforeunload", () => { void this.mapper?.disconnect(); });

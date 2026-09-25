@@ -1,4 +1,4 @@
-import moves from "~/data/moves.js";
+import gen1Moves from "~/data/moves/gen1.js";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { GameDexes } from "~/data/pokedex";
 import { tmhm } from "~/data/tmhm";
@@ -48,6 +48,16 @@ function unknownMove(moveName: string): PokemonMove {
 		description: "",
 	};
 }
+
+/**
+ * The move tables by generation. Only gen1's is bundled (2026-09-25, docs/performance-followups.md,
+ * third pass): `data/moves.js` used to hold gens 1-4 in one default export, all of it on the eager
+ * import graph for one generation's use. The other three are `data/moves/gen{2,3,4}.js`, kept for
+ * a generation that moves onto this data layer -- to be brought in with an `import()` from
+ * `setGame`, not a static import here.
+ */
+// The table is plain JS; its `type` fields are strings to the checker, PokemonType to the app.
+const moves: Partial<Record<PokemonGeneration, Record<string, PokemonMove>>> = { "1": gen1Moves as unknown as Record<string, PokemonMove> };
 
 class PokeData {
 	_games: PokemonGame[] = [
@@ -175,7 +185,7 @@ class PokeData {
 		if (!this._game || !this._generation || !moveName) {
 			return null;
 		}
-		return getPropertyInvariant<PokemonMove>(moves[this._generation], moveName);
+		return getPropertyInvariant<PokemonMove>(moves[this._generation] ?? {}, moveName);
 	}
 
 	/**

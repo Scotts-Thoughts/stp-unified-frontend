@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
+import { mkdir, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { app, dialog, ipcMain, nativeImage, shell, type BrowserWindow } from "electron";
 import { appRoot, rendererSourceRoot, resolveInside, splitsRoot, storageRoot, userDataRoot } from "./paths";
@@ -119,11 +120,28 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     const target = resolveInside(userDataRoot(), relative);
     return existsSync(target) ? readFileSync(target, "utf-8") : null;
   });
+  // Asynchronous, so a settings write never stalls the main process's loop (the control
+  // server and the keyhook forwarder run on it), and serialised per file so two writes to
+  // one path land in the order they were sent: `renderer/stores/helper/files.ts` coalesces
+  // gen1's per-mutation saves into one write per file per window, and `userState.ts` its
+  // own (docs/performance-followups.md, third pass). The invoke resolves when the bytes
+  // are on disk, which is what the harness's IPC barrier waits for.
+  const dataWrites = new Map<string, Promise<unknown>>();
   ipcMain.handle("data:write", (_e, relative: string, contents: string) => {
     const target = resolveInside(userDataRoot(), relative);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, contents);
-    return target;
+    const previous = dataWrites.get(target) ?? Promise.resolve();
+    const write = previous
+      .catch(() => undefined)
+      .then(async () => {
+        await mkdir(dirname(target), { recursive: true });
+        await writeFile(target, contents);
+        return target;
+      });
+    dataWrites.set(target, write);
+    void write.finally(() => {
+      if (dataWrites.get(target) === write) dataWrites.delete(target);
+    });
+    return write;
   });
   ipcMain.handle("data:list", (_e, relative: string) => {
     const target = resolveInside(userDataRoot(), relative);

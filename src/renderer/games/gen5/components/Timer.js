@@ -1,19 +1,18 @@
-// gen5's `components/Timer.js`, verbatim as an ES module (tools/port/lift-gen5.py): the
-// template string is compiled at runtime, exactly as the legacy page compiled it.
-import { ref } from "vue";
+// gen5's `components/Timer.js`, verbatim as an ES module (tools/port/lift-gen5.py) --
+// with its template string turned into the render function the compiler would have made
+// from it (2026-09-25): the string was compiled at runtime, which kept Vue's template
+// compiler in the renderer bundle for this component alone. The template's commented-out
+// title line is gone with the template.
+import { h, ref } from "vue";
 import PubSub from "../logic/PubSub.js";
 
-// How the component will render:
-const template = `
-    <div class="gametime">
-        <!-- <div class="timerTitle">time played at 4x game-speed</div> -->
-        <div class="gametimeClock">{{time}}</div>
-        <div class="gametimeFrames">{{frames}}</div>
-    </div>
-`
-
 export default {
-    template,
+    render() {
+        return h("div", { class: "gametime" }, [
+            h("div", { class: "gametimeClock" }, this.time),
+            h("div", { class: "gametimeFrames" }, this.frames),
+        ]);
+    },
     setup() {
         const time = ref("0");     // with a "ref", we can update the value of the variable and vue will automatically
         const frames = ref(".00"); // renrender the component.

@@ -1,27 +1,30 @@
 import { PokemonGame, PokemonSpecies } from "~/logic/PokeDataTypes";
-import { CrystalDex } from "./pokedex/CrystalDex";
-import { DiamondAndPearlDex } from "./pokedex/DiamondAndPearlDex";
-import { HeartGoldAndSoulSilverDex } from "./pokedex/HeartGoldAndSoulSilverDex";
-import { PlatinumDex } from "./pokedex/PlatinumDex";
 import { YellowDex } from "./pokedex/YellowDex";
 import { RedAndBlueDex } from "./pokedex/RedAndBlueDex";
-import { GoldAndSilverDex } from "./pokedex/GoldAndSilverDex";
-import { EmeraldDex } from "./pokedex/EmeraldDex";
-import { FireRedAndLeafGreenDex } from "./pokedex/FireRedAndLeafGreenDex";
-import { RubyAndSapphireDex } from "./pokedex/RubyAndSapphire";
 
+/**
+ * The dex tables gen1's data layer (`logic/PokeData.ts`) can reach.
+ *
+ * Only the two gen1 games are imported (2026-09-25, docs/performance-followups.md, third
+ * pass). This file is on the renderer's eager import graph -- `main.ts` imports gen1
+ * for the pre-mapper screen -- and it used to import all ten tables, so the entry
+ * chunk carried 3,561 species (8.9 MB of source) that nothing reachable read: gen1's
+ * `activate()` only ever selects Yellow or Red and Blue, and gens 2-5 ship their own
+ * tables inside their own lazily loaded chunks. The other eight files stay under
+ * `data/pokedex/` for the day a generation moves onto this data layer; bring one back
+ * with a `import()` from `PokeData.setGame`, not a static import here.
+ */
 export const GameDexes: Record<PokemonGame, Record<string, PokemonSpecies>> = {
     "Yellow": YellowDex,
     "Red and Blue": RedAndBlueDex,
-    "Gold and Silver": GoldAndSilverDex,
-    "Crystal": CrystalDex,
-    "Ruby and Sapphire": RubyAndSapphireDex,
-    "Emerald": EmeraldDex,
-    "FireRed and LeafGreen": FireRedAndLeafGreenDex,
-    "Diamond and Pearl": DiamondAndPearlDex,
-    "Platinum": PlatinumDex,
-    "HeartGold and SoulSilver": HeartGoldAndSoulSilverDex,
-    // gen5 ships no data until Phase 2; the registry never detects a gen5 mapper before then.
+    "Gold and Silver": {},
+    "Crystal": {},
+    "Ruby and Sapphire": {},
+    "Emerald": {},
+    "FireRed and LeafGreen": {},
+    "Diamond and Pearl": {},
+    "Platinum": {},
+    "HeartGold and SoulSilver": {},
     "Black": {},
     "White": {},
     "Black 2": {},
