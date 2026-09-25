@@ -12,7 +12,7 @@ it that are "why", not "what", are in the section headers of the source files th
 2. `npm run dev` -- the overlay opens and waits for PokeAByte (`http://localhost:8085`) to load a mapper.
    Code changes apply to the running app.
 3. `npm run build` -- the packaged-shape build in `out/`; `npm run build:unpack` wraps it with electron-builder
-   into `dist/win-unpacked/` (3.8 GB, the image pool included) and `npm run packaged:probe` launches that exe
+   into `dist/win-unpacked/` (3.0 GB, the image pool included) and `npm run packaged:probe` launches that exe
    with the network blocked and checks it found everything; `npm run build:win` zips the same tree.
 
 The recording queuer launches the app with `npm run dev` and drives it over `http://127.0.0.1:30159`
@@ -35,11 +35,12 @@ src/renderer
   components/, stores/, logic/, autosplitter/, data/
                     gen1's own code (the refactored generation; the others are lifted, see below)
   public/images/    the image pool: gen1's files at the root, each other generation's tree under
-                    `images/genN/`
+                    `images/genN/`; lossless WebP where the legacy apps had PNG (a new PNG goes
+                    through `tools/assets/to-webp.ts`), JPEG and SVG as they were
   fonts/
 tools/parity        the parity harness: a mock PokeAByte, the replay runner, nine oracles
 tools/port          the port/lift tooling that produced games/gen2-5 from the legacy apps
-tools/assets        the image-pool manifest and merge
+tools/assets        the image-pool manifest and merge, the PNG -> WebP conversion and its checks
 tools/splits        the one-time consolidation of the legacy splits trees
 docs/               the plan, the external contracts, the harness, the per-generation mapper
                     inventories, the known legacy bugs (preserved on purpose)

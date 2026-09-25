@@ -25,6 +25,11 @@
  *
  * `--apply` copies byte-for-byte, skips files already present with the same bytes,
  * and never deletes: a stale file in `images/genN/` is reported, not removed.
+ *
+ * Since 2026-09-24 the pool holds lossless WebPs where the legacy trees have PNGs
+ * (`to-webp.ts`), and `manifest.json` still describes the PNGs it was built from. An
+ * `--apply` now would copy every legacy PNG back in beside its WebP; follow one with
+ * `to-webp.ts --delete`.
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";

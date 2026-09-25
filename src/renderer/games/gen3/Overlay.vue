@@ -9,7 +9,7 @@
                         'transform': `scale(${backgroundScale}%) ${backgroundFlip ? 'rotateY(180deg)' : ''} ${backgroundXFlip ? 'rotateX(180deg)' : ''} translate(${backgroundXOffset}px, ${-backgroundYOffset}px)`
                     }">
                 </transition>
-                <img class="canvas" style="top: 30px;" :src="`images/gen3/elements/overlay/gen1&2/pokeball.png`">
+                <img class="canvas" style="top: 30px;" :src="`images/gen3/elements/overlay/gen1&2/pokeball.webp`">
                 <div v-if="starterString == 'Ditto'">
                     <img class="pokemon_art" ref="pokemon_art" :style="{
                         'transform': `scale(${imageScale}) ${imageFlip ? 'rotateY(180deg)' : ''} translate(${imageXOffset}px, ${-imageYOffset}px) rotate(${imageRotation}deg)`,
@@ -22,7 +22,7 @@
                         drop-shadow(0 0 0.4px #000)
                         drop-shadow(${imageFlip ? '-3px' : '3px'} 3px 3px #000)
                         `
-                    }" :src="`images/gen3/pokemon/ditto.png`">
+                    }" :src="`images/gen3/pokemon/ditto.webp`">
                 </div>
                 <div v-else="">
                     <!-- Keyed by Castform's active form so a form change cross-fades old/new art; key is null for other species -->
@@ -38,13 +38,13 @@
                             drop-shadow(0 0 0.4px #000)
                             drop-shadow(${imageFlip ? '-3px' : '3px'} 3px 3px #000)
                             `
-                        }" :src="`images/gen3/pokemon/${displayedPokemonSpecies == 'Deoxys' ? deoxys_image : displayedPokemonSpecies == 'Castform' ? castform_image : displayedPokemonSpecies}.png`">
+                        }" :src="`images/gen3/pokemon/${displayedPokemonSpecies == 'Deoxys' ? deoxys_image : displayedPokemonSpecies == 'Castform' ? castform_image : displayedPokemonSpecies}.webp`">
                     </transition>
                 </div>
                 <img class="canvas colored-image ds" src="images/gen3/ui/game_area.svg">
 
                 <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/ui/moveset.svg)"></div>
-                <img class="canvas" src="images/gen3/elements/moveset.png">
+                <img class="canvas" src="images/gen3/elements/moveset.webp">
                 <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/ui/stats.svg)"></div>
                 <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/ui/ability.svg)"></div>
                 <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/ui/heldItem.svg)"></div>
@@ -127,12 +127,12 @@
                     </div>
                 </transition>
 
-                <img class="canvas" :src="`images/gen3/new_ui/badges/${this.game_data.region.toLowerCase()}/progress.png`">
+                <img class="canvas" :src="`images/gen3/new_ui/badges/${this.game_data.region.toLowerCase()}/progress.webp`">
                 <!-- BADGES -->
                 <div>
                     <div v-for="x in badges">
                         <div v-if="game.properties.player.badges[x].value == true && g3stateVariable != `Base Stats`">
-                            <img class="badge" :src="`images/gen3/new_ui/badges/${this.game_data.region.toLowerCase()}/${x}.png`">
+                            <img class="badge" :src="`images/gen3/new_ui/badges/${this.game_data.region.toLowerCase()}/${x}.webp`">
                         </div>
                     </div>
                 </div>
@@ -856,7 +856,7 @@
                 <div v-if="stats != 'Comparison'">
                     <div v-for="x in badgeBoosts">
                         <div v-if="game.properties.player.badges[x].value == true && display_badge_boosts == true">
-                            <img class="badgeBoost" :src="`images/gen3/badges/badge_boosts/${this.game_data.region.toLowerCase()}/${ui_stat_arrangement_modifier}/${x}.png`">
+                            <img class="badgeBoost" :src="`images/gen3/badges/badge_boosts/${this.game_data.region.toLowerCase()}/${ui_stat_arrangement_modifier}/${x}.webp`">
                         </div>
                     </div>
                 </div>
@@ -989,7 +989,7 @@
                     <div :class="`movesetSmallFontSize moveAccuracyStyle movesetFontSize move1acc`">{{
                         moveAccuracyDynamic("Struggle") }}<span class="movesetPercentage">%</span></div>
                     <div :class="`movesetSmallFontSize movePPStyle movesetFontSize move1pp`">-</div>
-                    <img :class="`movesetFontSize move1icon`" src="images/gen3/elements/type-icons/curse.png">
+                    <img :class="`movesetFontSize move1icon`" src="images/gen3/elements/type-icons/curse.webp">
                 </div>
                 <div v-else-if="g3stateVariable == 'Battle' && game.properties.player.teamCount.value > 0 && game.properties.player.teamCount.value < 10 && game.properties.battle.yourPokemon.move1pp.value === 0 && game.properties.battle.yourPokemon.move2pp.value === 0 && game.properties.battle.yourPokemon.move3pp.value === 0 && game.properties.battle.yourPokemon.move4pp.value === 0">
                     <div :class="`movesetFontSize moveStyle move1`">Struggle</div>
@@ -997,7 +997,7 @@
                     <div :class="`movesetSmallFontSize moveAccuracyStyle movesetFontSize move1acc`">{{
                         moveAccuracyDynamic("Struggle") }}<span class="movesetPercentage">%</span></div>
                     <div :class="`movesetSmallFontSize movePPStyle movesetFontSize move1pp`">-</div>
-                    <img :class="`movesetFontSize move1icon`" src="images/gen3/elements/type-icons/curse.png">
+                    <img :class="`movesetFontSize move1icon`" src="images/gen3/elements/type-icons/curse.webp">
                 </div>
                 <div v-else-if="starterString == 'Ditto' && g3stateVariable == 'Battle'">
                     <div v-for="x in pkmnMoves">
@@ -1068,12 +1068,12 @@
                             </div>
                         </div>
                         <div class="ePkmnStyle ePkmn1">
-                            <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `${enemyDropShadow(styleModeCurrentSpecies())} saturate(1.1)` }" :src="`images/gen3/pokemon/${styleModeCurrentSpecies()}.png`">
-                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :src="`images/gen3/elements/type-icons/${dexData[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.png`">
-                            <img v-if="dexData[styleModeCurrentSpecies()]?.type_1 != dexData[styleModeCurrentSpecies()]?.type_2" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen3/elements/type-icons/${dexData[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.png`">
+                            <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `${enemyDropShadow(styleModeCurrentSpecies())} saturate(1.1)` }" :src="`images/gen3/pokemon/${styleModeCurrentSpecies()}.webp`">
+                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :src="`images/gen3/elements/type-icons/${dexData[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.webp`">
+                            <img v-if="dexData[styleModeCurrentSpecies()]?.type_1 != dexData[styleModeCurrentSpecies()]?.type_2" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen3/elements/type-icons/${dexData[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.webp`">
                             <div class="ePkmnSpecies opacityTransition">{{ styleModeCurrentSpecies() }}</div>
 
-                            <img v-for="(dummy, i) in style_mode_dummy_moves" :class="`ds eMoveIconStyle moveIcon${i + 1} opacityTransition`" :src="`images/gen3/elements/type-icons/${dummy.type}.png`">
+                            <img v-for="(dummy, i) in style_mode_dummy_moves" :class="`ds eMoveIconStyle moveIcon${i + 1} opacityTransition`" :src="`images/gen3/elements/type-icons/${dummy.type}.webp`">
                             <div v-for="(dummy, i) in style_mode_dummy_moves" :class="`ePkmnMoveStyle ePkmnMove${i + 1} opacityTransition`">{{ dummy.name }}</div>
 
                             <div class="ePkmnStatsLabelsStyle ePkmnStatsLabelColumn1 ePkmnHpLabel  enemy_stat_opacity_transition">Hp:</div>
@@ -1232,17 +1232,17 @@
                     <div class="colored-image ds" :style="battlePokemonCropWild()" style="--url: url(images/gen3/ui/enemy.svg)"></div>
                     <div class="enemyGraphic">
                         <div class="ePkmn1">
-                            <img v-show="game.properties.battle.enemyPokemon.species != undefined" class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === 0 }" :data-enemy-slot="0" :data-enemy-species="game.properties.battle.enemyPokemon.species?.value || game.properties.battle.enemyPokemon.species" :style="{ filter: `${enemyDropShadow(game.properties.battle.enemyPokemon.species?.value || game.properties.battle.enemyPokemon.species)} saturate(1.1) grayscale(0%)`, transform: enemyTransformFor(game.properties.battle.enemyPokemon.species?.value || game.properties.battle.enemyPokemon.species) }" :src="`images/gen3/pokemon/${game.properties.battle.enemyPokemon.species}.png`">
-                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :src="`images/gen3/elements/type-icons/${game.properties.battle.enemyPokemon.type1.value}.png`">
-                            <img v-if="game.properties.battle.enemyPokemon.type1.value != game.properties.battle.enemyPokemon.type2.value" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen3/elements/type-icons/${game.properties.battle.enemyPokemon.type2.value}.png`">
+                            <img v-show="game.properties.battle.enemyPokemon.species != undefined" class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === 0 }" :data-enemy-slot="0" :data-enemy-species="game.properties.battle.enemyPokemon.species?.value || game.properties.battle.enemyPokemon.species" :style="{ filter: `${enemyDropShadow(game.properties.battle.enemyPokemon.species?.value || game.properties.battle.enemyPokemon.species)} saturate(1.1) grayscale(0%)`, transform: enemyTransformFor(game.properties.battle.enemyPokemon.species?.value || game.properties.battle.enemyPokemon.species) }" :src="`images/gen3/pokemon/${game.properties.battle.enemyPokemon.species}.webp`">
+                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :src="`images/gen3/elements/type-icons/${game.properties.battle.enemyPokemon.type1.value}.webp`">
+                            <img v-if="game.properties.battle.enemyPokemon.type1.value != game.properties.battle.enemyPokemon.type2.value" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen3/elements/type-icons/${game.properties.battle.enemyPokemon.type2.value}.webp`">
                             <div class="ePkmnSpecies opacityTransition">{{ game.properties.battle.enemyPokemon.species
                                 }}</div>
                             <img class="enemyStatsArea" :src="`images/gen3/enemy_area/${ui_type_color_modifier}stats/0.svg`">
 
-                            <img v-show="game.properties.battle.enemyPokemon.move1.value != null" class="ds eMoveIconStyle moveIcon1 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move1.value)]?.type?.toLowerCase()}.png`">
-                            <img v-show="game.properties.battle.enemyPokemon.move2.value != null" class="ds eMoveIconStyle moveIcon2 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move2.value)]?.type?.toLowerCase()}.png`">
-                            <img v-show="game.properties.battle.enemyPokemon.move3.value != null" class="ds eMoveIconStyle moveIcon3 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move3.value)]?.type?.toLowerCase()}.png`">
-                            <img v-show="game.properties.battle.enemyPokemon.move4.value != null" class="ds eMoveIconStyle moveIcon4 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move4.value)]?.type?.toLowerCase()}.png`">
+                            <img v-show="game.properties.battle.enemyPokemon.move1.value != null" class="ds eMoveIconStyle moveIcon1 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move1.value)]?.type?.toLowerCase()}.webp`">
+                            <img v-show="game.properties.battle.enemyPokemon.move2.value != null" class="ds eMoveIconStyle moveIcon2 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move2.value)]?.type?.toLowerCase()}.webp`">
+                            <img v-show="game.properties.battle.enemyPokemon.move3.value != null" class="ds eMoveIconStyle moveIcon3 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move3.value)]?.type?.toLowerCase()}.webp`">
+                            <img v-show="game.properties.battle.enemyPokemon.move4.value != null" class="ds eMoveIconStyle moveIcon4 opacityTransition" :src="`images/gen3/elements/type-icons/${generation_3_moves[move_name(game.properties.battle.enemyPokemon.move4.value)]?.type?.toLowerCase()}.webp`">
 
                             <div class="ePkmnMoveStyle ePkmnMove1 opacityTransition">{{
                                 move_name(game.properties.battle.enemyPokemon.move1.value) }}</div>
@@ -1344,16 +1344,16 @@
                             </div>
                         </div>
                         <div v-if="enemyTrainer.pokemon[x] != undefined" :class="`ePkmnStyle ePkmn${x + 1}`">
-                            <img v-show="enemyTrainer.pokemon[x]?.species != undefined" class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemyTrainer.pokemon[x]?.species" :style="[enemyPkmnFaint(batt.trainer.team[x], enemyTrainer.pokemon[x]?.species), { transform: enemyTransformFor(enemyTrainer.pokemon[x]?.species) }]" :src="`images/gen3/pokemon/${enemyTrainer.pokemon[x]?.species}.png`">
-                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${enemyType1(x)?.toLowerCase()}.png`">
-                            <img v-if="enemyType1(x) != enemyType2(x)" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen3/elements/type-icons/${enemyType2(x)?.toLowerCase()}.png`">
+                            <img v-show="enemyTrainer.pokemon[x]?.species != undefined" class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemyTrainer.pokemon[x]?.species" :style="[enemyPkmnFaint(batt.trainer.team[x], enemyTrainer.pokemon[x]?.species), { transform: enemyTransformFor(enemyTrainer.pokemon[x]?.species) }]" :src="`images/gen3/pokemon/${enemyTrainer.pokemon[x]?.species}.webp`">
+                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${enemyType1(x)?.toLowerCase()}.webp`">
+                            <img v-if="enemyType1(x) != enemyType2(x)" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen3/elements/type-icons/${enemyType2(x)?.toLowerCase()}.webp`">
                             <div class="ePkmnSpecies opacityTransition" :style="enemyPkmnSpecies(batt.trainer.team[x])">
                                 {{ enemyTrainer.pokemon[x]?.species }}</div>
 
-                            <img v-if="enemyTrainer.pokemon[x]?.moves[0]" class="ds eMoveIconStyle moveIcon1 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[0]]?.type?.toLowerCase()}.png`">
-                            <img v-if="enemyTrainer.pokemon[x]?.moves[1]" class="ds eMoveIconStyle moveIcon2 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[1]]?.type?.toLowerCase()}.png`">
-                            <img v-if="enemyTrainer.pokemon[x]?.moves[2]" class="ds eMoveIconStyle moveIcon3 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[2]]?.type?.toLowerCase()}.png`">
-                            <img v-if="enemyTrainer.pokemon[x]?.moves[3]" class="ds eMoveIconStyle moveIcon4 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[3]]?.type?.toLowerCase()}.png`">
+                            <img v-if="enemyTrainer.pokemon[x]?.moves[0]" class="ds eMoveIconStyle moveIcon1 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[0]]?.type?.toLowerCase()}.webp`">
+                            <img v-if="enemyTrainer.pokemon[x]?.moves[1]" class="ds eMoveIconStyle moveIcon2 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[1]]?.type?.toLowerCase()}.webp`">
+                            <img v-if="enemyTrainer.pokemon[x]?.moves[2]" class="ds eMoveIconStyle moveIcon3 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[2]]?.type?.toLowerCase()}.webp`">
+                            <img v-if="enemyTrainer.pokemon[x]?.moves[3]" class="ds eMoveIconStyle moveIcon4 opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen3/elements/type-icons/${generation_3_moves[enemyTrainer.pokemon[x]?.moves[3]]?.type?.toLowerCase()}.webp`">
 
                             <div v-if="enemyTrainer.pokemon[x]?.moves[0]" class="ePkmnMoveStyle ePkmnMove1 opacityTransition" :style="enemyPkmnText(batt.trainer.team[x])">{{ enemyTrainer.pokemon[x]?.moves[0] }}
                             </div>
@@ -1470,7 +1470,7 @@
                                     Time</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 14px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen3/split_images/${gameSelection}/${trainer_name_lookup[split.trainer]?.trainer}.png`">
+                                <td style="font-size: 14px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen3/split_images/${gameSelection}/${trainer_name_lookup[split.trainer]?.trainer}.webp`">
                                 </td>
                                 <td style="font-size: 14px; width: 105px; text-align: left; padding-left: 3px;">
                                     {{trainer_name_lookup[split.trainer]?.trainer}}</td>
@@ -1498,7 +1498,7 @@
                                     Diff</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 14px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen3/split_images/${gameSelection}/${trainer_name_lookup[split.trainer]?.trainer}.png`">
+                                <td style="font-size: 14px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen3/split_images/${gameSelection}/${trainer_name_lookup[split.trainer]?.trainer}.webp`">
                                 </td>
                                 <td style="font-size: 14px; width: 105px; text-align: left; padding-left: 3px;">
                                     {{trainer_name_lookup[split.trainer]?.trainer}}</td>
@@ -1888,8 +1888,8 @@ export default defineComponent({
             // Visual game toggle (box-art buttons mirror the gameSelection dropdown).
             available_games       : ["Emerald", "FireRed and LeafGreen"],
             game_box_art          : {
-                "Emerald"             : "3-emerald.png",
-                "FireRed and LeafGreen": "3-firered.png",
+                "Emerald"             : "3-emerald.webp",
+                "FireRed and LeafGreen": "3-firered.webp",
             },
             evolution             : MyStorage['evolution'] ?? false,
             evolution_splits_label: MyStorage['evolution_splits_label'] ?? "",
@@ -3823,27 +3823,27 @@ export default defineComponent({
             const species = (this.evolution && this.selected_evolution_species) ? this.selected_evolution_species : this.starterString;
             if (this.wallyTutorialActive || this.zigzagoon_check == true) {
                 var type = this.dexData[species].type_1
-                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.png`.toLowerCase();
+                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.webp`.toLowerCase();
             }
             if (this.pick == true)
                 var type = this.dexData[species].type_1
                 if(this.dynamicTypeAvailable) {
                     type = this.game.properties.battle.yourPokemon.type1;
                 }
-                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.png`.toLowerCase();
+                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.webp`.toLowerCase();
         },
         getStarterType2() {
             const species = (this.evolution && this.selected_evolution_species) ? this.selected_evolution_species : this.starterString;
             if (this.wallyTutorialActive || this.zigzagoon_check == true) {
                 var type = this.dexData[species].type_2
-                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.png`.toLowerCase();
+                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.webp`.toLowerCase();
             }
             if (this.pick == true)
                 var type = this.dexData[species].type_2
                 if(this.dynamicTypeAvailable) {
                     type = this.game.properties.battle.yourPokemon.type2;
                 }
-                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.png`.toLowerCase();
+                return `images/gen3/elements/types/${this.ui_type_icons_modifier}${type}.webp`.toLowerCase();
         },
         dynamicTypeAvailable() {
             if(this.g3stateVariable != "Battle")
@@ -6168,51 +6168,51 @@ export default defineComponent({
             }
             if (this.showSpecialTrainerGraphics == true) {
                 return this.game_data.opponentImageMap[opponent];
-                if (this.opponent == "YOUNGSTER_CALVIN_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_ROXANNE_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_BRAWLY_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_WATTSON_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_FLANNERY_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_NORMAN_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_WINONA_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_TATE_AND_LIZA_1") return `images/gen3/trainers/${this.opponent}.png`
-                if (this.opponent == "LEADER_JUAN_1") return `images/gen3/trainers/${this.opponent}.png`
+                if (this.opponent == "YOUNGSTER_CALVIN_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_ROXANNE_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_BRAWLY_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_WATTSON_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_FLANNERY_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_NORMAN_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_WINONA_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_TATE_AND_LIZA_1") return `images/gen3/trainers/${this.opponent}.webp`
+                if (this.opponent == "LEADER_JUAN_1") return `images/gen3/trainers/${this.opponent}.webp`
                 
-                // if (this.opponent == "ELITE_FOUR_SIDNEY") return `images/gen3/trainers/${this.opponent}.png`
-                // if (this.opponent == "ELITE_FOUR_PHOEBE") return `images/gen3/trainers/${this.opponent}.png`
-                // if (this.opponent == "ELITE_FOUR_GLACIA") return `images/gen3/trainers/${this.opponent}.png`
-                // if (this.opponent == "ELITE_FOUR_DRAKE") return `images/gen3/trainers/${this.opponent}.png`
-                // if (this.opponent == "CHAMPION_WALLACE") return `images/gen3/trainers/${this.opponent}.png`
-                // if (this.opponent == "RIVAL_STEVEN") return `images/gen3/trainers/${this.opponent}.png`
+                // if (this.opponent == "ELITE_FOUR_SIDNEY") return `images/gen3/trainers/${this.opponent}.webp`
+                // if (this.opponent == "ELITE_FOUR_PHOEBE") return `images/gen3/trainers/${this.opponent}.webp`
+                // if (this.opponent == "ELITE_FOUR_GLACIA") return `images/gen3/trainers/${this.opponent}.webp`
+                // if (this.opponent == "ELITE_FOUR_DRAKE") return `images/gen3/trainers/${this.opponent}.webp`
+                // if (this.opponent == "CHAMPION_WALLACE") return `images/gen3/trainers/${this.opponent}.webp`
+                // if (this.opponent == "RIVAL_STEVEN") return `images/gen3/trainers/${this.opponent}.webp`
 
-                if (this.opponent == "RIVAL_WALLY_MAUVILLE") return `images/gen3/trainers/RIVAL_WALLY.png`
-                // if (this.opponent == "RIVAL_WALLY_VR_1") return `images/gen3/trainers/RIVAL_WALLY.png`
+                if (this.opponent == "RIVAL_WALLY_MAUVILLE") return `images/gen3/trainers/RIVAL_WALLY.webp`
+                // if (this.opponent == "RIVAL_WALLY_VR_1") return `images/gen3/trainers/RIVAL_WALLY.webp`
 
-                if (this.opponent == "RIVAL_MAY_RUSTBORO_TREECKO") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_RUSTBORO_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_RUSTBORO_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_103_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_110_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_119_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_103_TREECKO") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_110_TREECKO") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_119_TREECKO") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_103_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_110_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.png`
-                if (this.opponent == "RIVAL_MAY_ROUTE_119_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.png`
+                if (this.opponent == "RIVAL_MAY_RUSTBORO_TREECKO") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_RUSTBORO_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_RUSTBORO_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_103_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_110_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_119_MUDKIP") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_103_TREECKO") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_110_TREECKO") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_119_TREECKO") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_103_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_110_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.webp`
+                if (this.opponent == "RIVAL_MAY_ROUTE_119_TORCHIC") return `images/gen3/trainers/RIVAL_MAY.webp`
 
-                if (this.opponent == "RIVAL_BRENDAN_RUSTBORO_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_RUSTBORO_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_RUSTBORO_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_103_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_110_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_119_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_103_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_110_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_119_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_103_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_110_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.png`
-                if (this.opponent == "RIVAL_BRENDAN_ROUTE_119_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.png`
+                if (this.opponent == "RIVAL_BRENDAN_RUSTBORO_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_RUSTBORO_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_RUSTBORO_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_103_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_110_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_119_MUDKIP") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_103_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_110_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_119_TREECKO") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_103_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_110_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
+                if (this.opponent == "RIVAL_BRENDAN_ROUTE_119_TORCHIC") return `images/gen3/trainers/RIVAL_BRENDAN.webp`
                 else return null;
             }
         },
@@ -6556,30 +6556,23 @@ export default defineComponent({
         gameTimeM,
         gameTimeHMS,
 
-        getPokemonImageUrl: function (x) {
-            if (x != null)
-                return `images/gen3/overlay/${x.pokedexNumber}.png`
-        },
         getStarterArt: function () {
-            return `images/gen3/pokemon/${this.starterString}.png`
-        },
-        getStarterImageUrl: function () {
-            return `images/gen3/overlay/${this.starterString}.png`
+            return `images/gen3/pokemon/${this.starterString}.webp`
         },
         getStarterTypeTexture() {
             if (this.pick == true) {
                 var type = this.gen3data.find(y => y.dexNumber === this.starterString)
-                return `images/gen3/elements/textures/${type.type1.toLowerCase()}.png`
+                return `images/gen3/elements/textures/${type.type1.toLowerCase()}.webp`
             }
             else
-                return `images/gen3/elements/textures/normal.png`
+                return `images/gen3/elements/textures/normal.webp`
         },
 
         //BADGE GRAPHIC RECALL
         badgeGraphic(x) {
             if (x.value == true) {
                 var badge = x.path.toString().substring(14)
-                return `images/gen3/badges/${badge}.png`.toLowerCase();
+                return `images/gen3/badges/${badge}.webp`.toLowerCase();
             }
             else if (x.value == false) {   
                 return null
@@ -6824,13 +6817,13 @@ export default defineComponent({
         },
         moveTypeIcon(y) { //y = move1.value
             if (y != null && y != undefined && y.toUpperCase() == "HIDDEN POWER") {
-                return `images/gen3/elements/type-icons/${this.hiddenPowerTypeCalc(this.game.properties.player.team[0]).toLowerCase()}.png`
+                return `images/gen3/elements/type-icons/${this.hiddenPowerTypeCalc(this.game.properties.player.team[0]).toLowerCase()}.webp`
             }
             if (y != null && y != undefined && y.toUpperCase() == "WEATHER BALL" && this.g3stateVariable=="Battle") {
-                return `images/gen3/elements/type-icons/${this.weatherBallTypeCalc().toLowerCase()}.png`
+                return `images/gen3/elements/type-icons/${this.weatherBallTypeCalc().toLowerCase()}.webp`
             }
             if (y === "Struggle") {
-                return `images/gen3/elements/type-icons/curse.png`
+                return `images/gen3/elements/type-icons/curse.webp`
             }
             else if (y != null && y != undefined) {
                 var move = this.gen3moves.find(x => x.Move.toLowerCase() === this.move_name(y).toLowerCase())
@@ -6839,7 +6832,7 @@ export default defineComponent({
                     return null
                 }
                 var moveType = move[`Type`]?.toLowerCase()
-                return `images/gen3/elements/type-icons/${moveType}.png`
+                return `images/gen3/elements/type-icons/${moveType}.webp`
             }
             else {
                 return null
@@ -7590,12 +7583,12 @@ export default defineComponent({
 
         for (var species of Object.keys(dexDataRubySapphireEmerald)) {
             var image = new Image();
-            image.src = `images/gen3/pokemon/${species}.png`;
+            image.src = `images/gen3/pokemon/${species}.webp`;
         }
         // Preload form art so form swaps (weather in battle) cross-fade without a loading pop
         for (var form_art of ["Castform-Sunny", "Castform-Rainy", "Castform-Snowy", "Deoxys-Speed", "Deoxys-Normal", "Deoxys-Attack", "Deoxys-Defense"]) {
             var form_image = new Image();
-            form_image.src = `images/gen3/pokemon/${form_art}.png`;
+            form_image.src = `images/gen3/pokemon/${form_art}.webp`;
         }
         this.pokemon_list = this.keys_function(this.dexDataRubySapphireEmerald)
 

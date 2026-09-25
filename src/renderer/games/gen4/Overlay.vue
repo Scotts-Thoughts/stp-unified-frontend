@@ -8,7 +8,7 @@
                     'transform': `scale(${backgroundScale}%) ${backgroundFlip ? 'rotateY(180deg)' : ''} translate(${backgroundXOffset}px, ${-backgroundYOffset}px)`
                 }">
             </transition>
-            <img class="canvas" :src="`images/gen4/elements/pokeball.png`">
+            <img class="canvas" :src="`images/gen4/elements/pokeball.webp`">
             <!-- Keyed by the displayed species so starter changes, evolution-dropdown swaps and
                  mid-run evolutions cross-fade old/new art. No inline opacity here: it would
                  override the styleFade classes, so the fade is left entirely to the transition -->
@@ -24,7 +24,7 @@
                     drop-shadow(0 0 0.4px #000)
                     drop-shadow(${imageFlip ? '-3px' : '3px'} 3px 3px #000)
                     `
-                }" :src="`images/gen4/pokemon/${displayedPokemonSpecies}.png`">
+                }" :src="`images/gen4/pokemon/${displayedPokemonSpecies}.webp`">
             </transition>
             <img class="canvas colored-image ds" src="images/gen4/ui/game_area.svg">
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen4/ui/timer.svg)"></div>
@@ -40,7 +40,7 @@
                 <img class="canvas colored-image ds" :src="`images/gen4/ui/nature arrows/lowers/${natures[pkmnNature].lowers}.svg`">
             </div>
 
-            <img class="canvas" :src="`images/gen4/ui/move_backgrounds.png`">
+            <img class="canvas" :src="`images/gen4/ui/move_backgrounds.webp`">
 
             <!-- FAULTS COUNTERS -->
             <div style="position: absolute;">
@@ -82,10 +82,10 @@
             </div>
 
             <div>
-                <img v-if="game.properties.meta.game_name.value == 'Diamond and Pearl'" class="canvas" :src="`images/gen4/new_ui/progress sinnoh.png`">
-                <img v-else-if="game.properties.meta.game_name.value == 'Platinum'" class="canvas" :src="`images/gen4/new_ui/progress sinnoh.png`">
-                <img style="top: 1px; position: absolute;" v-else-if="game.properties.meta.game_name.value == 'HeartGold and SoulSilver' && kanto_badges == true" class="canvas" :src="`images/gen4/new_ui/progress kanto.png`">
-                <img style="top: 1px; position: absolute;" v-else-if="game.properties.meta.game_name.value == 'HeartGold and SoulSilver'" class="canvas" :src="`images/gen4/new_ui/progress johto.png`">
+                <img v-if="game.properties.meta.game_name.value == 'Diamond and Pearl'" class="canvas" :src="`images/gen4/new_ui/progress sinnoh.webp`">
+                <img v-else-if="game.properties.meta.game_name.value == 'Platinum'" class="canvas" :src="`images/gen4/new_ui/progress sinnoh.webp`">
+                <img style="top: 1px; position: absolute;" v-else-if="game.properties.meta.game_name.value == 'HeartGold and SoulSilver' && kanto_badges == true" class="canvas" :src="`images/gen4/new_ui/progress kanto.webp`">
+                <img style="top: 1px; position: absolute;" v-else-if="game.properties.meta.game_name.value == 'HeartGold and SoulSilver'" class="canvas" :src="`images/gen4/new_ui/progress johto.webp`">
             </div>
 
             <div>
@@ -553,8 +553,8 @@
             <!-- OVERLAY COMPONENTS -->
             <!-- Type Icons -->
             <div class="posAbs type_icons_boundingBox center">
-                <img class="type_icons" :src="`images/gen4/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_1')?.toLowerCase()}.png`">
-                <img v-if="getSoloMonType(game.properties.player.team[0].species.value??starter, 'type_1') != getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')" class="type_icons" :src="`images/gen4/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')?.toLowerCase()}.png`">
+                <img class="type_icons" :src="`images/gen4/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_1')?.toLowerCase()}.webp`">
+                <img v-if="getSoloMonType(game.properties.player.team[0].species.value??starter, 'type_1') != getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')" class="type_icons" :src="`images/gen4/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')?.toLowerCase()}.webp`">
             </div>
 
             <!-- Stats -->
@@ -612,14 +612,14 @@
                 <div v-if="kanto_badges == false" style="position: absolute; top: 1px;">
                     <div v-for="x in johto_badge_indexes">
                         <div v-if="hgss_badge_check(x) == true">
-                            <img class="badge" :src="`images/gen4/new_ui/johto/${x}.png`">
+                            <img class="badge" :src="`images/gen4/new_ui/johto/${x}.webp`">
                         </div>
                     </div>
                 </div>
                 <div v-else="">
                     <div v-for="x in kanto_badge_indexes" style="position: absolute; top: 1px;">
                         <div v-if="hgss_badge_check(x) == true">
-                            <img class="badge" :src="`images/gen4/new_ui/johto/${x}.png`">
+                            <img class="badge" :src="`images/gen4/new_ui/johto/${x}.webp`">
                         </div>
                     </div>
                 </div>
@@ -627,7 +627,7 @@
             <div>
                 <div v-for="x in badges">
                     <div v-if="game.properties.player.badges[x].value == true && game.properties.meta.state != `No Pokemon` && game.properties.meta.global_pointer.value != 0">
-                        <img v-if="game.properties.meta.game_name.value == 'Platinum' || game.properties.meta.game_name.value == 'Diamond and Pearl'" class="badge" :src="`images/gen4/new_ui/sinnoh/${x}.png`">
+                        <img v-if="game.properties.meta.game_name.value == 'Platinum' || game.properties.meta.game_name.value == 'Diamond and Pearl'" class="badge" :src="`images/gen4/new_ui/sinnoh/${x}.webp`">
                     </div>
                 </div>
             </div>
@@ -647,7 +647,7 @@
                 <tr v-if="getMoveObject('1')?.move.value != null">
                     <!-- Move1 -->
                     <th class="align_left g4mp_types">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('1')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('1')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove("1")}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle'" class="align_right g4mp_power">{{typeEffectiveness(game.properties.battle.player.active_pokemon.moves[0].move.value)}}</th>
@@ -671,7 +671,7 @@
                 <tr v-if="getMoveObject('2')?.move.value != null">
                     <!-- Move2 -->
                     <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('2')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('2')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove('2')}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle'" class="align_right g4mp_power">{{typeEffectiveness(game.properties.battle.player.active_pokemon.moves[1].move.value)}}</th>
@@ -687,7 +687,7 @@
                 <tbody><tr v-if="getMoveObject('3')?.move.value != null">
                     <!-- Move3 -->
                     <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('3')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('3')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove("3")}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle'" class="align_right g4mp_power">{{typeEffectiveness(game.properties.battle.player.active_pokemon.moves[2].move.value)}}</th>
@@ -703,7 +703,7 @@
                 <tbody><tr v-if="getMoveObject('4')?.move.value != null">
                     <!-- Move4 -->
                     <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('4')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen4/type-icons-circular/${getMoveType('4')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove("4")}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle'" class="align_right g4mp_power">{{typeEffectiveness(game.properties.battle.player.active_pokemon.moves[3].move.value)}}</th>
@@ -736,13 +736,13 @@
                     <div class="enemyGraphic">
                         <div class="eFaintTransition">
                             <div class="border slots ePkmnStyle ePkmn0">
-                                <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `drop-shadow(${getEnemySpriteFlipped(styleModeCurrentSpecies()) ? -2 : 2}px 2px 2px #000) saturate(1.1)` }" :src="`images/gen4/pokemon/${speciesSpecialCharacters(styleModeCurrentSpecies())}.png`">
+                                <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `drop-shadow(${getEnemySpriteFlipped(styleModeCurrentSpecies()) ? -2 : 2}px 2px 2px #000) saturate(1.1)` }" :src="`images/gen4/pokemon/${speciesSpecialCharacters(styleModeCurrentSpecies())}.webp`">
                                 <div class="ePkmnLvlSpecies">{{ styleModeCurrentSpecies() }}</div>
                                 <div class="ePkmnLevel">Level: 50</div>
                                 <div class="ePkmnAbility">{{ g4PokemonData[styleModeCurrentSpecies()]?.abilities?.[0] ?? '' }}</div>
                                 <div style="left: 2px;" class="border ePkmnTyping">
-                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.png`">
-                                    <img v-show="g4PokemonData[styleModeCurrentSpecies()]?.type_1 != g4PokemonData[styleModeCurrentSpecies()]?.type_2" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.png`">
+                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.webp`">
+                                    <img v-show="g4PokemonData[styleModeCurrentSpecies()]?.type_1 != g4PokemonData[styleModeCurrentSpecies()]?.type_2" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.webp`">
                                 </div>
                                 <div class="border ePkmnStats">
                                     <div class="ePkmnStatsLabelsStyle ePkmnStatsLabelColumn1 ePkmnHpLabel">Hp:</div>
@@ -762,7 +762,7 @@
                                 <div class="border ePkmnMoves">
                                     <table class="enemyMovesetTable">
                                         <tbody><tr v-for="(dummy, i) in style_mode_dummy_moves">
-                                            <th><img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${dummy.type}.png`"></th>
+                                            <th><img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${dummy.type}.webp`"></th>
                                         </tr>
                                     </tbody></table>
                                     <div v-for="(dummy, i) in style_mode_dummy_moves" :class="`ePkmnMoveStyle ePkmnMove${i + 1}`">{{ dummy.name }}</div>
@@ -792,13 +792,13 @@
                     <div class="enemyGraphic">
                         <div v-for="x in pkmnSlots" class="eFaintTransition" :style="enemyFaint(x)">
                             <div v-if="x < game.properties.battle.opponent.team_count.value" :class="`border slots ePkmnStyle ePkmn${x}`">
-                                <img class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemy_mon_static[x]?.species?.value || enemy_mon_static[x]?.species" :style="{ transform: enemyTransformFor(enemy_mon_static[x]?.species?.value || enemy_mon_static[x]?.species), filter: `drop-shadow(${getEnemySpriteFlipped(enemy_mon_static[x]?.species?.value || enemy_mon_static[x]?.species) ? -2 : 2}px 2px 2px #000) saturate(1.1)` }" :src="`images/gen4/pokemon/${speciesSpecialCharacters(enemy_mon_static[x]?.species)}.png`">
+                                <img class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemy_mon_static[x]?.species?.value || enemy_mon_static[x]?.species" :style="{ transform: enemyTransformFor(enemy_mon_static[x]?.species?.value || enemy_mon_static[x]?.species), filter: `drop-shadow(${getEnemySpriteFlipped(enemy_mon_static[x]?.species?.value || enemy_mon_static[x]?.species) ? -2 : 2}px 2px 2px #000) saturate(1.1)` }" :src="`images/gen4/pokemon/${speciesSpecialCharacters(enemy_mon_static[x]?.species)}.webp`">
                                 <div class="ePkmnLvlSpecies">{{enemy_mon_static[x]?.species}}</div>
                                 <div class="ePkmnLevel">Level: {{enemy_mon_static[x]?.level}}</div>
                                 <div class="ePkmnAbility">{{enemy_mon_static[x]?.ability}}</div>
                                 <div style="left: 2px;" class="border ePkmnTyping">
-                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_mon_static[x]?.species]?.type_1?.toLowerCase()}.png`">
-                                    <img v-show="g4PokemonData[enemy_mon_static[x]?.species]?.type_1 != g4PokemonData[enemy_mon_static[x]?.species]?.type_2" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_mon_static[x]?.species]?.type_2?.toLowerCase()}.png`">
+                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_mon_static[x]?.species]?.type_1?.toLowerCase()}.webp`">
+                                    <img v-show="g4PokemonData[enemy_mon_static[x]?.species]?.type_1 != g4PokemonData[enemy_mon_static[x]?.species]?.type_2" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_mon_static[x]?.species]?.type_2?.toLowerCase()}.webp`">
                                 </div>
                                 <div v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="border ePkmnStats">
                                     <div class="ePkmnStatsLabelsStyle ePkmnStatsLabelColumn1 ePkmnHpLabel " :style="enemyStatusLabelOpacity(game.properties.battle.opponent.active_pokemon.status_condition, x)">Hp:</div> 
@@ -827,7 +827,7 @@
                                     <table class="enemyMovesetTable">
                                         <tbody><tr v-for="move_index in moves = [0,1,2,3]">
                                             <th v-if="enemy_mon_static[x]?.moves[move_index] != undefined">
-                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${eHPType(platinum_moves[enemyMove(x, move_index)]?.Type?.toLowerCase(), enemyMove(x, move_index), x)}.png`">
+                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${eHPType(platinum_moves[enemyMove(x, move_index)]?.Type?.toLowerCase(), enemyMove(x, move_index), x)}.webp`">
                                             </th>
                                         </tr>
                                     </tbody></table>
@@ -843,12 +843,12 @@
                         </div>
                         <div v-for="x in pkmnSlots" class="eFaintTransition" :style="enemyFaint(x + 6)">
                             <div v-if="x < game.properties.battle.opponent_2.team_count.value && game.properties.battle.opponent_2.trainer.value != null && game.properties.meta.game_name.value != 'HeartGold and SoulSilver'" :class="`border slots ePkmnStyle ePkmn${x + game.properties.battle.opponent.team_count.value}`">
-                                <img class="ePkmnSprite" :src="`images/gen4/pokemon/${speciesSpecialCharacters(enemy_2_mon_static?.[x]?.species)}.png`">
+                                <img class="ePkmnSprite" :src="`images/gen4/pokemon/${speciesSpecialCharacters(enemy_2_mon_static?.[x]?.species)}.webp`">
                                 <div class="ePkmnLvlSpecies">{{enemy_2_mon_static[x]?.species}} Lv: {{enemy_2_mon_static[x]?.level}}</div>
                                 <div class="ePkmnAbility" style="opacity: .7;">{{enemy_2_mon_static[x]?.ability}}</div>
                                 <div style="left: 2px;" class="border ePkmnTyping">
-                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_2_mon_static[x]?.species]?.type_1?.toLowerCase()}.png`">
-                                    <img v-show="g4PokemonData[enemy_2_mon_static[x]?.species]?.type_1 != g4PokemonData[enemy_2_mon_static[x]?.species]?.type_2" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_2_mon_static[x]?.species]?.type_2?.toLowerCase()}.png`">
+                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_2_mon_static[x]?.species]?.type_1?.toLowerCase()}.webp`">
+                                    <img v-show="g4PokemonData[enemy_2_mon_static[x]?.species]?.type_1 != g4PokemonData[enemy_2_mon_static[x]?.species]?.type_2" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[enemy_2_mon_static[x]?.species]?.type_2?.toLowerCase()}.webp`">
                                 </div>
                                 <div v-if="game.properties.meta.state.value == 'Battle'" class="border ePkmnStats">
                                     <div v-if="game.properties.battle.player.active_pokemon.stats.hp.value > 0">
@@ -894,7 +894,7 @@
                                     <table class="enemyMovesetTable">
                                         <tbody><tr v-for="move_index in moves = [0,1,2,3]">
                                             <th v-if="enemy_2_mon_static[x]?.moves[move_index] != undefined">
-                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${eHPType(platinum_moves[enemyMove(x, move_index)]?.Type?.toLowerCase(), enemyMove(x, move_index), x)}.png`">
+                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${eHPType(platinum_moves[enemyMove(x, move_index)]?.Type?.toLowerCase(), enemyMove(x, move_index), x)}.webp`">
                                             </th>
                                             <th v-if="enemy_2_mon_static[x]?.moves[move_index] != undefined" class="align_left" style="font-size: 14px;">
                                                 {{enemy_2_mon_static[x]?.moves[move_index]}}
@@ -920,12 +920,12 @@
                     <div class="enemyGraphic">
                         <div v-for="x in pkmnSlots" class="eFaintTransition">
                             <div v-if="x < examined_trainer_data?.party?.length" :class="`border slots ePkmnStyle ePkmn${x}`">
-                                <img class="ePkmnSprite" :src="`images/gen4/pokemon/${speciesSpecialCharacters(examined_trainer_data?.party[x]?.species)}.png`">
+                                <img class="ePkmnSprite" :src="`images/gen4/pokemon/${speciesSpecialCharacters(examined_trainer_data?.party[x]?.species)}.webp`">
                                 <div class="ePkmnLvlSpecies">{{enemy_mon_static[x]?.species}} Lv: {{examined_trainer_data?.party[x]?.level}}</div>
                                 <div class="ePkmnAbility" style="opacity: .7;">{{examined_trainer_data?.party[x]?.ability}}</div>
                                 <div style="left: 2px;" class="border ePkmnTyping">
-                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_1?.toLowerCase()}.png`">
-                                    <img v-show="g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_1?.toLowerCase() != g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_2?.toLowerCase()" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_2?.toLowerCase()}.png`">
+                                    <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_1?.toLowerCase()}.webp`">
+                                    <img v-show="g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_1?.toLowerCase() != g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_2?.toLowerCase()" class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4PokemonData[examined_trainer_data?.party[x]?.species]?.type_2?.toLowerCase()}.webp`">
                                 </div>
                                 <div class="border ePkmnStats">
                                     <table v-if="game.properties.battle.player.active_pokemon.stats.hp.value > 0" class="enemyStatTable">
@@ -949,7 +949,7 @@
                                     <table class="enemyMovesetTable">
                                         <tbody><tr v-for="(move, index) in examined_trainer_data.party[x].moves">
                                             <th>
-                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4MoveData[examined_trainer_data.party[x].moves[index]].Type}.png`">
+                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${g4MoveData[examined_trainer_data.party[x].moves[index]].Type}.webp`">
                                             </th>
                                             <th style="font-size: 14px;">
                                                 {{examined_trainer_data.party[x].moves[index]}}
@@ -960,7 +960,7 @@
                                         </tr>
                                         <tr v-for="move_index in moves = [0,1,2,3]">
                                             <th v-if="enemy_mon_static[x]?.moves[move_index] != undefined">
-                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${eHPType(platinum_moves[enemyMove(x, move_index)]?.Type?.toLowerCase(), enemyMove(x, move_index), x)}.png`">
+                                                <img class="icons moveIcon" :src="`images/gen4/type-icons-circular/${eHPType(platinum_moves[enemyMove(x, move_index)]?.Type?.toLowerCase(), enemyMove(x, move_index), x)}.webp`">
                                             </th>
                                             <th v-if="enemy_mon_static[x]?.moves[move_index] != undefined" class="align_left" style="font-size: 14px;">
                                                 {{enemy_mon_static[x]?.moves[move_index]}}
@@ -991,7 +991,7 @@
                                 <td class="movepool_header" style="padding-top: 2px; font-size: 14px; width: 63px;  text-align: right; padding-right: 8px;">Diff</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 15px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen4/split_images/${selected_game}/${split_image(split.original_trainer || split.trainer)}.png`"></td>
+                                <td style="font-size: 15px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen4/split_images/${selected_game}/${split_image(split.original_trainer || split.trainer)}.webp`"></td>
                                 <td style="font-size: 15px; width: 150px; text-align: left; padding-left: 3px;">{{split.trainer}}</td>
                                 <td style="font-size: 15px; width: 78px;  text-align: right;">{{split.previous_time}}</td>
                                 <td style="font-size: 15px; width: 78px;  text-align: right;">{{split.current_time}}</td>
@@ -1012,7 +1012,7 @@
                                 <td class="movepool_header" style="padding-top: 2px; font-size: 14px; width: 63px;  text-align: right; padding-right: 8px;">Time</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 15px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen4/split_images/${selected_game}/${split_image(split.original_trainer || split.trainer)}.png`"></td>
+                                <td style="font-size: 15px; text-align: left; padding-left: 3px;"><img class="scaled_icon" :src="`images/gen4/split_images/${selected_game}/${split_image(split.original_trainer || split.trainer)}.webp`"></td>
                                 <td style="font-size: 15px; width: 100px; text-align: left; padding-left: 3px;">{{split.trainer}}</td>
                                 <td style="font-size: 15px; width: 78px;  text-align: right;"></td>
                                 <td style="font-size: 15px; width: 78px;  text-align: right;"></td>
@@ -1190,39 +1190,39 @@
                         <div  class="genericLabels voltorb_flip_data roundValue">{{game.properties.screen.voltorb_flip.information.round_coins.value}}</div> -->
                         <table class="voltorb_flip"> 
                             <tbody><tr>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.a.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.a.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.b.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.b.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.c.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.c.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.d.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.d.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.e.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.e.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.a.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.a.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.b.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.b.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.c.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.c.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.d.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.d.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_1.e.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_1.e.value)"></td>
                             </tr>
                             <tr>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.a.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.a.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.b.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.b.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.c.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.c.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.d.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.d.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.e.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.e.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.a.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.a.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.b.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.b.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.c.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.c.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.d.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.d.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_2.e.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_2.e.value)"></td>
                             </tr>
                             <tr>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.a.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.a.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.b.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.b.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.c.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.c.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.d.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.d.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.e.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.e.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.a.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.a.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.b.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.b.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.c.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.c.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.d.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.d.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_3.e.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_3.e.value)"></td>
                             </tr>
                             <tr>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.a.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.a.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.b.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.b.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.c.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.c.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.d.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.d.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.e.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.e.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.a.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.a.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.b.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.b.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.c.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.c.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.d.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.d.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_4.e.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_4.e.value)"></td>
                             </tr>
                             <tr>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.a.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.a.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.b.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.b.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.c.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.c.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.d.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.d.value)"></td>
-                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.e.value}.png`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.e.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.a.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.a.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.b.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.b.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.c.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.c.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.d.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.d.value)"></td>
+                                <td><img :src="`images/gen4/voltorb_flip/${game.properties.screen.voltorb_flip.value.row_5.e.value}.webp`" :style="voltorb_flip_style(game.properties.screen.voltorb_flip.value.row_5.e.value)"></td>
                             </tr>
                         </tbody></table>
                     </div>
@@ -1452,7 +1452,7 @@ export default defineComponent({
             selected_game                : MyStorage['selected_game'] ?? "Platinum",
             available_games              : ["Platinum", "HeartGold and SoulSilver", "Diamond and Pearl"],
             game_box_art                 : {
-                "Platinum"                : "4-Platinum.png",
+                "Platinum"                : "4-Platinum.webp",
                 "HeartGold and SoulSilver": "4-HeartGoldandSoulSilver.jpg",
                 "Diamond and Pearl"       : "4-DiamondandPearl.jpg",
             },
@@ -5094,7 +5094,7 @@ export default defineComponent({
             // instead of fading in a blank one. Only the family, never the full dex.
             for (const family_species of this.evolution_family_list) {
                 const family_art = new Image();
-                family_art.src = `images/gen4/pokemon/${family_species}.png`;
+                family_art.src = `images/gen4/pokemon/${family_species}.webp`;
             }
 
             // If the evolution family has only one member (e.g., Registeel), disable evolution
@@ -5490,77 +5490,77 @@ export default defineComponent({
         },
         getTrainerGraphic() {
             if (this.game.properties.meta.state == `Battle` || this.game.properties.meta.state == `From Battle`) {
-                let graphic = `images/gen4/trainers/roark.png`
+                let graphic = `images/gen4/trainers/roark.webp`
                 let trainer = this.game.properties.battle.opponent.trainer.value
                 let bytes = this.game.properties.battle.opponent.trainer.bytes
                 let id_value = this.game.properties.battle.opponent.id.value
                 let displayGraphicState = this.enemy_graphic == true ? true : false
                 if (this.selected_game == `Platinum` || this.selected_game == `Diamond and Pearl`) {
                     switch (trainer) {
-                        case "Leader Roark":      graphic = `images/gen4/trainers/roark.png`;       break;
-                        case "Leader Gardenia":   graphic = `images/gen4/trainers/gardenia.png`;    break;
-                        case "Leader Fantina":    graphic = `images/gen4/trainers/fantina.png`;     break;
-                        case "Leader Wake":       graphic = `images/gen4/trainers/crasherwake.png`; break;
-                        case "Leader Maylene":    graphic = `images/gen4/trainers/maylene.png`;     break;
-                        case "Leader Candice":    graphic = `images/gen4/trainers/candice.png`;     break;
-                        case "Leader Volkner":    graphic = `images/gen4/trainers/volkner.png`;     break;
-                        case "Leader Byron":      graphic = `images/gen4/trainers/byron.png`;       break;
-                        case "Elite Four Aaron":  graphic = `images/gen4/trainers/aaron.png`;       break;
-                        case "Elite Four Bertha": graphic = `images/gen4/trainers/bertha.png`;      break;
-                        case "Elite Four Flint":  graphic = `images/gen4/trainers/flint.png`;       break;
-                        case "Elite Four Lucian": graphic = `images/gen4/trainers/lucian.png`;      break;
+                        case "Leader Roark":      graphic = `images/gen4/trainers/roark.webp`;       break;
+                        case "Leader Gardenia":   graphic = `images/gen4/trainers/gardenia.webp`;    break;
+                        case "Leader Fantina":    graphic = `images/gen4/trainers/fantina.webp`;     break;
+                        case "Leader Wake":       graphic = `images/gen4/trainers/crasherwake.webp`; break;
+                        case "Leader Maylene":    graphic = `images/gen4/trainers/maylene.webp`;     break;
+                        case "Leader Candice":    graphic = `images/gen4/trainers/candice.webp`;     break;
+                        case "Leader Volkner":    graphic = `images/gen4/trainers/volkner.webp`;     break;
+                        case "Leader Byron":      graphic = `images/gen4/trainers/byron.webp`;       break;
+                        case "Elite Four Aaron":  graphic = `images/gen4/trainers/aaron.webp`;       break;
+                        case "Elite Four Bertha": graphic = `images/gen4/trainers/bertha.webp`;      break;
+                        case "Elite Four Flint":  graphic = `images/gen4/trainers/flint.webp`;       break;
+                        case "Elite Four Lucian": graphic = `images/gen4/trainers/lucian.webp`;      break;
                         case "Rival": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen4/trainers/rival1mon.png`; break;
-                                case 2: graphic = `images/gen4/trainers/rival1mon.png`; break;
-                                case 4: graphic = `images/gen4/trainers/rival4mon.png`; break;
-                                case 5: graphic = `images/gen4/trainers/rival5mon.png`; break;
+                                case 1: graphic = `images/gen4/trainers/rival1mon.webp`; break;
+                                case 2: graphic = `images/gen4/trainers/rival1mon.webp`; break;
+                                case 4: graphic = `images/gen4/trainers/rival4mon.webp`; break;
+                                case 5: graphic = `images/gen4/trainers/rival5mon.webp`; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen4/trainers/rival1mon.png`; break;
+                                default: graphic = `images/gen4/trainers/rival1mon.webp`; break;
                             }
                             break;
                         }   
                         case "Commander Mars": {
                             switch (id_value) {
-                                case 295: graphic = `images/gen4/trainers/mars.png`;  break;
-                                case 405: graphic = `images/gen4/trainers/mars2.png`; break;
-                                case 528: graphic = `images/gen4/trainers/mars.png`;  break;
+                                case 295: graphic = `images/gen4/trainers/mars.webp`;  break;
+                                case 405: graphic = `images/gen4/trainers/mars2.webp`; break;
+                                case 528: graphic = `images/gen4/trainers/mars.webp`;  break;
                                 case 926: { // TODO
-                                    graphic = `images/gen4/trainers/mars.png`;  
+                                    graphic = `images/gen4/trainers/mars.webp`;  
                                     displayGraphicState = false;
                                     break; 
                                 } 
-                                default:  graphic = `images/gen4/trainers/mars.png`;  break;
+                                default:  graphic = `images/gen4/trainers/mars.webp`;  break;
                             }
                             break;
                         }           
                         case "Commander Jupiter": {
                             switch (bytes) {
-                                case 406: graphic = `images/gen4/trainers/jupiter.png`; break;
-                                case 407: graphic = `images/gen4/trainers/jupiter.png`; break;
+                                case 406: graphic = `images/gen4/trainers/jupiter.webp`; break;
+                                case 407: graphic = `images/gen4/trainers/jupiter.webp`; break;
                                 case 927: { // TODO
-                                    graphic = `images/gen4/trainers/jupiter.png`; 
+                                    graphic = `images/gen4/trainers/jupiter.webp`; 
                                     displayGraphicState = false;
                                     break; 
                                 } 
-                                default:  graphic = `images/gen4/trainers/jupiter.png`; break;
+                                default:  graphic = `images/gen4/trainers/jupiter.webp`; break;
                             }
                             break;
                         }            
                         case "Commander Saturn": {
                             switch (bytes) {
-                                case 408: graphic = `images/gen4/trainers/saturn.png`; break;
-                                case 409: graphic = `images/gen4/trainers/saturn.png`; break; 
-                                default:  graphic = `images/gen4/trainers/saturn.png`; break;
+                                case 408: graphic = `images/gen4/trainers/saturn.webp`; break;
+                                case 409: graphic = `images/gen4/trainers/saturn.webp`; break; 
+                                default:  graphic = `images/gen4/trainers/saturn.webp`; break;
                             }
                             break;
                         }            
                         case "Galactic Boss Cyrus": {
                             switch (id_value) {
-                                case 403: graphic = `images/gen4/trainers/cyrus_1_2.png`; break;
-                                case 404: graphic = `images/gen4/trainers/cyrus_3.png`; break;
-                                case 913: graphic = `images/gen4/trainers/cyrus_1_2.png`; break;
-                                default:  graphic = `images/gen4/trainers/cyrus_3.png`;   break;
+                                case 403: graphic = `images/gen4/trainers/cyrus_1_2.webp`; break;
+                                case 404: graphic = `images/gen4/trainers/cyrus_3.webp`; break;
+                                case 913: graphic = `images/gen4/trainers/cyrus_1_2.webp`; break;
+                                default:  graphic = `images/gen4/trainers/cyrus_3.webp`;   break;
                             }
                             break;
                         }            
@@ -5569,36 +5569,36 @@ export default defineComponent({
                 }
                 if (this.selected_game == `HeartGold and SoulSilver`) {
                     switch (trainer) {
-                        case "Leader Falkner":    graphic = `images/gen4/trainers/falkner.png`; break;
-                        case "Leader Bugsy":      graphic = `images/gen4/trainers/bugsy.png`;   break;
-                        case "Leader Whitney":    graphic = `images/gen4/trainers/whitney.png`; break;
-                        case "Leader Morty":      graphic = `images/gen4/trainers/morty.png`;   break;
-                        case "Leader Chuck":      graphic = `images/gen4/trainers/chuck.png`;   break;
-                        case "Leader Pryce":      graphic = `images/gen4/trainers/pryce.png`;   break;
-                        case "Leader Jasmine":    graphic = `images/gen4/trainers/jasmine.png`; break;
-                        case "Leader Clair":      graphic = `images/gen4/trainers/clair.png`;   break;
-                        case "Leader Brock":      graphic = `images/gen4/trainers/brock.png`;   break;
-                        case "Leader Misty":      graphic = `images/gen4/trainers/misty.png`;   break;
-                        case "Leader Lt. Surge":  graphic = `images/gen4/trainers/surge.png`;   break;
-                        case "Leader Erika":      graphic = `images/gen4/trainers/erika.png`;   break;
-                        case "Leader Sabrina":    graphic = `images/gen4/trainers/sabrina.png`; break;
-                        case "Leader Janine":     graphic = `images/gen4/trainers/janine.png`;  break;
-                        case "Leader Blaine":     graphic = `images/gen4/trainers/blaine.png`;  break;
-                        case "Fisherman Ralph":   graphic = `images/gen4/trainers/ralph.png`;   break;
-                        case "Hiker Anthony":     graphic = `images/gen4/trainers/anthony.png`; break;
-                        case "Fisherman Justin":  graphic = `images/gen4/trainers/justin.png`;  break;
-                        case "Black Belt Yoshi":  graphic = `images/gen4/trainers/yoshi.png`;   break;
-                        case "Black Belt Lao":    graphic = `images/gen4/trainers/lao.png`;     break;
-                        case "Black Belt Nob":    graphic = `images/gen4/trainers/nob.png`;     break;
-                        case "School Kid Chad":   graphic = `images/gen4/trainers/chad.png`;    break;
-                        case "Kimono Girl Zuki":  graphic = `images/gen4/trainers/zuki.png`;    break;
-                        case "Kimono Girl Naoko": graphic = `images/gen4/trainers/naoko.png`;   break;
-                        case "Kimono Girl Miki":  graphic = `images/gen4/trainers/miki.png`;    break;
-                        case "Kimono Girl Sayo":  graphic = `images/gen4/trainers/sayo.png`;    break;
-                        case "Kimono Girl Kuni":  graphic = `images/gen4/trainers/kuni.png`;    break;
+                        case "Leader Falkner":    graphic = `images/gen4/trainers/falkner.webp`; break;
+                        case "Leader Bugsy":      graphic = `images/gen4/trainers/bugsy.webp`;   break;
+                        case "Leader Whitney":    graphic = `images/gen4/trainers/whitney.webp`; break;
+                        case "Leader Morty":      graphic = `images/gen4/trainers/morty.webp`;   break;
+                        case "Leader Chuck":      graphic = `images/gen4/trainers/chuck.webp`;   break;
+                        case "Leader Pryce":      graphic = `images/gen4/trainers/pryce.webp`;   break;
+                        case "Leader Jasmine":    graphic = `images/gen4/trainers/jasmine.webp`; break;
+                        case "Leader Clair":      graphic = `images/gen4/trainers/clair.webp`;   break;
+                        case "Leader Brock":      graphic = `images/gen4/trainers/brock.webp`;   break;
+                        case "Leader Misty":      graphic = `images/gen4/trainers/misty.webp`;   break;
+                        case "Leader Lt. Surge":  graphic = `images/gen4/trainers/surge.webp`;   break;
+                        case "Leader Erika":      graphic = `images/gen4/trainers/erika.webp`;   break;
+                        case "Leader Sabrina":    graphic = `images/gen4/trainers/sabrina.webp`; break;
+                        case "Leader Janine":     graphic = `images/gen4/trainers/janine.webp`;  break;
+                        case "Leader Blaine":     graphic = `images/gen4/trainers/blaine.webp`;  break;
+                        case "Fisherman Ralph":   graphic = `images/gen4/trainers/ralph.webp`;   break;
+                        case "Hiker Anthony":     graphic = `images/gen4/trainers/anthony.webp`; break;
+                        case "Fisherman Justin":  graphic = `images/gen4/trainers/justin.webp`;  break;
+                        case "Black Belt Yoshi":  graphic = `images/gen4/trainers/yoshi.webp`;   break;
+                        case "Black Belt Lao":    graphic = `images/gen4/trainers/lao.webp`;     break;
+                        case "Black Belt Nob":    graphic = `images/gen4/trainers/nob.webp`;     break;
+                        case "School Kid Chad":   graphic = `images/gen4/trainers/chad.webp`;    break;
+                        case "Kimono Girl Zuki":  graphic = `images/gen4/trainers/zuki.webp`;    break;
+                        case "Kimono Girl Naoko": graphic = `images/gen4/trainers/naoko.webp`;   break;
+                        case "Kimono Girl Miki":  graphic = `images/gen4/trainers/miki.webp`;    break;
+                        case "Kimono Girl Sayo":  graphic = `images/gen4/trainers/sayo.webp`;    break;
+                        case "Kimono Girl Kuni":  graphic = `images/gen4/trainers/kuni.webp`;    break;
                         case "Elite Four Will": {
                             switch (this.game.properties.battle.opponent.trainer.bytes) {
-                                case 245: graphic = `images/gen4/trainers/will.png`; break;
+                                case 245: graphic = `images/gen4/trainers/will.webp`; break;
                                 case 702: displayGraphicState = false;          break;
                                 default:  displayGraphicState = false;          break;
                             }
@@ -5606,7 +5606,7 @@ export default defineComponent({
                         }   
                         case "Elite Four Koga": {
                             switch (this.game.properties.battle.opponent.trainer.bytes) {
-                                case 247: graphic = `images/gen4/trainers/koga.png`; break;
+                                case 247: graphic = `images/gen4/trainers/koga.webp`; break;
                                 case 703: displayGraphicState = false;          break;
                                 default:  displayGraphicState = false;          break;
                             }
@@ -5614,7 +5614,7 @@ export default defineComponent({
                         }   
                         case "Elite Four Bruno": {
                             switch (this.game.properties.battle.opponent.trainer.bytes) {
-                                case 418: graphic = `images/gen4/trainers/bruno.png`; break;
+                                case 418: graphic = `images/gen4/trainers/bruno.webp`; break;
                                 case 704: displayGraphicState = false;           break;
                                 default:  displayGraphicState = false;           break;
                             }
@@ -5622,7 +5622,7 @@ export default defineComponent({
                         }   
                         case "Elite Four Karen": {
                             switch (this.game.properties.battle.opponent.trainer.bytes) {
-                                case 246: graphic = `images/gen4/trainers/karen.png`; break;
+                                case 246: graphic = `images/gen4/trainers/karen.webp`; break;
                                 case 705: displayGraphicState = false;           break;
                                 default:  displayGraphicState = false;           break;
                             }
@@ -5630,34 +5630,34 @@ export default defineComponent({
                         }   
                         case "Passerby Boy": {
                             switch (this.game.properties.battle.opponent.trainer.bytes) {
-                                case 495: graphic = `images/gen4/trainers/passerby boy.png`; break;
-                                case 496: graphic = `images/gen4/trainers/passerby boy.png`; break;
-                                case 497: graphic = `images/gen4/trainers/passerby boy.png`; break;
-                                default:  graphic = `images/gen4/trainers/passerby boy.png`; break;
+                                case 495: graphic = `images/gen4/trainers/passerby boy.webp`; break;
+                                case 496: graphic = `images/gen4/trainers/passerby boy.webp`; break;
+                                case 497: graphic = `images/gen4/trainers/passerby boy.webp`; break;
+                                default:  graphic = `images/gen4/trainers/passerby boy.webp`; break;
                             }
                             break;
                         }
                         case "Rival": {
                             switch (this.game.properties.battle.opponent.trainer.bytes) {
-                                case 1:   graphic = `images/gen4/trainers/rival2.png`;    break;
-                                case 2:   graphic = `images/gen4/trainers/rival1.png`;    break;
-                                case 3:   graphic = `images/gen4/trainers/rival1.png`;    break;
-                                case 263: graphic = `images/gen4/trainers/rival3.png`;    break;
-                                case 264: graphic = `images/gen4/trainers/rival5.png`;    break;
-                                case 265: graphic = `images/gen4/trainers/rival1.png`;    break;
-                                case 266: graphic = `images/gen4/trainers/rival2.png`;    break;
-                                case 267: graphic = `images/gen4/trainers/rival3.png`;    break;
-                                case 268: graphic = `images/gen4/trainers/rival5.png`;    break;
-                                case 269: graphic = `images/gen4/trainers/rival2.png`;    break;
-                                case 270: graphic = `images/gen4/trainers/rival3.png`;    break;
-                                case 271: graphic = `images/gen4/trainers/rival4.png`;    break;
-                                case 272: graphic = `images/gen4/trainers/rival5.png`;    break;
-                                case 285: graphic = `images/gen4/trainers/rival6.png`;    break;
-                                case 286: graphic = `images/gen4/trainers/rival6.png`;    break;
-                                case 287: graphic = `images/gen4/trainers/rival6.png`;    break;
-                                case 288: graphic = `images/gen4/trainers/rival4.png`;    break;
-                                case 289: graphic = `images/gen4/trainers/rival4.png`;    break;
-                                default:  graphic = `images/gen4/trainers/rival1mon.png`; break;
+                                case 1:   graphic = `images/gen4/trainers/rival2.webp`;    break;
+                                case 2:   graphic = `images/gen4/trainers/rival2.webp`;    break;
+                                case 3:   graphic = `images/gen4/trainers/rival2.webp`;    break;
+                                case 263: graphic = `images/gen4/trainers/rival3.webp`;    break;
+                                case 264: displayGraphicState = false; break;
+                                case 265: graphic = `images/gen4/trainers/rival2.webp`;    break;
+                                case 266: graphic = `images/gen4/trainers/rival2.webp`;    break;
+                                case 267: graphic = `images/gen4/trainers/rival3.webp`;    break;
+                                case 268: displayGraphicState = false; break;
+                                case 269: graphic = `images/gen4/trainers/rival2.webp`;    break;
+                                case 270: graphic = `images/gen4/trainers/rival3.webp`;    break;
+                                case 271: graphic = `images/gen4/trainers/rival4.webp`;    break;
+                                case 272: displayGraphicState = false; break;
+                                case 285: displayGraphicState = false; break;
+                                case 286: displayGraphicState = false; break;
+                                case 287: displayGraphicState = false; break;
+                                case 288: graphic = `images/gen4/trainers/rival4.webp`;    break;
+                                case 289: graphic = `images/gen4/trainers/rival4.webp`;    break;
+                                default:  graphic = `images/gen4/trainers/rival1mon.webp`; break;
                             }
                             break;
                         }   
@@ -5673,7 +5673,7 @@ export default defineComponent({
             else {
                 return {
                     state: false,
-                    graphic: `images/gen4/trainers/roark.png`,
+                    graphic: `images/gen4/trainers/roark.webp`,
                     name: "Error - there is no trainer graphic to display. Use 'v-if' to disable rendering of this code through the .state property of this object.",
                 }
             }
@@ -6010,7 +6010,7 @@ export default defineComponent({
             if (numberMatch) {
                 imageName = numberMatch[1]
                 // If we removed a number from "Cyrus 1", add back "Galactic Boss " prefix
-                // since the image file is "Galactic Boss Cyrus.png"
+                // since the image file is "Galactic Boss Cyrus.webp"
                 if (imageName === "Cyrus") {
                     imageName = "Galactic Boss Cyrus"
                 }
@@ -6035,7 +6035,7 @@ export default defineComponent({
                 if (imageName.startsWith("Pokemon Trainer ")) {
                     imageName = imageName.substring(16)
                 }
-                // Keep "Galactic Boss " prefix because image file is "Galactic Boss Cyrus.png"
+                // Keep "Galactic Boss " prefix because image file is "Galactic Boss Cyrus.webp"
                 // (don't remove it)
             }
             return imageName
@@ -6436,39 +6436,21 @@ export default defineComponent({
 
         getPokemonImageUrl: function (x) {
             if (x != null)
-                return `images/gen4/overlay/${x.pokedexNumber}.png`
+                return `images/gen4/overlay/${x.pokedexNumber}.webp`
         },
         getStarterArt: function () {
-            return `images/gen4/pokemon/${this.starter}.png`
+            return `images/gen4/pokemon/${this.starter}.webp`
         },
         getStarterImageUrl: function () {
-            return `images/gen4/overlay/${this.starter}.png`
-        },
-        getStarterTypeTexture() {
-            if (this.pick == true) {
-                var type = this.gen3data.find(y => y.dexNumber === this.starter)
-                return `images/gen4/elements/textures/${type.type1.toLowerCase()}.png`
-            }
-            else
-                return `images/gen4/elements/textures/normal.png`
+            return `images/gen4/overlay/${this.starter}.webp`
         },
         
-        getStarterType1() {
-            if (this.pick == true)
-                var type = this.g4PokemonData[this.starter].type_1
-                return `images/gen4/elements/types/${type.toLowerCase()}.png`
-        },
-        getStarterType2() {
-            if (this.pick == true)
-                var type = this.g4PokemonData[this.starter].type_2
-                return `images/gen4/elements/types/${type.toLowerCase()}.png`
-        },
 
         //BADGE GRAPHIC RECALL
         badgeGraphic(x) {
             if (x.value == true) {
                 var badge = x.path.toString().substring(14)
-                return `images/gen4/badges/${badge}.png`
+                return `images/gen4/badges/${badge}.webp`
             }
             else if (x.value == false) {   
                 return null
@@ -7344,7 +7326,7 @@ export default defineComponent({
         moveCategoryIcon(move) { //move = move.value
             if (move) {
                 var move = this.generation4_moves_new[move]
-                if (move) return `images/gen4/damageCategory/${move.category}.png`
+                if (move) return `images/gen4/damageCategory/${move.category}.webp`
             }
             return ""
         },
@@ -7451,31 +7433,6 @@ export default defineComponent({
                 if (move) return move.Type
             }
             return null
-        },
-        moveTypeIcon(y) { //y = move1.value
-            if (y != null && y != undefined && y == "Hidden Power") {
-                return `images/gen4/elements/type-icons/${this.hiddenPowerTypeCalc(this.game.properties.player.team[0])}.png`
-            }
-            else if (y != null && y == "Weather Ball") {
-                var moveType = "Normal"
-                if (this.batt.field.weather.value == `Sun`) {
-                    moveType = "Fire" }
-                if (this.batt.field.weather.value == `Sandstorm`) {
-                    moveType = "Rock" }
-                if (this.batt.field.weather.value == `Rain`) {
-                    moveType = "Water" }
-                if (this.batt.field.weather.value == `Hail`) {
-                    moveType = "Ice" }
-                return `images/gen4/elements/type-icons/${moveType}.png`
-            }
-            else if (y != null && y != undefined) {
-                var move = this.gen3moves.find(x => x.Move.toLowerCase() === y.toLowerCase())
-                var moveType = move[`Type`].toLowerCase()
-                return `images/gen4/elements/type-icons/${moveType}.png`
-            }
-            else {
-                return null
-            }
         },
         
 

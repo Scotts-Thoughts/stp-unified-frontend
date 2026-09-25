@@ -338,7 +338,9 @@ Errors are compared by message, with stack frames dropped (bundle names and line
 two builds by design) and file URLs folded: the app's own root to `<app>/out/renderer/`, and an image URL to
 its path under the image root -- `<sandbox>/app-tree/app/images/x.png` on the legacy side is
 `<app>/out/renderer/images/genN/x.png` on the unified side, and "the same missing image" is the claim (gen3
-requests `elements/type-icons/undefined.png` on both).
+requests `elements/type-icons/undefined.png` on both). Since the pool became lossless WebP (2026-09-24) the
+unified side asks for `x.webp`; `diff.ts` folds a pool image's `.webp` to `.png` in console messages and in
+computed `url(images/...)` values (`foldImageFormat`), so the legacy baselines stay comparable.
 
 Collecting the whole `userData` tree is a thirteenth trap: Chromium's own profile (DIPS, `DevToolsActivePort`, the
 DPAPI-encrypted `Local State` key, the leveldb log framing, the Dawn caches) differs byte-for-byte between
