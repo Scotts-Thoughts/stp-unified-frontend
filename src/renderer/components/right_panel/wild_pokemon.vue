@@ -12,22 +12,22 @@
                 :data-enemy-slot="0"
                 :data-enemy-species="wild_mon.species.value"
                 :style="[enemy_styles.faint, { transform: resize.transformFor(wild_mon.species.value) }]"
-                :src="'images/pokemon/' + wild_mon.species.value + '.png'"/>
+                :src="'images/pokemon/' + wild_mon.species.value + '.webp'"/>
             <img v-else-if="meta.game == 'Red and Blue'" class="ePkmnSprite"
                 :class="{ ePkmnSpriteResizing: resize.resize.slot === 0 }"
                 :data-enemy-slot="0"
                 :data-enemy-species="wild_mon.species.value"
                 :style="[enemy_styles.faint, { transform: resize.transformFor(wild_mon.species.value) }]"
-                :src="'images/pokemon/Red_and_Blue/' + wild_mon.species.value + '.png'"/>
+                :src="'images/pokemon/Red_and_Blue/' + wild_mon.species.value + '.webp'"/>
             
             <!-- UI Elements -->
             <img class="canvas" :class="svgColorClass(speed_comparison(wild_mon.speed).comparison, wild_mon)" :src="'images/ui/speed_comp/0.svg'"/>
             <img class="enemyStatsArea opacityTransition" :style="enemy_styles.faint_stats_background" :src="'images/stats/0.svg'"/>
             
             <!-- Types -->
-            <img                                       class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/' + enemyType1().toLowerCase() + '.png'"/>
-            <img v-if="enemyType1() != enemyType2(0)"  class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/' + enemyType2(0).toLowerCase() + '.png'"/>
-            <img v-if="enemyType3(0) == 'Ghost'"       class="ePkmnTypeIcons ePkmnType_3 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/ghost.png'"/>
+            <img                                       class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/' + enemyType1().toLowerCase() + '.webp'"/>
+            <img v-if="enemyType1() != enemyType2(0)"  class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/' + enemyType2(0).toLowerCase() + '.webp'"/>
+            <img v-if="enemyType3(0) == 'Ghost'"       class="ePkmnTypeIcons ePkmnType_3 ds opacityTransition" :style="enemy_fainted_styles" :src="'images/elements/type-icons/ghost.webp'"/>
             
             <!-- Species & Level -->
             <div class="ePkmnSpecies opacityTransition" :style="enemy_styles.species">{{wild_mon.species.value}}</div>
@@ -115,7 +115,7 @@ export default defineComponent({
         /** Path of the type icon for a move of the wild pokemon. Unknown moves fall back to the normal type. */
         move_icon(rawMoveName) {
             const move = PokeData.findMove(this.move_name(rawMoveName));
-            return 'images/elements/type-icons/' + (move?.type ?? "Normal").toLowerCase() + '.png';
+            return 'images/elements/type-icons/' + (move?.type ?? "Normal").toLowerCase() + '.webp';
         },
         wild_pkmn_name(species_string) {
             if (species_string == null || species_string == undefined) { return "" }

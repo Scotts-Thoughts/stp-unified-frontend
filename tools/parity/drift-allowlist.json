@@ -385,9 +385,9 @@
       "name": "badgeGraphic",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 (gen2 11L, gen3 11L, gen4 11L)",
       "bodies": {
-        "gen2": "1f9360074438",
-        "gen3": "0b299b71a043",
-        "gen4": "835bc5c8ef65"
+        "gen2": "aa2450058c67",
+        "gen3": "dc0f08194532",
+        "gen4": "e19f85e980fb"
       }
     },
     {
@@ -880,16 +880,6 @@
     },
     {
       "section": "methods",
-      "name": "getPokemonImageUrl",
-      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 4L, gen4 4L, gen5 4L)",
-      "bodies": {
-        "gen3": "96a9fa09ca85",
-        "gen4": "3e6711ad772e",
-        "gen5": "c82b71f13af3"
-      }
-    },
-    {
-      "section": "methods",
       "name": "getSoloMonType",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 29L, gen5 26L)",
       "bodies": {
@@ -912,49 +902,9 @@
       "name": "getStarterArt",
       "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 3L, gen4 3L, gen5 3L)",
       "bodies": {
-        "gen3": "0366bb54f58c",
-        "gen4": "4a6b52f44bbd",
-        "gen5": "abb56d043c17"
-      }
-    },
-    {
-      "section": "methods",
-      "name": "getStarterImageUrl",
-      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 3L, gen4 3L, gen5 3L)",
-      "bodies": {
-        "gen3": "3430cd794efb",
-        "gen4": "7db5b1756cd5",
-        "gen5": "a8ce4eabb6a4"
-      }
-    },
-    {
-      "section": "methods",
-      "name": "getStarterType1",
-      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 5L, gen4 5L, gen5 5L)",
-      "bodies": {
-        "gen2": "29a58d7e2451",
-        "gen4": "5869ab2410d1",
-        "gen5": "4f8b1630a174"
-      }
-    },
-    {
-      "section": "methods",
-      "name": "getStarterType2",
-      "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 5L, gen4 7L, gen5 7L)",
-      "bodies": {
-        "gen2": "f7eb33af06af",
-        "gen4": "c8655e71c490",
-        "gen5": "1d23e1f859d9"
-      }
-    },
-    {
-      "section": "methods",
-      "name": "getStarterTypeTexture",
-      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 10L, gen4 8L, gen5 8L)",
-      "bodies": {
-        "gen3": "aaa24df4bc01",
-        "gen4": "2abb51267555",
-        "gen5": "bfc423ee8da2"
+        "gen3": "33ae06a3bc77",
+        "gen4": "27ecb1bca2ba",
+        "gen5": "78b58697c3e1"
       }
     },
     {
@@ -981,8 +931,8 @@
       "name": "getTrainerGraphic",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 190L, gen5 293L)",
       "bodies": {
-        "gen4": "7d70970b009d",
-        "gen5": "edf3de67d6c9"
+        "gen4": "50fa0bc691c5",
+        "gen5": "5f81fa8a6b35"
       }
     },
     {
@@ -1180,8 +1130,8 @@
       "name": "moveCategoryIcon",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 7L, gen5 7L)",
       "bodies": {
-        "gen4": "8fc6084ba16d",
-        "gen5": "716c646e3b23"
+        "gen4": "08095d124f35",
+        "gen5": "89c59e19e120"
       }
     },
     {
@@ -1209,12 +1159,10 @@
     {
       "section": "methods",
       "name": "moveTypeIcon",
-      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 6L, gen3 24L, gen4 26L, gen5 26L)",
+      "reason": "UNREVIEWED: gen2 | gen3 (gen2 6L, gen3 24L)",
       "bodies": {
-        "gen2": "19c203598a98",
-        "gen3": "9305b68ad220",
-        "gen4": "5266e2d9ed8b",
-        "gen5": "cc5460fcdb5e"
+        "gen2": "b83c91c4ef19",
+        "gen3": "448b3a63287b"
       }
     },
     {
@@ -1435,8 +1383,8 @@
       "name": "specialTrainerGraphics",
       "reason": "UNREVIEWED: gen2 | gen3 (gen2 30L, gen3 57L)",
       "bodies": {
-        "gen2": "810af18df9f6",
-        "gen3": "e6275c7eaf91"
+        "gen2": "b00e391fb06e",
+        "gen3": "c296fd81309f"
       }
     },
     {
@@ -1527,8 +1475,8 @@
       "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 37L, gen4 31L, gen5 37L)",
       "bodies": {
         "gen3": "34120f25e2ec",
-        "gen4": "00ff28fc3877",
-        "gen5": "a3ca340511e6"
+        "gen4": "0aac145946d8",
+        "gen5": "1f6ab262acc5"
       }
     },
     {

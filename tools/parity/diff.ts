@@ -251,7 +251,7 @@ function diffStyles(baseDir: string, candDir: string, checkpoint: string, out: D
       reported++;
     }
     for (const prop of new Set([...Object.keys(ea.styles), ...Object.keys(eb.styles)])) {
-      if (ea.styles[prop] !== eb.styles[prop]) {
+      if (!sameStyleValue(ea.styles[prop], eb.styles[prop])) {
         out.push({
           oracle: 1,
           name: ORACLE_NAMES[1],
@@ -575,15 +575,18 @@ function diffConsole(basePath: string, candPath: string, checkpoint: string | un
   // root: the legacy apps load `<sandbox>/app-tree/app/images/x.png` and the unified
   // app `<app>/out/renderer/images/genN/x.png` (the generation's tree, plan 2.4), and
   // "the same missing image" is the claim -- gen3 asks for
-  // `elements/type-icons/undefined.png` on both sides.
+  // `elements/type-icons/undefined.png` on both sides (`.webp` on the unified side
+  // since the pool's conversion; `foldImageFormat`).
   const message = (text: string): string =>
-    text
-      .split("\n")
-      .filter((line) => !/^\s+at\s/.test(line))
-      .join("\n")
-      .replace(/file:\/\/\/\S*?\/(?:app-tree\/app|out\/renderer)\/images\/(?:gen[1-5]\/)?/g, "<images>/")
-      .replace(/file:\/\/\/\S*?\/out\/renderer\//g, "<app>/out/renderer/")
-      .trim();
+    foldImageFormat(
+      text
+        .split("\n")
+        .filter((line) => !/^\s+at\s/.test(line))
+        .join("\n")
+        .replace(/file:\/\/\/\S*?\/(?:app-tree\/app|out\/renderer)\/images\/(?:gen[1-5]\/)?/g, "<images>/")
+        .replace(/file:\/\/\/\S*?\/out\/renderer\//g, "<app>/out/renderer/")
+        .trim(),
+    );
   const baseline = new Set(a.filter((e) => e.type !== "warning").map((e) => message(e.text)));
   for (const entry of b) {
     if (entry.type === "warning") continue;
@@ -599,6 +602,20 @@ function diffConsole(basePath: string, candPath: string, checkpoint: string | un
 }
 
 // ---------------------------------------------------------------- helpers
+
+/**
+ * The legacy apps load PNGs; the unified pool holds the same pixels as lossless WebP
+ * (tools/assets/to-webp.ts), so an image under the pool root is compared by its
+ * `.png` spelling -- in a computed `url(images/...)` and in a failed load's
+ * `<images>/...` alike. The file is the claim, not its format.
+ */
+function foldImageFormat(value: string): string {
+  return value.replace(/url\(images\/([^)]*?)\.webp\)/g, "url(images/$1.png)").replace(/<images>\/(\S*?)\.webp\b/g, "<images>/$1.png");
+}
+
+function sameStyleValue(a: string | undefined, b: string | undefined): boolean {
+  return a === b || (a !== undefined && b !== undefined && foldImageFormat(a) === foldImageFormat(b));
+}
 
 function listCheckpoints(dir: string): string[] {
   if (!existsSync(dir)) return [];

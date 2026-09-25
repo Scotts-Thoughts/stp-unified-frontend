@@ -10,7 +10,7 @@
                     <td style="font-size: 18px; width: 68px;  text-align: right; padding-right: 3px;">Diff</td>
                 </tr>
                 <tr v-for="split in compare_splits">
-                    <td class="scaled_icon" style="font-size: 18px; width: 40px;  text-align: left;"><img :src="'images/split_images/' + trainer_name_lookup.basic[split.trainer]?.trainer + '.png'"></td>
+                    <td class="scaled_icon" style="font-size: 18px; width: 40px;  text-align: left;"><img :src="'images/split_images/' + trainer_name_lookup.basic[split.trainer]?.trainer + '.webp'"></td>
                     <td style="font-size: 18px; width: 80px;  text-align: left; padding-left: 3px;">{{trainer_name_lookup.basic[split.trainer]?.trainer}}</td>
                     <td style="font-size: 18px; width: 110px; text-align: right;">{{split.previous_time}}</td>
                     <td style="font-size: 18px; width: 110px; text-align: right;">{{split.current_time}}</td>

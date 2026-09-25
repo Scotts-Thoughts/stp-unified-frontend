@@ -16,9 +16,9 @@ These are read-only references; never modify them.
 | 3 | Ruby & Sapphire | `A:\decomps\pokeruby` |
 | 3 | Emerald | `A:\decomps\pokeemerald` |
 | 3 | FireRed & LeafGreen | `A:\decomps\pokefirered` |
-| 4 | Diamond & Pearl | `A:\Dropbox\stp-projects\programs\poke_map\repos\pokediamond` |
+| 4 | Diamond & Pearl | `A:\Dropbox\stp-projects\programs\pokemap\repos\pokediamond` |
 | 4 | Platinum | `A:\decomps\pokeplatinum` |
-| 4 | HeartGold & SoulSilver | `A:\Dropbox\stp-projects\programs\poke_map\repos\pokeheartgold` |
+| 4 | HeartGold & SoulSilver | `A:\Dropbox\stp-projects\programs\pokemap\repos\pokeheartgold` |
 
 Gen 1/2 repos are asm (rgbds); Gen 3 is C (agbcc); Gen 4 is C (ARM/NDS).
 

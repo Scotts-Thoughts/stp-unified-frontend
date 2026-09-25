@@ -7,7 +7,7 @@
         <div class="movesetContainer" v-if="meta.gameState != 'No Pokemon'">
             <!-- Out of PP on every move: the game forces Struggle. -->
             <div v-if="struggle_check">
-                <img class="movesetStyling iconStyling move1icon" :src="'images/elements/type-icons/normal.png'" />
+                <img class="movesetStyling iconStyling move1icon" :src="'images/elements/type-icons/normal.webp'" />
                 <div class="movesetStyling moveStyling move1">Struggle</div>
                 <div class="movesetStyling powerStyling move1">{{ type_effectiveness(dynamic_mon, 'move1', game_properties.battle.enemyPokemon, true) || "-" }}</div>
                 <div class="movesetStyling accuracyStyling move1">{{ moveAccuracyEvasionDynamic('Struggle') || "-" }}<span style="font-size: 20px;">%</span></div>
@@ -142,7 +142,7 @@ export default defineComponent({
         },
         moveTypeIcon(move_name_string: string | null): string {
             const move = PokeData.findMove(this.move_name(move_name_string, this.meta.starter));
-            return `images/elements/type-icons/${(move?.type ?? "Normal").toLowerCase()}.png`;
+            return `images/elements/type-icons/${(move?.type ?? "Normal").toLowerCase()}.webp`;
         },
         get_backport_move_name(move_name: string | null, starter: string, byte_value: number | undefined): string | null {
             if (move_name == 'STRUGGLE' || move_name == null) {

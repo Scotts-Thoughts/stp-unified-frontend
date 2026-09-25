@@ -16,7 +16,7 @@ const game_properties = inject<Record<string, GameHookProperty>>("game_propertie
 function badgeGraphic(x: GameHookProperty): string {
     if (x.value == true) {
         var badge = x.path.toString().substring(14);
-        return `images/badges/${badge}.png`;
+        return `images/badges/${badge}.webp`;
     }        
     return "";            
 }

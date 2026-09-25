@@ -9,7 +9,7 @@
                         'transform': `scale(${backgroundScale}%) ${backgroundFlip ? 'rotateY(180deg)' : ''} ${backgroundXFlip ? 'rotateX(180deg)' : ''} translate(${backgroundXOffset}px, ${-backgroundYOffset}px)`
                     }">
                     <img class="canvas" ref="old_background_texture" style="opacity: 0">
-                    <img class="canvas pokeball" :src="`images/gen2/elements/pokeball.png`" :style="{
+                    <img class="canvas pokeball" :src="`images/gen2/elements/pokeball.webp`" :style="{
                             'transform': `translate(${pokeball_translateX}px, ${-pokeball_translateY}px)`}">
                     <img class="pokemon_art pokemon_offsets" ref="pokemon_art" :style="{
                         'transform': `scale(${imageScale}) ${imageFlip ? 'rotateY(180deg)' : ''} translate(${imageXOffset}px, ${-imageYOffset}px)`,
@@ -22,7 +22,7 @@
                         drop-shadow(0 0 0.4px #000)
                         drop-shadow(${imageFlip ? '-3px' : '3px'} 3px 3px #000)
                         `
-                    }" :src="`images/gen2/pokemon/${s1dynamicReset.species.value}.png`">
+                    }" :src="`images/gen2/pokemon/${s1dynamicReset.species.value}.webp`">
                     <div class="svg-container">
                         <div v-show="blackouts_resets == 'None'" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen2/ui/timer_2.svg)"></div>
                         <div v-show="blackouts_resets == 'Blackouts'" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen2/ui/timer_2.svg)"></div>
@@ -31,8 +31,8 @@
                         <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen2/ui/stats.svg)"></div>
                         <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen2/ui/moveset.svg)"></div>
                     </div>
-                    <img v-if="ui_stats_styling == '2023'" class="exp_background" src="images/gen2/exp_bar/exp_bar.png">
-                    <img v-if="ui_stats_styling == '2023'" class="exp_label_box" src="images/gen2/exp_bar/exp_label.png">
+                    <img v-if="ui_stats_styling == '2023'" class="exp_background" src="images/gen2/exp_bar/exp_bar.webp">
+                    <img v-if="ui_stats_styling == '2023'" class="exp_label_box" src="images/gen2/exp_bar/exp_label.webp">
                     <div v-if="ui_stats_styling == '2023'" class="exp_growthRate">{{ growthRate(dexDataCrystal[starter].growth_rate) }}</div>
                     
                     <div v-if="shuckie_timer == true" class="gametime">
@@ -44,8 +44,8 @@
                         <live-text class="gametimeFrames" source="timer_frames"></live-text>
                     </div>
                     <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen2/ui/gamearea.svg)"></div>
-                    <img v-show="kanto_badges == false" class="canvas" src="images/gen2/elements/badges_johto.png">
-                    <img v-show="kanto_badges == true" class="canvas" src="images/gen2/elements/badges_kanto.png">
+                    <img v-show="kanto_badges == false" class="canvas" src="images/gen2/elements/badges_johto.webp">
+                    <img v-show="kanto_badges == true" class="canvas" src="images/gen2/elements/badges_kanto.webp">
                     <img v-if="ui_stats_styling == '2024'" class="posAbs" style="z-index: 0;" :src="`images/gen2/ui/${ui_type_color_modifier}${ui_stat_arrangement_modifier}stat_values.svg`">
                 </div>
 
@@ -481,12 +481,12 @@
                 <div v-show="g2stateVariable != 'Base Stats'">
                     <div v-show="kanto_badges == false">
                         <div v-for="badge in progressBadges">
-                            <transition name="fade"><img v-show="game.properties.player.badges[badge].value == true" :src="`images/gen2/badges/progress bar/${badge}.png`" class="canvas"></transition>
+                            <transition name="fade"><img v-show="game.properties.player.badges[badge].value == true" :src="`images/gen2/badges/progress bar/${badge}.webp`" class="canvas"></transition>
                         </div>
                     </div>
                     <div v-show="kanto_badges == true">
                         <div v-for="badge in progressBadges2">
-                            <transition name="fade"><img v-show="game.properties.player.badges[badge].value == true" :src="`images/gen2/badges/progress bar/${badge}.png`" class="canvas"></transition>
+                            <transition name="fade"><img v-show="game.properties.player.badges[badge].value == true" :src="`images/gen2/badges/progress bar/${badge}.webp`" class="canvas"></transition>
                         </div>
                     </div>
                 </div>
@@ -494,8 +494,8 @@
             <!-- TYPE ICONS -->
                 <transition name="fade1">
                     <div v-if="!run_complete" class="typeIconContainer">
-                        <img v-show="typeIcons == true" class="type1" :src="`images/gen2/type-icons/${ui_type_icons_modifier}${type1().toLowerCase()}.png`">
-                        <img v-show="typeIcons == true && type1() != type2()" class="type1" :src="`images/gen2/type-icons/${ui_type_icons_modifier}${type2().toLowerCase()}.png`">
+                        <img v-show="typeIcons == true" class="type1" :src="`images/gen2/type-icons/${ui_type_icons_modifier}${type1().toLowerCase()}.webp`">
+                        <img v-show="typeIcons == true && type1() != type2()" class="type1" :src="`images/gen2/type-icons/${ui_type_icons_modifier}${type2().toLowerCase()}.webp`">
                     </div>
                 </transition>
                 
@@ -600,13 +600,13 @@
                     <img class="canvas red-svg" :src="`images/gen2/ui/speed_comp/0.svg`">
                     <div class="enemyGraphic">
                         <div class="ePkmnStyle ePkmn1">
-                            <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `drop-shadow(${getEnemySpriteFlipped(styleModeCurrentSpecies()) ? -2 : 2}px 2px 2px #000) saturate(1.3)` }" :src="`images/gen2/pokemon/${styleModeCurrentSpecies()}.png`">
+                            <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `drop-shadow(${getEnemySpriteFlipped(styleModeCurrentSpecies()) ? -2 : 2}px 2px 2px #000) saturate(1.3)` }" :src="`images/gen2/pokemon/${styleModeCurrentSpecies()}.webp`">
                             <div class="ePkmnSpecies opacityTransition">{{ styleModeCurrentSpecies() }}</div>
                             <img class="enemyStatsArea" :src="`images/gen2/stats/0.svg`">
-                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :src="`images/gen2/type-icons-circular/${dexDataCrystal[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.png`">
-                            <img v-if="dexDataCrystal[styleModeCurrentSpecies()]?.type_1 != dexDataCrystal[styleModeCurrentSpecies()]?.type_2" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen2/type-icons-circular/${dexDataCrystal[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.png`">
+                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :src="`images/gen2/type-icons-circular/${dexDataCrystal[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.webp`">
+                            <img v-if="dexDataCrystal[styleModeCurrentSpecies()]?.type_1 != dexDataCrystal[styleModeCurrentSpecies()]?.type_2" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen2/type-icons-circular/${dexDataCrystal[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.webp`">
                             <!-- Moves -->
-                            <img v-for="(dummy, i) in style_mode_dummy_moves" :class="`ds eMoveIconStyle moveIcon${i + 1} opacityTransition`" :src="`images/gen2/type-icons-circular/${dummy.type}.png`">
+                            <img v-for="(dummy, i) in style_mode_dummy_moves" :class="`ds eMoveIconStyle moveIcon${i + 1} opacityTransition`" :src="`images/gen2/type-icons-circular/${dummy.type}.webp`">
                             <div v-for="(dummy, i) in style_mode_dummy_moves" :class="`ePkmnMoveStyle ePkmnMove${i + 1} opacityTransition`">{{ dummy.name }}</div>
                             <!-- Level -->
                             <div class="ePkmnLevel opacityTransition">Lv:50</div>
@@ -678,7 +678,7 @@
                                     <td style="font-size: 18px; width: 68px;  text-align: right; padding-right: 4px;">Diff</td>
                                 </tr>
                                 <tr v-for="split in compare_splits">
-                                    <td class="scaled_icon" style="font-size: 18px; width: 40px; padding-left: 3px; text-align: left;"><img :src="`images/gen2/split_images/${trainer_name_lookup.basic[split.trainer]?.trainer}.png`"></td>
+                                    <td class="scaled_icon" style="font-size: 18px; width: 40px; padding-left: 3px; text-align: left;"><img :src="`images/gen2/split_images/${trainer_name_lookup.basic[split.trainer]?.trainer}.webp`"></td>
                                     <td style="font-size: 18px; width: 80px;  text-align: left; padding-left: 3px; white-space: nowrap;">{{trainer_name_lookup.basic[split.trainer]?.trainer}}</td>
                                     <td style="font-size: 18px; width: 110px; text-align: right;">{{split.previous_time}}</td>
                                     <td style="font-size: 18px; width: 110px; text-align: right;">{{split.current_time}}</td>
@@ -697,7 +697,7 @@
                                     <td style="font-size: 18px; width: 110px; text-align: right; padding-right: 5px;">Time</td>
                                 </tr>
                                 <tr v-for="split in compare_splits">
-                                    <td class="scaled_icon" style="font-size: 20px; width: 40px; padding-left: 3px; text-align: left;"><img :src="`images/gen2/split_images/${trainer_name_lookup.basic[split.trainer]?.trainer}.png`"></td>
+                                    <td class="scaled_icon" style="font-size: 20px; width: 40px; padding-left: 3px; text-align: left;"><img :src="`images/gen2/split_images/${trainer_name_lookup.basic[split.trainer]?.trainer}.webp`"></td>
                                     <td style="font-size: 20px; width: 180px; text-align: left; padding-left: 3px;">{{trainer_name_lookup.detailed[split.trainer]?.trainer}}</td>
                                     <td style="font-size: 20px; width: 10px;  text-align: left; padding-left: 3px;"></td>
                                     <td style="font-size: 20px; width: 10px;  text-align: left; padding-left: 3px;"></td>
@@ -763,14 +763,14 @@
                     </div>
                     <div v-for="x in pkmnSlots" class="enemyGraphic">
                         <div v-show="batt.trainer.team[x].species.value != null" :class="`ePkmnStyle ePkmn${x + 1}`">
-                            <img v-if="batt.trainer.team[x].species.value != null" class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="batt.trainer.team[x].species.value" :style="[enemyPkmnFaint(batt.trainer.team[x]), { transform: enemyTransformFor(batt.trainer.team[x].species.value) }]" :src="`images/gen2/pokemon/${batt.trainer.team[x].species.value}.png`">
+                            <img v-if="batt.trainer.team[x].species.value != null" class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="batt.trainer.team[x].species.value" :style="[enemyPkmnFaint(batt.trainer.team[x]), { transform: enemyTransformFor(batt.trainer.team[x].species.value) }]" :src="`images/gen2/pokemon/${batt.trainer.team[x].species.value}.webp`">
                             <div class="ePkmnSpecies opacityTransition" :style="enemyPkmnSpecies(batt.trainer.team[x])">{{batt.trainer.team[x].species.value}}</div>
                             <img class="enemyStatsArea" :style="enemyPkmnFaintStatsBackground(batt.trainer.team[x])" :src="`images/gen2/stats/${x}.svg`">
-                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen2/type-icons-circular/${enemyType1(x).toLowerCase()}.png`">
-                            <img v-if="enemyType1(x) != enemyType2(x)" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen2/type-icons-circular/${enemyType2(x).toLowerCase()}.png`">
+                            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen2/type-icons-circular/${enemyType1(x).toLowerCase()}.webp`">
+                            <img v-if="enemyType1(x) != enemyType2(x)" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="`images/gen2/type-icons-circular/${enemyType2(x).toLowerCase()}.webp`">
                             <!-- Moves -->
                             <div v-for="move_index in moves = [0, 1, 2, 3]">
-                                <img v-if="enemy_trainer.party[x]?.moves[move_index] != null" :class="`ds eMoveIconStyle moveIcon${move_index + 1} opacityTransition`" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen2/type-icons-circular/${g2MoveData[move_name(game.properties.battle.trainer.team[x][`move${move_index + 1}`]?.value)]?.Type?.toLowerCase()}.png`">
+                                <img v-if="enemy_trainer.party[x]?.moves[move_index] != null" :class="`ds eMoveIconStyle moveIcon${move_index + 1} opacityTransition`" :style="enemyPkmnFaintTypes(batt.trainer.team[x])" :src="`images/gen2/type-icons-circular/${g2MoveData[move_name(game.properties.battle.trainer.team[x][`move${move_index + 1}`]?.value)]?.Type?.toLowerCase()}.webp`">
                                 <div :class="`ePkmnMoveStyle ePkmnMove${move_index + 1} opacityTransition`" :style="enemyPkmnText(batt.trainer.team[x])">
                                     {{move_name(batt.trainer.team[x][`move${move_index + 1}`]?.value)}}
                                 </div>
@@ -4595,7 +4595,7 @@ export default defineComponent({
         badgeGraphic(x) {
             if (x.value == true) {
                 var badge = x.path.toString().substring(14)
-                return `images/gen2/gen2-badges/${badge}.png`
+                return `images/gen2/gen2-badges/${badge}.webp`
             }
             else if (x.value == false) {   
                 return null
@@ -4606,12 +4606,12 @@ export default defineComponent({
         getStarterType1() {
             if (this.pick == true)
                 var type = this.dexDataCrystal[this.starter].type_1
-                return `images/gen2/type-icons/${type}.png`
+                return `images/gen2/type-icons/${type}.webp`
         },
         getStarterType2() {
             if (this.pick == true)
                 var type = this.dexDataCrystal[this.starter].type_2
-                return `images/gen2/type-icons/${type}.png`
+                return `images/gen2/type-icons/${type}.webp`
         },
         getRolloutCounter() {
             if (this.game.properties.patch.patchPresent!= null) {
@@ -4626,7 +4626,7 @@ export default defineComponent({
         moveTypeIcon(y) { //y = move1.value
             const moveType = this.moveType(y)?.toLowerCase()
             if (moveType) {
-                return `images/gen2/type-icons-circular/${moveType}.png`
+                return `images/gen2/type-icons-circular/${moveType}.webp`
             }
         },
         movePower(y) { //y = move1.value
@@ -5088,32 +5088,32 @@ export default defineComponent({
         },
         specialTrainerGraphics() {
             if (this.showSpecialTrainerGraphics == true) {
-                if (this.batt.trainer.class.value == "CLAIR") { return `images/gen2/trainers/${this.batt.trainer.class.value}.png` }
-                // else if (this.game.properties.battle.trainer.class == "POKEMANIAC" && this.game.properties.battle.trainer.number == 7) return `images/gen2/trainers/${this.game.properties.battle.trainer.class.value}_${this.game.properties.battle.trainer.number}.png`
-                else if (this.game.properties.battle.trainer.class == "FISHER"     && this.game.properties.battle.trainer.id == 2)  return `images/gen2/trainers/RALPH.png`
-                else if (this.game.properties.battle.trainer.class == "BLACKBELT"  && this.game.properties.battle.trainer.id == 2)  return `images/gen2/trainers/YOSHI.png`
-                else if (this.game.properties.battle.trainer.class == "BLACKBELT"  && this.game.properties.battle.trainer.id == 4)  return `images/gen2/trainers/LAO.png`
-                else if (this.game.properties.battle.trainer.class == "BLACKBELT"  && this.game.properties.battle.trainer.id == 5)  return `images/gen2/trainers/NOB.png`
-                else if (this.game.properties.battle.trainer.class == "HIKER"      && this.game.properties.battle.trainer.id == 5)  return `images/gen2/trainers/ANTHONY.png`
-                else if (this.game.properties.battle.trainer.class == "SCHOOLBOY"  && this.game.properties.battle.trainer.id == 10) return `images/gen2/trainers/CHAD.png`
+                if (this.batt.trainer.class.value == "CLAIR") { return `images/gen2/trainers/${this.batt.trainer.class.value}.webp` }
+                // else if (this.game.properties.battle.trainer.class == "POKEMANIAC" && this.game.properties.battle.trainer.number == 7) return `images/gen2/trainers/${this.game.properties.battle.trainer.class.value}_${this.game.properties.battle.trainer.number}.webp`
+                else if (this.game.properties.battle.trainer.class == "FISHER"     && this.game.properties.battle.trainer.id == 2)  return `images/gen2/trainers/RALPH.webp`
+                else if (this.game.properties.battle.trainer.class == "BLACKBELT"  && this.game.properties.battle.trainer.id == 2)  return `images/gen2/trainers/YOSHI.webp`
+                else if (this.game.properties.battle.trainer.class == "BLACKBELT"  && this.game.properties.battle.trainer.id == 4)  return `images/gen2/trainers/LAO.webp`
+                else if (this.game.properties.battle.trainer.class == "BLACKBELT"  && this.game.properties.battle.trainer.id == 5)  return `images/gen2/trainers/NOB.webp`
+                else if (this.game.properties.battle.trainer.class == "HIKER"      && this.game.properties.battle.trainer.id == 5)  return `images/gen2/trainers/ANTHONY.webp`
+                else if (this.game.properties.battle.trainer.class == "SCHOOLBOY"  && this.game.properties.battle.trainer.id == 10) return `images/gen2/trainers/CHAD.webp`
                 //RIVAL1
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 1) return `images/gen2/trainers/SILVER1.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 2) return `images/gen2/trainers/SILVER1.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 3) return `images/gen2/trainers/SILVER1.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 4) return `images/gen2/trainers/SILVER2.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 5) return `images/gen2/trainers/SILVER2.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 6) return `images/gen2/trainers/SILVER2.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 7) return `images/gen2/trainers/SILVER3.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 8) return `images/gen2/trainers/SILVER3.png`
-                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 9) return `images/gen2/trainers/SILVER3.png`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 1) return `images/gen2/trainers/SILVER1.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 2) return `images/gen2/trainers/SILVER1.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 3) return `images/gen2/trainers/SILVER1.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 4) return `images/gen2/trainers/SILVER2.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 5) return `images/gen2/trainers/SILVER2.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 6) return `images/gen2/trainers/SILVER2.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 7) return `images/gen2/trainers/SILVER3.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 8) return `images/gen2/trainers/SILVER3.webp`
+                else if (this.game.properties.battle.trainer.class == "RIVAL1" && this.game.properties.battle.trainer.id == 9) return `images/gen2/trainers/SILVER3.webp`
                 //KIMONO GIRLS
-                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 4) return `images/gen2/trainers/KIMONO_ZUKI.png`
-                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 3) return `images/gen2/trainers/KIMONO_NAOKO.png`
-                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 2) return `images/gen2/trainers/KIMONO_MIKI.png`
-                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 6) return `images/gen2/trainers/KIMONO_SAYO.png`
-                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 5) return `images/gen2/trainers/KIMONO_KUNI.png`
+                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 4) return `images/gen2/trainers/KIMONO_ZUKI.webp`
+                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 3) return `images/gen2/trainers/KIMONO_NAOKO.webp`
+                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 2) return `images/gen2/trainers/KIMONO_MIKI.webp`
+                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 6) return `images/gen2/trainers/KIMONO_SAYO.webp`
+                else if (this.game.properties.battle.trainer.class == "KIMONO GIRL" && this.game.properties.battle.trainer.id == 5) return `images/gen2/trainers/KIMONO_KUNI.webp`
                 //CATCH ALL FOR GYM LEADERS
-                else return `images/gen2/trainers/${this.batt.trainer.class.value}.png`
+                else return `images/gen2/trainers/${this.batt.trainer.class.value}.webp`
             }
         },
         g2trainerEnemySelector(trainerClass) {

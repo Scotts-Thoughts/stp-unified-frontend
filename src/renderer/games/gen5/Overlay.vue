@@ -8,7 +8,7 @@
                     'transform': `scale(${backgroundScale}%) ${backgroundFlip ? 'rotateY(180deg)' : ''} translate(${backgroundXOffset}px, ${-backgroundYOffset}px)`
                 }">
             </transition>
-            <img class="canvas" :src="`images/gen5/elements/pokeball.png`">
+            <img class="canvas" :src="`images/gen5/elements/pokeball.webp`">
             <!-- Keyed by the displayed species so starter changes, evolution-dropdown swaps and
                  mid-run evolutions cross-fade old/new art. No inline opacity here: it would
                  override the styleFade classes, so the fade is left entirely to the transition -->
@@ -24,7 +24,7 @@
                     drop-shadow(0 0 0.4px #000)
                     drop-shadow(${imageFlip ? '-3px' : '3px'} 3px 3px #000)
                     `
-                }" :src="`images/gen5/pokemon/${displayedPokemonSpecies}.png`">
+                }" :src="`images/gen5/pokemon/${displayedPokemonSpecies}.webp`">
             </transition>
             <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen5/ui/game_area.svg)"></div>
             <div v-if="shuckie_counters == true">
@@ -38,8 +38,8 @@
             
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/moveset.svg)"></div>
 
-            <img v-show="selected_game == 'Black' || selected_game == 'White'" class="canvas" :src="`images/gen5/progress.png`">
-            <img v-show="selected_game == 'Black 2' || selected_game == 'White 2'" class="canvas" :src="`images/gen5/bw2_progress.png`">
+            <img v-show="selected_game == 'Black' || selected_game == 'White'" class="canvas" :src="`images/gen5/progress.webp`">
+            <img v-show="selected_game == 'Black 2' || selected_game == 'White 2'" class="canvas" :src="`images/gen5/bw2_progress.webp`">
 
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/stats.svg)"></div>
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/stats.svg)"></div>
@@ -48,10 +48,10 @@
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/ability_helditem.svg)"></div>
             <img class="canvas colored-image ds" :src="`images/gen5/ui/stats_values.svg`">
             <div v-if="show_nature_changes == true && (stats_setting == 'Automatic' || stats_setting == 'Base Stats')">
-                <img class="canvas colored-image ds " :src="`images/gen5/ui/nature arrows//raises/${natures[pkmnNature].raises}.svg`">
-                <img class="canvas colored-image ds " :src="`images/gen5/ui/nature arrows//lowers/${natures[pkmnNature].lowers}.svg`">
+                <img class="canvas colored-image ds " :src="`images/gen5/ui/nature arrows/raises/${natures[pkmnNature].raises}.svg`">
+                <img class="canvas colored-image ds " :src="`images/gen5/ui/nature arrows/lowers/${natures[pkmnNature].lowers}.svg`">
             </div>
-            <img class="canvas" :src="`images/gen5/ui/move_backgrounds.png`">
+            <img class="canvas" :src="`images/gen5/ui/move_backgrounds.webp`">
             <!-- <shuckie-timer :emulatorStats="emulatorStats"></shuckie-timer> -->
             <div v-if="shuckie_timer == true">
                 <live-text class="gametimeClock" source="shuckie_clock"></live-text>
@@ -65,7 +65,7 @@
                 <div class="ui1">
                     <div>Game:</div>
                     <div class="gameToggle">
-                        <img v-for="game in available_games" :key="game" :src="`images/gen5/box_art/5-${game.replace(' ', '')}.png`" :title="game" :class="['gameToggleImg', { selected: selected_game == game }]" @click="selected_game = game">
+                        <img v-for="game in available_games" :key="game" :src="`images/gen5/box_art/5-${game.replace(' ', '')}.webp`" :title="game" :class="['gameToggleImg', { selected: selected_game == game }]" @click="selected_game = game">
                     </div><br>
                     <button class="buttonStyle" @click="newRun">New Run</button><br>
                     <br>
@@ -535,8 +535,8 @@
             <!-- OVERLAY COMPONENTS -->
             <!-- Type Icons -->
             <div v-if="!run_complete" class="posAbs type_icons_boundingBox center">
-                <img class="type_icons" :src="`images/gen5/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_1')?.toLowerCase()}.png`">
-                <img v-if="getSoloMonType(game.properties.player.team[0].species.value??starter, 'type_1') != getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')" class="type_icons" :src="`images/gen5/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')?.toLowerCase()}.png`">
+                <img class="type_icons" :src="`images/gen5/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_1')?.toLowerCase()}.webp`">
+                <img v-if="getSoloMonType(game.properties.player.team[0].species.value??starter, 'type_1') != getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')" class="type_icons" :src="`images/gen5/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')?.toLowerCase()}.webp`">
             </div>
 
             <!-- Stats -->
@@ -597,8 +597,8 @@
                 <div v-for="x in badges">
                     <transition name="fade1">
                         <div v-if="game.properties.player.badges[x].value == true && game.properties.meta.state != `No Pokemon`">
-                            <img v-if="selected_game == 'Black' || selected_game == 'White'" class="badge" :src="`images/gen5/badges/${x}.png`">
-                            <img v-if="selected_game == 'Black 2' || selected_game == 'White 2'" class="badge" :src="`images/gen5/badges/bw2/${x}.png`">
+                            <img v-if="selected_game == 'Black' || selected_game == 'White'" class="badge" :src="`images/gen5/badges/${x}.webp`">
+                            <img v-if="selected_game == 'Black 2' || selected_game == 'White 2'" class="badge" :src="`images/gen5/badges/bw2/${x}.webp`">
                         </div>
                     </transition>
                 </div>
@@ -618,7 +618,7 @@
                 <tr v-if="getMove('1')">
                     <!-- Move1 -->
                     <th class="align_left g4mp_types">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('1')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('1')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove('1')}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move1?.move.value, 1)}}</th>
@@ -642,7 +642,7 @@
                 <tr v-if="getMove('2')">
                     <!-- Move2 -->
                     <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('2')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('2')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove('2')}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move2?.move.value, 2)}}</th>
@@ -658,7 +658,7 @@
                 <tbody><tr v-if="getMove('3')">
                     <!-- Move3 -->
                     <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('3')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('3')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove("3")}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move3?.move.value, 3)}}</th>
@@ -674,7 +674,7 @@
                 <tbody><tr v-if="getMove('4')">
                     <!-- Move4 -->
                     <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('4')}.png`">
+                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('4')}.webp`">
                     </th>
                     <th class="align_left g4mp_move">{{getMove("4")}}</th>
                     <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move4?.move.value, 4)}}</th>
@@ -707,10 +707,10 @@
                             <div class="border slots ePkmnStyle ePkmn0">
                                 <div>
                                     <div>
-                                        <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `drop-shadow(${getEnemySpriteFlipped(styleModeCurrentSpecies()) ? -2 : 2}px 2px 2px #000) saturate(1.1)` }" :src="`images/gen5/pokemon/${speciesSpecialCharacters(styleModeCurrentSpecies())}.png`">
+                                        <img class="ePkmnSprite ePkmnSpriteResizing" :data-enemy-slot="0" :data-enemy-species="styleModeCurrentSpecies()" :style="{ transform: enemyTransformFor(styleModeCurrentSpecies()), filter: `drop-shadow(${getEnemySpriteFlipped(styleModeCurrentSpecies()) ? -2 : 2}px 2px 2px #000) saturate(1.1)` }" :src="`images/gen5/pokemon/${speciesSpecialCharacters(styleModeCurrentSpecies())}.webp`">
                                         <div class="border ePkmnTyping">
-                                            <img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.png`">
-                                            <img v-show="g5PokemonData[styleModeCurrentSpecies()]?.type_1 != g5PokemonData[styleModeCurrentSpecies()]?.type_2" class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.png`">
+                                            <img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[styleModeCurrentSpecies()]?.type_1?.toLowerCase()}.webp`">
+                                            <img v-show="g5PokemonData[styleModeCurrentSpecies()]?.type_1 != g5PokemonData[styleModeCurrentSpecies()]?.type_2" class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[styleModeCurrentSpecies()]?.type_2?.toLowerCase()}.webp`">
                                         </div>
                                         <div class="ePkmnLvlSpecies">{{ styleModeCurrentSpecies() }}</div>
                                         <div class="ePkmnLevel" style="opacity: .7;">Lv: 50</div>
@@ -733,7 +733,7 @@
                                         <div class="border ePkmnMoves">
                                             <table class="enemyMovesetTable">
                                                 <tbody><tr v-for="(dummy, i) in style_mode_dummy_moves">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${dummy.type}.png`"></th>
+                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${dummy.type}.webp`"></th>
                                                     <th class="align_left" style="font-size: 14px;">{{ dummy.name }}</th>
                                                 </tr>
                                             </tbody></table>
@@ -762,15 +762,15 @@
                             <div v-if="x < game.properties.battle.opponent.team_count.value" :class="`border slots ePkmnStyle ePkmn${x}`">
                                 <div :style="fade_enemy_mon(x)" class="eFaintTransition">
                                     <div :style="fade_enemy_mon_text(x)" class="eFaintTransition">
-                                        <img class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemy_mon_static[x]?.species?.value" :style="{ transform: enemyTransformFor(enemy_mon_static[x]?.species?.value), filter: `drop-shadow(${getEnemySpriteFlipped(enemy_mon_static[x]?.species?.value) ? -1 : 1}px 1px 2px)` }" :src="`images/gen5/pokemon/${speciesSpecialCharacters(enemy_mon_static[x]?.species)}${enemy_form(x, enemy_mon_static[x]?.species.value)}.png`">
+                                        <img class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemy_mon_static[x]?.species?.value" :style="{ transform: enemyTransformFor(enemy_mon_static[x]?.species?.value), filter: `drop-shadow(${getEnemySpriteFlipped(enemy_mon_static[x]?.species?.value) ? -1 : 1}px 1px 2px)` }" :src="`images/gen5/pokemon/${speciesSpecialCharacters(enemy_mon_static[x]?.species)}${enemy_form(x, enemy_mon_static[x]?.species.value)}.webp`">
                                         <!-- <img class="canvas" :src="`images/gen5/ui/speed_comp/${x}.svg`" /> -->
                                         <div class="border ePkmnTyping">
                                             <!-- <img v-if="held_item_icon(enemy_held_item(x))"
                                                 class="icons moveIcon ePkmnHeldItem"
                                                 :src="held_item_icon(enemy_held_item(x))"
                                                 @error="$event.target.style.visibility='hidden'" /> -->
-                                            <img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[enemy_mon_static[x]?.species]?.type_1?.toLowerCase()}.png`">
-                                            <img v-show="g5PokemonData[enemy_mon_static[x]?.species]?.type_1 != g5PokemonData[enemy_mon_static[x]?.species]?.type_2" class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[enemy_mon_static[x]?.species]?.type_2?.toLowerCase()}.png`">
+                                            <img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[enemy_mon_static[x]?.species]?.type_1?.toLowerCase()}.webp`">
+                                            <img v-show="g5PokemonData[enemy_mon_static[x]?.species]?.type_1 != g5PokemonData[enemy_mon_static[x]?.species]?.type_2" class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[enemy_mon_static[x]?.species]?.type_2?.toLowerCase()}.webp`">
                                         </div>
 
                                         <div class="ePkmnLvlSpecies">{{enemy_mon_static[x]?.species}}</div>
@@ -794,19 +794,19 @@
                                         <div class="border ePkmnMoves">
                                             <table class="enemyMovesetTable">
                                                 <tbody><tr v-show="game.properties.battle.opponent.team[x].moves[0].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[0].move.value]?.type?.toLowerCase()}.png`"></th>
+                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[0].move.value]?.type?.toLowerCase()}.webp`"></th>
                                                     <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[0].move.value}}</th>
                                                 </tr>
                                                 <tr v-show="game.properties.battle.opponent.team[x].moves[1].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[1].move.value]?.type?.toLowerCase()}.png`"></th>
+                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[1].move.value]?.type?.toLowerCase()}.webp`"></th>
                                                     <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[1].move.value}}</th>
                                                 </tr>
                                                 <tr v-show="game.properties.battle.opponent.team[x].moves[2].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[2].move.value]?.type?.toLowerCase()}.png`"></th>
+                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[2].move.value]?.type?.toLowerCase()}.webp`"></th>
                                                     <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[2].move.value}}</th>
                                                 </tr>
                                                 <tr v-show="game.properties.battle.opponent.team[x].moves[3].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[3].move.value]?.type?.toLowerCase()}.png`"></th>
+                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[3].move.value]?.type?.toLowerCase()}.webp`"></th>
                                                     <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[3].move.value}}</th>
                                                 </tr>
                                             </tbody></table>
@@ -824,7 +824,7 @@
                         </div>
                     </div> 
                     <img v-if="getTrainerGraphic().state == true" :src="getTrainerGraphic().graphic" style="position: absolute; top: 0px;">
-                    <img v-if="second_screen_check" class="canvas" src="images/gen5/ui/second_screen.png">
+                    <img v-if="second_screen_check" class="canvas" src="images/gen5/ui/second_screen.webp">
                 </div>
                 <!-- Second Screen Mode -->
                 <div v-else-if="second_screen_mode" key="2">
@@ -839,7 +839,7 @@
                                 <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Diff</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon_2" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.png`"></td>
+                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon_2" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
                                 <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
                                 <td style="font-size: 16px; text-align: right;">{{split.previous_time == "0:00" ? "-" : split.previous_time}}</td>
                                 <td style="font-size: 16px; text-align: right;">{{split.current_time}}</td>
@@ -858,7 +858,7 @@
                                 <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Time</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon_2" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.png`"></td>
+                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon_2" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
                                 <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
                                 <td style="font-size: 16px; text-align: right;"></td>
                                 <td style="font-size: 16px; text-align: right;"></td>
@@ -882,7 +882,7 @@
                                 <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Diff</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.png`"></td>
+                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
                                 <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
                                 <td style="font-size: 16px; text-align: right;">{{split.previous_time == "0:00" ? "-" : split.previous_time}}</td>
                                 <td style="font-size: 16px; text-align: right;">{{split.current_time}}</td>
@@ -901,7 +901,7 @@
                                 <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Time</td>
                             </tr>
                             <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.png`"></td>
+                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
                                 <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
                                 <td style="font-size: 16px; text-align: right;"></td>
                                 <td style="font-size: 16px; text-align: right;"></td>
@@ -3921,7 +3921,7 @@ export default defineComponent({
                 "Pink Bow":      "hold-item_silk-scarf",
             }
             if (legacyMap[itemName]) {
-                return `images/gen5/inventory_sprites/${legacyMap[itemName]}.png`
+                return `images/gen5/inventory_sprites/${legacyMap[itemName]}.webp`
             }
             const suffixes = [
                 { end: " Berry",   prefix: "berry" },
@@ -3937,10 +3937,10 @@ export default defineComponent({
             for (const { end, prefix } of suffixes) {
                 if (itemName.endsWith(end)) {
                     const base = normalize(itemName.slice(0, -end.length))
-                    return `images/gen5/inventory_sprites/${prefix}_${base}.png`
+                    return `images/gen5/inventory_sprites/${prefix}_${base}.webp`
                 }
             }
-            return `images/gen5/inventory_sprites/hold-item_${normalize(itemName)}.png`
+            return `images/gen5/inventory_sprites/hold-item_${normalize(itemName)}.webp`
         },
         enemy_form(x, species) {
             const pokemon_data = this.game.properties.battle.opponent.team[x]
@@ -3948,7 +3948,7 @@ export default defineComponent({
             const gender = pokemon_data.gender.value
             switch (species) {
                 case "Basculin": {
-                    // Basculin.png is the Red-Striped art (form 0), the same file the solo art uses
+                    // Basculin.webp is the Red-Striped art (form 0), the same file the solo art uses
                     if (form == 0) { return "" }
                     if (form == 1) { return " (Blue Striped)" }
                 }
@@ -5446,7 +5446,7 @@ export default defineComponent({
             // images/pokemon is ~400MB and images/textures ~9MB per texture, far too much to warm.
             for (const family_species of this.evolution_family_list) {
                 const family_art = new Image();
-                family_art.src = `images/gen5/pokemon/${family_species}.png`;
+                family_art.src = `images/gen5/pokemon/${family_species}.webp`;
             }
 
             // A species' other forms (and battle-only forms) aren't part of its evolution family, so
@@ -5455,7 +5455,7 @@ export default defineComponent({
             for (const form_species of [...this.formVariants(this.starter), ...this.battleFormVariants(this.starter)]) {
                 if (form_species === this.starter) continue;
                 const form_art = new Image();
-                form_art.src = `images/gen5/pokemon/${form_species}.png`;
+                form_art.src = `images/gen5/pokemon/${form_species}.webp`;
             }
 
             // If the evolution family has only one member (e.g., Registeel), disable evolution
@@ -5711,36 +5711,36 @@ export default defineComponent({
         },
         getTrainerGraphic() {
             if (this.enemy_graphic == true) {
-                let graphic = `images/gen5/trainers/Cress.png`
+                let graphic = `images/gen5/trainers/Cress.webp`
                 let trainer = this.game.properties.battle.opponent.trainer.value
                 let bytes = this.game.properties.battle.opponent.trainer.bytes
                 let id_value = this.game.properties.battle.opponent.id.value
                 let displayGraphicState = true
                 if (this.selected_game == `Black` || this.selected_game == `White`) {
                     switch (trainer) {
-                        case "Cress":    graphic = `images/gen5/trainers/Cress.png`;    break;
-                        case "Cilan":    graphic = `images/gen5/trainers/Cilan.png`;    break;
-                        case "Chili":    graphic = `images/gen5/trainers/Chili.png`;    break;
-                        case "Lenora":   graphic = `images/gen5/trainers/Lenora.png`;   break;
-                        case "Burgh":    graphic = `images/gen5/trainers/Burgh.png`;         break;
-                        case "Elesa":    graphic = `images/gen5/trainers/Elesa.png`;    break;
-                        case "Clay":     graphic = `images/gen5/trainers/Clay.png`;     break;
-                        case "Skyla":    graphic = `images/gen5/trainers/Skyla.png`;    break;
-                        case "Drayden":  graphic = `images/gen5/trainers/Drayden.png`;  break;
-                        case "Iris":     graphic = `images/gen5/trainers/Iris.png`;     break;
-                        case "Zinzolin": graphic = `images/gen5/trainers/Zinzolin.png`; break;
+                        case "Cress":    graphic = `images/gen5/trainers/Cress.webp`;    break;
+                        case "Cilan":    graphic = `images/gen5/trainers/Cilan.webp`;    break;
+                        case "Chili":    graphic = `images/gen5/trainers/Chili.webp`;    break;
+                        case "Lenora":   graphic = `images/gen5/trainers/Lenora.webp`;   break;
+                        case "Burgh":    graphic = `images/gen5/trainers/Burgh.webp`;         break;
+                        case "Elesa":    graphic = `images/gen5/trainers/Elesa.webp`;    break;
+                        case "Clay":     graphic = `images/gen5/trainers/Clay.webp`;     break;
+                        case "Skyla":    graphic = `images/gen5/trainers/Skyla.webp`;    break;
+                        case "Drayden":  graphic = `images/gen5/trainers/Drayden.webp`;  break;
+                        case "Iris":     displayGraphicState = false; break;
+                        case "Zinzolin": graphic = `images/gen5/trainers/Zinzolin.webp`; break;
                         case "Shauntal": { 
                             if (this.selected_game == `Black` || this.selected_game == `White`) {
                                 if (id_value == 563) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Shauntal.png`; break;
+                                graphic = `images/gen5/trainers/Shauntal.webp`; break;
                             }
                             if (this.selected_game == `Black 2` || this.selected_game == `White 2`) {
                                 if (id_value == 38) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Shauntal.png`; break;
+                                graphic = `images/gen5/trainers/Shauntal.webp`; break;
                             }
 
                         }
@@ -5749,13 +5749,13 @@ export default defineComponent({
                                 if (id_value == 564) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Marshal.png`;  break;
+                                graphic = `images/gen5/trainers/Marshal.webp`;  break;
                             }
                             if (this.selected_game == `Black 2` || this.selected_game == `White 2`) {
                                 if (id_value == 39) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Shauntal.png`; break;
+                                graphic = `images/gen5/trainers/Shauntal.webp`; break;
                             }
                         }
                         case "Grimsley": { 
@@ -5763,13 +5763,13 @@ export default defineComponent({
                                 if (id_value ==  565) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Grimsley.png`; break;
+                                graphic = `images/gen5/trainers/Grimsley.webp`; break;
                             }
                             if (this.selected_game == `Black 2` || this.selected_game == `White 2`) {
                                 if (id_value == 40) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Shauntal.png`; break;
+                                graphic = `images/gen5/trainers/Shauntal.webp`; break;
                             }
                         }
                         case "Caitlin":  { 
@@ -5777,48 +5777,48 @@ export default defineComponent({
                                 if (id_value == 566) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Caitlin.png`;  break;
+                                graphic = `images/gen5/trainers/Caitlin.webp`;  break;
                             }
                             if (this.selected_game == `Black 2` || this.selected_game == `White 2`) {
                                 if (id_value == 41) {
                                     displayGraphicState = false; break;
                                 }
-                                graphic = `images/gen5/trainers/Shauntal.png`; break;
+                                graphic = `images/gen5/trainers/Shauntal.webp`; break;
                             }
                         }
                         case "Cheren": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/Cheren_12.png`; break;
-                                case 2: graphic = `images/gen5/trainers/Cheren_12.png`; break;
-                                case 3: graphic = `images/gen5/trainers/Cheren_12.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Cheren_4.png`; break;
+                                case 1: graphic = `images/gen5/trainers/Cheren_12.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/Cheren_12.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/Cheren_12.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Cheren_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Cheren_12.png`; break;
+                                default: graphic = `images/gen5/trainers/Cheren_12.webp`; break;
                             }
                             break;
                         }    
                         case "Bianca": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/Bianca_12.png`; break;
-                                case 2: graphic = `images/gen5/trainers/Bianca_12.png`; break;
-                                case 3: graphic = `images/gen5/trainers/Bianca_12.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Bianca_4.png`; break;
+                                case 1: graphic = `images/gen5/trainers/Bianca_12.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/Bianca_12.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/Bianca_12.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Bianca_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Bianca_12.png`; break;
+                                default: graphic = `images/gen5/trainers/Bianca_12.webp`; break;
                             }
                             break;
                         }   
                         case "N": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/N_1.png`; break;
-                                case 2: graphic = `images/gen5/trainers/N_1.png`; break;
-                                case 3: graphic = `images/gen5/trainers/N_3.png`; break;
-                                case 4: graphic = `images/gen5/trainers/N_4.png`; break;
+                                case 1: graphic = `images/gen5/trainers/N_1.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/N_1.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/N_3.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/N_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Bianca_12.png`; break;
+                                default: graphic = `images/gen5/trainers/Bianca_12.webp`; break;
                             }
                             break;
                         }   
@@ -5829,26 +5829,26 @@ export default defineComponent({
                     switch (trainer) {
                         case "Cheren": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/bw2/Cheren_12.png`; break;
-                                case 2: graphic = `images/gen5/trainers/bw2/Cheren_12.png`; break;
-                                case 3: graphic = `images/gen5/trainers/bw2/Cheren_3.png`; break;
-                                case 4: graphic = `images/gen5/trainers/bw2/Cheren_4.png`; break;
+                                case 1: graphic = `images/gen5/trainers/bw2/Cheren_12.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/bw2/Cheren_12.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/bw2/Cheren_3.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/bw2/Cheren_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Cheren_12.png`; break;
+                                default: graphic = `images/gen5/trainers/Cheren_12.webp`; break;
                             }
                             break;
                         }   
-                        case "Roxie":    graphic = `images/gen5/trainers/bw2/Roxie.png`;     break;
+                        case "Roxie":    graphic = `images/gen5/trainers/bw2/Roxie.webp`;     break;
                         case "Burgh": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
                                 case 1: displayGraphicState = false; break;
                                 case 2: displayGraphicState = false; break;
-                                case 3: graphic = `images/gen5/trainers/Burgh.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Burgh_4.png`; break;
+                                case 3: graphic = `images/gen5/trainers/Burgh.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Burgh_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Burgh.png`; break;
+                                default: graphic = `images/gen5/trainers/Burgh.webp`; break;
                             }
                             break;
                         } 
@@ -5856,11 +5856,11 @@ export default defineComponent({
                             switch (this.game.properties.battle.opponent.team_count.value) {
                                 case 1: displayGraphicState = false; break;
                                 case 2: displayGraphicState = false; break;
-                                case 3: graphic = `images/gen5/trainers/bw2/Elesa.png`; break;
-                                case 4: graphic = `images/gen5/trainers/bw2/Elesa_4.png`; break;
+                                case 3: graphic = `images/gen5/trainers/bw2/Elesa.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/bw2/Elesa_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Elesa.png`; break;
+                                default: graphic = `images/gen5/trainers/Elesa.webp`; break;
                             }
                             break;
                         } 
@@ -5868,11 +5868,11 @@ export default defineComponent({
                             switch (this.game.properties.battle.opponent.team_count.value) {
                                 case 1: displayGraphicState = false; break;
                                 case 2: displayGraphicState = false; break;
-                                case 3: graphic = `images/gen5/trainers/Clay.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Clay_4.png`; break;
+                                case 3: graphic = `images/gen5/trainers/Clay.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Clay_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Clay.png`; break;
+                                default: graphic = `images/gen5/trainers/Clay.webp`; break;
                             }
                             break;
                         } 
@@ -5880,11 +5880,11 @@ export default defineComponent({
                             switch (this.game.properties.battle.opponent.team_count.value) {
                                 case 1: displayGraphicState = false; break;
                                 case 2: displayGraphicState = false; break;
-                                case 3: graphic = `images/gen5/trainers/Skyla.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Skyla_4.png`; break;
+                                case 3: graphic = `images/gen5/trainers/Skyla.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Skyla_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Skyla.png`; break;
+                                default: graphic = `images/gen5/trainers/Skyla.webp`; break;
                             }
                             break;
                         } 
@@ -5892,11 +5892,11 @@ export default defineComponent({
                             switch (this.game.properties.battle.opponent.team_count.value) {
                                 case 1: displayGraphicState = false; break;
                                 case 2: displayGraphicState = false; break;
-                                case 3: graphic = `images/gen5/trainers/Drayden.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Drayden_4.png`; break;
+                                case 3: graphic = `images/gen5/trainers/Drayden.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Drayden_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Drayden.png`; break;
+                                default: graphic = `images/gen5/trainers/Drayden.webp`; break;
                             }
                             break;
                         } 
@@ -5904,84 +5904,84 @@ export default defineComponent({
                             switch (this.game.properties.battle.opponent.team_count.value) {
                                 case 1: displayGraphicState = false; break;
                                 case 2: displayGraphicState = false; break;
-                                case 3: graphic = `images/gen5/trainers/bw2/Marlon.png`; break;
-                                case 4: graphic = `images/gen5/trainers/bw2/Marlon_4.png`; break;
+                                case 3: graphic = `images/gen5/trainers/bw2/Marlon.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/bw2/Marlon_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Marlon.png`; break;
+                                default: graphic = `images/gen5/trainers/bw2/Marlon.webp`; break;
                             }
                             break;
                         } 
-                        // case "Iris":     graphic = `images/gen5/trainers/bw2/Iris.png`;   break;
+                        // case "Iris":     graphic = `images/gen5/trainers/bw2/Iris.webp`;   break;
                         case "Colress": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                // case 1: graphic = `images/gen5/trainers/Colress.png`; break;
-                                // case 2: graphic = `images/gen5/trainers/Colress.png`; break;
-                                case 3: graphic = `images/gen5/trainers/Colress.png`; break;
-                                // case 4: graphic = `images/gen5/trainers/Cheren_4.png`; break;
-                                case 5: graphic = `images/gen5/trainers/Colress_5.png`; break;
-                                // case 6: graphic = `images/gen5/trainers/Colress.png`; break;
-                                default: graphic = `images/gen5/trainers/Colress.png`; break;
+                                // case 1: graphic = `images/gen5/trainers/Colress.webp`; break;
+                                // case 2: graphic = `images/gen5/trainers/Colress.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/Colress.webp`; break;
+                                // case 4: graphic = `images/gen5/trainers/Cheren_4.webp`; break;
+                                case 5: graphic = `images/gen5/trainers/Colress_5.webp`; break;
+                                // case 6: graphic = `images/gen5/trainers/Colress.webp`; break;
+                                default: graphic = `images/gen5/trainers/Colress.webp`; break;
                             }
                             break;
                         }  
                         case "Shauntal": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/Shauntal.png`; break;
-                                case 2: graphic = `images/gen5/trainers/Shauntal.png`; break;
-                                case 3: graphic = `images/gen5/trainers/Shauntal.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Shauntal.png`; break;
+                                case 1: graphic = `images/gen5/trainers/Shauntal.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/Shauntal.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/Shauntal.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Shauntal.webp`; break;
                                 case 5: graphic = displayGraphicState = false; break;
                                 case 6: graphic = displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Shauntal.png`; break;
+                                default: graphic = `images/gen5/trainers/Shauntal.webp`; break;
                             } 
                             break;
                         }
                         case "Marshal": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/Marshal.png`; break;
-                                case 2: graphic = `images/gen5/trainers/Marshal.png`; break;
-                                case 3: graphic = `images/gen5/trainers/Marshal.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Marshal.png`; break;
+                                case 1: graphic = `images/gen5/trainers/Marshal.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/Marshal.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/Marshal.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Marshal.webp`; break;
                                 case 5: graphic = displayGraphicState = false; break;
                                 case 6: graphic = displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Marshal.png`; break;
+                                default: graphic = `images/gen5/trainers/Marshal.webp`; break;
                             } 
                             break;
                         }
                         case "Grimsley": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/Grimsley.png`; break;
-                                case 2: graphic = `images/gen5/trainers/Grimsley.png`; break;
-                                case 3: graphic = `images/gen5/trainers/Grimsley.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Grimsley.png`; break;
+                                case 1: graphic = `images/gen5/trainers/Grimsley.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/Grimsley.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/Grimsley.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Grimsley.webp`; break;
                                 case 5: graphic = displayGraphicState = false; break;
                                 case 6: graphic = displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Grimsley.png`; break;
+                                default: graphic = `images/gen5/trainers/Grimsley.webp`; break;
                             } 
                             break;
                         }
                         case "Caitlin": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/Caitlin.png`; break;
-                                case 2: graphic = `images/gen5/trainers/Caitlin.png`; break;
-                                case 3: graphic = `images/gen5/trainers/Caitlin.png`; break;
-                                case 4: graphic = `images/gen5/trainers/Caitlin.png`; break;
+                                case 1: graphic = `images/gen5/trainers/Caitlin.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/Caitlin.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/Caitlin.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/Caitlin.webp`; break;
                                 case 5: graphic = displayGraphicState = false; break;
                                 case 6: graphic = displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/Caitlin.png`; break;
+                                default: graphic = `images/gen5/trainers/Caitlin.webp`; break;
                             } 
                             break;
                         }
                         case "Rival": {
                             switch (this.game.properties.battle.opponent.team_count.value) {
-                                case 1: graphic = `images/gen5/trainers/bw2/Hugh_12.png`; break;
-                                case 2: graphic = `images/gen5/trainers/bw2/Hugh_12.png`; break;
-                                case 3: graphic = `images/gen5/trainers/bw2/Hugh_3.png`; break;
-                                case 4: graphic = `images/gen5/trainers/bw2/Hugh_4.png`; break;
+                                case 1: graphic = `images/gen5/trainers/bw2/Hugh_12.webp`; break;
+                                case 2: graphic = `images/gen5/trainers/bw2/Hugh_12.webp`; break;
+                                case 3: graphic = `images/gen5/trainers/bw2/Hugh_3.webp`; break;
+                                case 4: graphic = `images/gen5/trainers/bw2/Hugh_4.webp`; break;
                                 case 5: displayGraphicState = false; break;
                                 case 6: displayGraphicState = false; break;
-                                default: graphic = `images/gen5/trainers/bw2/Hugh_12.png`; break;
+                                default: graphic = `images/gen5/trainers/bw2/Hugh_12.webp`; break;
                             }
                             break;
                         }   
@@ -5997,7 +5997,7 @@ export default defineComponent({
             else {
                 return {
                     state: false,
-                    graphic: `images/gen5/trainers/roark.png`,
+                    graphic: ``,
                     name: "Error - there is no trainer graphic to display. Use 'v-if' to disable rendering of this code through the .state property of this object.",
                 }
             }
@@ -6612,35 +6612,10 @@ export default defineComponent({
             }
         },
 
-        getPokemonImageUrl: function (x) {
-            if (x != null)
-                return `images/gen5/overlay/${x.pokedexNumber}.png`
-        },
         getStarterArt: function () {
-            return `images/gen5/pokemon/${this.starter}.png`
-        },
-        getStarterImageUrl: function () {
-            return `images/gen5/overlay/${this.starter}.png`
-        },
-        getStarterTypeTexture() {
-            if (this.pick == true) {
-                var type = this.gen3data.find(y => y.dexNumber === this.starter)
-                return `images/gen5/elements/textures/${type.type1.toLowerCase()}.png`
-            }
-            else
-                return `images/gen5/elements/textures/normal.png`
+            return `images/gen5/pokemon/${this.starter}.webp`
         },
         
-        getStarterType1() {
-            if (this.pick == true)
-                var type = this.g5PokemonData[this.starter].type_1
-                return `images/gen5/elements/types/${type.toLowerCase()}.png`
-        },
-        getStarterType2() {
-            if (this.pick == true)
-                var type = this.g5PokemonData[this.starter].type_2
-                return `images/gen5/elements/types/${type.toLowerCase()}.png`
-        },
         
         //GENERAL FUNCTIONS
         nullCheck(y) {
@@ -7519,7 +7494,7 @@ export default defineComponent({
         moveCategoryIcon(move) { //move = move.value
             if (move) {
                 var move = this.black_moves[move]
-                if (move) return `images/gen5/damageCategory/${move.category}.png`
+                if (move) return `images/gen5/damageCategory/${move.category}.webp`
             }
             return ""
         },
@@ -7657,31 +7632,6 @@ export default defineComponent({
                 if (move) return move.type
             }
             return null
-        },
-        moveTypeIcon(y) { //y = move1.value
-            if (y != null && y != undefined && y == "Hidden Power") {
-                return `images/gen5/elements/type-icons/${this.hiddenPowerTypeCalc(this.game.properties.player.team[0])}.png`
-            }
-            else if (y != null && y == "Weather Ball") {
-                var moveType = "Normal"
-                if (this.batt.field.weather.value == `Sun`) {
-                    moveType = "Fire" }
-                if (this.batt.field.weather.value == `Sandstorm`) {
-                    moveType = "Rock" }
-                if (this.batt.field.weather.value == `Rain`) {
-                    moveType = "Water" }
-                if (this.batt.field.weather.value == `Hail`) {
-                    moveType = "Ice" }
-                return `images/gen5/elements/type-icons/${moveType}.png`
-            }
-            else if (y != null && y != undefined) {
-                var move = this.gen3moves.find(x => x.Move.toLowerCase() === y.toLowerCase())
-                var moveType = move[`Type`].toLowerCase()
-                return `images/gen5/elements/type-icons/${moveType}.png`
-            }
-            else {
-                return null
-            }
         },
         
 

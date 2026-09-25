@@ -14,8 +14,8 @@ export const gen3Manifest: ModuleManifest = {
     mappers: [emeraldNe, fireRedLeafGreenNe],
     games: ["Emerald", "FireRed and LeafGreen"],
     editions: [
-        { name: "Emerald", game: "Emerald", boxArt: "3-Emerald.png", splitFolder: "Emerald", splitPrefix: "", icon: "gen3/icon-emerald.ico" },
-        { name: "FireRed and LeafGreen", game: "FireRed and LeafGreen", boxArt: "3-FireRedLeafGreen.png", splitFolder: "FireRed and LeafGreen", splitPrefix: "", icon: "gen3/icon-firered.ico" },
+        { name: "Emerald", game: "Emerald", boxArt: "3-Emerald.webp", splitFolder: "Emerald", splitPrefix: "", icon: "gen3/icon-emerald.ico" },
+        { name: "FireRed and LeafGreen", game: "FireRed and LeafGreen", boxArt: "3-FireRedLeafGreen.webp", splitFolder: "FireRed and LeafGreen", splitPrefix: "", icon: "gen3/icon-firered.ico" },
     ],
     editionKey: "gameSelection",
     load: () => import("./index").then((m) => m.gen3),

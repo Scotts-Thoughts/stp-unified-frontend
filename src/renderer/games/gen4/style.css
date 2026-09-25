@@ -696,7 +696,7 @@ body:has(.gen-4) {
     background-image: var(--url);
     background-size: 1920px 1080px;
     /* filter: drop-shadow(1px 1px 1px #000000c5); */
-    /* background-image: url(images/gen4/enemy_area/Electric.png); */
+    /* background-image: url(images/gen4/enemy_area/Electric.webp); */
     pointer-events: none; /* optional: this makes the image not clickable, so you can click the elements behind it */
     isolation: isolate; /* optional: this restricts the color blending only to this layer, just to be safe */
 }

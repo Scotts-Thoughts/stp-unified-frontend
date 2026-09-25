@@ -7,7 +7,7 @@
             }"
         />
         <img class="canvas" ref="old_background_texture" style="opacity: 0" />
-        <img class="canvas" style="top: -160px;" :src="'images/elements/floor/pokeball.png'" />
+        <img class="canvas" style="top: -160px;" :src="'images/elements/floor/pokeball.webp'" />
         <img v-show="meta.game == 'Yellow'" class="pokemon_art"
             :style="{
                 'transform': `scale(${artwork.scale}) ${artwork.flip ? 'rotateY(180deg)' : ''} translate(${artwork.offset_x}px, ${-artwork.offset_y}px) rotate(${artwork.rotation}deg)`,
@@ -21,7 +21,7 @@
                 drop-shadow(${artwork.flip ? '-3px' : '3px'} 3px 3px #000)
                 `
             }"
-            :src="`images/pokemon/${pokemonArt}.png`"
+            :src="`images/pokemon/${pokemonArt}.webp`"
         />
         <img v-if="meta.game == 'Red and Blue'" class="pokemon_art2"
             :style="{
@@ -36,7 +36,7 @@
                 drop-shadow(${artwork.flip ? '-3px' : '3px'} 3px 3px #000)
                 `
             }"
-            :src="`images/pokemon/Red_and_Blue/${pokemonArt}.png`"
+            :src="`images/pokemon/Red_and_Blue/${pokemonArt}.webp`"
         />
         <div class="tinted-box" style="--drop-shadow: 0px 0px 1px #000000; --url: url(images/ui/stats.svg)"></div>
         <div class="tinted-box" style="--drop-shadow: 0px 0px 1px #000000; --url: url(images/ui/moveset.svg)"></div>

@@ -224,7 +224,7 @@ export const textures = {
         'backgroundSaturation' : 100,
     },
     'Water'        : {
-        'path': 'images/gen5\\textures\\Water.png',
+        'path': 'images/gen5\\textures\\Water.jpg',
         'backgroundBlur'       : 0,
         'backgroundHue'        : 0,
         'backgroundScale'      : 125,
@@ -238,7 +238,7 @@ export const textures = {
         'backgroundSaturation' : 100,
     },
     'Ghost Purple' : {
-        'path': 'images/gen5\\textures\\Ghost Purple.png',
+        'path': 'images/gen5\\textures\\Ghost Purple.webp',
         'backgroundBlur'       : 0,
         'backgroundHue'        : 0,
         'backgroundScale'      : 100,

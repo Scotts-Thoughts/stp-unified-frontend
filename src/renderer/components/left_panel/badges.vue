@@ -1,11 +1,11 @@
 <template>
-    <img class="canvas" :src="'images/elements/badges.png'"/>
+    <img class="canvas" :src="'images/elements/badges.webp'"/>
     <div v-show="game_properties.meta.state.value != 'No Pokemon'">
         <div v-for="x in [1, 2, 3, 4, 5, 6, 7, 8]">
             <transition name="fade">
                 <img 
                     v-show="game_properties.player.badges['badge'+x].value == true" 
-                    :src="`images/badges/progress bar/badge${x}.png`" 
+                    :src="`images/badges/progress bar/badge${x}.webp`" 
                     class="canvas" />
             </transition>
         </div>

@@ -22,9 +22,9 @@ export const gen1Manifest: ModuleManifest = {
     mappers: [yellowDeprecated, redBlueDeprecated],
     games: ["Yellow", "Red and Blue"],
     editions: [
-        { name: "Red", game: "Red and Blue", boxArt: "1-Red.png", splitFolder: "Red and Blue", splitPrefix: "R", icon: "gen1/icon.png" },
-        { name: "Blue", game: "Red and Blue", boxArt: "1-Blue.png", splitFolder: "Red and Blue", splitPrefix: "B", icon: "gen1/icon.png" },
-        { name: "Yellow", game: "Yellow", boxArt: "1-Yellow.png", splitFolder: "Yellow", splitPrefix: "Y", icon: "gen1/icon.png" },
+        { name: "Red", game: "Red and Blue", boxArt: "1-Red.webp", splitFolder: "Red and Blue", splitPrefix: "R", icon: "gen1/icon.png" },
+        { name: "Blue", game: "Red and Blue", boxArt: "1-Blue.webp", splitFolder: "Red and Blue", splitPrefix: "B", icon: "gen1/icon.png" },
+        { name: "Yellow", game: "Yellow", boxArt: "1-Yellow.webp", splitFolder: "Yellow", splitPrefix: "Y", icon: "gen1/icon.png" },
     ],
     load: () => import("./index").then((m) => m.gen1),
 };

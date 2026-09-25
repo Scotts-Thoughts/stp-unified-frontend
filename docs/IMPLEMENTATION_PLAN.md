@@ -569,7 +569,7 @@ Nothing in this section blocks any phase any more.
 13. Inventory sprites → included in the pool.
 14. Data provenance → per-gen data verbatim now; `data_objects` consolidation after parity as its own change.
 15. gen2 backport importer → writes userData overrides, never shipped files.
-16. gen1/gen2 box art → `icon.png` / `2-crystal.png` as placeholders until Scott supplies art in the gen3–5 style. **Done 2026-09-11:** every edition's tile is the box front from Scott's library (`A:\Dropbox\stp-projects\librariesox art`), resized to 400 px tall into `images/box_art/`; a paired edition (Gold & Silver, FireRed and LeafGreen, Diamond and Pearl, HeartGold and SoulSilver) is the two boxes side by side in one file. The window icons are still the legacy ones.
+16. gen1/gen2 box art → `icon.png` / `2-crystal.png` as placeholders until Scott supplies art in the gen3–5 style. **Done 2026-09-11:** every edition's tile is the box front from Scott's library (`A:\Dropbox\stp-projects\libraries\box art`), resized to 400 px tall into `images/box_art/`; a paired edition (Gold & Silver, FireRed and LeafGreen, Diamond and Pearl, HeartGold and SoulSilver) is the two boxes side by side in one file. The window icons are still the legacy ones.
 
 **Resolved by Scott (2026-09-25, the Phase 6 interview):**
 
@@ -1581,6 +1581,111 @@ the Compare-splits dropdown.
   (x 787-1038, y 111-124 at every checkpoint). Not yet run against a live Super Shuckie: the fake server
   and the stub speak the `replay-bookmarks` REST API; a build older than that 404s `/add-bookmark` and
   everything degrades to the autosplitter's own rows, as before.
+
+## The image pool as lossless WebP (2026-09-24)
+
+Scott's ask: convert the PNGs to WebP to cut the program's size. Every PNG in the pool is now a
+lossless WebP of the same name: 7,626 files, 1,944 MB -> 1,121 MB (57.7%), and the pool as a whole
+3,478 MB -> 2,655 MB. JPEG and SVG files are untouched; the JPEG textures (1,532 MB) are now the
+bulk of the pool and the next place to look.
+
+- **Lossless, not lossy.** A 31-file sample put lossless `-z 9` at 58% of the PNG bytes and lossy
+  q90 at 13%, but lossy changes pixels: pixel-art sprites and UI would pick up artefacts, and oracle
+  2 could no longer tell a regression from the encoder. The big artwork (`genN/pokemon`, `pokemon/`)
+  is where lossy would pay; that is a separate decision.
+- **The pipeline** (`tools/assets/to-webp.ts`, libwebp 1.6.0's cwebp/dwebp/webpmux, not in the repo):
+  pngjs decodes each PNG and cwebp is handed a plain 8-bit RGBA PNG, because the Windows cwebp
+  decodes through WIC. Colour management follows Chromium's PNG rules: an iCCP profile (1,667
+  files, all sRGB-like) is copied into the WebP's ICCP chunk; an sRGB chunk (99) needs nothing;
+  cHRM+gAMA (40) is rebuilt as an equivalent ICC profile -- Chromium does apply it (without one,
+  `gen2/pokemon/Abra` renders up to 9 levels off in opaque pixels; with it, 0.4% of pixels one level
+  off); gAMA or cHRM alone Chromium ignores. A 16-bit sample keeps its high byte, as Chromium draws
+  it (two files). Not `-exact`: the colour under alpha 0 is the encoder's (4% smaller, never drawn).
+  Every WebP was decoded back with dwebp and matched its PNG pixel for pixel (alpha everywhere,
+  colour where alpha > 0) before it was kept.
+- **What reaches the screen** (`tools/assets/verify-webp-render.ts`): each pair decoded by Electron
+  37's Chromium and composited over black and over white. All 7,626: 4,810 identical, 2,816 within
+  one level, none beyond. The one systematic difference is premultiplication: Chromium
+  premultiplies a PNG with rounding and a WebP with libwebp's truncation, so a semi-transparent pixel
+  composites one level darker about half the time -- never an opaque pixel, never more than one level.
+  Undoing it would mean rewriting stored colours to game the decoder; oracle 2 forgives two. (One
+  page decoding thousands of images starts failing every decode, small files included; the tool
+  reloads its page every 400 pairs and retries a failure once on a fresh page.)
+- **Five "PNGs" were JPEG data** (`textures/water`, `gen2/textures/water`, `gen3|gen4/textures/Dark
+  Water`, `gen5/textures/Water`, one 12 MB blob): renamed to `.jpg`, bytes unchanged.
+- **References**: every `.png` under `src/renderer` (templates, template strings, texture tables, the
+  manifests' `boxArt`, comments) now says `.webp` (676) or `.jpg` (the five textures). The window icons
+  stay PNG: `resources/icons/gen1|gen2/icon.png` and `icon.png` are read by `nativeImage` and
+  electron-builder, neither of which takes WebP. A static check paired each changed line's old path
+  pattern (dynamic parts as wildcards) with its new one: each matches as many files after the
+  conversion as before. The references that matched nothing before either are the next section's.
+  No persisted state names an image file (the captures' `storage.json`, the live `user_state.json`, the
+  legacy LevelDBs), so nothing needs migrating.
+- **Harness**: `diff.ts` folds a pool image's `.webp` to `.png` in console messages and computed
+  `url(images/...)` values (`foldImageFormat`), so the legacy baselines and the fixtures' known failed
+  loads (`images/pokemon/null.png`, gen3's `type-icons/undefined.png`) still compare. `parity:drift`:
+  the twelve allowlisted members the rewrite touched were re-pinned after checking that each body,
+  with `.webp` read back as `.png`, hashes to its reviewed fingerprint; `get_stat` stays flagged.
+- **Not updated on purpose**: `tools/assets/manifest.json` (describes the PNGs the merge copied;
+  `merge.ts --apply` would now copy them back beside the WebPs -- its header says so) and the port
+  tooling (`tools/port/*-template.html`, `lift_assets.py`), which reads the legacy apps as they are.
+- **Verified** (2026-09-24): `npm run typecheck` clean; `parity:drift` as before (`get_stat` only).
+  Every fixture captured on the unmodified tree (`tools/reports/<fixture>.webp-head`) and after the
+  swap (`.webp-final`), diffed head against final: gen2, gen3, gen4, gen5 all oracles green, pixels
+  exact. gen1 differs in oracle 2 only, at the seven checkpoints from 0014 on: two pixels by three
+  levels (x 1573/1574, y 500/664), both on split-table trainer icons, which gen1 draws at 38x43 px
+  under `saturate(1.3) drop-shadow(...)` inside a table at opacity .9 -- the filter works on
+  un-premultiplied colour, so the icons' one-level edge rounding comes out as two in isolation (the
+  twenty icons alone, PNG then WebP in place: 4,646 pixels differ, max 2) and three at two pixels of
+  the full frame. A comparison with a WebP build on both sides is exact again. Against the standing
+  baselines, `parity:all` gives the same per-oracle counts before and after for all five fixtures.
+  `npm run build:unpack` + `packaged:probe`: `dist/win-unpacked` 3.8 GB -> 3.0 GB, 7,626 WebPs and no PNGs
+  under `resources/images`, every box-art tile loaded, no renderer errors. Its two failures predate this
+  change: it still expects 13 tiles (the manifests have had 14 editions since `b7c64f7`/`6088f94`) and
+  `resources/keyhook.exe` (removed from the repo in `5dce66a`).
+
+## Dead image references (2026-09-25)
+
+The WebP pass found image paths in the renderer that match no file, before the conversion as after.
+Scott's ask: fix them, on the guess that the files were in the legacy repos. A scan of every image
+path in `src/renderer` (all formats, dynamic parts as wildcards) found 32 in code and 21 in comments
+(commented-out CSS, gen3's commented-out `gameVariables` rows; left alone). None of the 32 files
+exists in `A:\Programs\genN-stp-frontend` or in their git history (the legacy code names the same
+missing files), nor anywhere on A: (`dir /s` for the names: only unrelated gen1/gen2 decomp sprites,
+Scott's art library `A:\Dropbox\stp-projects\libraries`, which has raw trainer art but none of these
+overlay images, and fury_cutter's example frames). So each was fixed by what it is:
+
+- **gen4 HGSS Silver** (`getTrainerGraphic`, the `trainer.bytes` switch): `rivalN` is Silver's Nth battle
+  (decomp `trainers.json`: rival1 = IDs 2/3/265, one Pokemon; rival2 = 1/266/269, three; rival3 =
+  263/267/270, four; rival4 = 271/288/289, five; rival5 = 264/268/272 and rival6 = 285-287, six), and
+  the image is Silver placed to clear that many enemy panels, as Platinum's `rivalNmon` places Barry.
+  rival1/5/6 were never drawn. Six panels leave no room, which is why Platinum hides Barry at six
+  (`case 6: displayGraphicState = false`); the six-Pokemon battles now do the same. The one-Pokemon
+  battle uses `rival2` (the three-panel placement, which clears one panel). A larger one-panel Silver
+  would need new art. Not changed, noticed: the switch's `default` shows Barry (`rival1mon`) for
+  Silver's final rematch (IDs 489-491, six Pokemon).
+- **gen5 Marlon** (BW2): his team-size switch fell back to `trainers/Marlon`, which never existed; now
+  `trainers/bw2/Marlon`, his only art (every other BW2 trainer falls back to their own base image).
+- **gen5 Iris** (White's eighth gym): no overlay image exists (only raw art,
+  `libraries/trainer art/gen5/Iris W.png`); the case now hides the graphic, which is what the BW1
+  switch's `default` does for a trainer without art. A composed `Iris.webp` (her art on the floor at
+  Drayden's placement) would restore one.
+- **gen5 `getTrainerGraphic`'s error branch** returned `trainers/roark` (gen4's art, copied with the
+  code) with `state: false`, so it was never rendered; the graphic is now empty.
+- **Methods nothing calls**, whose paths point at gen3's layout (`elements/textures|types|type-icons`,
+  `overlay/`): removed -- gen3 `getPokemonImageUrl`, `getStarterImageUrl`; gen4 `getStarterTypeTexture`,
+  `getStarterType1`, `getStarterType2`, `moveTypeIcon`; gen5 all six. Each was mentioned only at its
+  definition (templates, mixins, components and gen3's `this[propName]` watchers, which iterate settings
+  keys, checked).
+- **gen5 nature arrows** spelt `nature arrows//raises` (so did the legacy app). Chromium collapses the
+  doubled slash in a file path, so it loaded; now a single slash, as in gen4.
+
+`parity:drift`: five allowlist entries dropped (the member is left in one generation), `moveTypeIcon`
+narrowed to gen2/gen3, `getTrainerGraphic` re-pinned; `get_stat` stays flagged. **Verified**
+(2026-09-25): the scan finds no dead path in code; `npm run typecheck` clean; gen3/gen4/gen5 fixtures
+against the post-WebP captures (`.webp-final` vs `.deadrefs`) all oracles green, pixels exact. The
+smoke fixtures do not reach Silver's, Iris's or Marlon's battles; those branches are proven by the scan
+only.
 
 ## Phase 6 plan: decomposing the gen2-5 overlays (2026-09-25)
 

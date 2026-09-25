@@ -13,26 +13,26 @@
 						:data-enemy-slot="0"
 						:data-enemy-species="resize.styleModeCurrentSpecies"
 						:style="{ transform: resize.transformFor(resize.styleModeCurrentSpecies), filter: `drop-shadow(${resize.getFlipped(resize.styleModeCurrentSpecies) ? -2 : 2}px 2px 2px #000000c5) saturate(1.1)` }"
-						:src="'images/pokemon/' + resize.styleModeCurrentSpecies + '.png'"/>
+						:src="'images/pokemon/' + resize.styleModeCurrentSpecies + '.webp'"/>
 					<img v-else-if="meta.game == 'Red and Blue'" class="ePkmnSprite ePkmnSpriteResizing"
 						:data-enemy-slot="0"
 						:data-enemy-species="resize.styleModeCurrentSpecies"
 						:style="{ transform: resize.transformFor(resize.styleModeCurrentSpecies), filter: `drop-shadow(${resize.getFlipped(resize.styleModeCurrentSpecies) ? -2 : 2}px 2px 2px #000000c5) saturate(1.1)` }"
-						:src="'images/pokemon/Red_and_Blue/' + resize.styleModeCurrentSpecies + '.png'"/>
+						:src="'images/pokemon/Red_and_Blue/' + resize.styleModeCurrentSpecies + '.webp'"/>
 					<div class="ePkmnSpecies opacityTransition">{{ resize.styleModeCurrentSpecies }}</div>
 					<div class="ePkmnLevel opacityTransition">Lv:50</div>
 
 					<img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition"
-						:src="'images/elements/type-icons/' + styleModeType(1).toLowerCase() + '.png'"/>
+						:src="'images/elements/type-icons/' + styleModeType(1).toLowerCase() + '.webp'"/>
 					<img v-if="styleModeType(1) != styleModeType(2)" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition"
-						:src="'images/elements/type-icons/' + styleModeType(2).toLowerCase() + '.png'"/>
+						:src="'images/elements/type-icons/' + styleModeType(2).toLowerCase() + '.webp'"/>
 
 					<img class="canvas red-svg" :src="'images/ui/speed_comp/0.svg'"/>
 					<img class="enemyStatsArea opacityTransition" :src="'images/stats/0.svg'"/>
 
 					<img v-for="(dummy, i) in style_mode_dummy_moves"
 						:class="'ds eMoveIconStyle moveIcon' + (i + 1) + ' opacityTransition'"
-						:src="'images/elements/type-icons/' + dummy.type + '.png'"/>
+						:src="'images/elements/type-icons/' + dummy.type + '.webp'"/>
 					<div v-for="(dummy, i) in style_mode_dummy_moves"
 						:class="'ePkmnMoveStyle ePkmnMove' + (i + 1) + ' opacityTransition'">{{ dummy.name }}</div>
 
