@@ -44,6 +44,7 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux",
     "parity:selftest": "tsx tools/parity/mock-pokeabyte/selftest.ts",
+    "parity:gamehook": "tsx tools/parity/mock-gamehook/selftest.ts",
     "parity:bookmarks": "tsx --tsconfig tsconfig.web.json tools/parity/bookmarks-selftest.ts",
     "parity:replay-splits": "tsx --tsconfig tsconfig.web.json tools/parity/replay-splits-selftest.ts",
     "parity:debounce": "tsx tools/parity/debounce-selftest.ts",

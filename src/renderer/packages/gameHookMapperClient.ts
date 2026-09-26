@@ -46,7 +46,10 @@ type GameHookPropertyOwnAttributes =
 type GamehookPropertyData<T = any> = {
     path: string,
     memoryContainer: string | null,
-    address: number,
+    // GameHook allows a null address on a script-derived property; PokeAByte always
+    // gives a number. Nothing in the app reads `.address`, so the wider type costs it
+    // nothing.
+    address: number | null,
     length: number,
     type: GamePropertyType | GameHookProperty,
     size: number | null,
@@ -129,6 +132,97 @@ function sameBytes(a: number[] | null | undefined, b: number[] | null | undefine
     if (!a || !b || a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
     return true;
+}
+
+// ---------------------------------------------------------------------------
+// GameHook support. GameHook has no single snapshot endpoint like PokeAByte's
+// `/mapper` and no `PropertiesChanged`-shaped push, so the helpers below turn
+// its `/properties` value tree, its per-path detail route and its bare
+// `{path, value, bytes}` update frames into the same shapes the code above
+// already knows how to apply.
+
+/** `a.b.0.c` -> `{a:{b:{"0":{c: value}}}}`; numeric segments are object keys, never arrays. */
+function isGameHookNode(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Flattens a GameHook `/properties` tree to `{path, value}` leaves, dot-joined. A leaf is never a plain object; a bitArray (an array) is a leaf. */
+function flattenGameHookTree(tree: Record<string, unknown>, prefix = "", out: { path: string; value: unknown }[] = []): { path: string; value: unknown }[] {
+    for (const key of Object.keys(tree)) {
+        const value = tree[key];
+        const path = prefix ? `${prefix}.${key}` : key;
+        if (isGameHookNode(value)) {
+            flattenGameHookTree(value, path, out);
+        } else {
+            out.push({ path, value });
+        }
+    }
+    return out;
+}
+
+/** Deep-compares a value GameHook sent against what a property already holds (arrays/objects by content, everything else by identity). */
+function gameHookValuesEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (typeof a === "object" && a !== null && typeof b === "object" && b !== null) {
+        return JSON.stringify(a) === JSON.stringify(b);
+    }
+    return false;
+}
+
+/** Every path segment individually escaped, so a `.` inside a segment can never be mistaken for the next one; GameHook accepts `.` or `/` between segments and normalises to `.`. */
+function encodeGameHookPath(path: string): string {
+    return path.split(".").map(encodeURIComponent).join(".");
+}
+
+/** The instance index named at the end of an instance base (`…/instances/3` -> 3), or 0 when the base does not end in one. */
+function gameHookInstanceIndex(base: string): number {
+    const match = /\/instances\/(\d+)$/.exec(base);
+    return match ? Number(match[1]) : 0;
+}
+
+/**
+ * `/mappers`' `value` for an official mapper lists Windows path separators
+ * (`gba\pokemon_emerald.xml`); a custom one already uses `/` (`custom/ST/...`). Both
+ * become forward slashes here, and a leading `custom/` is dropped, so `meta.path`
+ * matches the same detection patterns (`main.ts`, `games/*\/manifest.ts`) either way
+ * -- `meta.key` is kept exactly as `/mappers` listed it elsewhere, since that is what
+ * a load has to send back.
+ */
+function gameHookMetaPath(key: string): string {
+    const forwardSlashed = key.replace(/\\/g, "/");
+    return forwardSlashed.startsWith("custom/") ? forwardSlashed.slice("custom/".length) : forwardSlashed;
+}
+
+/** `http://host:port/instances/3` -> `ws://host:port/instances/3/ws` (https -> wss). */
+function gameHookSocketUrl(base: string): string {
+    return base.replace(/\/+$/, "").replace(/^http/, "ws") + "/ws";
+}
+
+/**
+ * A property's type when its detail fetch failed and GameHook never got to say what
+ * it is -- a best-effort guess from the tree's own value so `type` is never left
+ * undefined. Never overrides a type GameHook actually reported.
+ */
+function gameHookGuessType(value: unknown): GamePropertyType {
+    if (Array.isArray(value)) return GamePropertyType.bitArray;
+    if (typeof value === "boolean") return GamePropertyType.bool;
+    if (typeof value === "string") return GamePropertyType.string;
+    return GamePropertyType.uint;
+}
+
+/** Runs `fn` over `items` with at most `limit` in flight, preserving input order in the result. */
+async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+    const results = new Array<R>(items.length);
+    let next = 0;
+    async function worker(): Promise<void> {
+        for (;;) {
+            const i = next++;
+            if (i >= items.length) return;
+            results[i] = await fn(items[i]);
+        }
+    }
+    await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+    return results;
 }
 
 /**
@@ -215,6 +309,19 @@ export class GameHookMapperClient {
      * PokeAByte coming up later "reconnected" an overlay that no longer existed.
      */
     _retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+    /**
+     * Which tool `_establishConnection()` last detected at `_connectionString`'s
+     * origin, chosen fresh on every connect and every retry (never assumed to stay
+     * the same across a reconnect). `null` before the first attempt.
+     */
+    _mode: "pokeabyte" | "gamehook" | null = null;
+    /** GameHook instance base (`http://host:port/instances/<n>`), set once detected. */
+    _gameHookBase: string | null = null;
+    /** The live GameHook update socket, or null when not in GameHook mode or not connected. */
+    _gameHookSocket: WebSocket | null = null;
+    /** GameHook has no mapper-changed event; this polls `GET {base}/mapper` for one. */
+    _gameHookPollTimer: ReturnType<typeof setInterval> | null = null;
 
     connected: boolean = false;
     private _options: { automaticRefreshMapperTimeMinutes: number; };
@@ -375,9 +482,60 @@ export class GameHookMapperClient {
         this._buildDebounceMap(this._debouceMap)
     }
 
+    /** The connection string's scheme+host+port, with any `/instances/<n>` path dropped. */
+    _origin(): string {
+        try {
+            return new URL(this._connectionString).origin
+        } catch {
+            return this._connectionString
+        }
+    }
+
+    /**
+     * `GET {origin}/`: GameHook answers `{"version":"..."}` as JSON; PokeAByte's root
+     * is an HTML page. Anything other than a 200 with a string `version` is PokeAByte
+     * -- today's path. A network failure (the tool is down) rejects out of here and
+     * into `_establishConnection`'s existing failure/5 s retry, which detects again
+     * on its next attempt.
+     */
+    async _detectTool(): Promise<"pokeabyte" | "gamehook"> {
+        const res = await fetch(`${this._origin()}/`, { headers: { Accept: "application/json" } })
+        if (res.status === 200) {
+            try {
+                const body = await res.json()
+                if (body && typeof body.version === "string") return "gamehook"
+            } catch {
+                // Not JSON -- PokeAByte's HTML root.
+            }
+        }
+        return "pokeabyte"
+    }
+
+    /**
+     * GameHook instance base: the connection string itself when it already names an
+     * instance (`…/instances/3`, optional trailing slash -- the ordinary-mode override
+     * and the Cutter frame server both pass one), otherwise instance 0 at the detected
+     * origin, GameHook's default for one running emulator.
+     */
+    _gameHookInstanceBase(): string {
+        const trimmed = this._connectionString.replace(/\/+$/, "")
+        return /\/instances\/\d+$/.test(trimmed) ? trimmed : `${this._origin()}/instances/0`
+    }
+
     async loadMapper() {
         console.debug('[GameHook Client] Loading mapper.')
+        const mapper = this._mode === "gamehook" ? await this._fetchGameHookMapper() : await this._fetchMapper()
+        this._applyMapperSnapshot(mapper)
+        return this
+    }
 
+    /**
+     * Shared by both transports: turns `{meta, glossary, properties}` -- a PokeAByte
+     * `/mapper` body as-is, or GameHook's assembled equivalent from
+     * `_fetchGameHookMapper` -- into the property tree, lookup map and debounce map,
+     * exactly as `loadMapper()` always has.
+     */
+    _applyMapperSnapshot(mapper: { meta: any; glossary: any; properties: GamehookPropertyData[] }) {
         function assign(target: any, path: string[], value: any) {
             let lastKeyIndex = path.length - 1
 
@@ -392,8 +550,6 @@ export class GameHookMapperClient {
 
             target[path[lastKeyIndex]] = value
         }
-
-        let mapper = await this._fetchMapper()
 
         this.meta = mapper.meta
         this.glossary = mapper.glossary
@@ -414,6 +570,134 @@ export class GameHookMapperClient {
         this._propertiesMap = map;
 
         this._buildDebounceMap()
+
+        this._scheduleRefresh()
+    }
+
+    /**
+     * GameHook's analogue of `_fetchMapper`: it has no single snapshot endpoint, so
+     * this assembles the same `{meta, glossary, properties}` shape `_applyMapperSnapshot`
+     * expects from GameHook's separate `/mapper`, `/mappers` and `/properties` routes.
+     * Throws after `_deconstructMapper()` on a non-200 `/mapper`, exactly as
+     * `_fetchMapper` does for PokeAByte.
+     */
+    async _fetchGameHookMapper() {
+        const base = this._gameHookBase!
+        const mapperRes = await fetch(`${base}/mapper`)
+        if (mapperRes.status !== 200) {
+            this._deconstructMapper()
+            let body: any = null
+            try { body = await mapperRes.json() } catch { /* not JSON either */ }
+            if (body) throw body
+            throw new Error('Unknown error.')
+        }
+        const info = await mapperRes.json() as { id: string; name: string; platform: string; nativeProcessor: string; custom: boolean }
+
+        // `/mapper` does not say which mapper *key* (e.g. "gba/pokemon_emerald.xml", or
+        // a "custom/..." path) is loaded at our instance; `/mappers` is the only route
+        // that ties a key to the instance indexes that have it loaded.
+        const index = gameHookInstanceIndex(base)
+        let key = info.id
+        try {
+            const mappersRes = await fetch(`${this._origin()}/mappers`)
+            if (mappersRes.ok) {
+                const mappers = await mappersRes.json() as { value: string; instances: number[] }[]
+                const entry = Array.isArray(mappers) ? mappers.find((m) => Array.isArray(m.instances) && m.instances.includes(index)) : undefined
+                if (entry?.value) key = entry.value
+            }
+        } catch (err) {
+            console.warn("[GameHook Client] Could not read /mappers; falling back to /mapper's id as the key:", err)
+        }
+
+        const meta = {
+            id: info.id,
+            gameName: info.name,
+            gamePlatform: info.platform,
+            // The overlay's generation detection matches this against patterns written
+            // for PokeAByte's own "custom/..." paths (main.ts, games/*/manifest.ts).
+            path: gameHookMetaPath(key),
+            key,
+            nativeProcessor: info.nativeProcessor,
+            custom: info.custom,
+        }
+
+        const treeRes = await fetch(`${base}/properties`)
+        const tree = treeRes.ok ? await treeRes.json() : {}
+        const leaves = flattenGameHookTree(tree)
+
+        const properties = await mapWithConcurrency(leaves, 16, async ({ path, value }): Promise<GamehookPropertyData> => {
+            try {
+                const detailRes = await fetch(`${base}/properties/${encodeGameHookPath(path)}`)
+                if (!detailRes.ok) throw new Error(String(detailRes.status))
+                const d = await detailRes.json()
+                return {
+                    path,
+                    memoryContainer: null,
+                    address: d.address ?? null,
+                    length: d.length ?? 0,
+                    type: d.type,
+                    size: null,
+                    reference: d.reference ?? null,
+                    bits: d.bits ?? null,
+                    description: null,
+                    value: d.value,
+                    bytes: d.bytes ?? [],
+                    isFrozen: false,
+                    isReadOnly: false,
+                    fieldsChanged: [],
+                }
+            } catch {
+                // The detail fetch failed (a transient error, or a path `/properties`
+                // named that `/properties/{path}` does not recognise); keep the
+                // property with the value the tree already gave it rather than
+                // dropping it from the mapper.
+                return {
+                    path,
+                    memoryContainer: null,
+                    address: null,
+                    length: 0,
+                    type: gameHookGuessType(value),
+                    size: null,
+                    reference: null,
+                    bits: null,
+                    description: null,
+                    value,
+                    bytes: [],
+                    isFrozen: false,
+                    isReadOnly: false,
+                    fieldsChanged: [],
+                }
+            }
+        })
+
+        return { meta, glossary: null, properties }
+    }
+
+    /**
+     * The minute refresh in GameHook mode: no full-detail endpoint to re-fetch, so
+     * this takes GameHook's values-only `/properties` tree and applies each path's new
+     * value onto the existing property, deep-compared exactly as `refreshMapper`
+     * compares a bitArray or struct value from PokeAByte, and firing no handlers -- the
+     * 2 s mapper poll and the update socket are what the app actually reacts to. A path
+     * set that does not match the loaded tree can only mean the mapper changed
+     * underneath the poll, so it falls back to a full `loadMapper()`.
+     */
+    async _refreshGameHookMapper() {
+        const base = this._gameHookBase!
+        const res = await fetch(`${base}/properties`)
+        if (!res.ok) throw new Error(`GameHook /properties refresh failed: ${res.status}`)
+        const tree = await res.json()
+        const leaves = flattenGameHookTree(tree)
+        const map = this._propertiesMap
+        const samePathSet = !!map && map.size === leaves.length && leaves.every(({ path }) => map!.has(path))
+        if (!samePathSet) return this.loadMapper()
+
+        for (const { path, value } of leaves) {
+            const property = map!.get(path)!
+            const dto = snapshotProperty(property)
+            dto.value = value
+            applyPropertyFields(property, dto, true)
+        }
 
         this._scheduleRefresh()
 
@@ -438,6 +722,8 @@ export class GameHookMapperClient {
      * back to the full rebuild.
      */
     async refreshMapper() {
+        if (this._mode === "gamehook") return this._refreshGameHookMapper()
+
         const mapper = await this._fetchMapper()
         const map = this._propertiesMap
         const dtos: GamehookPropertyData[] = mapper.properties ?? []
@@ -459,24 +745,46 @@ export class GameHookMapperClient {
         // A retry or reconnect that lands after disconnect() has nothing to connect.
         if (this._stopping) return false
         try {
-            if (this._signalrConnectionEstablished == false && this._signalrClient) {
-                await this._signalrClient.start()
-                console.debug('[GameHook Client] GameHook successfully established a SignalR connection.')
+            // Detected fresh on every attempt, including a retry: the tool at
+            // `_connectionString` could have changed between one attempt and the next
+            // (PokeAByte closed, GameHook opened in its place, or vice versa).
+            this._mode = await this._detectTool()
+
+            if (this._mode === "gamehook") {
+                this._gameHookBase = this._gameHookInstanceBase()
+                const socket = await this._connectGameHookSocket()
+                socket.onmessage = (ev) => this._handleGameHookMessage(ev)
+
+                this.connected = true
+                this.onConnected()
+                console.debug('[GameHook Client] GameHook is now connected.')
+            } else {
+                if (this._signalrConnectionEstablished == false && this._signalrClient) {
+                    await this._signalrClient.start()
+                    console.debug('[GameHook Client] GameHook successfully established a SignalR connection.')
+                }
+
+                this.connected = true
+                this.onConnected()
+                console.debug('[GameHook Client] GameHook is now connected.')
             }
 
-            this.connected = true
-            this.onConnected()
-            console.debug('[GameHook Client] GameHook is now connected.')
-
             try {
-                await this.loadMapper(); 
+                await this.loadMapper();
                 this.onMapperLoaded();
             } catch {}
 
             this._startDebounceLoop()
+            if (this._mode === "gamehook") this._startGameHookPoll()
             return true
         } catch (err) {
             this._deconstructMapper()
+            this._stopGameHookPoll()
+            if (this._gameHookSocket) {
+                const dead = this._gameHookSocket
+                this._gameHookSocket = null
+                try { dead.close() } catch { /* already going away */ }
+            }
 
             console.error(err)
             this.onMapperLoadError(err)
@@ -487,6 +795,147 @@ export class GameHookMapperClient {
             }, 5000)
 
             return false
+        }
+    }
+
+    /**
+     * Opens the GameHook update socket and resolves once it is actually open, the way
+     * `await this._signalrClient.start()` resolves once PokeAByte's hub handshake is
+     * done -- a socket that never opens (GameHook down, or a 409 while continuous read
+     * is off) rejects into `_establishConnection`'s usual failure/5 s retry instead of
+     * being reported as connected. `this._gameHookSocket` is set here, before resolving,
+     * so a close racing the caller's own bookkeeping is never mistaken for a stale one.
+     */
+    _connectGameHookSocket(): Promise<WebSocket> {
+        return new Promise((resolve, reject) => {
+            const socket = new WebSocket(gameHookSocketUrl(this._gameHookBase!))
+            let settled = false
+            socket.onopen = () => {
+                settled = true
+                this._gameHookSocket = socket
+                resolve(socket)
+            }
+            socket.onerror = () => {
+                if (!settled) {
+                    settled = true
+                    reject(new Error('GameHook: the update socket failed to connect.'))
+                }
+            }
+            socket.onclose = () => {
+                if (!settled) {
+                    settled = true
+                    reject(new Error('GameHook: the update socket closed before connecting.'))
+                    return
+                }
+                this._onGameHookSocketClosed(socket)
+            }
+        })
+    }
+
+    /**
+     * A GameHook update socket closing on its own -- the instance was removed,
+     * continuous read was switched off, or the process went away -- handled exactly as
+     * the SignalR transport's own `onclose` is: tear the mapper down, tell the app, and
+     * try again through `_establishConnection` (which arms the usual 5 s retry if that
+     * reconnect itself fails). A socket `disconnect()` closed on purpose has already
+     * been cleared from `_gameHookSocket`, so it is not mistaken for a lost connection.
+     */
+    _onGameHookSocketClosed(socket: WebSocket) {
+        if (this._gameHookSocket !== socket) return
+        this._gameHookSocket = null
+        if (this._stopping) return
+        console.debug('[GameHook Client] GameHook connection lost. Attempting to reconnect...')
+
+        this._stopGameHookPoll()
+        this._deconstructMapper()
+        this.onDisconnected()
+        this.connected = false
+
+        void this._establishConnection()
+    }
+
+    /**
+     * One update frame: a JSON array of `{path, value, bytes}` for whatever changed
+     * since the last read, no envelope. Turned into full DTOs and handed to the same
+     * batch handler `PropertiesChanged` uses, so debounce, `.change()`/`.once()` and the
+     * Cutter probe's received-batch count all behave identically either way. A frame
+     * with nothing this client recognises still reaches the handler as an empty batch,
+     * which still counts as received.
+     */
+    _handleGameHookMessage(ev: MessageEvent) {
+        let entries: { path: string; value: unknown; bytes?: number[] }[] = []
+        try {
+            const data = typeof ev.data === "string" ? ev.data : String(ev.data)
+            const parsed = JSON.parse(data)
+            if (Array.isArray(parsed)) entries = parsed
+        } catch (err) {
+            console.warn('[GameHook Client] Unparsable update frame:', err)
+        }
+        this._handlePropertiesChanged(this._gameHookEntriesToDtos(entries))
+    }
+
+    /**
+     * GameHook's push carries only what changed; `applyPropertyFields` assigns every
+     * field in `UPDATED_FIELDS`, so a partial DTO would wipe a property's `address`,
+     * `length` and the rest. Each entry becomes a snapshot of the property's current
+     * fields with `value`/`bytes` replaced, and `fieldsChanged` computed by comparing
+     * against what the property already holds, deep for arrays/objects -- GameHook does
+     * not say which of its own fields moved. An entry whose path matches no loaded
+     * property is dropped rather than guessed at.
+     */
+    _gameHookEntriesToDtos(entries: { path: string; value: unknown; bytes?: number[] }[]): GamehookPropertyData[] {
+        const dtos: GamehookPropertyData[] = []
+        for (const entry of entries) {
+            if (!entry || typeof entry.path !== "string") continue
+            const property = this._propertiesMap?.get(entry.path)
+            if (!property) continue
+            const nextBytes = entry.bytes ?? []
+            const raw = toRaw(property) as GameHookProperty
+            const fieldsChanged: string[] = []
+            if (!gameHookValuesEqual(raw.value, entry.value)) fieldsChanged.push("value")
+            if (!sameBytes(raw.bytes, nextBytes)) fieldsChanged.push("bytes")
+            const dto = snapshotProperty(property)
+            dto.value = entry.value
+            dto.bytes = nextBytes
+            dto.fieldsChanged = fieldsChanged
+            dtos.push(dto)
+        }
+        return dtos
+    }
+
+    /** GameHook has no `MapperLoaded`/`InstanceReset`; this notices the same things by asking every 2 s. */
+    _startGameHookPoll() {
+        this._stopGameHookPoll()
+        this._gameHookPollTimer = setInterval(() => { void this._pollGameHookMapper() }, 2000)
+    }
+
+    _stopGameHookPoll() {
+        if (this._gameHookPollTimer !== null) {
+            clearInterval(this._gameHookPollTimer)
+            this._gameHookPollTimer = null
+        }
+    }
+
+    async _pollGameHookMapper() {
+        if (this._mode !== "gamehook" || !this._gameHookBase || this._stopping) return
+        try {
+            const res = await fetch(`${this._gameHookBase}/mapper`)
+            if (res.status === 404) {
+                if (this.mapperLoaded) {
+                    this._deconstructMapper()
+                    this.onMapperUnloaded()
+                }
+                return
+            }
+            if (!res.ok) return // An unexpected status: leave things as they are and try again next tick.
+            const info = await res.json() as { id: string }
+            const currentId = (this.meta as { id?: string } | null)?.id
+            if (!this.mapperLoaded || info.id !== currentId) {
+                await this.loadMapper()
+                this.onMapperLoaded()
+            }
+        } catch (err) {
+            console.warn('[GameHook Client] Mapper poll failed:', err)
         }
     }
 
@@ -513,86 +962,8 @@ export class GameHookMapperClient {
             await this._establishConnection()
         })
 
-        function updateProperty(propertyChanged) {
-            let property = that._propertiesMap?.get(propertyChanged.path);
-            if (!property) {
-                return;
-            }
-
-            // Handlers receive the pre-update snapshot; it is taken off the raw
-            // object, and the fields are written only where they differ (A, H).
-            let oldProperty = snapshotProperty(property)
-            applyPropertyFields(property, propertyChanged)
-
-            // Only trigger the property's change events when
-            // the value has changed.
-
-            // This is functionally 'weird', but users are really
-            // only interested in when the value changed.
-
-            // If they need to know about other fields changing,
-            // they can register to the global GameHook event handler.
-
-            if (propertyChanged.fieldsChanged.includes('value')) {
-                // Trigger the property.change events if any.
-                const changeArray = that._change[property.path]
-                if (changeArray && changeArray.length > 0) {
-                    changeArray.forEach(x => {
-                        x(property, oldProperty)
-                    }) 
-                }
-
-                // Trigger the property.once events if any.
-                const onceArray = that._once[property.path]
-                if (onceArray && onceArray.length > 0) {
-                    onceArray.forEach(x => {
-                        x(property, oldProperty)
-                    })
-
-                    that._once[property.path] = []
-                }
-            }
-
-            // Trigger the global property changed event.
-            if (that.onPropertyChanged) {
-                that.onPropertyChanged(property, oldProperty, propertyChanged.fieldsChanged)
-            }
-        }
-
         this._signalrClient.on('PropertiesChanged', (propertiesChanged) => {
-            try {       
-                if (that._properties && that._properties.length > 0) {
-                    // What arrived, before any debounce holds it back: the evidence
-                    // the Cutter editor's export waits on (cutterProbe below).
-                    if (that._received) {
-                        that._receivedBatches++
-                        for (const changed of propertiesChanged) {
-                            if (changed && changed.path) that._received.set(changed.path, changed.bytes ?? null)
-                        }
-                    }
-                    for (const propertyChanged of propertiesChanged) {
-                        let property = that._propertiesMap?.get(propertyChanged.path)
-                        if (!property) {
-                            console.warn(`[GameHook Client] Could not find a related property in PropertyUpdated event for: ${propertyChanged.path}`)
-                            // Was `return`, which dropped the rest of the batch on the
-                            // floor -- a stale batch racing a mapper reload, or one path
-                            // the loaded tree lacks, left every later property unapplied.
-                            continue
-                        }
-                        const debounced = that._debouceMap?.get(propertyChanged.path)
-                        if (debounced) {
-                            debounced.timeoutFrames = that._debouceTimeout
-                            debounced.newProperty = propertyChanged
-                        } else {
-                            updateProperty(propertyChanged)
-                        }
-                    }
-                } else {
-                    console.debug('[GameHook Client] Mapper is not loaded, throwing away PropertiesChanged event.')
-                }
-            } catch (e) {
-                console.error(e);
-            }
+            that._handlePropertiesChanged(propertiesChanged)
         })
 
         function debouce() {
@@ -604,7 +975,7 @@ export class GameHookMapperClient {
                     if (value.timeoutFrames > 0) {
                         value.timeoutFrames--
                     } else if (value.timeoutFrames === 0) {
-                        updateProperty(value.newProperty)
+                        that._updateProperty(value.newProperty)
                         value.timeoutFrames = -1
                     }
                 }
@@ -634,6 +1005,102 @@ export class GameHookMapperClient {
         return result
     }
 
+    /**
+     * Applies one already-full DTO to its property and fires `.change()`/`.once()`
+     * and the global `onPropertyChanged`, exactly as the inline closure this was lifted
+     * from did (plan: shared between the SignalR `PropertiesChanged` handler, the
+     * debounce loop, and the GameHook update socket).
+     */
+    _updateProperty(propertyChanged: GamehookPropertyData) {
+        let property = this._propertiesMap?.get(propertyChanged.path);
+        if (!property) {
+            return;
+        }
+
+        // Handlers receive the pre-update snapshot; it is taken off the raw
+        // object, and the fields are written only where they differ (A, H).
+        let oldProperty = snapshotProperty(property)
+        applyPropertyFields(property, propertyChanged)
+
+        // Only trigger the property's change events when
+        // the value has changed.
+
+        // This is functionally 'weird', but users are really
+        // only interested in when the value changed.
+
+        // If they need to know about other fields changing,
+        // they can register to the global GameHook event handler.
+
+        if (propertyChanged.fieldsChanged.includes('value')) {
+            // Trigger the property.change events if any.
+            const changeArray = this._change[property.path]
+            if (changeArray && changeArray.length > 0) {
+                changeArray.forEach(x => {
+                    x(property, oldProperty)
+                })
+            }
+
+            // Trigger the property.once events if any.
+            const onceArray = this._once[property.path]
+            if (onceArray && onceArray.length > 0) {
+                onceArray.forEach(x => {
+                    x(property, oldProperty)
+                })
+
+                this._once[property.path] = []
+            }
+        }
+
+        // Trigger the global property changed event.
+        if (this.onPropertyChanged) {
+            this.onPropertyChanged(property, oldProperty, propertyChanged.fieldsChanged)
+        }
+    }
+
+    /**
+     * One batch of already-full DTOs, applied or handed to the debounce map -- the body
+     * of the inline `PropertiesChanged` handler this was lifted from, unchanged, so
+     * PokeAByte's SignalR push and GameHook's update socket behave identically once
+     * each has turned its own wire format into this shape. Counts as a received batch
+     * (`_receivedBatches`) even when `propertiesChanged` is empty, which is what lets
+     * the Cutter probe count a GameHook frame that named no property this client knows.
+     */
+    _handlePropertiesChanged(propertiesChanged: GamehookPropertyData[]) {
+        try {
+            if (this._properties && this._properties.length > 0) {
+                // What arrived, before any debounce holds it back: the evidence
+                // the Cutter editor's export waits on (cutterProbe below).
+                if (this._received) {
+                    this._receivedBatches++
+                    for (const changed of propertiesChanged) {
+                        if (changed && changed.path) this._received.set(changed.path, changed.bytes ?? null)
+                    }
+                }
+                for (const propertyChanged of propertiesChanged) {
+                    let property = this._propertiesMap?.get(propertyChanged.path)
+                    if (!property) {
+                        console.warn(`[GameHook Client] Could not find a related property in PropertyUpdated event for: ${propertyChanged.path}`)
+                        // Was `return`, which dropped the rest of the batch on the
+                        // floor -- a stale batch racing a mapper reload, or one path
+                        // the loaded tree lacks, left every later property unapplied.
+                        continue
+                    }
+                    const debounced = this._debouceMap?.get(propertyChanged.path)
+                    if (debounced) {
+                        debounced.timeoutFrames = this._debouceTimeout
+                        debounced.newProperty = propertyChanged
+                    } else {
+                        this._updateProperty(propertyChanged)
+                    }
+                }
+            } else {
+                console.debug('[GameHook Client] Mapper is not loaded, throwing away PropertiesChanged event.')
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     /** Starts the debounce frame loop if connected and no chain of it is running. */
     _startDebounceLoop() {
         if (!this.connected || this._debounceLoopRunning || !this._debounceTick) return
@@ -646,6 +1113,8 @@ export class GameHookMapperClient {
     // caught (gen1/2/3/5 let it surface as an unhandled rejection). The first-dot
     // path replace stays: PokeAByte normalises both forms (known-legacy-bugs.md #24).
     async _editPropertyValue(path, value, freeze) {
+        if (this._mode === "gamehook") return this._gameHookEditPropertyValue(path, value, freeze)
+
         path = path.replace('.', '/')
 
         const response = await fetch(`${this._connectionString}/mapper/set-property-value/`, {
@@ -661,6 +1130,8 @@ export class GameHookMapperClient {
     }
 
     async _editPropertyBytes(path, bytes, freeze) {
+        if (this._mode === "gamehook") return this._gameHookEditPropertyBytes(path, bytes, freeze)
+
         path = path.replace('.', '/')
 
         const response = await fetch(`${this._connectionString}/mapper/set-property-bytes/`, {
@@ -675,8 +1146,42 @@ export class GameHookMapperClient {
         }
     }
 
+    /** GameHook's write route: `POST {base}/properties/{path}` with exactly `{value}`. There is no freeze endpoint. */
+    async _gameHookEditPropertyValue(path: string, value: any, freeze?: boolean) {
+        if (freeze) console.warn('[GameHook Client] GameHook has no freeze endpoint; writing the value without freezing.')
+
+        const response = await fetch(`${this._gameHookBase}/properties/${encodeGameHookPath(path)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value })
+        })
+
+        if (!response.ok) {
+            const detail = await response.text().catch(() => '')
+            console.warn(`[GameHook Client] Failed to set ${path} = ${value}: ${response.status} ${response.statusText}${detail ? ` - ${detail}` : ''}`)
+        }
+    }
+
+    /** GameHook's write route with exactly `{bytes}`. There is no freeze endpoint. */
+    async _gameHookEditPropertyBytes(path: string, bytes: number[], freeze?: boolean) {
+        if (freeze) console.warn('[GameHook Client] GameHook has no freeze endpoint; writing the bytes without freezing.')
+
+        const response = await fetch(`${this._gameHookBase}/properties/${encodeGameHookPath(path)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bytes })
+        })
+
+        if (!response.ok) {
+            const detail = await response.text().catch(() => '')
+            console.warn(`[GameHook Client] Failed to set bytes for ${path}: ${response.status} ${response.statusText}${detail ? ` - ${detail}` : ''}`)
+        }
+    }
+
     //For setting multiple bits within the same byte at the same time
     async setBits(propertyArray) {
+        if (this._mode === "gamehook") return this._gameHookSetBits(propertyArray)
+
         const modifiedArray = propertyArray.map(item => ({
             ...item,
             path: item.path.replace(/\./g, '/')
@@ -695,6 +1200,27 @@ export class GameHookMapperClient {
     }
 
     /**
+     * GameHook has no set-properties-by-bits endpoint -- no way to merge several
+     * partial-byte writes into one so they land together without one clobbering
+     * another. The nearest honest equivalent: write each item's value to its own path
+     * in order, exactly as `_editPropertyValue` does. Unlike PokeAByte's endpoint this
+     * is not atomic across items and carries no `bits` field (GameHook has no notion of
+     * a partial-byte write), so a multi-item call that fails partway leaves some paths
+     * written and others not -- a caller that relies on both landing together (gen1's
+     * `starterDvs.ts`, gen2's manual DV writes) should treat GameHook as unsupported for
+     * that write until GameHook grows a real by-bits route.
+     */
+    async _gameHookSetBits(propertyArray: { path: string; value: any; freeze?: boolean }[]) {
+        for (const item of propertyArray) {
+            try {
+                await this._gameHookEditPropertyValue(item.path, item.value, item.freeze)
+            } catch (err) {
+                console.warn(`[GameHook Client] Failed to set bits for ${item.path}:`, err)
+            }
+        }
+    }
+
+    /**
      * gen3's: stop the SignalR connection and drop the mapper (plan 3.3). The legacy
      * gen3 called it from `beforeunload` so a reload did not leave PokeAByte a dangling
      * hub connection; main.ts does the same for every generation.
@@ -709,6 +1235,19 @@ export class GameHookMapperClient {
             this._retryTimer = null;
         }
         this._debounceTick = null;
+        // GameHook's poll and socket die with the client too: a later poll tick finds
+        // _stopping, and clearing `_gameHookSocket` before closing it means the close
+        // event below is never mistaken for a lost connection by `_onGameHookSocketClosed`.
+        this._stopGameHookPoll();
+        if (this._gameHookSocket) {
+            const socket = this._gameHookSocket;
+            this._gameHookSocket = null;
+            try {
+                socket.close();
+            } catch (err) {
+                console.warn('[GameHook Client] Error closing the GameHook update socket:', err);
+            }
+        }
         if (this._signalrClient) {
             try {
                 await this._signalrClient.stop();

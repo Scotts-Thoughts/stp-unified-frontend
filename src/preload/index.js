@@ -42,12 +42,25 @@ const cutterArg = (name) => {
   return found ? found.slice(name.length + 3) : null
 }
 
+/**
+ * The ordinary app's own override of the memory tool's address -- unrelated to
+ * `--cutter-tool`, which only exists on a chain the Cutter editor started. Either the
+ * `STP_TOOL_URL` environment variable or a `--tool-url=<url>` command-line switch (the
+ * flag wins when both are set); null when neither is, which keeps `main.ts`'s default
+ * (`http://localhost:8085`). This is how someone runs the overlay against a local
+ * GameHook instance, or a non-default PokeAByte port, without touching the source.
+ */
+const toolUrlOverride = cutterArg('tool-url') ?? process.env.STP_TOOL_URL ?? null
+
 const api = {
   /** Number of main-process calls still in flight; see `pendingInvokes`. */
   __pendingIpc: () => pendingInvokes,
 
   /** `{ toolUrl }` when the Cutter editor runs this overlay, otherwise null. */
   cutter: cutterArg('cutter-tool') ? { toolUrl: cutterArg('cutter-tool') } : null,
+
+  /** The ordinary-mode memory tool override, or null; see `toolUrlOverride`. */
+  toolUrl: toolUrlOverride,
 
   settings_dir: () => invoke('settings_dir'),
   /** The folder `./splits` and `./storage` are resolved against (plan 1.7). */
