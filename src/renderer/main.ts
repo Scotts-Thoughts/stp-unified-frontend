@@ -199,9 +199,13 @@ const main = defineComponent({
         };
 
         // The memory tool's own address, unless the Cutter editor is running this
-        // overlay against an instance of it (src/main/cutter.ts).
+        // overlay against an instance of it (src/main/cutter.ts) or the ordinary app
+        // was started with its own override (`STP_TOOL_URL` / `--tool-url=`, preload's
+        // `toolUrlOverride`) -- leaving both unset keeps GameHookMapperClient's own
+        // default (http://localhost:8085).
         const cutterTool: string | undefined = (window as any).api?.cutter?.toolUrl ?? undefined;
-        this.mapper = new GameHookMapperClient(cutterTool);
+        const toolUrl: string | undefined = (window as any).api?.toolUrl ?? undefined;
+        this.mapper = new GameHookMapperClient(cutterTool ?? toolUrl);
         this.mapper.onMapperLoaded = async () => {
             const sequence = ++this.loadSequence;
             // Which generation, which profile, which game -- from the mapper's path

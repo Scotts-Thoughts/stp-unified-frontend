@@ -10,7 +10,11 @@ it that are "why", not "what", are in the section headers of the source files th
 
 1. `npm ci`
 2. `npm run dev` -- the overlay opens and waits for PokeAByte (`http://localhost:8085`) to load a mapper.
-   Code changes apply to the running app.
+   Code changes apply to the running app. Set `STP_TOOL_URL` (or pass `--tool-url=<url>`) to point it at a
+   different address instead -- another PokeAByte port, or a GameHook instance
+   (`http://127.0.0.1:61358/instances/0`, GameHook's default port); the memory tool client
+   (`src/renderer/packages/gameHookMapperClient.ts`) detects which of the two is answering and speaks its
+   protocol, so nothing else about the overlay changes. Leaving it unset keeps the default above.
 3. `npm run build` -- the packaged-shape build in `out/`; `npm run build:unpack` wraps it with electron-builder
    into `dist/win-unpacked/` (3.0 GB, the image pool included) and `npm run packaged:probe` launches that exe
    with the network blocked and checks it found everything; `npm run build:win` zips the same tree.

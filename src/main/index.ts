@@ -71,6 +71,9 @@ function createWindow() {
             sandbox: false,
             contextIsolation: false,
             nodeIntegration: true,
+            // The renderer sees none of the app's command line unless it is passed on:
+            // `--tool-url=` is the one switch the preload reads in the ordinary app.
+            additionalArguments: process.argv.filter((a) => a.startsWith('--tool-url=')),
         },
     };
     if (useSaved) {
