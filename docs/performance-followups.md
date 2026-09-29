@@ -166,7 +166,7 @@ comparisons), the cache write and the debounced `schedule()` early-return -- is 
 
 - **E. gen4's `setImmediate` hop.** One macrotask per frame; nothing measurable to gain and
   the harness's frame-grid expectations were built with it in place
-  (`stp-overlay-harness-determinism`). Measure at runtime before touching, as the note said.
+  (`docs/parity-harness.md` §9, determinism). Measure at runtime before touching.
 - **F. The 500 ms owned-item ticks (gen3/gen5).** ~130 proxied reads twice a second. The
   proposed replacement -- refresh `lastSeenOwned` on the next `change()` instead -- is a
   behaviour change: after 2 s without any bag/held event, the next event would see a stale
@@ -230,7 +230,7 @@ frame; gen3 and gen5 keep it on the `Timer` instance, not in storage.
 gen4 wraps its `requestAnimationFrame(this.updateTime)` in `setImmediate()` (Node's, via
 `nodeIntegration`). It adds a macrotask per frame for no visible reason; the legacy app did
 the same, so the harness's frame-grid expectations may depend on it (see
-`stp-overlay-harness-determinism` in memory). Measure before touching.
+`docs/parity-harness.md` §9, determinism). Measure before touching.
 
 ### F. The 500 ms owned-item ticks in gen3 and gen5
 
@@ -255,7 +255,7 @@ that cannot be confirmed from source.
 ## How to verify a change from this list
 
 1. Capture a baseline from a `HEAD` worktree (the standing baselines are stale; see
-   `stp-overlay-verification-workflow` in memory), one harness run at a time.
+   `ARCHITECTURE.md` §12), one harness run at a time.
 2. Apply the change, run `npm run parity:run` for the affected generation(s), `npm run
    parity:diff` against the worktree capture.
 3. `npm run typecheck`.

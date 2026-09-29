@@ -1,5 +1,9 @@
 # STP Unified Frontend — Implementation Plan
 
+> **Status (2026-09-28): mostly history.** Phases 0–5 are done. Still live: §2 (rules), §4, §5 Decisions, §6,
+> §7g Phase 6 status, "Cross-generation drift", "The image pool as lossless WebP" and the final "Phase 6 plan".
+> The current map of the code is `ARCHITECTURE.md`; paths below written as `A:\...` are the Windows machine's.
+
 **Revision 2 — 2026-09-10.** Revision 1 was written against gen4 `2272e83` and gen5 `18167a5`. This revision was
 re-verified file-by-file against the current working trees (gen1 `996d031`, gen2 `dd0f402` on branch `2026`,
 gen3 `d1ce779`, gen4 `a7d179c`, gen5 `e441d32`), PokeAByte 0.11.2 source, the recording queuer, and the first
@@ -590,10 +594,10 @@ Nothing in this section blocks any phase any more.
 25. Legacy quirks (amends decision 4) → **two kinds**. *Game quirks* -- anything that mirrors a feature of the game, the
     game's own code, or how the game presents information (gen2's Special Defense badge rule is the model: pokecrystal's
     `BadgeStatBoosts` does exactly that and no other generation has it) -- are kept exactly, verified against the
-    decompilations listed in `CLAUDE.md`. *Code quirks* -- inconsistencies that exist only because the five apps were
+    decompilations listed in `AGENTS.md`. *Code quirks* -- inconsistencies that exist only because the five apps were
     written at different stages -- are technical debt and are streamlined and standardised whenever possible, each fix
     its own commit after the no-change one. Approved now: the crash class (#32, #34, #35, #37), the split-row data
-    class (#33, #36) and the persistence and folder class (#45 with a key migration, #2, #11). The rule is in `CLAUDE.md`.
+    class (#33, #36) and the persistence and folder class (#45 with a key migration, #2, #11). The rule is in `AGENTS.md` and `ARCHITECTURE.md` §11.
 26. Visual scope → **none**: visuals stay per generation through Phase 6; §4's value differences are a later phase.
 27. Pilot generation → **gen2**, then gen4, gen5, gen3; the recordings still to make follow that order after gen2's.
 
@@ -1862,7 +1866,7 @@ passing the recipe in §5.
   `real_time_hmmss` under a minute, #34/#35 bare reads, #36/#37 gen3's time functions, #43 `split_data`, #44 the
   removed duplicates, #45 gen2's `'this.*'` keys, #46 gen2's SpDef rule; `check-undefined`'s `--allow=hash`), each
   row classified under decision 25: a **game quirk** (it mirrors the game's features, code or presentation -- #46 is
-  the model, pokecrystal's `BadgeStatBoosts`; verified against the decompilations in `CLAUDE.md`) is carried
+  the model, pokecrystal's `BadgeStatBoosts`; verified against the decompilations in `AGENTS.md`) is carried
   verbatim; a **code quirk** (an artefact of when the app was written) is fixed in its own commit after the move.
   Approved for fixing already: the crash class (#32, #34, #35, #37), the split-row data class (#33, #36) and the
   persistence and folder class (#45 with a key migration, #2, #11). Every slice states which rows it carries and
@@ -1990,7 +1994,7 @@ passing the recipe in §5.
   inputs and the generation's tables on `GameModule.data` (`typeChart`, `stageModifiers`, `typeBoostingItems`,
   `natures`, `hiddenPower`, `badgeBoosts`, the growth tables). `battleMathMixin`, `dsPairMixin`, `naturesMixin`
   and `manualIvsMixin` dissolve into it as each member is typed; `npm run parity:battle-math` is a self-test per
-  function family, its cases taken from the fixtures' checkpoints and from the decompilations (`CLAUDE.md`: game
+  function family, its cases taken from the fixtures' checkpoints and from the decompilations (`AGENTS.md`: game
   internals come from the source, never guessed).
 - Tables move to `core/data/` only when identical (2.2's rule). Measured 2026-09-25: `type-effectiveness.js`
   gen3 = gen4 = gen5 (gen2's is the Gen 2 chart and stays); `hiddenpower-all.js` gen3 = gen4 = gen5;
@@ -2144,7 +2148,7 @@ In one place, what each changes:
 | 22 `setImmediate` dropped | 6.6: one timer loop; gen4 re-baselined if the frame grid moves |
 | 23 recordings alongside 6.1-6.3 | 6.0 runs in parallel; a logic slice waits per member for coverage |
 | 24 recordings committed | `tools/fixtures/<gen>/`, plain git |
-| 25 game quirks kept, code quirks fixed | the ledger classifies every row; three groups approved; the rule is in `CLAUDE.md` |
+| 25 game quirks kept, code quirks fixed | the ledger classifies every row; three groups approved; the rule is in `AGENTS.md` and `ARCHITECTURE.md` §11 |
 | 26 visuals stay per generation | no §4 unification inside Phase 6 |
 | 27 gen2 pilots | slice order gen2, gen4, gen5, gen3; the remaining recordings in that order |
 | 28 `features.forms` true for gen3 and gen4 | 6.1 flips the flags |

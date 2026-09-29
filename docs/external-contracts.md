@@ -242,8 +242,10 @@ Binary only (no source anywhere on disk). `md5 73db8f5278d94b21e6fc1beea09b144e`
 identical in the gen2 and gen3 repos; **removed from the gen1 repo in commit `996d031` (2026-09-10)**, so
 gen1 dev currently runs without hotkeys unless the exe is placed next to the project. gen1 looks in
 `process.cwd()`, then `process.resourcesPath`, then PATH. Stdout protocol: lines `down,keyCode,time`
-(`1`/`0`, Win32 VK code, ms). The unified app vendors it at `resources/keyhook.exe`, spawns it once from
-main, and forwards events over IPC.
+(`1`/`0`, Win32 VK code, ms). The unified app spawns it once from main and forwards events over IPC. It is
+**not in the repo** (build output, removed in `5dce66a`): `src/main/keyhook.ts` looks for `<appRoot>/keyhook.exe`,
+then `<appRoot>/resources/keyhook.exe`, then the packaged `resources/`; without it the app logs that hotkeys
+are disabled and runs on.
 
 ## 8. PokeAByte — `http://localhost:8085`
 

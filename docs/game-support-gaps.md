@@ -23,7 +23,7 @@ data is mostly good.
    deliberately, so `?.` short-circuits keep working), which is why an unguarded `.value` or `.change()`
    on one is a TypeError.
 2. **Data vs decomps.** The shipped trainer, learnset, base-stat, TM/HM and evolution tables were diffed
-   against the decomp repos listed in `CLAUDE.md` (pokegold/pokecrystal, pokeruby/pokeemerald,
+   against the decomp repos listed in `AGENTS.md` (pokegold/pokecrystal, pokeruby/pokeemerald,
    pokediamond `files/poketool/personal/wotbl.json`).
 3. **Overlay branching.** Every `gameSelection` / `selected_game` / `meta.gameName` / `meta.game_name`
    branch in the three `Overlay.vue` files was read for the edition in question.

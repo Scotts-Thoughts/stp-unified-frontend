@@ -1,7 +1,9 @@
 # Known legacy bugs and quirks (found during the 2026-09-10 survey)
 
-Default policy (plan §5, decision 4): **preserve** each one during migration so parity holds, list it here,
-and fix only after Scott approves. Each entry says what the unified app must do to stay bit-identical.
+Policy (plan §5, decision 25, which amends decision 4): **game quirks** -- anything that mirrors the game's own
+behaviour, checked against the decompilations -- are kept exactly. **Code quirks** -- drift between the five legacy
+apps -- are fixed: move verbatim first, fix in its own change, verify with the harness, and record the fix here.
+See `ARCHITECTURE.md` §11. Each entry says what the unified app does to stay bit-identical, or how it was fixed.
 
 | # | Gen | Where | What | Parity handling |
 |---|---|---|---|---|
@@ -27,7 +29,7 @@ and fix only after Scott approves. Each entry says what the unified app must do 
 | 20 | gen5 | `app/fling.js`, `app/methods/time_functions.js`, `lib/g4PokemonDataPlat.js`, `lib/platinum_*`, `lib/moves.js`, `lib/g4MoveData.js`, `lib/pokedex/black.js(.backup)`, `lib/default_style_settings.js.backup` | unreferenced (≈230 k lines + 29.8 MB) | not copied |
 | 21 | gen4 ↔ gen5 | `logCopy()` | gen4 takes `finishFileName` (branching evolution lines) and always copies from the non-refilmed attempts dir; gen5 takes `refilming_mode` and nests `finishes/` under the refilmed path | two implementations selected by GameModule |
 | 22 | gen1 | `logic/PokeData.ts` | `setGame("Yellow Legacy")` throws → with the Yellow Legacy hack mapper the overlay never becomes ready (error swallowed by the client) | out of scope: hack mappers are not registered (decision 8); the unified app shows the unsupported-mapper state instead of hanging |
-| 23 | gen1 | `components/keyhook.js` | `keyhook.exe` removed from the repo in `996d031`; looked up in cwd → hotkeys silently disabled in dev unless the exe is placed manually | unified app vendors `resources/keyhook.exe` (gen2/gen3 copy, md5 `73db8f52…`) |
+| 23 | gen1 | `components/keyhook.js` | `keyhook.exe` removed from the repo in `996d031`; looked up in cwd → hotkeys silently disabled in dev unless the exe is placed manually | unified app looks for `keyhook.exe` next to the app or in `resources/` (gen2/gen3 copy, md5 `73db8f52…`); not in the repo since `5dce66a`, place it by hand |
 | 24 | all | vendored `gameHookMapperClient.js` | `_editPropertyValue` does `path.replace('.', '/')` (first dot only); `get(path)` references an undefined `that`; `PropertiesChanged` handler `return`s (not `continue`) on the first unknown path, dropping the rest of the batch | one client in `core/mapper`; keep the first-dot replace (PokeAByte normalises), fix `get()` (unused), keep the early-return **only if** the harness shows a fixture that hits it — otherwise change to `continue` and record as an approved fix |
 | 25 | gen2–5 | `lib/style_settings_manager.js` | in dev mode the running app rewrites `app/lib/default_style_settings.js` (and `enemy_sprite_scales.js`) inside its own source tree; gen5 debounces 1 s with async write (can lose the last edit on quit), gen4 500 ms sync + `beforeunload` flush | shipped defaults become per-species JSON in the repo; dev-mode edits write those files (as today, but one species per file, no 26 MB blob, no source `.js`), packaged builds write userData overrides (decision 10); the legacy files were committed on 2026-09-10 (`inputs.lock.md`) |
 | 26 | gen2 | `lib/backport_importer.js` | appends imported backport moves/species to the shipped data files on disk (`g2MoveData.js`, `gen2moves.js`, `pokemon_crystal.js`, `backport_move_map.js`) | built 2026-09-12: the parser is `games/gen2/backports.js` (the legacy file's first half, verbatim); the four file appends are `games/gen2/backportOverrides.ts`, which writes `%APPDATA%/stp-overlay/data/gen2/backports.json` and folds it into the tables in gen2's `prepare()`; the shipped data stays read-only (decision 15) |

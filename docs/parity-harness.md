@@ -2,7 +2,9 @@
 
 The harness is the only thing that decides whether a migration step is "done". It replays a recorded
 PokeAByte session into an overlay app running under Playwright-for-Electron, and compares what the app
-*shows* and what it *does* against a committed baseline captured from the unmodified legacy app.
+*shows* and what it *does* against a baseline captured from the unmodified legacy app (or, on a machine without
+the legacy apps, from a built worktree of the previous commit -- see `unified@<dir>` below). Baselines are local
+and gitignored.
 
 Verified inputs (2026-09-10): PokeAByte 0.11.2 source (`A:\Programs\PokeAByte\src`), gen1's
 `packages/gameHookMapperClient.ts`, the queuer's `fixture_recorder.js`, the first recorded fixture
@@ -164,14 +166,18 @@ tools/parity/
   capture.ts        styles+rects dump, screenshot, localStorage dump, file collection
   diff.ts           oracles 1–9 → tools/reports/<gen>/<fixture>/<checkpoint>.{json,png}
   scan-fixture.ts   checkpoints + extraction
-  prune-fixture.ts  drop unread paths (per-gen allowlist from the adapter inventories)
-tools/baselines/<gen>/<fixture>/<checkpoint>/   committed reference captures (legacy@25 and legacy@37)
+  verify-all.ts     parity:all -- every fixture vs its baseline; --baselines recaptures them
+  targets.ts        unified / unified@<dir> / legacy:genN@25|@37 launch recipes (legacy = Windows only)
+  make-fixture.ts   synthetic fixture from a mapper XML + scenarios/*.json
+  *-selftest.ts, drift-check.ts, profile-check.ts, manual-ivs-check.ts   standalone checks (see §9)
+tools/baselines/<gen>/<fixture>/<checkpoint>/   local reference captures, gitignored (legacy@25/@37, or unified@<dir>)
 tools/fixtures/raw/<mapper gameName>/<replay>.fixture.jsonl.gz  (Dropbox-synced, git-ignored)
-tools/fixtures/<gen>/<replay>/…                committed pruned/extracted fixtures
+tools/fixtures/<gen>/<name>.fixture.jsonl.gz    committed fixtures (gen1, gen3, gen4, gen5 smoke; no gen2 yet)
 ```
 
-npm scripts: `parity:baseline <gen> <fixture>`, `parity:run <target> <fixture>`, `parity:diff`,
-`parity:scan`, `parity:prune`, `parity:all` (every gen that is migrated so far).
+npm scripts: `parity:all`, `parity:run <target> <fixture>`, `parity:diff`, `parity:scan`, `parity:mock`,
+`parity:preflight`, plus the checks listed in §9. (The earlier `parity:baseline`, `parity:prune` and
+`prune-fixture.ts` were never built; `parity:all -- --baselines` is how baselines are captured.)
 
 ## 8. Known quirks the mock must reproduce, not fix
 
@@ -369,9 +375,9 @@ or a 150%-scaled monitor a 1920x1080 content window ends up 1914x1063 whatever `
 runner moves it to the primary display's work-area corner before sizing and locking it, and again before a
 capture that finds it drifted (`ensureContentSize`).
 
-`resources/keyhook.exe` is copied into the sandbox for every run; when something outside git has quarantined it
-(it happens on this machine), the sandbox logs that and the run proceeds without hotkeys -- no oracle presses a
-key. The same scanner held the app's synchronous spawn of a freshly restored `keyhook.exe` for over a minute,
+`resources/keyhook.exe` is copied into the sandbox for every run when it is present. It is no longer tracked in
+git (removed in `5dce66a`), so place a copy there by hand; when it is missing or something outside git has
+quarantined it, the sandbox logs that and the run proceeds without hotkeys -- no oracle presses a key. The same scanner held the app's synchronous spawn of a freshly restored `keyhook.exe` for over a minute,
 which showed up as Playwright's 60 s `firstWindow` timeout with the main process alive and no window: the app
 now creates its window before it spawns the hook (`src/main/index.ts`), and the run log carries the main
 process's own output (`[app] ...`) so a launch that fails says why.

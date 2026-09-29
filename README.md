@@ -1,5 +1,8 @@
 # STP overlay (unified)
 
+> Working on the code (or an AI agent doing so)? Start with `AGENTS.md`, then the sections of
+> `ARCHITECTURE.md` it points to.
+
 One Electron app that plays the five Scott's Thoughts Pokémon overlays -- gen1 (Yellow, Red & Blue),
 gen2 (Crystal, Gold & Silver), gen3 (Emerald, FireRed & LeafGreen), gen4 (Platinum, Diamond & Pearl,
 HeartGold & SoulSilver) and gen5 (Black, White, Black 2, White 2) -- picking the generation from the
@@ -8,7 +11,8 @@ it that are "why", not "what", are in the section headers of the source files th
 
 ## Run it
 
-1. `npm ci`
+1. `npm ci` (Node ≥ 22.12, or 20.19+; electron-vite 4 will not load on older Node). F13–F24 hotkeys need
+   `keyhook.exe` next to the app or in `resources/` -- it is not in the repo; without it the app runs without them.
 2. `npm run dev` -- the overlay opens and waits for PokeAByte (`http://localhost:8085`) to load a mapper.
    Code changes apply to the running app. Set `STP_TOOL_URL` (or pass `--tool-url=<url>`) to point it at a
    different address instead -- another PokeAByte port, or a GameHook instance
@@ -105,5 +109,6 @@ same harness, which is how a refactor is shown not to change gen1.
   from the legacy app's own profile (`%APPDATA%/<legacy app>/Local Storage/leveldb`, read from a copy);
   `npm run import:dump <profile folder>` shows what that takes.
 - gen1's per-species settings and metrics: `%APPDATA%/stp-overlay/data/<game>/<species>/`.
-- Shipped style defaults: `games/genN/data/style/<Game>_<Species>.json` (a dev-mode edit writes the file).
+- Shipped style defaults: `games/genN/data/style/*.json` -- `<Species>.json` in gen2, `<Game>_<number>.json` in
+  gen3, `<Game>_<Species>.json` in gen4/5 (a dev-mode edit writes the file).
 - Split CSVs: `splits/` next to the app (the five legacy trees consolidated, every folder name kept).
