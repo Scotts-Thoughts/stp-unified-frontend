@@ -7,10 +7,14 @@ import { h, ref } from "vue";
 import PubSub from "../logic/PubSub.js";
 
 export default {
+    // `hideClock` is not in the legacy file: the overlay sets it while its out-of-process
+    // clock (core/overlay/ClockFrame.ts) is showing, and the two lines stay in the DOM, hidden.
+    props: { hideClock: { type: Boolean, default: false } },
     render() {
+        const hidden = this.hideClock ? { visibility: "hidden" } : null;
         return h("div", { class: "gametime" }, [
-            h("div", { class: "gametimeClock" }, this.time),
-            h("div", { class: "gametimeFrames" }, this.frames),
+            h("div", { class: "gametimeClock", style: hidden }, this.time),
+            h("div", { class: "gametimeFrames", style: hidden }, this.frames),
         ]);
     },
     setup() {

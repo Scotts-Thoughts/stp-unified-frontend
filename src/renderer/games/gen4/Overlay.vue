@@ -73,13 +73,15 @@
                 </div>
             </div>
             <div v-if="shuckie_timer == true">
-                <live-text class="gametimeClock" source="shuckie_clock"></live-text>
-                <live-text class="gametimeFrames" source="shuckie_frames"></live-text>
+                <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
             </div>
             <div v-else="">
-                <live-text class="gametimeClock" source="timer_clock"></live-text>
-                <live-text class="gametimeFrames" source="timer_frames"></live-text>
+                <live-text class="gametimeClock" source="timer_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                <live-text class="gametimeFrames" source="timer_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
             </div>
+            <!-- The clock in its own process (core/overlay/ClockFrame.ts); the two above show until it is up. -->
+            <clock-frame :gen="4" @live="timer_frame_live = $event"></clock-frame>
 
             <div>
                 <img v-if="game.properties.meta.game_name.value == 'Diamond and Pearl'" class="canvas" :src="`images/gen4/new_ui/progress sinnoh.webp`">
@@ -1337,6 +1339,7 @@
  */
 import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
+import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
@@ -1398,7 +1401,7 @@ let attack, basePower, battle_end, calculated_stats, d, damageMax, damageMin, de
 
 export default defineComponent({
     mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin],
-    components: { LiveText },
+    components: { LiveText, ClockFrame },
     props: ["game"],
     provide() {
         // What <live-text> shows (core/overlay/LiveText.ts): the Super Shuckie time and the timer text,
@@ -1412,6 +1415,9 @@ export default defineComponent({
                 timer_clock:    computed(() => this.timer_formatted_time[0]),
                 timer_frames:   computed(() => this.timer_formatted_time[1]),
             },
+            // What <clock-frame> posts to the out-of-process clock (core/overlay/ClockFrame.ts), read
+            // the same way: the overlay's render never depends on the timer fields or the polls.
+            clockState: computed(() => this.timer_frame_state),
         };
     },
     data() {
@@ -1943,6 +1949,7 @@ export default defineComponent({
             timer_pause:           MyStorage["timer_pause"]           ?? true,
             timer_formatted_time:  MyStorage["timer_formatted_time"]  ?? ["0", ".00"],
             timer_pause_time:      MyStorage["timer_pause_time"]      ?? 0,
+            timer_frame_live:      false, // the out-of-process clock is showing (core/overlay/ClockFrame.ts)
             time_h:                MyStorage['time_h']                ?? 0,
             time_m:                MyStorage['time_m']                ?? 0,
             time_s:                MyStorage['time_s']                ?? 0,
@@ -2648,6 +2655,16 @@ export default defineComponent({
         // },
     },
     computed: {
+        /** What the out-of-process clock needs (core/overlay/ClockFrame.ts): the timer fields and Super Shuckie's time. */
+        timer_frame_state() {
+            return {
+                mode: this.shuckie_timer ? 'emulator' : 'local',
+                startTime: this.timer_startTime,
+                pause: this.timer_pause,
+                pauseTime: this.timer_pause_time,
+                emulatorMs: this.emulatorStats?.time_current ?? null,
+            }
+        },
         /**
          * The Super Shuckie counters as primitives (2026-09-25): the template used to read
          * `emulatorStats?.counters?.x` directly, which made every poll that replaced
@@ -7733,7 +7750,8 @@ export default defineComponent({
                 : move_type == user_type_2 ? 1.5 
                 : 1
             var modifier_ability = this.abilityModifier(this.game.properties.battle.opponent.active_pokemon.ability.value, move_type, 'opponent')
-            if (this.game.properties.battle.player.active_pokemon.ability.value == 'Levitate' && move_type == 'Ground') {
+            // Mold Breaker ignores the target's ability (pokeplatinum Battler_IgnorableAbility)
+            if (this.game.properties.battle.player.active_pokemon.ability.value == 'Levitate' && move_type == 'Ground' && enemy_mon.ability?.value != 'Mold Breaker') {
                 modifier_ability = 0 
             }
             var modifier_item = this.determineItemBoost(move_name, enemy_mon)
@@ -7776,6 +7794,10 @@ export default defineComponent({
             if (player_ability == "Iron Fist" && (x == 'Hammer Arm' || x == 'Sky Uppercut' || x == 'Ice Hammer' || x == 'Double Iron Bash' || x.includes("Punch"))) {
                 player_ability_modifier = 1.2
             }
+            // Outside the in-battle calculation the enemy data is left over from the last battle, so its ability does not count
+            var in_battle_calc = this.typeCalcs == true && state == "Battle" && this.game.properties.meta.state_enemy.value != "Battle Finished"
+            // Mold Breaker ignores the target's ability (pokeplatinum Battler_IgnorableAbility)
+            var target_ability = !in_battle_calc || player_ability == 'Mold Breaker' ? null : enemy_pokemon_data?.ability.value
 
             var defendingType1Effectiveness = this.typeData.find(x => x.moveType == attackingType)[defendingType1]
             var pkmn_ability = this.game.properties.player.team[0].ability.value
@@ -7788,18 +7810,18 @@ export default defineComponent({
                 }
 
                 // Filter ability
-                if (enemy_pokemon_data?.ability.value == 'Filter' && defendingType1Effectiveness == 2) {
-                    defendingType1Effectiveness = 1.5 
+                if (target_ability == 'Filter' && defendingType1Effectiveness == 2) {
+                    defendingType1Effectiveness = 1.5
                 }
-                if (enemy_pokemon_data?.ability.value == 'Filter' && defendingType2Effectiveness == 2) {
-                    defendingType2Effectiveness = 1.5 
+                if (target_ability == 'Filter' && defendingType2Effectiveness == 2) {
+                    defendingType2Effectiveness = 1.5
                 }
 
                 // Solid Rock ability
-                if (enemy_pokemon_data?.ability.value == 'Solid Rock' && defendingType1Effectiveness == 2) {
-                    defendingType1Effectiveness = 1.5 
+                if (target_ability == 'Solid Rock' && defendingType1Effectiveness == 2) {
+                    defendingType1Effectiveness = 1.5
                 }
-                if (enemy_pokemon_data?.ability.value == 'Solid Rock' && defendingType2Effectiveness == 2) {
+                if (target_ability == 'Solid Rock' && defendingType2Effectiveness == 2) {
                     defendingType2Effectiveness = 1.5 
                 }
             }
@@ -7847,28 +7869,28 @@ export default defineComponent({
 
             var ability = this.abilityModifier(this.game.properties.player.team[0].ability.value, attackingType, 'player')
             
-            if (this.game.properties.battle.opponent.active_pokemon.ability.value == 'Levitate' && attackingType == 'Ground') {
-                ability = 0 
-            }
-            // if (enemy_pokemon_data?.ability.value == 'Storm Drain' && attackingType == 'Water') {
-            //     ability = 0 
-            // }
-            if (enemy_pokemon_data?.ability.value == 'Dry Skin' && attackingType == 'Water') {
-                ability = 0 
-            }
-            if (enemy_pokemon_data?.ability.value == 'Lightningrod' && attackingType == 'Electric') {
-                ability = 0 
-            }
-            if (enemy_pokemon_data?.ability.value == 'Flash Fire' && attackingType == 'Fire') {
-                ability = 0 
-            }
-            if (enemy_pokemon_data?.ability.value == 'Heatproof' && attackingType == 'Fire') {
-                ability = 0.5 
-            }
-            if (enemy_pokemon_data?.ability.value == 'Motor Drive' && attackingType == 'Electric') {
+            if (target_ability == 'Levitate' && attackingType == 'Ground') {
                 ability = 0
             }
-            if (enemy_pokemon_data?.ability.value == 'Thick Fat' && (attackingType == 'Ice' || attackingType == 'Fire')) {
+            // if (enemy_pokemon_data?.ability.value == 'Storm Drain' && attackingType == 'Water') {
+            //     ability = 0
+            // }
+            if (target_ability == 'Dry Skin' && attackingType == 'Water') {
+                ability = 0
+            }
+            if (target_ability == 'Lightningrod' && attackingType == 'Electric') {
+                ability = 0
+            }
+            if (target_ability == 'Flash Fire' && attackingType == 'Fire') {
+                ability = 0
+            }
+            if (target_ability == 'Heatproof' && attackingType == 'Fire') {
+                ability = 0.5
+            }
+            if (target_ability == 'Motor Drive' && attackingType == 'Electric') {
+                ability = 0
+            }
+            if (target_ability == 'Thick Fat' && (attackingType == 'Ice' || attackingType == 'Fire')) {
                 ability = 0.5
             }
             var recklessMoves = [
@@ -7887,7 +7909,7 @@ export default defineComponent({
                 "Wave Crash",
                 "Wild Charge",
             ]
-            if (enemy_pokemon_data?.ability.value == 'Reckless' && recklessMoves.includes(x)) {
+            if (in_battle_calc && enemy_pokemon_data?.ability.value == 'Reckless' && recklessMoves.includes(x)) {
                 ability = 1.2
             }
 
@@ -7906,7 +7928,7 @@ export default defineComponent({
             }
             var itemBoost = this.determineItemBoost(x, this.game.properties.player.team[0])
 
-            if (enemy_pokemon_data?.ability.value == 'Levitate' && attackingType == 'Ground' && enemy_item == "Iron Ball") {
+            if (target_ability == 'Levitate' && attackingType == 'Ground' && enemy_item == "Iron Ball") {
                 ability = 1 
             }
             if (attackingType == 'Ground' && defendingType1 == 'Flying' && enemy_item == "Iron Ball") {
@@ -7965,7 +7987,7 @@ export default defineComponent({
             // }
 
             // console.log("Recalculated:", defendingType2Effectiveness)
-            if (this.typeCalcs == true && this.game.properties.meta.state.value == "Battle" && this.game.properties.meta.state_enemy.value != "Battle Finished") { //Handles type effectiveness calculations in battle
+            if (in_battle_calc) { //Handles type effectiveness calculations in battle
                 if (power == "—") { return "—" }
                 if (power == "-") { return "—" }
                 return Math.floor(power * stabModifier * defendingType1Effectiveness * defendingType2Effectiveness * ability * itemBoost * weatherBoost * burnModifier * player_ability_modifier * multi_hit_modifier)

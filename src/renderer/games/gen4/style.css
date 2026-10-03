@@ -663,6 +663,15 @@ body:has(.gen-4) {
     /* filter: drop-shadow(1px 1px 1px #000000) */
 }
 
+/* The out-of-process clock (core/overlay/ClockFrame.ts): a box around .gametimeClock and .gametimeFrames. */
+.gen-4 .gametimeFrame {
+    position: absolute;
+    top: 30px;
+    right: 1480px;
+    width: 520px;
+    height: 100px;
+}
+
 .gen-4 .movepool_header {
     line-height: 17px;
 }

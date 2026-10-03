@@ -1760,6 +1760,15 @@
     /* filter: drop-shadow(1px 1px 1px #000000) */
 }
 
+/* The out-of-process clock (core/overlay/ClockFrame.ts): the .gametime box's content area. */
+.gen-1 .gametimeFrame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 78px;
+}
+
 .gen-1 .inventory {
     font-size: 30px;
     position: absolute;

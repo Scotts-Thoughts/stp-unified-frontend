@@ -4,6 +4,7 @@ import { app, shell, BrowserWindow, screen, type BrowserWindow as BrowserWindowT
 import path from "path";
 import fs from "fs";
 import { ControlServer } from "./control-server";
+import { TimerFrameServer } from "./timer-frame-server";
 import { registerIpc } from "./ipc";
 import { startKeyhook, stopKeyhook } from "./keyhook";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
@@ -23,6 +24,9 @@ const cutter = cutterArgs();
  */
 let mainWindow: BrowserWindowType | null = null;
 const controlServer = new ControlServer(() => mainWindow);
+/** The out-of-process clock page (port 30160); its URL reaches the renderer as `--timer-frame-url=`. */
+const timerFrame = new TimerFrameServer();
+let timerFrameUrl: string | null = null;
 
 const devStateFile = () => path.join(app.getPath('userData'), 'dev-window-state.json')
 
@@ -72,8 +76,12 @@ function createWindow() {
             contextIsolation: false,
             nodeIntegration: true,
             // The renderer sees none of the app's command line unless it is passed on:
-            // `--tool-url=` is the one switch the preload reads in the ordinary app.
-            additionalArguments: process.argv.filter((a) => a.startsWith('--tool-url=')),
+            // `--tool-url=` is the one switch the preload reads in the ordinary app, and
+            // `--timer-frame-url=` is how it learns where the clock page is served.
+            additionalArguments: [
+                ...process.argv.filter((a) => a.startsWith('--tool-url=')),
+                ...(timerFrameUrl ? [`--timer-frame-url=${timerFrameUrl}`] : []),
+            ],
         },
     };
     if (useSaved) {
@@ -200,6 +208,7 @@ if (!cutter) app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window);
         window._userData = app.getPath('userData');
     });
+    timerFrameUrl = timerFrame.start();
     createWindow();
     // After the window: spawning keyhook.exe is a synchronous CreateProcess, and the
     // antivirus on this machine has held that call for over a minute while it scanned
@@ -210,6 +219,7 @@ if (!cutter) app.whenReady().then(() => {
 
 if (!cutter) app.on('will-quit', () => {
     controlServer.stop();
+    timerFrame.stop();
     stopKeyhook();
 })
 

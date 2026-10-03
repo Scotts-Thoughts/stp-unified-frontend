@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Overlay clock</title>
+<style>
+    /* The overlay's clock, as its own page.
+       src/main/timer-frame-server.ts serves this at http://127.0.0.1:30160/timer, and the overlay
+       shows it in an <iframe> (core/overlay/ClockFrame.ts) over the spot its clock is drawn in.
+       The address differs from the overlay's (file:// in a packaged build, localhost in dev), so
+       Chromium gives this page its own renderer process and compositor surface: long scripts,
+       heavy repaints and first paints of new panels in the overlay cannot hold the clock back.
+       The overlay posts its timer state here; the time itself is computed on this side.
+
+       Each generation's geometry below is a copy of the `.gametime*` rules in its style.css,
+       drawn inside the box the overlay's `.gen-N .gametimeFrame` rule places the frame in. */
+    /* `oseb` is OpenSans-ExtraBold.ttf in gen1 and gen2 and OpenSans-ExtraBold-gen345.ttf in gen3-5, as in
+       each style.css; declared at weight 700 so Chromium does not embolden it again (known-legacy-bugs #40). */
+    @font-face { src: url(/timer-font); font-family: oseb; font-weight: 700; }
+    @font-face { src: url(/timer-font-gen345); font-family: oseb345; font-weight: 700; }
+    body.gen-3 .gametime, body.gen-3 .gametimeClock, body.gen-3 .gametimeFrames,
+    body.gen-4 .gametime, body.gen-4 .gametimeClock, body.gen-4 .gametimeFrames,
+    body.gen-5 .gametime, body.gen-5 .gametimeClock, body.gen-5 .gametimeFrames { font-family: oseb345; }
+    html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+    .gametime {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        font-size: 65px;
+        line-height: 60px;
+        font-family: oseb;
+        font-weight: 700;
+        color: #000;
+        white-space: nowrap;
+    }
+    .gametimeClock, .gametimeFrames {
+        text-align: right;
+        line-height: 60px;
+        font-family: oseb;
+        font-weight: 700;
+    }
+    .gametimeClock { font-size: 68px; display: block; }
+    .gametimeFrames { font-size: 35px; }
+
+    /* gen1 and gen2: the frame is the `.gametime` box's 380x78 content area (its 3px border is
+       transparent and stays in the overlay). The two lines flow as blocks, as in the overlay. */
+    body.gen-1 .gametimeClock, body.gen-2 .gametimeClock { position: relative; left: -60px; }
+    body.gen-1 .gametimeFrames, body.gen-2 .gametimeFrames { position: relative; left: -10px; }
+    body.gen-1 .gametimeClock { top: -1px; }
+    body.gen-1 .gametimeFrames { top: -48px; }
+    body.gen-2 .gametimeClock { top: 1px; }
+    body.gen-2 .gametimeFrames { top: -46px; }
+
+    /* gen3, gen4 and gen5: the two lines are placed from the right edge. The overlay's rules say
+       `right: 1627px/1550px; top: 46px` and `right: 1576px/1500px; top: 60px` in a 1920px-wide
+       area; the frame box starts 30px down and (gen3) 1556px / (gen4, gen5) 1480px from the right. */
+    body.gen-3 .gametimeClock, body.gen-4 .gametimeClock, body.gen-5 .gametimeClock { position: absolute; top: 16px; }
+    body.gen-3 .gametimeFrames, body.gen-4 .gametimeFrames, body.gen-5 .gametimeFrames { position: absolute; top: 30px; right: 20px; }
+    body.gen-3 .gametimeClock { right: 71px; }
+    body.gen-4 .gametimeClock, body.gen-5 .gametimeClock { right: 70px; }
+</style>
+</head>
+<body>
+<div class="gametime" id="gametime">
+    <div class="gametimeClock" id="clock">0</div>
+    <div class="gametimeFrames" id="frames">.00</div>
+</div>
+<script>
+(() => {
+    // `?gen=N` picks the geometry above.
+    const gen = new URLSearchParams(location.search).get('gen');
+    if (/^[1-5]$/.test(gen || '')) document.body.classList.add(`gen-${gen}`);
+
+    // Mirrors the overlay's timer fields; the overlay posts changes as they happen.
+    //   mode:       'local' (the overlay's own timer) or 'emulator' (Super Shuckie's time_current)
+    //   startTime:  Date.now() the local timer started at (timer_startTime)
+    //   pause:      the local timer is paused (timer_pause); pauseTime: Date.now() it paused at
+    //   emulatorMs: last emulator time in ms, mode 'emulator'
+    //   color:      the CSS colour of the overlay's own clock, copied here
+    let state = { mode: 'local', startTime: 0, pause: true, pauseTime: 0, emulatorMs: null, color: null };
+    const hostEl = document.getElementById('gametime');
+    const clockEl = document.getElementById('clock');
+    const framesEl = document.getElementById('frames');
+    let lastClock = null, lastFrames = null;
+
+    window.addEventListener('message', (e) => {
+        const d = e.data;
+        if (!d || d.type !== 'overlay-timer' || !d.state) return;
+        state = { ...state, ...d.state };
+        if (d.state.color) hostEl.style.color = d.state.color;
+    });
+
+    const pad = (x) => x.toString().padStart(2, '0');
+    // The overlays' progressive format: "s", then "m:ss", then "h:mm:ss", and ".cs" beside it.
+    function format(ms) {
+        if (!(ms >= 0)) ms = 0;
+        const totalSeconds = Math.floor(ms / 1000);
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        const c = pad(Math.floor(ms / 10) % 100);
+        if (h > 0) return [`${h}:${pad(m)}:${pad(s)}`, `.${c}`];
+        if (m > 0) return [`${m}:${pad(s)}`, `.${c}`];
+        return [`${s}`, `.${c}`];
+    }
+    function tick() {
+        let ms;
+        if (state.mode === 'emulator') {
+            ms = state.emulatorMs === null ? 0 : state.emulatorMs;
+        } else {
+            ms = (state.pause ? state.pauseTime : Date.now()) - state.startTime;
+        }
+        const [clock, frames] = format(ms);
+        if (clock !== lastClock) { clockEl.textContent = clock; lastClock = clock; }
+        if (frames !== lastFrames) { framesEl.textContent = frames; lastFrames = frames; }
+        requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // Tell the overlay this page is up -- once the font is in, so the first visible frame is
+    // already in the right face -- and keep telling it, so it can fall back to its own clock
+    // if this page ever dies. The heartbeat also waits for the font: the overlay shows the
+    // frame on either message.
+    const say = (type) => { try { window.parent.postMessage({ type }, '*'); } catch (e) {} };
+    document.fonts.ready.then(() => {
+        say('overlay-timer-ready');
+        setInterval(() => say('overlay-timer-alive'), 1000);
+    });
+})();
+</script>
+</body>
+</html>

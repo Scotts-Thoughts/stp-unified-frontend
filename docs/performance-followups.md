@@ -415,3 +415,14 @@ because the three bodies now agree. `get_stat` was already stale at `HEAD` -- ge
 gen5's copies were edited after the last review (the form-support and ability commits)
 -- and the check was failing on it before this pass; it is re-pinned with its reason
 unchanged.
+
+## The clock in its own process (2026-10-01)
+
+Not a load reduction: the clock's smoothness no longer depends on the overlay's load at all. The gen2 legacy app's
+"timer fix" (commit `1ab51d8`, 2026-09-30) moved its clock into an `<iframe>` served from a different address,
+which Chromium runs in its own renderer process; the unified app does the same for all five generations
+(`core/overlay/ClockFrame.ts`, `src/main/timer-frame-server.ts`, ARCHITECTURE.md §4). The in-page
+`requestAnimationFrame` loops are unchanged and still feed the split logs and `/status`; the frame only draws.
+Measured with the page's main thread blocked for 2 s: the frame's clock kept a 10-12 ms frame gap in every
+generation while the page's own clock showed a 2 s gap. Item E above (gen4's `setImmediate` hop) matters less
+now, since what the viewer sees is the frame.

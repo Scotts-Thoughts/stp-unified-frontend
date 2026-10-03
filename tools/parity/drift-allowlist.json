@@ -322,6 +322,17 @@
     },
     {
       "section": "computed",
+      "name": "timer_frame_state",
+      "reason": "data shape: gen2/gen4 keep the timer fields in data() (timer_startTime, timer_pause, timer_pause_time); gen3/gen5 keep them in their Timer's storage, which is not reactive, so they re-read it on timer_frame_version (Timer.onChange). Same ClockState either way (core/overlay/ClockFrame.ts).",
+      "bodies": {
+        "gen2": "ed1e97f4eaa0",
+        "gen3": "f52cbbaa1a2d",
+        "gen4": "ed1e97f4eaa0",
+        "gen5": "f52cbbaa1a2d"
+      }
+    },
+    {
+      "section": "computed",
       "name": "typeHeaderColor",
       "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 13L, gen4 9L, gen5 9L)",
       "bodies": {
@@ -701,8 +712,8 @@
       "bodies": {
         "gen2": "541e4dddc2cb",
         "gen3": "74d88b58b0d4",
-        "gen4": "adee0a664c96",
-        "gen5": "77881ea56e3b"
+        "gen4": "8612cc1fc30b",
+        "gen5": "7d2bae409acb"
       }
     },
     {
@@ -1456,8 +1467,8 @@
       "bodies": {
         "gen2": "b05e215a6b04",
         "gen3": "47bc213ce0e3",
-        "gen4": "9642e3459e99",
-        "gen5": "3a908129c944"
+        "gen4": "59efbea4965b",
+        "gen5": "72597793881a"
       }
     },
     {

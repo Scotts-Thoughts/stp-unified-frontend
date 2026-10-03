@@ -69,6 +69,9 @@ docs/             Reference docs. See §13.
   - `/quit`, `/reload` and `/load-split-file` are answered in main.
   - Every other route is forwarded to the renderer (`control-request` / `control-reply`, 5 s timeout).
 - `keyhook.ts`: spawns `keyhook.exe` (Windows only) and forwards key lines as `keyhook:key`.
+- `timer-frame-server.ts`: serves `timer-frame.html`, the clock page, on `127.0.0.1:30160` (§8). The page and
+  its two fonts are bundled with the main process (`?raw` and electron-vite's `?asset` imports). `STP_TIMER_FRAME=off`
+  skips it; the URL reaches the renderer as `--timer-frame-url=` (`window.api.timerFrameUrl`).
 - `importLegacy.ts`, `leveldb.ts`, `localStorageImport.ts`: the one-time seeding from the legacy apps' profiles.
 - `splitComparison.ts`, `replayFile.ts`: read split comparisons from `.replay` bookmarks or legacy CSVs.
 - `cutter.ts`: the air_cutter editor modes (`--cutter-*` flags), which replace the normal boot.
@@ -83,7 +86,7 @@ docs/             Reference docs. See §13.
 | `stores/` | `useEmulatorStatsStore` (Super Shuckie poll), `useReplaySplitsStore` |
 | `control/` | `registerControlServer`: turns forwarded requests into per-generation route calls and builds `/status` |
 | `hotkeys/` | `KeyHook`, `bindHotkeys(table)` |
-| `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), and `LiveText` |
+| `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), `LiveText`, and `ClockFrame` (the clock in its own process, below) |
 | `logic/` | Cross-generation helpers: OBS (`obs.ts`), Shuckie bookmarks, split comparison, enemy sprite scales, starter IVs, move reminder |
 | `window/` | `scaleToFit`, virtual keys |
 | `styles/base.css` | The document reset only. Each generation's look is in `games/genN/style.css` |
@@ -144,6 +147,38 @@ Every `games/genN/` has:
   - gen2–5: `enemySprites.ts`.
 - The seams where the legacy code was re-plumbed (`this.game.*` instead of `this.mapper.*`, the IPC in place of
   `fs`, and so on) are listed in a comment block at the top of each overlay's `<script>`.
+
+**Move power in battle (gen4, gen5).**
+- The power shown for the player's moves comes from `typeEffectiveness` in each overlay.
+- `in_battle_calc` says whether the in-battle calculation (type matchup included) is used. It is false out of
+  battle, once gen4's enemy state is `Battle Finished`, in a gen5 double battle, and with `typeCalcs` off.
+  Then the plain power is shown.
+- It reads the enemy's defensive abilities (Levitate, Filter, Flash Fire and so on) through `target_ability`.
+  That is `null` when:
+  - the player's ability is Mold Breaker, or in gen5 also Teravolt or Turboblaze, because those ignore the
+    target's ability (pokeplatinum `Battler_IgnorableAbility`);
+  - `in_battle_calc` is false, because the enemy data in memory is then left over from the last battle.
+- A new defensive-ability check must read `target_ability`, not the enemy's ability directly.
+- `enemy_effective_power` (the enemy's moves) never shows a number: gen4's first line always returns, and
+  gen5 never calls it (known-legacy-bugs #49).
+
+**The clock in its own process (all five generations, 2026-10-01).** After the gen2 legacy app's "timer fix"
+(its commit `1ab51d8`). The overlay's own clock is a `requestAnimationFrame` loop on the page, so a long script or
+a heavy repaint stalls it. Now `core/overlay/ClockFrame.ts` draws an `<iframe>` over the clock, showing
+`src/main/timer-frame.html` from `127.0.0.1:30160`; the address differs from the overlay's (`file://` packaged,
+`localhost` in dev), so Chromium gives the frame its own renderer process, and the page computes the time itself
+from the state the overlay posts (start, pause, Super Shuckie's time, the clock's colour).
+- Each generation keeps its clock markup and hides it (`visibility: hidden`) while the frame is live; with no
+  frame URL (the harness, the Cutter chain, port 30160 in use) nothing changes. The frame's box is the
+  `.gen-N .gametimeFrame` rule in each `style.css`; the page copies each generation's `.gametime*` geometry and
+  loads the generation's `oseb` font (gen1/2 and gen3-5 ship different files).
+- Each parent `provide`s the state as a computed (`clockState`, like `liveText`), so its own render never
+  depends on the timer fields or the Shuckie polls. gen2/gen4 build it from their `timer_*` data; gen3/gen5 from
+  `MyStorage` on `Timer.onChange` (their storage
+  proxy is not reactive, and must not be read through the reactive `timer`, whose Symbol-key probes its get trap
+  cannot take); gen1 from `useSpeciesMetricsStore().timer`.
+- Checked on the Mac with the page frozen for 2 s: the frame's worst gap was 10-12 ms in every generation, the
+  page's own clock 2 s. The Shuckie-timer mode shows the last posted emulator time, so it still stalls with the page.
 
 **Adding a mapper or edition.**
 - A new `games/genN/mappers/<x>.ts` profile, listed in that generation's `manifest.ts`.
@@ -258,6 +293,7 @@ flags it.
 | OBS | `ws://localhost:4455` | `core/logic/obs.ts` |
 | keyhook.exe (F13–F24 hotkeys) | child process, Windows only | `src/main/keyhook.ts`, then `core/hotkeys/KeyHook.ts` |
 | air_cutter (video tool) | launches the app with `--cutter-*` | `src/main/cutter.ts`, `tools/cutter/` |
+| The clock page (our own) | `http://127.0.0.1:30160/timer` | `src/main/timer-frame-server.ts`, `core/overlay/ClockFrame.ts` |
 
 `docs/external-contracts.md` specifies exactly what each of these sends and expects:
 - control routes and `/status` fields;
@@ -351,10 +387,18 @@ build does not check types. To check a main-process edit, compare that command's
 **Harness facts** (full reference: `docs/parity-harness.md`):
 - It always runs the built app in `out/`, so run `npm run build` first.
 - Harness runs must go one at a time.
+- The harness runs the app with `STP_TIMER_FRAME=off` (`run.ts`), so the overlay draws its own clock and the
+  oracles compare what they always did; the clock frame (§2 `core/overlay`) never appears in a capture.
 - Fixtures live in `tools/fixtures/genN/`. There is one synthetic smoke fixture each for gen1, gen3, gen4 and
   gen5. **gen2 has no committed fixture**; its one real recording is in the gitignored `tools/fixtures/raw/`.
 - Baselines (`tools/baselines/`) are local and gitignored, so a machine may have none. `parity:all` then
   prints `NOBASE`.
+- **Pixel noise (seen on the Mac).** gen4's faded box-art pictures in the settings panel (`.gameToggleImg`)
+  can differ between two runs of the same build: the same ~100 pixels in every capture, pixels oracle only.
+  If a diff shows only that, run each side again and compare the pairings before blaming the change.
+  A second signature (2026-10-01): the blurred grass background behind gen4's species art rasterises in one
+  of two states per run (up to 11 levels, ~1,900-2,800 pixels in every capture, pixels oracle only); two runs of
+  one build landed in different states, so repeats of both sides are the only way to tell it from a change.
 - The portable way to get a baseline:
   1. Build a `git worktree` of `HEAD` (before your change).
   2. Run it as target `unified@<dir>`.
@@ -369,7 +413,8 @@ build does not check types. To check a main-process edit, compare that command's
 
 **Mac setup.** electron-vite 4 needs Node ≥ 22.12 (or 20.19+). With an older Node, `build` and `dev` fail,
 but `typecheck` and the `tsx` self-tests still work. If `node_modules` is missing, run `npm ci` under Node 22
-(about 10 s). The harness runs on the Mac: `targets.ts` finds Electron through `require("electron")`, and a
+(about 10 s). If no Node 22 is installed, `npx -y node@22 -p process.execPath` fetches one into the npx cache
+and prints its path; put that folder first on `PATH` for `build` and the harness. The harness runs on the Mac: `targets.ts` finds Electron through `require("electron")`, and a
 1920×1080 content window fits the display.
 
 **Old-Chromium comparisons.** The legacy apps ran Electron 25 (Chromium 114). To check a difference that only

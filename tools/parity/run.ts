@@ -434,6 +434,10 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
       // the harness happened to launch with (plan 1.7).
       STP_APP_ROOT: target.cwd,
       ...(target.controlPort === CANONICAL_PORTS.control ? {} : { STP_CONTROL_PORT: String(target.controlPort) }),
+      // The out-of-process clock (core/overlay/ClockFrame.ts) runs on wall-clock time in a
+      // frame page.clock does not reach; with it off the overlay draws its own clock, which
+      // the oracles have always compared.
+      STP_TIMER_FRAME: "off",
     },
     timeout: 60000,
   });

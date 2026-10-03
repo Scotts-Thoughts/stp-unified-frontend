@@ -138,12 +138,14 @@
                 </div>
                 <div v-if="shuckie_timer == true" class="gametime">
                     <div class="timerTitle">time played at 4x game-speed</div>
-                    <live-text class="gametimeClock" source="shuckie_clock"></live-text>
-                    <live-text class="gametimeFrames" source="shuckie_frames"></live-text>
+                    <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                    <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
                 </div>
                 <div v-else="">
-                    <timer></timer>
+                    <timer :hide-clock="timer_frame_live"></timer>
                 </div>
+                <!-- The clock in its own process (core/overlay/ClockFrame.ts); the ones above show until it is up. -->
+                <clock-frame :gen="3" @live="timer_frame_live = $event"></clock-frame>
             </div>
             <!--------- DEBUGGING ----------------------------------------------------------------------------------------------------------------->
             <div v-if="gamestate == true">
@@ -1745,6 +1747,7 @@
  */
 import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
+import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
@@ -1831,6 +1834,7 @@ export default defineComponent({
     mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin],
     components: {
         LiveText,
+        ClockFrame,
         "Timer": TimerComponent,
     },
     props: ["game"],
@@ -1844,6 +1848,9 @@ export default defineComponent({
                 shuckie_clock:  computed(() => this.formatMilliseconds(this.emulatorStats?.time_current)),
                 shuckie_frames: computed(() => "." + this.getCentiseconds(this.emulatorStats?.time_current)),
             },
+            // What <clock-frame> posts to the out-of-process clock (core/overlay/ClockFrame.ts), read
+            // the same way: the overlay's render never depends on the timer fields or the polls.
+            clockState: computed(() => this.timer_frame_state),
         };
     },
     data() {
@@ -2250,6 +2257,8 @@ export default defineComponent({
             time_split_start:      MyStorage['time_split_start']     ?? "00:00:00:00",
             battle_start:          MyStorage['battle_start']         ?? 0,
             timer:                 new Timer(MyStorage),
+            timer_frame_live:      false, // the out-of-process clock is showing (core/overlay/ClockFrame.ts)
+            timer_frame_version:   0,     // bumped by Timer.onChange: its storage is not reactive
 
             //resets
             playerId:            MyStorage["playerId"]         ?? 0,
@@ -3269,6 +3278,20 @@ export default defineComponent({
     },
 
     computed: {
+        /** What the out-of-process clock needs (core/overlay/ClockFrame.ts): the Timer's storage fields and Super Shuckie's time. */
+        timer_frame_state() {
+            this.timer_frame_version // re-read when the Timer reports a change
+            // MyStorage itself, not `this.timer.storage`: through the reactive `timer` Vue would wrap the
+            // storage proxy and probe it with Symbol keys, which its get trap cannot take.
+            const storage = MyStorage
+            return {
+                mode: this.shuckie_timer ? 'emulator' : 'local',
+                startTime: storage.timer_startTime ?? 0,
+                pause: storage.timer_pause ?? true,
+                pauseTime: storage.timer_pause_time ?? 0,
+                emulatorMs: this.emulatorStats?.time_current ?? null,
+            }
+        },
         /**
          * The Super Shuckie counters as primitives (2026-09-25): the template used to read
          * `emulatorStats?.counters?.x` directly, which made every poll that replaced
@@ -7181,6 +7204,8 @@ export default defineComponent({
         if (this._devMousedown) window.removeEventListener('mousedown', this._devMousedown, true);
     },
     mounted: async function () {
+        // The Timer writes its storage outside Vue's reactivity; this is how the clock frame hears of a change.
+        this.timer.onChange = () => { this.timer_frame_version++ }
         const that = this
         // main.ts owns the mapper client and mounts this component once the mapper is
         // loaded and detected. The legacy awaited the client's connect here, which resolved after

@@ -877,6 +877,15 @@ body:has(.gen-3) {
     /* filter: drop-shadow(1px 1px 1px #000000) */
 }
 
+/* The out-of-process clock (core/overlay/ClockFrame.ts): a box around .gametimeClock and .gametimeFrames. */
+.gen-3 .gametimeFrame {
+    position: absolute;
+    top: 30px;
+    right: 1556px;
+    width: 520px;
+    height: 100px;
+}
+
 .gen-3 .statsLabelsColumn1 {
     font-size: 30px;
     position: absolute;

@@ -492,6 +492,15 @@ body:has(.gen-2) {
     /* filter: drop-shadow(1px 1px 1px #000000) */
 }
 
+/* The out-of-process clock (core/overlay/ClockFrame.ts): the .gametime box's content area, past its 3px border. */
+.gen-2 .gametimeFrame {
+    position: absolute;
+    top: 61px;
+    left: 13px;
+    width: 380px;
+    height: 78px;
+}
+
 .gen-2 .exp_label_box {
     position: absolute;
     top: 0px;

@@ -62,6 +62,9 @@ const api = {
   /** The ordinary-mode memory tool override, or null; see `toolUrlOverride`. */
   toolUrl: toolUrlOverride,
 
+  /** Where main serves the out-of-process clock page (core/overlay/ClockFrame.ts), or null when it is off. */
+  timerFrameUrl: cutterArg('timer-frame-url'),
+
   settings_dir: () => invoke('settings_dir'),
   /** The folder `./splits` and `./storage` are resolved against (plan 1.7). */
   app_root: () => invoke('app_root'),

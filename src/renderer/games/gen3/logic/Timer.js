@@ -41,6 +41,13 @@ class Timer {
 	}
 
 	/**
+	 * Called after every change to the storage fields (set, start, pause, unpause, stop). Not
+	 * in the legacy file: the overlay's out-of-process clock (core/overlay/ClockFrame.ts)
+	 * mirrors those fields, and the storage is not reactive, so it has to be told.
+	 */
+	onChange = null;
+
+	/**
  	 * Pause and set the timer back to default
 	 * @param {string} startTimeOffset The default value to set the timer to, as a string in the format `hh:mm:ss.ms`
 	 */
@@ -50,6 +57,7 @@ class Timer {
 		this.storage.timer_startTime = Date.now() - timeOffset;
 		this.storage.timer_pause_time = Date.now();
 		this.update();
+		this.onChange?.();
 	}
 
 	/**
@@ -63,6 +71,7 @@ class Timer {
 		this.setTimer(startTimeOffset);
 		this.storage.timer_pause = false;
 		this.update();
+		this.onChange?.();
 	}
 
 	/**
@@ -78,12 +87,14 @@ class Timer {
 			this.storage.timer_pause = true;
 			this.storage.timer_pause_time = Date.now();
 		}
+		this.onChange?.();
 	}
 
 	/** Pause the timer. */
 	stopTime = () => {
 		this.storage.timer_pause_time = Date.now();
 		this.storage.timer_pause = true;
+		this.onChange?.();
 	}
 
 	/**

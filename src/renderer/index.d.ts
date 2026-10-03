@@ -25,6 +25,8 @@ declare global {
     api: {
       /** Outstanding main-process calls; used by the parity harness, not by the app. */
       __pendingIpc: () => number,
+      /** The clock page's URL (src/main/timer-frame-server.ts), or null when the frame is off. */
+      timerFrameUrl: string | null,
       settings_dir: () => Promise<string>,
       app_root: () => Promise<string>,
       is_packaged: () => Promise<boolean>,
