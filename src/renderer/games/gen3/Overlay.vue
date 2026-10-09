@@ -1749,6 +1749,7 @@ import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
+import { gen3OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -6186,6 +6187,14 @@ export default defineComponent({
             }
             if (moveAccuracy == `-`) {
                 return `-`
+            }
+            else if (isOhkoMove(move)) {
+                // One-hit KO moves skip the accuracy calculation: no stages or abilities, only
+                // Sturdy and the level difference (core/logic/ohkoAccuracy.ts).
+                if (this.g3stateVariable != `Battle`) {
+                    return moveAccuracy
+                }
+                return gen3OhkoAccuracy(moveAccuracy, this.batt.yourPokemon.level?.value, this.batt.enemyPokemon.level?.value, this.batt.enemyPokemon.ability?.value) ?? moveAccuracy
             }
             else if (this.g3stateVariable == `Battle`) {
                 var accuracy = Math.floor(moveAccuracy * abilityMod * stageModsAcc[currentModStageAcc] * stageModsEva[currentModStageEva])

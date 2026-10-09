@@ -30,6 +30,8 @@ export const GEN1_DEPRECATED_READS: readonly string[] = [
     "battle.enemyPokemon.modEnemyStageEvasion",
     "battle.enemyPokemon.partyPos",
     "battle.enemyPokemon.species",
+    // One-hit KO moves (2026-10-02, core/logic/ohkoAccuracy.ts): miss when the user is slower.
+    "battle.enemyPokemon.speed",
     "battle.lowHealthAlarm",
     "battle.trainer.class",
     "battle.trainer.number",

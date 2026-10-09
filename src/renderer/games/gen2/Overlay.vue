@@ -1106,6 +1106,7 @@ import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
+import { gen2OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -3981,6 +3982,13 @@ export default defineComponent({
                     }
                     else if (weather == 'Rain' && move == 'Thunder') {
                         return '-'
+                    }
+                    else if (isOhkoMove(move) && moveAccuracy != `-`) {
+                        // Fails below the target's level, else gains accuracy per level of
+                        // difference before the stages apply (core/logic/ohkoAccuracy.ts).
+                        const ohkoAccuracy = gen2OhkoAccuracy(moveAccuracy, this.batt.yourPokemon.level?.value, this.batt.enemyPokemon.level?.value)
+                        const accuracy = ohkoAccuracy ?? moveAccuracy
+                        return Math.min(100, Math.floor(accuracy * accuracyStageMods[currentAccuracyModStage] * evasionStageMods[currentEvasionModStage]))
                     }
                     else {
                         return Math.floor(moveAccuracy * accuracyStageMods[currentAccuracyModStage] * evasionStageMods[currentEvasionModStage])

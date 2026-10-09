@@ -1122,6 +1122,7 @@ import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
+import { gen45OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -6460,6 +6461,15 @@ export default defineComponent({
             if (accuracy == '-') {
                 return '—'
             }
+            if (isOhkoMove(move)) {
+                // One-hit KO moves skip the accuracy calculation: no stages, items or Compound
+                // Eyes, only Sturdy, No Guard and the level difference (core/logic/ohkoAccuracy.ts).
+                if (state != `Battle`) {
+                    return accuracy
+                }
+                const opponent = this.game.properties.battle.opponent.active_pokemon
+                return gen45OhkoAccuracy(5, accuracy, pokemon_data.level?.value, opponent.level?.value, this.game.properties.battle.player.active_pokemon.ability?.value, opponent.ability?.value) ?? accuracy
+            }
             if (ability == 'No Guard') {
                 return '—'
             }
@@ -6505,18 +6515,6 @@ export default defineComponent({
                 let evasionModifier = this.stageModifiersData["evasion"][oppAStage]
                 let modifiers = pokemon_data.modifiers
                 let item_modifier = 1
-                if (move == 'Fissure' || move == 'Guillotine' || move == 'Sheer Cold' || move == 'Horn Drill') {
-                    let ohko_accuracy = 30
-                    let incremental_improvement = 1
-                    let player_level = pokemon_data.level?.value
-                    let opponent_level = this.game.properties.battle.opponent.active_pokemon.level?.value
-                    if (player_level < opponent_level) {
-                        calculated_accuracy = 0
-                        return calculated_accuracy
-                    }
-                    calculated_accuracy = (ohko_accuracy + ((player_level - opponent_level) * incremental_improvement))
-                    return calculated_accuracy
-                }
                 switch (held_item) {
                     case "Wide Lens": item_modifier = 4505/4096; break;
                     case "Zoom Lens": {

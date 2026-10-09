@@ -17,6 +17,8 @@ export const GEN2_DEPRECATED_READS: readonly string[] = [
     "battle.battleStart",
     "battle.enemyPokemon",
     "battle.enemyPokemon.hp",
+    // One-hit KO moves (2026-10-02, core/logic/ohkoAccuracy.ts): fail below the target's level.
+    "battle.enemyPokemon.level",
     "battle.enemyPokemon.partyPos",
     "battle.enemyPokemon.type1",
     "battle.enemyPokemon.type2",

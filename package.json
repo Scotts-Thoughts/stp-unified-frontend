@@ -47,6 +47,7 @@
     "parity:gamehook": "tsx tools/parity/mock-gamehook/selftest.ts",
     "parity:bookmarks": "tsx --tsconfig tsconfig.web.json tools/parity/bookmarks-selftest.ts",
     "parity:replay-splits": "tsx --tsconfig tsconfig.web.json tools/parity/replay-splits-selftest.ts",
+    "parity:ohko": "tsx tools/parity/ohko-selftest.ts",
     "parity:debounce": "tsx tools/parity/debounce-selftest.ts",
     "parity:drift": "tsx tools/parity/drift-check.ts",
     "parity:manual-ivs": "tsx tools/parity/manual-ivs-check.ts",

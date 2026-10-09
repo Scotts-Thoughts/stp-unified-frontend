@@ -45,6 +45,7 @@ import { GameState } from "~/stores/types/GameState";
 import { stageModifiersData } from "~/data/stage-modifiers.ts";
 import typeEffectiveness from "~/data/type-effectiveness.ts";
 import PokeData from "~/logic/PokeData.ts";
+import { gen1OhkoFails, isOhkoMove } from "~/core/logic/ohkoAccuracy";
 import { capitalize_words, move_name } from "../../methods/text_functions";
 import { defineComponent, inject } from "vue";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
@@ -276,6 +277,13 @@ export default defineComponent({
             const currentEvasionModStage = this.game_properties?.battle?.enemyPokemon.modEnemyStageEvasion.value
             if (moveObject.accuracy === null) {
                 return `-`
+            }
+            // One-hit KO moves miss outright when the user is slower (core/logic/ohkoAccuracy.ts).
+            if (isOhkoMove(moveObject.move) && gen1OhkoFails(
+                this.game_properties?.battle?.yourPokemon.speed?.value,
+                this.game_properties?.battle?.enemyPokemon.speed?.value,
+            )) {
+                return 0
             }
             if (accuracyStageMods && evasionStageMods) {
                 return Math.floor(moveObject.accuracy * accuracyStageMods[currentAccuracyModStage] * evasionStageMods[currentEvasionModStage])

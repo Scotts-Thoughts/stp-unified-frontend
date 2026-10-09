@@ -1341,6 +1341,7 @@ import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
+import { gen45OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -6281,6 +6282,16 @@ export default defineComponent({
             }
             if (accuracy == `—`) {
                 return `—`
+            }
+            if (isOhkoMove(move)) {
+                // One-hit KO moves skip the accuracy calculation: no stages, items or Compound
+                // Eyes, only Sturdy, No Guard and the level difference (core/logic/ohkoAccuracy.ts).
+                if (state != `Battle`) {
+                    return accuracy
+                }
+                const player = this.game.properties.battle.player.active_pokemon
+                const opponent = this.game.properties.battle.opponent.active_pokemon
+                return gen45OhkoAccuracy(4, accuracy, player.level?.value, opponent.level?.value, player.ability?.value, opponent.ability?.value) ?? accuracy
             }
             if (this.game.properties.player?.team[0]?.ability?.value == 'No Guard') {
                 return `—`

@@ -771,8 +771,8 @@
       "name": "getAccuracy",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 101L, gen5 105L)",
       "bodies": {
-        "gen4": "db79b34bc140",
-        "gen5": "2e9cb9816e90"
+        "gen4": "a824957054f2",
+        "gen5": "c9e6962df6ab"
       }
     },
     {
