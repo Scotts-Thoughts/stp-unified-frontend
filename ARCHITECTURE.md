@@ -130,6 +130,10 @@ Every `games/genN/` has:
 - The overlay itself is `src/renderer/components/Overlay.vue` (~200 lines), built from `components/left_panel/`,
   `right_panel/` and `settings/`, with the Pinia stores in `src/renderer/stores/`.
 - gen1's data layer is `logic/PokeData.ts` over `data/`.
+- The ROM starter (`patch.hChosenStarter`, HRAM `$FFDF`) is reset by the patch's `Init` on every soft reset
+  and power-on: stp-pokered writes `$FF` (default starters), stp-pokeyellow `SPECIES_STARTER` (Backport, or Mew
+  without backports). `components/settings/interface_2.vue` watches the byte and writes the solo Pokemon again,
+  once per reset. Any other write to it must expect that.
 
 **gen2–5 (lifted).**
 - `games/genN/Overlay.vue` is a single Options-API component of 7,000–10,000 lines. Around it sit:

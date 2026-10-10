@@ -28,7 +28,9 @@ export default defineComponent({
         return {
             game_properties: inject<Record<string, GameHookProperty>>("game_properties", {}),
             overlaySettings: useOverlaySettingsStore(),
-            search_term: ""
+            search_term: "",
+            /** Whether the next time the ROM loses the solo Pokemon it is written again (see `mounted`). */
+            rom_starter_resync_armed: true,
         }
     },
     computed: {
@@ -47,6 +49,7 @@ export default defineComponent({
          * to the patch, where gen1 used to wait for the button.
          */
         "overlaySettings.starter"() {
+            this.rom_starter_resync_armed = true;
             this.set_rom_starter();
         },
     },
@@ -64,11 +67,45 @@ export default defineComponent({
             }
             await this.game_properties.patch.hChosenStarter.set(starter, false);
         },
+        /** Whether the ROM's starter byte holds the solo Pokemon; null when the solo Pokemon is unknown. */
+        rom_holds_starter(property: GameHookProperty): boolean | null {
+            const starter = this.overlaySettings.starter;
+            const species = PokeData.findSpecies(starter);
+            if (!species) {
+                return null;
+            }
+            if (PokeData.isBackportSpecies(starter)) {
+                return property.bytes?.[0] === BACKPORT_SPECIES_BYTE;
+            }
+            return PokeData.findSpecies(property.value) === species;
+        },
     },
     mounted() {
         // Sync the ROM starter to the dropdown on load, as gens 2-5 do: the overlay settings are
         // read before the overlay mounts, so the watcher never sees the persisted starter arrive.
         this.set_rom_starter();
+
+        // Automatic re-sync after a reset, as gen3/gen4 re-set the ROM starter on a new game
+        // (2026-10-09). The patch only writes hChosenStarter in `Init`, which every reset runs:
+        // stp-pokered puts back $FF (default starters), stp-pokeyellow SPECIES_STARTER (Backport
+        // or Mew). So a change that leaves the byte off the solo Pokemon is a reset, and the solo
+        // Pokemon is written again. Armed again once the byte holds it (or the solo Pokemon
+        // changes): one write per reset, never a loop if a write does not stick.
+        this.game_properties.patch?.hChosenStarter?.change((property: GameHookProperty) => {
+            const holds = this.rom_holds_starter(property);
+            if (holds == null) {
+                return;
+            }
+            if (holds) {
+                this.rom_starter_resync_armed = true;
+                return;
+            }
+            if (!this.rom_starter_resync_armed) {
+                return;
+            }
+            this.rom_starter_resync_armed = false;
+            this.set_rom_starter();
+        });
     },
 });
 </script>

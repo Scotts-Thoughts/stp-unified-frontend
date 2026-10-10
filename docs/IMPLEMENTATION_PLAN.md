@@ -1500,6 +1500,29 @@ ask: the same automatic assignment in gen1.
   and deterministic (a second capture of the same build diffs all-green against the first).
   `npm run typecheck` clean. Not yet run against a live game.
 
+## gen1: the ROM starter is written again after a reset (2026-10-09)
+
+The 2026-09-18 entry left one gap open: the patch's `Init` (stp-pokered and stp-pokeyellow
+`home/init.asm`) puts its own default back in `hChosenStarter` on every soft reset and power-on --
+`$FF` (default starters) on Red/Blue, `SPECIES_STARTER` (Backport, or Mew without backports) on
+Yellow -- and gen1 never wrote the solo Pokemon again, so a reset after the overlay loaded handed
+out the default starter. gen3/gen4 cover this by re-setting the ROM starter on a new game
+(`set_rom_starter_automatically`); Scott's ask: the same automatic set in gen1.
+
+- **Watching the byte, not the reset.** `Init` is the patch's only writer, so any change that leaves
+  the byte off the solo Pokemon is a reset (or another tool): `interface_2.vue` subscribes to
+  `patch.hChosenStarter` and calls `set_rom_starter` again. Watching `playerId` instead would race
+  `Init` (WRAM is cleared before the HRAM write) and miss a reset made on the title screen.
+- **One write per reset.** The match is by species (`PokeData.findSpecies` on both sides, so mapper
+  spellings like `NidoranM` compare correctly) or byte `0xBF` for a backport. After a re-send the
+  watcher stays disarmed until the byte holds the solo Pokemon again or the solo Pokemon changes, so a
+  write that does not stick can never loop. The write stays unfrozen.
+- **Verified** against a HEAD worktree build on `gen1-yellow-smoke` with `--control`
+  (`tools/reports/starter-resync-gen1.{head,final}`): all oracles green, pixels exact (the fixture
+  never changes the byte, and the mount write's echo only re-arms). A staged copy with the byte reset
+  to Backport at 20 s and to `$FF` at 32 s (`starter-resync-gen1.staged`) writes the solo Pokemon at
+  0 s, 20 s and 32 s and nothing else. `npm run typecheck` clean. Not yet run against a live game.
+
 ## Split bookmarks and the replay as split comparison (2026-09-23)
 
 Scott's ask: write each simple split into the replay Super Shuckie is recording, as a bookmark

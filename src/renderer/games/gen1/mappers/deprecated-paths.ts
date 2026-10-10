@@ -280,7 +280,8 @@ export const GEN1_DEPRECATED_WRITES: Readonly<Record<string, WriteKind[]>> = {
     "patch.encounter_flags.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY": ["bits", "value"],
     // The ROM starter (settings/interface_2.vue): by value for the original 151, by bytes
     // (0xBF) for a backport. Written on mount and on every change of the solo Pokemon
-    // since 2026-09-18, as gens 2-5 do -- the queuer's `/set-starter` lands here too.
+    // since 2026-09-18, as gens 2-5 do -- the queuer's `/set-starter` lands here too --
+    // and again after a reset puts the patch's default back (2026-10-09, read by value).
     "patch.hChosenStarter": ["bytes", "value"],
     "patch.wEarlyEncounters": ["value"],
     "player.itemCount": ["value"],
