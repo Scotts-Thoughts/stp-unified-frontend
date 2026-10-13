@@ -10,6 +10,7 @@
     "asar": false,
     "files": [
       "out/**",
+      "!out/renderer/images",
       "!out/renderer/images/**"
     ],
     "extraFiles": [
@@ -48,6 +49,9 @@
     "parity:bookmarks": "tsx --tsconfig tsconfig.web.json tools/parity/bookmarks-selftest.ts",
     "parity:replay-splits": "tsx --tsconfig tsconfig.web.json tools/parity/replay-splits-selftest.ts",
     "parity:ohko": "tsx tools/parity/ohko-selftest.ts",
+    "parity:speed": "tsx tools/parity/battle-speed-selftest.ts",
+    "parity:accuracy": "tsx tools/parity/accuracy-selftest.ts",
+    "parity:move-power": "tsx tools/parity/move-power-selftest.ts",
     "parity:debounce": "tsx tools/parity/debounce-selftest.ts",
     "parity:drift": "tsx tools/parity/drift-check.ts",
     "parity:manual-ivs": "tsx tools/parity/manual-ivs-check.ts",

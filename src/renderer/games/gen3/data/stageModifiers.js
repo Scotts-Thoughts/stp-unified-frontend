@@ -2,7 +2,7 @@ export const stageModifiersData = [
   {
     "modType": "stat",
     "-6": (2/8),
-    "-5": (2/8),
+    "-5": (2/7),  // 10/35 (pokeemerald gStatStageRatios); was 2/8, the -6 ratio
     "-4": (2/6),
     "-3": (2/5),
     "-2": (2/4),

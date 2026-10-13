@@ -25,7 +25,7 @@
 
                 <div v-if="display_mode == 'Badge Boosts'" class="stat_value stat_multi_line devs"           >Stat: {{game_properties.player.team[0][stat.path].value}}</div>
                 <div v-if="display_mode == 'Badge Boosts'" class="stat_value stat_multi_line percentage_evs" >Boost: {{get_bb_stat(stat.name)}}</div>
-                <div v-if="display_mode == 'Badge Boosts'" class="stat_value stat_multi_line ev_stats_gained">+{{(get_stat(stat.name) - game_properties.player.team[0][stat.path].value) / game_properties.player.team[0][stat.path].value*100}}%</div>
+                <div v-if="display_mode == 'Badge Boosts'" class="stat_value stat_multi_line ev_stats_gained">+{{(get_stat(stat.name, false) - game_properties.player.team[0][stat.path].value) / game_properties.player.team[0][stat.path].value*100}}%</div>
             </div>
         </div>
         <div class="exp_growthRate">{{ growthRate }}</div>
@@ -41,6 +41,7 @@ import { useMetaStore } from "~/stores/metaStore";
 import { GameState } from "~/stores/types/GameState";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { BaseStats, GrowthRate } from "~/logic/PokeDataTypes";
+import { status_penalty } from "~/logic/statusPenalty";
 
 type StatObject = {
     /**
@@ -105,11 +106,17 @@ export default defineComponent({
         current_species_data() {
             return PokeData.findSpecies(this.meta.currentSpecies) ?? PokeData.findSpecies(this.meta.starter);
         },
-        /** Provides the criticial hit rate of the current pokemon. */
+        /**
+         * Provides the criticial hit rate of the current pokemon. Focus Energy and Dire Hit (the same flag)
+         * shift the rate right instead of left (pokered CriticalHitTest, a game quirk): base/8 instead of base/2.
+         */
         crit_rate(): number {
             var baseSpeed = this.current_species_data?.base_stats.speed;
             if (baseSpeed) {
-                return Math.round((Math.floor(baseSpeed/2)/256) * 10000) / 100
+                const pumped = this.meta.gameState == GameState.in_battle
+                    && this.game_properties.battle?.yourPokemon?.effects?.focusEnergy?.value == true;
+                const rate = pumped ? Math.floor(Math.floor(baseSpeed / 2) / 4) : Math.floor(baseSpeed / 2);
+                return Math.round((rate/256) * 10000) / 100
             } else {
                 return 0;
             }
@@ -213,14 +220,20 @@ export default defineComponent({
                     return dv_spe
             }
         },
-        get_stat(stat_name) {
+        /**
+         * The stat the panel shows. Out of battle it previews the battle stat: with `with_status`, the party
+         * status is applied first, as pokered LoadBattleMonFromParty does before ApplyBadgeStatBoosts.
+         */
+        get_stat(stat_name, with_status: boolean = true) {
             if (this.meta.gameState == GameState.overworld || this.meta.gameState == GameState.to_battle) {
+                const party = this.game_properties.player.team[0]
+                const status = with_status ? party.statusCondition?.value : null
                 switch (stat_name) {
-                    case "Hp":      return this.game_properties.player.team[0].maxHp.value
-                    case "Attack":  return this.badge_boost(this.game_properties.player.badges.badge1.value, this.game_properties.player.team[0].attack.value)
-                    case "Defense": return this.badge_boost(this.game_properties.player.badges.badge3.value, this.game_properties.player.team[0].defense.value)
-                    case "Special": return this.badge_boost(this.game_properties.player.badges.badge7.value, this.game_properties.player.team[0].special.value)
-                    case "Speed":   return this.badge_boost(this.game_properties.player.badges.badge5.value, this.game_properties.player.team[0].speed.value)
+                    case "Hp":      return party.maxHp.value
+                    case "Attack":  return this.badge_boost(this.game_properties.player.badges.badge1.value, status_penalty("Attack", party.attack.value, status))
+                    case "Defense": return this.badge_boost(this.game_properties.player.badges.badge3.value, party.defense.value)
+                    case "Special": return this.badge_boost(this.game_properties.player.badges.badge7.value, party.special.value)
+                    case "Speed":   return this.badge_boost(this.game_properties.player.badges.badge5.value, status_penalty("Speed", party.speed.value, status))
                 }
             }
             if (this.meta.gameState == GameState.in_battle || this.meta.gameState == GameState.from_battle) {
@@ -261,14 +274,16 @@ export default defineComponent({
                         }
                     }
                     case "Defense":         {
-                        boosting_badge = this.game_properties.player.badges.badge6.value
+                        // Thunder Badge (pokered ApplyBadgeStatBoosts: Boulder Atk, Thunder Def, Soul Spe, Volcano Spc)
+                        boosting_badge = this.game_properties.player.badges.badge3.value
                         switch (boosting_badge) {
                             case true:  return Math.floor(this.game_properties.player.team[0].defense.value * badge_boost_modifier)
                             case false: return 0
                         }
                     }
                     case "Speed":           {
-                        boosting_badge = this.game_properties.player.badges.badge3.value
+                        // Soul Badge
+                        boosting_badge = this.game_properties.player.badges.badge5.value
                         switch (boosting_badge) {
                             case true:  return Math.floor(this.game_properties.player.team[0].speed.value * badge_boost_modifier)
                             case false: return 0

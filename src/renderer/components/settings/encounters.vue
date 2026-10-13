@@ -4,6 +4,7 @@
         <tbody>
             <tr><td>Early Encounters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.wEarlyEncounters"/></td></tr>
             <tr><td>No Moon:</td><td>         <input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.wEarlyEncountersNoMoon"/></td></tr>
+            <tr><td>Guaranteed Catches:</td><td><input class="checkBoxStyle" type="checkbox" v-model="overlaySettings.guaranteed_catches"/></td></tr>
         </tbody>
     </table>
     <table v-if="game.properties.meta.gameName.value == 'Yellow'" class="ui_table">
@@ -68,6 +69,7 @@
 import { defineComponent } from "vue";
 import { useMetaStore } from "~/stores/metaStore.js";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useSettingsStore } from "~/stores/useSettingsStore";
 
 
@@ -97,6 +99,7 @@ export default defineComponent({
         return {
             meta: useMetaStore(),
             runConfig: useGameSpeciesData(),
+            overlaySettings: useOverlaySettingsStore(),
             settings: useSettingsStore(),
             /** Snapshot of the encounter settings that were last written to the ROM. */
             lastApplied: null,
@@ -116,6 +119,10 @@ export default defineComponent({
                     this.initialize_encounter_settings();
                 }
             }
+        );
+        this.$watch(
+            () => this.overlaySettings.guaranteed_catches,
+            this.sync_guaranteed_catches
         );
     },
     methods: {
@@ -176,25 +183,39 @@ export default defineComponent({
             const early_encounters_value = encounterSettings.wEarlyEncounters == true ? "On" : "Off";
             this.game.properties.patch.wEarlyEncounters.set(early_encounters_value, false)
             if (game == 'Yellow') {
-                this.mapper.setBits([ // Set bits can only be called on properties that share the same address
+                this.game.setBits([ // Set bits can only be called on properties that share the same address
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_ROUTE1_TEST', value: encounterSettings.EVENT_ENCOUNTER_ROUTE1_TEST == true, freeze: false },
                 ])
-                this.mapper.setBits([
+                this.game.setBits([
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY', value: encounterSettings.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY == true, freeze: false },
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_ROUTE3_SPEAROW', value: encounterSettings.EVENT_ENCOUNTER_ROUTE3_SPEAROW == true, freeze: false },
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_SANDSHREW', value: encounterSettings.EVENT_ENCOUNTER_MTMOON_SANDSHREW == true, freeze: false },
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_ROUTE16_DODUO', value: encounterSettings.EVENT_ENCOUNTER_ROUTE16_DODUO == true, freeze: false },
                 ])
             } else if (game == 'Red and Blue') {
-                this.mapper.setBits([ // Set bits can only be called on properties that share the same address
+                this.game.setBits([ // Set bits can only be called on properties that share the same address
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_ROUTE3_SPEAROW', value: encounterSettings.EVENT_ENCOUNTER_ROUTE3_SPEAROW == true, freeze: false },
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_GEODUDE', value: encounterSettings.EVENT_ENCOUNTER_MTMOON_GEODUDE == true, freeze: false },
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_MTMOON_PARAS', value: encounterSettings.EVENT_ENCOUNTER_MTMOON_PARAS == true, freeze: false },
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_ROUTE6_CUT_USER', value: encounterSettings.EVENT_ENCOUNTER_ROUTE6_CUT_USER == true, freeze: false },
                 ])
-                this.mapper.setBits([
+                this.game.setBits([
                     { path: 'patch.encounter_flags.EVENT_ENCOUNTER_ROUTE16_DODUO', value: encounterSettings.EVENT_ENCOUNTER_ROUTE16_DODUO == true, freeze: false },
                 ])
+            }
+        },
+        /**
+         * Write the guaranteed catches setting to the ROM when the ROM's byte disagrees with it.
+         * The patch reads any non-zero byte as on, and clears it on boot and on every reset.
+         */
+        sync_guaranteed_catches() {
+            const property = this.game.properties.patch?.hStpCatchRate;
+            if (property == null || property.value == null) {
+                return;
+            }
+            const wanted = this.overlaySettings.guaranteed_catches == true;
+            if ((property.value != 0) !== wanted) {
+                property.set(wanted ? 1 : 0, false);
             }
         },
     },
@@ -202,6 +223,10 @@ export default defineComponent({
         if (!this.settings.loading) {
             this.initialize_encounter_settings();
         }
+        // Guaranteed catches, as gen2 does it: synced on load, and written again whenever the
+        // ROM's byte changes away from the setting (the patch clears it on every reset).
+        this.sync_guaranteed_catches();
+        this.game.properties.patch?.hStpCatchRate?.change(() => this.sync_guaranteed_catches());
         //HM Encounters
         this.game.properties.overworld.map.change((newValue, oldValue) => {
             const encounterSettings = this.runConfig.config.gameSpecific;

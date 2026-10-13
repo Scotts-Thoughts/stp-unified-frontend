@@ -121,6 +121,12 @@ function defaultOverlaySettings() {
 			timer: false as boolean,
 			counters: false as boolean,
 		},
+		/**
+		 * Every Poké Ball catches (the patch's `hStpCatchRate`, non-zero = on). Once per
+		 * generation, as gen2's `toggle_wGuaranteedCatches`. The patch clears the byte on
+		 * boot, so `settings/encounters.vue` writes it again whenever the ROM disagrees.
+		 */
+		guaranteed_catches: false as boolean,
 		starter_search: "",
 		keyboard_shortcuts: {},
 		visualization: {

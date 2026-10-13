@@ -30,6 +30,7 @@ declare global {
       settings_dir: () => Promise<string>,
       app_root: () => Promise<string>,
       is_packaged: () => Promise<boolean>,
+      /** A file under resources/icons/, or "" to put the portrait back. */
       set_game_icon: (relative: string) => void,
       send_virtual_key: (keyName: string | number) => void,
       splits: {

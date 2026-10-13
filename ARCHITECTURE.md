@@ -62,7 +62,8 @@ docs/             Reference docs. See §13.
 ### src/main
 
 - `index.ts`: window creation, first-launch legacy imports, IPC registration, control server, then keyhook
-  (last on purpose, because antivirus delays the spawn).
+  (last on purpose, because antivirus delays the spawn). The window has `backgroundThrottling: false`: OBS
+  captures it while it may be covered or minimised, and a throttled window stops `requestAnimationFrame`.
 - `paths.ts`: `appRoot()`, `splitsRoot()`, `userDataRoot()`, etc. `resolveInside()` guards every IPC path.
 - `ipc.ts`: all file IPC. Writes to `storage/` and source files are refused in a packaged build.
 - `control-server.ts`: `ControlServer` on `127.0.0.1:30159` (`STP_CONTROL_PORT` overrides it).
@@ -87,7 +88,7 @@ docs/             Reference docs. See §13.
 | `control/` | `registerControlServer`: turns forwarded requests into per-generation route calls and builds `/status` |
 | `hotkeys/` | `KeyHook`, `bindHotkeys(table)` |
 | `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), `LiveText`, and `ClockFrame` (the clock in its own process, below) |
-| `logic/` | Cross-generation helpers: OBS (`obs.ts`), Shuckie bookmarks, split comparison, enemy sprite scales, starter IVs, move reminder |
+| `logic/` | Cross-generation helpers: OBS (`obs.ts`), Shuckie bookmarks, split comparison, enemy sprite scales, starter IVs, move reminder, battle mechanics (speed, accuracy, move power, OHKO; §4) |
 | `window/` | `scaleToFit`, virtual keys |
 | `styles/base.css` | The document reset only. Each generation's look is in `games/genN/style.css` |
 
@@ -111,6 +112,12 @@ All of this is in `src/renderer/main.ts`.
    - The view is rebuilt when the client replaces its tree, which happens every 60 s.
 5. **Mapper unloads.** Subscriptions are cleared, `deactivate()` runs, and gen1 styling is restored. The shell
    returns to `GameSelect`.
+6. **Window icon.** As soon as the overlay for a detected game is up, the shell sets the taskbar icon to that
+   game's cartridge (`Edition.icon`, a file under `resources/icons/`). Red and Blue are one mapper, so that
+   icon follows the edition. A pair shares the first game's cartridge (Gold for Gold & Silver, and the same
+   for FireRed, Diamond and HeartGold). With no mapper loaded the icon is the portrait,
+   `resources/icons/default.png` (the same picture electron-builder stamps on the exe). Clicking
+   a tile on the pre-mapper screen sets that tile's cartridge until a mapper loads.
 
 A `loadSequence` counter discards stale loads when mappers change quickly.
 
@@ -134,6 +141,11 @@ Every `games/genN/` has:
   and power-on: stp-pokered writes `$FF` (default starters), stp-pokeyellow `SPECIES_STARTER` (Backport, or Mew
   without backports). `components/settings/interface_2.vue` watches the byte and writes the solo Pokemon again,
   once per reset. Any other write to it must expect that.
+- The encounter flags (`patch.encounter_flags.*`, the forced HM-user encounters): stp-pokered's rival battle in
+  Oak's Lab turns Spearow, Geodude and the Cut user on itself. `components/settings/encounters.vue` overwrites
+  every flag with the run's settings when the player leaves the lab before the Pokedex (`set_encounters`), and
+  writes a single flag when its checkbox changes. Mt Moon checks Geodude before Paras, so a Geodude flag left on
+  wins. The patch clears a flag when that species is caught. The gen1 smoke fixture never takes this path.
 
 **gen2–5 (lifted).**
 - `games/genN/Overlay.vue` is a single Options-API component of 7,000–10,000 lines. Around it sit:
@@ -147,7 +159,6 @@ Every `games/genN/` has:
   - gen3 and gen5: `logic/Timer.js` and `PubSub.js`, and a small `components/` folder (`Timer.js`; gen5 also
     has `ShuckieTimer.js`);
   - gen4 and gen5: `forms.js`;
-  - gen3–5: `icons.ts`;
   - gen2–5: `enemySprites.ts`.
 - The seams where the legacy code was re-plumbed (`this.game.*` instead of `this.mapper.*`, the IPC in place of
   `fs`, and so on) are listed in a comment block at the top of each overlay's `<script>`.
@@ -165,6 +176,38 @@ Every `games/genN/` has:
 - A new defensive-ability check must read `target_ability`, not the enemy's ability directly.
 - `enemy_effective_power` (the enemy's moves) never shows a number: gen4's first line always returns, and
   gen5 never calls it (known-legacy-bugs #49).
+
+**Battle mechanics shared across generations (2026-10-13 audit).**
+- The rules live in `core/logic/`, each read from the decompilations and covered by a `tsx` self-test:
+  `battleSpeed.ts` (gens 4-5 turn-order Speed and who moves first, `parity:speed`), `moveAccuracy.ts`
+  (gens 3-5 accuracy, `parity:accuracy`), `movePower.ts` (Flail/Reversal, Gyro Ball, Wring Out, Trump Card,
+  Punishment, and gen5's Stored Power, Electro Ball and Heavy Slam, `parity:move-power`),
+  `ohkoAccuracy.ts` (`parity:ohko`). Add a mechanic there, not as another copy in each overlay.
+- **One-hit KO moves show "KO" in the power column** (Scott's rule, all five generations): `ohkoPowerText` in
+  `ohkoAccuracy.ts`, or 0 in battle when the type chart (or Levitate, Wonder Guard...) leaves them no effect.
+  gen1's data gives them power 1, the game's own placeholder, which used to show as 1.
+- **One place per effect (Scott's rule).** An effect on a stat (Choice Band, Huge Power, Light Ball in gen5)
+  shows in the stats panel; an effect on the move or the target's side (type items, screens, Explosion
+  halving Defense) shows in the power column. Never both, or the number counts it twice.
+- The speed label compares the Speed the game uses for turn order (stages, items, paralysis, Tailwind,
+  Unburden) and, under Trick Room, says who moves first.
+- Battle flags (Unburden, Tailwind, Trick Room, screens, Foresight, Flash Fire...) are `battle.flags.*` in the
+  Platinum and HG/SS `_ne` mappers and the gen3 ST mappers. D/P and gen5 have none, so those effects do
+  nothing there. HG/SS names the Unburden flag `knock_off_flag` (pokeheartgold `unk88.knockOffFlag`).
+- gen5's `battle.opponent.active_pokemon` is pinned to party slot 0; the enemy that is out is
+  `battle.opponent.pkmn_ram[pokemon_<party_position>_ram]` (`activeOpponent()`).
+- gen5 weather is switched off in `typeEffectiveness` (known-legacy-bugs #58), so gen5's accuracy leaves
+  weather out too.
+- **Weather is a bit field in gens 3 and 4.** Each weather has a temporary bit and a permanent bit (Drizzle,
+  Drought, Sand Stream, Snow Warning, overworld weather), so a glossary on the raw value must list every
+  combination. In gen4 the same bytes also hold Uproar and Gravity, so gen4 reads the bits instead:
+  `battleWeather()` (what is on the field, for display) and `effectiveWeather()` (empty under Cloud Nine or Air
+  Lock, for every damage, speed and accuracy rule). Don't read `battle.field.weather` directly in gen4.
+- Simple differs by generation: gen4 doubles the stored stage when it is used, gen5 doubles each change as it
+  is applied (the stored stage already counts it), so only gen4 code may double a stage for Simple.
+- A move's in-battle power that depends on the target or on earlier turns (Brine, Rollout, Trump Card...) is
+  gen4's `battleMovePower`; gen4 works out a battler's gender from its personality value
+  (`battlerGender`), because the battle structure's gender is not mapped.
 
 **The clock in its own process (all five generations, 2026-10-01).** After the gen2 legacy app's "timer fix"
 (its commit `1ab51d8`). The overlay's own clock is a `requestAnimationFrame` loop on the page, so a long script or
@@ -205,6 +248,15 @@ in `tools/parity/drift-allowlist.json`. `npm run parity:drift` fails otherwise.
 - Changing one copy of such a method means you either change all copies (a cross-generation fix) or
   re-review the allowlist entry.
 - It is a 3-second static check, so run it after any gen2–5 edit.
+
+**Render traps in the lifted overlays** (docs/performance-followups.md lists what was fixed).
+- A method the template calls must not write `data()` that the template reads. Vue queues the render again and
+  loops until the value settles, all before the first paint (gen4's stat countdown ran 43 renders per battle
+  exit, known-legacy-bugs #80). Existing writers: `get_stat` (`stat_fix_*`), gen5 `typeEffectiveness`.
+- Each template is over a thousand lines and re-renders on any mapper value it reads. Something that changes
+  often (per frame, per poll, per step) belongs in a small child or a computed (`LiveText`, `on_starter_spot`),
+  and a lookup the template repeats belongs in an index (`core/logic/firstMatchIndex.ts`,
+  `caseInsensitiveLookup.ts`), not a `find` over a table.
 
 **Phase 6** is breaking each lifted overlay down to a ~200-line composition root like gen1's.
 - The plan is the last section of `docs/IMPLEMENTATION_PLAN.md`, "Phase 6 plan". Its §5 "The recipe" and §6
@@ -267,6 +319,12 @@ Files of 5,000 to 14,000 lines:
   - gen3: `<Game>_<number>.json`
   - gen4 and gen5: `<Game>_<Species>.json`
 - `enemy_sprite_scales.json` works the same way.
+- The dev server must not hot-update these files: a hot update re-mounts the overlay mid-edit, which is how
+  Style Mode once lost its resize handle after the first Enter. The `SELF_WRITTEN` pattern in
+  `electron.vite.config.js` drops their updates; a new written-back data file needs adding there too.
+- **Don't use `server.watch.ignored` for this.** An unwatched file is never invalidated in Vite's cache, so
+  every window reload until the dev server restarts gets the table as it was at startup (edits look "lost"),
+  and the next sprite commit writes that stale table back over the file, wiping the session's edits.
 
 **File names with spaces.** gen4 and gen5 have `data/type effectiveness array.js`, which needs quoting in shell commands.
 
@@ -312,6 +370,19 @@ Treat those as fixed interfaces. Another program depends on each one.
 3. the packaged `resources/` folder
 
 Without it, the app runs and logs that hotkeys are disabled.
+
+**Building the Windows package.** `npm run build:win` does not add `keyhook.exe`, so build in three steps:
+1. `npm run build:unpack`
+2. copy `keyhook.exe` (the one in `A:\Programs\gen2-stp-frontend`) to `dist/win-unpacked/resources/`
+3. `npx electron-builder --win --prepackaged dist/win-unpacked` to make the zip
+
+Make the zip **before** launching the packaged app, or run `packaged:probe` only after zipping. On first launch
+the app creates the `resources/app/out/renderer/images` junction, and the zip step follows it, storing the
+image pool twice (5.9 GB instead of 3 GB). If that junction is already there, remove it with
+`[System.IO.Directory]::Delete(path, $false)`, which deletes only the link; `rm -rf` would follow it. The
+`!out/renderer/images` entry in `build.files` keeps the dev build's junction, which points into
+`src/renderer/public/images`, out of the package. Before that entry was added, the package worked only on the
+machine that built it.
 
 ## 9. Chapter markers, bookmarks and splits
 
@@ -370,6 +441,9 @@ This is decision 25 of the plan. The ledger is `docs/known-legacy-bugs.md`.
   3. Verify both with the harness.
   4. Record the fix in `docs/known-legacy-bugs.md`.
 - **If you can't tell which kind a quirk is,** the decompilation decides: if the game does it, keep it.
+- **A missing `.value` is not automatically a bug.** Mapper property objects define `toString()` (the value as
+  text), so `prop == 3`, `prop < 206` and `prop / other` coerce to the number and work. `===`, `switch`, `+`
+  (string concatenation) and a `null` value do not. Test the expression before logging it as a bug.
 
 ## 12. Verifying a change
 
@@ -409,6 +483,11 @@ build does not check types. To check a main-process edit, compare that command's
   3. Run `unified` on your change.
   4. `npx tsx tools/parity/diff.ts <before> <after>`.
 
+  If the worktree's `node_modules` is a junction to the repo's, delete the junction **before** removing the
+  worktree: `git worktree remove --force` follows it and empties the real `node_modules`. From PowerShell,
+  `[System.IO.Directory]::Delete("<worktree>\node_modules", $false)` removes only the link (a `cmd /c rmdir`
+  from PowerShell can fail silently); check it is gone before deleting the folder.
+
   A `git archive` of `HEAD` built in a scratch folder works too. Leave the images out of the archive, and
   symlink `node_modules` and `src/renderer/public/images` (and, once built, `out/renderer/images`) back to the
   repo's copies.
@@ -443,7 +522,7 @@ Re-running them would overwrite months of hand edits.
 | `docs/known-legacy-bugs.md` | Anything that looks like a bug in gen2–5; recording a quirk fix |
 | `docs/mapper-matrix.md`, `docs/genN-inventory.md` | Mapper, profile or detection work. The inventories list every property each generation reads and writes |
 | `docs/game-support-gaps.md` | Adding or fixing support for a game or edition |
-| `docs/performance-followups.md` | Performance work. It records what three passes did and what is still open |
+| `docs/performance-followups.md` | Performance work. It records what four passes did and what is still open |
 | `docs/themes-plan.md` | Themes (per-generation looks). A proposed plan, not built yet |
 | `docs/CRITICAL_ITEM_CHAPTER_MARKER.md`, `docs/NEW_MOVE_CHAPTER_MARKER.md` | OBS marker logic |
 | `docs/inputs.lock.md`, `docs/queuer-unified.patch`, `docs/battle-timing-notes.animations.css` | Rarely. These are port inputs, the queuer-side patch, and timing notes |

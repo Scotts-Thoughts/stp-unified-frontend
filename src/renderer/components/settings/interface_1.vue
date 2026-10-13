@@ -31,8 +31,8 @@
                 <tr><td>No attempt/split:</td><td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.advanced.no_attempt"/></td></tr>
                 <tr title="Dev only. Packaged builds always apply enemy sprite styles."><td>Enemy Sprite Styles:</td><td><input class="checkBoxStyle" type="checkbox" :checked="enemyResize.styles_enabled" @change="enemyResize.setStylesEnabled($event.target.checked)"/></td></tr>
                 <tr><td>Style Mode:</td><td>
-                    <button v-if="!enemyResize.style_mode_active" class="buttonStyle" style="font-size: 11px;" @click="enemyResize.enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
-                    <button v-else class="buttonStyle" style="font-size: 11px; color: #f44;" @click="enemyResize.exitStyleMode()">Exit</button>
+                    <button v-if="!enemyResize.style_mode_active" class="buttonStyle" style="font-size: 11px; width: auto; padding: 0 12px;" @click="enemyResize.enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
+                    <button v-else class="buttonStyle" style="font-size: 11px; width: auto; padding: 0 12px; color: #f44;" @click="enemyResize.exitStyleMode()">Exit</button>
                 </td></tr>
                 <tr v-if="enemyResize.style_mode_active"><td colspan="2" style="font-size: 11px;">{{ enemyResize.style_mode_index + 1 }} / {{ enemyResize.style_mode_species_list.length }} — <strong>{{ enemyResize.styleModeCurrentSpecies }}</strong></td></tr>
             </tbody>

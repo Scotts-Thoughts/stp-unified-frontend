@@ -6,6 +6,7 @@ import fs from "fs";
 import { ControlServer } from "./control-server";
 import { TimerFrameServer } from "./timer-frame-server";
 import { registerIpc } from "./ipc";
+import { appRoot } from "./paths";
 import { startKeyhook, stopKeyhook } from "./keyhook";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
 import { cutterArgs, runCutter } from "./cutter";
@@ -70,11 +71,21 @@ function createWindow() {
         height: 1080,
         show: false,
         autoHideMenuBar: true,
+        // The portrait, until a mapper loads and the shell swaps in that game's cartridge.
+        // Set here so Windows has a window icon to replace; a window created without one
+        // keeps the Electron icon in the taskbar. This file ships in resources/ (extraFiles);
+        // the repo-root icon.png is only what electron-builder stamps on the exe.
+        icon: path.join(appRoot(), "resources", "icons", "default.png"),
         webPreferences: {
             preload: path.join(__dirname, '../preload/index.js'),
             sandbox: false,
             contextIsolation: false,
             nodeIntegration: true,
+            // OBS captures this window, and it may sit behind others or minimised. With
+            // throttling on, Chromium treats a covered window as hidden: requestAnimationFrame
+            // stops (the clocks and the mapper client's debounce loop with it) and timers
+            // slow to once a second, so the capture freezes.
+            backgroundThrottling: false,
             // The renderer sees none of the app's command line unless it is passed on:
             // `--tool-url=` is the one switch the preload reads in the ordinary app, and
             // `--timer-frame-url=` is how it learns where the clock page is served.

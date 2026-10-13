@@ -27,6 +27,33 @@ function imagePoolJunction() {
   };
 }
 
+/**
+ * Files the app writes back into its own source tree in dev mode: gen2-5 style edits
+ * (`games/genN/data/style/*.json`, and gen3's species file on every mount) and the
+ * enemy sprite tables (every Enter in the resize tool / Style Mode). They are modules,
+ * and nothing on their import chain accepts an HMR update, so each write would be a
+ * full page reload (overlay -> "Please load a mapper" -> boot again) or, for the
+ * sprites, a remount that leaves Style Mode with no resize handle. The writer has
+ * already updated the in-memory table, so the update is dropped here.
+ *
+ * Don't put these paths in `server.watch.ignored` instead: Vite would then never
+ * invalidate its cached copy, and every reload until the dev server restarts would get
+ * the table as it was at startup -- and the next sprite commit would write that stale
+ * table back over the file.
+ */
+const SELF_WRITTEN = /\/src\/renderer\/(?:games\/[^/]+\/data\/(?:style\/|enemy_sprite_scales\.json$)|data\/enemy_sprite_scales\.json$)/;
+
+function suppressSelfWrittenHmr() {
+  return {
+    name: 'stp-suppress-self-written-hmr',
+    apply: 'serve',
+    enforce: 'post',
+    hotUpdate({ file }) {
+      if (SELF_WRITTEN.test(file.replace(/\\/g, '/'))) return [];
+    },
+  };
+}
+
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()]
@@ -39,18 +66,6 @@ export default defineConfig({
     assetsInclude: ['**/*.svg', '**/*.png'],
     build: {
       copyPublicDir: false,
-    },
-    server: {
-      watch: {
-        // gen2-5 write style edits back into `games/genN/data/style/*.json` in dev mode
-        // (`!app.isPackaged`, core/env.ts), and gen3 writes its species file on every
-        // mount. Those files are modules (`import.meta.glob` in each `storage.ts`), and
-        // nothing on the import chain accepts an HMR update, so under `electron-vite dev`
-        // each write was a full page reload: overlay -> "Please load a mapper" -> boot
-        // again. The in-memory table is already updated by the writer; the file only
-        // needs to be current for the next start.
-        ignored: ['**/src/renderer/games/*/data/style/**'],
-      },
     },
     resolve: {
       alias: {
@@ -70,6 +85,7 @@ export default defineConfig({
         },
       }),
       imagePoolJunction(),
+      suppressSelfWrittenHmr(),
     ]
   }
 })

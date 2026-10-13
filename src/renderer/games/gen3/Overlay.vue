@@ -138,8 +138,8 @@
                 </div>
                 <div v-if="shuckie_timer == true" class="gametime">
                     <div class="timerTitle">time played at 4x game-speed</div>
-                    <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
-                    <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                    <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
+                    <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
                 </div>
                 <div v-else="">
                     <timer :hide-clock="timer_frame_live"></timer>
@@ -203,8 +203,8 @@
                         <tr v-if="isInDevMode && show_advanced_settings && debugging">
                             <td>Style Mode:</td>
                             <td>
-                                <button v-if="!style_mode_active" class="buttonStyle" style="font-size: 11px;" @click="enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
-                                <button v-else="" class="buttonStyle" style="font-size: 11px; color: #f44;" @click="exitStyleMode()">Exit</button>
+                                <button v-if="!style_mode_active" class="buttonStyle" style="font-size: 11px; width: auto; padding: 0 12px;" @click="enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
+                                <button v-else="" class="buttonStyle" style="font-size: 11px; width: auto; padding: 0 12px; color: #f44;" @click="exitStyleMode()">Exit</button>
                             </td>
                         </tr>
                         <tr v-if="isInDevMode && show_advanced_settings && debugging && style_mode_active">
@@ -1340,7 +1340,7 @@
                                 <div class="enemyStatsArea colored-image" :style="`--overlay-color: ${overlay_color}; --url: url(images/gen3/new_ui/enemy_ui/${x}.svg)`">
                                 </div>
                             </div>
-                            <img class="enemyStatsArea" :class="svgColorClass(speed_comparison(x, game.properties.battle.trainer.team[x]?.speed.value).comparison, game.properties.battle.trainer.team[x])" :src="`images/gen3/new_ui/comp/${x}.svg`">
+                            <img class="enemyStatsArea" :class="svgColorClass(speed_comparison(x, enemyStatModification(x, batt.enemyPokemon.partyPos.value, 'speed', game.properties.battle.trainer.team[x]?.speed.value, batt.enemyPokemon.modStageSpeed.value, game.properties.battle.enemyPokemon)).comparison, game.properties.battle.trainer.team[x])" :src="`images/gen3/new_ui/comp/${x}.svg`">
                             <div :style="enemyPkmnUI(batt.trainer.team[x])">
                                 <img :style="fade_enemy_mon(batt.trainer.team[x])" class="enemyStatsArea" :src="`images/gen3/new_ui/enemy_stats/${x}.svg`">
                             </div>
@@ -1449,7 +1449,7 @@
                             </div>
                             <transition name="fade">
                                 <div v-show="speed_comparison_toggle == true" :style="enemyPkmnText(batt.trainer.team[x])" class="ePkmnSpeedComparison">
-                                    {{speed_comparison(x, game.properties.battle.trainer.team[x]?.speed).comparison}}
+                                    {{speed_comparison(x, enemyStatModification(x, batt.enemyPokemon.partyPos.value, 'speed', game.properties.battle.trainer.team[x]?.speed.value, batt.enemyPokemon.modStageSpeed.value, game.properties.battle.enemyPokemon)).comparison}}
                                 </div>
                             </transition>
                         </div>
@@ -1727,7 +1727,7 @@
  *   - `<script src>`    -> imports of games/gen3/data/**.js; the dynamic
  *                          `import('../lib/gameVariables.js')` -> a static import of
  *                          games/gen3/data/gameVariables.js, assigned in `created()`.
- *   - set-game-icon     -> `window.api.set_game_icon` with the module's icon table.
+ *   - set-game-icon     -> the shell, from the detected game (src/renderer/main.ts).
  *   - openFolder        -> the splits IPC.
  *   - `images/...`      -> `images/gen3/...` everywhere (template, script,
  *                          stylesheet, data): the generation's tree sits next to gen1's
@@ -1750,6 +1750,7 @@ import { LiveText } from "~/core/overlay/LiveText";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { gen3OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
+import { gen3IsPhysicalType, moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -1767,7 +1768,6 @@ import { battleMathMixin } from "~/core/overlay/battleMathMixin";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen3Hotkeys } from "./hotkeys";
-import { gen3GameIcon } from "./icons";
 // loadCsvFile: only `load_temp_splits` (legacy, unreferenced) still uses it; the comparison picker is core's.
 import { loadCsvFile, logData, logCopy } from "./splits.js";
 import { Timer } from "./logic/Timer.js";
@@ -1798,6 +1798,7 @@ import { gameTimeM } from "./data/methods/time_functions.js";
 import { gen3abilities } from "./data/gen3abilities.js";
 import { gen3data } from "./data/gen3data.js";
 import { gen3moves } from "./data/gen3moves.js";
+import { gen3MoveByLowerName } from "./moveLookup";
 import { generation_3_moves } from "./data/generation_3_moves.js";
 import { hiddenPowerPowerCalc } from "./data/methods/move_power_functions.js";
 import { hiddenPowerTypeCalc } from "./data/methods/move_power_functions.js";
@@ -2441,14 +2442,6 @@ export default defineComponent({
         }
     },
     created() {
-        // Set the taskbar/window icon to match the initially selected game. The game ->
-        // .ico mapping was gen3's main.js; it is the module's now (games/gen3/icons.ts),
-        // and the file is sent over the shell's `set-game-icon` channel (plan 3.4).
-        try {
-            window.api.set_game_icon(gen3GameIcon(this.gameSelection))
-        } catch (e) {
-            console.error('Failed to set initial game icon', e)
-        }
         // Was `import('../lib/gameVariables.js').then(...)`: the file resolved from disk
         // long before the mapper connected and `ready` rose, so nothing ever saw the gap.
         // The module is imported statically (games/gen3/data/gameVariables.js) and
@@ -2720,14 +2713,6 @@ export default defineComponent({
     },
 
     watch: {
-        gameSelection(newValue) {
-            // Update the taskbar/window icon to match the selected game (games/gen3/icons.ts).
-            try {
-                window.api.set_game_icon(gen3GameIcon(newValue))
-            } catch (e) {
-                console.error('Failed to update game icon', e)
-            }
-        },
         post_kanto_evolutions(newValue) {
             if (newValue == true) {
                 this.game.properties.patch.stp_flags.stp_allow_evolution.set(true, false)
@@ -3279,6 +3264,14 @@ export default defineComponent({
     },
 
     computed: {
+        // average_median_stats() for each stat the panel shows, recomputed only when the dex changes
+        average_median_by_stat() {
+            const by_stat = {}
+            for (const stat_label of ['hp', 'atk', 'def', 'spc_atk', 'spc_def', 'spd']) {
+                by_stat[stat_label] = this.average_median_stats_of(stat_label)
+            }
+            return by_stat
+        },
         /** What the out-of-process clock needs (core/overlay/ClockFrame.ts): the Timer's storage fields and Super Shuckie's time. */
         timer_frame_state() {
             this.timer_frame_version // re-read when the Timer reports a change
@@ -3857,17 +3850,12 @@ export default defineComponent({
             return this.game_data.dexData;
         },
         weatherDenial() {
-            let output = false;
-            if(this.pkmnAbility == "Air Lock" || this.pkmnAbility == "Cloud Nine") {
-                output = true;
-            }
-            if(this.game.properties.battle.yourPokemon.ability?.value == "Air Lock" || this.game.properties.battle.yourPokemon.ability?.value == "Cloud Nine") {
-                output = true;
-            }
-            if(this.game.properties.battle.enemyPokemon.ability?.value == "Air Lock" || this.game.properties.battle.enemyPokemon.ability?.value == "Cloud Nine") {
-                output = true;
-            }
-            return output;
+            // The battle abilities arrive in capitals ("AIR LOCK"), and older ST mappers spell
+            // Cloud Nine "CLOULD NINE", so compare the letters only.
+            const blocks = (a) => ["airlock", "cloudnine", "clouldnine"].includes(String(a ?? "").toLowerCase().replace(/[^a-z]/g, ""))
+            return blocks(this.pkmnAbility)
+                || blocks(this.game.properties.battle.yourPokemon.ability?.value)
+                || blocks(this.game.properties.battle.enemyPokemon.ability?.value)
         },
         //TYPE ICONS FOR THE STARTER SELECTION
         starterTypeCheck() {
@@ -4302,9 +4290,48 @@ export default defineComponent({
             const starter = this.starterString || this.starter;
             return this.getStorageKey(starter, false);
         },
-        light_ball(stat) {
-            if (this.game.properties.player.team[0].itemHeld.value == 'LIGHT BALL' && this.starterString == "Pikachu") {
-                return Math.floor(stat * 2)
+        // The battle reads the battler's own copy (gBattleMons[].item / .species): Knock Off and a used-up
+        // berry empty the item for the rest of the battle, and Transform copies the target's species.
+        // Only trusted while the battler is the solo (same personality value); otherwise the party values.
+        battle_mon_is_solo() {
+            const state = this.g3stateVariable
+            if (state != "Battle" && state != "From Battle") { return false }
+            const mon = this.game.properties.battle.yourPokemon
+            const pv = mon?.personalityValue?.value
+            return mon?.species?.value != null && pv != null && pv == this.game.properties.player.team[0]?.personalityValue?.value
+        },
+        player_held_item() {
+            if (this.battle_mon_is_solo()) { return this.game.properties.battle.yourPokemon.heldItem?.value ?? null }
+            return this.game.properties.player.team[0].itemHeld.value
+        },
+        player_battle_species() {
+            if (this.battle_mon_is_solo()) { return this.game.properties.battle.yourPokemon.species.value }
+            return this.starterString
+        },
+        // Held items that raise a stat, in pokeemerald CalculateBaseDamage's order (src/pokemon.c:3185-3200):
+        // Choice Band, Soul Dew (Latias/Latios), Deep Sea Tooth / Scale (Clamperl), Light Ball (Pikachu,
+        // Sp. Atk only in gen3), Metal Powder (Ditto), Thick Club (Cubone/Marowak). The species is the
+        // battler's, so a transformed Ditto or Pikachu loses its item's boost.
+        stat_items(stat_name, stat) {
+            const item = this.player_held_item()
+            const species = this.player_battle_species()
+            switch (stat_name) {
+                case "attack":
+                    if (item == "CHOICE BAND") { stat = Math.floor(stat * 150 / 100) }
+                    if (item == "THICK CLUB" && (species == "Cubone" || species == "Marowak")) { stat = stat * 2 }
+                    break
+                case "defense":
+                    if (item == "METAL POWDER" && species == "Ditto") { stat = stat * 2 }
+                    break
+                case "special_attack":
+                    if (item == "SOUL DEW" && (species == "Latias" || species == "Latios")) { stat = Math.floor(stat * 150 / 100) }
+                    if (item == "DEEP SEA TOOTH" && species == "Clamperl") { stat = stat * 2 }
+                    if (item == "LIGHT BALL" && species == "Pikachu") { stat = stat * 2 }
+                    break
+                case "special_defense":
+                    if (item == "SOUL DEW" && (species == "Latias" || species == "Latios")) { stat = Math.floor(stat * 150 / 100) }
+                    if (item == "DEEP SEA SCALE" && species == "Clamperl") { stat = stat * 2 }
+                    break
             }
             return stat
         },
@@ -4328,8 +4355,12 @@ export default defineComponent({
             }
             let data = this.gameSelection == 'Emerald' ? this.emeraldTrainers : this.remakeTrainers
             let enemy_hp = this.game.properties.battle.trainer.team[enemy_slot]?.hp.value
-            let player_speed   = this.get_stat('Speed')
+            let player_speed   = this.get_stat('Speed', true)
             let enemy_speed = enemy_speed_incoming
+            // The modified Speed is NaN when the stage is unreadable; compare the party Speed then
+            if (!Number.isFinite(Number(enemy_speed))) {
+                enemy_speed = this.game.properties.battle.trainer.team[enemy_slot]?.speed?.value
+            }
             // console.log(player_speed, enemy_speed)
             if (state == 'To Battle') {
                 enemy_speed = data[`${trainer_number}`].pokemon[enemy_slot]?.spe
@@ -4606,7 +4637,7 @@ export default defineComponent({
             else { return }
         },
         macho_brace(stat) { 
-            if (this.game.properties.player.team[0].itemHeld.value == 'MACHO BRACE') {
+            if (this.player_held_item() == 'MACHO BRACE') {
                 return Math.floor(stat * 0.5)
             }
             else {
@@ -4654,7 +4685,12 @@ export default defineComponent({
                 default                                : return opponent
             }
         },
+        // The stats panel's Average and Median modes call this from the template, six times per render;
+        // each call walks and sorts the whole dex, so the six answers are a computed (average_median_by_stat).
         average_median_stats(stat_label) {
+            return this.average_median_by_stat[stat_label] ?? this.average_median_stats_of(stat_label)
+        },
+        average_median_stats_of(stat_label) {
             let sum = 0;
             let count = 0;
             let values = [];
@@ -4777,7 +4813,8 @@ export default defineComponent({
             }
             return object
         },
-        get_stat(stat_name) {
+        // turn_order: the Speed the game compares, which always has the badge boost (GetWhoStrikesFirst)
+        get_stat(stat_name, turn_order = false) {
             // Wally's Zigzagoon tutorial - return buffered stats
             if (this.wallyTutorialActive && this.wallyTutorialBuffer?.stats) {
                 return this.wallyTutorialBuffer.stats[stat_name]
@@ -4820,21 +4857,21 @@ export default defineComponent({
             else if ((state == `Overworld` || state == `To Battle`) && this.game.properties.player.team[0].species.value != null) {
                 switch (stat_name) {
                     case "Hp":              return this.game.properties.player.team[0].maxHp.value
-                    case "Attack":          return this.ability(this.pkmn_ability, "attack",  this.badge_boost(this.game.properties.player.badges.badge1.value, this.game.properties.player.team[0].attack.value))
-                    case "Defense":         return this.metal_powder("defense", this.badge_boost(this.game.properties.player.badges.badge5.value, this.game.properties.player.team[0].defense.value))
-                    case "Special Attack":  return this.light_ball(this.badge_boost(this.game.properties.player.badges.badge7.value, this.game.properties.player.team[0].specialAttack.value))
-                    case "Special Defense": return this.metal_powder("special_defense", this.badge_boost(this.game.properties.player.badges.badge7.value, this.game.properties.player.team[0].specialDefense.value))
-                    case "Speed":           return this.status_stat_change(this.game.properties.player.team[0].statusCondition.value, this.macho_brace(this.badge_boost(this.game.properties.player.badges.badge3.value, this.game.properties.player.team[0].speed.value)))
+                    case "Attack":          return this.ability(this.pkmn_ability, "attack",  this.stat_items("attack", this.badge_boost(this.game.properties.player.badges.badge1.value, this.game.properties.player.team[0].attack.value)))
+                    case "Defense":         return this.stat_items("defense", this.badge_boost(this.game.properties.player.badges.badge5.value, this.game.properties.player.team[0].defense.value))
+                    case "Special Attack":  return this.stat_items("special_attack", this.badge_boost(this.game.properties.player.badges.badge7.value, this.game.properties.player.team[0].specialAttack.value))
+                    case "Special Defense": return this.stat_items("special_defense", this.badge_boost(this.game.properties.player.badges.badge7.value, this.game.properties.player.team[0].specialDefense.value))
+                    case "Speed":           return this.status_stat_change(this.game.properties.player.team[0].statusCondition.value, this.macho_brace(this.badge_boost(this.game.properties.player.badges.badge3.value, this.game.properties.player.team[0].speed.value, turn_order)))
                 }
             }
             else if (state == `Battle` || state == `From Battle`) {
                 switch (stat_name) {
                     case "Hp":              return this.game.properties.battle.yourPokemon.maxHp.value
-                    case "Attack":          return this.ability(this.pkmn_ability, "attack",  this.badge_boost(this.game.properties.player.badges.badge1.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageAttack.value,  this.game.properties.battle.yourPokemon.attack.value)))
-                    case "Defense":         return this.metal_powder("defense", this.ability(this.pkmn_ability, "defense", this.badge_boost(this.game.properties.player.badges.badge5.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageDefense.value, this.game.properties.battle.yourPokemon.defense.value))))
-                    case "Speed":           return this.status_stat_change(this.game.properties.battle.yourPokemon.status1.value, this.macho_brace(this.ability(this.pkmn_ability, "speed",   this.badge_boost(this.game.properties.player.badges.badge3.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageSpeed.value,   this.game.properties.battle.yourPokemon.speed.value)))))
-                    case "Special Attack":  return this.light_ball(this.badge_boost(this.game.properties.player.badges.badge7.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageSpecialAttack.value,  this.game.properties.battle.yourPokemon.specialAttack.value)))
-                    case "Special Defense": return this.metal_powder("special_defense", this.badge_boost(this.game.properties.player.badges.badge7.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageSpecialDefense.value, this.game.properties.battle.yourPokemon.specialDefense.value)))
+                    case "Attack":          return this.ability(this.pkmn_ability, "attack",  this.stat_items("attack", this.badge_boost(this.game.properties.player.badges.badge1.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageAttack.value,  this.game.properties.battle.yourPokemon.attack.value))))
+                    case "Defense":         return this.ability(this.pkmn_ability, "defense", this.stat_items("defense", this.badge_boost(this.game.properties.player.badges.badge5.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageDefense.value, this.game.properties.battle.yourPokemon.defense.value))))
+                    case "Speed":           return this.status_stat_change(this.game.properties.battle.yourPokemon.status1.value, this.macho_brace(this.ability(this.pkmn_ability, "speed",   this.badge_boost(this.game.properties.player.badges.badge3.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageSpeed.value,   this.game.properties.battle.yourPokemon.speed.value), turn_order))))
+                    case "Special Attack":  return this.ability(this.pkmn_ability, "special_attack", this.stat_items("special_attack", this.badge_boost(this.game.properties.player.badges.badge7.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageSpecialAttack.value,  this.game.properties.battle.yourPokemon.specialAttack.value))))
+                    case "Special Defense": return this.stat_items("special_defense", this.badge_boost(this.game.properties.player.badges.badge7.value, this.stageMultiplier(this.game.properties.battle.yourPokemon.modStageSpecialDefense.value, this.game.properties.battle.yourPokemon.specialDefense.value)))
                 }
             }
             else if (state == `Base Stats` || this.game.properties.player.team[0].species.value == null) {
@@ -4951,19 +4988,6 @@ export default defineComponent({
             }
             else {
                 return stat_value
-            }
-        },
-        metal_powder(stat_name, stat) {
-            if (this.game.properties.player.team[0].itemHeld.value == 'METAL POWDER') {
-                if (stat_name === 'defense' && (this.starterString === "Ditto" && this.s1dynamicReset.species.value === "Ditto")) {
-                    return Math.floor(stat * 2)
-                }
-                else {
-                    return stat
-                }
-            }
-            else {
-                return stat
             }
         },
         get_bb_stat(stat_name) {
@@ -6142,7 +6166,7 @@ export default defineComponent({
 
         // MOVE ACCURACY
         moveAccuracyStatic(move) {
-            var moveObject = this.gen3moves.find(x => x.Move.toLowerCase() === this.move_name(move).toLowerCase())
+            var moveObject = gen3MoveByLowerName(this.gen3moves, this.move_name(move).toLowerCase())
             if(!moveObject) {
                 console.error(" Move not found")
                 return `-`;
@@ -6150,7 +6174,7 @@ export default defineComponent({
             return moveObject.Accuracy
         },
         moveAccuracyDynamic(move) {
-            var moveObject = this.gen3moves.find(x => x.Move.toLowerCase() === this.move_name(move).toLowerCase())
+            var moveObject = gen3MoveByLowerName(this.gen3moves, this.move_name(move).toLowerCase())
             if(!moveObject)
             {
                 console.error(" Move not found: "+move)
@@ -6158,6 +6182,35 @@ export default defineComponent({
             }
             var moveAccuracy = moveObject.Accuracy
             var moveCategory = moveObject.Category
+            // sSoundMovesTable (pokeemerald src/battle_util.c:688) plus Perish Song, which skips a Soundproof target
+            // (Cmd_trysetperishsong). Names arrive in either spelling, so compare the letters.
+            const moveKey = String(move).toUpperCase().replace(/[^A-Z]/g, "")
+            let soundProof = ["GRASSWHISTLE","GROWL","METALSOUND","PERISHSONG","ROAR","SCREECH","SING","SUPERSONIC","SNORE","UPROAR","HYPERVOICE"]
+            if (this.game.properties.battle.enemyPokemon.ability.value == "SOUNDPROOF" && soundProof.includes(moveKey) && this.g3stateVariable=="Battle") {
+                return 0;
+            }
+            // pokeemerald AccuracyCalcHelper (src/battle_script_commands.c:1053-1095), in its order: Lock-On / Mind
+            // Reader on the target for this battler always hits; then a target in the air, underground or underwater
+            // is missed by all but the moves that reach it; then Vital Throw always hits. The OHKO path checks the
+            // same Lock-On first (Cmd_accuracycheck NO_ACC_CALC_CHECK_LOCK_ON, :1103-1108).
+            if (this.g3stateVariable == "Battle" && moveAccuracy != `-`) {
+                const foe = this.game.properties.battle.flags?.enemy_active
+                const lockedOn = Number(foe?.always_hits_turns?.value) > 0 && Number(foe?.battler_with_sure_hit?.value) === 0
+                if (lockedOn) {
+                    if (isOhkoMove(move)) {
+                        return gen3OhkoAccuracy(moveAccuracy, this.batt.yourPokemon.level?.value, this.batt.enemyPokemon.level?.value, this.batt.enemyPokemon.ability?.value) === 0 ? 0 : `-`
+                    }
+                    return `-`
+                }
+                if ((foe?.on_air?.value == true && !["GUST", "TWISTER", "THUNDER", "SKYUPPERCUT"].includes(moveKey))
+                    || (foe?.underground?.value == true && !["EARTHQUAKE", "MAGNITUDE"].includes(moveKey))
+                    || (foe?.underwater?.value == true && !["SURF", "WHIRLPOOL"].includes(moveKey))) {
+                    return 0
+                }
+                if (moveKey == "VITALTHROW") {
+                    return `-`
+                }
+            }
             if(move.toUpperCase() == "THUNDER") {
                 if(this.game.properties.battle.field.weather.value == "Sun" && !this.weatherDenial && this.g3stateVariable == "Battle") {
                     moveAccuracy = 50;
@@ -6172,14 +6225,11 @@ export default defineComponent({
             var currentModStageEva = this.batt.enemyPokemon.modStageEvasion.value
             var abilityMod         = 1
             // debugger
-            let soundProof = ["GRASSWHISTLE","GROWL","METAL SOUND","PERISH SONG","ROAR","SCREECH","SING","SUPERSONIC"]
-            if (this.game.properties.battle.enemyPokemon.ability.value == "SOUNDPROOF" && soundProof.includes(move) && this.g3stateVariable=="Battle") {
-                return 0;
-            }
             if (this.pkmn_ability == "Compound Eyes") {
                 abilityMod *= 1.3
             }
-            if (this.pkmn_ability == "Hustle" && moveCategory == "Physical") {
+            // gen3 moves have no category: physical or special follows the type (IS_TYPE_PHYSICAL)
+            if (this.pkmn_ability == "Hustle" && gen3IsPhysicalType(this.moveType(move))) {
                 abilityMod *= 0.8;
             }
             if (this.game.properties.battle.enemyPokemon.ability.value == "SAND VEIL" && this.game.properties.battle.field.weather.value == "Sandstorm" && !this.weatherDenial && this.g3stateVariable == "Battle") {
@@ -6197,11 +6247,19 @@ export default defineComponent({
                 return gen3OhkoAccuracy(moveAccuracy, this.batt.yourPokemon.level?.value, this.batt.enemyPokemon.level?.value, this.batt.enemyPokemon.ability?.value) ?? moveAccuracy
             }
             else if (this.g3stateVariable == `Battle`) {
-                var accuracy = Math.floor(moveAccuracy * abilityMod * stageModsAcc[currentModStageAcc] * stageModsEva[currentModStageEva])
-                if (accuracy > 100) {
-                    return 100
-                }
-                return accuracy
+                // One combined stage, then the modifiers in the game's order (core/logic/moveAccuracy.ts)
+                return calcMoveAccuracy(3, {
+                    accuracy: moveAccuracy,
+                    accuracyStage: currentModStageAcc,
+                    evasionStage: currentModStageEva,
+                    physical: gen3IsPhysicalType(this.moveType(move)),
+                    userAbility: this.pkmn_ability,
+                    targetAbility: this.batt.enemyPokemon.ability?.value,
+                    targetItem: this.batt.enemyPokemon.heldItem?.value,
+                    weather: this.game.properties.battle.field.weather.value,
+                    weatherSuppressed: this.weatherDenial,
+                    targetIdentified: this.batt.enemyPokemon.status2?.STATUS2_FORESIGHT?.value == true,
+                }) ?? `-`
             }
             else {
                 var accuracy = Math.floor(moveAccuracy * abilityMod)
@@ -6383,9 +6441,15 @@ export default defineComponent({
             if (pkmnData.status1.value == "Burned" && statLabel == "attack")   { status_burn = 1 }      // sets modifier for burn if the Pokemon is burned
 
             //ABILITIES
-            //Guts
-            if (ability == "guts" && statLabel == "attack" && 
-            (pkmnData.status1.value == "Burned" || pkmnData.status1.value == "Paralyzed" || pkmnData.status1.value == "Poisoned" || pkmnData.status1.value == "Badly Poisoned" || pkmnData.status1.value == "Badly Posioned")) {
+            //Huge Power / Pure Power x2, Hustle x1.5 (pokeemerald CalculateBaseDamage, src/pokemon.c:3158, :3205)
+            if ((ability == "huge power" || ability == "pure power") && statLabel == "attack") {
+                mod_ability = 2
+            }
+            if (ability == "hustle" && statLabel == "attack") {
+                mod_ability = 1.5
+            }
+            //Guts: any status1, sleep and freeze too (src/pokemon.c:3211)
+            if (ability == "guts" && statLabel == "attack" && pkmnData.status1.value != null) {
                 mod_ability = 1.5 
             }
             //Marvel Scale
@@ -6604,8 +6668,8 @@ export default defineComponent({
 
 
         // Badge boosts
-        badge_boost(badge, stat) {
-            if (this.display_badge_boosts == false) { return stat }
+        badge_boost(badge, stat, always = false) {
+            if (this.display_badge_boosts == false && !always) { return stat }
             return badge ? Math.floor(stat * 1.1) : stat;
         },
 
@@ -6736,6 +6800,17 @@ export default defineComponent({
             return damageMin.toString() + "-" + damageMax.toString()
         },
     
+        // Plus/Minus: ABILITY_ON_FIELD2 searches every battler, the foe included, so in gen3 a Plus Pokemon is
+        // boosted by an opposing Minus even in a single battle (pokeemerald include/battle_util.h:38,
+        // src/battle_util.c:3114-3122, src/pokemon.c:3207-3210). A game quirk.
+        plus_minus_partner_on_field(ability) {
+            if (this.g3stateVariable != "Battle") { return false }
+            const wanted = ability == `Plus` ? "MINUS" : "PLUS"
+            const batt = this.game.properties.battle
+            const others = [batt.enemyPokemon]
+            if (batt.type?.double?.value) { others.push(batt.yourSecondPokemon, batt.enemySecondPokemon) }
+            return others.some(mon => String(mon?.ability?.value ?? "").toUpperCase() == wanted)
+        },
         ability(ability, statname, statValue) {
             if (ability == `Hustle` && statname == `attack`) {
                 return Math.floor(statValue * 1.5)
@@ -6755,8 +6830,11 @@ export default defineComponent({
             else if (ability == `Swift Swim` && this.batt.turnInfo.battleWeather.value == `Rain` && statname == `speed`&& !this.weatherDenial) {
                 return Math.floor(statValue * 2)
             }
-            else if (ability == `Guts` && statname == `attack` && (this.s1.statusCondition.value == "Paralyzed" || this.s1.statusCondition.value == "Poisoned" || this.s1.statusCondition.value == "Burned")) {
+            else if (ability == `Guts` && statname == `attack` && this.s1.statusCondition.value) { // any status1, sleep and freeze too (pokeemerald CalculateBaseDamage)
                 return Math.floor(statValue * 1.5)
+            }
+            else if ((ability == `Plus` || ability == `Minus`) && statname == `special_attack` && this.plus_minus_partner_on_field(ability)) {
+                return Math.floor(statValue * 150 / 100)
             }
             else { 
                 return statValue
@@ -6875,7 +6953,7 @@ export default defineComponent({
                 return this.weatherBallTypeCalc();
             }
             else if (y) {
-                var move = this.gen3moves.find(x => x.Move.toLowerCase() === this.move_name(y).toLowerCase())
+                var move = gen3MoveByLowerName(this.gen3moves, this.move_name(y).toLowerCase())
                 if (move) return move.Type
             }
             return null
@@ -6891,7 +6969,7 @@ export default defineComponent({
                 return `images/gen3/elements/type-icons/curse.webp`
             }
             else if (y != null && y != undefined) {
-                var move = this.gen3moves.find(x => x.Move.toLowerCase() === this.move_name(y).toLowerCase())
+                var move = gen3MoveByLowerName(this.gen3moves, this.move_name(y).toLowerCase())
                 if(!move) {
                     console.error(" Move not found")
                     return null

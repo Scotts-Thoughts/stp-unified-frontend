@@ -73,12 +73,12 @@
                 </div>
             </div>
             <div v-if="shuckie_timer == true">
-                <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
-                <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
+                <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
             </div>
             <div v-else="">
-                <live-text class="gametimeClock" source="timer_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
-                <live-text class="gametimeFrames" source="timer_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                <live-text class="gametimeClock" source="timer_clock" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
+                <live-text class="gametimeFrames" source="timer_frames" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
             </div>
             <!-- The clock in its own process (core/overlay/ClockFrame.ts); the two above show until it is up. -->
             <clock-frame :gen="4" @live="timer_frame_live = $event"></clock-frame>
@@ -1324,7 +1324,7 @@
  *   - OBS marker method -> core/logic/obs.ts (the same exchange, plan 1.9).
  *   - logData/logCopy   -> games/gen4/splits.js over the splits IPC.
  *   - `<script src>`    -> imports of games/gen4/data/**.js.
- *   - set-game-icon     -> `window.api.set_game_icon` with the module's icon table.
+ *   - set-game-icon     -> the shell, from the detected game (src/renderer/main.ts).
  *   - openFolder        -> the splits IPC.
  *   - `images/...`      -> `images/gen4/...` everywhere (template, script,
  *                          stylesheet, data): the generation's tree sits next to gen1's
@@ -1341,7 +1341,10 @@ import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
-import { gen45OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
+import { gen45OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
+import { flailReversalPower, gyroBallPower, punishmentPower, trumpCardPower, wringOutPower } from "~/core/logic/movePower";
+import { gen45TurnOrder, gen45TurnOrderSpeed } from "~/core/logic/battleSpeed";
+import { moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -1360,7 +1363,6 @@ import { dsPairMixin } from "~/core/overlay/dsPairMixin";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
 import { gen4Hotkeys } from "./hotkeys";
-import { gen4GameIcon } from "./icons";
 // loadCsvFile: only `load_temp_splits` (legacy, unreferenced) still uses it; the comparison picker is core's.
 import { loadCsvFile, logData, logCopy, transition } from "./splits.js";
 import { auto_save_settings } from "./data/auto_save_settings.js";
@@ -1545,7 +1547,6 @@ export default defineComponent({
             search_trainers        : "",
             
             stat_fix_toggle        : false,
-            stat_fix_toggle_2      : 0,
             stat_fix_lvl           : 0,
             stat_fix_hp            : 0,
             stat_fix_atk           : 0,
@@ -2115,19 +2116,6 @@ export default defineComponent({
         }
     },
     watch: {
-        iconGameName: {
-            immediate: true,
-            handler(newValue) {
-                // Update the taskbar/window icon to match the active game. The game ->
-                // .ico mapping was gen4's main.js; it is the module's now (games/gen4/index.ts),
-                // and the file is sent over the shell's `set-game-icon` channel (plan 3.4).
-                try {
-                    window.api.set_game_icon(gen4GameIcon(newValue))
-                } catch (e) {
-                    console.error('Failed to update game icon', e)
-                }
-            },
-        },
         encounters_route_201(newValue) {
             MyStorage['encounters_route_201'] = newValue;
             this.disable_encounters();
@@ -2656,6 +2644,14 @@ export default defineComponent({
         // },
     },
     computed: {
+        // average_median_stats() for each stat the panel shows, recomputed only when the dex changes
+        average_median_by_stat() {
+            const by_stat = {}
+            for (const stat_label of ['hp', 'atk', 'def', 'spc_atk', 'spc_def', 'spd']) {
+                by_stat[stat_label] = this.average_median_stats_of(stat_label)
+            }
+            return by_stat
+        },
         /** What the out-of-process clock needs (core/overlay/ClockFrame.ts): the timer fields and Super Shuckie's time. */
         timer_frame_state() {
             return {
@@ -2686,13 +2682,6 @@ export default defineComponent({
          */
         movepoolRows() {
             return this.getMovepool(this.g4PokemonData, this.platinum_moves, this.g4tmhmMapping, this.displayedPokemonSpecies)
-        },
-        /**
-         * The game whose cartridge icon should be shown in the taskbar:
-         * the connected mapper's game if available, otherwise the manual selection.
-         */
-        iconGameName() {
-            return this.game?.properties?.meta?.game_name?.value || this.selected_game;
         },
         /**
          * Check if the current Pokemon has multiple evolution stages
@@ -3494,8 +3483,8 @@ export default defineComponent({
         // SCREENS
         screen_weather() { // [statusReflect, reflectCount, statusLightScreen, LightScreenCount, weather, weatherCount, showPopUp]
             var fieldArray = [null, null, null, null, null, null, false]
-            if (this.batt.field.weather.value != null) {
-                fieldArray[4] = this.batt.field.weather.value
+            if (this.battleWeather() != null) {
+                fieldArray[4] = this.battleWeather()
                 fieldArray[5] = this.batt.field.weather_count.value
                 fieldArray[6] = true
             }
@@ -3541,7 +3530,7 @@ export default defineComponent({
                 ["Reflect", false, 0,],
                 ["Light Screen", false, 0,],
                 ["Safeguard", false, 0,],
-                [this.game.properties.battle.field.weather.value, false, 0,],
+                [this.battleWeather(), false, 0,],
             ]
             if (this.game.properties.meta.state.value == `Battle`) {
                 effect_array[0][1] = this.batt.field.player.reflect?.value
@@ -3550,7 +3539,7 @@ export default defineComponent({
                 effect_array[1][2] = this.batt.field.player.lightscreen_count?.value
                 effect_array[2][1] = this.batt.field.player.safeguard?.value
                 effect_array[2][2] = this.batt.field.player.safeguard_count?.value
-                effect_array[3][1] = this.batt.field.weather?.value
+                effect_array[3][1] = this.battleWeather()
                 effect_array[3][2] = this.batt.field.weather_count?.value
             }
             return effect_array
@@ -4270,7 +4259,12 @@ export default defineComponent({
 
             revealSplitFolder(folderPath);
         },
+        // The stats panel's Average and Median modes call this from the template, six times per render;
+        // each call walks and sorts the whole dex, so the six answers are a computed (average_median_by_stat).
         average_median_stats(stat_label) {
+            return this.average_median_by_stat[stat_label] ?? this.average_median_stats_of(stat_label)
+        },
+        average_median_stats_of(stat_label) {
             let sum = 0;
             let count = 0;
             let values = [];
@@ -4334,6 +4328,23 @@ export default defineComponent({
             function choice_specs(stat) {
                 return Math.floor(stat * 1.5)
             }
+            // Held items that scale a stat in the damage calculation (pokeplatinum BattleSystem_CalcMoveDamage);
+            // Klutz switches them off. Light Ball doubles move power there, so it is in the power column instead.
+            function item_stat_boosts(stats) {
+                if (ability == 'Klutz') return stats
+                let { Atk, Def, SpA, SpD } = stats
+                if (held_item == 'Choice Band') Atk = Math.floor(Atk * 1.5)
+                if (held_item == 'Thick Club' && (species == 'Cubone' || species == 'Marowak')) Atk = Atk * 2
+                if ((held_item == 'Deep Sea Tooth' || held_item == 'DeepSeaTooth') && species == 'Clamperl') SpA = SpA * 2
+                if ((held_item == 'Deep Sea Scale' || held_item == 'DeepSeaScale') && species == 'Clamperl') SpD = SpD * 2
+                if (held_item == 'Soul Dew' && (species == 'Latios' || species == 'Latias')) {
+                    SpA = Math.floor(SpA * 1.5)
+                    SpD = Math.floor(SpD * 1.5)
+                }
+                // Transform copies the target's species, so a transformed Ditto loses it
+                if (held_item == 'Metal Powder' && species == 'Ditto') Def = Def * 2
+                return { Atk, Def, SpA, SpD }
+            }
             let HP  = 0
             let Atk = 0
             let Def = 0
@@ -4359,48 +4370,26 @@ export default defineComponent({
                     Atk = this.game.properties.player.team[0].stats.attack.value
                 }
 
-                if (species == 'Marowak' && held_item == 'Thick Club') {
-                    Atk = Math.floor(Atk * 2)
-                }
-
                 Def = this.game.properties.player.team[0].stats.defense.value
                 SpA = held_item == 'Choice Specs' ? choice_specs(this.game.properties.player.team[0].stats.special_attack.value) : this.game.properties.player.team[0].stats.special_attack.value
                 SpD = this.game.properties.player.team[0].stats.special_defense.value
-                SpE = this.game.properties.player.team[0].stats.speed.value
-                if (held_item == 'Macho Brace') {
-                    SpE = Math.floor(SpE * 0.5)
+                ;({ Atk, Def, SpA, SpD } = item_stat_boosts({ Atk, Def, SpA, SpD }))
+                // Marvel Scale: Defense x1.5 with any status
+                if (status_condition && ability == 'Marvel Scale') {
+                    Def = Math.floor(Def * 1.5)
                 }
-
-                if (status_condition && ability == 'Quick Feet') {
-                    SpE = Math.floor(SpE * 1.5)
-                }
-                if (status_condition == 'Paralyzed' && ability != 'Quick Feet') {
-                    SpE = Math.floor(SpE / 4)
-                }
-                if ((status_condition == 'Paralyzed' || status_condition == 'Poisoned' || status_condition == 'Burned') && ability == 'Guts') {
+                // The Speed it will have on entering battle (core/logic/battleSpeed.ts): items, status, Slow Start
+                SpE = gen45TurnOrderSpeed(4, {
+                    speed: this.game.properties.player.team[0].stats.speed.value,
+                    ability, item: held_item, species, status: status_condition,
+                })
+                // Guts: any status, sleep and freeze included (pokeplatinum BattleSystem_CalcMoveDamage)
+                if (status_condition && ability == 'Guts') {
                     Atk = Math.floor(Atk * 1.5)
                 }
 
                 if (ability == 'Slow Start') {
                     Atk = Math.floor(Atk * 0.5)
-                    SpE = Math.floor(SpE * 0.5)
-                }
-                if (this.stat_fix_toggle_2 > 0) {
-                    this.stat_fix_toggle_2 -= 1
-                    HP = this.stat_fix_hp
-                    Atk = this.stat_fix_hp
-                    Def = this.stat_fix_hp
-                    SpA = this.stat_fix_hp
-                    SpD = this.stat_fix_hp
-                    SpE = this.stat_fix_hp
-                    return {
-                        "Hp" : HP,
-                        "Atk": Atk,
-                        "Def": Def,
-                        "SpA": SpA,
-                        "SpD": SpD,
-                        "Spe": SpE
-                    }
                 }
                 // if (HP == 0, Atk == 0, Def == 0, SpA == 0, SpD == 0, SpE == 0) {
                 //     const pokemonData = this.g4PokemonData?.[starter]
@@ -4473,13 +4462,7 @@ export default defineComponent({
 
                 this.stat_fix_toggle = true
                 ability = this.game.properties.battle.player.active_pokemon.ability.value
-                if (this.game.properties.meta.game_name.value == 'HeartGold and SoulSilver') {
-                    
-                }
-                else {
-                    const turn_count = this.game.properties.battle.turn_counter.value
-                }
-                const weather = this.game.properties.battle.field.weather.value
+                const weather = this.effectiveWeather()
                 // const ability = this.game.properties.battle.player.active_pokemon.ability.value
 
                 // Simple doubles every stat stage, clamped to the -6..+6 range
@@ -4500,22 +4483,11 @@ export default defineComponent({
                 Def = this.game.properties.battle.player.active_pokemon.stats.defense.value
                 SpA = this.game.properties.battle.player.active_pokemon.stats.special_attack.value
                 SpD = this.game.properties.battle.player.active_pokemon.stats.special_defense.value
-                SpE = this.game.properties.battle.player.active_pokemon.stats.speed.value
-                if (held_item == 'Macho Brace') {
-                    SpE = Math.floor(SpE * 0.5)
-                }
-
-                if (ability == 'Slow Start' && turn_count < 5) {
+                if (ability == 'Slow Start' && this.battleFlags('player_active')?.slow_start_ended?.value != true) {
                     Atk = Math.floor(Atk * 0.5)
-                    SpE = Math.floor(SpE * 0.5)
                 }
-                if (status_condition && ability == 'Quick Feet') {
-                    SpE = Math.floor(SpE * 1.5)
-                }
-                if (status_condition == 'Paralyzed' && ability != 'Quick Feet') {
-                    SpE = Math.floor(SpE / 4)
-                }
-                if ((status_condition == 'Paralyzed' || status_condition == 'Poisoned' || status_condition == 'Burned') && ability == 'Guts') {
+                // Guts: any status, sleep and freeze included (pokeplatinum BattleSystem_CalcMoveDamage)
+                if (status_condition && ability == 'Guts') {
                     Atk = Math.floor(Atk * 1.5)
                 }
 
@@ -4529,8 +4501,19 @@ export default defineComponent({
                     Atk = Math.floor(Atk * 2)
                 }
 
-                if (species == 'Marowak' && held_item == 'Thick Club') {
-                    Atk = Math.floor(Atk * 2)
+                ;({ Atk, Def, SpA, SpD } = item_stat_boosts({ Atk, Def, SpA, SpD }))
+                if (status_condition && ability == 'Marvel Scale') {
+                    Def = Math.floor(Def * 1.5)
+                }
+                // Sun, unless Cloud Nine / Air Lock: Solar Power SpA x1.5; Flower Gift (Cherrim) Atk and SpD x1.5
+                if (weather == 'Sun' && !this.weatherSuppressed()) {
+                    if (ability == 'Solar Power') {
+                        SpA = Math.floor(SpA * 1.5)
+                    }
+                    if (ability == 'Flower Gift') {
+                        Atk = Math.floor(Atk * 1.5)
+                        SpD = Math.floor(SpD * 1.5)
+                    }
                 }
 
                 let battle_hp  = HP
@@ -4538,13 +4521,8 @@ export default defineComponent({
                 let battle_def = Math.floor(Def * this.stageModifiersData.stats[mod_def]) == 0 ? 1 : Math.floor(Def * this.stageModifiersData.stats[mod_def])
                 let battle_spa = Math.floor(SpA * this.stageModifiersData.stats[mod_spa]) == 0 ? 1 : Math.floor(SpA * this.stageModifiersData.stats[mod_spa])
                 let battle_spd = Math.floor(SpD * this.stageModifiersData.stats[mod_spd]) == 0 ? 1 : Math.floor(SpD * this.stageModifiersData.stats[mod_spd])
-                let battle_spe = Math.floor(SpE * this.stageModifiersData.stats[mod_spe]) == 0 ? 1 : Math.floor(SpE * this.stageModifiersData.stats[mod_spe])
-                if (weather == "Rain" && ability == "Swift Swim") {
-                    battle_spe = Math.floor(battle_spe * 2)
-                }
-                if (weather == "Sun" && ability == "Chlorophyll") {
-                    battle_spe = Math.floor(battle_spe * 2)
-                }
+                // The Speed the game compares for turn order (core/logic/battleSpeed.ts)
+                let battle_spe = Math.max(1, this.playerTurnOrderSpeed())
                 if (weather == "Sandstorm") {
                     const type_1 = this.game.properties.battle.player.active_pokemon.type_1.value
                     const type_2 = this.game.properties.battle.player.active_pokemon.type_2.value
@@ -4581,13 +4559,10 @@ export default defineComponent({
                         Atk = Math.floor(Atk * 2)
                     }
 
-                    if (species == 'Marowak' && held_item == 'Thick Club') {
-                        Atk = Math.floor(Atk * 2)
-                    }
-
                     Def = this.game.properties.battle.player.active_pokemon.stats.defense.value
                     SpA = held_item == 'Choice Specs' ? choice_specs(this.game.properties.battle.player.active_pokemon.stats.special_attack.value) : this.game.properties.battle.player.active_pokemon.stats.special_attack.value
                     SpD = this.game.properties.battle.player.active_pokemon.stats.special_defense.value
+                    ;({ Atk, Def, SpA, SpD } = item_stat_boosts({ Atk, Def, SpA, SpD }))
                     SpE = this.game.properties.battle.player.active_pokemon.stats.speed.value
                     if (held_item == 'Macho Brace') {
                         SpE = Math.floor(SpE * 0.5)
@@ -4611,7 +4586,6 @@ export default defineComponent({
                         this.stat_fix_spa = SpA
                         this.stat_fix_spd = SpD
                         this.stat_fix_spe = SpE
-                        this.stat_fix_toggle_2 = 500
                     }
                 }
                 return {
@@ -5844,6 +5818,11 @@ export default defineComponent({
             if (modifier == null) {
                 return statValue
             }
+            if (statName == 'speed') {
+                // The Speed the game compares for turn order (core/logic/battleSpeed.ts)
+                const speed = this.enemyTurnOrderSpeed(slotIndex)
+                return speed == 0 || speed > 1500 ? statValue : speed
+            }
             else if (this.game.properties.meta.state.value == `Battle` && this.game.properties.battle.opponent.party_position == slotIndex) {
                 currentStat = this.game?.properties?.battle?.opponent?.team[slotIndex].stats[statName].value
                 
@@ -5851,17 +5830,17 @@ export default defineComponent({
                 let weatherMod = 1
                 if (statName == 'speed') {
                     let ability = this.enemy_mon_static[slotIndex]?.ability
-                    if (this.game.properties.battle.field.weather.value == 'Sun' && ability == 'Chlorophyll') {
+                    if (this.effectiveWeather() == 'Sun' && ability == 'Chlorophyll') {
                         weatherMod = 2
                     }
-                    else if (this.game.properties.battle.field.weather.value == 'Rain' && ability == 'Swift Swim') {
+                    else if (this.effectiveWeather() == 'Rain' && ability == 'Swift Swim') {
                         weatherMod = 2
                     }
                 }
-                if (statName == 'special defense') {
+                if (statName == 'special_defense') {
                     let type1 = this.g4PokemonData[this.enemy_mon_static[slotIndex]?.species]?.type_1
                     let type2 = this.g4PokemonData[this.enemy_mon_static[slotIndex]?.species]?.type_2
-                    if (this.game.properties.battle.field.weather.value == 'Sandstorm' && (type1 == 'Rock' || type2 == 'Rock')) {
+                    if (this.effectiveWeather() == 'Sandstorm' && (type1 == 'Rock' || type2 == 'Rock')) {
                         weatherMod = 1.5
                     }
                 }
@@ -5878,17 +5857,17 @@ export default defineComponent({
                 let weatherMod = 1
                 if (statName == 'speed') {
                     let ability = this.enemy_mon_static[slotIndex]?.ability
-                    if (this.game.properties.battle.field.weather.value == 'Sun' && ability == 'Chlorophyll') {
+                    if (this.effectiveWeather() == 'Sun' && ability == 'Chlorophyll') {
                         weatherMod = 2
                     }
-                    else if (this.game.properties.battle.field.weather.value == 'Rain' && ability == 'Swift Swim') {
+                    else if (this.effectiveWeather() == 'Rain' && ability == 'Swift Swim') {
                         weatherMod = 2
                     }
                 }
-                if (statName == 'special defense') {
+                if (statName == 'special_defense') {
                     let type1 = this.g4PokemonData[this.enemy_mon_static[slotIndex]?.species]?.type_1
                     let type2 = this.g4PokemonData[this.enemy_mon_static[slotIndex]?.species]?.type_2
-                    if (this.game.properties.battle.field.weather.value == 'Sandstorm' && (type1 == 'Rock' || type2 == 'Rock')) {
+                    if (this.effectiveWeather() == 'Sandstorm' && (type1 == 'Rock' || type2 == 'Rock')) {
                         weatherMod = 1.5
                     }
                 }
@@ -6272,10 +6251,11 @@ export default defineComponent({
         
         // MOVE ACCURACY
         getAccuracy(accuracy, move) {
-            const weather   = this.game.properties.battle.field.weather.value
+            const weather   = this.effectiveWeather()
             const state     = this.game.properties.meta.state.value
             const held_item = this.game.properties.player.team[0].held_item.value
             const move_category = this.platinum_moves[move]?.Category
+            const listed_accuracy = accuracy
             let ability = this.game.properties.player.team[0].ability.value
             if (accuracy == `-`) {
                 return `—`
@@ -6339,42 +6319,40 @@ export default defineComponent({
                     let calculated_accuracy = Math.floor(accuracy * item_modifier * ability_modifier) <= 100 ? Math.floor(accuracy * item_modifier * ability_modifier) : 100
                     return calculated_accuracy
                 }
-                let playerStage = this.game.properties.battle.player.active_pokemon.modifiers.accuracy?.value?.toString()
-                let oppAStage = this.game.properties.battle.opponent.active_pokemon.modifiers.evasion?.value?.toString()
-                let accuracyModifier = this.stageModifiersData["accuracy"][playerStage]
-                let evasionModifier = this.stageModifiersData["evasion"][oppAStage]
-                let modifiers = this.game.properties.battle.player.active_pokemon.modifiers
-                let item_modifier = 1
-                let ability_modifier = 1
-                // console.log(playerStage, oppAStage, accuracyModifier, evasionModifier, modifiers, item_modifier)
-                switch (held_item) {
-                    case "Wide Lens": item_modifier = 4505/4096; break;
-                    case "Zoom Lens": {
-                        const player_speed = this.game.properties.battle.player.active_pokemon.stats.speed.value
-                        const enemy_speed  = this.game.properties.battle.opponent.active_pokemon.stats.speed.value
-                        if (player_speed < enemy_speed) { item_modifier = 4915/4096 }
-                        else { item_modifier = 1 }
-                        break;
-                    }
-                    default: item_modifier = 1; break;
+                const player = this.game.properties.battle.player.active_pokemon
+                const opponent = this.game.properties.battle.opponent.active_pokemon
+                const enemy_flags = this.battleFlags('enemy_active')
+                const field = this.battleFlags('field')
+                const weather = this.effectiveWeather()
+                const suppressed = this.weatherSuppressed()
+                // Moves that cannot miss: Thunder in rain, the target's No Guard (pokeplatinum BattleControllerPlayer_CheckMoveHit)
+                if ((move == 'Thunder' && weather == 'Rain' && !suppressed) || opponent.ability?.value == 'No Guard') {
+                    return `—`
                 }
-                if (move_category == "Physical" && ability == "Hustle") {
-                    ability_modifier = 3277/4096
-                }
-                let calculated_accuracy = Math.floor(accuracy * accuracyModifier * evasionModifier * item_modifier * ability_modifier) <= 100 ? Math.floor(accuracy * accuracyModifier * evasionModifier * item_modifier * ability_modifier) : 100
-                if (calculated_accuracy == "err") {
-                    // console.log(
-                    //     accuracy,
-                    //     playerStage,
-                    //     oppAStage,
-                    //     accuracyModifier,
-                    //     evasionModifier,
-                    //     calculated_accuracy,
-                    //     state,
-                    //     this.game.properties.meta.state_enemy.value,
-                    // )
-                }
-                return calculated_accuracy
+                // One combined stage, then the modifiers in the game's order (core/logic/moveAccuracy.ts)
+                const enemy_moves_first = gen45TurnOrder(
+                    { speed: this.get_stat().Spe, ability: player.ability?.value, item: player.held_item?.value },
+                    { speed: this.enemyTurnOrderSpeed(this.game.properties.battle.opponent.party_position?.value), ability: opponent.ability?.value, item: opponent.held_item?.value },
+                    field?.trick_room?.value > 0,
+                ) < 0
+                return calcMoveAccuracy(4, {
+                    accuracy: listed_accuracy,
+                    accuracyStage: player.modifiers.accuracy?.value,
+                    evasionStage: opponent.modifiers.evasion?.value,
+                    physical: move_category == "Physical",
+                    thunder: move == 'Thunder',
+                    userAbility: player.ability?.value,
+                    targetAbility: opponent.ability?.value,
+                    userItem: player.held_item?.value,
+                    targetItem: opponent.held_item?.value,
+                    weather, weatherSuppressed: suppressed,
+                    targetIdentified: enemy_flags?.foresight?.value == true || enemy_flags?.miracle_eye?.value == true,
+                    targetConfused: enemy_flags?.confusion_turns?.value > 0,
+                    targetMovedFirst: enemy_moves_first,
+                    micleBerry: this.battleFlags('player_active')?.micle_berry?.value == true,
+                    gravity: field?.gravity?.value > 0,
+                    fog: field?.fog?.value == true || weather == 'Fog',
+                }) ?? `—`
             }
             // Any other state (e.g. 'From Battle'): no battle modifiers apply, but still floor so
             // an upstream decimal (e.g. Compound Eyes' 1.3x) never shows decimal places.
@@ -6387,21 +6365,107 @@ export default defineComponent({
             // Use getStat to get player speed with modifiers applied
             const playerSpeed = this.get_stat().Spe || 0
             const enemySpeed = enemySpeedValue || 0
-            
+            const player = state == 'Battle' ? this.game.properties.battle.player.active_pokemon : this.game.properties.player.team[0]
+            const enemy = this.enemyTurnOrderSource(slotIndex)
+            // Who moves first: Lagging Tail, Stall and Trick Room as the game orders them (core/logic/battleSpeed.ts)
+            const trick_room = state == 'Battle' && this.battleFlags('field')?.trick_room?.value > 0
+            const order = gen45TurnOrder(
+                { speed: playerSpeed, ability: player?.ability?.value, item: player?.held_item?.value },
+                { speed: enemySpeed, ability: enemy.ability, item: enemy.item },
+                trick_room,
+            )
 
             let comparison = ""
-            if (playerSpeed > enemySpeed) {
+            if (order > 0) {
                 comparison = "Outspeeds"
-            } else if (playerSpeed == enemySpeed) {
+            } else if (order == 0) {
                 comparison = "Speed-Tied"
             } else {
                 comparison = "Underspeeds"
             }
-            
-            // console.log(slotIndex, playerSpeed, enemySpeed, comparison)
-
 
             return { comparison }
+        },
+        // The mapper's battle flags (Platinum and HG/SS; D/P has none, so every flag reads as unset).
+        battleFlags(group) {
+            return this.game.properties.battle?.flags?.[group]
+        },
+        // The battle's weather: 'Rain', 'Sun', 'Sandstorm', 'Hail', 'Fog' or null. The mapper's `field.weather` reads
+        // the whole fieldConditionsMask through a glossary, which misses the permanent weathers (Drizzle, Drought,
+        // Sand Stream, Snow Warning, overworld weather) and breaks while Gravity or Uproar is up, so the weather bits
+        // are read where the mapper has them (Platinum, HG/SS; pokeplatinum FIELD_CONDITION_*).
+        battleWeather() {
+            const field = this.battleFlags('field')
+            if (field?.rain != null) {
+                if (field.rain.value == true || field.rain_permanent?.value == true) return 'Rain'
+                if (field.sandstorm?.value == true || field.sandstorm_permanent?.value == true) return 'Sandstorm'
+                if (field.sun?.value == true || field.sun_permanent?.value == true) return 'Sun'
+                if (field.hail?.value == true || field.hail_permanent?.value == true) return 'Hail'
+                if (field.fog?.value == true) return 'Fog'
+                return null
+            }
+            return this.game.properties.battle.field.weather?.value ?? null
+        },
+        // The weather as the damage and speed rules see it: none while Cloud Nine or Air Lock is out.
+        effectiveWeather() {
+            return this.weatherSuppressed() ? null : this.battleWeather()
+        },
+        // Cloud Nine or Air Lock on the field switches every weather effect off.
+        weatherSuppressed() {
+            const abilities = [this.game.properties.battle.player.active_pokemon?.ability?.value, this.game.properties.battle.opponent.active_pokemon?.ability?.value]
+            return this.game.properties.meta.state.value == 'Battle' && abilities.some(a => a == 'Cloud Nine' || a == 'Air Lock')
+        },
+        // Platinum names the Unburden flag can_unburden, HG/SS knock_off_flag (pokeheartgold unk88.knockOffFlag).
+        canUnburden(group) {
+            const flags = this.battleFlags(group)
+            return (flags?.can_unburden ?? flags?.knock_off_flag)?.value == true
+        },
+        playerTurnOrderSpeed() {
+            const mon = this.game.properties.battle.player.active_pokemon
+            return gen45TurnOrderSpeed(4, {
+                speed: mon.stats.speed.value,
+                stage: mon.modifiers.speed.value,
+                ability: mon.ability.value,
+                item: mon.held_item.value,
+                species: mon.species.value,
+                status: mon.status_condition.value,
+                weather: this.effectiveWeather(),
+                weatherSuppressed: this.weatherSuppressed(),
+                canUnburden: this.canUnburden('player_active'),
+                tailwind: this.battleFlags('player_side')?.tailwind?.value > 0,
+                slowStartActive: this.battleFlags('player_active')?.slow_start_ended?.value != true,
+            })
+        },
+        // The enemy in a slot: the battler itself while it is out, otherwise its party data and trainer entry.
+        enemyTurnOrderSource(slotIndex) {
+            const battle = this.game.properties.battle
+            const trainer_mon = this.enemy_mon_static?.[slotIndex]
+            const party = battle.opponent.team?.[slotIndex]
+            if (this.game.properties.meta.state.value == 'Battle' && battle.opponent.party_position == slotIndex) {
+                const mon = battle.opponent.active_pokemon
+                return {
+                    active: true, speed: party?.stats?.speed?.value, stage: mon?.modifiers?.speed?.value,
+                    ability: mon?.ability?.value, item: mon?.held_item?.value, species: mon?.species?.value,
+                    status: mon?.status_condition?.value,
+                }
+            }
+            return {
+                active: false, speed: party?.stats?.speed?.value, stage: 0,
+                ability: trainer_mon?.ability, item: trainer_mon?.held_item, species: trainer_mon?.species,
+                status: party?.status_condition?.value,
+            }
+        },
+        enemyTurnOrderSpeed(slotIndex) {
+            const source = this.enemyTurnOrderSource(slotIndex)
+            const in_battle = this.game.properties.meta.state.value == 'Battle'
+            return gen45TurnOrderSpeed(4, {
+                ...source,
+                weather: in_battle ? this.effectiveWeather() : null,
+                weatherSuppressed: this.weatherSuppressed(),
+                canUnburden: source.active && this.canUnburden('enemy_active'),
+                tailwind: in_battle && this.battleFlags('enemy_side')?.tailwind?.value > 0,
+                slowStartActive: !source.active || this.battleFlags('enemy_active')?.slow_start_ended?.value != true,
+            })
         },
         svgColorClass(comparison, enemyPkmnData) {
             // Return appropriate CSS class based on speed comparison
@@ -6441,11 +6505,11 @@ export default defineComponent({
                 mod_ability = 1.5 
             }
             //Chlorophyll
-            if (pkmnData.ability?.value.toLowerCase() == "chlorophyll" && statLabel == "speed" && this.game.properties.battle.field.weather.value == "Sun") {
+            if (pkmnData.ability?.value.toLowerCase() == "chlorophyll" && statLabel == "speed" && this.effectiveWeather() == "Sun") {
                 mod_weather = 2 
             }
             //Swift Swim
-            if (pkmnData.ability?.value.toLowerCase() == "swift swim" && statLabel == "speed" && this.game.properties.battle.field.weather.value == "Rain") {
+            if (pkmnData.ability?.value.toLowerCase() == "swift swim" && statLabel == "speed" && this.effectiveWeather() == "Rain") {
                 mod_weather = 2 
             }
             //Torrent
@@ -6484,10 +6548,10 @@ export default defineComponent({
             else if (ability == `Marvel Scale` && this.s1.status_condition.value != null && statname == `defense`) {
                 return Math.floor(statValue * 1.5)
             }
-            else if (ability == `Chlorophyll` && this.batt.field.weather.value == `Sun` && statname == `speed`) {
+            else if (ability == `Chlorophyll` && this.effectiveWeather() == `Sun` && statname == `speed`) {
                 return Math.floor(statValue * 1.5)
             }
-            else if (ability == `Swift Swin` && this.batt.field.weather.value == `Rain` && statname == `speed`) {
+            else if (ability == `Swift Swin` && this.effectiveWeather() == `Rain` && statname == `speed`) {
                 return Math.floor(statValue * 1.5)
             }
             else if (ability == `Guts` && statname == `attack` && (this.s1.status_condition.value == "Paralyzed" || this.s1.status_condition.value == "Poisoned" || this.s1.status_condition.value == "Burned")) {
@@ -6649,22 +6713,12 @@ export default defineComponent({
                     return specialMovePower
                 }
                 else if ((y == "Flail" || y == "Reversal") && state == 'Overworld') {
-                    var hpPercentage = this.game.properties.player.team[0].stats.hp.value / this.game.properties.player.team[0].stats.hp_max.value
-                    if (hpPercentage >= .672) { return 20 }
-                    else if (hpPercentage >= .344 && hpPercentage < .672) { return 40 }
-                    else if (hpPercentage >= .203 && hpPercentage < .344) { return 80 }
-                    else if (hpPercentage >= .1042 && hpPercentage < .203) { return 100 }
-                    else if (hpPercentage >= .094 && hpPercentage < .1042) { return 150 }
-                    else if (hpPercentage < .031) { return 200 }
+                    // The game's HP fractions, not rounded percentages (core/logic/movePower.ts)
+                    return flailReversalPower(4, this.game.properties.player.team[0].stats.hp.value, this.game.properties.player.team[0].stats.hp_max.value) ?? "—"
                 }
                 else if ((y == "Flail" || y == "Reversal") && state == 'Battle') {
-                    var hpPercentage = this.game.properties.battle.player.team[0].stats.hp.value / this.game.properties.battle.player.team[0].stats.hp_max.value
-                    if (hpPercentage >= .6875) { return 20 }
-                    else if (hpPercentage >= .344 && hpPercentage < .672) { return 40 }
-                    else if (hpPercentage >= .203 && hpPercentage < .344) { return 80 }
-                    else if (hpPercentage >= .1042 && hpPercentage < .203) { return 100 }
-                    else if (hpPercentage >= .094 && hpPercentage < .1042) { return 150 }
-                    else if (hpPercentage < .031) { return 200 }
+                    // The game's HP fractions, not rounded percentages (core/logic/movePower.ts)
+                    return flailReversalPower(4, this.game.properties.battle.player.team[0].stats.hp.value, this.game.properties.battle.player.team[0].stats.hp_max.value) ?? "—"
                 }
                 else if ((y == "Water Spout" || y == "Eruption") && state == 'Overworld') {
                     var power = (150 * this.game.properties.player.team[0].stats.hp.value) / this.game.properties.player.team[0].stats.hp_max.value
@@ -6700,16 +6754,14 @@ export default defineComponent({
                 else if (y == "Hidden Power") {
                     return this.hiddenPowerPowerCalc(this.game.properties.player.team[0])
                 }
-                else if (y == "Facade" && (this.s1.status_condition.value == "Paralyzed" || this.s1.status_condition.value == "Poisoned" || this.s1.status_condition.value == "Burned")) {
+                else if (y == "Facade" && ["Paralyzed", "Poisoned", "Burned", "Badly Poisoned"].includes(this.s1.status_condition.value)) { // toxic too
                     return move.power * 2
                 }
                 else if (y == "Gyro Ball") {
                     if (state != "Battle") { return "—" }
-                    const user_speed = this.game.properties.battle.player.active_pokemon.stats.speed.value
-                    const target_speed = this.game.properties.battle.opponent.active_pokemon.stats.speed.value
-                    var base_power = Math.min(((25 * target_speed) / user_speed) + 1)
-                    if (base_power > 150) { base_power = 150 }
-                    return base_power
+                    // Both turn-order Speeds, with stages, paralysis, items and Tailwind (BtlCmd_CalcGyroBallPower, monSpeedValues)
+                    const enemy_slot = this.game.properties.battle.opponent.party_position?.value
+                    return gyroBallPower(this.playerTurnOrderSpeed(), this.enemyTurnOrderSpeed(enemy_slot)) ?? "—"
                 }
                 else if (y == "Natural Gift") {
                     if (this.game.properties.player.team[0].held_item.value == null) { return "—" }
@@ -6718,35 +6770,98 @@ export default defineComponent({
                     return power
                 }
                 else if (y == "Punishment") {
-                    var power = 60 // Starts at 60, increases by 20 for each positive stat change the enemy has, maxes out at 200
-                    var stat_change_atk = this.game.properties.battle.opponent.active_pokemon.modifiers.attack.value > 0          ? this.game.properties.battle.opponent.active_pokemon.modifiers.attack.value          : 0
-                    var stat_change_def = this.game.properties.battle.opponent.active_pokemon.modifiers.defense.value > 0         ? this.game.properties.battle.opponent.active_pokemon.modifiers.defense.value         : 0
-                    var stat_change_spa = this.game.properties.battle.opponent.active_pokemon.modifiers.special_attack.value > 0  ? this.game.properties.battle.opponent.active_pokemon.modifiers.special.value         : 0
-                    var stat_change_spd = this.game.properties.battle.opponent.active_pokemon.modifiers.special_defense.value > 0 ? this.game.properties.battle.opponent.active_pokemon.modifiers.special_defense.value : 0
-                    var stat_change_spe = this.game.properties.battle.opponent.active_pokemon.modifiers.speed.value > 0           ? this.game.properties.battle.opponent.active_pokemon.modifiers.speed.value           : 0
-                    var increases = stat_change_atk + stat_change_def + stat_change_spa + stat_change_spd + stat_change_spe
-                    var power_boost = increases * 20
-                    power += power_boost
-                    if (power > 200) { power = 200 } // Ensure power does not exceed 200
-                    return power
+                    // 60 + 20 per stage the target has raised, all seven stats, max 200 (BtlCmd_CalcPunishmentPower)
+                    const mods = this.game.properties.battle.opponent.active_pokemon.modifiers
+                    return punishmentPower(['attack', 'defense', 'special_attack', 'special_defense', 'speed', 'accuracy', 'evasion'].map(stat => mods?.[stat]?.value))
                 }
                 else if (y == "Fling") {
                     fling_power = this.get_fling_power()
                     return fling_power
                 }
 
-                let held_item_2 = this.game.properties.player.team[0].held_item.value
-                if (held_item_2 == 'Wise Glasses' && move.category == 'Special') {
-                    if (move.power != "—" && move.power != 0 && move.power != 1) {
-                        return Math.floor(move.power * 1.1)
-                    }
-                }
+                // Wise Glasses is in determineItemBoost
+
+                // In battle, moves whose power depends on the target or on earlier turns (pokeplatinum battle_script.c)
+                const battle_power = state == 'Battle' && move ? this.battleMovePower(y, move.power) : null
+                if (battle_power != null) { return battle_power }
 
                 if (move.power == "—") { return "—"}
                 if (move.power == 0) { return "—"}
                 if (move.power == 1) { return "—"}
                 else
                     if (move) return move.power
+            }
+            return null
+        },
+        // A battler's gender, 'M', 'F' or null for a genderless species, as the game derives it from the species'
+        // gender ratio and the personality value (pokeplatinum SpeciesData_GetGenderOf); the battle copies it at send-out.
+        battlerGender(mon) {
+            const ratio = Number(this.g4PokemonData[mon?.species?.value]?.gender_ratio)
+            const pid = mon?.internals?.personality_value?.value
+            if (!Number.isFinite(ratio) || pid == null || ratio == 255) return null
+            if (ratio == 0) return 'M'
+            if (ratio == 254) return 'F'
+            return ratio > (Number(pid) & 0xff) ? 'F' : 'M'
+        },
+        // The in-battle power of a move that depends on the target or on earlier turns, or null to use the listed power.
+        battleMovePower(move, power) {
+            const battle = this.game.properties.battle
+            const user = battle.player.active_pokemon
+            const target = battle.opponent.active_pokemon
+            const user_flags = this.battleFlags('player_active')
+            const target_status = target?.status_condition?.value
+            switch (move) {
+                // Brine: x2 when the target is at half HP or less (effect script 221: curHP <= maxHP / 2)
+                case "Brine":
+                    return target?.stats?.hp?.value <= Math.floor(target?.stats?.hp_max?.value / 2) ? power * 2 : null
+                // Wake-Up Slap: x2 against a sleeping target; SmellingSalt: x2 against a paralysed one
+                case "Wake-Up Slap":
+                    return target_status == 'Asleep' ? power * 2 : null
+                case "SmellingSalt":
+                case "Smelling Salt":
+                    return target_status == 'Paralyzed' ? power * 2 : null
+                // Wring Out / Crush Grip: 1 + 120 x the target's HP fraction (BtlCmd_CalcWringOutPower)
+                case "Wring Out":
+                case "Crush Grip":
+                    return wringOutPower(4, target?.stats?.hp?.value, target?.stats?.hp_max?.value)
+                // Trump Card: from the PP left after this use, two against Pressure (BtlCmd_CalcTrumpCardPower)
+                case "Trump Card": {
+                    const slot = [0, 1, 2, 3].find(i => user?.moves?.[i]?.move?.value == move)
+                    const pp = slot === undefined ? null : user.moves[slot].pp?.value
+                    if (pp == null) return null
+                    return trumpCardPower(Math.max(0, pp - (target?.ability?.value == 'Pressure' ? 2 : 1)))
+                }
+                // Payback: x2 when the target moves first this turn (BtlCmd_CalcPaybackPower); a Speed tie is a coin flip
+                case "Payback": {
+                    const slot = battle.opponent.party_position?.value
+                    const comparison = this.speed_comparison(slot, this.enemyTurnOrderSpeed(slot))?.comparison
+                    return comparison == 'Underspeeds' ? power * 2 : null
+                }
+                // Rollout / Ice Ball: doubles with each hit of the five-turn chain, and again after Defense Curl
+                // (BtlCmd_CalcRolloutPower: the count holds the hits still to come)
+                case "Rollout":
+                case "Ice Ball": {
+                    if (user_flags?.rollout_count == null) return null
+                    const remaining = Number(user_flags.rollout_count.value) || 0
+                    let next_power = remaining > 0 ? power * 2 ** (5 - remaining) : power
+                    if (user_flags.defense_curl?.value == true) next_power *= 2
+                    return next_power
+                }
+                // Fury Cutter: doubles with each consecutive hit, up to x16 (BtlCmd_CalcFuryCutterPower)
+                case "Fury Cutter": {
+                    if (user_flags?.fury_cutter_count == null) return null
+                    const count = Math.min(5, (Number(user_flags.fury_cutter_count.value) || 0) + 1)
+                    return power * 2 ** (count - 1)
+                }
+                // Spit Up: 100 per Stockpile; it fails with none
+                case "Spit Up": {
+                    if (user_flags?.stockpile == null) return null
+                    const stockpile = Number(user_flags.stockpile.value) || 0
+                    return stockpile > 0 ? 100 * stockpile : "—"
+                }
+                // Weather Ball: x2 in any weather unless Cloud Nine / Air Lock (BtlCmd_CalcWeatherBallParams)
+                case "Weather Ball":
+                    return this.effectiveWeather() ? power * 2 : null
             }
             return null
         },
@@ -7461,11 +7576,9 @@ export default defineComponent({
             else if (weather == "Rain" && moveType == "Fire") {
                 return .5
             }
-            else if (weather == "Rain" && move == "SolarBeam") {
+            // SolarBeam is halved in every weather but sun (pokeplatinum FIELD_CONDITION_SOLAR_DOWN: rain, sand, hail, fog)
+            else if (["Rain", "Sandstorm", "Hail", "Fog"].includes(weather) && (move == "SolarBeam" || move == "Solar Beam")) {
                 return .5
-            }
-            else if (weather == "Sandstorm") {
-                return 1
             }
             else {
                 return 1
@@ -7477,13 +7590,13 @@ export default defineComponent({
                 return move
             }
             else if (y != null && y == "Weather Ball") {
-                if (this.batt.field.weather.value == `Sun`) {
+                if (this.effectiveWeather() == `Sun`) {
                     return "Fire" }
-                if (this.batt.field.weather.value == `Sandstorm`) {
+                if (this.effectiveWeather() == `Sandstorm`) {
                     return "Rock" }
-                if (this.batt.field.weather.value == `Rain`) {
+                if (this.effectiveWeather() == `Rain`) {
                     return "Water" }
-                if (this.batt.field.weather.value == `Hail`) {
+                if (this.effectiveWeather() == `Hail`) {
                     return "Ice" }
                 return "Normal"
             }
@@ -7629,15 +7742,26 @@ export default defineComponent({
             }
             var heldItemValue = pkmn_object.held_item?.value
             var itemType = this.typeBoostingItems[heldItemValue]
-            if (itemType == this.moveType(x)) {
+            var moveType = this.moveType(x)
+            var move_category = this.generation4_moves_new[x]?.category
+            // pokeplatinum BattleSystem_CalcMoveDamage: the Orbs work only for their own legendary
+            if (Array.isArray(itemType)) {
+                const holder = { "Adamant Orb": "Dialga", "Lustrous Orb": "Palkia", "Griseous Orb": "Giratina" }[heldItemValue]
+                return holder && pkmn_object.species.value?.startsWith(holder) && itemType.includes(moveType) ? 1.2 : 1
+            }
+            if (itemType == moveType) {
                 return 1.2
             }
-            else   
-                return 1
+            // Muscle Band / Wise Glasses x1.1 (POWER_UP_PHYS / _SPEC); Life Orb x1.3 on the damage (battle_script.c)
+            if (heldItemValue == 'Muscle Band' && move_category == 'Physical') { return 1.1 }
+            if (heldItemValue == 'Wise Glasses' && move_category == 'Special') { return 1.1 }
+            if (heldItemValue == 'Life Orb') { return 1.3 }
+            return 1
         },
         abilityModifier(ability, attackingType, controller) {
             var healthPercentage = this.game.properties.battle[controller].active_pokemon.stats.hp / this.game.properties.battle[controller].active_pokemon.stats.hp_max
-            if (healthPercentage <= .3) {
+            // curHP <= maxHP / 3 (pokeplatinum BattleSystem_CalcMoveDamage); was 0.3, which left out 30-33%
+            if (healthPercentage <= 1/3) {
                 if (ability == `Torrent` && attackingType == `Water`) {
                     return 1.5
                 }
@@ -7661,7 +7785,7 @@ export default defineComponent({
         burnModifier(x) {
             if (this.game.properties.meta.state.value == "No Pokemon") { return 1 }
             var attackingCategory = this.moveCategory(x)
-            if (attackingCategory == "Physical" && this.solo_mon.status_condition?.value == `Burned` && this.game.properties.player.team[0].ability?.value != `Guts`) {
+            if (attackingCategory == "Physical" && (this.solo_mon.status_condition?.value ?? this.game.properties.player.team[0].status_condition?.value) == `Burned` && this.game.properties.player.team[0].ability?.value != `Guts`) {
                 return 0.5
                 }
             else {
@@ -7682,13 +7806,8 @@ export default defineComponent({
                     return specialMovePower
                 }
                 else if (move_name == "Flail" || move_name == "Reversal") {
-                    var hpPercentage = enemy_mon.hp.value / enemy_mon.hp_max.value
-                    if (hpPercentage >= .6875) { return 20 }
-                    else if (hpPercentage >= .3542 && hpPercentage < .6875) { return 40 }
-                    else if (hpPercentage >= .2083 && hpPercentage < .3542) { return 80 }
-                    else if (hpPercentage >= .1042 && hpPercentage < .2083) { return 100 }
-                    else if (hpPercentage >= .0417 && hpPercentage < .1042) { return 150 }
-                    else if (hpPercentage < .0417) { return 200 }
+                    // The game's HP fractions, not rounded percentages (core/logic/movePower.ts)
+                    return flailReversalPower(4, enemy_mon.hp.value, enemy_mon.hp_max.value) ?? "—"
                 }
                 else if (move_name == "Water Spout" || move_name == "Eruption") {
                     var power = (150 * enemy_mon.hp.value) / enemy_mon.hp_max.value
@@ -7717,7 +7836,7 @@ export default defineComponent({
                 else if (move_name == "Hidden Power") {
                     return this.hiddenPowerPowerCalc(enemy_mon)
                 }
-                else if (move_name == "Facade" && (enemy_mon.status_condition.value == "Paralyzed" || enemy_mon.status_condition.value == "Poisoned" || enemy_mon.status_condition.value == "Burned")) {
+                else if (move_name == "Facade" && ["Paralyzed", "Poisoned", "Burned", "Badly Poisoned"].includes(enemy_mon.status_condition.value)) { // toxic too
                     return move.power * 2
                 }
                 else if (move_name == "Gyro Ball") {
@@ -7766,7 +7885,7 @@ export default defineComponent({
                 modifier_ability = 0 
             }
             var modifier_item = this.determineItemBoost(move_name, enemy_mon)
-            var modifier_weather = this.weatherModifier(this.game.properties.battle.field.weather.value, move_name, move_type)
+            var modifier_weather = this.weatherModifier(this.effectiveWeather(), move_name, move_type)
             var modifier_burn = 1
             if (move_category == "Physical" && enemy_mon.status_condition?.value == `Burned` && enemy_mon.ability?.value != `Guts`) {
                 modifier_burn = 0.5
@@ -7802,7 +7921,9 @@ export default defineComponent({
             if (player_ability == 'Normalize') {
                 attackingType = 'Normal'
             }
-            if (player_ability == "Iron Fist" && (x == 'Hammer Arm' || x == 'Sky Uppercut' || x == 'Ice Hammer' || x == 'Double Iron Bash' || x.includes("Punch"))) {
+            // Iron Fist: the game's own list (pokeplatinum sPunchingMoves), which has no Sucker Punch
+            const punching_moves = ["Ice Punch", "Fire Punch", "ThunderPunch", "Thunder Punch", "Mach Punch", "Focus Punch", "Dizzy Punch", "DynamicPunch", "Dynamic Punch", "Hammer Arm", "Mega Punch", "Comet Punch", "Meteor Mash", "Shadow Punch", "Drain Punch", "Bullet Punch", "Sky Uppercut"]
+            if (player_ability == "Iron Fist" && punching_moves.includes(x)) {
                 player_ability_modifier = 1.2
             }
             // Outside the in-battle calculation the enemy data is left over from the last battle, so its ability does not count
@@ -7820,21 +7941,8 @@ export default defineComponent({
                     var defendingType2Effectiveness = this.typeData.find(x => x.moveType == attackingType)[defendingType2]
                 }
 
-                // Filter ability
-                if (target_ability == 'Filter' && defendingType1Effectiveness == 2) {
-                    defendingType1Effectiveness = 1.5
-                }
-                if (target_ability == 'Filter' && defendingType2Effectiveness == 2) {
-                    defendingType2Effectiveness = 1.5
-                }
-
-                // Solid Rock ability
-                if (target_ability == 'Solid Rock' && defendingType1Effectiveness == 2) {
-                    defendingType1Effectiveness = 1.5
-                }
-                if (target_ability == 'Solid Rock' && defendingType2Effectiveness == 2) {
-                    defendingType2Effectiveness = 1.5 
-                }
+                // Filter / Solid Rock: x3/4 on the whole super-effective hit (pokeplatinum BattleSystem_ApplyTypeChart),
+                // not per type -- a 4x hit is 3x, not 2.25x. Applied in the return below.
             }
 
             if (pkmn_ability == 'Scrappy' && (attackingType == 'Fighting' || attackingType == 'Normal')) {
@@ -7845,6 +7953,20 @@ export default defineComponent({
                     defendingType2Effectiveness = 1
                 }
             }
+
+            // The target's and the field's battle flags (Platinum, HG/SS; pokeplatinum BattleSystem_ApplyTypeChart,
+            // BasicTypeMulApplies): Foresight / Odor Sleuth let Normal and Fighting hit a Ghost, Miracle Eye lets Psychic
+            // hit a Dark type, and Gravity lets Ground hit a Flying type
+            const target_flags = in_battle_calc ? this.battleFlags('enemy_active') : null
+            const gravity = in_battle_calc && this.battleFlags('field')?.gravity?.value > 0
+            function lift_immunity(type, applies) {
+                if (!applies) return
+                if (defendingType1 == type) defendingType1Effectiveness = 1
+                if (defendingType2 == type) defendingType2Effectiveness = 1
+            }
+            lift_immunity('Ghost', target_flags?.foresight?.value == true && (attackingType == 'Fighting' || attackingType == 'Normal'))
+            lift_immunity('Dark', target_flags?.miracle_eye?.value == true && attackingType == 'Psychic')
+            lift_immunity('Flying', gravity && attackingType == 'Ground')
 
             var multi_hit_modifier = 1;
             const double_hit_moves = [
@@ -7880,7 +8002,11 @@ export default defineComponent({
 
             var ability = this.abilityModifier(this.game.properties.player.team[0].ability.value, attackingType, 'player')
             
-            if (target_ability == 'Levitate' && attackingType == 'Ground') {
+            // Levitate, and Magnet Rise on the target, lift it out of Ground's reach -- not under Gravity
+            if (target_ability == 'Levitate' && attackingType == 'Ground' && !gravity) {
+                ability = 0
+            }
+            if (attackingType == 'Ground' && !gravity && target_flags?.magnet_rise_turns?.value > 0) {
                 ability = 0
             }
             // if (enemy_pokemon_data?.ability.value == 'Storm Drain' && attackingType == 'Water') {
@@ -7903,6 +8029,42 @@ export default defineComponent({
             }
             if (target_ability == 'Thick Fat' && (attackingType == 'Ice' || attackingType == 'Fire')) {
                 ability = 0.5
+            }
+            // Water Absorb / Volt Absorb: immune (pokeplatinum BattleSystem_TriggerImmunityAbility)
+            if ((target_ability == 'Water Absorb' && attackingType == 'Water') || (target_ability == 'Volt Absorb' && attackingType == 'Electric')) {
+                ability = 0
+            }
+            // Dry Skin: Fire x1.25 (BattleSystem_CalcMoveDamage); its Water immunity is above
+            if (target_ability == 'Dry Skin' && attackingType == 'Fire') {
+                ability = 1.25
+            }
+            // The target's side (BattleSystem_CalcMoveDamage): Explosion and Selfdestruct halve its Defense, and its
+            // Reflect / Light Screen halve the damage (2/3 in a double battle with both foes up; not modelled)
+            var explode_modifier = (x == 'Explosion' || x == 'Selfdestruct') ? 2 : 1
+            var screen_modifier = 1
+            if (in_battle_calc) {
+                const enemy_side = this.battleFlags('enemy_side')
+                const category = this.generation4_moves_new[x]?.category
+                if ((category == 'Physical' && enemy_side?.reflect?.value == true) || (category == 'Special' && enemy_side?.light_screen?.value == true)) {
+                    screen_modifier = 0.5
+                }
+            }
+            // The attacker's volatile effects and the field (pokeplatinum BattleSystem_CalcMoveDamage): Charge doubles
+            // Electric, Mud Sport / Water Sport on any battler halve Electric / Fire, an activated Flash Fire boosts
+            // Fire x1.5, and Rivalry is x1.25 against the same gender, x0.75 against the other
+            var field_modifier = 1
+            if (in_battle_calc) {
+                const user_flags = this.battleFlags('player_active')
+                const any_battler = flag => ['player_active', 'enemy_active'].some(group => this.battleFlags(group)?.[flag]?.value == true)
+                if (attackingType == 'Electric' && user_flags?.charge?.value == true) field_modifier *= 2
+                if (attackingType == 'Electric' && any_battler('mud_sport')) field_modifier *= 0.5
+                if (attackingType == 'Fire' && any_battler('water_sport')) field_modifier *= 0.5
+                if (attackingType == 'Fire' && user_flags?.flash_fire?.value == true) field_modifier *= 1.5
+                if (player_ability == 'Rivalry') {
+                    const user_gender = this.battlerGender(this.game.properties.battle.player.active_pokemon)
+                    const target_gender = this.battlerGender(enemy_pokemon_data)
+                    if (user_gender && target_gender) field_modifier *= user_gender == target_gender ? 1.25 : 0.75
+                }
             }
             var recklessMoves = [
                 "Axe Kick",
@@ -7939,7 +8101,7 @@ export default defineComponent({
             }
             var itemBoost = this.determineItemBoost(x, this.game.properties.player.team[0])
 
-            if (target_ability == 'Levitate' && attackingType == 'Ground' && enemy_item == "Iron Ball") {
+            if ((target_ability == 'Levitate' || target_flags?.magnet_rise_turns?.value > 0) && attackingType == 'Ground' && enemy_item == "Iron Ball") {
                 ability = 1 
             }
             if (attackingType == 'Ground' && defendingType1 == 'Flying' && enemy_item == "Iron Ball") {
@@ -7971,7 +8133,7 @@ export default defineComponent({
                 itemBoost = 2
             }
 
-            var weatherBoost = this.weatherModifier(this.game.properties.battle.field.weather.value, x, this.moveType(x))
+            var weatherBoost = this.weatherModifier(this.effectiveWeather(), x, this.moveType(x))
             var burnModifier = this.burnModifier(x)
             // console.log("Type1:",defendingType1Effectiveness)
             // console.log("Type2:",defendingType2Effectiveness)
@@ -7986,6 +8148,10 @@ export default defineComponent({
             if (power <= 60 && pkmn_ability == "Technician") {
                 power = power * 1.5
             }
+            // Expert Belt: x1.2 on a super-effective hit (pokeplatinum BattleSystem_ApplyTypeChart, HOLD_EFFECT_POWER_UP_SE)
+            if (in_battle_calc && player_item == 'Expert Belt' && defendingType1Effectiveness * defendingType2Effectiveness > 1) {
+                itemBoost = itemBoost * 1.2
+            }
 
             // Metronome (item) - not implemented, no way to know what move was used previously. Also, the counter increments when your Pokemon uses the move, so we need to predictively assign power before the move is used.
             // var metronome_counter = this.game.properties.battle.flags.player_active.metronome_item_turns.value
@@ -7998,16 +8164,26 @@ export default defineComponent({
             // }
 
             // console.log("Recalculated:", defendingType2Effectiveness)
+            // One-hit KO moves show "KO", or 0 when the type chart or the target's ability leaves them no effect
+            // (core/logic/ohkoAccuracy.ts; pokeplatinum gives them power 1, so Wonder Guard applies)
+            if (isOhkoMove(x)) {
+                if (!in_battle_calc) { return ohkoPowerText() }
+                if (target_ability == 'Wonder Guard' && defendingType1Effectiveness * defendingType2Effectiveness <= 1) { return 0 }
+                return ohkoPowerText(defendingType1Effectiveness * defendingType2Effectiveness * ability)
+            }
             if (in_battle_calc) { //Handles type effectiveness calculations in battle
                 if (power == "—") { return "—" }
                 if (power == "-") { return "—" }
-                return Math.floor(power * stabModifier * defendingType1Effectiveness * defendingType2Effectiveness * ability * itemBoost * weatherBoost * burnModifier * player_ability_modifier * multi_hit_modifier)
+                // Wonder Guard: only super-effective moves hit (BattleSystem_ApplyTypeChart)
+                if (target_ability == 'Wonder Guard' && defendingType1Effectiveness * defendingType2Effectiveness <= 1) { return 0 }
+                const filter_modifier = (target_ability == 'Filter' || target_ability == 'Solid Rock') && defendingType1Effectiveness * defendingType2Effectiveness > 1 ? 0.75 : 1
+                return Math.floor(power * stabModifier * defendingType1Effectiveness * defendingType2Effectiveness * ability * itemBoost * weatherBoost * burnModifier * player_ability_modifier * multi_hit_modifier * explode_modifier * screen_modifier * filter_modifier * field_modifier)
             }
             else //handles out of battle cases
                 if (power == "—") { return power }
                 if (power == "-") { return "—" }
                 else 
-                    return Math.floor(power * stabModifier * ability * itemBoost * burnModifier * player_ability_modifier * multi_hit_modifier)
+                    return Math.floor(power * stabModifier * ability * itemBoost * burnModifier * player_ability_modifier * multi_hit_modifier * explode_modifier)
         },
         convertDurationToSeconds(duration) {
             const parts = duration.split(':').map(part => parseInt(part, 10));

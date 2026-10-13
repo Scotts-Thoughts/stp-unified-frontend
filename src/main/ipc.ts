@@ -53,15 +53,16 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     mkdirSync(target, { recursive: true });
     return target;
   });
-  // --- window icon (plan 3.4, brought forward for gen4's lift) --------------------
-  // gen3/4/5 swap the taskbar icon with the selected game (`set-game-icon`). The
-  // renderer names a file under resources/icons/ -- `gen4/icon-platinum.ico` -- and
-  // the module owns the game -> file mapping; an unknown file leaves the icon alone,
-  // as the legacy `isEmpty()` check did.
+  // --- window icon (plan 3.4) -------------------------------------------------------
+  // The shell names a file under resources/icons/ -- `gen4/icon-platinum.ico` -- for
+  // the cartridge that is loaded. An empty string puts the portrait (`default.png`) back.
+  // An unknown file leaves the icon alone, as the legacy `isEmpty()` check did.
   ipcMain.on("set-game-icon", (_e, relative: string) => {
     const window = getWindow();
-    if (!window || typeof relative !== "string") return;
-    const target = resolveInside(join(appRoot(), "resources", "icons"), relative);
+    if (!window || window.isDestroyed() || typeof relative !== "string") return;
+    const target = relative === ""
+      ? join(appRoot(), "resources", "icons", "default.png")
+      : resolveInside(join(appRoot(), "resources", "icons"), relative);
     if (!existsSync(target)) return;
     const image = nativeImage.createFromPath(target);
     if (!image.isEmpty()) window.setIcon(image);

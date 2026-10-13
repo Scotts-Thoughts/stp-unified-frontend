@@ -10,7 +10,7 @@
                 <img class="movesetStyling iconStyling move1icon" :src="'images/elements/type-icons/normal.webp'" />
                 <div class="movesetStyling moveStyling move1">Struggle</div>
                 <div class="movesetStyling powerStyling move1">{{ type_effectiveness(dynamic_mon, 'move1', game_properties.battle.enemyPokemon, true) || "-" }}</div>
-                <div class="movesetStyling accuracyStyling move1">{{ moveAccuracyEvasionDynamic('Struggle') || "-" }}<span style="font-size: 20px;">%</span></div>
+                <div class="movesetStyling accuracyStyling move1">{{ accuracy_text(moveAccuracyEvasionDynamic('Struggle')) }}<span style="font-size: 20px;">%</span></div>
                 <div class="movesetStyling ppStyling move1">-</div>
             </div>
             <template v-else>
@@ -26,7 +26,7 @@
                             {{ type_effectiveness(dynamic_mon, move, game_properties.battle.enemyPokemon) || "-" }}
                         </div>
                         <div :class="'movesetStyling accuracyStyling ' + move">
-                            {{ moveAccuracyEvasionDynamic(get_backport_move(move)) || "-" }}
+                            {{ accuracy_text(moveAccuracyEvasionDynamic(get_backport_move(move))) }}
                             <span style="font-size: 20px;">%</span>
                         </div>
                         <div :class="'movesetStyling ppStyling ' + move">
@@ -45,10 +45,13 @@ import { GameState } from "~/stores/types/GameState";
 import { stageModifiersData } from "~/data/stage-modifiers.ts";
 import typeEffectiveness from "~/data/type-effectiveness.ts";
 import PokeData from "~/logic/PokeData.ts";
-import { gen1OhkoFails, isOhkoMove } from "~/core/logic/ohkoAccuracy";
+import { gen1OhkoFails, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
 import { capitalize_words, move_name } from "../../methods/text_functions";
 import { defineComponent, inject } from "vue";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
+
+/** Moves whose damage is fixed or stored rather than worked out from power (gen1 data spellings). */
+const FIXED_DAMAGE_MOVES = new Set(["Seismic Toss", "Night Shade", "SonicBoom", "Dragon Rage", "Super Fang", "Psywave", "Counter", "Bide"]);
 
 /**
  * Backported species use move slots that the mapper reports as STRUGGLE (or nothing). The raw byte of the move
@@ -64,6 +67,9 @@ const BACKPORT_MOVE_BYTES: Record<string, Record<number, string>> = {
 
 /** Moves that always score a critical hit for pokemon with a high enough base speed. */
 const HIGH_CRIT_MOVES = ["RAZOR LEAF", "CRABHAMMER", "SLASH", "KARATE CHOP", "AEROBLAST", "SHADOW CLAW"];
+
+/** Status moves that lower a stat, which the target's Mist blocks (pokered MoveHitTest: effects $12-$19 and $3a-$41). */
+const MIST_BLOCKED_MOVES = new Set(["Growl", "Tail Whip", "Leer", "String Shot", "Sand-Attack", "SmokeScreen", "Kinesis", "Flash", "Screech"]);
 
 export default defineComponent({
     data() {
@@ -174,7 +180,13 @@ export default defineComponent({
 
             const moveData = PokeData.findMove(this.move_name(move_name, this.meta.starter));
             if (!moveData) { return "-" }
+            // Fixed or stored damage skips the damage formula and the type chart (pokered SetDamageEffects,
+            // HandleCounterMove, Bide), so there is no power to show
+            if (FIXED_DAMAGE_MOVES.has(moveData.move)) { return "-" }
+            // One-hit KO moves carry power 1 in the game's data, a placeholder: they show "KO" (core/logic/ohkoAccuracy.ts)
+            const ohko = isOhkoMove(moveData.move)
             if (this.typeCalcs != true) {
+                if (ohko) { return ohkoPowerText() }
                 return this.movePower(move_name) ?? "";
             }
 
@@ -192,6 +204,8 @@ export default defineComponent({
             var multiplier_type3 = 1
             var screen_reflect = 1
             var screen_lightscreen = 1
+            // Explosion and Selfdestruct halve the target's Defense (pokered CalculateDamage), so their power is doubled
+            var multiplier_explode = (moveData.move == "Explosion" || moveData.move == "Selfdestruct") ? 2 : 1
 
             //Pumpkaboo TrickOrTreat
             if (this.meta.starter == 'Pumpkaboo' && move_type == 'Ghost' && this.game_properties.patch?.backport?.prop_2?.value == 8) {
@@ -212,17 +226,25 @@ export default defineComponent({
             }
             if (enemyData?.effects?.reflect?.value == true && move_category == "Physical") { screen_reflect = 0.5 }
             if (enemyData?.effects?.lightScreen?.value == true && move_category == "Special") { screen_lightscreen = 0.5 }
+            // A critical hit swaps in the unmodified stats, so Reflect and Light Screen do nothing to it
+            // (pokered GetDamageVarsForPlayerAttack): a move that always crits ignores them
+            if (this.always_crits(move_name)) {
+                screen_reflect = 1
+                screen_lightscreen = 1
+            }
 
             // return if further updates aren't required
+            // "KO", or 0 in battle against a target the type chart makes immune:
+            if (ohko) { return ohkoPowerText(this.meta.gameState == GameState.in_battle ? multiplier_type1 * multiplier_type2 : null) }
             // returns "-" if the move has no power:
             if (move_power == null) { return "-" }
             // returns the move's base power if not in battle:
             if (this.meta.gameState != GameState.in_battle) {
-                return Math.floor(move_power * multiplier_stab)
+                return Math.floor(move_power * multiplier_stab * multiplier_explode)
             }
 
             //calculate the move's effective power
-            return Math.floor(move_power * multiplier_stab * multiplier_type1 * multiplier_type2 * multiplier_type3 * screen_reflect * screen_lightscreen)
+            return Math.floor(move_power * multiplier_stab * multiplier_type1 * multiplier_type2 * multiplier_type3 * screen_reflect * screen_lightscreen * multiplier_explode)
         },
         movePower(y: string | null): number | null { //y = move1.value
             if (y) {
@@ -238,9 +260,7 @@ export default defineComponent({
                     const level = this.game_properties.player.team[0].level.value
                     const critModifier = (2 * level + 5) / (level + 5) // This part of the function is currently an approximation
                     const power = move.power
-                    const baseSpeed = PokeData.findSpecies(this.meta.starter)?.base_stats.speed ?? 0;
-                    // test to see if the Pokemon always crits
-                    if (baseSpeed > 64 && power) { // if the Pokemon has 63 or less base speed it will crit less often
+                    if (this.always_crits(y) && power) {
                         return power * critModifier
                     }
                     else {
@@ -260,6 +280,26 @@ export default defineComponent({
             }
             return null
         },
+        /**
+         * Whether a high-crit move is (all but) certain to crit: pokered CriticalHitTest gives it
+         * min(255, 8 * floor(base Speed / 2)) / 256, so base Speed 64 and up. Focus Energy / Dire Hit shift right
+         * instead of left (a game quirk), which leaves min(255, 4 * floor(base Speed / 4)): never certain. The
+         * species is the battle one (wBattleMonSpecies), so it follows Transform.
+         */
+        always_crits(move_name_string: string | null): boolean {
+            if (!move_name_string || !HIGH_CRIT_MOVES.includes(move_name_string.toUpperCase())) {
+                return false;
+            }
+            const species = PokeData.findSpecies(this.meta.currentSpecies) ?? PokeData.findSpecies(this.meta.starter);
+            const baseSpeed = species?.base_stats.speed ?? 0;
+            const pumped = this.meta.gameState == GameState.in_battle
+                && this.game_properties?.battle?.yourPokemon?.effects?.focusEnergy?.value == true;
+            return !pumped && baseSpeed >= 64;
+        },
+        /** The accuracy cell: 0 is a real value (the move cannot hit), an empty value shows "-". */
+        accuracy_text(accuracy: string | number): string | number {
+            return accuracy === 0 ? 0 : (accuracy || "-");
+        },
         moveAccuracyEvasionDynamic(move: string | null): string | number {
             if (!move) {
                 return "";
@@ -275,15 +315,39 @@ export default defineComponent({
             const currentAccuracyModStage = this.game_properties?.battle?.yourPokemon.modStageAccuracy.value
             const evasionStageMods = stageModifiersData.find(x => x.modType === "evasion")
             const currentEvasionModStage = this.game_properties?.battle?.enemyPokemon.modEnemyStageEvasion.value
+            // pokered MoveHitTest, in its order. "-" means the move cannot miss, 0 that it cannot hit.
+            const user = this.game_properties?.battle?.yourPokemon
+            const target = this.game_properties?.battle?.enemyPokemon
+            // Dream Eater misses a target that is not asleep (the sleep counter is the low 3 bits of the status)
+            if (moveObject.move == "Dream Eater" && target?.statusCondition) {
+                const raw = target.statusCondition.bytes?.[0]
+                const asleep = raw != null ? (raw & 7) != 0 : /^(asleep|alseep)$/i.test(String(target.statusCondition.value ?? ""))
+                if (!asleep) {
+                    return 0
+                }
+            }
+            // Swift never misses
             if (moveObject.accuracy === null) {
                 return `-`
             }
-            // One-hit KO moves miss outright when the user is slower (core/logic/ohkoAccuracy.ts).
+            // Nothing else reaches a target in the middle of Fly or Dig, X Accuracy included
+            if (target?.effects?.invulnerable?.value == true) {
+                return 0
+            }
+            // The target's Mist blocks stat-lowering status moves
+            if (MIST_BLOCKED_MOVES.has(moveObject.move) && target?.effects?.mist?.value == true) {
+                return 0
+            }
+            // One-hit KO moves miss outright when the user is slower (core/logic/ohkoAccuracy.ts), X Accuracy or not.
             if (isOhkoMove(moveObject.move) && gen1OhkoFails(
                 this.game_properties?.battle?.yourPokemon.speed?.value,
                 this.game_properties?.battle?.enemyPokemon.speed?.value,
             )) {
                 return 0
+            }
+            // X Accuracy: the move hits whatever the accuracy and evasion
+            if (user?.effects?.xAccuracy?.value == true) {
+                return `-`
             }
             if (accuracyStageMods && evasionStageMods) {
                 return Math.floor(moveObject.accuracy * accuracyStageMods[currentAccuracyModStage] * evasionStageMods[currentEvasionModStage])

@@ -24,7 +24,7 @@
             <img v-if="enemyType3(x) == 'Ghost'" :style="enemy_pkmn_faint_types(battle.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_3 ds opacityTransition" :src="'images/elements/type-icons/ghost.webp'"/>
             
             <!-- Moves -->
-            <img class="canvas" :class="svgColorClass(speed_comparison(x, game_properties.battle.trainer.team[x]?.speed).comparison, battle.trainer.team[x])" :src="'images/ui/speed_comp/' + x + '.svg'"/>
+            <img class="canvas" :class="svgColorClass(speed_comparison(x, activeSlot(x,battle.enemyPokemon.partyPos.value,'speed',game_properties.battle.trainer.team[x]?.speed,'enemyPokemon')).comparison, battle.trainer.team[x])" :src="'images/ui/speed_comp/' + x + '.svg'"/>
             <img 
                 class="enemyStatsArea opacityTransition" 
                 :style="pokemon.style.faint_stats_background" 
@@ -56,7 +56,7 @@
             <div class="ePkmnStatsStyle ePkmnDef  opacityTransition" :style="pokemon.style.text">{{activeSlot(x,battle.enemyPokemon.partyPos.value,"defense",game_properties.battle.trainer.team[x]?.defense,"enemyPokemon")}}</div>
             <div class="ePkmnStatsStyle ePkmnSpc  opacityTransition" :style="pokemon.style.text">{{activeSlot(x,battle.enemyPokemon.partyPos.value,"speed",game_properties.battle.trainer.team[x]?.speed,"enemyPokemon")}}</div>
             <div class="ePkmnStatsStyle ePkmnSpe  opacityTransition" :style="pokemon.style.text">{{activeSlot(x,battle.enemyPokemon.partyPos.value,"special",game_properties.battle.trainer.team[x]?.special,"enemyPokemon")}}</div>
-            <div class="ePkmnStatsStyle ePkmnCrit opacityTransition" :style="pokemon.style.text">{{enemy_crit_rate(game_properties.battle.trainer.team[x])}}%</div>
+            <div class="ePkmnStatsStyle ePkmnCrit opacityTransition" :style="pokemon.style.text">{{enemy_crit_rate(game_properties.battle.trainer.team[x], x)}}%</div>
         
             <!-- Modifiers -->
             <div v-for="mod in [
@@ -72,7 +72,7 @@
             </div>
             <div>
                 <transition name="fade">
-                    <div v-show="overlay.right_panel.speed_comparison" :style="pokemon.style.text" class="speed_comparison">{{speed_comparison(x, game_properties.battle.trainer.team[x]?.speed).comparison}}</div>
+                    <div v-show="overlay.right_panel.speed_comparison" :style="pokemon.style.text" class="speed_comparison">{{speed_comparison(x, activeSlot(x,battle.enemyPokemon.partyPos.value,'speed',game_properties.battle.trainer.team[x]?.speed,'enemyPokemon')).comparison}}</div>
                 </transition>
             </div>
         </div>
@@ -86,6 +86,7 @@
 <script lang="ts">
 import { get_enemy_pkmn_styles } from "../../methods/enemy";
 import PokeData from "~/logic/PokeData";
+import { status_penalty } from "~/logic/statusPenalty";
 import { capitalize_words, move_name } from "../../methods/text_functions";
 import { useMetaStore } from "~/stores/metaStore";
 import { defineComponent, inject } from "vue";
@@ -160,10 +161,15 @@ export default defineComponent({
             let enemy_hp = this.game_properties.battle.trainer.team[enemy_slot].hp.value
             let player_speed = this.game_properties.battle.yourPokemon.speed.value
             let enemy_speed = enemy_speed_incoming
+            // The live Speed is unreadable until the battle data is in; compare the party Speed then
+            if (enemy_speed == null || !Number.isFinite(Number(enemy_speed))) {
+                enemy_speed = this.game_properties.battle.trainer.team[enemy_slot]?.speed?.value
+            }
             if (this.meta.gameState == 'To Battle') {
                 // Before the battle data is populated, compare against the trainer data and apply the Soul Badge boost.
+                // Paralysis is applied before the badge (pokered LoadBattleMonFromParty)
                 const koga_badge = this.game_properties.player.badges.badge5.value
-                const party_speed = this.game_properties.player.team[0].speed.value
+                const party_speed = status_penalty("Speed", this.game_properties.player.team[0].speed.value, this.game_properties.player.team[0].statusCondition?.value)
                 enemy_speed = trainerData?.party?.[enemy_slot]?.stats?.speed
                 player_speed = koga_badge ? Math.floor(party_speed * 1.125) : party_speed
             }
@@ -331,11 +337,16 @@ export default defineComponent({
             }
             return stat;
         },
-        enemy_crit_rate(pkmnData) {
+        enemy_crit_rate(pkmnData, slot) {
             const species = pkmnData?.species.value;
             const base_speed = PokeData.findSpecies(species)?.base_stats.speed;
             if (base_speed) {
-                return Math.round(Math.round((Math.floor(base_speed / 2) / 256) * 10000) / 100)
+                // The active enemy's Focus Energy shifts the rate right instead of left (pokered CriticalHitTest)
+                const pumped = this.meta.gameState == "Battle"
+                    && slot == this.game_properties.battle.enemyPokemon.partyPos.value
+                    && this.game_properties.battle.enemyPokemon.effects?.focusEnergy?.value == true
+                const rate = pumped ? Math.floor(Math.floor(base_speed / 2) / 4) : Math.floor(base_speed / 2)
+                return Math.round(Math.round((rate / 256) * 10000) / 100)
             }
             return 0;
         },

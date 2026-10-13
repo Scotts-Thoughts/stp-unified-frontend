@@ -4,7 +4,7 @@
         <div class="gametimeClock" :style="frameLive ? 'visibility: hidden' : null">{{ time }}</div>
         <div class="gametimeFrames" :style="frameLive ? 'visibility: hidden' : null">{{ frames }}</div>
         <!-- The clock in its own process (core/overlay/ClockFrame.ts); the two above show until it is up. -->
-        <clock-frame :gen="1" @live="frameLive = $event"></clock-frame>
+        <clock-frame :gen="1" @live="onFrameLive"></clock-frame>
     </div>
 </template>
 
@@ -30,16 +30,27 @@ export default defineComponent({
             localTime: "0",
             localFrames: ".00",
             frameLive: false,
+            // What the two lines showed when the frame came up; they keep it while hidden.
+            frozenTime: "0",
+            frozenFrames: ".00",
         };
     },
     computed: {
+        // While the frame shows the clock these two are hidden, and they hold still rather than
+        // re-render every frame and every Super Shuckie poll (core/overlay/LiveText.ts, `frozen`).
         time(): string {
+            if (this.frameLive) {
+                return this.frozenTime;
+            }
             if (this.settings.shuckie.timer) {
                 return formatShuckieTime(this.emulator.timeCurrent)[0];
             }
             return this.localTime;
         },
         frames(): string {
+            if (this.frameLive) {
+                return this.frozenFrames;
+            }
             if (this.settings.shuckie.timer) {
                 return formatShuckieTime(this.emulator.timeCurrent)[1];
             }
@@ -57,6 +68,13 @@ export default defineComponent({
         },
     },
     methods: {
+        onFrameLive(live: boolean) {
+            if (live) {
+                this.frozenTime = this.time;
+                this.frozenFrames = this.frames;
+            }
+            this.frameLive = live;
+        },
         onTimeUpdate(value: string[]) {
             this.localTime = value[0];
             this.localFrames = value[1];

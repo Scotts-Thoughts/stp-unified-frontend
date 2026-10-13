@@ -19,10 +19,14 @@ export function determineSTAB(x) { //x = move1.value
     }
 }
 export function determineItemBoost(x) { //x - move1.value
-    var heldItemValue = this.game.properties.player.team[0].itemHeld.value
+    var heldItemValue = this.player_held_item() // the battle's copy in battle: Knock Off and used berries empty it
     var itemType = this.typeBoostingItems[heldItemValue]
     if (itemType == this.moveType(x)) {
         return 1.1
+    }
+    // Sea Incense: HOLD_EFFECT_WATER_POWER with param 5, so Water x1.05 (pokeemerald src/data/items.h)
+    if (heldItemValue == "SEA INCENSE" && this.moveType(x) == "Water") {
+        return 1.05
     }
     else   
         return 1
@@ -105,7 +109,8 @@ export function weatherModifier(weather, move, moveType) {
     else if (weather == "Rain" && moveType == "Fire") {
         return mod * 0.5
     }
-    else if (weather == "Rain" && move_key == "SOLARBEAM") {
+    // Any weather but sun halves SolarBeam (pokeemerald CalculateBaseDamage, src/pokemon.c:3347-3349)
+    else if ((weather == "Rain" || weather == "Sandstorm" || weather == "Hail") && move_key == "SOLARBEAM") {
         return mod * 0.5
     }
     else if (weather == "Sandstorm") {

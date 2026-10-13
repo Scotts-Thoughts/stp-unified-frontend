@@ -33,6 +33,17 @@ export function isOhkoMove(move: string | null | undefined): boolean {
     return OHKO_MOVES.has(move.toLowerCase().replace(/[\s_-]+/g, " ").trim());
 }
 
+/**
+ * What the power column shows for a one-hit KO move: "KO" (Scott's rule, 2026-10-13). gen1's data gives these
+ * moves power 1, which is the game's own placeholder (pokered data/moves/moves.asm); gens 2-5's tables say "-".
+ * In battle, pass the product of the type chart entries against the target: the move does nothing to a target
+ * the chart makes immune in every generation (pokered AdjustDamageForMoveType, pokecrystal BattleCommand_OHKO,
+ * pokeemerald BattleScript_EffectOHKO's typecalc), so that shows 0, as any other move's power does.
+ */
+export function ohkoPowerText(typeMultiplier?: number | null): "KO" | 0 {
+    return typeMultiplier === 0 ? 0 : "KO";
+}
+
 function sameAbility(ability: string | null | undefined, name: string): boolean {
     return (ability ?? "").toLowerCase().replace(/[\s_-]+/g, "") === name.toLowerCase().replace(/\s+/g, "");
 }

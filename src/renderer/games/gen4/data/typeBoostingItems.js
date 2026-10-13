@@ -20,7 +20,7 @@ export const typeBoostingItems = {
 
     //Gen3 Items
     "Silk Scarf": "Normal",
-    "Soul Dew":   [ "Dragon", "Psychic" ],
+    // Soul Dew is a SpA/SpD stat boost for Latias/Latios in gens 4-5, not a move boost (pokeplatinum HOLD_EFFECT_LATI_SPECIAL)
 
     //Gen4 Plates
     "Draco Plate":  "Dragon",
@@ -43,7 +43,14 @@ export const typeBoostingItems = {
     //gen4 specific items
     "Adamant Orb":  [ "Dragon", "Steel" ],
     "Griseous Orb": [ "Dragon", "Ghost" ],
-    "Lustrous Orb": [ "Dragon", "Ghost" ],
+    "Lustrous Orb": [ "Dragon", "Water" ],  // Dialga / Giratina / Palkia only: see determineItemBoost
+
+    //gen4 incenses: type boosters for any holder (pokeplatinum sTypeBoostingItems)
+    "Odd Incense":  "Psychic",
+    "Rock Incense": "Rock",
+    "Rose Incense": "Grass",
+    "Sea Incense":  "Water",
+    "Wave Incense": "Water",
 
     //gen6 specific items
     "Pixie Plate": "Fairy",

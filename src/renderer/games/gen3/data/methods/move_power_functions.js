@@ -2,10 +2,12 @@
 // Implicit globals of the legacy classic script, see tools/port/lift-gen3.py.
 let ivAtkBit, ivDefBit, ivHpBit, ivSpcABit, ivSpcDBit, ivSpdBit, type;
 import { gen3moves } from "../gen3moves.js";
+import { flailReversalPower } from "~/core/logic/movePower";
+import { gen3MoveByLowerName } from "../../moveLookup";
 export function movePower(y) { //y = move1.value
     if (y) { y = y.toUpperCase() }
     if (y) {
-        var move = this.gen3moves.find(x => x.Move.toLowerCase() === this.move_name(y).toLowerCase())
+        var move = gen3MoveByLowerName(this.gen3moves, this.move_name(y).toLowerCase())
         if (y == "RETURN") {
             if (this.game.properties.player.team[0].friendship.value < 2.5)
                 var friendshipValue = 2.5 
@@ -15,13 +17,8 @@ export function movePower(y) { //y = move1.value
             return specialMovePower
         }
         else if (y == "FLAIL" || y == "REVERSAL") {
-            var hpPercentage = this.game.properties.player.team[0].hp.value / this.game.properties.player.team[0].maxHp.value
-            if (hpPercentage >= .6875) { return 20 }
-            else if (hpPercentage >= .3542 && hpPercentage < .6875) { return 40 }
-            else if (hpPercentage >= .2083 && hpPercentage < .3542) { return 80 }
-            else if (hpPercentage >= .1042 && hpPercentage < .2083) { return 100 }
-            else if (hpPercentage >= .0417 && hpPercentage < .1042) { return 150 }
-            else if (hpPercentage < .0417) { return 200 }
+            // The game's 48ths of the HP, not rounded percentages (core/logic/movePower.ts)
+            return flailReversalPower(3, this.game.properties.player.team[0].hp.value, this.game.properties.player.team[0].maxHp.value) ?? move?.Power
         }
         else if (y == "WATER SPOUT" || y == "ERUPTION") {
             var power = (150 * this.game.properties.player.team[0].hp.value) / this.game.properties.player.team[0].maxHp.value
@@ -50,7 +47,7 @@ export function movePower(y) { //y = move1.value
         else if (y.toUpperCase() == "HIDDEN POWER") {
             return this.hiddenPowerPowerCalc(this.game.properties.player.team[0])
         }
-        else if (y == "FACADE" && (this.s1.statusCondition.value == "Paralyzed" || this.s1.statusCondition.value == "Poisoned" || this.s1.statusCondition.value == "Burned")) {
+        else if (y == "FACADE" && ["Paralyzed", "Poisoned", "Burned", "Badly Poisoned", "Badly Posioned"].includes(this.s1.statusCondition.value)) { // toxic too (Cmd_jumpifstatus STATUS1_PSN_ANY)
             return move.Power * 2
         }
         else if (y == "FURY CUTTER") {
@@ -67,7 +64,22 @@ export function movePower(y) { //y = move1.value
                 return 10 
             }
         }
-        else if (y == "ROLLOUT") {
+        else if (y == "SPIT UP") {
+            // 100 per Stockpile; it fails with none (pokeemerald Cmd_stockpiletobasedamage, src/battle_script_commands.c:6868)
+            if (this.g3stateVariable != "Battle") { return move?.Power }
+            const stockpile = Number(this.game.properties.battle.flags?.player_active?.stockpile?.value)
+            if (!(stockpile > 0)) { return "-" }
+            return 100 * stockpile
+        }
+        else if (y.replace(/[^A-Z]/g, "") == "SMELLINGSALT") {
+            // Double against a paralysed target, unless it is behind a Substitute (data/battle_scripts_1.s:2268-2274)
+            const enemy = this.game.properties.battle.enemyPokemon
+            if (this.g3stateVariable == "Battle" && enemy?.status1?.value == "Paralyzed" && this.game.properties.battle.flags?.enemy_active?.substitute?.value != true) {
+                return Number(move?.Power) * 2
+            }
+            return move?.Power
+        }
+        else if (y == "ROLLOUT" || y == "ICE BALL") { // both EFFECT_ROLLOUT (Cmd_rolloutdamagecalculation)
             let rolloutTimer         = this.game.properties.battle.yourPokemon.counters.rollout.value
             let defenseCurl_flag     = this.game.properties.battle.yourPokemon.status2.STATUS2_DEFENSE_CURL.value
             let defenseCurl_modifier = defenseCurl_flag == true ? 1 : 0

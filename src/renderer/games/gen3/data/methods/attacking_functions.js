@@ -1,6 +1,9 @@
 // Component code, not data: lifted in place by tools/port/lift-gen3.py (step 13).
 import { typeData } from "../type-effectiveness.js";
 import { generation_3_moves } from "../generation_3_moves.js";
+import { gen3IsPhysicalType } from "~/core/logic/moveAccuracy";
+import { isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
+import { gen3MoveByLetters } from "../../moveLookup";
 export function enemy_move_power(move_name) {
     var move_power = this.generation_3_moves[move_name].power ?? 0
     if (move_power == 0) { return "—" }
@@ -35,14 +38,27 @@ export function enemy_effective_power(move_name, enemy_mon, slot) {
         var modifier_stab = move_type == user_type_1 ? 1.5 
             : move_type == user_type_2 ? 1.5 
             : 1
-        var modifier_ability = this.abilityModifier(this.game.properties.battle.enemyPokemon, move_type, 'opponent')
-        if (this.game.properties.battle.yourPokemon.ability.value == 'Levitate' && move_type == 'Ground') {
+        // The battle abilities arrive in capitals ("TORRENT"); abilityModifier compares title case
+        const enemy_battle = this.game.properties.battle.enemyPokemon
+        const enemy_ability = String(enemy_battle.ability?.value ?? "").toUpperCase()
+        const player_ability = String(this.game.properties.battle.yourPokemon.ability?.value ?? "").toUpperCase()
+        var modifier_ability = this.abilityModifier(this.pascalCaseSpace(enemy_ability.toLowerCase()), move_type, 'opponent')
+        // The solo's defensive abilities (pokeemerald Cmd_typecalc / AbilityBattleEffects ABILITYEFFECT_ABSORBING,
+        // CalculateBaseDamage Thick Fat, src/pokemon.c:3203)
+        if ((player_ability == 'LEVITATE' && move_type == 'Ground')
+            || (player_ability == 'VOLT ABSORB' && move_type == 'Electric')
+            || (player_ability == 'WATER ABSORB' && move_type == 'Water')
+            || (player_ability == 'FLASH FIRE' && move_type == 'Fire')) {
             modifier_ability = 0 
+        }
+        if (player_ability == 'THICK FAT' && (move_type == 'Fire' || move_type == 'Ice')) {
+            modifier_ability *= 0.5
         }
         var modifier_item = 1
         var modifier_weather = this.weatherModifier(this.game.properties.battle.field.weather.value, move_name, move_type)
         var modifier_burn = 1
-        if (move_category == "Physical" && enemy_mon.status_condition?.value == `Burned` && enemy_mon.ability?.value != `Guts`) {
+        // Burn halves physical (by type) damage unless the attacker has Guts; the battle copy holds the status
+        if (move_category == "Physical" && enemy_battle.status1?.value == `Burned` && enemy_ability != `GUTS`) {
             modifier_burn = 0.5
             }
         else {
@@ -52,6 +68,7 @@ export function enemy_effective_power(move_name, enemy_mon, slot) {
         if (this.typeCalcs == true) { //Handles type effectiveness calculations in battle
             return Math.floor(move_base_power * modifier_stab * modifier_effectiveness_1 * modifier_effectiveness_2 * modifier_ability * modifier_item * modifier_weather * modifier_burn)
         }
+        return move_base_power
     }
 }
 
@@ -89,16 +106,62 @@ export function typeEffectiveness(x) { //x = move1.value
         "Triple Dive",
         "Water Shuriken",
     ];
-    if (double_hit_moves.includes(x.toLowerCase())) {
+    if (double_hit_moves.some(m => m.toLowerCase() == x.toLowerCase())) { // the list mixes cases; was only Bonemerang
         multi_hit_modifier = 2;
     }
-    if (triple_hit_moves.includes(x.toLowerCase())) {
+    if (triple_hit_moves.some(m => m.toLowerCase() == x.toLowerCase())) { // the list mixes cases; was only Bonemerang
         multi_hit_modifier = 3;
     }
     // console.log(x, double_hit_moves.includes(x.toLowerCase()), multi_hit_modifier);
 
     const enemyAbility = this.game.properties.battle.enemyPokemon.ability.value;
-    if (x == "FUTURE SIGHT") { return 80 }
+    // The target's side, folded into the power (pokeemerald CalculateBaseDamage): Explosion and Selfdestruct
+    // halve its Defense; its Reflect / Light Screen halve the damage in a single battle
+    const explode_modifier = ["EXPLOSION", "SELFDESTRUCT"].includes(String(x).toUpperCase().replace(/[^A-Z]/g, "")) ? 2 : 1
+    let screen_modifier = 1
+    if (this.g3stateVariable == "Battle") {
+        const physical = gen3IsPhysicalType(attackingType)
+        const side = this.game.properties.battle.flags?.enemy_side
+        if (physical && side?.reflect?.value == true) { screen_modifier = 0.5 }
+        if (!physical && side?.light_screen?.value == true) { screen_modifier = 0.5 }
+    }
+    const move_key = String(x).toUpperCase().replace(/[^A-Z]/g, "")
+    // Future Sight / Doom Desire: the damage is set when the move is used, by CalculateBaseDamage alone (items and
+    // the target's screens count), and lands later with no typecalc, so no STAB and no type chart
+    // (pokeemerald Cmd_trysetfutureattack, src/battle_script_commands.c:8941; BattleScript_MonTookFutureAttack)
+    if (move_key == "FUTURESIGHT" || move_key == "DOOMDESIRE") {
+        if (power == "-" || power == null) { return power }
+        return Math.floor(power * itemBoost * (this.g3stateVariable == "Battle" && !this.batt.type?.double.value ? screen_modifier : 1))
+    }
+    // In-battle effects on the damage, single battles (pokeemerald):
+    // - Charge doubles the damage of a move whose table type is Electric (Cmd_damagecalc, src/battle_script_commands.c:1298);
+    // - Mud Sport / Water Sport on any battler halve Electric / Fire power (src/pokemon.c:3215-3218);
+    // - Earthquake/Magnitude into Dig, Gust/Twister into Fly, Surf/Whirlpool into Dive, and Stomp, Needle Arm,
+    //   Astonish and Extrasensory into a Minimized target deal double (data/battle_scripts_1.s sDMG_MULTIPLIER).
+    let battle_modifier = 1
+    let foresight = false
+    if (this.g3stateVariable == "Battle") {
+        const flags = this.game.properties.battle.flags
+        const me = flags?.player_active
+        const foe = flags?.enemy_active
+        const tableType = gen3MoveByLetters(this.gen3moves, move_key)?.Type
+        if (me?.charged_up?.value == true && tableType == "Electric") { battle_modifier *= 2 }
+        if (attackingType == "Electric" && (me?.mud_sport?.value == true || foe?.mud_sport?.value == true)) { battle_modifier *= 0.5 }
+        if (attackingType == "Fire" && (me?.water_sport?.value == true || foe?.water_sport?.value == true)) { battle_modifier *= 0.5 }
+        if ((["EARTHQUAKE", "MAGNITUDE"].includes(move_key) && foe?.underground?.value == true)
+            || (["GUST", "TWISTER"].includes(move_key) && foe?.on_air?.value == true)
+            || (["SURF", "WHIRLPOOL"].includes(move_key) && foe?.underwater?.value == true)
+            || (["STOMP", "NEEDLEARM", "ASTONISH", "EXTRASENSORY"].includes(move_key) && foe?.minimized?.value == true)) {
+            battle_modifier *= 2
+        }
+        // Foresight / Odor Sleuth: typecalc stops at the TYPE_FORESIGHT marker, so Normal and Fighting hit Ghosts
+        // (Cmd_typecalc, src/battle_script_commands.c:1388-1392)
+        foresight = enemyPokemon.status2?.STATUS2_FORESIGHT?.value == true || foe?.foresight?.value == true
+    }
+    const typeFactor = (defType) => {
+        if (foresight && defType == "Ghost" && (attackingType == "Normal" || attackingType == "Fighting")) { return 1 }
+        return multipliers[defType]
+    }
     //IN BATTLE
     // try{ 
     //     if (this.batt.trainer[this.game_data.opponent].value == `LEADER_TATE_AND_LIZA_1` || this.batt.trainer[this.game_data.opponent].value == `MAGMA_LEADER_MAXIE_MOSSDEEP`) {
@@ -109,17 +172,24 @@ export function typeEffectiveness(x) { //x = move1.value
     //     // console.log("null opponent, no double battle power")
     // }
 
+    // One-hit KO moves show "KO" (core/logic/ohkoAccuracy.ts); with type calcs in a single battle, 0 below when
+    // typecalc leaves them no effect
+    const ohko = isOhkoMove(x)
+    if (ohko && !(this.typeCalcs && this.g3stateVariable == "Battle" && !this.batt.type?.double.value)) {
+        return ohkoPowerText()
+    }
+
     //NOT IN BATTLE
     if(this.g3stateVariable != "Battle") {
         if (power == "-") { return power }
-        return Math.floor(power * stabModifier * itemBoost * ability * burnModifier * multi_hit_modifier);
+        return Math.floor(power * stabModifier * itemBoost * ability * burnModifier * multi_hit_modifier * explode_modifier);
     }
     // console.log(multiplier1,multiplier2,attackingType,defendingType1,defendingType2)
 
     //Handle double battles
     if(this.g3stateVariable == "Battle" && this.batt.type?.double.value) {
         if (power == "-") { return power }
-        return Math.floor(power * stabModifier * itemBoost * ability * burnModifier * multi_hit_modifier);
+        return Math.floor(power * stabModifier * itemBoost * ability * burnModifier * multi_hit_modifier * explode_modifier);
     }
     if (this.typeCalcs && this.g3stateVariable == "Battle") {
         let abilityImmunities = {
@@ -128,14 +198,24 @@ export function typeEffectiveness(x) { //x = move1.value
             "WATER ABSORB" : "Water",
             "FLASH FIRE" : "Fire" 
         }
-        let soundProofMoves = ["HYPER VOICE", "SNORE", "UPROAR"];
-        if(enemyAbility == "SOUNDPROOF" && soundProofMoves.includes(x)) {
+        // The damaging moves of sSoundMovesTable (pokeemerald src/battle_util.c:688); names arrive in either spelling
+        let soundProofMoves = ["HYPERVOICE", "SNORE", "UPROAR"];
+        if(enemyAbility == "SOUNDPROOF" && soundProofMoves.includes(move_key)) {
             return 0;
         }
         if (enemyAbility == "THICK FAT" && (attackingType == "Ice" || attackingType == "Fire")) {
             defenseAbility = .5;
         }
 
+        // One-hit KO: no effect through the type chart, Levitate, or Wonder Guard (pokeemerald gives these
+        // moves power 1, so Wonder Guard's check in Cmd_typecalc applies)
+        if (ohko) {
+            if (abilityImmunities[enemyAbility] == attackingType) { return 0 }
+            if (defendingType1 == null) { return ohkoPowerText() }
+            const factor = typeFactor(defendingType1) * (defendingType1 === defendingType2 ? 1 : typeFactor(defendingType2))
+            if (enemyAbility == "WONDER GUARD" && factor <= 1) { return 0 }
+            return ohkoPowerText(factor)
+        }
         //STATUS MOVE
         if (power == "-") { return power }
         //LEVITATE INTERACTION
@@ -145,27 +225,33 @@ export function typeEffectiveness(x) { //x = move1.value
         }
         //NO ENEMY DATA (HAVEN'T BATTLED SINCE RELOADING ROM OR SAVE)
         else if (defendingType1 == null) {
-            return Math.floor(power * stabModifier * itemBoost * ability * burnModifier * multi_hit_modifier)
+            return Math.floor(power * stabModifier * itemBoost * ability * burnModifier * multi_hit_modifier * explode_modifier * battle_modifier)
         }
         //ATTACKING A MONO-TYPE POKEMON
         else if (defendingType1 === defendingType2) {
-            var multiplier1 = multipliers[defendingTypeMono]
-            return Math.floor(power * multiplier1 * stabModifier * itemBoost * weatherBoost * ability * burnModifier * defenseAbility * multi_hit_modifier)
+            var multiplier1 = typeFactor(defendingTypeMono)
+            // Wonder Guard: only super-effective moves hit (Cmd_typecalc)
+            if (enemyAbility == "WONDER GUARD" && multiplier1 <= 1) { return 0 }
+            return Math.floor(power * multiplier1 * stabModifier * itemBoost * weatherBoost * ability * burnModifier * defenseAbility * multi_hit_modifier * explode_modifier * screen_modifier * battle_modifier)
         }
         //ATTACKING A DUAL-TYPE POKEMON
         else if (defendingType1 != defendingType2) {
             var multipliers = this.typeData.find(x => x.moveType == attackingType)
-            var multiplier1 = multipliers[defendingType1]
-            var multiplier2 = multipliers[defendingType2]
+            var multiplier1 = typeFactor(defendingType1)
+            var multiplier2 = typeFactor(defendingType2)
             // console.log(multiplier1,multiplier2,attackingType,defendingType1,defendingType2)
-            return Math.floor(power * multiplier1 * multiplier2 * stabModifier * itemBoost * weatherBoost * ability * burnModifier * defenseAbility * multi_hit_modifier)
+            // Wonder Guard: only super-effective moves hit (Cmd_typecalc)
+            if (enemyAbility == "WONDER GUARD" && multiplier1 * multiplier2 <= 1) { return 0 }
+            return Math.floor(power * multiplier1 * multiplier2 * stabModifier * itemBoost * weatherBoost * ability * burnModifier * defenseAbility * multi_hit_modifier * explode_modifier * screen_modifier * battle_modifier)
         }
         //RETURN THE MOVES POWER IF NOTHING ELSE WORKS
         else {
             return Math.floor(power * stabModifier * burnModifier * multi_hit_modifier)
         }
     }
-        
+    // Type calcs off in a single battle: the plain power, as out of battle (it fell through to undefined)
+    if (power == "-") { return power }
+    return Math.floor(power * stabModifier * itemBoost * ability * burnModifier * multi_hit_modifier * explode_modifier)
 }
 ////This needs to be updated
 export function type_effectiveness(pkmnData, moveNumber, enemyData) { //pkmnData = team[0] etc

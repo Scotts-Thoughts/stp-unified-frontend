@@ -26,10 +26,15 @@ import type { WriteKind } from "../../../core/mapper/MapperProfile";
 export const GEN1_DEPRECATED_READS: readonly string[] = [
     "battle",
     "battle.enemyPokemon",
+    // Battle effects shown since 2026-10-13 (accuracy, crit rate, type icons; pokered MoveHitTest / CriticalHitTest).
+    "battle.enemyPokemon.effects.focusEnergy",
+    "battle.enemyPokemon.effects.invulnerable",
+    "battle.enemyPokemon.effects.mist",
     "battle.enemyPokemon.hp",
     "battle.enemyPokemon.modEnemyStageEvasion",
     "battle.enemyPokemon.partyPos",
     "battle.enemyPokemon.species",
+    "battle.enemyPokemon.statusCondition",
     // One-hit KO moves (2026-10-02, core/logic/ohkoAccuracy.ts): miss when the user is slower.
     "battle.enemyPokemon.speed",
     "battle.lowHealthAlarm",
@@ -42,8 +47,10 @@ export const GEN1_DEPRECATED_READS: readonly string[] = [
     "battle.yourPokemon",
     "battle.yourPokemon.attack",
     "battle.yourPokemon.defense",
+    "battle.yourPokemon.effects.focusEnergy",
     "battle.yourPokemon.effects.lightScreen",
     "battle.yourPokemon.effects.reflect",
+    "battle.yourPokemon.effects.xAccuracy",
     "battle.yourPokemon.maxHp",
     "battle.yourPokemon.modStageAccuracy",
     "battle.yourPokemon.modStageAttack",
@@ -62,6 +69,8 @@ export const GEN1_DEPRECATED_READS: readonly string[] = [
     "battle.yourPokemon.special",
     "battle.yourPokemon.species",
     "battle.yourPokemon.speed",
+    "battle.yourPokemon.type1",
+    "battle.yourPokemon.type2",
     "events.beatChampion",
     "events.got_pokedex",
     "gameTime.frames",
@@ -165,6 +174,7 @@ export const GEN1_DEPRECATED_READS: readonly string[] = [
     "patch.encounter_flags.EVENT_ENCOUNTER_ROUTE6_CUT_USER",
     "patch.encounter_flags.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY",
     "patch.hChosenStarter",
+    "patch.hStpCatchRate",
     "patch.items.itemsBought",
     "patch.items.itemsPickedUp",
     "patch.items.itemsSold",
@@ -283,6 +293,9 @@ export const GEN1_DEPRECATED_WRITES: Readonly<Record<string, WriteKind[]>> = {
     // since 2026-09-18, as gens 2-5 do -- the queuer's `/set-starter` lands here too --
     // and again after a reset puts the patch's default back (2026-10-09, read by value).
     "patch.hChosenStarter": ["bytes", "value"],
+    // Guaranteed catches (settings/encounters.vue, 2026-10-13): 1 or 0, only when the ROM's
+    // byte differs from the setting, so a run with the toggle off never writes it.
+    "patch.hStpCatchRate": ["value"],
     "patch.wEarlyEncounters": ["value"],
     "player.itemCount": ["value"],
     "player.items.0.item": ["value"],

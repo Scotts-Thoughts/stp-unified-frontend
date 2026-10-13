@@ -63,7 +63,8 @@ Gen 1/2 are asm; Gen 3/4 are C. Search them instead of guessing at game internal
 | Red/Blue, Yellow | `A:\Cygwin\home\scott\pokered`, `…\pokeyellow` | `~/Documents/pokemap/repos/pokered`, `…/pokeyellow` |
 | Gold/Silver, Crystal | `A:\Cygwin\home\scott\pokegold`, `…\pokecrystal` | `~/Documents/pokemap/repos/pokegold`, `…/pokecrystal` |
 | Ruby/Sapphire, Emerald, FireRed/LeafGreen | `A:\decomps\pokeruby`, `…\pokeemerald`, `…\pokefirered` | `~/Documents/pokemap/repos/pokeruby`, `…/pokeemerald`, `…/pokefirered` |
-| Diamond/Pearl, HeartGold/SoulSilver | `A:\Dropbox\stp-projects\programs\pokemap\repos\pokediamond`, `…\pokeheartgold` | `~/Documents/pokemap/repos/pokediamond`, `…/pokeheartgold` |
+| Diamond/Pearl | none; use `A:\decomps\pokeplatinum` (same battle engine) | `~/Documents/pokemap/repos/pokediamond` |
+| HeartGold/SoulSilver | `A:\decomps\pokeheartgold` | `~/Documents/pokemap/repos/pokeheartgold` |
 | Platinum | `A:\decomps\pokeplatinum` | `~/Documents/pokemap/repos/pokeplatinum` |
 
 ## Machine notes

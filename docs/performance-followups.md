@@ -426,3 +426,74 @@ which Chromium runs in its own renderer process; the unified app does the same f
 Measured with the page's main thread blocked for 2 s: the frame's clock kept a 10-12 ms frame gap in every
 generation while the page's own clock showed a 2 s gap. Item E above (gen4's `setImmediate` hop) matters less
 now, since what the viewer sees is the frame.
+
+## Fourth pass (2026-10-13)
+
+Found by reading the source; the two items marked *measured* were measured. Verified the way "How to verify" says,
+against a copy of the working tree taken just before (it held another agent's uncommitted battle-mechanics edits,
+so `HEAD` was not the right baseline): gen1, gen3, gen4, gen5 smoke and the Crystal recording, all nine oracles
+green, pixels exact. `typecheck` and `parity:drift` pass.
+
+### 1. The window was throttled when covered or minimised (all generations)
+
+`src/main/index.ts` left `backgroundThrottling` at its default. Chromium then treats a minimised window, and on
+Windows a fully covered one, as hidden: `requestAnimationFrame` stops (the clocks, gen4/gen5's debounced enemy
+team through the mapper client's frame loop) and timers drop to once a second (the 10 ms Super Shuckie poll). OBS
+captures this window, so a covered overlay could freeze on stream. Now `backgroundThrottling: false`, as the
+Cutter window already had. The harness window is never covered, so it cannot show this either way.
+
+### 2. gen4 re-rendered itself 43 times in a row at every battle exit (*measured*)
+
+`get_stat()`'s `stat_fix_toggle_2` countdown (known-legacy-bugs #80): every call in the Overworld wrote the
+component's own data from inside its render, which queues the render again, until the counter reached 0. The
+gen4 smoke fixture's two battle exits each ran 43 renders in one task; now 1 (the whole replay: 98 renders of the
+overlay before, 14 after). A method the template calls must not write `data()` that the template reads
+(ARCHITECTURE.md §5).
+
+How it was counted: a scratch script calling `run()` with a `beforeReplay` hook that wraps the overlay instance's
+`render` (`document.querySelector('#app')._vnode.component.refs.overlay.$` -- a production build has no
+`app._instance`) and counts renders per task with a `MessageChannel` ping. The other smoke fixtures, before ->
+after: gen3 25 -> 25, gen5 23 -> 21, the Crystal recording 226 -> 226.
+
+### 3. Move lookups were linear scans, about 40 (gen3) and 150 (gen2) per render in battle (*measured*)
+
+`gen3moves.find(x => x.Move.toLowerCase() === this.move_name(y).toLowerCase())` re-ran `move_name` (some 30
+string comparisons and a regex) for every row; gen2's `find` over `gen2moves` read every row through the reactive
+proxy. Both go through `core/logic/firstMatchIndex.ts` now: the first element whose key matches, indexed once per
+list, rebuilt on a miss if the list grew (gen2's backport importer). Checked against `find` for 996 names
+(gen2's five duplicate spellings, misspellings, a growing list): identical results. gen3's 40 lookups: 3.4 ms ->
+0.03 ms in Node; gen2 measured 1.8 ms -> 0.002 ms per render by the audit.
+
+### 4. The hidden in-page clock no longer ticks behind the clock frame (all generations)
+
+While the out-of-process clock shows, the page's own clock is `visibility: hidden` but kept re-rendering every frame
+and every Super Shuckie poll. `LiveText` takes `frozen` (gens 2-5 pass `timer_frame_live`), gen3/gen5's `Timer.js`
+freezes on `hideClock`, gen1's `timer.vue` returns the text it showed when the frame came up. The text follows the
+source again in the render that unhides it. `ClockFrame.post()` read the page clock's colour with
+`getComputedStyle` on every post (up to 100 a second with the Shuckie timer); the colour is now read on the frame's
+own ready/alive messages, once a second, so a colour change reaches the frame up to 1 s later. Neither is visible
+to the harness (it runs with the frame off).
+
+### 5. Smaller
+
+- `average_median_stats` (gens 3-5): six calls per render in the Average and Median modes, each walking and sorting
+  the whole dex. The six answers are the computed `average_median_by_stat`; the body is `average_median_stats_of`.
+- gen5 `on_starter_spot`: the starter-spot test in `get_stat`, `pokemon_dynamic_ability` and `stats_header`
+  read `overworld.x`/`y`, so on map 391 at level 0/5 every step re-rendered the overlay. One computed; the render
+  now depends on the yes/no answer.
+- gen3/gen5 `Timer.js` unsubscribed in `onUnmounted`, never called (#82).
+- Two debug `console.log`s gone (#81): gen2's per-move one ran about 16 times per render.
+
+### Left alone
+
+- gen2 still renders in bursts of up to 8 in one task (6 bursts of 4+ in the Crystal recording), the signature
+  of a template method writing its own data. Not found yet.
+- gen4/gen5 still call `get_stat()` 12-20 times per render (stat cells, `speed_comparison` twice per slot). It
+  writes `stat_fix_*` and `stat_fix_toggle` while rendering, so making it a computed changes when those writes
+  happen; worth it only with a harness diff on a recording that leaves a battle.
+- The settings `<select>`/`<li>` lists (gen2 ~250, gen3 ~400, gen4 ~500, gen5 ~650 entries) are re-diffed on every
+  render. Unmeasured, est. 0.1-0.5 ms; `v-memo` or a child component would fix it.
+- `src/main/ipc.ts` `splits:write`, `storage:write`, `source:write` are synchronous; gen2's style store has no
+  write debounce, so a slider drag blocks main once per input event (dev builds only).
+- The Super Shuckie poll does not wait for the previous fetch; a stalled emulator stacks requests. Changing it
+  changes poll timing, which the harness sees.

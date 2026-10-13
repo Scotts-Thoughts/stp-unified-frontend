@@ -1,4 +1,4 @@
-import { defineComponent, h, toDisplayString, type ComputedRef } from "vue";
+import { defineComponent, h, markRaw, toDisplayString, type ComputedRef } from "vue";
 
 /**
  * A `<div>` whose text the *parent's* render never reads (2026-09-25,
@@ -24,19 +24,34 @@ import { defineComponent, h, toDisplayString, type ComputedRef } from "vue";
  * `nodeValue` in place; gen4's captures then varied between runs of the same build by a
  * few levels in a filtered image elsewhere on the page, which the whole-text form does
  * not do.)
+ *
+ * `frozen` (2026-10-13): the overlay sets it on its clock text while the out-of-process clock
+ * (ClockFrame.ts) is showing and the in-page one is `visibility: hidden`. The div then keeps
+ * the text it last showed and its render stops reading the source, so the hidden clock no
+ * longer re-renders and re-lays out every frame and every Super Shuckie poll. When the frame
+ * goes away the prop turns off and the text is the source's again in the same render. The
+ * harness runs without the frame, so `frozen` is always false there.
  */
 export const LiveText = defineComponent({
     name: "LiveText",
     props: {
         /** Key into the provided `liveText` table. */
         source: { type: String, required: true },
+        /** Keep the last text and stop following the source (while the clock frame covers it). */
+        frozen: { type: Boolean, default: false },
     },
     inject: {
         liveText: { from: "liveText", default: () => ({}) },
     },
+    data() {
+        return { shown: markRaw({ text: undefined as string | undefined }) };
+    },
     render() {
-        const sources = this.liveText as Record<string, ComputedRef<unknown>>;
-        const source = sources[this.source];
-        return h("div", null, toDisplayString(source ? source.value : undefined));
+        if (!this.frozen || this.shown.text === undefined) {
+            const sources = this.liveText as Record<string, ComputedRef<unknown>>;
+            const source = sources[this.source];
+            this.shown.text = toDisplayString(source ? source.value : undefined);
+        }
+        return h("div", null, this.shown.text);
     },
 });

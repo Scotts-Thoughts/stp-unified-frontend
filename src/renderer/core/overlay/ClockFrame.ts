@@ -1,4 +1,4 @@
-import { defineComponent, h } from "vue";
+import { defineComponent, h, markRaw } from "vue";
 
 /** The timer fields the clock page needs; one shape for all five generations. */
 export interface ClockState {
@@ -57,6 +57,12 @@ export const ClockFrame = defineComponent({
             reloads: 0,
             lastAlive: 0,
             cleanup: null as null | (() => void),
+            /**
+             * The page clock's colour as last read. Reading it costs a style lookup, and `post()`
+             * runs on every Super Shuckie poll that moved the time (up to 100 a second), so it is
+             * read on the frame's own messages instead: when it comes up and once a second after.
+             */
+            pageClock: markRaw({ color: null as string | null }),
         };
     },
     computed: {
@@ -98,6 +104,7 @@ export const ClockFrame = defineComponent({
             if (type === "overlay-timer-ready") {
                 this.lastAlive = Date.now();
                 this.live = true;
+                this.pageClock.color = this.colorOfPageClock();
                 this.post();
             } else if (type === "overlay-timer-alive") {
                 this.lastAlive = Date.now();
@@ -105,6 +112,7 @@ export const ClockFrame = defineComponent({
                     this.live = true;
                 }
                 // The colour follows the overlay's style settings; once a second is enough.
+                this.pageClock.color = this.colorOfPageClock();
                 this.post();
             }
         };
@@ -139,7 +147,7 @@ export const ClockFrame = defineComponent({
                 pause: s.pause,
                 pauseTime: s.pauseTime,
                 emulatorMs: s.emulatorMs,
-                color: this.colorOfPageClock(),
+                color: this.pageClock.color,
             };
             try {
                 frame.contentWindow.postMessage({ type: "overlay-timer", state }, this.targetOrigin);

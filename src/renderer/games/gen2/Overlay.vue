@@ -36,12 +36,12 @@
                     <div v-if="ui_stats_styling == '2023'" class="exp_growthRate">{{ growthRate(dexDataCrystal[starter].growth_rate) }}</div>
                     
                     <div v-if="shuckie_timer == true" class="gametime">
-                        <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
-                        <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                        <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
+                        <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
                     </div>
                     <div v-else="" class="gametime">
-                        <live-text class="gametimeClock" source="timer_clock" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
-                        <live-text class="gametimeFrames" source="timer_frames" :style="timer_frame_live ? 'visibility: hidden' : null"></live-text>
+                        <live-text class="gametimeClock" source="timer_clock" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
+                        <live-text class="gametimeFrames" source="timer_frames" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
                     </div>
                     <!-- The clock in its own process (core/overlay/ClockFrame.ts); the two above show until it is up. -->
                     <clock-frame :gen="2" @live="timer_frame_live = $event"></clock-frame>
@@ -79,8 +79,8 @@
                             <tr v-if="isInDevMode && show_advanced_settings && debugging">
                                 <td>Style Mode:</td>
                                 <td>
-                                    <button v-if="!style_mode_active" class="buttonStyle" style="font-size: 11px;" @click="enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
-                                    <button v-else="" class="buttonStyle" style="font-size: 11px; color: #f44;" @click="exitStyleMode()">Exit</button>
+                                    <button v-if="!style_mode_active" class="buttonStyle" style="font-size: 11px; width: auto; padding: 0 12px;" @click="enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Start</button>
+                                    <button v-else="" class="buttonStyle" style="font-size: 11px; width: auto; padding: 0 12px; color: #f44;" @click="exitStyleMode()">Exit</button>
                                 </td>
                             </tr>
                             <tr v-if="isInDevMode && show_advanced_settings && debugging && style_mode_active">
@@ -761,7 +761,7 @@
                     <div class="trainerLabel">{{capitalization_format(fixTrainerName(batt.trainer.class.value, batt.trainer.id.value))}}'s Team</div>
                     <div class="colored-image" :style="battlePokemonCrop()" style="--url: url(images/gen2/ui/opponent.svg)"></div>
                     <div v-for="x in pkmnSlots">
-                        <img v-show="game.properties.battle.trainer.totalPokemon.value > x" class="canvas" :class="svgColorClass(speed_comparison(x, game.properties.battle.trainer.team[x]?.speed.value).comparison, game.properties.battle.trainer.team[x])" :src="`images/gen2/ui/speed_comp/${x}.svg`">
+                        <img v-show="game.properties.battle.trainer.totalPokemon.value > x" class="canvas" :class="svgColorClass(speed_comparison(x, activeSlot(x, batt.enemyPokemon.partyPos.value, 'speed', game.properties.battle.trainer.team[x]?.speed.value, 'enemyPokemon')).comparison, game.properties.battle.trainer.team[x])" :src="`images/gen2/ui/speed_comp/${x}.svg`">
                     </div>
                     <div v-for="x in pkmnSlots" class="enemyGraphic">
                         <div v-show="batt.trainer.team[x].species.value != null" :class="`ePkmnStyle ePkmn${x + 1}`">
@@ -814,7 +814,7 @@
                             </div>
                             <div>
                                 <transition name="fade">
-                                    <div v-show="speed_comparison_toggle == true" :style="enemyPkmnText(batt.trainer.team[x])" class="speed_comparison">{{speed_comparison(x, game.properties.battle.trainer.team[x]?.speed).comparison}}</div>
+                                    <div v-show="speed_comparison_toggle == true" :style="enemyPkmnText(batt.trainer.team[x])" class="speed_comparison">{{speed_comparison(x, activeSlot(x, batt.enemyPokemon.partyPos.value, 'speed', game.properties.battle.trainer.team[x]?.speed.value, 'enemyPokemon')).comparison}}</div>
                                 </transition>
                             </div>
                         </div>
@@ -1106,7 +1106,9 @@ import { computed, defineComponent } from "vue";
 import { LiveText } from "~/core/overlay/LiveText";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
-import { gen2OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
+import { gen2OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
+import { flailReversalPower } from "~/core/logic/movePower";
+import { gen3IsPhysicalType } from "~/core/logic/moveAccuracy";
 import { bindHotkeys } from "~/core/hotkeys/KeyHook";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -1138,6 +1140,7 @@ import { g2MoveData } from "./data/g2MoveData.js";
 import { g2trainers } from "./data/g2trainers-short.js";
 import { g2trainersOtto } from "./data/crystal-trainers-otto.js";
 import { gen2moves } from "./data/gen2moves.js";
+import { firstMatchIndex } from "~/core/logic/firstMatchIndex";
 import { hiddenPowerTypeSelector } from "./data/hiddenPowerTypeSelector.js";
 import { hiddenPowerTypes } from "./data/hpTable.js";
 import { split_trainers } from "./data/autosplitter/split_trainers.js";
@@ -1148,6 +1151,9 @@ import { trainer_name_lookup } from "./data/autosplitter/trainer_name_lookup.js"
 import { typeBoostingItems } from "./data/typeBoostingItems.js";
 import { typeData } from "./data/type-effectiveness.js";
 import { unobtainable_moves_object } from "./data/unobtainable_moves.js";
+
+// `gen2moves.find(x => x.Move.toUpperCase() === name)`, indexed (core/logic/firstMatchIndex.ts)
+const gen2MoveByUpperName = firstMatchIndex((x) => x.Move.toUpperCase());
 
 // Implicit globals of the legacy classic script, see tools/port/lift-gen2.py.
 let backport_check_string, battle_end, d, damageMax, damageMin, g2HpType, g2gamestate, h, hpPower, ivAtkBit, ivDefBit, m, maxPercentage, minPercentage, newColor, part1, part2, part3, part4, starterType, string, timecode, upperZ, usableVitamins, v, vitaminsUsed, w, x, y;
@@ -2833,11 +2839,16 @@ export default defineComponent({
             // const stat_exp_spc = pokemon_data.statExpSpecial.value
             // const stat_exp_spe = pokemon_data.statExpSpeed.value
 
+            // pokecrystal GetSquareRoot returns the smallest b with b * b >= stat exp, at most 255 (a ceiling, not
+            // a floor), so the written stats match the ones the game itself would compute (CalcMonStatC)
+            function stat_exp_root(stat_exp) {
+                return Math.min(255, Math.ceil(Math.sqrt(stat_exp)))
+            }
             function calculate_hp_stat(dv, base_stat, stat_exp, level) {
-                return Math.floor(((base_stat + dv) * 2 + Math.floor(Math.sqrt(stat_exp) / 4)) * level / 100) + level + 10
+                return Math.floor(((base_stat + dv) * 2 + Math.floor(stat_exp_root(stat_exp) / 4)) * level / 100) + level + 10
             }
             function calculate_stat(dv, base_stat, stat_exp, level) {
-                return Math.floor(((base_stat + dv) * 2 + Math.floor(Math.sqrt(stat_exp) / 4)) * level / 100) + 5
+                return Math.floor(((base_stat + dv) * 2 + Math.floor(stat_exp_root(stat_exp) / 4)) * level / 100) + 5
             }
 
             // Calculate stats and set them
@@ -3113,9 +3124,15 @@ export default defineComponent({
             let enemy_hp = this.game.properties.battle.trainer.team[enemy_slot]?.hp.value
             let player_speed   = this.game.properties.battle.yourPokemon.speed.value
             let enemy_speed = enemy_speed_incoming
+            // The live Speed is unreadable until the battle data is in; compare the party Speed then
+            if (enemy_speed == null || !Number.isFinite(Number(enemy_speed))) {
+                enemy_speed = this.game.properties.battle.trainer.team[enemy_slot]?.speed?.value
+            }
             if (state == 'To Battle') {
                 enemy_speed = data[`${trainer} ${trainer_number}`].party[enemy_slot]?.stats.speed
-                player_speed = badge_3 ? Math.floor(this.game.properties.player.team[0].speed.value * 1.125) : this.game.properties.player.team[0].speed.value
+                // Paralysis first, then the Plain Badge (InitBattleMon), whatever the badge-boost display setting says
+                const party_speed = this.status_stat_penalty("Speed", this.game.properties.player.team[0].speed.value)
+                player_speed = badge_3 ? Math.floor(party_speed * 1.125) : party_speed
             }
 
             // if (state == `To Battle`) {
@@ -3267,6 +3284,7 @@ export default defineComponent({
             let base_atk = this.dexDataCrystal[species].base_atk
             let base_def = this.dexDataCrystal[species].base_def
             let base_spc = this.dexDataCrystal[species].base_spc_atk
+            let base_spc_def = this.dexDataCrystal[species].base_spc_def
             let base_spe = this.dexDataCrystal[species].base_spd
             let base_hp  = this.dexDataCrystal[species].base_hp
             //Assign DVs (gender-aware in Automatic, the fields' in Manual)
@@ -3276,18 +3294,21 @@ export default defineComponent({
             let dv_spc = starterDVs.spc
             let dv_spe = starterDVs.spe
             let dv_hp  = starterDVs.hp
-            //Calculate stats
+            //Calculate stats (pokecrystal CalcMonStatC: HP adds level + 10, the others 5; Sp.Def has its own base)
             let atk = Math.floor(((((base_atk + dv_atk) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_atk)) / 4)) * level) / 100)) + 5
             let def = Math.floor(((((base_def + dv_def) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_def)) / 4)) * level) / 100)) + 5
             let spa = Math.floor(((((base_spc + dv_spc) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_spc)) / 4)) * level) / 100)) + 5
-            let spd = Math.floor(((((base_spc + dv_spc) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_spc)) / 4)) * level) / 100)) + 5
+            let spd = Math.floor(((((base_spc_def + dv_spc) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_spc)) / 4)) * level) / 100)) + 5
             let spe = Math.floor(((((base_spe + dv_spe) * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_spe)) / 4)) * level) / 100)) + 5
-            let hp  = Math.floor(((((base_hp  + dv_hp)  * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_hp))  / 4)) * level) / 100)) + level + 5
+            let hp  = Math.floor(((((base_hp  + dv_hp)  * 2 + Math.floor(Math.ceil(Math.sqrt(stat_exp_hp))  / 4)) * level) / 100)) + level + 10
             if (include_badge_boost == true) { 
+                // Glacier Badge boosts Sp.Def only when the unboosted Sp.Atk is 206-432 or 661+ (a game quirk,
+                // pokecrystal BadgeStatBoosts; the same rule as badge_boost)
+                const glacier_boosts_spd = (spa >= 206 && spa <= 432) || spa >= 661
                 atk = Math.floor(atk * badge_boost)
                 def = Math.floor(def * badge_boost)
                 spa = Math.floor(spa * badge_boost)
-                spd = Math.floor(spd * badge_boost)
+                if (glacier_boosts_spd) { spd = Math.floor(spd * badge_boost) }
                 spe = Math.floor(spe * badge_boost)
             }
             //Package and return stats as an object
@@ -3306,11 +3327,11 @@ export default defineComponent({
             if (state == `Overworld` || state == `To Battle`) {
                 switch (stat_name) {
                     case "Hp":              return this.game.properties.player.team[0].maxHp.value
-                    case "Attack":          return this.badge_boost(this.game.properties.player.badges.badge1.value, this.game.properties.player.team[0].attack.value)
+                    case "Attack":          return this.badge_boost(this.game.properties.player.badges.badge1.value, this.status_stat_penalty("Attack", this.game.properties.player.team[0].attack.value))
                     case "Defense":         return this.badge_boost(this.game.properties.player.badges.badge6.value, this.game.properties.player.team[0].defense.value)
                     case "Special Attack":  return this.badge_boost(this.game.properties.player.badges.badge7.value, this.game.properties.player.team[0].specialAttack.value)
                     case "Special Defense": return this.badge_boost(this.game.properties.player.badges.badge7.value, this.game.properties.player.team[0].specialDefense.value, "Special Defense")
-                    case "Speed":           return this.badge_boost(this.game.properties.player.badges.badge3.value, this.game.properties.player.team[0].speed.value)
+                    case "Speed":           return this.badge_boost(this.game.properties.player.badges.badge3.value, this.status_stat_penalty("Speed", this.game.properties.player.team[0].speed.value))
                 }
             }
             else if (state == `Battle` || state == `From Battle`) {
@@ -3333,6 +3354,17 @@ export default defineComponent({
                     case "Speed":           return this.dexDataCrystal[this.starter].base_spd
                 }
             }
+        },
+        /**
+         * The party status carried into battle: pokecrystal InitBattleMon applies ApplyStatusEffectOnPlayerStats
+         * (paralysis quarters Speed, burn halves Attack, both at least 1) before BadgeStatBoosts.
+         */
+        status_stat_penalty(stat_name, stat) {
+            const status = this.game.properties.player.team[0].statusCondition?.value
+            if (stat == null) { return stat }
+            if (stat_name == "Speed" && status == "PRZ") { return Math.max(1, Math.floor(stat / 4)) }
+            if (stat_name == "Attack" && status == "BRN") { return Math.max(1, Math.floor(stat / 2)) }
+            return stat
         },
         get_bb_stat(stat_name) {
             const state = this.g2stateVariable
@@ -3422,7 +3454,7 @@ export default defineComponent({
             let dv_def  = this.game.properties.player.team[0].dvDefense.value
             let dv_spc  = this.game.properties.player.team[0].dvSpecial.value
             let dv_spe  = this.game.properties.player.team[0].dvSpeed.value
-            let dv_hp   = this.hpDv(dv_atk, dv_def, dv_spc, dv_spe)
+            let dv_hp   = this.hpDv(dv_atk, dv_def, dv_spe, dv_spc) // hpDv(atk, def, spd, spc): Speed before Special
             switch (stat_name) {
                 case "Hp":
                     return dv_hp
@@ -3974,25 +4006,69 @@ export default defineComponent({
                 //     return `100`
                 // }
                 if (this.g2stateVariable == `Battle` || this.g2stateVariable == `From Battle`) {
-                    if (moveAccuracy == `-`) {
+                    // pokecrystal BattleCommand_CheckHit, in its order. "-" means the move cannot miss, 0 that it cannot hit.
+                    const key = String(move).toUpperCase().replace(/[\s-]/g, "")
+                    const userStatus = this.batt.yourPokemon.status
+                    const targetStatus = this.batt.enemyPokemon.status
+                    // Swift, Faint Attack and Vital Throw (EFFECT_ALWAYS_HIT) still go through the checks below; the
+                    // other "-" moves (Swords Dance, Recover...) never roll to hit at all
+                    const alwaysHitEffect = ["SWIFT", "FAINTATTACK", "VITALTHROW"].includes(key)
+                    if (moveAccuracy == `-` && !alwaysHitEffect) {
                         return `-`
                     }
-                    else if (this.batt.yourPokemon.modStageAccuracy.bytes > 0x0E) {
-                        return moveAccuracy
+                    // .DreamEater: misses an awake target (the enemy's status is mapped for Gold/Silver only). The
+                    // glossary has no name for 0 or for a 7-turn sleep, so the sleep counter is read from the byte
+                    const enemyStatus = this.batt.enemyPokemon.statsCondition
+                    if (key == "DREAMEATER" && enemyStatus != null) {
+                        const raw = enemyStatus.bytes?.[0]
+                        const asleep = raw != null ? (raw & 7) != 0 : enemyStatus.value == "SLP"
+                        if (!asleep) { return 0 }
                     }
-                    else if (weather == 'Rain' && move == 'Thunder') {
+                    // One-hit KO moves fail below the target's level whatever else applies (BattleCommand_OHKO)
+                    const ohkoAccuracy = isOhkoMove(move) && moveAccuracy != `-`
+                        ? gen2OhkoAccuracy(moveAccuracy, this.batt.yourPokemon.level?.value, this.batt.enemyPokemon.level?.value)
+                        : null
+                    if (ohkoAccuracy === 0) {
+                        return 0
+                    }
+                    const targetFlying = targetStatus?.flying?.value == true
+                    const targetUnderground = targetStatus?.underground?.value == true
+                    // .LockOn: the target's Lock-On / Mind Reader mark makes the move hit, except Earthquake,
+                    // Fissure or Magnitude against a flying target (a game quirk)
+                    if (targetStatus?.lock_on?.value == true && !(targetFlying && ["EARTHQUAKE", "FISSURE", "MAGNITUDE"].includes(key))) {
+                        return `-`
+                    }
+                    // .FlyDigMoves: only these moves reach a target in the air or underground
+                    if (targetFlying && !["GUST", "WHIRLWIND", "THUNDER", "TWISTER"].includes(key)) {
+                        return 0
+                    }
+                    if (targetUnderground && !["EARTHQUAKE", "FISSURE", "MAGNITUDE"].includes(key)) {
+                        return 0
+                    }
+                    // .ThunderRain
+                    if (weather == 'Rain' && key == 'THUNDER') {
                         return '-'
                     }
-                    else if (isOhkoMove(move) && moveAccuracy != `-`) {
-                        // Fails below the target's level, else gains accuracy per level of
-                        // difference before the stages apply (core/logic/ohkoAccuracy.ts).
-                        const ohkoAccuracy = gen2OhkoAccuracy(moveAccuracy, this.batt.yourPokemon.level?.value, this.batt.enemyPokemon.level?.value)
-                        const accuracy = ohkoAccuracy ?? moveAccuracy
-                        return Math.min(100, Math.floor(accuracy * accuracyStageMods[currentAccuracyModStage] * evasionStageMods[currentEvasionModStage]))
+                    // .XAccuracy: the user's X Accuracy
+                    if (userStatus?.x_accuracy?.value == true) {
+                        return `-`
                     }
-                    else {
-                        return Math.floor(moveAccuracy * accuracyStageMods[currentAccuracyModStage] * evasionStageMods[currentEvasionModStage])
+                    if (alwaysHitEffect) {
+                        return `-`
                     }
+                    // BattleCommand_ThunderAccuracy: 50% + 1 (128/255) in sun, before the stages
+                    let accuracy = ohkoAccuracy ?? moveAccuracy
+                    if (weather == 'Sun' && key == 'THUNDER') {
+                        accuracy = 128 / 255 * 100
+                    }
+                    // .StatModifiers: an identified (Foresight) target whose evasion stage is at least the user's
+                    // accuracy stage skips every stage; the result is capped at 255/255
+                    const accuracyStage = Number(currentAccuracyModStage)
+                    const evasionStage = Number(currentEvasionModStage)
+                    if (targetStatus?.identified?.value == true && evasionStage >= accuracyStage) {
+                        return Math.min(100, Math.floor(accuracy))
+                    }
+                    return Math.min(100, Math.floor(accuracy * accuracyStageMods[currentAccuracyModStage] * evasionStageMods[currentEvasionModStage]))
                 }
                 else {
                     return moveAccuracy
@@ -4072,7 +4148,7 @@ export default defineComponent({
             var targetType1          = targetPkmnData.type1.value
             var targetType2          = targetPkmnData.type2.value
 
-            var moveData = this.gen2moves.find(x => x.Move.toUpperCase() === move.toUpperCase())
+            var moveData = gen2MoveByUpperName(this.gen2moves, move.toUpperCase())
             var moveType = moveData.Type
             if (move == "Hidden Power") {
                 moveType = this.moveType(move)
@@ -4657,7 +4733,7 @@ export default defineComponent({
         movePower(y) { //y = move1.value
             if (y) { y = y.toUpperCase() }
             if (y) {
-                var move = this.gen2moves.find(x => x.Move.toUpperCase() === y)
+                var move = gen2MoveByUpperName(this.gen2moves, y)
                 if (y == "RETURN") { return this.g2ReturnPowerCalc(this.game.properties.player.team[0]) }
                 else if (y == "FRUSTRATION") { return this.g2FrustrationPowerCalc(this.game.properties.player.team[0]) }
                 else if (y == "HIDDEN POWER") { return this.g2HiddenpowerPowerCalc(this.game.properties.player.team[0]) }
@@ -4674,12 +4750,8 @@ export default defineComponent({
             // if (this.g2stateVariable == `Battle`) { hpPercentage = (this.batt.yourPokemon.hp / this.batt.yourPokemon.maxHp) }
             if (this.g2stateVariable == `Battle`) { hpPercentage = (this.s1.hp / this.s1.maxHp) }
             if (this.g2stateVariable != `Battle`) { hpPercentage = (this.s1.hp / this.s1.maxHp) }
-            if ( hpPercentage >= .6875 ) { return 20 }
-            if ( hpPercentage >= .3542 ) { return 40 }
-            if ( hpPercentage >= .2083 ) { return 80 }
-            if ( hpPercentage >= .1042 ) { return 100 }
-            if ( hpPercentage >= .0417 ) { return 150 }
-            return 200
+            // The game's 48ths of the HP, not rounded percentages (core/logic/movePower.ts)
+            return flailReversalPower(2, this.s1.hp?.value, this.s1.maxHp?.value) ?? "-"
         },
         g2ReturnPowerCalc(slotNumber) {
             if (this.g2stateVariable == "Base Stats") { return "-"}
@@ -4721,7 +4793,8 @@ export default defineComponent({
             w = slot.dvSpeed.value >> 3
             x = slot.dvDefense.value >> 3
             upperZ = slot.dvSpecial.value % 4
-            hpPower = ((5 * v + upperZ)/2) + (5 * w) + (10 * x) + (20 * y) + 31
+            // `srl a` in pokecrystal HiddenPowerDamage: the halving drops the remainder
+            hpPower = Math.floor((5 * v + upperZ) / 2) + (5 * w) + (10 * x) + (20 * y) + 31
             return hpPower
         },
         moveType(y) { //y = move1.value
@@ -4730,7 +4803,7 @@ export default defineComponent({
                 return this.g2HiddenpowerTypeCalc(this.game.properties.player.team[0])
             }
             else if (y) {
-                var move = this.gen2moves.find(x => x.Move.toUpperCase() === y)
+                var move = gen2MoveByUpperName(this.gen2moves, y)
                 if (move) return move.Type
             }
             return null
@@ -4769,6 +4842,14 @@ export default defineComponent({
                 // var pkmnType2 = "Psychic"
                 var pkmnType1 = this.starterProp("type_1")
                 var pkmnType2 = this.starterProp("type_2")
+                // In battle the game compares with wBattleMonType1/2 (BattleCommand_Stab), which Conversion,
+                // Conversion2 and Transform overwrite
+                const battleType1 = this.game.properties.battle.yourPokemon.type1?.value
+                const battleType2 = this.game.properties.battle.yourPokemon.type2?.value
+                if (this.g2stateVariable == "Battle" && battleType1 != null && battleType2 != null) {
+                    pkmnType1 = battleType1
+                    pkmnType2 = battleType2
+                }
                 if (x == `HIDDEN POWER`) {
                     if (pkmnType1 == hpType || pkmnType2 == hpType) {
                         return 1.5
@@ -4836,7 +4917,6 @@ export default defineComponent({
             return this.typeData.find(x => x.moveType === moveType)
         },
         typeEffectiveness(x) { //x = move1.value
-            console.log(x)
             if (x) { x = this.move_name(x).toUpperCase() }
             let typeOfMove = this.moveType(x);
             if(typeOfMove == null || typeOfMove == undefined) {
@@ -4846,6 +4926,39 @@ export default defineComponent({
             var itemBoost = this.determineItemBoost(x)
             var weatherBoost = this.weatherModifier(this.game.properties.battle.weather.weatherType.value, x, this.moveType(x))
             var typeBoost = this.badgeBoostType(x) 
+            // The target's side, folded into the power (pokecrystal BattleCommand_DamageStats): Explosion and
+            // Selfdestruct halve its Defense; its Reflect / Light Screen double its Defense / Special Defense
+            var explode_modifier = (x == "EXPLOSION" || x == "SELFDESTRUCT") ? 2 : 1
+            var screen_modifier = 1
+            const physical = gen3IsPhysicalType(typeOfMove)
+            if (this.g2stateVariable == "Battle") {
+                if (physical && this.game.properties.battle.field.enemy?.statusReflect?.value == true) { screen_modifier = 0.5 }
+                if (!physical && this.game.properties.battle.field.enemy?.statusLightScreen?.value == true) { screen_modifier = 0.5 }
+            }
+            // pokecrystal SpeciesItemBoost (PlayerAttackDamage): a Thick Club doubles Cubone's or Marowak's Attack, a
+            // Light Ball Pikachu's Special Attack (gen2: Special Attack only). It is applied inside the damage formula,
+            // not to the battle stats the panel shows, so it is counted here. The doubled stat is not capped at 999
+            // (a game quirk, docs/bugs_and_glitches.md), so doubling the power matches it.
+            var species_item_modifier = 1
+            const holder_species = String(this.game.properties.player.team[0].species?.value ?? "").toUpperCase()
+            const held_item = String(this.game.properties.player.team[0].heldItem?.value ?? "").toUpperCase()
+            if (physical && held_item == "THICK CLUB" && (holder_species == "CUBONE" || holder_species == "MAROWAK")) { species_item_modifier = 2 }
+            if (!physical && held_item == "LIGHT BALL" && holder_species == "PIKACHU") { species_item_modifier = 2 }
+            // The target's semi-invulnerable turn: Earthquake doubles against Dig, Gust and Twister against Fly
+            // (BattleCommand_DoubleUndergroundDamage / DoubleFlyingDamage). Magnitude's power is random, shown "-".
+            var target_state_modifier = 1
+            if (this.g2stateVariable == "Battle") {
+                const target_status = this.game.properties.battle.enemyPokemon.status
+                if (x == "EARTHQUAKE" && target_status?.underground?.value == true) { target_state_modifier = 2 }
+                if ((x == "GUST" || x == "TWISTER") && target_status?.flying?.value == true) { target_state_modifier = 2 }
+            }
+            // Foresight (the target is identified): Normal and Fighting moves hit Ghosts, whose immunities sit after
+            // the -2 marker of pokecrystal's TypeMatchups and are skipped
+            const foresight = this.g2stateVariable == "Battle" && this.game.properties.battle.enemyPokemon.status?.identified?.value == true
+            const type_multiplier = (multipliers, defendingType) => {
+                if (foresight && defendingType == "Ghost" && (typeOfMove == "Normal" || typeOfMove == "Fighting")) { return 1 }
+                return multipliers[defendingType]
+            }
 
             var multi_hit_modifier = 1;
             const double_hit_moves = [
@@ -4873,9 +4986,29 @@ export default defineComponent({
             if (triple_hit_moves.map(m => m.toUpperCase()).includes(x) == true) {
                 multi_hit_modifier = 3;
             }
+            // Triple Kick's kicks deal 1x, 2x and 3x the damage (BattleCommand_TripleKick): 6x if all three land
+            if (x == "TRIPLE KICK") {
+                multi_hit_modifier = 6;
+            }
 
             var movePowerFunction = this.movePower(x)
             if (x == "FUTURE SIGHT") { return 80 }
+            // One-hit KO moves show "KO", or 0 against a target the type chart makes immune (core/logic/ohkoAccuracy.ts)
+            if (isOhkoMove(x)) {
+                const enemy = this.game.properties.battle.enemyPokemon
+                if (this.typeCalcs == true && this.g2stateVariable == "Battle" && enemy.type1 != null) {
+                    const multipliers = this.typeData.find(m => m.moveType === typeOfMove)
+                    const type1 = enemy.type1.value
+                    const type2 = enemy.type2.value
+                    return ohkoPowerText(type_multiplier(multipliers, type1) * (type1 === type2 ? 1 : type_multiplier(multipliers, type2)))
+                }
+                return ohkoPowerText()
+            }
+            // Beat Up's effect script has no `stab` command, so no STAB, type chart, weather or badge boost, and its
+            // own stats replace damagestats (no Reflect, Thick Club or Light Ball); only damagecalc's item boost applies
+            if (x == "BEAT UP") {
+                return Math.floor(this.movePower(x) * itemBoost)
+            }
             if (x != null) {
                 if (this.typeCalcs == true && this.g2stateVariable == "Battle") { //calculates effective power when in battle
                     var attackingType = this.moveType(x)
@@ -4888,19 +5021,19 @@ export default defineComponent({
                         return this.movePower(x)
                     //NO ENEMY DATA (HAVEN'T BATTLED SINCE RELOADING ROM OR SAVE)
                     else if (this.game.properties.battle.enemyPokemon.type1 == null) {
-                        return Math.floor(this.movePower(x) * stab * itemBoost * typeBoost * multi_hit_modifier)
+                        return Math.floor(this.movePower(x) * stab * itemBoost * typeBoost * multi_hit_modifier * explode_modifier * species_item_modifier)
                     }
                     //ATTACKING A MONO-TYPE POKEMON
                     else if (this.game.properties.battle.enemyPokemon.type1.value === this.game.properties.battle.enemyPokemon.type2.value) {
-                        var multiplier1 = multipliers[defendingTypeMono]
-                        return Math.floor(this.movePower(x) * multiplier1 * stab * itemBoost * weatherBoost * typeBoost * multi_hit_modifier)
+                        var multiplier1 = type_multiplier(multipliers, defendingTypeMono)
+                        return Math.floor(this.movePower(x) * multiplier1 * stab * itemBoost * weatherBoost * typeBoost * multi_hit_modifier * explode_modifier * screen_modifier * species_item_modifier * target_state_modifier)
                     }
                     //ATTACKING A DUAL-TYPE POKEMON
                     else if (this.game.properties.battle.enemyPokemon.type1 != this.game.properties.battle.enemyPokemon.type2) {
                         var multipliers = this.typeData.find(x => x.moveType === attackingType)
-                        var multiplier1 = multipliers[defendingType1]
-                        var multiplier2 = multipliers[defendingType2]
-                        return Math.floor(this.movePower(x) * multiplier1 * multiplier2 * stab * itemBoost * weatherBoost * typeBoost * multi_hit_modifier)
+                        var multiplier1 = type_multiplier(multipliers, defendingType1)
+                        var multiplier2 = type_multiplier(multipliers, defendingType2)
+                        return Math.floor(this.movePower(x) * multiplier1 * multiplier2 * stab * itemBoost * weatherBoost * typeBoost * multi_hit_modifier * explode_modifier * screen_modifier * species_item_modifier * target_state_modifier)
                     }
                     //RETURN THE MOVES POWER IF NOTHING ELSE WORKS
                     else
@@ -4909,7 +5042,7 @@ export default defineComponent({
                 //RETURN THE MOVE'S POWER IF NOT IN BATTLE
                 else {
                     if (this.movePower(x) == "-") { return this.movePower(x) }
-                    else { return Math.floor(this.movePower(x) * stab * itemBoost * typeBoost * multi_hit_modifier) } //returns the move's base power if not in battle
+                    else { return Math.floor(this.movePower(x) * stab * itemBoost * typeBoost * multi_hit_modifier * explode_modifier * species_item_modifier) } //returns the move's base power if not in battle
                 } 
             }
             else { return "" }

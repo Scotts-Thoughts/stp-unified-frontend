@@ -70,7 +70,7 @@ const api = {
   app_root: () => invoke('app_root'),
   /** `app.isPackaged`; the legacy style managers' dev/prod switch (core/env.ts). */
   is_packaged: () => invoke('is_packaged'),
-  /** Taskbar/window icon: a file under resources/icons/ (gen3/4/5's `set-game-icon`). Fire and forget, as it was. */
+  /** Taskbar icon: a file under resources/icons/, or "" for the portrait. Fire and forget. */
   set_game_icon: (relative) => ipcRenderer.send('set-game-icon', relative),
   /** gen5's second-screen key sender (node-key-sender in the main process, decision 9). Fire and forget. */
   send_virtual_key: (keyName) => ipcRenderer.send('send-virtual-key', keyName),

@@ -126,7 +126,7 @@
       "bodies": {
         "gen2": "9e9b901e8902",
         "gen3": "9725af1949d8",
-        "gen4": "db67c157026d",
+        "gen4": "c4fe3604fd2c",
         "gen5": "db67c157026d"
       }
     },
@@ -268,7 +268,7 @@
       "bodies": {
         "gen2": "05865f91ef6c",
         "gen3": "05865f91ef6c",
-        "gen4": "08014728c601",
+        "gen4": "73226083acfe",
         "gen5": "08014728c601"
       }
     },
@@ -317,7 +317,7 @@
         "gen2": "21676d310f2b",
         "gen3": "4e387a23dc20",
         "gen4": "34632895aee1",
-        "gen5": "5680c045fcf0"
+        "gen5": "b0b1517ff106"
       }
     },
     {
@@ -366,8 +366,8 @@
       "name": "ability",
       "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 28L, gen4 25L, gen5 25L)",
       "bodies": {
-        "gen3": "406812529afc",
-        "gen4": "b59ee9ad6f24",
+        "gen3": "fed3568eb5ad",
+        "gen4": "ea2b65a69dd7",
         "gen5": "b59ee9ad6f24"
       }
     },
@@ -377,14 +377,14 @@
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 23L, gen5 30L)",
       "bodies": {
         "gen3": "5a145013b256",
-        "gen4": "ae9642ee8367",
-        "gen5": "5a8740d59771"
+        "gen4": "6a0ea6b0df40",
+        "gen5": "1a8a800ac01b"
       }
     },
     {
       "section": "methods",
-      "name": "average_median_stats",
-      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 28L, gen4 28L, gen5 40L)",
+      "name": "average_median_stats_of",
+      "reason": "Was average_median_stats (renamed 2026-10-13 when the six answers became the computed average_median_by_stat). Same calc; each reads its own dex: gen3 dexDataFireRedLeafGreen, gen4 g4PokemonData, gen5 g5PokemonData, whose entries nest the stats under base_stats (hence gen5's name map).",
       "bodies": {
         "gen3": "d7869f75263d",
         "gen4": "89c5dd5dbc67",
@@ -404,10 +404,10 @@
     {
       "section": "methods",
       "name": "badge_boost",
-      "reason": "quirk: gen2 applies the Glacier Badge's Special Defense rule (boost only when the unboosted SpAtk is 206-432 or 661+, pokecrystal BadgeStatBoosts) and the BadgeBoosts display toggle; gen3 is the plain 1.1x behind display_badge_boosts. gen2's comparison reads the property object, not .value, so the rule never fires -- known-legacy-bugs.md #46, preserved.",
+      "reason": "quirk: gen2 applies the Glacier Badge's Special Defense rule (boost only when the unboosted SpAtk is 206-432 or 661+, pokecrystal BadgeStatBoosts) and the BadgeBoosts display toggle; gen3 is the plain 1.1x behind display_badge_boosts, which the speed label bypasses (always = true) because the game always applies the Speed badge. gen2's comparison reads the property object, which coerces to its value, so the rule does fire (known-legacy-bugs.md #46, corrected 2026-10-13).",
       "bodies": {
         "gen2": "17d823f36882",
-        "gen3": "bd618dc97ddc"
+        "gen3": "e439ed92f903"
       }
     },
     {
@@ -425,8 +425,8 @@
       "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 15L, gen4 10L, gen5 10L)",
       "bodies": {
         "gen3": "fab195a85baf",
-        "gen4": "6bd720b66249",
-        "gen5": "6bd720b66249"
+        "gen4": "b3e3a2420ede",
+        "gen5": "b3e3a2420ede"
       }
     },
     {
@@ -538,9 +538,9 @@
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 18L, gen4 13L, gen5 26L)",
       "bodies": {
         "gen2": "b4fe613f679f",
-        "gen3": "72c70542a643",
-        "gen4": "b8e9664bcc9d",
-        "gen5": "f121b1d4c325"
+        "gen3": "c1e81eacb94f",
+        "gen4": "064c90f8f96a",
+        "gen5": "469c1d651169"
       }
     },
     {
@@ -548,10 +548,10 @@
       "name": "determineSTAB",
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 28L, gen4 14L, gen5 12L)",
       "bodies": {
-        "gen2": "4611f3ac5f49",
+        "gen2": "7b8b6c8937c1",
         "gen3": "30b9a78d4b22",
         "gen4": "de684ee90904",
-        "gen5": "4386c1cbf32b"
+        "gen5": "a4a7c7bb5f7a"
       }
     },
     {
@@ -673,8 +673,8 @@
       "name": "enemyStatModification",
       "reason": "UNREVIEWED: gen4=gen5 | gen3 (gen3 49L, gen4 47L, gen5 47L)",
       "bodies": {
-        "gen3": "d10386abc2cb",
-        "gen4": "a8a6e9be3d50",
+        "gen3": "73d3aafc0c78",
+        "gen4": "68cc4226ce0d",
         "gen5": "a8a6e9be3d50"
       }
     },
@@ -711,8 +711,8 @@
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 29L, gen4 44L, gen5 44L)",
       "bodies": {
         "gen2": "541e4dddc2cb",
-        "gen3": "74d88b58b0d4",
-        "gen4": "8612cc1fc30b",
+        "gen3": "6c2009467735",
+        "gen4": "65ab579b9714",
         "gen5": "7d2bae409acb"
       }
     },
@@ -723,8 +723,8 @@
       "bodies": {
         "gen2": "54beffbb25ca",
         "gen3": "1d99d9f3326a",
-        "gen4": "c671de6f803e",
-        "gen5": "fe2bc3837877"
+        "gen4": "1332ffb533d2",
+        "gen5": "048be5786e93"
       }
     },
     {
@@ -771,8 +771,8 @@
       "name": "getAccuracy",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 101L, gen5 105L)",
       "bodies": {
-        "gen4": "a824957054f2",
-        "gen5": "c9e6962df6ab"
+        "gen4": "bff8a5a383ee",
+        "gen5": "ed68de6f5326"
       }
     },
     {
@@ -790,8 +790,8 @@
       "name": "getEnemyStat",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 59L, gen5 63L)",
       "bodies": {
-        "gen4": "4a523ff407ed",
-        "gen5": "858dfc1b493c"
+        "gen4": "2d89e6999227",
+        "gen5": "550e58bd7d4d"
       }
     },
     {
@@ -1018,10 +1018,10 @@
       "name": "get_stat",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 33L, gen3 75L, gen4 319L, gen5 274L)",
       "bodies": {
-        "gen2": "47da10fe5ea9",
-        "gen3": "2d853ec98cdc",
-        "gen4": "f41643044718",
-        "gen5": "cf7e20d89dc5"
+        "gen2": "f3fafd9625e0",
+        "gen3": "da7e466e379d",
+        "gen4": "1ce7a11393e8",
+        "gen5": "5e64cafd3f37"
       }
     },
     {
@@ -1150,10 +1150,10 @@
       "name": "movePower",
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 15L, gen4 114L, gen5 120L)",
       "bodies": {
-        "gen2": "63745de1f740",
-        "gen3": "bca37ca531a0",
-        "gen4": "fe5f9dcd4ced",
-        "gen5": "524462120c88"
+        "gen2": "5de5b6d262a4",
+        "gen3": "d7b931c9ec3f",
+        "gen4": "b76e90ecb858",
+        "gen5": "ec9c514b78e4"
       }
     },
     {
@@ -1161,9 +1161,9 @@
       "name": "moveType",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 11L, gen3 28L, gen4 27L, gen5 43L)",
       "bodies": {
-        "gen2": "8bbd09c81de5",
-        "gen3": "81884f85a29a",
-        "gen4": "b2273b35f69b",
+        "gen2": "99da91f4aef7",
+        "gen3": "7bf0b3d81e8a",
+        "gen4": "b6b6c9582a52",
         "gen5": "0a553a0d03c9"
       }
     },
@@ -1173,7 +1173,7 @@
       "reason": "UNREVIEWED: gen2 | gen3 (gen2 6L, gen3 24L)",
       "bodies": {
         "gen2": "b83c91c4ef19",
-        "gen3": "448b3a63287b"
+        "gen3": "ce4c2a27d4b2"
       }
     },
     {
@@ -1403,10 +1403,10 @@
       "name": "speed_comparison",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 41L, gen3 39L, gen4 22L, gen5 28L)",
       "bodies": {
-        "gen2": "549264008a52",
-        "gen3": "2f6d2f5ff0b7",
-        "gen4": "b47b57b3af53",
-        "gen5": "b870c682b5f3"
+        "gen2": "45f9cb2e6ee1",
+        "gen3": "3a045ec17577",
+        "gen4": "8d9dd8e97371",
+        "gen5": "5c453e44fee8"
       }
     },
     {
@@ -1465,10 +1465,10 @@
       "name": "typeEffectiveness",
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 79L, gen4 226L, gen5 367L)",
       "bodies": {
-        "gen2": "b05e215a6b04",
-        "gen3": "47bc213ce0e3",
-        "gen4": "59efbea4965b",
-        "gen5": "72597793881a"
+        "gen2": "60a0eb963257",
+        "gen3": "3fac7f03ef0f",
+        "gen4": "97df038dc2a2",
+        "gen5": "82b165b00679"
       }
     },
     {
@@ -1548,9 +1548,18 @@
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 24L, gen4 23L, gen5 29L)",
       "bodies": {
         "gen2": "4fa9730e1512",
-        "gen3": "ad31725da115",
-        "gen4": "9bd16738b94a",
+        "gen3": "2c94b96a082c",
+        "gen4": "d78c8773e9c3",
         "gen5": "330b63069b7e"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "weatherSuppressed",
+      "reason": "mapper shape: the active enemy is battle.opponent.active_pokemon in gen4, but in gen5 that is always party slot 0, so gen5 reads battle.opponent.team[party_position] (and the player's ability_temp).",
+      "bodies": {
+        "gen4": "f6d5f0921ae0",
+        "gen5": "5f7d65a774ed"
       }
     },
     {

@@ -12,6 +12,7 @@ import { registerControlServer } from "~/core/control/useControlServer";
 import { buildCanonicalView } from "~/core/mapper/MapperAdapter";
 import type { GameModule } from "~/core/game/GameModule";
 import { detect, loadModule, type Detection } from "~/games/registry";
+import { iconForDetection } from "~/games/gameIcon";
 import { setActiveModule } from "~/core/game/active";
 import { setActiveNamespace } from "~/core/persistence/userState";
 import { useReplaySplitsStore } from "~/core/stores/useReplaySplitsStore";
@@ -134,6 +135,10 @@ const main = defineComponent({
         overlayComponent() {
             return this.session?.module.overlay ?? null;
         },
+        /** Red and Blue share a mapper, so the cartridge follows this edition. */
+        editionForIcon(): string {
+            return this.settings.overlay.edition;
+        },
         /**
          * What the overlay is handed instead of the raw mapper client: the detected
          * module, and `properties` as the profile's canonical view over the client's
@@ -249,6 +254,9 @@ const main = defineComponent({
                 applyScaleToFit(module);
                 this.session = { ...detection, module };
                 module.activate?.(detection.game);
+                // After activate: gen1's setGame may have just corrected the edition
+                // (Yellow, or Red when the saved edition was the other game).
+                this.applyWindowIcon(detection);
                 // Every generation: the run's splits from the replay Super Shuckie is
                 // playing back (core/stores/useReplaySplitsStore.ts, 2026-09-23).
                 useReplaySplitsStore().startPolling();
@@ -278,6 +286,7 @@ const main = defineComponent({
             this.session?.module.deactivate?.();
             useReplaySplitsStore().stopPolling();
             this.session = null;
+            this.applyWindowIcon(null);
             setActiveModule(null);
             setActiveNamespace(null);
             applyScaleToFit(gen1);
@@ -301,6 +310,26 @@ const main = defineComponent({
                 mapperPath: (this.mapper?.meta?.path as string | undefined) ?? null,
             }),
         );
+    },
+    watch: {
+        editionForIcon() {
+            if (this.session?.manifest.id === "gen1") this.applyWindowIcon(this.session);
+        },
+    },
+    methods: {
+        /**
+         * The taskbar icon: the loaded cartridge, or the portrait when nothing is loaded.
+         * An empty string is `resources/icons/default.png` (`src/main/ipc.ts`).
+         */
+        applyWindowIcon(detection: Detection | null) {
+            if (!detection) {
+                window.api.set_game_icon("");
+                return;
+            }
+            const edition = detection.manifest.id === "gen1" ? this.editionForIcon : null;
+            const icon = iconForDetection(detection.manifest, detection.profile, edition);
+            if (icon) window.api.set_game_icon(icon);
+        },
     },
     unmounted() {
         this.unregisterControl?.();
