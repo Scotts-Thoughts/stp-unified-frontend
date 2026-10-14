@@ -524,6 +524,7 @@ Re-running them would overwrite months of hand edits.
 | `docs/game-support-gaps.md` | Adding or fixing support for a game or edition |
 | `docs/performance-followups.md` | Performance work. It records what four passes did and what is still open |
 | `docs/themes-plan.md` | Themes (per-generation looks). A proposed plan, not built yet |
+| `docs/hotkeys-without-keyhook-plan.md` | Hotkeys or `keyhook.exe`. A proposed plan to replace the exe with Electron's built-in shortcuts; not built yet |
 | `docs/CRITICAL_ITEM_CHAPTER_MARKER.md`, `docs/NEW_MOVE_CHAPTER_MARKER.md` | OBS marker logic |
 | `docs/inputs.lock.md`, `docs/queuer-unified.patch`, `docs/battle-timing-notes.animations.css` | Rarely. These are port inputs, the queuer-side patch, and timing notes |
 
