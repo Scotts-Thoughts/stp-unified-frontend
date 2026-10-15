@@ -1,43 +1,11 @@
 <template>
     <div>
-        <img class="canvas" ref="background_texture" :src="currentBackground"
-            :style="{
-                'filter': `blur(${background.blur}px) hue-rotate(${background.hue}deg) brightness(${background.brightness}%) contrast(${background.contrast}%) saturate(${background.saturation}%)` ,
-                'transform': `scale(${background.scale}%) ${background.flip ? 'rotateY(180deg)' : ''} ${background.flip_y ? 'rotateX(180deg)' : ''} translate(${background.offset_x}px, ${-background.offset_y}px)`
-            }"
-        />
+        <img class="canvas" ref="background_texture" :src="currentBackground" :style="backgroundStyle" />
         <img class="canvas" ref="old_background_texture" style="opacity: 0" />
         <img class="canvas" style="top: -160px;" :src="'images/elements/floor/pokeball.webp'" />
-        <img v-show="meta.game == 'Yellow'" class="pokemon_art"
-            :style="{
-                'transform': `scale(${artwork.scale}) ${artwork.flip ? 'rotateY(180deg)' : ''} translate(${artwork.offset_x}px, ${-artwork.offset_y}px) rotate(${artwork.rotation}deg)`,
-                'filter': `saturate(${artwork.saturation}%)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(${artwork.flip ? '-3px' : '3px'} 3px 3px #000)
-                `
-            }"
-            :src="`images/pokemon/${pokemonArt}.webp`"
-        />
-        <img v-if="meta.game == 'Red and Blue'" class="pokemon_art2"
-            :style="{
-                'transform': `scale(${artwork.scale}) ${artwork.flip ? 'rotateY(180deg)' : ''} translate(${artwork.offset_x}px, ${-artwork.offset_y}px)`,
-                'filter': `saturate(${artwork.saturation}%)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(0 0 0.4px #000)
-                drop-shadow(${artwork.flip ? '-3px' : '3px'} 3px 3px #000)
-                `
-            }"
-            :src="`images/pokemon/Red_and_Blue/${pokemonArt}.webp`"
-        />
+        <!-- The species art (core/overlay/player/SpeciesArt.ts): Yellow's, and Red/Blue's own pictures; a new picture cross-fades. -->
+        <species-art :show="meta.game == 'Yellow'" img-class="pokemon_art" v-bind="artLook" transition="species-art-fade" :src="`images/pokemon/${pokemonArt}.webp`"></species-art>
+        <species-art v-if="meta.game == 'Red and Blue'" img-class="pokemon_art2" v-bind="artLook" transition="species-art-fade" :src="`images/pokemon/Red_and_Blue/${pokemonArt}.webp`"></species-art>
         <div class="tinted-box" style="--drop-shadow: 0px 0px 1px #000000; --url: url(images/ui/stats.svg)"></div>
         <div class="tinted-box" style="--drop-shadow: 0px 0px 1px #000000; --url: url(images/ui/moveset.svg)"></div>
         <img class="svg" :src="'images/ui/current_hp_spd_stats_backgrounds.svg'"/>
@@ -49,6 +17,9 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
 import { textures } from '~/data/textures';
+import { backgroundTextureStyle } from '~/core/overlay/backgroundTexture';
+import { SpeciesArt } from '~/core/overlay/player/SpeciesArt';
+import { lookAfterTextureChange, texturePath } from '~/core/overlay/textureLooks';
 import { transition } from "../utils/transition";
 import { useMetaStore } from "~/stores/metaStore";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
@@ -63,10 +34,32 @@ const currentBackground = computed(() => {
     return textures[background.value.texture] ?? textures['Bug 1'];
 });
 
+// Scaled up to cover the canvas when an offset or blur would show its edge (core/overlay/backgroundTexture.ts).
+const backgroundStyle = computed(() => {
+    const b = background.value;
+    return backgroundTextureStyle({
+        blur: b.blur, hue: b.hue, brightness: b.brightness, contrast: b.contrast, saturation: b.saturation,
+        scale: b.scale, flip: b.flip, flipY: b.flip_y, offsetX: b.offset_x, offsetY: b.offset_y,
+    });
+});
+
+// The art's saved adjustments, as SpeciesArt's props.
+const artLook = computed(() => {
+    const a = artwork.value;
+    return { scale: a.scale, flip: a.flip, offsetX: a.offset_x, offsetY: a.offset_y, rotation: a.rotation, saturation: a.saturation };
+});
+
 const pokemonArt = computed(() => {
     return meta.currentSpecies === 'Backport'
         ? meta.starter
         : meta.currentSpecies || meta.starter;
+});
+
+// Picking a texture shows it in its default look unless the filters were styled by hand (core/overlay/textureLooks.ts).
+watch(() => background.value.texture, (newTexture, oldTexture) => {
+    const b = background.value;
+    const look = lookAfterTextureChange(texturePath(textures, oldTexture), texturePath(textures, newTexture), b);
+    if (look) Object.assign(b, look);
 });
 
 // Cross-fade between background textures whenever the texture changes (e.g. when switching species).

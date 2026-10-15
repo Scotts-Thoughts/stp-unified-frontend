@@ -1,0 +1,31 @@
+/*
+ * On-stream player pieces shared by all five generations (core/overlay/player/). Unscoped: the names are used by
+ * nothing else.
+ */
+
+/* A new badge fades in (BadgeRow.ts, decision 23 of docs/ui-uniformity-plan.md): gen1's timing, which gen2's markup
+   always asked for but never had the CSS for. */
+.badge-fade-enter-from,
+.badge-fade-leave-to {
+    opacity: 0;
+}
+
+.badge-fade-enter-active {
+    transition: opacity 300ms ease-in-out;
+}
+
+.badge-fade-leave-active {
+    transition: opacity 200ms ease-in-out;
+}
+
+/* The species art cross-fades to a new picture (SpeciesArt.ts, decision 24 of docs/ui-uniformity-plan.md): gens 4-5's
+   styleFade timing, for the generations that had no fade of their own (gens 1-2). */
+.species-art-fade-enter-from,
+.species-art-fade-leave-to {
+    opacity: 0;
+}
+
+.species-art-fade-enter-active,
+.species-art-fade-leave-active {
+    transition: opacity 750ms ease-in-out;
+}

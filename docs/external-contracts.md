@@ -69,7 +69,7 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 | `GET /set-counters` | `bonk=false&repel_counter=false` | gen2 only | |
 | `GET /refresh` | – | all -- gen2: after `/set-counters`; gen4: **before** `/set-evolution`; gen1/3/5: **after** it | reload styles for the starter |
 | `GET /set-evolution` | `enabled=true&species=` / `enabled=false&species=` | not gen2 (gen1 gets it like gen3/5; the unified gen1 answers `ok: false, unsupported: true`) | **gen4: after `/refresh`; gen1/gen3/gen5: before `/refresh`** |
-| `GET /set-right-panel` | `panel=Battle Graphic` (gen1/2/3) or `panel=Automatic` (gen4/5) | all | gen1 has no "Battle Graphic" mode: the unified app takes it as `Automatic` and reports `Automatic`, which the queuer's gen1 verification rejects -- `docs/queuer-unified.patch` sends gen1 `Automatic` |
+| `GET /set-right-panel` | `panel=Battle Graphic` (gen1/2/3) or `panel=Automatic` (gen4/5) | all | gen1 has no "Battle Graphic" mode: the unified app takes it as `Automatic` and reports `Automatic`, which the queuer's gen1 verification rejects -- `docs/queuer-unified.patch` sends gen1 `Automatic`. Since 2026-10-15 (decision 27) every generation's modes are Automatic / Movepool / Splits / Trainers; gens 2-5 map old values ("Battle Graphic", "Inventory", "Movepool+" -> Automatic, "Wild" -> Automatic + Show Wild Battles), and gens 2-3 still report Automatic as `"Battle Graphic"` in the reply and in `/status` `right_panel`, so the queuer's check passes unchanged. `/status` `right_panel_active` (all five) is what shows now, a post-battle Splits included |
 | `GET /set-splits` | `mode=First|Followup` | all | |
 | `GET /load-split-file` | `file=<absolute path>` (a CSV the queuer's user dragged in, `encodeURIComponent`ed; since 2026-09-23 also a Super Shuckie `.replay`, by extension) | only with `item.splitFile` | loads a previous run's splits for comparison; the unified main process reads the path as it is (`src/main/splitComparison.ts`: a CSV as `fs.readFileSync` + the legacy columns, as gen2-5 did; a `.replay` through its bookmark section, section 5) and hands the rows to the active generation's route as `__splits`, the file's name as `__source`. A replay it cannot read (format v3/v4, never closed) is a 500 with the reason. The reply body is unchanged: `{ ok, splits_loaded }` |
 | `GET /new-run` | – | all | same as the F23 hotkey / "New Run" button |
@@ -165,13 +165,30 @@ The harness runs a tiny OBS WebSocket stub (Hello → Identify → Identified, t
 
 ## 5. Split CSV files
 
-gen1 writes, **relative to `process.cwd()`**:
+**Since 2026-10-14 every generation writes only the simple CSV, and its name has no `-simple`.**
+The full and deprecated CSVs (and gen1/gen2's never-called `battleSummary` branch) were removed. The
+columns of the simple CSV did not change. Names now:
+
+```
+gen1   splits/<GamePath>/<Species>/attempts/<L>-<test_run_>?<Species>-<N>.csv
+gen2   splits/Crystal/<Species>/attempts/<L>-<test_run_>?<Species>-<N>.csv   (finishes under <GamePath>, known-legacy-bugs #2)
+gen3   splits/<GamePath>/<Species>/attempts/<L>-<test_run_>?<Species>-<run id>.csv
+gen4/5 splits/<Game>/<Species>/<Species>-<N>.csv                            (a test run: same name, in test_runs/)
+all    …/finishes/…  (the copy on run completion)   …/refilmed/…  (refilming mode, gens 1, 2, 4, 5)
+```
+
+`<Species>` is `<Fully evolved>-line` when gen3-5's evolution option is on. gen4/5 never had an edition
+letter. A name without `-simple` is the name the deprecated CSV had in gens 1-3, so an old folder can hold
+an old deprecated `Y-Venomoth-1.csv` beside new files. A normal run gets a new attempt number, so it never
+lands in one, but a test run (gens 1-2 don't count it) or a refilm (it reuses the chosen number) can append
+simple rows to an old deprecated file of the same name, under that file's old header. gen3 numbers a finished run from the files in `finishes/` and counts both spellings.
+
+Before 2026-10-14, gen1 wrote (relative to `process.cwd()`):
 
 ```
 ./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>-simple.csv
 ./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>-full.csv
 ./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>.csv            (deprecated format)
-./splits/<GamePath>/<Species>/attempts/<L>-<test_>?<Species>-<N>-battleSummary.csv
 ./splits/<GamePath>/<Species>/finishes/…   (copies on run completion)
 ./splits/<GamePath>/<Species>/refilmed/{attempts,finishes}/…   (refilming mode)
 ```
@@ -182,7 +199,8 @@ prefix. gen2–5 folder names: `Crystal`, `Gold & Silver`, `HGSS`, `Platinum`, `
 the per-gen inventories, Phase 2.1).
 
 Consumers: `compare_gym_splits` reads `<Species>-<N>-simple.csv` and requires columns `trainer_name` and
-`real_time_hmmss`; the overlay's own "Split Comparison" / `previous_splits`; the queuer's `/load-split-file`.
+`real_time_hmmss` (it must be changed to take the file it is given whatever the name; it was not found on the
+Windows machine on 2026-10-14); the overlay's own "Split Comparison" / `previous_splits`; the queuer's `/load-split-file`.
 
 **A replay as the comparison** (2026-09-23): the overlay's "Load replay / split file to compare" button
 (gen1: the right-panel settings; gens 2-5: the button that loaded a CSV) and `/load-split-file` accept a
@@ -225,6 +243,11 @@ trade gen4 already makes. The one-time import of every legacy app's `Local Stora
 is built (2026-09-12, `src/main/importLegacy.ts`): the file is one section per generation (`format: 2`) plus
 a `global` one, and each section is seeded once from its legacy profile's LevelDB, read from a copy.
 
+**Keyboard shortcut bindings** (2026-10-14) are `shortcuts` in each generation's section of `user_state.json`:
+`{ "<action id>": "<accelerator>" | null }`, only the changes from the defaults (`null` = a default key removed).
+The action ids (`games/genN/actions.ts`) are therefore persisted names like any other key here: renaming one drops
+the user's binding. The key is absent until the user changes a shortcut.
+
 Shipped style defaults are per-species JSON in the repo (written back by dev-mode runs, as the legacy apps do with
 `default_style_settings.js`); user state is under userData. The unified app's userData is `%APPDATA%\stp-overlay\`.
 Because Chromium's `localStorage` is origin-scoped
@@ -236,16 +259,20 @@ and values alike). gen2-5 wrote under `file://` (they load `index.html` from dis
 `devtools://devtools`. This is deterministic and tested (`npm run import:selftest`); it never opens the live
 profile. gen1's `data\` tree is copied file-for-file.
 
-## 7. keyhook.exe
+## 7. keyhook.exe (legacy apps only)
+
+The unified app no longer uses it. Since 2026-10-14 its keys come from the `uiohook-napi` keyboard hook
+(`src/main/hotkeys.ts`), which, like keyhook.exe, only watches: other programs still receive every key, so the
+emulator and the overlay can both react to F24. (For one day, 2026-10-13, they were Electron global shortcuts,
+which took bound keys from every other program.) Since 2026-10-14 every shortcut can be rebound in the
+Keyboard Shortcuts window (ARCHITECTURE §4 "Shortcuts"); each generation's original F13–F24 keys are the defaults. The exe is still an input for the legacy apps that the
+parity harness drives (`resources/keyhook.exe`, copied into their sandboxes; excluded from the package).
 
 Binary only (no source anywhere on disk). `md5 73db8f5278d94b21e6fc1beea09b144e`, 373,946 bytes,
 identical in the gen2 and gen3 repos; **removed from the gen1 repo in commit `996d031` (2026-09-10)**, so
 gen1 dev currently runs without hotkeys unless the exe is placed next to the project. gen1 looks in
 `process.cwd()`, then `process.resourcesPath`, then PATH. Stdout protocol: lines `down,keyCode,time`
-(`1`/`0`, Win32 VK code, ms). The unified app spawns it once from main and forwards events over IPC. It is
-**not in the repo** (build output, removed in `5dce66a`): `src/main/keyhook.ts` looks for `<appRoot>/keyhook.exe`,
-then `<appRoot>/resources/keyhook.exe`, then the packaged `resources/`; without it the app logs that hotkeys
-are disabled and runs on.
+(`1`/`0`, Win32 VK code, ms). It is **not in the repo** (removed in `5dce66a`).
 
 ## 8. PokeAByte — `http://localhost:8085`
 

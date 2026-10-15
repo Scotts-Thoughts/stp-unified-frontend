@@ -1,7 +1,7 @@
 /**
  * Super Shuckie stand-in on http://127.0.0.1:30158.
  *
- * gen1 polls /stats every 10 ms and gen5's ShuckieTimer reads the same shape, so the
+ * gen1 polls /stats every 10 ms and gens 2-5 read the same shape, so the
  * stub answers from the replay's `F` frame samples and the virtual clock. Every POST
  * is logged in call order -- that log is oracle 8.
  *

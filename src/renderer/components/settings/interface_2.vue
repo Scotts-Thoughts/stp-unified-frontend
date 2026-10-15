@@ -1,24 +1,18 @@
-
-
-<template>
-    <div>
-        <div>Solo Pokemon:</div>
-        <select v-model="overlaySettings.starter" class="dropdownMenu dropdown_menu_column3" style="background-color: rgb(201, 199, 100)">
-            <option disabled value="">Select a species</option>
-            <option v-for="key in filtered_pokemon_list" :value="key">{{key}}</option>
-        </select><br>
-        <div>Search Pokemon:</div>
-        <input type="text" v-model="search_term" placeholder="Search for a species">
-        <!-- The ROM starter follows the dropdown (see the watcher); the button is a manual re-sync. -->
-        <button class="buttonStyle set_starter_button" @click="set_rom_starter">Set ROM Starter</button>
-    </div>
-</template>
-
 <script lang="ts">
 import { defineComponent, inject } from "vue";
 import PokeData from "~/logic/PokeData";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
+import PubSub from "~/logic/PubSub";
+import { SET_ROM_STARTER } from "./commands";
+
+/**
+ * The ROM starter (logic only since 2026-10-14). The Solo Pokemon picker and the "Set ROM Starter"
+ * button are in the settings panel (games/gen1/settingsPanel.ts); this component, mounted by
+ * components/game_area.vue where the old Solo Pokemon column was, still owns the mapper write: it
+ * follows the store's `starter`, answers the button and shortcut (`SET_ROM_STARTER`), and writes the
+ * solo Pokemon again after a reset (ARCHITECTURE §4).
+ */
 
 /** Species byte that the ROM patch uses for every backported species. */
 const BACKPORT_SPECIES_BYTE = 0xBF;
@@ -28,30 +22,27 @@ export default defineComponent({
         return {
             game_properties: inject<Record<string, GameHookProperty>>("game_properties", {}),
             overlaySettings: useOverlaySettingsStore(),
-            search_term: "",
             /** Whether the next time the ROM loses the solo Pokemon it is written again (see `mounted`). */
             rom_starter_resync_armed: true,
         }
     },
-    computed: {
-        filtered_pokemon_list() {
-            if (this.search_term === '') {
-                return PokeData.getAllSpecieNames();
-            } else {
-                return PokeData.getAllSpecieNames().filter(pokemon => pokemon.toLowerCase().includes(this.search_term.toLowerCase()));
-            }
-        },
-    },
     watch: {
         /**
          * The ROM starter follows the solo Pokemon, as in gens 2-5 (2026-09-18): every change of
-         * the store's `starter` -- the dropdown here or the queuer's `/set-starter` -- is written
+         * the store's `starter` -- the panel's picker or the queuer's `/set-starter` -- is written
          * to the patch, where gen1 used to wait for the button.
          */
         "overlaySettings.starter"() {
             this.rom_starter_resync_armed = true;
             this.set_rom_starter();
         },
+    },
+    created() {
+        // The "Set ROM Starter" button and shortcut (commands.ts setRomStarter): this component owns the mapper write.
+        PubSub.subscribe(SET_ROM_STARTER, this.set_rom_starter);
+    },
+    unmounted() {
+        PubSub.unsubscribe(SET_ROM_STARTER, this.set_rom_starter);
     },
     methods: {
         async set_rom_starter() {
@@ -81,7 +72,7 @@ export default defineComponent({
         },
     },
     mounted() {
-        // Sync the ROM starter to the dropdown on load, as gens 2-5 do: the overlay settings are
+        // Sync the ROM starter to the solo Pokemon on load, as gens 2-5 do: the overlay settings are
         // read before the overlay mounts, so the watcher never sees the persisted starter arrive.
         this.set_rom_starter();
 
@@ -106,6 +97,9 @@ export default defineComponent({
             this.rom_starter_resync_armed = false;
             this.set_rom_starter();
         });
+    },
+    render() {
+        return null;
     },
 });
 </script>

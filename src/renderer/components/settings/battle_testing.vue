@@ -1,23 +1,18 @@
 <template>
-    <div>
-        <div>Moveset Updating:</div>
-        <input type="text" v-model="move1_replacement" placeholder="Input move 1">
-        <input type="text" v-model="move2_replacement" placeholder="Input move 2">
-        <input type="text" v-model="move3_replacement" placeholder="Input move 3">
-        <input type="text" v-model="move4_replacement" placeholder="Input move 4">
-        <button class="buttonStyle buttonStyle_column3" @click="update_moveset">Update Party Moves</button>
-        <button class="buttonStyle buttonStyle_column3" @click="update_battle_moveset">Update Battle Moves</button>
-        <br>
-        <br>
-        <div>Item Updating:</div>
-        <input type="text" v-model="item1_replacement" placeholder="Input item 1">
-        <input type="text" v-model="item2_replacement" placeholder="Input item 2">
-        <input type="text" v-model="item3_replacement" placeholder="Input item 3">
-        <input type="text" v-model="item4_replacement" placeholder="Input item 4">
-        <button class="buttonStyle buttonStyle_column3" @click="update_items">Update</button>
-        <br>
-        <br>
-    </div>
+    <!-- The "editor" slot of the settings panel (games/gen1/settingsPanel.ts, "Pokemon Editor"). -->
+    <span class="stp-label stp-label-block">Moves</span>
+    <input class="stp-input" type="text" v-model="move1_replacement" placeholder="Move 1">
+    <input class="stp-input" type="text" v-model="move2_replacement" placeholder="Move 2">
+    <input class="stp-input" type="text" v-model="move3_replacement" placeholder="Move 3">
+    <input class="stp-input" type="text" v-model="move4_replacement" placeholder="Move 4">
+    <button class="stp-btn" @click="update_moveset">Update Party Moves</button>
+    <button class="stp-btn" @click="update_battle_moveset">Update Battle Moves</button>
+    <span class="stp-label stp-label-block">Items</span>
+    <input class="stp-input" type="text" v-model="item1_replacement" placeholder="Item 1">
+    <input class="stp-input" type="text" v-model="item2_replacement" placeholder="Item 2">
+    <input class="stp-input" type="text" v-model="item3_replacement" placeholder="Item 3">
+    <input class="stp-input" type="text" v-model="item4_replacement" placeholder="Item 4">
+    <button class="stp-btn" @click="update_items">Update Items</button>
 </template>
 
 <script lang="ts">

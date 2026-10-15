@@ -4,37 +4,16 @@
         <div>
             <div class="statsheader">{{stats_header}} </div>
             <div class="expLabelGen1">Exp:</div>
-            <div v-for="stat in stat_object" class="stat">
-                <div v-if="stat.name != 'Hp' && meta.gameState == 'Battle'" class="stat_label mod_style">{{ mod_stage_label(game_properties.battle.yourPokemon['modStage'+stat.mod_path]) }}</div>
-                <div :style="{ opacity: statLabelOpacity()[stat.name]}" class="stat_label">{{stat.label}}</div>
-
-                <div v-if="display_mode == 'Base Stats'"   class="stat_value">{{base_stats(stat.base_stat_key)}}</div>
-                <div v-if="display_mode == 'Averages'"     class="stat_value">{{stat_averages[stat.base_stat_key].mean}}</div>
-                <div v-if="display_mode == 'Medians'"      class="stat_value">{{stat_averages[stat.base_stat_key].median}}</div>
-                <div v-if="display_mode == 'DVs'"          class="stat_value dv">{{get_dv(stat.name)}}/15</div>
-                <div v-if="display_mode == 'EVs'"          class="stat_value stat_exp">{{game_properties.player.team[0]['statExp' + stat.name].value}}</div>
-                <div v-if="display_mode == 'Automatic'"    class="stat_value">{{get_stat(stat.name)}}</div>
-
-                <div v-if="display_mode == 'Vitamins'"     class="stat_value stat_multi_line devs2"           ><span style="opacity: .7;">{{stat.vitamin}}</span></div>
-                <div v-if="display_mode == 'Vitamins'"     class="stat_value stat_multi_line percentage_evs2" style="font-size: 21px;"><span style="font-size: 31px;">{{usable_vitamins(game_properties.player.team[0][stat.statExpPath].value)}}</span><span style="font-size: 15px;">/10</span></div>
-                <div v-if="display_mode == 'Vitamins'"     class="stat_value stat_multi_line ev_stats_gained2">{{game_properties.player.team[0]['statExp' + stat.name].value}}<span style="font-size: 13px;">/65535</span></div>
-
-                <div v-if="display_mode == 'Detailed EVs'" class="stat_value stat_multi_line devs"           >{{game_properties.player.team[0]['statExp' + stat.name].value}}/65535</div>
-                <div v-if="display_mode == 'Detailed EVs'" class="stat_value stat_multi_line percentage_evs" >{{decimalToPercentage(game_properties.player.team[0]['statExp' + stat.name].value / 65535) }}%</div>
-                <div v-if="display_mode == 'Detailed EVs'" class="stat_value stat_multi_line ev_stats_gained">Stats: {{Math.floor(Math.sqrt(game_properties.player.team[0]['statExp' + stat.name].value) / 4)}}</div>
-
-                <div v-if="display_mode == 'Badge Boosts'" class="stat_value stat_multi_line devs"           >Stat: {{game_properties.player.team[0][stat.path].value}}</div>
-                <div v-if="display_mode == 'Badge Boosts'" class="stat_value stat_multi_line percentage_evs" >Boost: {{get_bb_stat(stat.name)}}</div>
-                <div v-if="display_mode == 'Badge Boosts'" class="stat_value stat_multi_line ev_stats_gained">+{{(get_stat(stat.name, false) - game_properties.player.team[0][stat.path].value) / game_properties.player.team[0][stat.path].value*100}}%</div>
-            </div>
+            <stat-tiles :nodes="tiles"></stat-tiles>
         </div>
         <div class="exp_growthRate">{{ growthRate }}</div>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject } from "vue";
+import { defineComponent, inject, toDisplayString } from "vue";
 import PokeData from "~/logic/PokeData";
+import { StatTiles, type StatChild, type StatNode } from "~/core/overlay/player/StatTiles";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { StatsPanelMode } from "~/stores/types/StatsPanelMode";
 import { useMetaStore } from "~/stores/metaStore";
@@ -42,6 +21,8 @@ import { GameState } from "~/stores/types/GameState";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { BaseStats, GrowthRate } from "~/logic/PokeDataTypes";
 import { status_penalty } from "~/logic/statusPenalty";
+import { formatStage } from "~/core/logic/statFormat";
+import { statHeaders } from "~/games/gen1/playerPanel";
 
 type StatObject = {
     /**
@@ -81,6 +62,7 @@ const VITAMIN_MAPS = new Set([
 ]);
 
 export default defineComponent({
+    components: { StatTiles },
     data() {
         return {
             /** Provided by the `frontend` component. */
@@ -124,8 +106,8 @@ export default defineComponent({
         stats_header(): string {
             switch (this.settings.left_panel.stats.mode) {
                 case "Base Stats":   return 'Base Stats'
-                case "DVs":          return `${this.meta.starter}'s DVs`
-                case "EVs":          return 'Stat Experience'
+                case "DVs":          return statHeaders.individual
+                case "EVs":          return statHeaders.effort
                 case "Detailed EVs": return 'Detailed Stat Experience'
                 case "Automatic":    {
                     if (this.meta.gameState === GameState.no_pokemon) {
@@ -134,8 +116,8 @@ export default defineComponent({
                     return `Level ${this.game_properties.player.team[0].level.value}`
                 }
                 case "Badge Boosts": return 'Badge Boosts'
-                case "Averages":     return 'Gen1 Average Stats'
-                case "Medians":      return 'Gen1 Median Stats'
+                case "Averages":     return statHeaders.averages
+                case "Medians":      return statHeaders.medians
                 case "Vitamins":     return 'Vitamins'
                 default:             return 'Base Stats'
             }
@@ -156,6 +138,68 @@ export default defineComponent({
                 result[stat.base_stat_key] = this.average_stats(stat.base_stat_key);
             }
             return result;
+        },
+        /**
+         * The stat tiles (core/overlay/player/StatTiles.ts): one `.stat` per stat with its stage modifier (in
+         * battle), label and the current mode's value cells. Each value is worked out once here per change.
+         */
+        tiles(): StatChild[] {
+            const mode = this.display_mode;
+            const battle = this.meta.gameState == GameState.in_battle;
+            const opacity = this.statLabelOpacity();
+            return this.stat_object.map((stat): StatNode => {
+                const cells: StatChild[] = [];
+                if (stat.name != 'Hp' && battle) {
+                    const stage = this.game_properties.battle.yourPokemon['modStage' + stat.mod_path];
+                    cells.push({ key: "mod", class: "stat_label mod_style", text: this.mod_stage_label(stage) });
+                }
+                cells.push({ class: "stat_label", style: { opacity: opacity[stat.name] }, text: stat.label });
+                const value = (key: string, cls: string, text: unknown): StatNode => ({ key, class: `stat_value${cls}`, text });
+                const party = () => this.game_properties.player.team[0];
+                const statExp = () => party()['statExp' + stat.name].value;
+                switch (mode as string) {
+                    case 'Base Stats': cells.push(value("base", "", this.base_stats(stat.base_stat_key))); break;
+                    case 'Averages':   cells.push(value("mean", "", this.stat_averages[stat.base_stat_key].mean)); break;
+                    case 'Medians':    cells.push(value("median", "", this.stat_averages[stat.base_stat_key].median)); break;
+                    case 'DVs':        cells.push(value("dv", " dv", toDisplayString(this.get_dv(stat.name)) + "/15")); break;
+                    case 'EVs':        cells.push(value("ev", " stat_exp", statExp())); break;
+                    case 'Automatic':  cells.push(value("auto", "", this.get_stat(stat.name))); break;
+                    case 'Vitamins':
+                        cells.push(
+                            { key: "vit1", class: "stat_value stat_multi_line devs2", children: [
+                                { tag: "span", style: "opacity: .7;", text: stat.vitamin },
+                            ] },
+                            { key: "vit2", class: "stat_value stat_multi_line percentage_evs2", style: "font-size: 21px;", children: [
+                                { tag: "span", style: "font-size: 31px;", text: this.usable_vitamins(party()[stat.statExpPath].value) },
+                                { tag: "span", style: "font-size: 15px;", text: "/10" },
+                            ] },
+                            { key: "vit3", class: "stat_value stat_multi_line ev_stats_gained2", children: [
+                                toDisplayString(statExp()),
+                                { tag: "span", style: "font-size: 13px;", text: "/65535" },
+                            ] },
+                        );
+                        break;
+                    case 'Detailed EVs': {
+                        const exp = statExp();
+                        cells.push(
+                            value("dev1", " stat_multi_line devs", toDisplayString(exp) + "/65535"),
+                            value("dev2", " stat_multi_line percentage_evs", toDisplayString(this.decimalToPercentage(exp / 65535)) + "%"),
+                            value("dev3", " stat_multi_line ev_stats_gained", "Stats: " + toDisplayString(Math.floor(Math.sqrt(exp) / 4))),
+                        );
+                        break;
+                    }
+                    case 'Badge Boosts': {
+                        const own = party()[stat.path].value;
+                        cells.push(
+                            value("bb1", " stat_multi_line devs", "Stat: " + toDisplayString(own)),
+                            value("bb2", " stat_multi_line percentage_evs", "Boost: " + toDisplayString(this.get_bb_stat(stat.name))),
+                            value("bb3", " stat_multi_line ev_stats_gained", "+" + toDisplayString((this.get_stat(stat.name, false) - own) / own * 100) + "%"),
+                        );
+                        break;
+                    }
+                }
+                return { class: "stat", children: cells };
+            });
         },
     },
     methods: {
@@ -334,13 +378,7 @@ export default defineComponent({
         },
         /** Converts the mod stage value to `" "` for 0 or null or a signed number string otherwise. */
         mod_stage_label(property: GameHookProperty): string {
-            if (!property || property.value === "0") {
-                return " ";
-            }
-            if (parseInt(property.value) > 0) {
-                return "+" + property.value;
-            }
-            return property.value;
+            return formatStage(property?.value, " ");
         },
         /**
          * Switch to the vitamins view when entering a shop that sells them and switch back to whatever was

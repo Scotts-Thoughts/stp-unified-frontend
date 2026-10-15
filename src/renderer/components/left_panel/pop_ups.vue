@@ -1,27 +1,9 @@
 
 <template>
     <div v-if="battle_fade == true && (meta.gameState == 'Battle' || meta.gameState == 'From Battle')">
-        <transition name="fade">
-            <div v-if="game_properties.battle.yourPokemon.modStageAccuracy.bytes[0] != 0x07 && game_properties.battle.yourPokemon.modStageAccuracy.bytes[0] != 0x00 && game_properties.battle.yourPokemon.modStageAccuracy.bytes[0] != 0xFF">
-                <div class="tinted-box" style="--url: url(images/ui/accuracy.svg)"></div>
-                <div class="accuracyLabel">accuracy</div>
-                <div class="popUpsStyle accuracyMod">{{ sign(game_properties.battle.yourPokemon.modStageAccuracy.value) }}</div>
-            </div>
-        </transition>
-        <transition name="fade">
-            <div v-if="game_properties.battle.yourPokemon.modStageEvasion.bytes[0] != 0x07 && game_properties.battle.yourPokemon.modStageEvasion.bytes[0] != 0x00 && game_properties.battle.yourPokemon.modStageEvasion.bytes[0] != 0xFF">
-                <div class="tinted-box" style="--url: url(images/ui/evasion.svg)"></div>
-                <div class="evasionLabel2">evasion</div>
-                <div class="popUpsStyle evasionMod">{{ sign(game_properties.battle.yourPokemon.modStageEvasion.value) }}</div>
-            </div>
-        </transition>
-        <transition name="fade">
-            <div v-if="game_properties.battle.yourPokemon.effects.reflect.bytes[0] != 0xFF && (game_properties.battle.yourPokemon.effects.reflect.value == true || game_properties.battle.yourPokemon.effects.lightScreen.value == true)">
-                <div class="tinted-box"  style="--url: url(images/ui/screens.svg)"></div>
-                <div class="screensLabel">{{screen[2]}}</div>
-                <div class="popUpsStyle screensValue" :style="screen[1]">{{ screen[0] }}</div>
-            </div>
-        </transition>
+        <popup-box v-bind="boxes.accuracy"></popup-box>
+        <popup-box v-bind="boxes.evasion"></popup-box>
+        <popup-box v-bind="boxes.screens"></popup-box>
     </div>
 </template>
 
@@ -29,23 +11,36 @@
 import { defineComponent, inject } from "vue";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { useMetaStore } from "~/stores/metaStore";
+import { PopupBox, type PopupBoxProps } from "~/core/overlay/player/PopupBox";
+import { popupBoxes } from "~/games/gen1/playerPanel";
+import { formatStage } from "~/core/logic/statFormat";
+
+/** A stage byte the battle structure holds when no stage is set (0x07 is stage 0; 0x00 / 0xFF: not in a battle yet). */
+const noStage = (byte: number) => byte == 0x07 || byte == 0x00 || byte == 0xFF;
 
 export default defineComponent({
+    components: { PopupBox },
     data() {
         return { 
             game_properties: inject<Record<string, GameHookProperty>>("game_properties", {}),
             meta: useMetaStore(),
         }
     },
-    methods: {
-        sign(value) {
-            if (value > 0) {
-                return "+" + value
-            }
-            return value
-        },
-    },
     computed: {
+        /** The three boxes' props (games/gen1/playerPanel.ts popupBoxes), worked out once per change. */
+        boxes(): Record<"accuracy" | "evasion" | "screens", PopupBoxProps> {
+            const mon = this.game_properties.battle.yourPokemon;
+            const accuracy = !noStage(mon.modStageAccuracy.bytes[0]);
+            const evasion = !noStage(mon.modStageEvasion.bytes[0]);
+            const screens = mon.effects.reflect.bytes[0] != 0xFF && (mon.effects.reflect.value == true || mon.effects.lightScreen.value == true);
+            return {
+                accuracy: { ...popupBoxes.accuracy, shown: accuracy, value: accuracy ? formatStage(mon.modStageAccuracy.value) : null },
+                evasion: { ...popupBoxes.evasion, shown: evasion, value: evasion ? formatStage(mon.modStageEvasion.value) : null },
+                screens: screens
+                    ? { ...popupBoxes.screens, shown: true, label: this.screen[2], value: this.screen[0], valueStyle: this.screen[1] }
+                    : { ...popupBoxes.screens, shown: false },
+            };
+        },
         battle_fade() {
             const trainerClasses = ["LORELEI", "BRUNO", "AGATHA", "LANCE", "RIVAL3"];
             const validStates = ["To Battle", "From Battle"];

@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, linkSync, mkdirSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { app } from "electron";
 import { isGlobalKey, parseUserStateFile, serializeUserState, type UserStateSections } from "../shared/userStateFormat";
@@ -41,11 +41,70 @@ export function ensureImagePool(): void {
     if (!app.isPackaged) return;
     const link = join(app.getAppPath(), "out", "renderer", "images");
     const pool = join(process.resourcesPath, "images");
-    if (existsSync(link) || !existsSync(pool)) return;
+    if (!existsSync(pool)) return;
+    restoreImageCopies(pool);
+    if (existsSync(link)) return;
     try {
         symlinkSync(pool, link, "junction");
     } catch (err) {
         console.error(`[images] could not junction ${link} -> ${pool}:`, err);
+    }
+}
+
+/**
+ * The package ships each identical image once (tools/build/after-pack.mjs), listing
+ * every group of identical files in `resources/image-copies.json`, the kept file
+ * first. This puts the dropped copies back where the renderer looks for them: as
+ * hard links (a second name for the same file, no extra disk space) or, on a drive
+ * that has none (FAT/exFAT), as plain copies. Copies already there are skipped, so
+ * after the first launch this only checks: one listing per folder, ~6 ms for 2,488
+ * copies in 68 folders, where an existsSync per copy took ~60 ms on every launch.
+ */
+function restoreImageCopies(pool: string): void {
+    const manifest = join(process.resourcesPath, "image-copies.json");
+    if (!existsSync(manifest)) return;
+    let groups: string[][];
+    try {
+        groups = JSON.parse(readFileSync(manifest, "utf-8")).copies;
+    } catch (err) {
+        console.error(`[images] could not read ${manifest}:`, err);
+        return;
+    }
+    const listings = new Map<string, Set<string>>();
+    const present = (relative: string): boolean => {
+        const slash = relative.lastIndexOf("/");
+        const folder = slash < 0 ? "" : relative.slice(0, slash);
+        let names = listings.get(folder);
+        if (!names) {
+            names = new Set(existsSync(join(pool, folder)) ? readdirSync(join(pool, folder)) : []);
+            listings.set(folder, names);
+        }
+        return names.has(relative.slice(slash + 1));
+    };
+    let linked = 0;
+    let copied = 0;
+    let failed = 0;
+    for (const [kept, ...copies] of groups) {
+        for (const copy of copies) {
+            if (present(copy)) continue;
+            const target = join(pool, copy);
+            try {
+                mkdirSync(dirname(target), { recursive: true });
+                try {
+                    linkSync(join(pool, kept), target);
+                    linked++;
+                } catch {
+                    copyFileSync(join(pool, kept), target);
+                    copied++;
+                }
+            } catch (err) {
+                failed++;
+                console.error(`[images] could not restore ${copy} from ${kept}:`, err);
+            }
+        }
+    }
+    if (linked || copied || failed) {
+        console.log(`[images] restored duplicate images: ${linked} hard-linked, ${copied} copied${failed ? `, ${failed} failed` : ""}`);
     }
 }
 

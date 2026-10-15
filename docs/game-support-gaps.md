@@ -281,7 +281,7 @@ The D/P mapper's `<patch>` block (line 799) is a stub: one live property, the re
 | `platinum_moves` / `g4MoveData` / `g4tmhmMapping` / `misc/tmhm.js` | shared; move stats and the TM list are the same across gen4 |
 | `trainerData()` (`:3432`) | returns `undefined` for D/P (and HGSS); `getTrainer` (`:6144`) would throw |
 | `get_trainer_name` (`:3969`) | Platinum's id table: D/P has no Lake Verity rival (850–852), so D/P's first rival (247–249) is labelled "Rival 2" and each later one is off by one; D/P's two Cyrus fights (403 HQ, 404 Spear Pillar) are labelled "Cyrus 2" / "Cyrus 3"; 913 / 926 / 927 do not exist in D/P |
-| box art, icon, split folder | present (`4-DiamondandPearl.jpg`, `gen4/icon-diamond.ico`, `DP`) |
+| box art, icon, split folder | present (`box_art/4-DiamondPearl.webp`, `gen4/icon-diamond.ico`, `DP`) |
 
 ### 6. What D/P support needs, in order
 

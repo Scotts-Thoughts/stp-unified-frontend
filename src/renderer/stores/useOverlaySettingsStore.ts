@@ -5,6 +5,7 @@ import { deepMerge } from "./helper/merge";
 import { StatsPanelMode } from "./types/StatsPanelMode";
 import { RightPanelMode } from "./types/RightPanelMode";
 import { SplitsMode } from "./types/SplitsMode";
+import { readRightPanelMode } from "~/core/overlay/rightPanelMode";
 import { OverlayPopupSettings } from "./types/OverlayPopupSettings";
 import { BonksSettings } from "./types/BonksSettings";
 
@@ -65,13 +66,17 @@ export const useOverlaySettingsStore = defineStore('overlay_settings', {
 			const merged = deepMerge(defaultOverlaySettings(), loaded);
 			// A file written before save() dropped the override still carries it.
 			merged.visualization.right_panel.mode_override = null;
+			// An unknown or old mode reads as Automatic (core/overlay/rightPanelMode.ts, decision 27).
+			merged.visualization.right_panel.mode = readRightPanelMode(merged.visualization.right_panel.mode).mode as RightPanelMode;
 			// Replace the state in one go so that subscribers get a single, synchronous notification.
 			this.$patch((state) => { Object.assign(state, merged); });
 		},
 		setRightPanelOverride(mode: RightPanelMode) {
 			this.visualization.right_panel.mode_override = mode;
 		},
+		/** The operator's pick: it becomes the preference, and a post-battle Splits override gives way to it. */
 		setRightPanelMode(mode: RightPanelMode) {
+			this.visualization.right_panel.mode_override = null;
 			this.visualization.right_panel.mode = mode;
 		},
 		setStatsPanelMode(mode: StatsPanelMode) {
@@ -127,6 +132,12 @@ function defaultOverlaySettings() {
 		 * boot, so `settings/encounters.vue` writes it again whenever the ROM disagrees.
 		 */
 		guaranteed_catches: false as boolean,
+		/**
+		 * "Show Advanced Settings" in the settings panel (games/gen1/settingsPanel.ts, 2026-10-14):
+		 * Super Shuckie, Automatic Post-Battle Splits, the Pokemon Editor and the dev-only run modes
+		 * sit under it, as in gens 2-5. Only what the panel shows; shortcuts work either way.
+		 */
+		show_advanced_settings: false as boolean,
 		starter_search: "",
 		keyboard_shortcuts: {},
 		visualization: {
@@ -160,11 +171,18 @@ function defaultOverlaySettings() {
 				/** Whether or not to show battle details in the right panel (on mode == Automatic) on wild pokemon encounters */
 				wild_battles: false as boolean,
 				/** Movepool settings */
-				movepool: {},
+				movepool: {
+					/**
+					 * When the movepool crosses out moves Scott's run rules ban (gen1: Double Team only,
+					 * decision 15d). The options and default are gens 2-5's `unobtainable_moves_toggle`;
+					 * the list is `games/gen1/data/unobtainable_moves.ts`, read by `right_panel/move_pool.vue`.
+					 */
+					unobtainable_moves: "Always Cross Out" as string,
+				},
 				/** Splits settings */
 				splits: { mode: SplitsMode.first },
-				/** Trainer battle settings */
-				trainer: {},
+				/** Trainer battle settings; `examined` is the trainer the "Trainers" mode previews (a key of data/trainers/). */
+				trainer: { examined: "" as string },
 				/** Wild encounter battle settings */
 				wild_pokemon: {},
 				/** Inventory settings */

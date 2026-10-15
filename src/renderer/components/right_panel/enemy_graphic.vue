@@ -1,85 +1,10 @@
 
+
 <template>
 <div>
-    <div class="trainerLabel">{{capitalize_words(fixTrainerName(battle.trainer.class.value, battle.trainer.number))}}</div>
-    <div class="tinted-box" :style="battle_pokemon_crop" style="--url: url(images/ui/opponent.svg);"></div>
-    <div class="enemyGraphic">
-        <div v-for="[x, pokemon] in party" class="ePkmnStyle">
-            <img v-if="meta.game == 'Yellow'" class="ePkmnSprite"
-                :class="{ ePkmnSpriteResizing: resize.resize.slot === x }"
-                :data-enemy-slot="x"
-                :data-enemy-species="game_properties.battle.trainer.team[x]?.species?.value"
-                :style="[pokemon.style.faint, { transform: resize.transformFor(game_properties.battle.trainer.team[x]?.species?.value) }]"
-                :src="'images/pokemon/' + game_properties.battle.trainer.team[x]?.species + '.webp'"/>
-            <img v-else-if="meta.game == 'Red and Blue'" class="ePkmnSprite"
-                :class="{ ePkmnSpriteResizing: resize.resize.slot === x }"
-                :data-enemy-slot="x"
-                :data-enemy-species="game_properties.battle.trainer.team[x]?.species?.value"
-                :style="[pokemon.style.faint, { transform: resize.transformFor(game_properties.battle.trainer.team[x]?.species?.value) }]"
-                :src="'images/pokemon/Red_and_Blue/' + game_properties.battle.trainer.team[x]?.species + '.webp'"/>
-            <div class="ePkmnSpecies opacityTransition" :style="pokemon.style.species">{{game_properties.battle.trainer.team[x]?.species}}</div>
-            <div class="ePkmnLevel opacityTransition" :style="pokemon.style.species">Lv:{{game_properties.battle.trainer.team[x]?.level}}</div>
-            <img class="ePkmnTypeIcons ePkmnType_1 ds opacityTransition" :style="enemy_pkmn_faint_types(battle.trainer.team[x])" :src="'images/elements/type-icons/' + enemyType1(x).toLowerCase() + '.webp'"/>
-            <img v-if="enemyType1(x) != enemyType2(x)" :style="enemy_pkmn_faint_types(battle.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_2 ds opacityTransition" :src="'images/elements/type-icons/' + enemyType2(x).toLowerCase() + '.webp'"/>
-            <img v-if="enemyType3(x) == 'Ghost'" :style="enemy_pkmn_faint_types(battle.trainer.team[x])" class="ePkmnTypeIcons ePkmnType_3 ds opacityTransition" :src="'images/elements/type-icons/ghost.webp'"/>
-            
-            <!-- Moves -->
-            <img class="canvas" :class="svgColorClass(speed_comparison(x, activeSlot(x,battle.enemyPokemon.partyPos.value,'speed',game_properties.battle.trainer.team[x]?.speed,'enemyPokemon')).comparison, battle.trainer.team[x])" :src="'images/ui/speed_comp/' + x + '.svg'"/>
-            <img 
-                class="enemyStatsArea opacityTransition" 
-                :style="pokemon.style.faint_stats_background" 
-                :src="'images/stats/' + x + '.svg'"
-            />
-
-            <div v-for="move_index in [0, 1, 2, 3]">
-                <img v-if="game_properties.battle.trainer.team[x]['move' + (move_index + 1)]?.value != null" 
-                    :class="'ds eMoveIconStyle moveIcon' + (move_index + 1) + ' opacityTransition'" 
-                    :style="enemy_pkmn_faint_types(battle.trainer.team[x])" 
-                    :src="move_icon(game_properties.battle.trainer.team[x]['move' + (move_index + 1)]?.value)"
-                />
-                <div :class="'ePkmnMoveStyle ePkmnMove' + (move_index + 1) + ' opacityTransition'" 
-                    :style="pokemon.style.text">
-                    {{move_name(game_properties.battle.trainer.team[x]['move' + (move_index + 1)]?.value)}}
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="ePkmnStatLabelStyle ePkmnLabelHp   opacityTransition" :style="stat_mod(0, x).style"                                           >HP</div>
-            <div class="ePkmnStatLabelStyle ePkmnLabelAtk  opacityTransition" :style="stat_mod(battle.enemyPokemon.modEnemyStageAttack.value, x).style" >Atk.</div>
-            <div class="ePkmnStatLabelStyle ePkmnLabelDef  opacityTransition" :style="stat_mod(battle.enemyPokemon.modEnemyStageDefense.value, x).style">Def.</div>
-            <div class="ePkmnStatLabelStyle ePkmnLabelSpc  opacityTransition" :style="stat_mod(battle.enemyPokemon.modEnemyStageSpecial.value, x).style">Spc.</div>
-            <div class="ePkmnStatLabelStyle ePkmnLabelSpe  opacityTransition" :style="stat_mod(battle.enemyPokemon.modEnemyStageSpeed.value, x).style"  >Spe.</div>
-            <div class="ePkmnStatLabelStyle ePkmnLabelCrit opacityTransition" :style="stat_mod(0, x).style"                                           >Crit.</div>
-
-            <div class="ePkmnStatsStyle ePkmnHp   opacityTransition" :style="pokemon.style.text">{{game_properties.battle.trainer.team[x]?.maxHp}}</div>
-            <div class="ePkmnStatsStyle ePkmnAtk  opacityTransition" :style="pokemon.style.text">{{activeSlot(x,battle.enemyPokemon.partyPos.value,"attack",game_properties.battle.trainer.team[x]?.attack,"enemyPokemon")}}</div>
-            <div class="ePkmnStatsStyle ePkmnDef  opacityTransition" :style="pokemon.style.text">{{activeSlot(x,battle.enemyPokemon.partyPos.value,"defense",game_properties.battle.trainer.team[x]?.defense,"enemyPokemon")}}</div>
-            <div class="ePkmnStatsStyle ePkmnSpc  opacityTransition" :style="pokemon.style.text">{{activeSlot(x,battle.enemyPokemon.partyPos.value,"speed",game_properties.battle.trainer.team[x]?.speed,"enemyPokemon")}}</div>
-            <div class="ePkmnStatsStyle ePkmnSpe  opacityTransition" :style="pokemon.style.text">{{activeSlot(x,battle.enemyPokemon.partyPos.value,"special",game_properties.battle.trainer.team[x]?.special,"enemyPokemon")}}</div>
-            <div class="ePkmnStatsStyle ePkmnCrit opacityTransition" :style="pokemon.style.text">{{enemy_crit_rate(game_properties.battle.trainer.team[x], x)}}%</div>
-        
-            <!-- Modifiers -->
-            <div v-for="mod in [
-                ['modEnemyStageAttack',  'Atk',],
-                ['modEnemyStageDefense', 'Def',],
-                ['modEnemyStageSpecial', 'Spc',],
-                ['modEnemyStageSpeed',   'Spd',],
-            ]">
-                <div v-show="(meta.enemyState == 'Pokemon' || meta.enemyState == 'Pokemon Sent Out' || meta.enemyState == 'Fainting') && battle.enemyPokemon.partyPos.value == x && battle.enemyPokemon[mod[0]].value != '0'" 
-                :class="'ePkmnModsStyle ePkmnMod' + mod[1]">
-                    {{stat_mod(battle.enemyPokemon[mod[0]].value, x).mod}}
-                </div>
-            </div>
-            <div>
-                <transition name="fade">
-                    <div v-show="overlay.right_panel.speed_comparison" :style="pokemon.style.text" class="speed_comparison">{{speed_comparison(x, activeSlot(x,battle.enemyPokemon.partyPos.value,'speed',game_properties.battle.trainer.team[x]?.speed,'enemyPokemon')).comparison}}</div>
-                </transition>
-            </div>
-        </div>
-    </div> 
-    <div v-if="showtrainerArtwork" style="position: absolute;" key=1>
-        <img class="canvas" :src="trainer_artwork()"/>
-    </div>
+    <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in games/gen1/enemyPanel.ts. A slot whose data
+         hasn't arrived yet would show "null" and "Lv:0"; it is hidden like gen2's (v-show keeps it in the DOM). -->
+    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" />
 </div>
 </template>
 
@@ -89,14 +14,21 @@ import PokeData from "~/logic/PokeData";
 import { status_penalty } from "~/logic/statusPenalty";
 import { capitalize_words, move_name } from "../../methods/text_functions";
 import { useMetaStore } from "~/stores/metaStore";
+import { formatStage } from "~/core/logic/statFormat";
 import { defineComponent, inject } from "vue";
 import {  useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
+import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
+import { speedColorClass, speedLabel, speedLabelOrder, speedOrder } from "~/core/logic/speedLabel";
+import { enemyTeamLayout, enemyTeamView, trainerPreviewView, type Gen1EnemyTeam } from "~/games/gen1/enemyPanel";
 export default defineComponent({
     name: "EnemyGraphics",
+    components: { EnemyTeamPanel },
     props: [
         "enemy_pkmn_faint_types",
+        /** The right panel's "Trainers" mode: `{ key, trainer }` of the picked trainer (core/logic/trainerPreview.ts). */
+        "preview",
     ],
     data() {
         return {
@@ -107,6 +39,13 @@ export default defineComponent({
         }
     },
     computed: {
+        /** What the enemy team panel shows, worked out once per change (games/gen1/enemyPanel.ts). */
+        enemy_team_view(): Gen1EnemyTeam {
+            return this.preview ? trainerPreviewView(this, this.preview.trainer, this.preview.key) : enemyTeamView(this);
+        },
+        enemy_team_layout() {
+            return enemyTeamLayout;
+        },
         showtrainerArtwork() {
             // TODO: I think this logic can be drastically simplified, but i'm not sure. - Ion.
             return this.trainer_artwork() != null 
@@ -114,7 +53,7 @@ export default defineComponent({
                 && this.meta.gameState != 'Overworld' 
                 && this.meta.gameState != 'From Battle' 
                 && (this.game_properties.battle.type as unknown  as GameHookProperty).value == 'Trainer' 
-                && this.overlay.right_panel.mode === 'Automatic';
+                && (this.overlay.right_panel.mode === 'Automatic' || this.overlay.right_panel.mode === 'Trainers');
         },
         party() {
             const result: any[] = [];
@@ -133,7 +72,12 @@ export default defineComponent({
         },
         //Sets the crop on the UI image for the enemy team so that unused party slots are not present
         battle_pokemon_crop() {
-            const totalPokemon = this.game_properties.battle.trainer.totalPokemon.value;
+            return this.crop_for(this.game_properties.battle.trainer.totalPokemon.value);
+        },
+    },
+    methods: {
+        /** The panel art cut to a team of `totalPokemon`. */
+        crop_for(totalPokemon: number): string {
             const heights = {
                 1: "242px",
                 2: "402px",
@@ -144,8 +88,6 @@ export default defineComponent({
             };
             return `height: ${heights[totalPokemon] ?? "242px"};`;
         },
-    },
-    methods: {
         move_name,
         capitalize_words,
         get_enemy_pkmn_styles,
@@ -177,12 +119,12 @@ export default defineComponent({
                 comparison: "Outspeeds",
                 color: "background-color: rgba(255, 63, 63, 0.6)",
             }
-            if (player_speed > enemy_speed) {
-                object.comparison = "Outsped"
+            const order = speedOrder(player_speed, enemy_speed)
+            object.comparison = speedLabel(order, "enemy")
+            if (order > 0) {
                 object.color = "background-color: rgba(28, 255, 58, 0.4)"
             }
-            else if (player_speed == enemy_speed) {
-                object.comparison = "Speed-tie"
+            else if (order == 0) {
                 object.color = "background-color: rgba(255, 255, 0, 0.5)"
             }
             if (enemy_hp == 0) {
@@ -191,17 +133,7 @@ export default defineComponent({
             return object
         },
         svgColorClass(speed_comparison, enemy_data) {
-            const isFainted = enemy_data.hp.value
-            if (isFainted == 0) {
-                return 'grey-svg';
-            }
-            if (speed_comparison === 'Outsped') {
-                return 'blue-svg';
-            }
-            else if (speed_comparison === 'Speed-tie') {
-                return 'yellow-svg';
-            }
-            return 'red-svg';
+            return speedColorClass(speedLabelOrder(speed_comparison, "enemy") ?? -1, enemy_data.hp.value == 0);
         },
         fixTrainerName(trainerName, trainerNumber) {
             const gameName = this.meta.game;
@@ -291,20 +223,23 @@ export default defineComponent({
                 return "Normal"
             }
         },
+        /** False while a team slot's species hasn't arrived (null or empty), so the slot stays hidden. */
+        slot_has_species(slot: number): boolean {
+            const species = this.game_properties.battle.trainer.team[slot]?.species?.value;
+            return species != null && species !== "";
+        },
         stat_mod(modifer, slot) {
             let mod = modifer
-            let mod_string = ""
+            const mod_string = formatStage(mod)
             let style_string = ""
 
             if (mod == 0) {
                 style_string = 'opacity: .7;'
             }
             if (mod > 0) {
-                mod_string = `+${mod}`
                 style_string = 'opacity: .1;'
             }
             if (mod < 0) {
-                mod_string = mod
                 style_string = 'opacity: .1;'
             }
 

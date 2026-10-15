@@ -533,7 +533,9 @@ helper, the second screen, Style Mode, the backport importer, the item watchers.
 - Introduce a CSS custom property only when its value is already identical everywhere it is used.
 - Value differences between gens are **reported**, not fixed: selector, property, per-gen value, screenshot crop.
   Scott approves each; approved ones become tokens.
-- Font family, weight, style, and any structural change are never proposed.
+- ~~Font family, weight, style, and any structural change are never proposed.~~ Superseded 2026-10-14 (decision 26
+  is a guideline now): fonts, sizes and structure may be proposed and unified, operator UI freely, on-stream looks
+  with Scott's OK per item. `docs/ui-uniformity-plan.md` holds the list.
 - **[r2]** Templates move from Vue 3.2's in-browser compiler to Vue 3.5 SFC compilation. Both condense whitespace by
   default, but the harness's rect oracle is the arbiter; if a gen's inline layout depends on a whitespace text node,
   the SFC gets the explicit `whitespace: 'preserve'` compiler option for that component rather than a CSS tweak.
@@ -598,7 +600,14 @@ Nothing in this section blocks any phase any more.
     written at different stages -- are technical debt and are streamlined and standardised whenever possible, each fix
     its own commit after the no-change one. Approved now: the crash class (#32, #34, #35, #37), the split-row data
     class (#33, #36) and the persistence and folder class (#45 with a key migration, #2, #11). The rule is in `AGENTS.md` and `ARCHITECTURE.md` §11.
-26. Visual scope → **none**: visuals stay per generation through Phase 6; §4's value differences are a later phase.
+26. Visual scope → **a guideline, not a lock** (revised by Scott 2026-10-14; it was "none: visuals stay per
+    generation through Phase 6"). The project is moving away from rigid per-generation locks and toward uniform code
+    through refactoring. The aims: fewer lines in total, better performance, and a user experience as uniform as
+    possible across generations, while every control stays clear and does exactly what it did. A slice may make a
+    control or panel look and behave alike in every generation. Such a change is its own commit, never inside a
+    no-change move (the "a move and a rewrite never share a commit" rule still holds), and its harness diff must show
+    only the intended difference. A look that mirrors the game itself is a game quirk (decision 25) and stays. The
+    audit and order of work are in `docs/ui-uniformity-plan.md`.
 27. Pilot generation → **gen2**, then gen4, gen5, gen3; the recordings still to make follow that order after gen2's.
 
 **Resolved by me at Scott's request (2026-09-25; say so if either should change):**
@@ -1670,6 +1679,16 @@ bulk of the pool and the next place to look.
   under `resources/images`, every box-art tile loaded, no renderer errors. Its two failures predate this
   change: it still expects 13 tiles (the manifests have had 14 editions since `b7c64f7`/`6088f94`) and
   `resources/keyhook.exe` (removed from the repo in `5dce66a`).
+- **Textures keep full detail (Scott, 2026-10-14).** Don't downscale or lossy-re-encode the JPEG
+  textures, even though they are far larger than the 1920x1080 canvas (up to 13,440 px wide, 200% max
+  zoom). Size work must leave their pixels unchanged. Measured the same day: 1,401 MB of the 2,655 MB
+  pool is byte-identical copies across `genN/` folders (`textures` and `pokemon` mostly); the package
+  now ships each once (ARCHITECTURE §8, "Building the Windows package"). Lossless repacking was measured
+  the same day and isn't worth doing: `jpegtran -copy all -optimize` saves 0.3% of the 846 MB of JPEGs (their
+  tables are already near-optimal), `-progressive` saves 3% but makes the 60-megapixel textures slower to decode,
+  and re-encoding the WebPs at `cwebp -lossless -z 9` saves 0.03% (they are already at maximum effort). The same
+  pass deleted 28 images nothing can reach (32 MB, including the 22 MB `gen3/textures/Marble Caves.jpg`) and
+  turned zip compression on.
 
 ## Dead image references (2026-09-25)
 
@@ -1786,8 +1805,9 @@ gen1's shape, by name, so that a slice can say where a thing lands:
   keys, never mapper paths; a generation difference is data on the module (`features`, `data`, `hooks`, a profile)
   or a variant component, never a generation conditional in `core/`.
 - **CSS does not change**: the class names and ids stay on the same elements and `games/genN/style.css` stays
-  scoped under `.gen-N`, so every rule keeps matching. §4's fold-into-`base.css` work is not part of this phase, and
-  visuals stay per generation throughout (decision 26).
+  scoped under `.gen-N`, so every rule keeps matching, during a move. Folding shared rules into one stylesheet
+  and making the generations look alike are welcome as their own commits after the move (decision 26, a guideline
+  since 2026-10-14).
 
 ### 3. Where each part of a lifted overlay goes
 
@@ -2172,7 +2192,7 @@ In one place, what each changes:
 | 23 recordings alongside 6.1-6.3 | 6.0 runs in parallel; a logic slice waits per member for coverage |
 | 24 recordings committed | `tools/fixtures/<gen>/`, plain git |
 | 25 game quirks kept, code quirks fixed | the ledger classifies every row; three groups approved; the rule is in `AGENTS.md` and `ARCHITECTURE.md` §11 |
-| 26 visuals stay per generation | no §4 unification inside Phase 6 |
+| 26 visuals per generation: a guideline since 2026-10-14 | unifying look and behaviour is a goal, each change its own commit after the move (`docs/ui-uniformity-plan.md`) |
 | 27 gen2 pilots | slice order gen2, gen4, gen5, gen3; the remaining recordings in that order |
 | 28 `features.forms` true for gen3 and gen4 | 6.1 flips the flags |
 | 29 whitespace-normalised identity counts | 6.8's table moves |

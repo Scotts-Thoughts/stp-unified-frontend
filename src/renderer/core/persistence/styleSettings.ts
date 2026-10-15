@@ -96,6 +96,37 @@ export function writeStyleDefaultsFile(sourceDir: string, key: string, value: un
         .catch((e) => { if (log) console.error(`${tag} Failed to write default settings file:`, e?.message ?? e); });
 }
 
+/**
+ * gen4's `_scheduleWriteDefaultsFile`: one timer, reset by every edit, flushed on
+ * unload (when `flushOnUnload`). Per key here, because a key is a file; the legacy blob
+ * was one file. `writeNow(key)` runs when the key's timer fires, so it writes the value
+ * as it is then. No `delayMs` means every call writes at once. Used by this store and
+ * by gen3's own (`games/gen3/storage.ts`).
+ */
+export function createDebouncedStyleWriter(writeNow: (key: string) => void, delayMs: number | undefined, flushOnUnload: boolean): (key: string) => void {
+    const pendingWrites = new Map<string, ReturnType<typeof setTimeout>>();
+    const flushPendingWrites = (): void => {
+        for (const [key, timer] of pendingWrites) {
+            clearTimeout(timer);
+            writeNow(key);
+        }
+        pendingWrites.clear();
+    };
+    if (delayMs && flushOnUnload) window.addEventListener("beforeunload", flushPendingWrites);
+    return (key: string): void => {
+        if (!delayMs) {
+            writeNow(key);
+            return;
+        }
+        const pending = pendingWrites.get(key);
+        if (pending) clearTimeout(pending);
+        pendingWrites.set(key, setTimeout(() => {
+            pendingWrites.delete(key);
+            writeNow(key);
+        }, delayMs));
+    };
+}
+
 export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSettingsStore {
     const tag = options.tag ?? "[StyleSettingsManager]";
     const defaults = options.defaults;
@@ -104,31 +135,7 @@ export function createStyleSettingsStore(options: StyleSettingsOptions): StyleSe
     console.log(`${tag} Initialized in ${isDev ? "DEVELOPMENT" : "PRODUCTION"} mode`);
 
     const writeDefaultsFileNow = (key: string): void => writeStyleDefaultsFile(options.sourceDir, key, defaults[key], tag);
-
-    // gen4's `_scheduleWriteDefaultsFile`: one timer, reset by every edit, flushed on
-    // unload. Per key here, because a key is a file; the legacy blob was one file.
-    const pendingWrites = new Map<string, ReturnType<typeof setTimeout>>();
-    const flushPendingWrites = (): void => {
-        for (const [key, timer] of pendingWrites) {
-            clearTimeout(timer);
-            writeDefaultsFileNow(key);
-        }
-        pendingWrites.clear();
-    };
-    if (options.writeDebounceMs && !options.noUnloadFlush) window.addEventListener("beforeunload", flushPendingWrites);
-    const writeDefaultsFile = (key: string): void => {
-        const delay = options.writeDebounceMs;
-        if (!delay) {
-            writeDefaultsFileNow(key);
-            return;
-        }
-        const pending = pendingWrites.get(key);
-        if (pending) clearTimeout(pending);
-        pendingWrites.set(key, setTimeout(() => {
-            pendingWrites.delete(key);
-            writeDefaultsFileNow(key);
-        }, delay));
-    };
+    const writeDefaultsFile = createDebouncedStyleWriter(writeDefaultsFileNow, options.writeDebounceMs, !options.noUnloadFlush);
 
     /** gen4's "only persist style fields": the listed properties of `value`, or all of it. */
     const styleOnly = (value: Record<string, unknown>): Record<string, unknown> => {

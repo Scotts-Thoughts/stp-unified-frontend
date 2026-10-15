@@ -51,6 +51,7 @@ export const GEN5_STYLE_PROPERTIES: readonly string[] = [
     'backgroundScale',
     'backgroundUrl',
     'backgroundFlip',
+    'backgroundXFlip',
     'use_custom_background',
     'backgroundXOffset',
     'backgroundYOffset',

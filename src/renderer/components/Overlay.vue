@@ -77,8 +77,6 @@ export default defineComponent({
             split_data: [],
             split_logStr: "",
             simple_data_str: "",
-            full_data_str: "",
-            deprecated_data_str: "",
             simple_data: "",
             previous_splits: [],
             /** The file `previous_splits` came from (a replay or a CSV), for the settings panels. */

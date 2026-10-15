@@ -60,20 +60,18 @@
 		<div v-else-if="settings.right_panel_mode == 'Splits'" key=5>
 			<div key=3>
 				<div class="split_label">Splits</div>
-				<div v-if="settings.right_panel.splits.mode === 'Followup'">
-					<splits_followup :compare_splits :trainer_name_lookup />
-				</div>
-				<div v-else-if="settings.right_panel.splits.mode === 'First'">
-					<splits_first :current_splits :trainer_name_lookup />
-				</div>
-				<div v-else-if="settings.right_panel.splits.mode === 'Followup + Summary'">
-					<splits_summary :compare_splits :trainer_name_lookup :battle_summary_header />
+				<div v-if="splitsView">
+					<div><splits-panel :view="splitsView" /></div>
 				</div>
 			</div>
 		</div>		
-		<div v-else-if="settings.right_panel_mode == 'Automatic' && (meta.gameState == 'To Battle' || meta.gameState == 'Battle') && (battle_type == 'Trainer' || (battle_type == 'Wild' && settings.right_panel.wild_battles))" style="position: absolute;" key=1>
+		<div v-else-if="(settings.right_panel_mode == 'Automatic' || settings.right_panel_mode == 'Trainers') && (meta.gameState == 'To Battle' || meta.gameState == 'Battle') && (battle_type == 'Trainer' || (battle_type == 'Wild' && settings.right_panel.wild_battles))" style="position: absolute;" key=1>
 			<enemy_graphic v-if="(game_properties.battle.type as GameHookProperty).value == 'Trainer'" :enemy_pkmn_faint_types />
 			<wild_pokemon v-else-if="(game_properties.battle.type as GameHookProperty).value == 'Wild'"  :enemy_pkmn_faint_types />
+		</div>
+		<!-- Trainers (decision 14): the picked trainer's team in the enemy panel, outside a trainer battle. -->
+		<div v-else-if="settings.right_panel_mode == 'Trainers' && trainer_preview" style="position: absolute;" key=6>
+			<enemy_graphic :enemy_pkmn_faint_types :preview="trainer_preview" />
 		</div>
 		<div v-else key=3>
 			<movepool/>
@@ -88,23 +86,24 @@ import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { useMetaStore } from "~/stores/metaStore";
 import { trainer_name_lookup } from "~/autosplitter/trainer_name_lookup";
-import { convertDurationToSeconds, convertSecondsToDuration } from "~/utils/timehelpers";
+import { convertDurationToSeconds, convertSecondsToDuration, formatSplitTime } from "~/utils/timehelpers";
 import { split_trainers } from "~/games/gen1/data/splits";
+import { battle_summary } from "~/autosplitter/battle_summary";
+import { useBattleStore } from "~/stores/useBattleStore";
+import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
+import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
+import { splitDiffColor, splitsHead, type SplitsRow, type SplitsSummaryRow, type SplitsView } from "~/core/overlay/splitsView";
 import movepool from "./right_panel/move_pool.vue"
-import splits_followup from "./right_panel/splits_followup.vue"
-import splits_first from "./right_panel/splits_first.vue"
-import splits_summary from "./right_panel/splits_summary.vue"
 import enemy_graphic from "./right_panel/enemy_graphic.vue"
 import wild_pokemon from "./right_panel/wild_pokemon.vue"
 import PokeData from "~/logic/PokeData";
+import { gen1PreviewTrainer } from "~/games/gen1/enemyPanel";
 
 export default defineComponent({
 	props: [ "current_splits", "previous_splits", "collect_split_data"],
 	components: {
 		movepool,
-		splits_followup,
-		splits_first,
-		splits_summary,
+		SplitsPanel,
 		enemy_graphic,
 		wild_pokemon
 	},
@@ -113,6 +112,8 @@ export default defineComponent({
 			meta: useMetaStore(),
 			settings: useOverlaySettingsStore(),
 			resize: useEnemySpriteResizeStore(),
+			battle: useBattleStore(),
+			runConfig: useGameSpeciesData(),
 			game_properties: inject<Record<string, GameHookProperty>>("game_properties", {}),
 			trainer_name_lookup,
             battle_summary_header: "Battle Summary",
@@ -125,6 +126,10 @@ export default defineComponent({
 		}
 	},
 	computed: {
+		/** The trainer the "Trainers" mode previews (games/gen1/enemyPanel.ts), or null. */
+		trainer_preview() {
+			return gen1PreviewTrainer(this.meta.game, this.settings.right_panel.trainer.examined);
+		},
 		/** "Trainer", "Wild" or "None". */
 		battle_type(): string {
 			return (this.game_properties.battle?.type as unknown as GameHookProperty)?.value ?? "None";
@@ -167,8 +172,71 @@ export default defineComponent({
                     }
                 }
             }
-            return result            
+            return result
         },
+		/** The "first run" rows: completed splits, then the ones still to come (plan 1.1). */
+		first_splits(): { trainer: string; current_time: string }[] {
+			const game = this.game_properties.meta.gameName.value;
+			const optional = ["Rival1a-Route 22"];
+			const completedSplits = this.current_splits
+				.filter(split => split_trainers[game].includes(split.trainer))
+				.map(split => { return { trainer: split.trainer, current_time: formatSplitTime(split.time) } });
+			const upcomingSplits = split_trainers[game]
+				.filter(trainer => !optional.includes(trainer))
+				.filter(trainer => !completedSplits.some(split => split.trainer === trainer))
+				.map(x => ({ trainer: x, current_time: "-" }));
+			return [
+				...completedSplits,
+				...upcomingSplits
+			];
+		},
+		/** What the shared Splits panel (core/overlay/SplitsPanel.vue) shows in the chosen mode, if any. */
+		splitsView(): SplitsView | undefined {
+			const mode: string = this.settings.right_panel.splits.mode;
+			if (mode !== "First" && mode !== "Followup" && mode !== "Followup + Summary") return undefined;
+			const lookup = this.trainer_name_lookup;
+			const type = (PokeData.findSpecies(this.meta.starter)?.type_2 ?? "Normal").toLowerCase();
+			const labels = this.runConfig.config.labels;
+			const icon = (trainer: string) => 'images/split_images/' + lookup.basic[trainer]?.trainer + '.webp';
+			const compared: any[] = this.compare_splits ?? [];
+			const view: SplitsView = {
+				table: mode === "Followup + Summary" ? { class: "splits_table_old" } : { class: "splits_table", icon: { cellClass: "scaled_icon" } },
+				head: splitsHead(mode, labels.split_previous, labels.split_current),
+				headerColor: `var(--${type})`,
+				rows: mode === "First"
+					? this.first_splits.map((split): SplitsRow => ({
+						icon: icon(split.trainer),
+						cells: [lookup.detailed[split.trainer]?.trainer, "", "", split.current_time],
+					}))
+					: compared.map((split): SplitsRow => ({
+						icon: mode === "Followup" ? icon(split.trainer) : undefined,
+						cells: [lookup.basic[split.trainer]?.trainer, split.previous_time, split.current_time, split.difference],
+						diffStyle: splitDiffColor(split.difference),
+					})),
+				art: { class: "tinted-box", style: "--url: url(images/ui/movepool.svg)" },
+			};
+			if (mode === "Followup + Summary") {
+				const stats = this.battle.statistics as Record<string, any>;
+				const metric = (stat: { name: string; data_name: string }): SplitsSummaryRow =>
+					({ label: [stat.name], value: stats[stat.data_name] != 0 ? stats[stat.data_name] : "-" });
+				view.summary = {
+					header: this.battle_summary_header,
+					labelFirst: true,
+					sectionClass: `background-${type}`,
+					rows: [
+						{ label: ["Battle Duration", "(real-time)"], value: stats.battle_duration ? stats.battle_duration : "-" },
+						{ label: ["Experience Per Second"], value: stats.exp_per_second != 0 ? stats.exp_per_second : "-" },
+						...battle_summary.global.map(metric),
+						{ section: "Player:" },
+						...battle_summary.player.map(metric),
+						{ section: "Enemy:" },
+						...battle_summary.enemy.map(metric),
+					],
+				};
+				view.art = { class: "tinted-box", style: "--url: url(images/ui/ui_splits.svg)" };
+			}
+			return view;
+		},
 	},
 	methods: {
 		enemy_pkmn_faint_types(pkmnData) {

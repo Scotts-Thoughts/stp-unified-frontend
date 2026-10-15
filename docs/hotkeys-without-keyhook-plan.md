@@ -1,7 +1,20 @@
 # Hotkeys without keyhook.exe — plan
 
-Status: **proposed, not started** (written 2026-10-13). One decision is still open (§2); settle it with Scott
-before starting.
+Status: **option B built 2026-10-14** (`src/main/hotkeys.ts`, `uiohook-napi` 1.5.5). Option A was built first
+(2026-10-13), but `globalShortcut` took F24 from Super Shuckie, which Scott pauses with it, so §2's answer is B.
+§6 was written for the old `KeyHook` VK-code stream, which the shortcuts menu has since replaced: main now builds
+an accelerator from each hook key-down (keycode -> key name, plus the event's Ctrl/Alt/Shift/Meta flags) and
+matches it exactly against what the overlay bound. A key-down of a key already down is an auto-repeat and is
+ignored, so a hold fires once. The notes below on option A are kept for the reasoning.
+
+What the build found (§4 step 2, keys injected with `keybd_event` into a harness-driven gen1 run):
+- every key registered; presses arrive as a down/up pair, and a second press of a key works;
+- **Electron fires on every auto-repeat** (a 10-repeat hold gave 10 triggers), so main drops a press within
+  200 ms of the same key's previous one. A realistic hold (500 ms delay, then 33 ms repeats) now fires twice,
+  and two taps 300 ms apart fire twice. Option B would get this exactly right (one trigger), since it sees key-up;
+- the built renderer is byte-identical with and without the change (all 1,084 files in `out/renderer`), so no
+  harness oracle can differ;
+- not run: `packaged:probe` (needs a fresh `build:unpack`), and the Mac.
 
 ## 1. Why
 

@@ -1,6 +1,6 @@
 import type { Component } from "vue";
 import type { MapperProfile } from "../mapper/MapperProfile";
-import type { HotkeyTable } from "../hotkeys/KeyHook";
+import type { ShortcutAction } from "../shortcuts/types";
 import type { ControlRoutes } from "../control/useControlServer";
 
 /**
@@ -92,11 +92,12 @@ export interface GameModule {
         [table: string]: unknown;
     };
     /**
-     * The F-key table main.ts binds while this module is active. A lifted module
-     * (gen2-5) binds its own table from its overlay's `mounted`, because the handlers
-     * close over the component instance, and returns `{}` here.
+     * The shortcut actions the shell binds while this module is active
+     * (core/shortcuts/Shortcuts.vue, docs/shortcuts-menu-plan.md). Only gen1 has it: a
+     * lifted module (gen2-5) binds its own from its overlay's `mounted`
+     * (`games/genN/actions.ts`), because the actions close over the component instance.
      */
-    hotkeys(): HotkeyTable;
+    shortcuts?(): ShortcutAction[];
     control(ctx: ControlContext): ControlRoutes;
     chapterMarkers: ChapterMarkers;
     /** The overlay component main.ts mounts once the mapper is detected. */
@@ -111,7 +112,7 @@ export interface GameModule {
     appClass?: string;
     /**
      * gen1's legacy keyhook was a Vue component that rendered an empty `<div>` as
-     * `#app`'s first child, and the layout oracle sees it (core/hotkeys/Hotkeys.vue).
+     * `#app`'s first child, and the layout oracle sees it (core/shortcuts/Shortcuts.vue).
      * Only gen1 sets this: under gen3 that div would take the grid's first cell.
      */
     keyhookElement?: boolean;

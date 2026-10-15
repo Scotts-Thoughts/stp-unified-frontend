@@ -209,7 +209,6 @@ export const auto_save_settings = [
     "pokemon_recalculator",
     "run_complete",
     "show_advanced_settings",
-    "search_term",
     "unobtainable_moves_toggle",
     "recalculate_level",
     "shuckie_timer",

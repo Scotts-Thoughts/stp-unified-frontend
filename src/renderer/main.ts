@@ -2,7 +2,7 @@ import { createApp, defineComponent, h } from "vue";
 import { GameHookMapperClient } from "~/packages/gameHookMapperClient";
 import no_mapper from "~/components/GameSelect.vue";
 import { gen1 } from "~/games/gen1";
-import keyhook from "~/core/hotkeys/Hotkeys.vue";
+import shortcutBinder from "~/core/shortcuts/Shortcuts.vue";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "./stores/useSettingsStore";
 import { loadLegacyStorage } from "~/logic/Storage";
@@ -85,13 +85,13 @@ const main = defineComponent({
      * runtime -- which is why `createApp` came from the full build, and the template
      * compiler shipped in the entry chunk for these three nodes and the two gen3/gen5
      * timer components (now render functions too). Same elements in the same order:
-     * the keyhook, then either the pre-mapper screen or the detected module's overlay,
+     * the shortcut binder (gen1's legacy keyhook div), then either the pre-mapper screen or the detected module's overlay,
      * a direct child of `#app` with no wrapper of its own (tools/parity/capture.ts roots
      * gen4's comparison there). `ref="overlay"` is what the control-server bridge reads.
      */
     render() {
         return [
-            h(keyhook, { table: this.hotkeys, placeholder: this.module.keyhookElement === true }),
+            h(shortcutBinder, { module: this.module, gameLoaded: this.ready, placeholder: this.module.keyhookElement === true }),
             this.ready == false
                 ? h(no_mapper, { key: "no_mapper", unsupportedMapper: this.unsupportedMapper })
                 : h(this.overlayComponent as any, { key: "overlay", game: this.game, ref: "overlay" }),
@@ -120,17 +120,9 @@ const main = defineComponent({
         }
     },
     computed: {
-        /** The active module, or gen1 for the pre-mapper screen (its styles and hotkeys, as today). */
+        /** The active module, or gen1 for the pre-mapper screen (its styles and shortcuts, as today). */
         module(): GameModule {
             return this.session?.module ?? gen1;
-        },
-        /**
-         * The F-key table passed to <keyhook/> (plan 1.1). gen1's is bound before any
-         * mapper is known, exactly as gen1 did; a lifted module returns `{}` here and
-         * binds its own from its overlay.
-         */
-        hotkeys() {
-            return this.module.hotkeys();
         },
         overlayComponent() {
             return this.session?.module.overlay ?? null;

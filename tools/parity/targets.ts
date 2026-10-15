@@ -182,21 +182,25 @@ export function prepareSandbox(target: Target, opts: SandboxOptions = {}): strin
     mkdirSync(join(target.cwd, dir), { recursive: true });
   }
 
-  // Every app spawns keyhook.exe from its cwd; without it hotkeys are silently off
-  // (known-legacy-bugs.md #23), which is a behaviour difference the oracles would see.
-  // Something outside git (an antivirus, by the look of it) quarantines the exe from
-  // the working tree now and then, and once failed the copy mid-run with EUNKNOWN;
-  // a run without hotkeys is still a run (no oracle presses a key), so this logs and
-  // goes on. `git checkout -- resources/keyhook.exe` brings the file back.
+  // The legacy apps spawn keyhook.exe from their cwd; without it their hotkeys are
+  // silently off and their console logs `spawn keyhook.exe ENOENT` (known-legacy-bugs.md
+  // #23), which the console oracle would see. The unified app uses Electron global
+  // shortcuts instead (src/main/hotkeys.ts) and needs no exe. Something outside git (an
+  // antivirus, by the look of it) quarantines the exe from the working tree now and then,
+  // and once failed the copy mid-run with EUNKNOWN; a run without hotkeys is still a run
+  // (no oracle presses a key), so this logs and goes on. The exe is not in the repo:
+  // copy it from A:\Programs\gen2-stp-frontend\keyhook.exe into resources/.
   const keyhook = join(REPO, "resources", "keyhook.exe");
-  if (existsSync(keyhook) && !existsSync(join(target.cwd, "keyhook.exe"))) {
+  if (target.kind === "unified") {
+    // nothing to seed
+  } else if (existsSync(keyhook) && !existsSync(join(target.cwd, "keyhook.exe"))) {
     try {
       cpSync(keyhook, join(target.cwd, "keyhook.exe"));
     } catch (err) {
       log(`[sandbox] keyhook.exe not copied (${(err as Error).message}); the run has no hotkeys`);
     }
   } else if (!existsSync(keyhook)) {
-    log("[sandbox] resources/keyhook.exe is missing from the working tree (git checkout -- resources/keyhook.exe); the run has no hotkeys");
+    log("[sandbox] resources/keyhook.exe is missing (copy it from the gen2 legacy app); the legacy run has no hotkeys");
   }
 
   if (target.kind === "unified") junctionLegacyImages(target.appArg, log);

@@ -1,10 +1,10 @@
 import type { GameModule } from "~/core/game/GameModule";
 import { moduleBase } from "~/core/game/ModuleManifest";
 import { gen1Manifest } from "./manifest";
-import { autosplitter, deprecated_autosplitter, split_trainers } from "./data/splits";
+import { autosplitter, split_trainers } from "./data/splits";
 import { gen1ControlRoutes } from "./control";
 import { installGen1RunHooks } from "./hooks";
-import { gen1Hotkeys } from "./hotkeys";
+import { gen1Actions } from "./actions";
 import { gen1ChapterMarkers } from "./markers";
 import { useGameStateSync } from "./state";
 import Overlay from "~/components/Overlay.vue";
@@ -56,14 +56,14 @@ export const gen1: GameModule = {
         installStateSync: useGameStateSync,
     },
     data: {
-        splits: { autosplitter, deprecated_autosplitter, split_trainers },
+        splits: { autosplitter, split_trainers },
     },
-    hotkeys: gen1Hotkeys,
+    shortcuts: gen1Actions,
     control: (ctx) => gen1ControlRoutes(ctx.isReady),
     chapterMarkers: gen1ChapterMarkers,
     overlay: Overlay,
     cssClass: "gen-1",
-    // The legacy keyhook component's empty <div> in #app (core/hotkeys/Hotkeys.vue).
+    // The legacy keyhook component's empty <div> in #app (core/shortcuts/Shortcuts.vue).
     keyhookElement: true,
     // The 16:9 fit-to-window script at the bottom of the legacy index.html (core/window/scaleToFit.ts).
     scaleToFit: true,

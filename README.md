@@ -11,8 +11,11 @@ it that are "why", not "what", are in the section headers of the source files th
 
 ## Run it
 
-1. `npm ci` (Node ≥ 22.12, or 20.19+; electron-vite 4 will not load on older Node). F13–F24 hotkeys need
-   `keyhook.exe` next to the app or in `resources/` -- it is not in the repo; without it the app runs without them.
+1. `npm ci` (Node ≥ 22.12, or 20.19+; electron-vite 4 will not load on older Node). Keyboard shortcuts are
+   watched through the `uiohook-napi` package, which `npm ci` installs. Each generation's F13–F24 keys are bound
+   by default, and every settings control can be bound to a key in the Keyboard Shortcuts window (the button in
+   the first settings column). Other programs still get every key, so the emulator can use F24 too. On a Mac,
+   allow stp-overlay (or the terminal running `npm run dev`) under Privacy & Security > Accessibility.
 2. `npm run dev` -- the overlay opens and waits for PokeAByte (`http://localhost:8085`) to load a mapper.
    Code changes apply to the running app. Set `STP_TOOL_URL` (or pass `--tool-url=<url>`) to point it at a
    different address instead -- another PokeAByte port, or a GameHook instance
@@ -30,16 +33,16 @@ queuer-side change). Super Shuckie (`http://127.0.0.1:30158`) and OBS (`ws://loc
 ## How it is put together
 
 ```
-src/main            Electron main process: the window, the control server (30159), the keyhook.exe
-                    forwarder, the file IPC (splits, user data, shipped defaults, dev-mode source writes)
+src/main            Electron main process: the window, the control server (30159), the keyboard
+                    shortcuts and their window, the file IPC (splits, user data, shipped defaults, dev-mode source writes)
 src/preload         the renderer's whole view of the main process (`window.api`)
 src/renderer
   core/             what every generation shares: the mapper profile/adapter layer, the file-backed
-                    user state and layered style store, the OBS client, hotkeys, the control-server
+                    user state and layered style store, the OBS client, the shortcut engine, the control-server
                     bridge, the fit-to-window scaling, the base stylesheet
   games/genN/       one folder per generation: `manifest.ts` (what the shell knows before loading it:
                     mapper profiles, editions), `index.ts` (the GameModule), the overlay, its data,
-                    stylesheet, storage rules, hotkeys, control routes, split-file writers
+                    stylesheet, storage rules, shortcut actions, control routes, split-file writers
   components/, stores/, logic/, autosplitter/, data/
                     gen1's own code (the refactored generation; the others are lifted, see below)
   public/images/    the image pool: gen1's files at the root, each other generation's tree under

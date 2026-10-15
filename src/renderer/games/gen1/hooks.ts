@@ -1,6 +1,5 @@
 import PubSub from "~/logic/PubSub";
 import { logData, logCopy } from "~/autosplitter/autosplitter_functions.js";
-import { autosplitter } from "~/games/gen1/data/splits";
 import { addSplitBookmark, sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
 import { applyManualStarterDvs, OAKS_LAB } from "~/games/gen1/starterDvs";
@@ -16,8 +15,8 @@ import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
  *
  * `vm` is the overlay component instance, which is what `this` was; `vm.game.properties`
  * is the profile's canonical view (plan 1.4), which for gen1 spells every key the way the
- * mapper does. Keeping the instance as the context object is deliberate: the hooks write `simple_data_str`, `full_data_str`,
- * `deprecated_data_str` and `split_data` on it, and call `log_split()` and
+ * mapper does. Keeping the instance as the context object is deliberate: the hooks write `simple_data_str` and
+ * `split_data` on it, and call `log_split()` and
  * `autosplitter_process()`, which are the `autosplitter_functions.js` helpers bound as
  * component methods. Untangling that is plan 1.4's job, not this move's.
  *
@@ -97,20 +96,10 @@ export function installGen1RunHooks(vm: any): void {
 
             vm.battle.endBattle(vm.game.properties, vm.collect_split_data);
 
-            //write full split data (this is written for every single battle)
-            logData(gameName, gameName_Path, vm.full_data_str, vm.metrics.attempts, vm.meta.starter, "Full", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
-
-            //write deprecated split data (this is written for only pre-defined trainers)
-            //a list of these trainers can be found within `autosplitter.js` and inside the parent `Yellow` or `Red and Blue`
-            if (autosplitter[vm.game.properties.meta.gameName.value][unique]) {
-                logData(gameName, gameName_Path, vm.deprecated_data_str, vm.metrics.attempts, vm.meta.starter, "Deprecated", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
-            }
-
-            //write simple split data
-            //a list of these can be found within `autosplitter.js` and inside the parent `Simple`
+            //write split data for the trainers below
             const simpleSplit = () => {
                 vm.log_split()
-                logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, "Simple", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
+                logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
                 vm.split_data.push(vm.simple_data)
                 // The same split into the replay (2026-09-23): simple_data[2] is the trainer
                 // key current_splits holds, [3] the CSV's real_time_hmmss.
@@ -162,7 +151,7 @@ export function installGen1RunHooks(vm: any): void {
                 if (vm.settings.shuckie.timer) {
                     vm.emulator.sendEnd();
                 }
-                logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, "Simple", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish) //log a simple split
+                logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish) //log a simple split
                 vm.split_data.push(vm.simple_data) //push the split data into the data variable
             }
         }
@@ -178,9 +167,7 @@ export function installGen1RunHooks(vm: any): void {
                 const { formatted: formattedTime } = vm.metrics.getTime();
                 vm.autosplitter_process()
                 console.log("Run Ended - Backing up split data now...")
-                logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, "Simple", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
-                logData(gameName, gameName_Path, vm.deprecated_data_str, vm.metrics.attempts, vm.meta.starter, "Deprecated", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
-                logData(gameName, gameName_Path, vm.full_data_str, vm.metrics.attempts, vm.meta.starter, "Full", advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
+                logData(gameName, gameName_Path, vm.simple_data_str, vm.metrics.attempts, vm.meta.starter, advanced.test_run, advanced.refilming_mode, advanced.refilmed_attempt, advanced.refilmed_finish)
                 vm.split_data.push(vm.simple_data)
                 console.log(`Autosplitter - Run Ended: Real-Time: ${formattedTime[0]}${formattedTime[1]} Resets: ${vm.metrics.resets} Blackouts: ${vm.metrics.blackouts} Level: ${vm.game.properties.player.team[0].level.value} Gametime: ${vm.gametimeSplit})`)
                 vm.metrics.update("run_finished", true); //stop incrementing resets

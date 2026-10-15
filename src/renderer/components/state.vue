@@ -1,6 +1,6 @@
 <template>
     <!--
-        Behaviour-only, like `core/hotkeys/Hotkeys.vue`: `state.js` rendered
+        Behaviour-only, like `core/shortcuts/Shortcuts.vue`: `state.js` rendered
         `<div></div>` in this position inside `.mainContainer`, and the layout oracle
         keys every element by its nth-child index, so removing the node would shift every
         sibling after it. The div stays.

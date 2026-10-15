@@ -3,38 +3,16 @@
 
             <!-- Keyed by the texture path so swapping textures cross-fades old/new instead of popping -->
             <transition name="styleFade">
-                <img class="canvas" ref="background_texture" :key="currentTexturePath" :src="currentTexturePath" :style="{
-                    'filter': `blur(${backgroundBlur}px) hue-rotate(${backgroundHue}deg) brightness(${backgroundBrightness}%) contrast(${backgroundContrast}%) saturate(${backgroundSaturation}%)` ,
-                    'transform': `scale(${backgroundScale}%) ${backgroundFlip ? 'rotateY(180deg)' : ''} translate(${backgroundXOffset}px, ${-backgroundYOffset}px)`
-                }">
+                <img class="canvas" ref="background_texture" :key="currentTexturePath" :src="currentTexturePath" :style="background_texture_style">
             </transition>
             <img class="canvas" :src="`images/gen5/elements/pokeball.webp`">
             <!-- Keyed by the displayed species so starter changes, evolution-dropdown swaps and
                  mid-run evolutions cross-fade old/new art. No inline opacity here: it would
                  override the styleFade classes, so the fade is left entirely to the transition -->
-            <transition name="styleFade">
-                <img class="pokemon_art" ref="pokemon_art" :key="displayedPokemonSpecies" :style="{
-                    'transform': `scale(${imageScale}) ${imageFlip ? 'rotateY(180deg)' : ''} translate(${imageXOffset}px, ${-imageYOffset}px) rotate(${imageRotation}deg)`,
-                    'filter': `saturate(${imageSat}%)
-                    drop-shadow(0 0 0.4px #000)
-                    drop-shadow(0 0 0.4px #000)
-                    drop-shadow(0 0 0.4px #000)
-                    drop-shadow(0 0 0.4px #000)
-                    drop-shadow(0 0 0.4px #000)
-                    drop-shadow(0 0 0.4px #000)
-                    drop-shadow(${imageFlip ? '-3px' : '3px'} 3px 3px #000)
-                    `
-                }" :src="`images/gen5/pokemon/${displayedPokemonSpecies}.webp`">
-            </transition>
+            <species-art ref="pokemon_art" img-class="pokemon_art" v-bind="species_art_look" transition="styleFade" :art-key="displayedPokemonSpecies" :src="`images/gen5/pokemon/${displayedPokemonSpecies}.webp`"></species-art>
             <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen5/ui/game_area.svg)"></div>
-            <div v-if="shuckie_counters == true">
-                <div v-if="shuckie_faults_check == true" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/timer.svg)"></div>
-                <div v-else="" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/timer_2.svg)"></div>
-            </div>
-            <div v-else="">
-                <div v-show="playerResets == 0 || blackout_counter == 0" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/timer.svg)"></div>
-                <div v-show="playerResets > 0 && blackout_counter > 0" class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/timer_2.svg)"></div>
-            </div>
+            <!-- The faults box (core/overlay/player/FaultsBox.ts, laid out in playerPanel.ts): its frame here, its labels and counts after the Ability and Held Item boxes. -->
+            <faults-box :layout="faults_layout.frames" :mode="blackouts_resets" :frame-style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`"></faults-box>
             
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen5/ui/moveset.svg)"></div>
 
@@ -52,462 +30,93 @@
                 <img class="canvas colored-image ds " :src="`images/gen5/ui/nature arrows/lowers/${natures[pkmnNature].lowers}.svg`">
             </div>
             <img class="canvas" :src="`images/gen5/ui/move_backgrounds.webp`">
-            <!-- <shuckie-timer :emulatorStats="emulatorStats"></shuckie-timer> -->
-            <div v-if="shuckie_timer == true">
-                <live-text class="gametimeClock" source="shuckie_clock" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
-                <live-text class="gametimeFrames" source="shuckie_frames" :style="timer_frame_live ? 'visibility: hidden' : null" :frozen="timer_frame_live"></live-text>
-            </div>
+            <game-clock v-if="shuckie_timer == true" shuckie :hidden="timer_frame_live"></game-clock>
             <div v-else="">
-                <timer :hide-clock="timer_frame_live"></timer>
+                <game-clock wrapper-class="gametime" :hidden="timer_frame_live"></game-clock>
             </div>
             <!-- The clock in its own process (core/overlay/ClockFrame.ts); the ones above show until it is up. -->
             <clock-frame :gen="5" @live="timer_frame_live = $event"></clock-frame>
 
-            <div>
-                <div class="ui1">
-                    <div>Game:</div>
-                    <div class="gameToggle">
-                        <img v-for="game in available_games" :key="game" :src="`images/gen5/box_art/5-${game.replace(' ', '')}.webp`" :title="game" :class="['gameToggleImg', { selected: selected_game == game }]" @click="selected_game = game">
-                    </div><br>
-                    <button class="buttonStyle" @click="newRun">New Run</button><br>
-                    <br>
-                    <button class="buttonStyle buttonStyle_column3" @click="this.timer.pauseUnpauseTime()">Play/Pause</button>
-                    <div v-if="this.shuckie_timer == false"><button class="buttonStyle set_button_style" @click="this.timer.setTimer(this.timer_startTimeOffset)">Set Timer</button><br></div>
-                    <div v-else=""><button class="buttonStyle set_button_style" @click="this.sendEmulatorStart()">Set Timer</button><br></div>
-                    <!-- <button class="buttonStyle set_button_style" @click="this.sendEmulatorStart()">Start Time</button><br> -->
-                    <!-- <button class="buttonStyle set_button_style" @click="this.sendEmulatorEnd()">End Time</button><br> -->
-                    <input type="text" style="width: 280px; text-align: right;" class="inputContainer" v-model="timer_startTimeOffset" placeholder="00:00:00.00"><br>
-                    <table>
-                        <tbody><tr><td>Show Advanced Settings:</td><td><input class="checkBoxStyle" type="checkbox" v-model="show_advanced_settings"></td></tr>
-                        <tr v-if="show_advanced_settings"><td>HP Banned for 1st run:</td><td><input class="checkBoxStyle" type="checkbox" v-model="banned_hidden_power"></td></tr>
-                        <!-- <tr v-if="show_advanced_settings"><td>Test Run:</td><td><input class="checkBoxStyle" type="checkbox" v-model="testRun"/></td></tr> -->
-                        <tr v-if="show_advanced_settings"><td>Shuckie Timer</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_timer"></td></tr>
-                        <tr v-if="show_advanced_settings"><td>Shuckie Counters</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_counters"></td></tr>
-                        <tr v-if="show_advanced_settings"><td>Shuckie Bookmarks</td><td><input class="checkBoxStyle" type="checkbox" v-model="shuckie_bookmarks"></td></tr>
-                        <!-- <tr v-if="show_advanced_settings"><td>Refilming-Mode:</td><td><input class="checkBoxStyle" type="checkbox" v-model="refilming_mode"/></td></tr> -->
-                        <tr v-if="show_advanced_settings"><td>Debugging-Mode:</td><td><input class="checkBoxStyle" type="checkbox" v-model="debugging_mode"></td></tr>
-                        <!-- <tr v-if="show_advanced_settings"><td>Collect Split Data:</td><td><input class="checkBoxStyle" type="checkbox" v-model="collect_split_data"/></td></tr> -->
-                        <tr v-if="show_advanced_settings && !second_screen_mode"><td>Automatic Post Battle Splits:</td><td><input class="checkBoxStyle" type="checkbox" v-model="automatic_post_battle_splits"></td></tr>
-                        <tr v-if="show_advanced_settings"><td>Second Screen Mode:</td><td><input class="checkBoxStyle" type="checkbox" v-model="second_screen_mode"></td></tr>
-                        <tr v-if="show_advanced_settings"><td>Live HP:</td><td><input class="checkBoxStyle" type="checkbox" v-model="live_hp"></td></tr>
-                        <tr v-if="show_advanced_settings"><td>Stop timer after N dialogue:</td><td><input class="checkBoxStyle" type="checkbox" v-model="stop_timer_after_n_dialogue"></td></tr>
-                        <!-- <tr v-if="show_advanced_settings"><td>Second Screen Toggle:</td><td><input class="checkBoxStyle" type="checkbox" v-model="second_screen_toggle"/></td></tr> -->
-                    </tbody></table>
-                    <br>
-                    <button class="buttonStyle" @click="openSplitsFolder()">Open Splits Folder</button>
-                    <br>
-                    <button class="buttonStyle" @click="togglePopup">Keyboard Shortcuts</button>
-                    <br><br>
-                    
-                    <!-- Style Settings Management -->
-                    <div v-if="show_advanced_settings && debugging_mode == true" style="margin-bottom: 10px; padding: 8px; border: 1px solid #444; border-radius: 4px;">
-                        <div style="margin-bottom: 5px; font-weight: bold;">Style Settings</div>
-                        <div v-if="isInDevMode" style="color: #4CAF50; font-size: 11px; margin-bottom: 5px;">
-                            Development Mode - Changes save to defaults
+            <!-- The settings panel (core/settings/SettingsPanel.vue), described in settingsPanel.ts. The templates below
+                 are the few pieces that stay markup: they render inside the panel, in its look. -->
+            <settings-panel :panel="settingsPanel">
+                <template #editor>
+                    <button class="stp-btn" @click="add_testing_items()">Add Testing Items</button>
+                    <button class="stp-btn" @click="set_options()">Set Options</button>
+                    <button class="stp-btn" @click="write_byte_data(set_starter_stats_object)">Recalculate Stats</button>
+                    <span class="stp-label stp-label-block">Moves</span>
+                    <input class="stp-input" type="text" v-model="move1_replacement" placeholder="Move 1">
+                    <input class="stp-input" type="text" v-model="move2_replacement" placeholder="Move 2">
+                    <input class="stp-input" type="text" v-model="move3_replacement" placeholder="Move 3">
+                    <input class="stp-input" type="text" v-model="move4_replacement" placeholder="Move 4">
+                    <button class="stp-btn" @click="update_moveset">Update Party Moves</button>
+                    <button class="stp-btn" @click="update_battle_moveset">Update Battle Moves</button>
+                    <span class="stp-label stp-label-block">Items</span>
+                    <input class="stp-input" type="text" v-model="item1_replacement" placeholder="Item 1">
+                    <input class="stp-input" type="text" v-model="item2_replacement" placeholder="Item 2">
+                    <input class="stp-input" type="text" v-model="item3_replacement" placeholder="Item 3">
+                    <input class="stp-input" type="text" v-model="item4_replacement" placeholder="Item 4">
+                    <button class="stp-btn" @click="update_items">Update Items</button>
+                    <span class="stp-label stp-label-block">Held Item</span>
+                    <input class="stp-input" type="text" v-model="held_item_replacement" placeholder="Held Item">
+                    <button class="stp-btn" @click="update_held_item">Update Held Item</button>
+                </template>
+                <template #devtools>
+                    <div class="stp-hint">{{ isInDevMode ? "Development mode: changes save to the defaults" : "Production mode: changes save locally" }}</div>
+                    <button v-if="isInDevMode" class="stp-btn" @click="exportStyleSettingsAsDefaults()">Export All Settings as Defaults</button>
+                    <button class="stp-btn" @click="resetCurrentPokemonToDefaults()">Reset Current Pokémon to Defaults</button>
+                    <confirm-button class="stp-btn stp-btn-danger" label="Reset ALL to Defaults" confirm-label="Click again to reset ALL" @confirm="resetAllStyleSettingsToDefaults()"></confirm-button>
+                    <button class="stp-btn" @click="print_texture_settings()">Log Color Settings</button>
+                    <label v-if="isInDevMode" class="stp-row stp-toggle" title="Dev only. Packaged builds always use enemy sprite styles.">
+                        <span class="stp-label">Enemy Sprite Styles</span>
+                        <input type="checkbox" v-model="enemy_sprite_styles_enabled">
+                    </label>
+                    <template v-if="isInDevMode">
+                        <button v-if="!style_mode_active" class="stp-btn" @click="enterStyleMode()" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">Style Mode (Iterate Pokédex)</button>
+                        <button v-else class="stp-btn stp-btn-danger" @click="exitStyleMode()">Exit Style Mode</button>
+                        <div v-if="style_mode_active" class="stp-hint">{{ style_mode_index + 1 }} / {{ style_mode_species_list.length }} — <strong>{{ styleModeCurrentSpecies() }}</strong></div>
+                    </template>
+                </template>
+                <template #formNote>
+                    <div class="stp-hint">Each form styles separately.<template v-if="pokemon_form_note"> {{ pokemon_form_note }}</template></div>
+                </template>
+                <template #battleFormNote>
+                    <div class="stp-hint">Each form styles separately. Shown outside battle for styling; in battle the game's form takes over.</div>
+                </template>
+                <template #ivs>
+                    <div v-if="iv_mode == 'Automatic'" class="stp-ivgrid">
+                        <span>HP</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[0] }}</span>
+                        <span>Atk</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[1] }}</span>
+                        <span>Def</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[2] }}</span>
+                        <span>SpA</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[4] }}</span>
+                        <span>SpD</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[5] }}</span>
+                        <span>Spe</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[3] }}</span>
+                    </div>
+                    <template v-else>
+                        <div class="stp-ivgrid">
+                            <span>HP</span><input type="text" class="manual_iv_input" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)">
+                            <span>Atk</span><input type="text" class="manual_iv_input" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)">
+                            <span>Def</span><input type="text" class="manual_iv_input" :value="manual_ivs.def" @change="set_manual_iv('def', $event)">
+                            <span>SpA</span><input type="text" class="manual_iv_input" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)">
+                            <span>SpD</span><input type="text" class="manual_iv_input" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)">
+                            <span>Spe</span><input type="text" class="manual_iv_input" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)">
                         </div>
-                        <div v-else="" style="color: #888; font-size: 11px; margin-bottom: 5px;">
-                            📦 Production Mode - Changes save locally
+                        <div class="stp-hint">Hidden Power: {{ manualHiddenPower.type }} ({{ manualHiddenPower.power }})</div>
+                    </template>
+                </template>
+                <template #natureGrid>
+                    <div class="nature_grid">
+                        <div class="nature_grid_row">
+                            <span class="nature_grid_label nature_grid_raise">+</span>
+                            <button v-for="stat in natureStats" :key="'raise-' + stat.key" class="nature_grid_btn" :class="{ 'nature_grid_raise_on': natureRaisedStat() === stat.key }" @click="selectNatureRaise(stat.key)">{{stat.short}}</button>
                         </div>
-                        <button v-if="isInDevMode" class="buttonStyle" @click="exportStyleSettingsAsDefaults()" style="font-size: 11px;">
-                            Export All Settings as Defaults
-                        </button>
-                        <button class="buttonStyle" @click="resetCurrentPokemonToDefaults()" style="font-size: 11px;">
-                            Reset Current Pokémon to Defaults
-                        </button>
-                        <button class="buttonStyle" @click="resetAllStyleSettingsToDefaults()" style="font-size: 11px; color: #f44;">
-                            Reset ALL to Defaults
-                        </button>
-                        <div v-if="isInDevMode" style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #333; font-size: 11px;" title="Dev only. Packaged builds always use enemy sprite styles.">
-                            <label>
-                                <input class="checkBoxStyle" type="checkbox" v-model="enemy_sprite_styles_enabled">
-                                Enemy Sprite Styles (scale/offset/flip)
-                            </label>
-                        </div>
-                        <div v-if="isInDevMode" style="margin-top: 6px;">
-                            <button v-if="!style_mode_active" class="buttonStyle" @click="enterStyleMode()" style="font-size: 11px;" title="Iterate every species: Enter saves + advances, Backspace discards + steps back, Escape exits.">
-                                Style Mode (iterate Pokedex)
-                            </button>
-                            <button v-else="" class="buttonStyle" @click="exitStyleMode()" style="font-size: 11px; color: #f44;">
-                                Exit Style Mode
-                            </button>
-                            <div v-if="style_mode_active" style="font-size: 11px; margin-top: 4px;">
-                                {{ style_mode_index + 1 }} / {{ style_mode_species_list.length }} — <strong>{{ styleModeCurrentSpecies() }}</strong>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    Pokemon Editor:<input class="checkBoxStyle" type="checkbox" v-model="editor">
-                    <br>
-                    <div v-if="editor == true">
-                        <button class="buttonStyle" @click="add_testing_items()">Add Testing Items</button>
-                        <button class="buttonStyle" @click="set_options()">Set Options</button>
-                        <button class="buttonStyle" @click="write_byte_data(set_starter_stats_object)">Recalculate Stats</button>
-                        <div>Moveset Updating:</div>
-                        <input class="inputContainer" style="width: 140px;" type="text" v-model="move1_replacement" placeholder="Input move 1">
-                        <input class="inputContainer" style="width: 140px;" type="text" v-model="move2_replacement" placeholder="Input move 2">
-                        <input class="inputContainer" style="width: 140px;" type="text" v-model="move3_replacement" placeholder="Input move 3">
-                        <input class="inputContainer" style="width: 140px;" type="text" v-model="move4_replacement" placeholder="Input move 4">
-                        <button class="buttonStyle buttonStyle_column3" @click="update_moveset">Update Moves</button>
-                        <div>Held Item:</div>
-                        <input class="inputContainer" style="width: 280px;" type="text" v-model="held_item_replacement" placeholder="Input move 1">
-                        <button class="buttonStyle buttonStyle_column3" @click="update_held_item">Update Item</button>
-                    </div>
-                    <br>
-                    <div v-if="editor == false && debugging_mode == true">
-                        <div>Debugging:</div>
-                        <table>
-                            <tbody><tr><td>State:</td><td>{{this.game.properties.meta.state.value}}</td></tr>
-                            <tr><td>outcome_flags:</td><td>{{this.game.properties.battle.other.outcome_flags.value}}</td></tr>
-                            <tr><td>Team Count:</td><td>{{this.game.properties.player.team_count.value}}</td></tr>
-                            <tr><td>Delay:</td><td>{{disallow_delay}}</td></tr>
-                            <tr><td>Blackout:</td><td>{{this.blackout}}</td></tr>
-                            <tr><td>Enemy Graphic:</td><td>{{enemy_graphic}}</td></tr>
-                            <tr><td>Run Complete:</td><td>{{run_complete}}</td></tr>
-                            <tr><td>Single Battle:</td><td>{{single_battle}}</td></tr>
-                            <tr><td>Second Screen:</td><td>{{second_screen_check}}</td></tr>
-                            <tr><td>Show Evolved Base Stats:</td><td>{{show_evolved_base_stats}}</td></tr>
-                            <!-- <tr><td>Emulator Object:</td><td>{{ emulatorStats?.time_current ?? 'N/A' }}</td></tr> -->
-                            <tr v-if="run_complete"><td>Final Gametime:</td><td>{{simple_data[7]}}</td></tr>
-                        </tbody></table>
-                    </div>
-                    <table>
-                        <tbody><tr><td>Player Party Count:</td><td style="text-align: right;">{{game.properties.player.team_count.value > 6 ? 0 : game.properties.player.team_count.value}}</td></tr>
-                        <tr><td>Overworld HP:</td>      <td style="text-align: right;">{{game.properties.player.team[0].stats.hp.value}} / {{game.properties.player.team[0].stats.hp_max.value}}</td></tr>
-                        <tr><td>Status:</td>            <td style="text-align: right;">{{game.properties.player.team[0].status_condition.value == null ? 'None' : game.properties.player.team[0].status_condition.value}}</td></tr>
-                    </tbody></table>
-                    <div>
-                        <div>EVs:</div>
-                        <table>
-                            <tbody><tr>
-                                <td>HP: </td>
-                                <td style="padding-left: 5px;">{{game.properties.player.team[0].evs.hp}}</td>     
-                                <td v-show="game.properties.meta.state.value != 'Battle'" style="text-align: right; padding-right: 20px; opacity: .7;">(+{{calculate_ev_benefit('hp')}})</td>     
-                                <td>Spe:</td><td style="padding-left: 5px;">{{game.properties.player.team[0].evs.speed}}</td>          
-                                <td v-show="game.properties.meta.state.value != 'Battle'" style="text-align: right; opacity: .7;">(+{{calculate_ev_benefit('speed')}})</td>
-                            </tr>
-                            <tr>
-                                <td>Atk:</td>
-                                <td style="padding-left: 5px;">{{game.properties.player.team[0].evs.attack}}</td> 
-                                <td v-show="game.properties.meta.state.value != 'Battle'" style="text-align: right; padding-right: 20px; opacity: .7;">(+{{calculate_ev_benefit('attack')}})</td> 
-                                <td>SpA:</td><td style="padding-left: 5px;">{{game.properties.player.team[0].evs.special_attack}}</td> 
-                                <td v-show="game.properties.meta.state.value != 'Battle'" style="text-align: right; opacity: .7;">(+{{calculate_ev_benefit('special_attack')}})</td>
-                            </tr>
-                            <tr>
-                                <td>Def:</td>
-                                <td style="padding-left: 5px;">{{game.properties.player.team[0].evs.defense}}</td>
-                                <td v-show="game.properties.meta.state.value != 'Battle'" style="text-align: right; padding-right: 20px; opacity: .7;">(+{{calculate_ev_benefit('defense')}})</td>
-                                <td>SpD:</td><td style="padding-left: 5px;">{{game.properties.player.team[0].evs.special_defense}}</td>
-                                <td v-show="game.properties.meta.state.value != 'Battle'" style="text-align: right; opacity: .7;">(+{{calculate_ev_benefit('special_defense')}})</td>
-                            </tr>
-                        </tbody></table>
-                    </div>
-                </div>
-                <div class="ui2">
-                    <div>Solo Pokemon:</div>
-                    <select v-model="starter" class="dropdownMenu">
-                        <option disabled="" value="">Select a species</option>
-                        <option v-for="key in filtered_pokemon_list" :value="`${key}`">{{key}}</option>
-                    </select>
-                    <div>Search Pokemon:</div>
-                    <input type="text" class="inputContainer" style="width: 280px;" v-model="search_term" placeholder="Search for a species">
-                    <button class="buttonStyle comparison_button" @click="load_splits()">Load replay / split file to compare</button>
-                    <div v-if="previous_splits_source" style="font-size: 12px;">Comparing against: {{ previous_splits_source }}</div>
-                    <button class="buttonStyle comparison_button" @click="clear_splits()" v-if="previous_splits.length > 0">Clear loaded splits</button><br>
-                    <table>
-                        <tbody><tr>
-                            <td>Attempt Number:</td>
-                            <td>{{attempt_number}}</td>
-                            <td><button @click="increment('attempt_number')" class="smallButtonStyle increment">+</button></td>
-                            <td><button @click="decrement('attempt_number')" class="smallButtonStyle2 decrement">-</button></td>
-                        </tr>
-                        <tr>
-                            <td>Finish Number:</td>
-                            <td>{{finished_run_count}}</td>
-                            <td><button @click="increment('finished_run_count')" class="smallButtonStyle increment">+</button></td>
-                            <td><button @click="decrement('finished_run_count')" class="smallButtonStyle2 decrement">-</button></td>
-                        </tr>
-                        <tr>
-                            <td>Resets:</td>
-                            <td>{{playerResets}}</td>
-                            <td><button @click="increment('playerResets')" class="smallButtonStyle increment">+</button></td>
-                            <td><button @click="decrement('playerResets')" class="smallButtonStyle2 decrement">-</button></td>
-                        </tr>
-                        <tr>
-                            <td>Blackouts:</td>
-                            <td>{{blackout_counter}}</td>
-                            <td><button @click="increment('blackout_counter')" class="smallButtonStyle increment">+</button></td>
-                            <td><button @click="decrement('blackout_counter')" class="smallButtonStyle2 decrement">-</button></td>
-                        </tr>
-                        <tr>
-                            <td>Faults:</td>
-                            <td>{{faults}}</td>
-                        </tr>
-                    </tbody></table>
-                    <!-- <br> -->
-                    <table v-if="hasMultipleEvolutionStages">
-                        <!-- <tr v-if="show_advanced_settings"><td>Show nature arrows:</td><td><input class="checkBoxStyle" type="checkbox" v-model="show_nature_changes"/></td></tr> -->
-                        <tbody><tr><td>Evolution:</td><td><input class="checkBoxStyle" type="checkbox" v-model="evolution"></td></tr>
-                        <tr v-if="show_advanced_settings && (selected_game == 'Black 2' || selected_game == 'White 2')"><td>Show Tutor Moves:</td><td><input class="checkBoxStyle" type="checkbox" v-model="show_tutor_moves"></td></tr>
-                    </tbody></table>
-                    <div v-if="evolution == true && evolution_family_list.length > 1">
-                        <!-- <div>Evolution Family Style:</div> -->
-                        <select v-model="selected_evolution_species" class="dropdownMenu" style="width: 180px;">
-                            <option disabled="" value="">Select a species in the evolution family</option>
-                            <option v-for="species in evolution_family_list" :value="`${species}`">{{species}}</option>
-                        </select>
-                        <!-- <br> -->
-                        <!-- <br> -->
-                        <button @click="copyCurrentStylesToAllFamilyMembers()" class="buttonStyle" style="font-size: 13px; width: 100px; height: 23px; top: -2px;">Unify Styles</button>
-                        <br>
-                    </div>
-                    <div v-if="show_pokemon_forms">
-                        <div>{{ form_base_species }} Form: (each form styles separately)</div>
-                        <select v-model="pokemon_form" class="dropdownMenu" style="width: 180px;">
-                            <option v-for="option in pokemon_form_options" :value="option.species">{{ option.label }}</option>
-                        </select>
-                        <div v-if="pokemon_form_note" style="font-size: 11px; line-height: 14px; width: 180px;">{{ pokemon_form_note }}</div>
-                        <br>
-                    </div>
-                    <div v-if="show_battle_forms">
-                        <div>{{ starter }} Battle Form: (each form styles separately)</div>
-                        <select v-model="battle_form" class="dropdownMenu" style="width: 180px;">
-                            <option v-for="option in battle_form_options" :value="option.species == starter ? '' : option.species">{{ option.label }}</option>
-                        </select>
-                        <div style="font-size: 11px; line-height: 14px; width: 180px;">Shown outside battle for styling; in battle the game's form takes over.</div>
-                        <br>
-                    </div>
-                    <br>
-                    <div>IVs:</div>
-                    <select v-model="iv_mode" class="dropdownMenu dropdown_menu_column3">
-                        <option>Automatic</option>
-                        <option>Manual</option>
-                    </select><br>
-                    <div v-if="iv_mode == 'Automatic'">
-                    <div>Hidden Power:</div>
-                    <select v-model="hidden_power_type" class="dropdownMenu dropdown_menu_column3">
-                        <option disabled="" value="">Select a Hidden Power type</option>
-                        <option v-for="key in values_function(hiddenPowerTypes)" :value="`${key}`">{{key}}</option>
-                    </select><br>
-                    <select v-model="hidden_power_index" class="dropdownMenu dropdown_menu_column3">
-                        <option disabled="" value="">Select a Hidden Power index</option>
-                        <option v-for="(key, index) in hiddenpowers[hidden_power_type]" :value="`${index}`">{{key}}</option>
-                    </select><br>
-                    <table style="font-size: 11px; line-height: 14px;">
-                        <tbody><tr>
-                            <td>HP:</td><td style="padding-left: 3px;">{{hiddenpowers[hidden_power_type][hidden_power_index][0]}}</td>
-                            <td style="padding-left: 8px;">Atk:</td><td style="padding-left: 3px;">{{hiddenpowers[hidden_power_type][hidden_power_index][1]}}</td>
-                            <td style="padding-left: 8px;">Def:</td><td style="padding-left: 3px;">{{hiddenpowers[hidden_power_type][hidden_power_index][2]}}</td>
-                            <td style="padding-left: 8px;">SpA:</td><td style="padding-left: 3px;">{{hiddenpowers[hidden_power_type][hidden_power_index][4]}}</td>
-                            <td style="padding-left: 8px;">SpD:</td><td style="padding-left: 3px;">{{hiddenpowers[hidden_power_type][hidden_power_index][5]}}</td>
-                            <td style="padding-left: 8px;">Spe:</td><td style="padding-left: 3px;">{{hiddenpowers[hidden_power_type][hidden_power_index][3]}}</td>
-                        </tr>
-                    </tbody></table>
-                    </div>
-                    <div v-else>
-                    <table style="font-size: 11px; line-height: 14px;">
-                        <tbody><tr>
-                            <td>HP:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)"></td>
-                            <td style="padding-left: 8px;">Atk:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)"></td>
-                            <td style="padding-left: 8px;">Def:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.def" @change="set_manual_iv('def', $event)"></td>
-                            <td style="padding-left: 8px;">SpA:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)"></td>
-                            <td style="padding-left: 8px;">SpD:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)"></td>
-                            <td style="padding-left: 8px;">Spe:</td><td style="padding-left: 3px;"><input type="text" class="inputContainer manual_iv_input" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)"></td>
-                        </tr>
-                    </tbody></table>
-                    <div style="font-size: 11px; line-height: 14px;">Hidden Power: {{manualHiddenPower.type}} ({{manualHiddenPower.power}})</div>
-                    </div>
-                    <br>
-                    <div style="display: flex; gap: 12px; align-items: flex-start;">
-                        <div>
-                            <div>Abilities: ({{starter}} has {{g5PokemonData[starter].abilities.length}})</div>
-                            <select v-model="pkmn_ability" class="dropdownMenu dropdown_menu_column3" style="width: 144px;">
-                                <option disabled="" value="">Select an ability</option>
-                                <option v-for="key in values_function(g5PokemonData[starter].abilities)" :value="`${key}`">{{key}}</option>
-                            </select>
-                            <div style="font-size: 11px; line-height: 14px;">Ability: {{g5PokemonData[starter].abilities.indexOf(pkmn_ability) + 1 == 3 ? 'Hidden Ability' : g5PokemonData[starter].abilities.indexOf(pkmn_ability) + 1}}</div>
-                        </div>
-                        <div>
-                            <div>Gender:</div>
-                            <select v-model="pkmn_gender" class="dropdownMenu" style="width: 144px;">
-                                <option>Female</option>
-                                <option>Male</option>
-                            </select>
+                        <div class="nature_grid_row">
+                            <span class="nature_grid_label nature_grid_lower">−</span>
+                            <button v-for="stat in natureStats" :key="'lower-' + stat.key" class="nature_grid_btn" :class="{ 'nature_grid_lower_on': natureLoweredStat() === stat.key }" @click="selectNatureLower(stat.key)">{{stat.short}}</button>
                         </div>
                     </div>
-                    <br>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <div>
-                            <div>Nature:</div>
-                            <select v-model="pkmnNature" class="dropdownMenu dropdown_menu_column3" style="width: 144px;">
-                                <option disabled="" value="">Select a Nature</option>
-                                <option v-for="key in values_function(simple_natures)" :value="`${key}`">{{natureLabels(`${key}`)}}</option>
-                            </select>
-                        </div>
-                        <div class="nature_grid">
-                            <div class="nature_grid_row">
-                                <span class="nature_grid_label nature_grid_raise">+</span>
-                                <button v-for="stat in natureStats" :key="'raise-' + stat.key" class="nature_grid_btn" :class="{ 'nature_grid_raise_on': natureRaisedStat() === stat.key }" @click="selectNatureRaise(stat.key)">{{stat.short}}</button>
-                            </div>
-                            <div class="nature_grid_row">
-                                <span class="nature_grid_label nature_grid_lower">−</span>
-                                <button v-for="stat in natureStats" :key="'lower-' + stat.key" class="nature_grid_btn" :class="{ 'nature_grid_lower_on': natureLoweredStat() === stat.key }" @click="selectNatureLower(stat.key)">{{stat.short}}</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-if="selected_game == 'White 2'" style="margin-top: 8px;">
-                        <button class="buttonStyle" style="padding: 2px 10px; font-size: 12px;" @click="openRNGModal">RNG</button>
-                    </div>
-                    <br>
-                    <div v-if="selected_game == 'Black' || selected_game == 'White'" style="display: flex; gap: 24px; align-items: flex-start;">
-                        <div>
-                            <div>Encounters:</div>
-                            <table style="font-size: 11px; line-height: 14px;">
-                                <tbody><tr><td>Route 1</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_route_1"></td></tr>
-                                <tr><td>Route 2</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_route_2"></td></tr>
-                            </tbody></table>
-                        </div>
-                        <div>
-                            <div>HM Users:</div>
-                            <table style="font-size: 11px; line-height: 14px;">
-                                <tbody><tr><td>Woobat</td>    <td><input class="checkBoxStyle" type="checkbox" v-model="encounters_woobat"></td></tr>
-                                <tr><td>Roggenrola</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_roggenrola"></td></tr>
-                                <tr><td>Pidove</td>    <td><input class="checkBoxStyle" type="checkbox" v-model="encounters_pidove"></td></tr>
-                                <tr><td>Tympole</td>   <td><input class="checkBoxStyle" type="checkbox" v-model="encounters_tympole"></td></tr>
-                                <tr><td>Timburr</td>   <td><input class="checkBoxStyle" type="checkbox" v-model="encounters_timburr"></td></tr>
-                            </tbody></table>
-                        </div>
-                    </div>
-                    <div v-else-if="selected_game == 'Black 2' || selected_game == 'White 2'" style="display: flex; gap: 24px; align-items: flex-start;">
-                        <div>
-                            <div>Encounters:</div>
-                            <table style="font-size: 11px; line-height: 14px;">
-                                <tbody><tr><td>Route 19</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_route_19"></td></tr>
-                                <tr><td>Route 20</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_route_20"></td></tr>
-                                <tr><td>Flocessy Ranch</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_flocessy_ranch"></td></tr>
-                            </tbody></table>
-                        </div>
-                        <div>
-                            <div>HM Users:</div>
-                            <table style="font-size: 11px; line-height: 14px;">
-                                <tbody><tr><td>Psyduck</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_psyduck"></td></tr>
-                                <tr><td>Pidove</td><td><input class="checkBoxStyle" type="checkbox" v-model="encounters_pidove"></td></tr>
-                            </tbody></table>
-                        </div>
-                    </div>
-                </div>
-                <div class="ui3">
-                    <div>Stat Display:</div>
-                    <select v-model="stats_setting" class="dropdownMenu">
-                        <option>Automatic</option>
-                        <option>IVs</option>
-                        <option>EVs</option>
-                        <option>Vitamins</option>
-                        <option>Detailed EVs</option>
-                        <option>Base Stats</option>
-                        <option>Base Stats Average</option>
-                        <option>Base Stats Median</option>
-                    </select><br>
-                    <div v-if="show_advanced_settings">
-                        <br>
-                            <div v-if="!second_screen_mode">
-                                <div>Right UI:</div>
-                                <select v-model="right_ui" class="dropdownMenu">
-                                    <option>Automatic</option>
-                                    <option>Splits</option>
-                                </select><br>
-                            </div>
-                            <div>Unobtainable Moves:</div>
-                            <select v-model="unobtainable_moves_toggle" class="dropdownMenu">
-                                <option>Never Cross Out</option>
-                                <option>Cross Out When Starter is Obtained</option>
-                                <option>Cross Out After First Badge</option>
-                                <option>Always Cross Out</option>
-                            </select><br>
-                            <div>Splits:</div>
-                            <select v-model="toggle_compare_splits" class="dropdownMenu">
-                                <option>Followup</option>
-                                <option>First</option>
-                            </select><br>
-                        </div>
-                    <br>
-                    <div v-if="right_display == 'Trainer' && show_advanced_settings">
-                        <div>Search Trainers:</div>
-                        <input type="text" v-model="search_trainers" placeholder="Search for a trainer">
-                        <div>Trainer:</div>
-                        <select v-model="examined_trainer" class="dropdownMenu">
-                            <option v-for="trainer in filtered_trainer_list" :key="trainer" :value="trainer">{{ trainer }}</option>
-                        </select><br>
-                    </div>
-                    <div v-if="right_display != 'Trainer' || !show_advanced_settings">
-                        <div>Pokemon Image Settings</div>
-                        <table>
-                            <tbody><tr><td>X-Offset:  </td><td><input type="range" min="-400" max="400" v-model="imageXOffset"></td></tr>
-                            <tr><td>Y-Offset:  </td><td><input type="range" min="-400" max="400" v-model="imageYOffset"></td></tr>
-                            <tr><td>Scale:     </td><td><input type="range" min="0.2" max="2.5" step="0.01" v-model="imageScale"></td></tr>
-                            <tr><td>Saturation:</td><td><input type="range" min="90" max="150" step="1" v-model="imageSat"></td></tr>
-                            <tr><td>Rotation:  </td><td><input type="range" min="-180" max="180" step=".01" v-model="imageRotation"></td></tr>
-                            <tr><td>Flip:      </td><td><input class="checkBoxStyle" type="checkbox" v-model="imageFlip"></td></tr>
-                        </tbody></table>
-                        <button @click="resetPokemon()" class="buttonStyle">Reset Pokemon Settings</button><br>
-                        <button @click="color_picker" class="buttonStyle">Color Picker</button><br>
-                        Saturation: <input type="range" min="0" max="2" step="0.1" v-model="ui_saturation"><br>
-                        <br>
-                        <div>Background Texture:</div>
-                        <select v-model="backgroundTexture" class="dropdownMenu">
-                            <option v-for="key in dropdownDownMenuKeys.textures" :key="key" :value="key">
-                                {{ key }}
-                            </option>
-                        </select><br>
-                        <table>
-                            <tbody><tr><td>X-Offset:   </td><td><input type="range" min="-125" max="125" v-model="backgroundXOffset"></td></tr>
-                            <tr><td>Y-Offset:   </td><td><input type="range" min="-125" max="125" v-model="backgroundYOffset"></td></tr>
-                            <tr><td>Scale:      </td><td><input type="range" min="100" max="200" v-model="backgroundScale"></td></tr>
-                            <tr><td>Brightness: </td><td><input type="range" min="0" max="200" v-model="backgroundBrightness"></td></tr>
-                            <tr><td>Contrast:   </td><td><input type="range" min="0" max="200" v-model="backgroundContrast"></td></tr>
-                            <tr><td>Saturation: </td><td><input type="range" min="0" max="200" v-model="backgroundSaturation"></td></tr>
-                            <tr><td>Blur:       </td><td><input type="range" min="0" max="10" v-model="backgroundBlur"></td></tr>
-                            <tr><td>Hue:        </td><td><input type="range" min="0" max="358" v-model="backgroundHue"></td></tr>
-                            <tr><td>Flip:       </td><td><input class="checkBoxStyle" type="checkbox" v-model="backgroundFlip"></td></tr>
-                        </tbody></table>
-                        <button @click="print_texture_settings()" class="buttonStyle">Log Color Settings</button><br>
-                        <br>
-                    </div>
-                    <!-- <div v-if="show_advanced_settings">
-                        <div>Copy Texture Settings:</div>
-                        <table>
-                            <tr><td>Copy from:</td><td><input type="text" class="inputContainer" style="width: 207px;" v-model="copy_overlay_pokemon_from"/></td></tr>
-                            <tr><td>Copy to:</td>  <td><input type="text" class="inputContainer" style="width: 207px;" v-model="copy_overlay_pokemon_to"/></td></tr>
-                        </table>
-                        <button @click="copy_overlay_properties()" class="buttonStyle">Copy Texture Settings</button><br>
-                        <br>
-                    </div> -->
-                </div>
-            </div>
-
-            <!-- POPUP MENU -->
-            <div v-if="showPopup" class="popup-overlay" @click="closePopup">
-                <div class="popup-menu" @click.stop="">
-                    <div class="popup-header">
-                        <h3>Keyboard Shortcuts</h3>
-                        <button class="popup-close" @click="closePopup">×</button>
-                    </div>
-                    <table>
-                        <tbody><tr><td>Stats</td></tr>
-                        <tr><td>F13</td><td> - </td><td>IVs</td></tr>
-                        <tr><td>F14</td><td> - </td><td>EVs</td></tr>
-                        <tr><td>F15</td><td> - </td><td>Base Stats</td></tr>
-                        <tr><td>F16</td><td> - </td><td>Automatic Stats (default)</td></tr>
-                        <tr><td>Right Panel</td></tr>
-                        <tr><td>F17</td><td> - </td><td>Cycling Movepool/Splits</td></tr>
-                        <tr><td>F18</td><td> - </td><td>Cycling First/Followup Splits Style</td></tr>
-                        <tr><td>F19</td><td> - </td><td>Increment Unobtainable Moves Setting</td></tr>
-                        <tr><td>Overlay</td></tr>
-                        <tr><td>F22</td><td> - </td><td>Toggle Encounters</td></tr>
-                        <tr><td>F23</td><td> - </td><td>New Run (clear timer and metrics)</td></tr>
-                        <tr><td>F24</td><td> - </td><td>Pause/Unpause the timer</td></tr>
-                    </tbody></table>
-                </div>
-            </div>
+                </template>
+            </settings-panel>
 
             <!-- RNG Configuration Modal -->
             <div v-if="showRNGModal" class="popup-overlay" @click="closeRNGModal">
@@ -536,158 +145,32 @@
 
             <!-- OVERLAY COMPONENTS -->
             <!-- Type Icons -->
-            <div v-if="!run_complete" class="posAbs type_icons_boundingBox center">
-                <img class="type_icons" :src="`images/gen5/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_1')?.toLowerCase()}.webp`">
-                <img v-if="getSoloMonType(game.properties.player.team[0].species.value??starter, 'type_1') != getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')" class="type_icons" :src="`images/gen5/type-icons/${ui_type_icons_modifier}/${getSoloMonType(game.properties.player.team[0].species.value ?? starter, 'type_2')?.toLowerCase()}.webp`">
-            </div>
+            <type-badges v-if="!run_complete" v-bind="type_badges"></type-badges>
 
             <!-- Stats -->
             <div class="posAbs">
                 <div class="stats_header">{{stats_header}}</div>
                 <div class="growth_rate">{{growth_rate}}</div>
-                <div class="nature_label">Nature:</div>
-                <div class="nature_value">{{pkmnNature}}</div>
-                <div v-if="stats_setting == 'Base Stats' || stats_header == 'Base Stats'">
-                    <div class="friendship_label">Total:</div>
-                    <div class="friendship_value">{{get_base_stat_total()}}</div>
-                </div>
-                <div v-else-if="stats_setting == 'Base Stats Detailed'">
-                    <div class="friendship_label">Total:</div>
-                    <div class="friendship_value">{{get_base_stat_total()}}</div>
-                </div>
-                <div v-else-if="stats_setting == 'IVs'">
-                    <div class="friendship_label">Total:</div>
-                    <div class="friendship_value">{{get_iv_total()}}</div>
-                </div>
-                <div v-else-if="stats_setting == 'EVs'">
-                    <div class="friendship_label">Total:</div>
-                    <div class="friendship_value">{{get_effort_values()}}</div>
-                </div>
-                <div v-else="">
-                    <div class="friendship_label">Friendship:</div>
-                    <div class="friendship_value">{{get_friendship()}}</div>
-                </div>
+                <!-- Nature and Friendship / Total (core/overlay/player/InfoRow.ts, built in playerPanel.ts) -->
+                <info-row v-bind="info_rows.nature"></info-row>
+                <info-row v-bind="info_rows.total"></info-row>
                 <div class="stats_container" id="stats">
                     <!--  New Stats -->
                     <div style="z-index: 100000;">
-                        <div v-for="stat in stat_object">
-                            <div v-if="stat.name != 'Hp' && game.properties.meta.state.value == 'Battle' && !not_valid_battle_state">
-                                <div :class="`playerMods hp_spd_${stat.mod_abrv}Mod`" style="font-family: play;">{{ stage_modifiers(n_battle_data_fix.modifiers[stat.path].value) }}</div>
-                            </div>
-                            <div v-if="stats_setting != 'Vitamins'" :style="{ opacity: statLabelOpacity()[stat.name]}" :class="`stat_label_style stat_row_${stat[`stat_row`]} stat_column_${stat.label_column}`">{{stat.label}}</div>
-                            <div v-else="" :style="{ opacity: statLabelOpacity()[stat.name]}" :class="`stat_label_style stat_row_${stat[`stat_row`]} stat_column_${stat.label_column}`">{{stat.vitamin}}</div>
-                            <div v-if="stats_setting == 'Base Stats'" :id="stat.abrv" :class="`stat_value_style stat_row_${stat[`stat_row`]} stat_column_${stat.value_column}`">{{g5PokemonData[statsDisplaySpecies]?.base_stats[stat.path]}}</div>
-                            <div v-if="stats_setting == 'IVs'" :id="stat.abrv" :class="`stat_value_style stat_row_${stat[`stat_row`]} stat_column_${stat.value_column} dv`">{{get_iv(`${stat.name}`)}}/31</div>
-                            <div v-if="stats_setting == 'EVs'" :id="stat.abrv" :class="`stat_value_style stat_row_${stat[`stat_row`]} stat_column_${stat.value_column} evs`">{{game.properties.player.team[0].evs[stat.path].value}}/255</div>
-                            <div v-if="stats_setting == 'Vitamins'" :id="stat.abrv" :class="`stat_value_style stat_row_${stat[`stat_row`]} stat_column_${stat.value_column} evs`">{{vitamins_remaining(game.properties.player.team[0].evs[stat.path].value)}}</div>
-                            <div v-if="stats_setting == 'Detailed EVs'" :id="stat.abrv" :class="`stat_value_style detailed_ev_stat_row_${stat[`stat_row`]} stat_column_${stat.value_column} devs`">{{game.properties.player.team[0].evs[stat.path].value}}/255</div>
-                            <div v-if="stats_setting == 'Detailed EVs'" :id="stat.abrv" :class="`stat_value_style detailed_ev_stat_row_${stat[`stat_row`]} stat_column_${stat.value_column} percentage_evs`">{{decimalToPercentage(game.properties.player.team[0].evs[stat.path].value / 255) }}%</div>
-                            <div v-if="stats_setting == 'Detailed EVs'" :id="stat.abrv" :class="`stat_value_style detailed_ev_stat_row_${stat[`stat_row`]} stat_column_${stat.value_column} ev_stats_gained`">+{{calculate_ev_benefit(stat.path)}}</div>
-                            <div v-if="stats_setting == 'Base Stats Median'" :id="stat.abrv" :class="`average_value_style stat_row_${stat[`stat_row`]} stat_column_${stat.value_column}`">{{average_median_stats(stat.object_identifier).median}}</div>
-                            <div v-if="stats_setting == 'Base Stats Average'" :id="stat.abrv" :class="`average_value_style stat_row_${stat[`stat_row`]} stat_column_${stat.value_column}`">{{average_median_stats(stat.object_identifier).average}}</div>
-
-                            <div v-if="stats_setting == 'Automatic'" :class="`stat_value_style stat_row_${stat[`stat_row`]} stat_column_${stat.value_column}`" :id="stat.abrv">
-                                {{get_stat()[stat.abrv]}}
-                            </div>
-                        </div>
+                        <stat-tiles :nodes="stat_tiles"></stat-tiles>
                     </div>
                 </div>
             </div>
 
             <!--------- BADGE ICONS ---------------------------------------------------------------------------------------------------------------------->
             <div>
-                <div v-for="x in badges">
-                    <transition name="fade1">
-                        <div v-if="game.properties.player.badges[x].value == true && game.properties.meta.state != `No Pokemon`">
-                            <img v-if="selected_game == 'Black' || selected_game == 'White'" class="badge" :src="`images/gen5/badges/${x}.webp`">
-                            <img v-if="selected_game == 'Black 2' || selected_game == 'White 2'" class="badge" :src="`images/gen5/badges/bw2/${x}.webp`">
-                        </div>
-                    </transition>
-                </div>
+                <badge-row v-bind="badge_row"></badge-row>
             </div>
 
             <!-- Moveset -->
             
-            <table class="posAbs g4movepool" style="top: 900px; left: 457px;">
-                <tbody><tr class="g4movepool_header">
-                    <th class="align_center g4mp_type">Type</th>
-                    <th class="align_left g4mp_move">Move</th>
-                    <th class="align_right g4mp_power">Pwr.</th>
-                    <th class="align_center g4mp_category">DC</th>
-                    <th class="align_right g4mp_accuracy">Acc.</th>
-                    <th class="align_right g4mp_pp">PP</th>
-                </tr>
-                <tr v-if="getMove('1')">
-                    <!-- Move1 -->
-                    <th class="align_left g4mp_types">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('1')}.webp`">
-                    </th>
-                    <th class="align_left g4mp_move">{{getMove('1')}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move1?.move.value, 1)}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Overworld' || game.properties.meta.state.value == 'To Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves[0]?.move.value, 1)}}</th>
-                    <th class="align_right g4mp_category">
-                        <img class="centered-content dropshadow" :src="moveCategoryIcon(getMove('1'))">
-                    </th>
-                    <th class="align_right g4mp_accuracy">{{getAccuracy(black_moves[getMove('1')]?.accuracy, getMove('1'))}}%</th>
-                    <th class="align_right g4mp_pp">{{getPP("1")}}</th>
-                </tr>
-            </tbody></table>    
-            <table class="posAbs g4movepool" style="top: 900px; left: 966px;">
-                <tbody><tr class="g4movepool_header">
-                    <th class="align_center g4mp_type">Type</th>
-                    <th class="align_left g4mp_move">Move</th>
-                    <th class="align_right g4mp_power">Pwr.</th>
-                    <th class="align_center g4mp_category">DC</th>
-                    <th class="align_right g4mp_accuracy">Acc.</th>
-                    <th class="align_right g4mp_pp">PP</th>
-                </tr>
-                <tr v-if="getMove('2')">
-                    <!-- Move2 -->
-                    <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('2')}.webp`">
-                    </th>
-                    <th class="align_left g4mp_move">{{getMove('2')}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move2?.move.value, 2)}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Overworld' || game.properties.meta.state.value == 'To Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves[1]?.move.value, 2)}}</th>
-                    <th class="align_right g4mp_category">
-                        <img class="centered-content dropshadow" :src="moveCategoryIcon(getMove('2'))">
-                    </th>
-                    <th class="align_right g4mp_accuracy">{{getAccuracy(black_moves[getMove('2')]?.accuracy, getMove('2'))}}%</th>
-                    <th class="align_right g4mp_pp">{{getPP('2')}}</th>
-                </tr>
-            </tbody></table>
-            <table class="posAbs g4movepool" style="top: 986px; left: 457px;">
-                <tbody><tr v-if="getMove('3')">
-                    <!-- Move3 -->
-                    <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('3')}.webp`">
-                    </th>
-                    <th class="align_left g4mp_move">{{getMove("3")}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move3?.move.value, 3)}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Overworld' || game.properties.meta.state.value == 'To Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves[2]?.move.value, 3)}}</th>
-                    <th class="align_right g4mp_category">
-                        <img class="centered-content dropshadow" :src="moveCategoryIcon(getMove('3'))">
-                    </th>
-                    <th class="align_right g4mp_accuracy">{{getAccuracy(black_moves[getMove('3')]?.accuracy, getMove('3'))}}%</th>
-                    <th class="align_right g4mp_pp">{{getPP("3")}}</th>
-                </tr>
-            </tbody></table>
-            <table class="posAbs g4movepool" style="top: 986px; left: 966px;">
-                <tbody><tr v-if="getMove('4')">
-                    <!-- Move4 -->
-                    <th class="align_left g4mp_type">
-                        <img class="moveset_typeIcons centered-content dropshadow" :src="`images/gen5/type-icons-circular/${getMoveType('4')}.webp`">
-                    </th>
-                    <th class="align_left g4mp_move">{{getMove("4")}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Battle' || game.properties.meta.state.value == 'From Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves.move4?.move.value, 4)}}</th>
-                    <th v-if="game.properties.meta.state.value == 'Overworld' || game.properties.meta.state.value == 'To Battle'" class="align_right g4mp_power">{{typeEffectiveness(n_battle_data_fix.moves[3]?.move.value, 4)}}</th>
-                    <th class="align_right g4mp_category">
-                        <img class="centered-content dropshadow" :src="moveCategoryIcon(getMove('4'))">
-                    </th>
-                    <th class="align_right g4mp_accuracy">{{getAccuracy(black_moves[getMove('4')]?.accuracy, getMove('4'))}}%</th>
-                    <th class="align_right g4mp_pp">{{getPP("4")}}</th>
-                </tr>
-            </tbody></table>
+            <!-- One table per move slot, laid out 1 2 / 3 4 (core/overlay/player/MoveList.ts, laid out in playerPanel.ts) -->
+            <move-list :list="player_move_list" :layout="move_list_layout"></move-list>
 
             <!-- Right Hand Information Area -->
             <transition name="fade1">
@@ -747,252 +230,52 @@
                     </div>
                 </div>
                 <!-- Enemy Team Display -->
-                <div v-else-if="enemy_graphic == true && battlePokemonCrop != false && !second_screen_mode" style="position: absolute;" key="1">
-                    <div v-if="game.properties.battle.opponent_2?.value == null" class="trainerLabel">{{game.properties.battle.opponent.trainer.value}}'s Team</div>
-                    <div v-else="" class="trainerLabel">Double Battle Team</div>
-                    <div class="colored-image ds" :style="battlePokemonCrop" style="--url: url(images/gen5/ui/opponent.svg)"></div>
-                    <div v-for="x in pkmnSlots" :style="fade_stats(x)">
-                        <div v-if="x < game.properties.battle.opponent.team_count.value">
-                            <img class="canvas eFaintTransition" :style="fade_enemy_mon_comparison(x)" :class="svgColorClass(speed_comparison(x, game.properties.battle.opponent.team[x]?.stats.speed.value).comparison, game.properties.battle.opponent.team[x])" style="left: -1px;" :src="`images/gen5/ui/speed_comp/${x}.svg`">
-                            <div class="colored-image" :style="`--overlay-color: ${overlay_color}; --url: url(images/gen5/ui/enemy_ui/${x}.svg)`"></div>
-                            <img :src="`images/gen5/enemy-area/stats/${ui_type_color_modifier}/${x}.svg`" :style="fade_enemy_mon(x)" class="enemyPng eFaintTransition">
-                        </div>
-                    </div>
-
-                    <div class="enemyGraphic">
-                        <div v-for="x in pkmnSlots" class="eFaintTransition" :style="enemyFaint(x)">
-                            <div v-if="x < game.properties.battle.opponent.team_count.value" :class="`border slots ePkmnStyle ePkmn${x}`">
-                                <div :style="fade_enemy_mon(x)" class="eFaintTransition">
-                                    <div :style="fade_enemy_mon_text(x)" class="eFaintTransition">
-                                        <img class="ePkmnSprite" :class="{ ePkmnSpriteResizing: enemyResize.slot === x }" :data-enemy-slot="x" :data-enemy-species="enemy_mon_static[x]?.species?.value" :style="{ transform: enemyTransformFor(enemy_mon_static[x]?.species?.value), filter: `drop-shadow(${getEnemySpriteFlipped(enemy_mon_static[x]?.species?.value) ? -1 : 1}px 1px 2px)` }" :src="`images/gen5/pokemon/${speciesSpecialCharacters(enemy_mon_static[x]?.species)}${enemy_form(x, enemy_mon_static[x]?.species.value)}.webp`">
-                                        <!-- <img class="canvas" :src="`images/gen5/ui/speed_comp/${x}.svg`" /> -->
-                                        <div class="border ePkmnTyping">
-                                            <!-- <img v-if="held_item_icon(enemy_held_item(x))"
-                                                class="icons moveIcon ePkmnHeldItem"
-                                                :src="held_item_icon(enemy_held_item(x))"
-                                                @error="$event.target.style.visibility='hidden'" /> -->
-                                            <img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[enemy_mon_static[x]?.species]?.type_1?.toLowerCase()}.webp`">
-                                            <img v-show="g5PokemonData[enemy_mon_static[x]?.species]?.type_1 != g5PokemonData[enemy_mon_static[x]?.species]?.type_2" class="icons moveIcon" :src="`images/gen5/type-icons-circular/${g5PokemonData[enemy_mon_static[x]?.species]?.type_2?.toLowerCase()}.webp`">
-                                        </div>
-
-                                        <div class="ePkmnLvlSpecies">{{enemy_mon_static[x]?.species}}</div>
-                                        <div class="ePkmnLevel" style="opacity: .7;">Lv: {{enemy_mon_static[x]?.level}}</div>
-                                        <div class="ePkmnAbility" style="opacity: .7;">{{enemy_mon_static[x]?.ability}}</div>
-                                        <div class="speed_comparison">{{speed_comparison(x, game.properties.battle.opponent.team[x]?.stats.speed.value).comparison}}</div>
-
-                                        <div class="enemyStatLabel eStatLabel eLabelLeft eLabel1">Hp:</div>
-                                        <div v-show="game.properties.battle.opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers?.attack.value == 0" class="enemyStatLabel eStatLabel eLabelLeft eLabel2">Atk:</div>
-                                        <div v-show="game.properties.battle.opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers?.defense.value == 0" class="enemyStatLabel eStatLabel eLabelLeft eLabel3">Def:</div>
-                                        <div v-show="game.properties.battle.opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers?.speed.value == 0" class="enemyStatLabel eStatLabel eLabelRight eLabel1">Spe:</div>
-                                        <div v-show="game.properties.battle.opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers?.special_attack.value == 0" class="enemyStatLabel eStatLabel eLabelRight eLabel2">SpA:</div>
-                                        <div v-show="game.properties.battle.opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers?.special_defense.value == 0" class="enemyStatLabel eStatLabel eLabelRight eLabel3">SpD:</div>
-        
-                                        <div class="align_right eStatValue eValueLeft eValue1">{{ game.properties.battle.opponent.team[x].stats.hp_max }}</div>
-                                        <div class="align_right eStatValue eValueLeft eValue2">{{ getEnemyStat("attack", game.properties.battle.opponent.team[x].stats.attack, x) }}</div>
-                                        <div class="align_right eStatValue eValueLeft eValue3">{{ getEnemyStat("defense", game.properties.battle.opponent.team[x].stats.defense, x) }}</div>
-                                        <div class="align_right eStatValue eValueRight eValue1">{{ getEnemyStat("speed", game.properties.battle.opponent.team[x].stats.speed, x) }}</div>
-                                        <div class="align_right eStatValue eValueRight eValue2">{{ getEnemyStat("special_attack", game.properties.battle.opponent.team[x].stats.special_attack, x) }}</div>
-                                        <div class="align_right eStatValue eValueRight eValue3">{{ getEnemyStat("special_defense", game.properties.battle.opponent.team[x].stats.special_defense, x) }}</div>
-                                        <div class="border ePkmnMoves">
-                                            <table class="enemyMovesetTable">
-                                                <tbody><tr v-show="game.properties.battle.opponent.team[x].moves[0].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[0].move.value]?.type?.toLowerCase()}.webp`"></th>
-                                                    <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[0].move.value}}</th>
-                                                </tr>
-                                                <tr v-show="game.properties.battle.opponent.team[x].moves[1].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[1].move.value]?.type?.toLowerCase()}.webp`"></th>
-                                                    <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[1].move.value}}</th>
-                                                </tr>
-                                                <tr v-show="game.properties.battle.opponent.team[x].moves[2].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[2].move.value]?.type?.toLowerCase()}.webp`"></th>
-                                                    <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[2].move.value}}</th>
-                                                </tr>
-                                                <tr v-show="game.properties.battle.opponent.team[x].moves[3].move.value != null">
-                                                    <th><img class="icons moveIcon" :src="`images/gen5/type-icons-circular/${black_moves[game.properties.battle.opponent.team[x].moves[3].move.value]?.type?.toLowerCase()}.webp`"></th>
-                                                    <th class="align_left" style="font-size: 14px;">{{game.properties.battle.opponent.team[x].moves[3].move.value}}</th>
-                                                </tr>
-                                            </tbody></table>
-                                        </div>
-                                        <div v-if="game.properties.meta.state.value == 'Battle'" class="ePkmnStats">
-                                            <div class="enemyStatModTable">
-                                                <div v-for="modifier in modifier_values">
-                                                    <div v-show="game.properties.battle.opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers?.[modifier].value != 0" class="enemyMod" :class="`e_${modifier}`">{{stage_modifiers(game.properties.battle.opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers?.[modifier].value)}}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> 
-                    <img v-if="getTrainerGraphic().state == true" :src="getTrainerGraphic().graphic" style="position: absolute; top: 0px;">
-                    <img v-if="second_screen_check" class="canvas" src="images/gen5/ui/second_screen.webp">
+                <!-- Decision 27: only Automatic and Trainers show it (Movepool and Splits keep their panel). It follows the
+                     setting, not a post-battle Splits, which waits for enemy_graphic to end, as before. -->
+                <div v-else-if="enemy_graphic == true && battlePokemonCrop != false && !second_screen_mode && (right_ui == 'Automatic' || right_ui == 'Trainers')" style="position: absolute;" key="1">
+                    <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout"></enemy-team-panel>
+                </div>
+                <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, during the battle. -->
+                <div v-else-if="!second_screen_mode && (right_ui == 'Automatic' || right_ui == 'Trainers') && wild_pokemon_view" style="position: absolute;" key="9">
+                    <enemy-team-panel :view="wild_pokemon_view" :layout="enemy_team_layout"></enemy-team-panel>
                 </div>
                 <!-- Second Screen Mode -->
                 <div v-else-if="second_screen_mode" key="2">
                     <div class="posAbs movepoolLabel">Splits</div>
-                    <div v-if="toggle_compare_splits === 'Followup'">
-                        <table class="second_screen_splits_table" cellspacing="0">
-                            <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${starting_type_fix})`, 'outline': '1px solid #000', height: '9px'}">
-                                <td style="text-decoration: underline; font-size: 16px; width: 30px; text-align: left;  padding-left: 5px;">Split</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 150px; text-align: left; padding-left: 5px;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;">{{previous_label}}</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;">{{current_label}}</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Diff</td>
-                            </tr>
-                            <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon_2" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
-                                <td style="font-size: 16px; text-align: right;">{{split.previous_time == "0:00" ? "-" : split.previous_time}}</td>
-                                <td style="font-size: 16px; text-align: right;">{{split.current_time}}</td>
-                                <td style="font-size: 16px; text-align: right; padding-right: 7px;" :style="split_diff_color(split.difference)">{{split.difference}}</td>
-                            </tr>
-                        </tbody></table>
-                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/second_screen_splits.svg)"></div>
-                    </div>
-                    <div v-else-if="toggle_compare_splits === 'First'">
-                        <table class="second_screen_splits_table" cellspacing="0">
-                            <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${starting_type_fix})`, 'outline': '1px solid #000', height: '9px'}">
-                                <td style="text-decoration: underline; font-size: 16px; width: 30px; text-align: left;  padding-left: 5px;">Split</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 150px; text-align: left; padding-left: 5px;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Time</td>
-                            </tr>
-                            <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon_2" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
-                                <td style="font-size: 16px; text-align: right;"></td>
-                                <td style="font-size: 16px; text-align: right;"></td>
-                                <td style="font-size: 16px; text-align: right; padding-right: 7px;">{{split.current_time}}</td>
-                            </tr>
-                        </tbody></table>
-                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/second_screen_splits.svg)"></div>
+                    <div v-if="secondScreenSplitsView">
+                        <splits-panel :view="secondScreenSplitsView" />
                     </div>
                     <div v-if="second_screen_mode == true" class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen5/ui/second_screen_game_area.svg)"></div>
                 </div>
+                <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
+                <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout"></enemy-team-panel>
+                </div>
                 <!-- Splits -->
-                <div v-else-if="right_ui == 'Splits'" key="7" :style="`filter: drop-shadow(0px 1px 1px)`" class="posAbs">
+                <div v-else-if="right_panel_mode == 'Splits'" key="7" :style="`filter: drop-shadow(0px 1px 1px)`" class="posAbs">
                     <div class="posAbs movepoolLabel">Splits</div>
-                    <div v-if="toggle_compare_splits === 'Followup'">
-                        <table class="splits_table" cellspacing="0">
-                            <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${starting_type_fix})`, 'outline': '1px solid #000', height: '9px'}">
-                                <td style="text-decoration: underline; font-size: 16px; width: 30px; text-align: left;  padding-left: 5px;">Split</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 150px; text-align: left; padding-left: 5px;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;">{{previous_label}}</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;">{{current_label}}</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Diff</td>
-                            </tr>
-                            <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
-                                <td style="font-size: 16px; text-align: right;">{{split.previous_time == "0:00" ? "-" : split.previous_time}}</td>
-                                <td style="font-size: 16px; text-align: right;">{{split.current_time}}</td>
-                                <td style="font-size: 16px; text-align: right; padding-right: 7px;" :style="split_diff_color(split.difference)">{{split.difference}}</td>
-                            </tr>
-                        </tbody></table>
-                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/splits.svg)"></div>
-                    </div>
-                    <div v-else-if="toggle_compare_splits === 'First'">
-                        <table class="splits_table" cellspacing="0">
-                            <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${starting_type_fix})`, 'outline': '1px solid #000', height: '9px'}">
-                                <td style="text-decoration: underline; font-size: 16px; width: 30px; text-align: left;  padding-left: 5px;">Split</td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 150px; text-align: left; padding-left: 5px;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 92px;  text-align: right;"></td>
-                                <td style="text-decoration: underline; font-size: 16px; width: 71px;  text-align: right; padding-right: 7px;">Time</td>
-                            </tr>
-                            <tr v-for="split in compare_splits">
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;"><img class="icons splitIcon" :src="`images/gen5/split_images/${getSplitImageName(split.imageTrainer || split.trainer)}.webp`"></td>
-                                <td style="font-size: 16px; text-align: left; padding-left: 5px;">{{split.trainer}}</td>
-                                <td style="font-size: 16px; text-align: right;"></td>
-                                <td style="font-size: 16px; text-align: right;"></td>
-                                <td style="font-size: 16px; text-align: right; padding-right: 7px;">{{split.current_time}}</td>
-                            </tr>
-                        </tbody></table>
-                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/splits.svg)"></div>
+                    <div v-if="splitsView">
+                        <splits-panel :view="splitsView" />
                     </div>
                 </div>
                 <!-- Movepool -->
-                <div v-else-if="right_ui == 'Movepool' || right_ui == 'Automatic'" key="6" :style="evolution_transitioning ? `filter: drop-shadow(0px 1px 1px); opacity: ${movepoolOpacity}; transition: ${movepoolTransition};` : `filter: drop-shadow(0px 1px 1px);`">
-                    <div class="posAbs movepoolLabel">Movepool</div><table class="movepoolDemo" cellspacing="0" :style="movepoolResize()">
-                        <tbody><tr :style="{'background-color': `var(--${ui_type_color_modifier}${starting_type_fix})`, 'outline': '2px solid #000'}">
-                            <th class="movepool_header movepool_way">Way</th>
-                            <th class="movepool_header movepool_move">Move</th>
-                            <th class="movepool_header movepool_type">Type</th>
-                            <th class="movepool_header movepool_type">DC</th>
-                            <th class="movepool_header movepool_tableC">Pwr.</th>
-                            <th class="movepool_header movepool_tableC">Acc.</th>
-                            <th class="movepool_header movepool_tableC">PP</th>
-                        </tr>
-                        <tr v-for="(x, index) in movepoolRows.level" :class="{ 'first-row': index === 0 }" :style="getUnobtainableMoveStyle(x, 'Banned')">
-                            <td class="movepool_way">{{x.Level}}</td>
-                            <td class="movepool_move">{{move_name(x.move)}}</td>
-                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
-                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${getMoveCategory(x.category, x)[1].toLowerCase()})`}">{{getMoveCategory(x.category)[0]}}</td>
-                            <td class="movepool_tableC">{{movepoolPower(x)}}</td>
-                            <td class="movepool_tableC">{{x.accuracy}}%</td>
-                            <td class="movepool_tableC">{{x.pp}}</td>
-                        </tr>
-                        <tr v-for="x in movepoolRows.form" :style="getUnobtainableMoveStyle(x, 'Banned')">
-                            <td class="movepool_way">Form</td>
-                            <td class="movepool_move">{{move_name(x.move)}}</td>
-                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
-                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${getMoveCategory(x.category, x)[1].toLowerCase()})`}">{{getMoveCategory(x.category)[0]}}</td>
-                            <td class="movepool_tableC">{{movepoolPower(x)}}</td>
-                            <td class="movepool_tableC">{{x.accuracy}}%</td>
-                            <td class="movepool_tableC">{{x.pp}}</td>
-                        </tr>
-                        <tr v-for="x in movepoolRows.tmhm" :style="getUnobtainableMoveStyle(x, selected_game)">
-                            <td v-if="x.Move == 'Whirlpool'" class="movepool_way">HM05</td>
-                            <td v-else="" class="movepool_way">{{x.tmhm}}</td>
-                            <td class="movepool_move">{{move_name(x.move)}}</td>
-                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}">{{movepoolType(x)}}</td>
-                            <td class="movepool_type" :style="{'background-color': `var(--${ui_type_color_modifier}${getMoveCategory(x.category, x)[1].toLowerCase()})`}">{{getMoveCategory(x.category)[0]}}</td>
-                            <td class="movepool_tableC">{{movepoolPower(x)}}</td>
-                            <td class="movepool_tableC">{{x.accuracy}}%</td>
-                            <td class="movepool_tableC">{{x.pp}}</td>
-                        </tr>
-                        <template v-if="show_tutor_moves && (selected_game == 'Black 2' || selected_game == 'White 2')">
-                            <tr v-for="x in movepoolRows.tutor" :style="getUnobtainableMoveStyle(x, selected_game)">
-                                <td class="movepool_way">Tutor</td>
-                                <td class="movepool_move">{{move_name(x.move)}}</td>
-                                <td :style="{'background-color': `var(--${ui_type_color_modifier}${movepoolTypeColor(x)?.toLowerCase()})`}" class="movepool_type">{{movepoolType(x)}}</td>
-                                <td :style="{'background-color': `var(--${ui_type_color_modifier}${getMoveCategory(x.category, x)[1].toLowerCase()})`}" class="movepool_type">{{getMoveCategory(x.category)[0]}}</td>
-                                <td class="movepool_tableC">{{movepoolPower(x)}}</td>
-                                <td class="movepool_tableC">{{x.accuracy}}%</td>
-                                <td class="movepool_tableC">{{x.pp}}</td>
-                            </tr>
-                        </template>
-                        
-                    </tbody></table>
-                    <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/movepool.svg)"></div>
+                <!-- Movepool, Automatic, and Trainers with no trainer picked (or no table: Black 2 / White 2). -->
+                <div v-else="" key="6" :style="evolution_transitioning ? `filter: drop-shadow(0px 1px 1px); opacity: ${movepoolOpacity}; transition: ${movepoolTransition};` : `filter: drop-shadow(0px 1px 1px);`">
+                    <movepool :view="movepoolView">
+                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/movepool.svg)"></div>
+                    </movepool>
                 </div>
             </transition>
 
             <!--------- BATTLE POP UPS -------------------------------------------------------------------------------------------------------------------->
             <div v-if="!not_valid_battle_state" style="position: absolute;">
-                <transition name="fade1">
-                    <div v-show="get_acc_eva_mod('accuracy') != 0 && game.properties.meta.state == `Battle`">
-                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/accuracy.svg)"></div>
-                        <div class="genericLabels accuracyModLabel">accuracy:</div>
-                        <div class="popUpsStyle accuracyMod">{{ get_acc_eva_mod('accuracy') }}</div>
-                    </div>
-                </transition>
-                <transition name="fade1">
-                    <div v-show="get_acc_eva_mod('evasion') != 0 && game.properties.meta.state == `Battle`">
-                        <div class="colored-image ds" :style="`filter: saturate(${ui_saturation})`" style="--url: url(images/gen5/ui/evasion.svg)"></div>
-                        <div class="genericLabels evasionModLabel">evasion:</div>
-                        <div class="popUpsStyle evasionMod">{{ get_acc_eva_mod('evasion') }}</div>
-                    </div>
-                </transition>
+                <popup-box v-bind="battle_popups.accuracy"></popup-box>
+                <popup-box v-bind="battle_popups.evasion"></popup-box>
             </div>
 
             <!-- Exp bar -->
-            <div class="expBar">
-                <div class="exp_label">Exp:</div>
-                <div class="expMeterOuter expMeterStyle"><div class="expMeterInner expMeterStyle" ref="expBar"></div></div>
-            </div>
+            <exp-bar ref="expBar" :layout="exp_bar_layouts.bar" :label="exp_label" :timing="exp_bar_timing"></exp-bar>
 
             <!-- Misc -->
             <div class="posAbs labelAbility" style="font-family: play; top: 817px; left: 507px;">
@@ -1005,56 +288,7 @@
             <div class="genericLabels timerLabel">time played at 4x game speed</div>
 
             <!-- Faults -->
-            <div v-if="shuckie_counters == false">
-                <div v-if="blackout_counter == 0">
-                    <div class="genericLabels resetsLabel">resets</div>
-                    <div v-show="resetCounter == true" id="reset_counter" class="resets">
-                        <div>{{playerResets}}</div>
-                    </div>
-                </div>
-                <div v-else-if="blackout_counter > 0 && playerResets == 0">
-                    <div class="genericLabels resetsLabel">blackouts</div>
-                    <div v-show="resetCounter == true" id="reset_counter" class="resets">
-                        <div>{{blackout_counter}}</div>
-                    </div>
-                </div>
-                <div v-else="">
-                    <div class="genericLabels resetsLabel_2">resets</div>
-                    <div v-show="resetCounter == true" id="reset_counter" class="resets_2">
-                        <div>{{playerResets}}</div>
-                    </div>
-                    <div class="genericLabels resetsLabel_3">blackouts</div>
-                    <div v-show="resetCounter == true" id="blackout_counter" class="resets_3">
-                        <div>{{blackout_counter}}</div>
-                    </div>
-                </div>
-            </div>
-            <div v-else-if="shuckie_counters == true">
-                <div v-if="shuckie_faults_check == false">
-                    <div class="genericLabels resetsLabel_2">resets</div>
-                    <div v-show="resetCounter == true" id="reset_counter" class="resets_2">
-                        <div>{{shuckie_player_resets ?? 0}}</div>
-                    </div>
-                    <div class="genericLabels resetsLabel_3">blackouts</div>
-                    <div v-show="resetCounter == true" id="blackout_counter" class="resets_3">
-                        <div>{{shuckie_blackout_counter ?? 0}}</div>
-                    </div>
-                </div>
-                <div v-else="">
-                    <div v-if="shuckie_blackout_counter == undefined || shuckie_blackout_counter == 0">
-                        <div class="genericLabels resetsLabel">resets</div>
-                        <div v-show="resetCounter == true" id="reset_counter" class="resets">
-                            <div>{{shuckie_player_resets ?? 0}}</div>
-                        </div>
-                    </div>
-                    <div v-else-if="shuckie_blackout_counter > 0 && (shuckie_player_resets == undefined || shuckie_player_resets == 0)">
-                        <div class="genericLabels resetsLabel">blackouts</div>
-                        <div v-show="resetCounter == true" id="reset_counter" class="resets">
-                            <div>{{shuckie_blackout_counter ?? 0}}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <faults-box :layout="faults_layout.counts" :mode="blackouts_resets" :resets="fault_resets" :blackouts="fault_blackouts" :font-sizes="faults_font_sizes"></faults-box>
             <!-- Gametime -->
             <transition name="fade1">
                 <div v-show="run_complete" style="position: relative; top: 59px;">
@@ -1096,14 +330,14 @@
  *   - `MyStorage`       -> games/gen5/storage.ts (the file-backed layered store, with
  *                          gen5's key rule, style-field filter, three-layer read and
  *                          1 s debounced write).
- *   - keyhook block     -> games/gen5/hotkeys.ts through core/hotkeys; the second-screen
+ *   - keyhook block     -> games/gen5/actions.ts through core/shortcuts; the second-screen
  *                          key sender -> core/window/virtualKeys.ts (decision 9).
  *   - control server    -> games/gen5/control.ts, bound by main.ts (plan 1.8).
  *   - OBS marker method -> core/logic/obs.ts (the same exchange, plan 1.9).
  *   - logData/logCopy   -> games/gen5/splits.js over the splits IPC; the three split
  *                          folders the legacy file created at load are created there too.
- *   - Timer / PubSub    -> games/gen5/logic/, the two timer components -> games/gen5/
- *                          components/, all four as ES modules with their bodies as they were.
+ *   - Timer / PubSub    -> games/gen5/logic/, as ES modules with their bodies as they were. The
+ *                          timer component (components/Timer.js) became core/overlay/player/GameClock.vue.
  *   - `<script src>`    -> imports of games/gen5/data/**.js.
  *   - set-game-icon     -> the shell, from the detected game (src/renderer/main.ts).
  *   - openFolder        -> the splits IPC.
@@ -1118,9 +352,30 @@
  * is the Phase 2.4 refactor proper, to be done with the harness as the net, exactly
  * as gen1's was in Phase 1.
  */
-import { computed, defineComponent } from "vue";
-import { LiveText } from "~/core/overlay/LiveText";
+import { computed, defineComponent, markRaw, shallowRef } from "vue";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
+import { FaultsBox } from "~/core/overlay/player/FaultsBox";
+import { MoveList } from "~/core/overlay/player/MoveList";
+import { PopupBox } from "~/core/overlay/player/PopupBox";
+import { battlePopups, moveListLayout, playerMoveList } from "./playerPanel";
+import GameClock from "~/core/overlay/player/GameClock.vue";
+import { faultsLayout, faultsFontSizes, statTiles, expBarLayouts, expBarTiming, expBarLabel, badgeRow, statHeaders } from "./playerPanel";
+import { StatTiles } from "~/core/overlay/player/StatTiles";
+import { ExpBar } from "~/core/overlay/player/ExpBar";
+import { BadgeRow } from "~/core/overlay/player/BadgeRow";
+import { expProgress } from "~/core/logic/expCurve";
+import ConfirmButton from "~/core/overlay/ConfirmButton.vue";
+import SettingsPanel from "~/core/settings/SettingsPanel.vue";
+import Movepool from "~/core/overlay/Movepool.vue";
+import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
+import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
+import { speedColorClass, speedLabel, speedLabelOrder } from "~/core/logic/speedLabel";
+import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
+import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
+import { searchTrainers } from "~/core/logic/trainerPreview";
+import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
+import { crossOutActive, struckMoves } from "~/core/logic/unobtainableMoves";
+import { gen5SettingsPanel } from "./settingsPanel";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { gen45OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
 import {
@@ -1135,12 +390,13 @@ import {
 } from "~/core/logic/movePower";
 import { gen45TurnOrder, gen45TurnOrderSpeed } from "~/core/logic/battleSpeed";
 import { moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
-import { bindHotkeys } from "~/core/hotkeys/KeyHook";
+import { bindShortcuts } from "~/core/shortcuts/engine";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
 import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
+import { formatStage } from "~/core/logic/statFormat";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { sendVirtualKey } from "~/core/window/virtualKeys";
 import { enemySpriteStyleMixin } from "~/core/overlay/enemySpriteStyleMixin";
@@ -1149,15 +405,18 @@ import { naturesMixin } from "~/core/overlay/naturesMixin";
 import { manualIvsMixin } from "~/core/overlay/manualIvsMixin";
 import { speciesArtMixin } from "~/core/overlay/speciesArtMixin";
 import { overlayCommonMixin } from "~/core/overlay/overlayCommonMixin";
+import { SpeciesArt } from "~/core/overlay/player/SpeciesArt";
+import { TypeBadges } from "~/core/overlay/player/TypeBadges";
+import { InfoRow } from "~/core/overlay/player/InfoRow";
+import { typeBadges, infoRows } from "./playerPanel";
 import { battleMathMixin } from "~/core/overlay/battleMathMixin";
 import { dsPairMixin } from "~/core/overlay/dsPairMixin";
 import { MyStorage, StyleSettingsUtils } from "./storage";
 import { enemySpriteScaleManager } from "./enemySprites";
-import { gen5Hotkeys } from "./hotkeys";
+import { gen5Actions } from "./actions";
 import { logData, logCopy, transition } from "./splits.js";
 import { Timer } from "./logic/Timer.js";
-import TimerComponent from "./components/Timer.js";
-import ShuckieTimerComponent from "./components/ShuckieTimer.js";
+import PubSub from "./logic/PubSub.js";
 import { POKEMON_FORMS, POKEMON_FORM_LABELS, POKEMON_FORM_INFO, BATTLE_ONLY_FORMS, baseSpeciesOf, BATTLE_FORM_VARIANTS, BATTLE_FORM_LABELS } from "./forms.js";
 import { ability_glossary } from "./data/references/abilities.js";
 import { auto_save_settings } from "./data/auto_save_settings.js";
@@ -1186,15 +445,33 @@ import { typeEffectivenessArray } from "./data/type effectiveness array.js";
 import { unobtainable_moves_object } from "./data/moves/unobtainable_moves.js";
 
 // Implicit globals of the legacy classic script, see tools/port/lift-gen5.py.
-let attack, basePower, battle_end, d, damageMax, damageMin, debugging_mode, defense, fling_power, gen3abilities, h, level, m, maxPercentage, minPercentage, nature, newColor, part1, part2, part3, part4, pid, power, shuckie_blackouts, shuckie_resets, specialA, specialD, stab, starterType, timecode, type, type1, type2, typeString, usableVitamins, vitaminsUsed;
+let attack, basePower, battle_end, damageMax, damageMin, debugging_mode, defense, fling_power, gen3abilities, h, level, m, maxPercentage, minPercentage, nature, newColor, part1, part2, part3, part4, pid, power, shuckie_blackouts, shuckie_resets, specialA, specialD, stab, starterType, timecode, type, type1, type2, typeString, usableVitamins, vitaminsUsed;
+
+// The movepool rows come from black.js, whose keys are lower-case (`move`, `type`), but
+// movepoolPower/movepoolType/movepoolTypeColor were copied from gen4, whose rows say `Move`/`Type`,
+// so their Hidden Power, Return and Frustration branches never ran (known-legacy-bugs, 2026-10-14).
+const rowMove = (row) => row.move ?? row.Move;
+const rowType = (row) => row.type ?? row.Type;
 
 export default defineComponent({
-    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin],
+    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin, rightPanelModeMixin("right_ui")],
     components: {
-        LiveText,
         ClockFrame,
-        "Timer": TimerComponent,
-        "ShuckieTimer": ShuckieTimerComponent,
+        FaultsBox,
+        MoveList,
+        PopupBox,
+        GameClock,
+        ConfirmButton,
+        SettingsPanel,
+        Movepool,
+        SplitsPanel,
+        EnemyTeamPanel,
+        StatTiles,
+        ExpBar,
+        BadgeRow,
+        SpeciesArt,
+        TypeBadges,
+        InfoRow,
     },
     props: ["game"],
     provide() {
@@ -1202,10 +479,18 @@ export default defineComponent({
         // which changes every poll. Read here through computeds the child renders, so
         // this component's own render is not a dependent of them and does not re-run at
         // that rate (docs/performance-followups.md, third pass).
+        // The overlay's own timer comes the same way: logic/Timer.js publishes its text on `time_update` every
+        // frame, and only the clock's two lines (core/overlay/player/GameClock.vue) read it. (Until 2026-10-14 a
+        // `components/Timer.js` child subscribed and drew the clock itself.)
+        const timerText = shallowRef(["0", ".00"])
+        this._onTimeUpdate = (value) => { timerText.value = value }
+        PubSub.subscribe("time_update", this._onTimeUpdate)
         return {
             liveText: {
                 shuckie_clock:  computed(() => this.formatMilliseconds(this.emulatorStats?.time_current)),
                 shuckie_frames: computed(() => "." + this.getCentiseconds(this.emulatorStats?.time_current)),
+                timer_clock:    computed(() => timerText.value[0]),
+                timer_frames:   computed(() => timerText.value[1]),
             },
             // What <clock-frame> posts to the out-of-process clock (core/overlay/ClockFrame.ts), read
             // the same way: the overlay's render never depends on the timer fields or the polls.
@@ -1253,11 +538,9 @@ export default defineComponent({
             is_loading_evolution_style   : false, // Flag to prevent watchers from saving during style loading
             evolved_base_stats           : false, // Flag to show base stats of evolved species until next battle
             selected_game                : MyStorage['selected_game'] ?? "Black",
-            available_games              : ["Black", "White", "Black 2", "White 2"], // ["Black", "White", "Black 2", "White 2"],
             starter_choice               : "Tepig",
             refilming_mode               : false,
             show_advanced_settings       : MyStorage['show_advanced_settings'] ?? false,
-            showPopup                    : false,
 
             // RNG modal lookup tables (item name -> patch value)
             stpRoute5BerryGirl: {
@@ -1298,7 +581,10 @@ export default defineComponent({
             stop_timer_after_n_dialogue: MyStorage['stop_timer_after_n_dialogue'] ?? false,
 
             // Settings
-            right_ui                     : MyStorage['right_ui']               ?? "Automatic",
+            // Decision 27 (core/overlay/rightPanelMode.ts): an old or unknown value reads as Automatic.
+            right_ui                     : readRightPanelMode(MyStorage['right_ui']).mode,
+            // Decision 30: the wild panel, off by default.
+            show_wild_battles            : MyStorage['show_wild_battles']      ?? false,
             previous_label               : MyStorage['previous_label']         ?? "Previous",
             current_label                : MyStorage['current_label']          ?? "Current",
             collect_split_data           : MyStorage['collect_split_data']     ?? true,
@@ -1352,19 +638,12 @@ export default defineComponent({
             manual_ivs             : clampIvs(null),
             overlayNew             : "Chimchar",
             overlayOld             : "Chimchar",
-            scott_mode             : true,
             testStatus             : MyStorage['testStatus']           ?? false,
             wild_pokemon_display   : false,
             stats_setting          : MyStorage['stats_setting']        ?? "Automatic",
             expBarToggle           : MyStorage['expBarToggle']         ?? true,
             show_nature_changes    : MyStorage['show_nature_changes']  ?? true,
             show_tutor_moves       : MyStorage['show_tutor_moves']     ?? true,
-            movepool_isolation     : MyStorage['movepool_isolation']   ?? "Automatic",
-            
-            right_display          : MyStorage['right_display'] ?? "Automatic",
-            hgss_trainers          : [],
-            examined_trainer       : "",
-            search_trainers        : "",
             
             stat_fix_toggle        : true,
             stat_fix_lvl           : 0,
@@ -1521,6 +800,9 @@ export default defineComponent({
             badgeBoosts:     ["badge1", "badge3", "badge5", "badge7"],
             moves:           ["move1","move2","move3","move4",],
             pkmnSlots:       [0, 1, 2, 3, 4, 5],
+            // The trainer the "Trainers" right panel previews (a trainer-table id), and the picker's search text.
+            examined_trainer: MyStorage['examined_trainer'] ?? "",
+            search_trainers:  "",
             modifier_values: ["attack","defense","special_attack","special_defense","speed"],
             simple_natures: {
                 "0" : "Hardy",
@@ -1616,6 +898,7 @@ export default defineComponent({
             backgroundScale      : MyStorage["backgroundScale"]       ?? 100,
             backgroundUrl        : MyStorage["backgroundUrl"]         ?? "",
             backgroundFlip       : MyStorage["backgroundFlip"]        ?? false,
+            backgroundXFlip      : MyStorage["backgroundXFlip"]       ?? false,
             use_custom_background: MyStorage["use_custom_background"] ?? false,
             backgroundXOffset    : MyStorage["backgroundXOffset"]     ?? 0,
             backgroundYOffset    : MyStorage["backgroundYOffset"]     ?? 0,
@@ -1632,7 +915,7 @@ export default defineComponent({
                 "overlay_color", "imageXOffset", "imageYOffset", "imageScale", "imageFlip", "imageSat", "imageRotation",
                 "backgroundBlur", "backgroundHue", "backgroundScale", "backgroundUrl", "use_custom_background",
                 "backgroundXOffset", "backgroundYOffset", "backgroundTexture", "backgroundBrightness",
-                "backgroundContrast", "backgroundSaturation", "backgroundFlip", "ui_saturation",
+                "backgroundContrast", "backgroundSaturation", "backgroundFlip", "backgroundXFlip", "ui_saturation",
             ],
             pokemon_settings: [
                 "overlay_color",
@@ -1655,6 +938,7 @@ export default defineComponent({
                 "backgroundContrast",
                 "backgroundSaturation",
                 "backgroundFlip",
+                "backgroundXFlip",
 
                 "attempt_number",
                 "pb_time",
@@ -1708,8 +992,6 @@ export default defineComponent({
             finished_run_count       : 0,
             split_data               : MyStorage["split_data"]          ?? [],
             simple_data_str          : MyStorage["simple_data_str"]     ?? "",
-            full_data_str            : MyStorage["full_data_str"]       ?? "",
-            deprecated_data_str      : MyStorage["deprecated_data_str"] ?? "",
             simple_data              : MyStorage["simple_data"]         ?? "",
             n_dialogue_gametime      : MyStorage["n_dialogue_gametime"] ?? "",
             testRun                  : MyStorage['testRun']             ?? false,
@@ -1725,8 +1007,6 @@ export default defineComponent({
             buffer_battle_special_attack : 0,
             buffer_battle_special_defense: 0,
             buffer_battle_friendship     : 0,
-
-            search_term: MyStorage["search_term"] ?? "",
 
             // UI
             ui_saturation:                MyStorage["ui_saturation"]                ?? .6,
@@ -1841,12 +1121,26 @@ export default defineComponent({
                 }
             );
         }
+        // A trainer battle ends the post-battle Splits: enemy_graphic on, Style Mode off, and an opponent team count
+        // other than 0 (the condition of the old write inside the battlePokemonCrop computed). Decision 27: it ends
+        // only the override; it used to set the setting itself to Automatic, a "Splits" picked by the operator too.
+        this.$watch(
+            () => this.right_panel_override == "Splits" && this.enemy_graphic == true
+                && !(this.isInDevMode && this.style_mode_active)
+                && this.game.properties.battle.opponent.team_count.value != 0,
+            (leave_splits) => {
+                if (leave_splits) {
+                    this.clear_right_panel_override()
+                }
+            },
+            { immediate: true }
+        );
     },
     watch: {
         enemy_graphic(newValue) {
             if (newValue == false && this.prepare_for_splits == true) {
                 this.prepare_for_splits = false
-                this.right_ui = "Splits"
+                this.show_post_battle_splits()
             }
         },
         // backgroundTexture(newValue) {
@@ -2106,11 +1400,6 @@ export default defineComponent({
                 // The flag in loadEvolutionStyle will prevent watchers from overwriting
                 this.loadEvolutionStyle(newValue, true);
                 
-                // Recalculate movepool size for the new species
-                this.$nextTick(() => {
-                    this.movepoolResize();
-                });
-                
                 // If we're changing from one species to another (not initial load), perform transition
                 if (oldValue && oldValue !== newValue) {
                     this.performEvolutionTransition(oldValue, newValue);
@@ -2251,8 +1540,6 @@ export default defineComponent({
             if (oldValue !== newValue && newValue in POKEMON_FORM_INFO) {
                 this.$nextTick(() => this.applyPokemonForm(newValue));
             }
-
-            this.movepoolResize();
         },
         ui_stat_arrangement(newValue) {
             if (newValue == 'HP, Atk, Def, SpA, SpD, Spe') {
@@ -2280,49 +1567,12 @@ export default defineComponent({
             this.blackout_counter = 0;
         },    
         async playerResets(newProp) {
-            if ((newProp + this.blackout_counter).toString().length == 1) {
-                document.getElementById("reset_counter").style.fontSize = "68px"
-            }
-            if ((newProp + this.blackout_counter).toString().length == 2) {
-                document.getElementById("reset_counter").style.fontSize = "68px"
-            }
-            if ((newProp + this.blackout_counter).toString().length == 3) {
-                document.getElementById("reset_counter").style.fontSize = "54px"
-            }
-            if ((newProp + this.blackout_counter).toString().length == 4) {
-                document.getElementById("reset_counter").style.fontSize = "40px"
-            }
-
-            // if (newProp.toString().length == 1) {
-            //     document.getElementById("reset_counter").style.fontSize = "68px"
-            // }
-            // if (newProp.toString().length == 3) {
-            //     document.getElementById("reset_counter").style.fontSize = "54px"
-            // }
-            // if (newProp.toString().length == 4) {
-            //     document.getElementById("reset_counter").style.fontSize = "40px"
-            // }
-            
             if (this.playerResets < 0) {
                 this.playerResets = 0;
             }
-            this.blackout == false
             MyStorage["playerResets"] = this.playerResets
         },
         blackout_counter(newProp) {
-            if ((this.playerResets + newProp).toString().length == 1) {
-                document.getElementById("reset_counter").style.fontSize = "68px"
-            }
-            if ((this.playerResets + newProp).toString().length == 2) {
-                document.getElementById("reset_counter").style.fontSize = "68px"
-            }
-            if ((this.playerResets + newProp).toString().length == 3) {
-                document.getElementById("reset_counter").style.fontSize = "54px"
-            }
-            if ((this.playerResets + newProp).toString().length == 4) {
-                document.getElementById("reset_counter").style.fontSize = "40px"
-            }
-            
             if (this.blackout_counter < 0) {
                 this.blackout_counter = 0;
             }
@@ -2338,6 +1588,11 @@ export default defineComponent({
         },
     },
     computed: {
+        // The settings panel's description (settingsPanel.ts). It reads nothing reactive itself, so it is
+        // built once; the panel component reads the overlay through its closures as it renders.
+        settingsPanel() {
+            return markRaw(gen5SettingsPanel(this));
+        },
         // Standing in the Overworld on the starter's spot before the first battle: base stats and the
         // ability are shown instead of the party's. x and y change with every step there, so the three
         // places that ask (get_stat, pokemon_dynamic_ability, stats_header) read this answer instead and
@@ -2381,17 +1636,45 @@ export default defineComponent({
                 emulatorMs: this.emulatorStats?.time_current ?? null,
             }
         },
-        /**
-         * The Super Shuckie counters as primitives (2026-09-25): the template used to read
-         * `emulatorStats?.counters?.x` directly, which made every poll that replaced
-         * `emulatorStats` a re-render of this whole component. A computed that yields the
-         * same primitive as before triggers nothing.
-         */
-        shuckie_player_resets() {
-            return this.emulatorStats?.counters?.playerResets
+        /** The faults box's layout and count font sizes (core/overlay/player/FaultsBox.ts); its counts and mode are overlayCommonMixin's. */
+        faults_layout() {
+            return faultsLayout
         },
-        shuckie_blackout_counter() {
-            return this.emulatorStats?.counters?.blackout_counter
+        /** The player's move list and the pop-up boxes (core/overlay/player/MoveList.ts, PopupBox.ts), worked out in playerPanel.ts. */
+        player_move_list() {
+            return playerMoveList(this)
+        },
+        move_list_layout() {
+            return moveListLayout
+        },
+        battle_popups() {
+            return battlePopups(this)
+        },
+        faults_font_sizes() {
+            return faultsFontSizes
+        },
+        /** The stat tiles, exp bar and badge row (core/overlay/player/), built in playerPanel.ts. */
+        stat_tiles() {
+            return statTiles(this)
+        },
+        exp_label() {
+            return expBarLabel(this)
+        },
+        exp_bar_layouts() {
+            return expBarLayouts
+        },
+        exp_bar_timing() {
+            return expBarTiming
+        },
+        badge_row() {
+            return badgeRow(this)
+        },
+        /** The type badges and the Nature / Total rows (core/overlay/player/TypeBadges.ts, InfoRow.ts), worked out once per change in playerPanel.ts. */
+        type_badges() {
+            return typeBadges(this)
+        },
+        info_rows() {
+            return infoRows(this)
         },
         /**
          * The movepool table's rows, computed once per displayed species. The template
@@ -2401,6 +1684,82 @@ export default defineComponent({
          */
         movepoolRows() {
             return this.getMovepool(this.g5PokemonData, this.black_moves, this.g5tmhmMapping, this.displayedPokemonSpecies)
+        },
+        /**
+         * The moves the "Unobtainable Moves" setting crosses out (core/logic/unobtainableMoves.ts): the run
+         * rules' bans and, on the first attempt with "HP Banned for 1st Run" on, Hidden Power everywhere;
+         * the edition's unobtainable TMs and tutor moves in those rows.
+         */
+        movepoolStruck() {
+            const active = crossOutActive(this.unobtainable_moves_toggle, {
+                starterObtained: this.game.properties.meta.state.value != "No Pokemon",
+                firstBadge: this.game.properties.player.badges[0].value == true,
+            })
+            const lists = this.unobtainable_moves_object
+            const firstRun = (this.attempt_number > 1 || this.banned_hidden_power == false) ? [] : (lists['First Playthrough'] || [])
+            return struckMoves(active, { everywhere: [...(lists['Banned'] || []), ...firstRun], machines: lists[this.selected_game] })
+        },
+        /**
+         * What the shared movepool table (core/overlay/Movepool.vue) shows: gen5's own Hidden Power,
+         * Curse, Return/Frustration, form and damage-class rules, built once per change instead of
+         * per row per render.
+         */
+        movepoolView() {
+            const prefix = this.ui_type_color_modifier
+            const row = (x, way, first) => ({
+                way, move: this.move_name(x.move), type: this.movepoolType(x),
+                typeColor: `var(--${prefix}${this.movepoolTypeColor(x)?.toLowerCase()})`,
+                dc: this.getMoveCategory(x.category)[0],
+                dcColor: `var(--${prefix}${this.getMoveCategory(x.category, x)[1].toLowerCase()})`,
+                power: this.movepoolPower(x), accuracy: x.accuracy, pp: x.pp, first,
+            })
+            const rows = this.movepoolRows
+            const struck = this.movepoolStruck
+            const groups = [
+                { struck: struck.everywhere, rows: rows.level.map((x, index) => row(x, x.Level, index === 0)) },
+                { struck: struck.everywhere, rows: rows.form.map(x => row(x, "Form")) },
+                { struck: struck.machines, rows: rows.tmhm.map(x => row(x, x.Move == 'Whirlpool' ? "HM05" : x.tmhm)) },
+            ]
+            if (this.show_tutor_moves && (this.selected_game == 'Black 2' || this.selected_game == 'White 2')) {
+                groups.push({ struck: struck.machines, rows: rows.tutor.map(x => row(x, "Tutor")) })
+            }
+            return {
+                title: "Movepool",
+                titleClass: "posAbs movepoolLabel",
+                titleFirst: true,
+                dc: true,
+                headerColor: `var(--${prefix}${this.starting_type_fix})`,
+                // 993px of the 1000px table less the 17px header; rows at 19px/14px, and a long list's font
+                // shrinks once its rows are under 17px, a little slower than the rows.
+                fit: { containerHeight: 976, lineHeight: 19, fontSize: 14, shrinkFactor: 0.77, fontFrom: 17 },
+                groups,
+            }
+        },
+        /** What the shared Splits panel (core/overlay/SplitsPanel.vue) shows in the chosen mode, if any. */
+        splitsView() {
+            const mode = this.toggle_compare_splits
+            if (mode !== "First" && mode !== "Followup") return undefined
+            return {
+                table: { class: "splits_table", icon: { imgClass: "icons splitIcon" } },
+                head: splitsHead(mode, this.previous_label, this.current_label),
+                headerColor: `var(--${this.ui_type_color_modifier}${this.starting_type_fix})`,
+                rows: (this.compare_splits ?? []).map(split => ({
+                    icon: `images/gen5/split_images/${this.getSplitImageName(split.imageTrainer || split.trainer)}.webp`,
+                    cells: mode === "First" ? [split.trainer, "", "", split.current_time]
+                        : [split.trainer, split.previous_time == "0:00" ? "-" : split.previous_time, split.current_time, split.difference],
+                    diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
+                })),
+                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/splits.svg)"] },
+            }
+        },
+        /** The second-screen layout's copy of the Splits panel: its own table and icon classes and art. */
+        secondScreenSplitsView() {
+            const view = this.splitsView
+            return view && {
+                ...view,
+                table: { class: "second_screen_splits_table", icon: { imgClass: "icons splitIcon_2" } },
+                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/second_screen_splits.svg)"] },
+            }
         },
         /**
          * The game-name folder that splits are written into.
@@ -2915,14 +2274,6 @@ export default defineComponent({
                 return false
             }
         },
-        examined_trainer_data() {
-            var trainer_id = ""
-            var inputString = this.examined_trainer
-            const underscoreIndex = inputString.indexOf('_');
-            trainer_id = inputString.substring(underscoreIndex + 1);
-            var data = this.trainers_hgss[trainer_id] ?? { name: "Unknown"}
-            return data
-        },
         stats_header() {
             const toggle    = true
             const stat_type = this.stats_setting
@@ -2933,10 +2284,10 @@ export default defineComponent({
                 return 'Base Stats'
             }
             if (stat_type == 'Base Stats Average') {
-                return 'Gen5 Base Stat Averages'
+                return statHeaders.averages
             }
             if (stat_type == 'Base Stats Median') {
-                return 'Gen5 Base Stat Medians'
+                return statHeaders.medians
             }
             // stat_fix_lvl 
             if (year == '2023') {
@@ -2957,9 +2308,9 @@ export default defineComponent({
                 }
                 switch (stat_type) {
                     case "Base Stats":   return `Base Stats`
-                    case "IVs":          return `IVs`
+                    case "IVs":          return statHeaders.individual
                     case "Hidden Power": return `Hidden Power ${this.hpType}`
-                    case "EVs":          return `EVs`
+                    case "EVs":          return statHeaders.effort
                     case "Vitamins":     return `Vitamins`
                     case "Detailed EVs": {
                         let ev_hp  = this.game.properties.player.team[0].evs.hp.value
@@ -2995,20 +2346,6 @@ export default defineComponent({
         growth_rate() {
             return this.g5PokemonData[this.starter].growth_rate
         },
-        filtered_pokemon_list() {
-            if (this.search_term === '') {
-                return this.pokemon_list;
-            } else {
-                return this.pokemon_list.filter(pokemon => pokemon.toLowerCase().includes(this.search_term.toLowerCase()));
-            }
-        },
-        filtered_trainer_list() {
-            if (this.search_trainers === '') {
-                return this.hgss_trainers;
-            } else {
-                return this.hgss_trainers.filter(pokemon => pokemon.toLowerCase().includes(this.search_trainers.toLowerCase()));
-            }
-        },
         gametimeSplit() {
             h = this.game.properties.game_time.hours.value
             m = this.game.properties.game_time.minutes.value
@@ -3031,6 +2368,32 @@ export default defineComponent({
             } catch (error) {
                 return null;
             }
+        },
+        /** The enemy team panel (core/overlay/EnemyTeamPanel.ts), worked out once per change in enemyPanel.ts. */
+        enemy_team_view() {
+            return enemyTeamView(this)
+        },
+        enemy_team_layout() {
+            return enemyTeamLayout
+        },
+        /** The trainer preview (decision 14): the picker's options, the picked trainer and its panel (enemyPanel.ts). */
+        trainer_options() {
+            return trainerPickerOptions(this)
+        },
+        filtered_trainer_list() {
+            return searchTrainers(this.trainer_options, this.search_trainers)
+        },
+        trainer_preview() {
+            return previewTrainer(this)
+        },
+        trainer_preview_view() {
+            const trainer = this.trainer_preview
+            return trainer ? trainerPreviewView(this, trainer) : null
+        },
+        // "Show Wild Battles" (decision 30): the wild Pokémon in the enemy panel, or null (enemyPanel.ts wildPreview).
+        wild_pokemon_view() {
+            const wild = this.show_wild_battles == true ? wildPreview(this) : null
+            return wild ? trainerPreviewView(this, wild) : null
         },
         enemy_mon_static() {
             // const opponent_id = this.game.properties.battle.opponent?.id?.value
@@ -3103,10 +2466,6 @@ export default defineComponent({
                 5: "898px",
                 6: "1080px"
               };
-            if (this.right_display == 'Trainer') {
-                totalPokemon = this.examined_trainer_data?.party?.length ?? 0
-                return `height: ${heights[totalPokemon]}; filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`;
-            }
             totalPokemon = this.game.properties.battle.opponent.team_count.value;
             if (totalPokemon == 0) { 
                 return false 
@@ -3118,9 +2477,6 @@ export default defineComponent({
             // if (opponent_2 && game != "HeartGold and SoulSilver") {
             //     totalPokemon = opponent_team_count + opponent_2_team_count
             // }
-            if (this.right_ui == "Splits") {
-                this.right_ui = "Automatic"
-            }
             return `height: ${heights[totalPokemon]}; filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`;
         },
         solo_mon() {
@@ -4358,12 +3714,6 @@ export default defineComponent({
                 this.openFolder('splits', this.current_game_folder, splitFileName);
             }
         },
-        togglePopup() {
-            this.showPopup = !this.showPopup;
-        },
-        closePopup() {
-            this.showPopup = false;
-        },
         closeRNGModal() {
             this.showRNGModal = false;
             MyStorage['rng_config'] = this.rng_config;
@@ -4458,11 +3808,6 @@ export default defineComponent({
                 }
             }
             console.log(`[RNG] bag watcher setup complete: listeners attached items=${attached.items}, berries=${attached.berries}; initial totals`, lastBagTotals);
-        },
-        popupAction(action) {
-            console.log(`Popup action selected: ${action}`);
-            // Add your custom logic here for each menu option
-            this.closePopup();
         },
         async add_testing_items() {
             await this.game.properties.bag.money.set(200000, false)
@@ -4598,12 +3943,11 @@ export default defineComponent({
                 false,
             )
 
+            object.comparison = speedLabel(order, "enemy")
             if (order > 0) {
-                object.comparison = "Outsped"
                 object.color      = "background-color: rgba(28, 255, 58, 0.4)"
             }
             else if (order == 0) {
-                object.comparison = "Speed-tie"
                 object.color      = "background-color: rgba(255, 255, 0, 0.5)"
             }
             if (enemy_hp == 0) {
@@ -4636,17 +3980,7 @@ export default defineComponent({
             return ability == 'Defeatist' && max > 0 && cur <= Math.floor(max / 2)
         },
         svgColorClass(speed_comparison, enemy_data) {
-            const isFainted = enemy_data?.stats.hp?.value
-            if (isFainted == 0) {
-                return 'grey-svg';
-            }
-            if (speed_comparison === 'Outsped') {
-                return 'blue-svg';
-            } 
-            else if (speed_comparison === 'Speed-tie') {
-                return 'yellow-svg';
-            }
-            return 'red-svg';
+            return speedColorClass(speedLabelOrder(speed_comparison, "enemy") ?? -1, enemy_data?.stats.hp?.value == 0)
         },
         // async update_rom_starter_and_intro_mon() {
         //     let starter = this.starter
@@ -5086,31 +4420,6 @@ export default defineComponent({
             const total   = hp + atk + def + spa + spd + spe
             return total
         },
-        getUnobtainableMoveStyle(move_object, type_of_move) {
-            const unobtainable_moves_toggle = this.unobtainable_moves_toggle
-            const state = this.game.properties.meta.state.value
-            const move_name = this.move_name(move_object.move)
-            const unobtainable_moves = this.unobtainable_moves_object[type_of_move]
-            const opacity = 0.4
-            const animation_duration = 1.5 // seconds
-            let unobtainable_moves_first_run = (this.attempt_number > 1 || this.banned_hidden_power == false) ? [] : this.unobtainable_moves_object['First Playthrough']
-
-            if (unobtainable_moves_toggle == "Never Cross Out") {
-                return `transition: opacity ${animation_duration}s;`
-            }
-            else if (state != "No Pokemon" && unobtainable_moves_toggle == "Cross Out When Starter is Obtained" && (unobtainable_moves.includes(move_name) || unobtainable_moves_first_run.includes(move_name))) {
-                return `transition: opacity ${animation_duration}s; opacity: ${opacity}; text-decoration: line-through;`
-            }
-            else if (this.game.properties.player.badges[0].value == true && unobtainable_moves_toggle == "Cross Out After First Badge" && (unobtainable_moves.includes(move_name) || unobtainable_moves_first_run.includes(move_name))) {
-                return `transition: opacity ${animation_duration}s; opacity: ${opacity}; text-decoration: line-through;`
-            }
-            else if (unobtainable_moves_toggle == "Always Cross Out" && (unobtainable_moves.includes(move_name) || unobtainable_moves_first_run.includes(move_name))) {
-                return `transition: opacity ${animation_duration}s; opacity: ${opacity}; text-decoration: line-through;`
-            }
-            else {
-                return `transition: opacity ${animation_duration}s;`
-            }
-        },
         copy_overlay_properties() {
             const copy_from = this.copy_overlay_pokemon_from.trim()
             const copy_to = this.copy_overlay_pokemon_to.trim()
@@ -5154,6 +4463,7 @@ export default defineComponent({
                 'backgroundScale',
                 'backgroundUrl',
                 'backgroundFlip',
+                'backgroundXFlip',
                 'use_custom_background',
                 'backgroundXOffset',
                 'backgroundYOffset',
@@ -5228,6 +4538,7 @@ export default defineComponent({
                 'backgroundScale',
                 'backgroundUrl',
                 'backgroundFlip',
+                'backgroundXFlip',
                 'use_custom_background',
                 'backgroundXOffset',
                 'backgroundYOffset',
@@ -5330,8 +4641,6 @@ export default defineComponent({
             this.showSpecialTrainerGraphics = MyStorage['showSpecialTrainerGraphics'] ?? true
             this.testRun =                    MyStorage['testRun']                    ?? false
             this.simple_data_str =            MyStorage['simple_data_str']            ?? ""
-            this.full_data_str =              MyStorage['full_data_str']              ?? ""
-            this.deprecated_data_str =        MyStorage['deprecated_data_str']        ?? ""
             this.simple_data =                MyStorage['simple_data']                ?? ""
             this.time_split_start =           MyStorage['time_split_start']           ?? "00:00:00:00"
             this.battle_start =               MyStorage['battle_start']               ?? 0
@@ -5416,6 +4725,7 @@ export default defineComponent({
                 this.backgroundScale =       MyStorage[`${game_name}_${this.starter}`]?.backgroundScale ?? 100
                 this.backgroundUrl =         MyStorage[`${game_name}_${this.starter}`]?.backgroundUrl ?? ""
                 this.backgroundFlip =        MyStorage[`${game_name}_${this.starter}`]?.backgroundFlip ?? false
+                this.backgroundXFlip =        MyStorage[`${game_name}_${this.starter}`]?.backgroundXFlip ?? false
                 this.use_custom_background = MyStorage[`${game_name}_${this.starter}`]?.use_custom_background ?? false
                 this.backgroundXOffset =     MyStorage[`${game_name}_${this.starter}`]?.backgroundXOffset ?? 0
                 this.backgroundYOffset =     MyStorage[`${game_name}_${this.starter}`]?.backgroundYOffset ?? 0
@@ -5423,6 +4733,7 @@ export default defineComponent({
                 this.backgroundBrightness =  MyStorage[`${game_name}_${this.starter}`]?.backgroundBrightness ?? 100
                 this.backgroundContrast =    MyStorage[`${game_name}_${this.starter}`]?.backgroundContrast ?? 100
                 this.backgroundSaturation =  MyStorage[`${game_name}_${this.starter}`]?.backgroundSaturation ?? 100
+                this.apply_texture_look()
                 
                 //UI styling
                 this.ui_saturation =  MyStorage[`${game_name}_${this.starter}`]?.ui_saturation ?? .6
@@ -5453,7 +4764,8 @@ export default defineComponent({
             this.backgroundTexture =     this.g5PokemonData[this.starter]?.type_1?.toLowerCase(),
             this.backgroundBrightness =  100,
             this.backgroundContrast =    100,
-            this.backgroundSaturation =  100
+            this.backgroundSaturation =  100,
+            this.apply_texture_look()
         },
         increment(property) {
             this[property]++;
@@ -5478,12 +4790,6 @@ export default defineComponent({
             var color = await this.colorPick()
             this.set_pokemon_prop("overlay_color", color)
             this.overlay_color = color
-        },
-        clear_overlay_color() {
-            starterType = this.g5PokemonData[this.starter].type_1;
-            newColor = getComputedStyle(document.documentElement).getPropertyValue("--"+starterType.toLowerCase());
-            this.set_pokemon_prop("overlay_color", newColor)
-            this.overlay_color = newColor;
         },
         set_pokemon_prop(property_name, value) {
             // Only ever called for style properties, so a displayed battle-only form routes to its own key
@@ -5562,12 +4868,14 @@ export default defineComponent({
             this.backgroundScale = 'backgroundScale' in stored ? stored.backgroundScale : 100;
             this.backgroundUrl = 'backgroundUrl' in stored ? stored.backgroundUrl : "";
             this.backgroundFlip = 'backgroundFlip' in stored ? stored.backgroundFlip : false;
+            this.backgroundXFlip = 'backgroundXFlip' in stored ? stored.backgroundXFlip : false;
             this.use_custom_background = 'use_custom_background' in stored ? stored.use_custom_background : false;
             this.backgroundXOffset = 'backgroundXOffset' in stored ? stored.backgroundXOffset : 0;
             this.backgroundYOffset = 'backgroundYOffset' in stored ? stored.backgroundYOffset : 0;
             this.backgroundBrightness = 'backgroundBrightness' in stored ? stored.backgroundBrightness : 100;
             this.backgroundContrast = 'backgroundContrast' in stored ? stored.backgroundContrast : 100;
             this.backgroundSaturation = 'backgroundSaturation' in stored ? stored.backgroundSaturation : 100;
+            this.apply_texture_look();
             
             // Load shared evolution family settings (ability, nature, gender, hidden power) if using evolution line
             if (useEvolutionLine) {
@@ -6417,84 +5725,6 @@ export default defineComponent({
             return obj
         }, 
 
-        movepoolResize() {
-            // Was: the calc, then a `.change()` handler on the party slot's species that only
-            // re-ran the calc into a local nothing read again. Bound in the movepool table's
-            // :style, this runs on every render, so each render left one more handler on the
-            // property until the mapper unloaded (docs/performance-followups.md, third pass).
-            return this.movepoolResizeCalc();
-        },
-        movepoolResizeCalc() {
-            if(!this.game_data?.dexData){ 
-                return;
-            }
-            
-            let small_line_height = 19;
-            let resize_threshold = 20;
-            this.movepoolDefaultFontSize = 14;
-            this.movepoolDefaultLineHeight = 17;
-            this.movepoolDefaultContainerHeight = 993-(this.movepoolDefaultLineHeight);
-            let maxSize = this.movepoolDefaultContainerHeight / this.movepoolDefaultLineHeight;
-        
-            //calculate new sizes
-            // Use displayedPokemonSpecies to get the correct species for movepool sizing
-            // This ensures the movepool size is based on the selected evolution family member
-            let currentStarter = this.displayedPokemonSpecies;
-            if(currentStarter == undefined || currentStarter == null) {
-                if(this.game?.properties?.player?.team?.[0]?.species?.value) {
-                    currentStarter = this.game.properties.player.team[0].species.value;
-                }
-                else {
-                    currentStarter = this.starter;
-                }
-            }
-            
-            // Add comprehensive null checks
-            if (!currentStarter) {
-                // console.warn('No starter Pokemon defined');
-                return;
-            }
-            
-            if (!this.game_data.dexData[currentStarter]) {
-                // console.warn(`Pokemon data not found for: ${currentStarter}`);
-                return;
-            }
-            
-            // Check if the required arrays exist
-            if (!this.game_data.dexData[currentStarter].tm_hm_learnset || 
-                !this.game_data.dexData[currentStarter].level_up_learnset) {
-                // console.warn(`Missing move data for ${currentStarter}:`, this.game_data.dexData[currentStarter]);
-                return;
-            }
-            
-            let movepoolSize = this.game_data.dexData[currentStarter].tm_hm_learnset.length + this.game_data.dexData[currentStarter].level_up_learnset.length + this.formChangeMoves(this.game_data.dexData[currentStarter]).length;
-            // Tutor moves only exist in Black 2 / White 2, and only render when the
-            // toggle is on — match those conditions here so line-height fills the area
-            // without leaving room for rows that won't render.
-            const isBW2 = this.selected_game == 'Black 2' || this.selected_game == 'White 2';
-            if (this.show_tutor_moves && isBW2 && this.game_data.dexData[currentStarter].tutor_learnset) {
-                movepoolSize = movepoolSize + this.game_data.dexData[currentStarter].tutor_learnset.length;
-            }
-            
-            let correctedLineHeight = this.movepoolDefaultContainerHeight / movepoolSize;
-            let fontShrinkFactor = 0.77; //make this bigger to shrink the font more. 0.5 was the default in gen1-3. 0 = no shrinking. 1 or above will be *tiny*
-            //This is fairly arbitrary. This formula reduces the font size gradually based on the shrink factor
-            let correctedFontSize = this.movepoolDefaultFontSize * Math.pow(correctedLineHeight / this.movepoolDefaultLineHeight, fontShrinkFactor); 
-            
-            if (movepoolSize > (maxSize)) {
-                return "line-height: " + correctedLineHeight + "px; font-size: "+correctedFontSize+"px;";
-            }
-            else if (movepoolSize < resize_threshold) {
-                return "line-height: " + small_line_height + "px; font-size: "+this.movepoolDefaultFontSize+"px;";
-            }
-            else if (movepoolSize < resize_threshold) {
-                return "line-height: " + small_line_height + "px; font-size: "+this.movepoolDefaultFontSize+"px;";
-            }
-            else {
-                return "line-height: " + correctedLineHeight + "px; font-size: "+this.movepoolDefaultFontSize+"px;";
-            }
-        },
-        
         // MOVE ACCURACY
         getAccuracy(accuracy, move) {
             // const weather   = this.game.properties.battle.field.weather.value
@@ -6684,19 +5914,7 @@ export default defineComponent({
                 return pkmnData[x]
         },
         stage_modifiers(y) {
-            if (y === null) {
-                return "nu"
-            }
-            else
-                if (y > 0) {
-                    return "+" + y.toString()
-                }
-                else
-                    if (y < 0) {
-                        return y.toString()
-                    }
-                    else
-                        return ""
+            return formatStage(y)
         },
         abilityDescription(y) {
             return gen3abilities[y]
@@ -6758,33 +5976,10 @@ export default defineComponent({
             }
         },
         calcExpStats(growthRate, exp) {
-            const expTable = {
-                "Erratic":     [0,15,52,122,237,406,637,942,1326,1800,2369,3041,3822,4719,5737,6881,8155,9564,11111,12800,14632,16610,18737,21012,23437,26012,28737,31610,34632,37800,41111,44564,48155,51881,55737,59719,63822,68041,72369,76800,81326,85942,90637,95406,100237,105122,110052,115015,120001,125000,131324,137795,144410,151165,158056,165079,172229,179503,186894,194400,202013,209728,217540,225443,233431,241496,249633,257834,267406,276458,286328,296358,305767,316074,326531,336255,346965,357812,367807,378880,390077,400293,411686,423190,433572,445239,457001,467489,479378,491346,501878,513934,526049,536557,548720,560922,571333,583539,591882,600000],
-                "Fast":        [0,6,21,51,100,172,274,409,583,800,1064,1382,1757,2195,2700,3276,3930,4665,5487,6400,7408,8518,9733,11059,12500,14060,15746,17561,19511,21600,23832,26214,28749,31443,34300,37324,40522,43897,47455,51200,55136,59270,63605,68147,72900,77868,83058,88473,94119,100000,106120,112486,119101,125971,133100,140492,148154,156089,164303,172800,181584,190662,200037,209715,219700,229996,240610,251545,262807,274400,286328,298598,311213,324179,337500,351180,365226,379641,394431,409600,425152,441094,457429,474163,491300,508844,526802,545177,563975,583200,602856,622950,643485,664467,685900,707788,730138,752953,776239,800000],
-                "Medium Fast": [0,8,27,64,125,216,343,512,729,1000,1331,1728,2197,2744,3375,4096,4913,5832,6859,8000,9261,10648,12167,13824,15625,17576,19683,21952,24389,27000,29791,32768,35937,39304,42875,46656,50653,54872,59319,64000,68921,74088,79507,85184,91125,97336,103823,110592,117649,125000,132651,140608,148877,157464,166375,175616,185193,195112,205379,216000,226981,238328,250047,262144,274625,287496,300763,314432,328509,343000,357911,373248,389017,405224,421875,438976,456533,474552,493039,512000,531441,551368,571787,592704,614125,636056,658503,681472,704969,729000,753571,778688,804357,830584,857375,884736,912673,941192,970299,1000000],
-                "Medium Slow": [0,9,57,96,135,179,236,314,419,560,742,973,1261,1612,2035,2535,3120,3798,4575,5460,6458,7577,8825,10208,11735,13411,15244,17242,19411,21760,24294,27021,29949,33084,36435,40007,43808,47846,52127,56660,61450,66505,71833,77440,83335,89523,96012,102810,109923,117360,125126,133229,141677,150476,159635,169159,179056,189334,199999,211060,222522,234393,246681,259392,272535,286115,300140,314618,329555,344960,360838,377197,394045,411388,429235,447591,466464,485862,505791,526260,547274,568841,590969,613664,636935,660787,685228,710266,735907,762160,789030,816525,844653,873420,902835,932903,963632,995030,1027103,1059860],
-                "Slow":        [0,10,33,80,156,270,428,640,911,1250,1663,2160,2746,3430,4218,5120,6141,7290,8573,10000,11576,13310,15208,17280,19531,21970,24603,27440,30486,33750,37238,40960,44921,49130,53593,58320,63316,68590,74148,80000,86151,92610,99383,106480,113906,121670,129778,138240,147061,156250,165813,175760,186096,196830,207968,219520,231491,243890,256723,270000,283726,297910,312558,327680,343281,359370,375953,393040,410636,428750,447388,466560,486271,506530,527343,548720,570666,593190,616298,640000,664301,689210,714733,740880,767656,795070,823128,851840,881211,911250,941963,973360,1005446,1038230,1071718,1105920,1140841,1176490,1212873,1250000],
-                "Fluctuating": [0,4,13,32,65,112,178,276,393,540,745,967,1230,1591,1957,2457,3046,3732,4526,5440,6482,7666,9003,10506,12187,14060,16140,18439,20974,23760,26811,30146,33780,37731,42017,46656,50653,55969,60505,66560,71677,78533,84277,91998,98415,107069,114205,123863,131766,142500,151222,163105,172697,185807,196322,210739,222231,238036,250562,267840,281456,300293,315059,335544,351520,373744,390991,415050,433631,459620,479600,507617,529063,559209,582187,614566,639146,673863,700115,737280,765275,804997,834809,877201,908905,954084,987754,1035837,1071552,1122660,1160499,1214753,1254796,1312322,1354652,1415577,1460276,1524731,1571884,1640000]
-            };
-
-            // makes searching a bit easiser
-            expTable["Erratic"][100]     = expTable["Erratic"][99] + 1;
-            expTable["Fast"][100]        = expTable["Fast"][99] + 1;
-            expTable["Medium Fast"][100] = expTable["Medium Fast"][99] + 1;
-            expTable["Medium Slow"][100] = expTable["Medium Slow"][99] + 1;
-            expTable["Slow"][100]        = expTable["Slow"][99] + 1;
-            expTable["Fluctuating"][100] = expTable["Fluctuating"][99] + 1;
-            //! FIX_LATER
-            const index = expTable[growthRate].findIndex(x => x > exp);
-            const currLvlExp = expTable[growthRate][index - 1];
-            const nextLvlExp = expTable[growthRate][index];
-            const rawPercentage = (exp - currLvlExp) / (nextLvlExp - currLvlExp);
-            const percentage = isNaN(rawPercentage) ? 0 : rawPercentage;
-            return {
-                level: index,
-                percent: percentage,
-                nextLvlExp: nextLvlExp,
-            };
+            const progress = expProgress(growthRate, exp)
+            // gen5's own guard: past level 100's threshold the bar shows empty, not "NaN%"
+            if (isNaN(progress.percent)) progress.percent = 0
+            return progress
         }, 
 
         // MOVE MANAGEMENT
@@ -7592,16 +6787,16 @@ export default defineComponent({
             if (this.game.properties.meta.state.value == "No Pokemon") {
                 return moveObject.power
             }
-            if (moveObject.Move == `Hidden Power`) {
+            if (rowMove(moveObject) == `Hidden Power`) {
                 return this.hiddenPowerPowerCalc(this.game.properties.player.team[0])
             }
-            if (moveObject.Move == `Return`) {
+            if (rowMove(moveObject) == `Return`) {
                 // if (this.game.properties.battle.player.team_count.value == 0) {
                 //     return "-"
                 // }
                 return this.g3ReturnPowerCalc(this.game.properties.player.team[0])
             }
-            if (moveObject.Move == `Frustration`) {
+            if (rowMove(moveObject) == `Frustration`) {
                 // if (this.game.properties.battle.player.team_count.value == 0) {
                 //     return "-"
                 // }
@@ -7619,34 +6814,34 @@ export default defineComponent({
             this.set_starter_stats_object.ivs = this.starter_ivs()
         },
         movepoolTypeColor(moveObject) {
-            if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value == "No Pokemon") {
+            if (rowMove(moveObject) == `Hidden Power` && this.game.properties.meta.state.value == "No Pokemon") {
                 return this.starterHiddenPowerType
             }
-            if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value != "No Pokemon") {
+            if (rowMove(moveObject) == `Hidden Power` && this.game.properties.meta.state.value != "No Pokemon") {
                 return this.hiddenPowerTypeCalc(this.game.properties.player.team[0])
             }
             if (this.game.properties.meta.state.value == "No Pokemon") {
                 return moveObject.type
             }
-            if (moveObject.Type == `Curse`) {
+            if (rowType(moveObject) == `Curse`) {
                 return "Curse"
             }
             return moveObject.type
         },
         movepoolType(moveObject) {
-            if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value == "No Pokemon") {
+            if (rowMove(moveObject) == `Hidden Power` && this.game.properties.meta.state.value == "No Pokemon") {
                 return this.starterHiddenPowerType
             }
-            if (moveObject.Move == `Hidden Power` && this.game.properties.meta.state.value != "No Pokemon") {
+            if (rowMove(moveObject) == `Hidden Power` && this.game.properties.meta.state.value != "No Pokemon") {
                 return this.hiddenPowerTypeCalc(this.game.properties.player.team[0])
             }
             if (this.game.properties.meta.state.value == "No Pokemon") {
                 return moveObject.type
             }
-            if (moveObject.Type == `Curse`) {
+            if (rowType(moveObject) == `Curse`) {
                 return "???"
             }
-            if (moveObject.Move == `Hidden Power`) {
+            if (rowMove(moveObject) == `Hidden Power`) {
                 return this.starterHiddenPowerType
             }
             return moveObject.type
@@ -8384,6 +7579,7 @@ export default defineComponent({
         this.unbindHotkeys?.();
         clearInterval(this.emulatorStatsInterval);
         this.timer.stop();
+        PubSub.unsubscribe("time_update", this._onTimeUpdate);
         clearInterval(this._ownedItemsInterval);
         if (this._devKeydown) window.removeEventListener('keydown', this._devKeydown);
         if (this._devMousedown) window.removeEventListener('mousedown', this._devMousedown, true);
@@ -8405,7 +7601,7 @@ export default defineComponent({
                         this.game.properties.player.team[0].exp.value) ?? 0;
                     const growthRate = this.g5PokemonData[species]?.growth_rate ?? "Error Growth Rate";
                     const expStats = this.calcExpStats(growthRate, expPoints);
-                    this.$refs.expBar.style.width = (expStats.percent * 100) + "%";
+                    this.$refs.expBar.setWidth((expStats.percent * 100) + "%");
                     this.expBarState.species = species;
                     this.expBarState.expPoints = expPoints;
                 }
@@ -8584,7 +7780,7 @@ export default defineComponent({
             if (function_logging == true) { console.log(expStats) }
             const width = (expStats.percent * 100) + "%";
             if (this.$refs.expBar) {
-                this.$refs.expBar.style.width = width
+                this.$refs.expBar.setWidth(width)
             }
             if (function_logging == true) { console.log(width) }
 
@@ -8746,30 +7942,16 @@ export default defineComponent({
         }
         const autosplitter_process = () => {
             if (this.autosplitter_toggle == true) {
-                d = new Date()
                 battle_end = Date.now()
-                //values
-                let gameTimeH = this.game.properties.game_time?.hours?.value
-                let gameTimeM = this.game.properties.game_time?.minutes?.value
-                let gameTimeS = this.game.properties.game_time?.seconds?.value
-                let gameTimeF = 0
-                
                 //data to be collected with the autosplitter
-                let date_string  = (d.getMonth() + 1) + "-" + d.getDate().toString().padStart(2, "0")
-                let time_string  = d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0") + ":" + d.getSeconds().toString().padStart(2, "0")
                 let player_name  = this.game.properties.player.name.value
                 let pokemon      = this.starter
                 let trainer_name = this.game.properties.battle.opponent.trainer.value
                 let trainer_id           = this.game.properties.battle.opponent.id.value
-                let location             = this.game.properties.overworld.map_name.value
-                let total_pokemon        = this.game.properties.battle.opponent.team_count.value
                 const formattedTime = this.timer.formatted_time;
-                let real_time_total = formattedTime[0] + formattedTime[1]
                 let real_time_hmmss = formattedTime[0]
-                let real_time_file_label = formattedTime[2]
                 let resets               = this.playerResets.toString()
                 let blackouts            = this.blackout_counter.toString()
-                let failures             = this.playerResets + this.blackout_counter
                 let level                = this.game.properties.player.team[0].level.value.toString()
                 let game_time            = this.gametimeSplit.toString()
                 let battle_duration      = (battle_end - this.battle_start)/1000 
@@ -8777,254 +7959,26 @@ export default defineComponent({
                 let move2     = this.game.properties.player.team[0].moves[1].move.value
                 let move3     = this.game.properties.player.team[0].moves[2].move.value
                 let move4     = this.game.properties.player.team[0].moves[3].move.value
-                let move1pp   = this.game.properties.player.team[0].moves[0].pp.value
-                let move2pp   = this.game.properties.player.team[0].moves[1].pp.value
-                let move3pp   = this.game.properties.player.team[0].moves[2].pp.value
-                let move4pp   = this.game.properties.player.team[0].moves[3].pp.value
-                let move1ppUp = this.game.properties.player.team[0].moves[0].pp_up.value
-                let move2ppUp = this.game.properties.player.team[0].moves[1].pp_up.value
-                let move3ppUp = this.game.properties.player.team[0].moves[2].pp_up.value
-                let move4ppUp = this.game.properties.player.team[0].moves[3].pp_up.value
-                let saves = 0
-                let steps = 0
-                let bonks = 0
-                let trainerBattles = 0
-                let wildBattles = 0
-                let battleTurns = 0
-                let playerTurns = 0
-                let enemyTurns  = 0
-                let itemsInBag  = 0
-                let money       = 0
-                let rivalTeam   = 0
-                let statusCondition = this.game.properties.player.team[0].status_condition.value
-                let type1           = this.g5PokemonData[this.starter].type_1
-                let type2           = this.g5PokemonData[this.starter].type_2
-                let experience      = this.game.properties.player.team[0].exp.value
-                
-                //deprecated properties
-                let runIdentifier  = this.starter.toString() + this.attempt_number.toString()
-                let trainerName    = this.game.properties.battle.opponent.trainer.value
-                const time = this.timer.getTime();
-                let RTHours = time.hours;
-                let RTMinutes = time.minutes;
-                let RTSeconds = time.seconds;
-                let RTMilliseconds = time.ms;
 
-                let startTime      = this.time_split_start
+                const time = this.timer.getTime();
+
                 let realTime = this.padTime(time.hours) + ":" + this.padTime(time.minutes) + ":" + this.padTime(time.seconds) + "." + this.padTime(time.ms)
-                let gameTime       = this.padTime(gameTimeH) + ":" + this.padTime(gameTimeM) + ":" + this.padTime(gameTimeS) + "." + this.padTime(gameTimeF)
 
                 let shuckie_time_hhmmss = this.formatMilliseconds(this.emulatorStats?.time_current)
                 let shuckie_time_cs = this.getCentiseconds(this.emulatorStats?.time_current)
                 let shuckie_rt = this.shuckie_timer ?shuckie_time_hhmmss + "." + shuckie_time_cs : realTime
 
-                let hp    = this.game.properties.player.team[0].stats.hp.value
-                let maxHp = this.game.properties.player.team[0].stats.hp_max.value
-                let atk   = this.game.properties.player.team[0].stats.attack.value
-                let def   = this.game.properties.player.team[0].stats.defense.value
-                let spA   = this.game.properties.player.team[0].stats.special_attack.value
-                let spD   = this.game.properties.player.team[0].stats.special_defense.value
-                let spe   = this.game.properties.player.team[0].stats.speed.value
-
-                let statExp_hp  = this.game.properties.player.team[0].evs.hp.value
-                let statExp_atk = this.game.properties.player.team[0].evs.attack.value
-                let statExp_def = this.game.properties.player.team[0].evs.defense.value
-                let statExp_spA = this.game.properties.player.team[0].evs.special_attack.value
-                let statExp_spD = this.game.properties.player.team[0].evs.special_defense.value
-                let statExp_spe = this.game.properties.player.team[0].evs.speed.value
-
-                let iv_hp  = this.game.properties.player.team[0].ivs.hp.value
-                let iv_atk = this.game.properties.player.team[0].ivs.attack.value
-                let iv_def = this.game.properties.player.team[0].ivs.defense.value
-                let iv_spA = this.game.properties.player.team[0].ivs.special_attack.value
-                let iv_spD = this.game.properties.player.team[0].ivs.special_defense.value
-                let iv_spe = this.game.properties.player.team[0].ivs.speed.value
-
-                let mod_atk = this.game.properties.battle.player.active_pokemon.modifiers.attack.value
-                let mod_def = this.game.properties.battle.player.active_pokemon.modifiers.defense.value
-                let mod_spA = this.game.properties.battle.player.active_pokemon.modifiers.special_attack.value
-                let mod_spD = this.game.properties.battle.player.active_pokemon.modifiers.special_defense.value
-                let mod_spe = this.game.properties.battle.player.active_pokemon.modifiers.speed.value
-                let mod_acc = this.game.properties.battle.player.active_pokemon.modifiers.accuracy.value
-                let mod_eva = this.game.properties.battle.player.active_pokemon.modifiers.evasion.value
-
-                let battle_atk = 0
-                let battle_def = 0
-                let battle_spA = 0
-                let battle_spD = 0
-                let battle_spe = 0
-                
-                //patch properties
-                let patch_frameCount                 = 0
-                let patch_oWFrameCount               = 0
-                let patch_battleFrameCount           = 0
-                let patch_menuFrameCount             = 0
-                let patch_introsFrameCount           = 0
-                let patch_saveCount                  = 0
-                let patch_reloadCount                = 0
-                let patch_clockResetCount            = 0
-                let patch_stepsCount                 = 0
-                let patch_stepsCountWalk             = 0
-                let patch_stepsCountBike             = 0
-                let patch_stepsCountSurf             = 0
-                let patch_bonks                      = 0
-                let patch_battles                    = 0
-                let patch_trainerBattles             = 0
-                let patch_wildBattles                = 0
-                let patch_battlesFled                = 0
-                let patch_failedRuns                 = 0
-                let patch_totalDamageDealt           = 0
-                let patch_actualDamageDealt          = 0
-                let patch_totalDamageTaken           = 0
-                let patch_actualDamageTaken          = 0
-                let patch_ownMovesHit                = 0
-                let patch_ownMovesMissed             = 0
-                let patch_enemyMovesHit              = 0
-                let patch_enemyMovesMissed           = 0
-                let patch_ownMovesSE                 = 0
-                let patch_ownMovesNVE                = 0
-                let patch_enemyMovesSE               = 0
-                let patch_enemyMovesNVE              = 0
-                let patch_criticalsDealt             = 0
-                let patch_oHKOsDealt                 = 0
-                let patch_criticalsTaken             = 0
-                let patch_oHKOsTaken                 = 0
-                let patch_wasConfused                = 0
-                let patch_enemyBecameConfused        = 0
-                let patch_wasParalyzed               = 0
-                let patch_enemyWasParalyzed          = 0
-                let patch_wasBurned                  = 0
-                let patch_enemyWasBurned             = 0
-                let patch_wasFrozen                  = 0
-                let patch_enemyWasFrozen             = 0
-                let patch_wasPoisoned                = 0
-                let patch_enemyWasPoisoned           = 0
-                let patch_wasPoisonedBadly           = 0
-                let patch_enemyWasPoisonedBadly      = 0
-                let patch_fellAsleep                 = 0
-                let patch_enemyFellAsleep            = 0
-                let patch_playerTurnsConfused        = 0
-                let patch_enemyTurnsConfused         = 0
-                let patch_playerTurnsConfusedHitSelf = 0
-                let patch_enemyTurnsConfusedHitSelf  = 0
-                let patch_playerTurnsParalyzed       = 0
-                let patch_enemyTurnsParalyzed        = 0
-                let patch_playerTurnsParalyzedFully  = 0
-                let patch_enemyTurnsParalyzedFully   = 0
-                let patch_PlayerTurnsAsleep          = 0
-                let patch_EnemyTurnsAsleep           = 0
-                let patch_playerHpHealed             = 0
-                let patch_enemyHpHealed              = 0
-                let patch_playerPokemonFainted       = 0
-                let patch_enemyPokemonFainted        = 0
-                let patch_experienceGained           = 0
-                let patch_switchout                  = 0
-                let patch_moneyMade                  = 0
-                let patch_moneySpent                 = 0
-                let patch_moneyLost                  = 0
-                let patch_itemsPickedUp              = 0
-                let patch_itemsBought                = 0
-                let patch_itemsSold                  = 0
-                let patch_ballsThrown                = 0
-                let patch_pokemonCaughtInBalls       = 0
-                let patch_movesLearnt                = 0
-
-                //definitions for what split data is logged to file
+                //what split data is logged to file
                 let simple_data = [
                     player_name, pokemon, trainer_name, shuckie_rt, 
                     resets, blackouts, level, game_time, battle_duration, 
                     move1, move2, move3, move4
                 ]
-                let full_data = simple_data
-                if (this.scott_mode == true) {
-                    full_data = [
-                        date_string, time_string, player_name, pokemon, trainer_name, 
-                        trainer_id, location, total_pokemon, real_time_total, 
-                        real_time_hmmss, real_time_file_label, resets, blackouts, failures, 
-                        level, game_time, battle_duration, move1, move2, move3, move4, 
-                        saves, steps, bonks, trainerBattles, wildBattles, battleTurns, 
-                        playerTurns, enemyTurns, itemsInBag, money, rivalTeam,
-                        statusCondition, type1, type2, experience,
-                        runIdentifier, this.starter, trainerName,
-                        startTime, realTime, gameTime, level, this.playerResets,
-                        RTHours, RTMinutes, RTSeconds, RTMilliseconds,
-                        move1, move2, move3, move4, move1pp, move2pp, move3pp, move4pp, move1ppUp, move2ppUp, move3ppUp, move4ppUp,
-                        hp, maxHp, atk, def, spA, spD, spe,
-                        statExp_hp, statExp_atk, statExp_def, statExp_spA, statExp_spD, statExp_spe,
-                        iv_hp, iv_atk, iv_def, iv_spA, iv_spD, iv_spe,
-                        mod_atk, mod_def, mod_spA, mod_spD, mod_spe, mod_acc, mod_eva,
-                        battle_atk, battle_def, battle_spA, battle_spD, battle_spe,
-                        patch_frameCount, patch_oWFrameCount, patch_battleFrameCount, patch_menuFrameCount, patch_introsFrameCount,
-                        patch_saveCount, patch_reloadCount, patch_clockResetCount,
-                        patch_stepsCount, patch_stepsCountWalk, patch_stepsCountBike, patch_stepsCountSurf, patch_bonks,
-                        patch_battles, patch_trainerBattles, patch_wildBattles, patch_battlesFled, patch_failedRuns,
-                        patch_totalDamageDealt, patch_actualDamageDealt, patch_totalDamageTaken, patch_actualDamageTaken,
-                        patch_ownMovesHit, patch_ownMovesMissed, patch_enemyMovesHit, patch_enemyMovesMissed, 
-                        patch_ownMovesSE, patch_ownMovesNVE, patch_enemyMovesSE, patch_enemyMovesNVE, 
-                        patch_criticalsDealt, patch_oHKOsDealt, patch_criticalsTaken, patch_oHKOsTaken,
-                        patch_wasConfused, patch_enemyBecameConfused, patch_wasParalyzed, patch_enemyWasParalyzed, 
-                        patch_wasBurned, patch_enemyWasBurned, patch_wasFrozen, patch_enemyWasFrozen,
-                        patch_wasPoisoned, patch_enemyWasPoisoned, patch_wasPoisonedBadly, patch_enemyWasPoisonedBadly,
-                        patch_fellAsleep, patch_enemyFellAsleep, patch_playerTurnsConfused, patch_playerTurnsConfusedHitSelf, 
-                        patch_playerTurnsParalyzed, patch_playerTurnsParalyzedFully, patch_enemyTurnsConfused, patch_enemyTurnsConfusedHitSelf, 
-                        patch_enemyTurnsParalyzed, patch_enemyTurnsParalyzedFully, patch_PlayerTurnsAsleep, patch_EnemyTurnsAsleep,
-                        patch_playerHpHealed, patch_enemyHpHealed, 
-                        patch_playerPokemonFainted, patch_enemyPokemonFainted, patch_experienceGained, patch_switchout,
-                        patch_moneyMade, patch_moneySpent, patch_moneyLost,
-                        patch_itemsPickedUp, patch_itemsBought, patch_itemsSold,
-                        patch_ballsThrown, patch_pokemonCaughtInBalls,
-                        patch_movesLearnt,
-                        //new properties
-                        blackouts, this.attempt_number, failures, rivalTeam
-                    ]
-                }
-
-                let deprecated_data = []
-                if (this.scott_mode == true) {
-                    deprecated_data = [
-                        runIdentifier, this.starter, trainerName,
-                        startTime, realTime, gameTime, level, this.playerResets,
-                        RTHours, RTMinutes, RTSeconds, RTMilliseconds,
-                        move1, move2, move3, move4,
-                        atk, def, spA, spD, spe,
-                        mod_atk, mod_def, mod_spA, mod_spD, mod_spe, mod_acc, mod_eva,
-                        battle_atk, battle_def, battle_spA, battle_spD, battle_spe,
-                        patch_frameCount, patch_oWFrameCount, patch_battleFrameCount, patch_menuFrameCount, patch_introsFrameCount,
-                        patch_saveCount, patch_reloadCount, patch_clockResetCount,
-                        patch_stepsCount, patch_stepsCountWalk, patch_stepsCountBike, patch_stepsCountSurf, patch_bonks,
-                        patch_battles, patch_trainerBattles, patch_wildBattles, patch_battlesFled, patch_failedRuns,
-                        patch_totalDamageDealt, patch_actualDamageDealt, patch_totalDamageTaken, patch_actualDamageTaken,
-                        patch_ownMovesHit, patch_ownMovesMissed, patch_enemyMovesHit, patch_enemyMovesMissed, 
-                        patch_ownMovesSE, patch_ownMovesNVE, patch_enemyMovesSE, patch_enemyMovesNVE, 
-                        patch_criticalsDealt, patch_oHKOsDealt, patch_criticalsTaken, patch_oHKOsTaken,
-                        patch_wasConfused, patch_enemyBecameConfused, patch_wasParalyzed, patch_enemyWasParalyzed, 
-                        patch_wasBurned, patch_enemyWasBurned, patch_wasFrozen, patch_enemyWasFrozen,
-                        patch_wasPoisoned, patch_enemyWasPoisoned, patch_wasPoisonedBadly, patch_enemyWasPoisonedBadly,
-                        patch_fellAsleep, patch_enemyFellAsleep, patch_playerTurnsConfused, patch_playerTurnsConfusedHitSelf, 
-                        patch_playerTurnsParalyzed, patch_playerTurnsParalyzedFully, patch_enemyTurnsConfused, patch_enemyTurnsConfusedHitSelf, 
-                        patch_enemyTurnsParalyzed, patch_enemyTurnsParalyzedFully,
-                        patch_playerHpHealed, patch_enemyHpHealed, 
-                        patch_playerPokemonFainted, patch_enemyPokemonFainted, patch_experienceGained, patch_switchout,
-                        patch_moneyMade, patch_moneySpent, patch_moneyLost,
-                        patch_itemsPickedUp, patch_itemsBought, patch_itemsSold,
-                        patch_ballsThrown, patch_pokemonCaughtInBalls,
-                        patch_movesLearnt,
-                        //new properties
-                        blackouts, this.attempt_number, failures, rivalTeam
-                    ]
-                }
-                
                 let simple_data_str = simple_data.join(",") + "\n";
-                let full_data_str = full_data.join(",") + "\n";
-                let deprecated_data_str = deprecated_data.join(",") + "\n";
                 MyStorage["simple_data_str"] = simple_data_str
-                MyStorage["full_data_str"] = full_data_str
                 MyStorage["simple_data"] = simple_data
-                MyStorage["deprecated_data_str"] = deprecated_data_str
                 this.simple_data_str = simple_data_str
-                this.full_data_str = full_data_str
                 this.simple_data = simple_data
-                this.deprecated_data_str = deprecated_data_str
                 // Normalize trainer name: convert "Leader Cress" to "Cress" using autosplitter mapping
                 let normalizedTrainerName = trainer_name
                 if (this.game_data && this.game_data.gameName && autosplitter[this.game_data.gameName]) {
@@ -9135,20 +8089,12 @@ export default defineComponent({
                 // Get the split file name (either "FullyEvolved-line" or "Species")
                 const splitFileName = this.getSplitFileName();
                 
-                //write full split data
-                logData(gameName, this.full_data_str, this.attempt_number, splitFileName, "Full", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
-                
-                //write deprecated split data
-                if (this.game_data && this.autosplitter[this.game_data.gameName]?.[trainer]) {
-                    logData(gameName, this.deprecated_data_str, this.attempt_number, splitFileName, "Deprecated", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
-                }
-                
-                //write simple split data
+                //write split data
                 const simpleSplit = () => {
                     log_split()
                     // The same split into the replay (2026-09-23), keyed like current_splits (gen5's trainer id marks the instance).
                     addSplitBookmark(this.last_simple_split?.trainer, this.last_simple_split?.time, this.last_simple_split?.id)
-                    logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
+                    logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, splitFileName, this.refilming_mode)
                     this.split_data.push(this.simple_data)
                     // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
                     // CSV split files are the record, and storing the whole history under the bare key
@@ -9193,7 +8139,7 @@ export default defineComponent({
                         // Toggle on: record the Ghetsis split now, but the run doesn't end until the
                         // N dialogue. The battle_party_data_start listener below stops the timer, logs
                         // a separate "Hall of Fame" split, and finalizes the run copy.
-                        logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
+                        logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, splitFileName, this.refilming_mode)
                             .catch(error => {
                                 console.error("Error:", error);
                             });
@@ -9206,7 +8152,7 @@ export default defineComponent({
                             this.finished_run_count++
                         };
                         //use then so that logCopy doesn't touch any files until logData finishes
-                        logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
+                        logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, splitFileName, this.refilming_mode)
                         .then(() => {
                                 // Test-run attempt files live in test_runs/, so there is nothing
                                 // valid to copy into finishes/ for a test run.
@@ -9255,7 +8201,7 @@ export default defineComponent({
                     
                     //use then so that logCopy doesn't touch any files until logData finishes
                     const splitFileName = this.getSplitFileName();
-                    logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, "Simple", this.testRun, this.scott_mode, this.evolution, splitFileName, this.refilming_mode)
+                    logData(gameName, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, splitFileName, this.refilming_mode)
                     .then(() => {
                             // Test-run attempt files live in test_runs/, so there is nothing
                             // valid to copy into finishes/ for a test run.
@@ -9650,7 +8596,7 @@ export default defineComponent({
                 this.expBarState.expPoints = expPoints;
 
                 if (this.$refs.expBar) {
-                    this.$refs.expBar.style.width = (newExpStats.percent * 100) + "%";
+                    this.$refs.expBar.setWidth((newExpStats.percent * 100) + "%");
                 }
             }
         })
@@ -9671,14 +8617,12 @@ export default defineComponent({
 
                     this.expBarState.species = newSpecies;
                     this.expBarState.expPoints = newExpPoints;
-                    
-                    const animationMaxDuration = 500;
     
                     // did we switch out?
                     if (prevSpecies != newSpecies) {
                         // dont animate, just set newExpStats.percent
                         if (this.$refs.expBar) {
-                            this.$refs.expBar.style.width = (newExpStats.percent * 100) + "%";
+                            this.$refs.expBar.setWidth((newExpStats.percent * 100) + "%");
                         }
                     } 
                     // same pokemon but exp changed
@@ -9687,48 +8631,19 @@ export default defineComponent({
                             return
                         }
 
-                        if (prevExpStats.level == newExpStats.level) {
-                            let diffExp = newExpStats.percent - prevExpStats.percent
-                            let animationDuration = Math.ceil(diffExp * animationMaxDuration)
-                            // animate width to newExpStats.percent
-                            if (this.$refs.expBar) {
-                                this.$refs.expBar.style.transition = `width ${animationDuration}ms ease-in-out`;
-                                this.$refs.expBar.style.width = (newExpStats.percent * 100) + "%";
-                            }
-                            await this.sleep(animationDuration + 50);
-                        } else {
-                            let diffExp1 = 1 - prevExpStats.percent
-                            let animationDuration1 = Math.ceil(diffExp1 * animationMaxDuration)
-                            let diffExp2 = newExpStats.percent
-                            let animationDuration2 = Math.ceil(diffExp2 * animationMaxDuration)
-                            // animate width to 100%
-                            if (this.$refs.expBar) {
-                                this.$refs.expBar.style.transition = `width ${animationDuration1}ms ease-in`;
-                                this.$refs.expBar.style.width = "100%";
-                            }
-                            await this.sleep(animationDuration1 + 50);
-                            // dont animate, set width to 0%
-                            if (this.$refs.expBar) {
-                                this.$refs.expBar.style.transition = null;
-                                this.$refs.expBar.style.width = "0%";
-                            }
-                            await this.sleep(50);
-                            // animate width to newExpStats.percent
-                            if (this.$refs.expBar) {
-                                this.$refs.expBar.style.transition = `width ${animationDuration2}ms ease-out`;
-                                this.$refs.expBar.style.width = (newExpStats.percent * 100) + "%";
-                            }
-                            await this.sleep(animationDuration2 + 50);
+                        // animate (core/overlay/player/ExpBar.ts, timed in playerPanel.ts)
+                        if (this.$refs.expBar) {
+                            await this.$refs.expBar.animate(prevExpStats, newExpStats);
                         }
                     }
                     if (this.$refs.expBar) {
-                        this.$refs.expBar.style.transition = null;
+                        this.$refs.expBar.setTransition(null);
                     }
                 }
             }
         })
         //keybinds
-        this.unbindHotkeys = bindHotkeys(gen5Hotkeys(this));
+        this.unbindHotkeys = bindShortcuts({ actions: gen5Actions(this), namespace: "gen5", title: "Generation 5", gameLoaded: true });
 
         // The control server (port 30159) lives in the main process and is bound to
         // games/gen5/control.ts by main.ts; the client is main.ts's too, so the

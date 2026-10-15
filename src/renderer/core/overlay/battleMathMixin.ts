@@ -2,10 +2,11 @@
 /**
  * Pure battle-math helpers the lifted overlays share: Curse's type, the species string
  * a mapper value maps to, stage-modifier colours, vitamins left, Return/Frustration
- * power from friendship, and the speed comparison label.
+ * power from friendship. (The unused `speedComparison` went in 2026-10; the speed label is
+ * core/logic/speedLabel.ts.)
  *
  * Each was byte-identical across the overlays that defined it (gens 3-5 for most,
- * gens 2/3/5 for `speedComparison`, gens 2/3 for `enemyPkmnFaintCheck`) and was moved
+ * gens 2/3 for `enemyPkmnFaintCheck`) and was moved
  * out unchanged (tools/parity/drift-check.ts). A generation that had no copy gains it
  * unused; one that needs a different formula overrides it in its own `methods`, which
  * the drift check reports as a difference to be explained.
@@ -64,19 +65,6 @@ export const battleMathMixin = {
                 specialMovePower = 1
             }
             return specialMovePower
-        },
-        speedComparison(playerPkmnData, enemyPkmnData) {
-            var playerSpeed = playerPkmnData.speed.value
-            var enemySpeed = enemyPkmnData.speed.value
-            if (playerSpeed > enemySpeed) {
-                return "Outspeeds"
-            }
-            if (playerSpeed == enemySpeed) {
-                return "Speed-Tied"
-            }
-            if (playerSpeed < enemySpeed) {
-                return "Underspeeds"
-            }
         },
         enemyPkmnFaintCheck(pkmnData) {
             if (pkmnData.hp == 0) {

@@ -32,7 +32,10 @@ export function gen3ControlRoutes(vm: () => any): ControlRoutes {
                 selected_evolution_species: v?.selected_evolution_species,
                 gameSelection: v?.gameSelection,
                 selected_game: v?.gameSelection,
-                right_panel: v?.right_panel,
+                // The preference. The queuer sets and checks "Battle Graphic" for gen3, so Automatic keeps that
+                // name here (docs/external-contracts.md); `right_panel_active` is what shows now (a post-battle Splits).
+                right_panel: v?.right_panel == "Automatic" ? "Battle Graphic" : v?.right_panel,
+                right_panel_active: v?.right_panel_mode,
                 hidden_power_type: v?.hidden_power_type,
                 nature: v?.pkmnNature,
                 ability: v?.pkmn_ability,
@@ -68,8 +71,9 @@ export function gen3ControlRoutes(vm: () => any): ControlRoutes {
             },
             "/set-right-panel": (query) => {
                 if (!query.panel) return missing("panel");
-                vm().right_panel = query.panel;
-                return { ok: true, right_panel: vm().right_panel };
+                // Old values map to the modes (core/overlay/rightPanelMode.ts); the reply names Automatic as /status does.
+                const mode = vm().set_right_panel(query.panel);
+                return { ok: true, right_panel: mode == "Automatic" ? "Battle Graphic" : mode };
             },
             "/set-hidden-power": (query) => {
                 if (!query.type) return missing("type");

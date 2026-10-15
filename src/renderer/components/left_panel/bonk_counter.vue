@@ -2,36 +2,12 @@
 <template>
     <div v-if="enabled">
         <div v-if="mode === 'Bonks'">
-            <transition name="fade">
-                <div v-if="metrics.faultsMode != 'Both'">
-                    <div class="tinted-box"  style="--url: url(images/ui/bonks.svg)"></div>
-                    <div class="bonksLabel">bonks</div>
-                    <div class="popUpsStyle bonksValue">{{ bonks }}</div>
-                </div>
-            </transition>
-            <transition name="fade">
-                <div v-if="metrics.faultsMode == 'Both'">
-                    <div class="tinted-box"  style="--url: url(images/ui/bonks_2.svg)"></div>
-                    <div class="bonksLabel_1">bonks</div>
-                    <div class="popUpsStyle bonksValue_1">{{ bonks }}</div>
-                </div>
-            </transition>
+            <popup-box v-bind="boxes.bonks"></popup-box>
+            <popup-box v-bind="boxes.bonksBesideBoth"></popup-box>
         </div>
         <div v-else-if="mode === 'Item Count'">
-            <transition name="fade">
-                <div v-if="metrics.faultsMode != 'Both'">
-                    <div class="tinted-box"  style="--url: url(images/ui/bonks.svg)"></div>
-                    <div class="bonksLabel">item count</div>
-                    <div class="popUpsStyle bonksValue">{{ game_properties?.player.itemCount.value }}</div>
-                </div>
-            </transition>
-            <transition name="fade">
-                <div v-if="metrics.faultsMode == 'Both'">
-                    <div class="tinted-box" style="--url: url(images/ui/bonks_2.svg)"></div>
-                    <div class="bonksLabel_1">item count</div>
-                    <div class="popUpsStyle bonksValue_1">{{ game_properties?.player.itemCount.value }}</div>
-                </div>
-            </transition>
+            <popup-box v-bind="boxes.itemCount"></popup-box>
+            <popup-box v-bind="boxes.itemCountBesideBoth"></popup-box>
         </div>
     </div>
 </template>
@@ -42,7 +18,10 @@ import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore.js";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.js";
 import { useMetaStore } from "~/stores/metaStore.js";
 import { GameState } from "~/stores/types/GameState";
+import { PopupBox } from "~/core/overlay/player/PopupBox";
+import { popupBoxes } from "~/games/gen1/playerPanel";
 export default defineComponent({
+    components: { PopupBox },
     inject: ["game_properties"],
     data() {
         return { 
@@ -60,6 +39,21 @@ export default defineComponent({
         },
         bonks() {
             return this.game_properties.patch.steps.bonks.value;
+        },
+        /** Bonks or the item count, beside a single or a double faults box (games/gen1/playerPanel.ts). */
+        boxes() {
+            const both = this.metrics.faultsMode == 'Both';
+            if (this.mode === 'Bonks') {
+                return {
+                    bonks: { ...popupBoxes.bonks, shown: !both, value: !both ? this.bonks : null },
+                    bonksBesideBoth: { ...popupBoxes.bonksBesideBoth, shown: both, value: both ? this.bonks : null },
+                };
+            }
+            const count = () => this.game_properties?.player.itemCount.value;
+            return {
+                itemCount: { ...popupBoxes.itemCount, shown: !both, value: !both ? count() : null },
+                itemCountBesideBoth: { ...popupBoxes.itemCountBesideBoth, shown: both, value: both ? count() : null },
+            };
         }
     }
 });

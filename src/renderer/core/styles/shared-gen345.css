@@ -1,0 +1,153 @@
+/**
+ * CSS that gen3, gen4, gen5 had byte-identical in their games/genN/style.css, moved here by tools/css/share-css.ts
+ * (re-run it after editing a generation sheet). Each module's styles() puts this text before its own sheet in one
+ * <style>, with `.gen-N` replaced by the generation's class
+ * (core/styles/joinStyleSheets.ts), so every selector is exactly the one it had there.
+ * A rule here applies to all of gen3, gen4, gen5: to change one generation only, override it in that sheet.
+ */
+html:has(.gen-N) {
+    height: 100%;
+    width: 100%;
+}
+
+/* TIMER/RESETS */
+
+@font-face {
+    src: url(../../fonts/OpenSans-ExtraBold-gen345.ttf);
+    font-family: oseb;
+    font-weight: 700;
+}
+
+/* replace font to change - leave label */
+
+@font-face {
+    src: url(../../fonts/TitanOne-Regular.ttf);
+    font-family: titan;
+}
+
+@font-face { /* replace font to change - leave label */
+    src: url(../../fonts/Play-Bold.ttf);
+    font-family: play;
+    font-weight: 700;
+}
+
+/* TEXT UPDATES (MOVE, MOVE POWER, PP) */
+
+@keyframes blur-out {
+    0% {
+         transform: scale(1);
+         animation-timing-function: ease;
+    }
+    50% {
+        transform: scale(1.015);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0;
+        animation-timing-function: ease;
+    }
+}
+
+/* DURATION: 2.65s */
+
+@keyframes battleIntroAnimationFull {
+    /* Black (from the first black frane to when the screen turns white) */
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    /* Grayscale Trainer Scroll (from the white frame until the first colour frame) */
+    13% {
+        opacity: 0;
+        transform: translateX(100%);
+        animation-timing-function: ease;
+    }
+    /* Trainers Send Their Pokemon In (starts with "TRAINER wants to fight!") */
+    36% {
+        opacity: 1;
+        transform: translateX(25%);
+        animation-timing-function: ease;
+    }
+    /* Opponent's Pokemon Fully Rendered (health bar appears) */
+    65% {
+        opacity: 1;
+        transform: translateX(0%);
+        animation-timing-function: ease;
+        }
+    /* Player Pokemon Text (player off screen, text scroll) */
+    73% {
+        opacity: 1;
+        transform: translateX(0%);
+    }
+    /* Player Pokemon Text (player off screen, text scroll) */
+    86% {
+        opacity: 1;
+        transform: translateX(0%);
+    }
+    /* Player Gains Control (fight, item, pkmn, run) */
+    100% {
+        opacity: 1;
+        transform: translateX(0%);
+    }
+}
+
+/* DURATION: 2.65s */
+
+@keyframes battleTextIntroAnimationFull {
+    0% {
+        opacity: 0;
+        transform: translateX(25%);
+    }
+    /* Starts animating when the battle is starting */
+    72% {
+        opacity: 0;
+        transform: translateX(25%);
+        animation-timing-function: ease;
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0%);
+        animation-timing-function: ease;
+    }
+}
+
+@keyframes blur-out-movepool {
+    0% {
+         transform: scale(1);
+         animation-timing-function: ease;
+    }
+    24% {
+        transform: scale(1);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    50% {
+        transform: scale(1.015);
+        opacity: 1;
+        animation-timing-function: ease;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0;
+        animation-timing-function: ease;
+    }
+}
+
+.gen-N .ePkmnSpriteResizing {
+    outline: 2px dashed #00ffff;
+    outline-offset: 2px;
+}
+
+.gen-N .movepoolDemo th:nth-child(6) {
+    width: 40px;
+}
+
+.gen-N .movepoolDemo tr:nth-child(odd) {
+    background-color: #cfcfcf;
+}
+
+.gen-N .splits_table tr:nth-child(odd) {
+    background-color: #cfcfcf;
+}

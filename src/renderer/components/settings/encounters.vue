@@ -1,66 +1,10 @@
-<template>
-    <div>Encounter Settings:</div>
-    <table>
-        <tbody>
-            <tr><td>Early Encounters:</td><td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.wEarlyEncounters"/></td></tr>
-            <tr><td>No Moon:</td><td>         <input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.wEarlyEncountersNoMoon"/></td></tr>
-            <tr><td>Guaranteed Catches:</td><td><input class="checkBoxStyle" type="checkbox" v-model="overlaySettings.guaranteed_catches"/></td></tr>
-        </tbody>
-    </table>
-    <table v-if="game.properties.meta.gameName.value == 'Yellow'" class="ui_table">
-        <tbody>
-            <tr>
-                <td>Route 1</td>        <td>- Test:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_ROUTE1_TEST"/></td>
-            </tr>
-            <tr>
-                <td>Viridian Forest</td><td>- Pidgey:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_VIRIDIAN_FOREST_PIDGEY"/></td>
-            </tr>
-            <tr>
-                <td>Route 3</td>        <td>- Spearow:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_ROUTE3_SPEAROW"/></td>
-            </tr>
-            <tr>
-                <td>Mt. Moon</td>       <td>- Sandshrew:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_MTMOON_SANDSHREW"/></td>
-            </tr>
-            <tr>
-                <td>Route 16</td>       <td>- Doduo:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_ROUTE16_DODUO"/></td>
-            </tr>
-        </tbody>
-    </table>
-    <table v-if="game.properties.meta.gameName.value == 'Red and Blue'" class="ui_table">
-        <tbody>
-            <tr>
-                <td>Route 3</td> <td>- Spearow:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_ROUTE3_SPEAROW"/></td>
-            </tr>
-            <tr>
-                <td>Mt. Moon</td><td>- Geodude:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_MTMOON_GEODUDE"/></td>
-            </tr>
-            <tr>
-                <td>Mt. Moon</td><td>- Paras:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_MTMOON_PARAS"/></td>
-            </tr>
-            <tr>
-                <td>Route 6</td> <td>- Cut User:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_ROUTE6_CUT_USER"/></td>
-            </tr>
-            <tr>
-                <td>Route 16</td><td>- Doduo:</td>
-                <td><input class="checkBoxStyle" type="checkbox" v-model="runConfig.config.gameSpecific.EVENT_ENCOUNTER_ROUTE16_DODUO"/></td>
-            </tr>
-        </tbody>
-    </table>
-</template>
-
 <script>
 /**
- * The Encounters settings panel, and the startup write of the encounter flags to the
- * ROM (plan 1.1; known-legacy-bugs.md #30 for the race in `mounted`).
+ * The encounter flags' writes to the ROM (plan 1.1; known-legacy-bugs.md #30 for the race in
+ * `mounted`). Logic only since 2026-10-14: the checkboxes are in the settings panel
+ * (games/gen1/settingsPanel.ts, "Encounters" and "Forced HM Users"); components/game_area.vue
+ * still mounts this where the old Encounters block was, so its watchers and mapper
+ * subscriptions register in the same order.
  *
  * Converted from a template-string component. Plain JavaScript rather than `lang="ts"`,
  * as with `left_panel/exp_bar.vue`: the panel reads and writes mapper properties through
@@ -245,6 +189,9 @@ export default defineComponent({
                 this.game.properties.patch.wEarlyEncounters.set("Off", false)
             }
         })
-    }
+    },
+    render() {
+        return null;
+    },
 });
 </script>

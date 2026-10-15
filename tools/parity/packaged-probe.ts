@@ -4,9 +4,11 @@
  * with the network blocked, and reports what the packaged layout resolved:
  *
  *   - the renderer loaded from resources/app/out/renderer
- *   - the image pool: ensureImagePool()'s junction and the box-art grid's images
+ *   - the image pool: ensureImagePool()'s junction, the duplicate images it restores,
+ *     and the box-art grid's images
  *   - the shipped defaults: storage/Storage.json readable through the storage IPC
- *   - keyhook.exe in the package and found by the main process
+ *   - the keyboard hook's native file (uiohook-napi) shipped, and the hook started
+ *   - the Keyboard Shortcuts window loading its page from the package
  *   - the control server answering /status on STP_CONTROL_PORT
  *
  *   npx tsx tools/parity/packaged-probe.ts [--exe=<path>]
@@ -14,7 +16,7 @@
  * Nothing here is a parity claim; the harness runs the app from `out/` and this only
  * proves the packaged shape puts the same files where the main process looks.
  */
-import { existsSync, lstatSync, mkdirSync, rmSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { _electron as electron } from "playwright-core";
 
@@ -89,6 +91,32 @@ try {
   check(junctionOk, `image pool junction ${junction}`);
   check(existsSync(join(packagedRoot, "resources", "images", "gen2")), "resources/images carries the generation trees");
 
+  // The package ships each identical image once (tools/build/after-pack.mjs) and
+  // ensureImagePool() puts the copies back, as hard links where the drive allows.
+  const images = join(packagedRoot, "resources", "images");
+  const copiesFile = join(packagedRoot, "resources", "image-copies.json");
+  if (existsSync(copiesFile)) {
+    const groups: string[][] = JSON.parse(readFileSync(copiesFile, "utf-8")).copies;
+    const missing: string[] = [];
+    let total = 0;
+    let linked = 0;
+    for (const [kept, ...copies] of groups) {
+      const keptId = statSync(join(images, kept), { bigint: true }).ino;
+      for (const copy of copies) {
+        total++;
+        if (!existsSync(join(images, copy))) missing.push(copy);
+        else if (statSync(join(images, copy), { bigint: true }).ino === keptId) linked++;
+      }
+    }
+    check(missing.length === 0, `duplicate images restored: ${total - missing.length} of ${total}, ${linked} as hard links${missing.length ? `; missing ${missing.slice(0, 5).join(", ")}` : ""}`);
+  } else {
+    check(false, `resources/image-copies.json shipped (${copiesFile})`);
+  }
+  const sourcePool = join(REPO, "src", "renderer", "public", "images");
+  const absent = (readdirSync(sourcePool, { recursive: true }) as string[])
+    .filter((rel) => statSync(join(sourcePool, rel)).isFile() && !existsSync(join(images, rel)));
+  check(absent.length === 0, `every file in src/renderer/public/images is under resources/images${absent.length ? `; absent: ${absent.slice(0, 5).join(", ")}` : ""}`);
+
   const tiles = await page.evaluate(() =>
     Array.from(document.querySelectorAll<HTMLImageElement>(".game-select .gameToggleImg")).map((img) => ({
       src: img.getAttribute("src"),
@@ -119,11 +147,27 @@ try {
   }
   check(status?.ok === true && status?.app === "stp-overlay", `control server /status on ${CONTROL_PORT}: ${JSON.stringify(status)}`);
 
-  // The antivirus on this machine quarantines the exe from the working tree; a build
-  // made while it was gone ships without it and says nothing.
-  check(existsSync(join(packagedRoot, "resources", "keyhook.exe")), "resources/keyhook.exe is in the package");
-  const keyhookLine = mainLog.find((l) => /keyhook/i.test(l));
-  check(!keyhookLine || !/not found|Could not start/.test(keyhookLine), `keyhook.exe${keyhookLine ? ` -- ${keyhookLine.trim()}` : " started without complaint"}`);
+  // The keyboard hook is a native file in node_modules/uiohook-napi; src/main/hotkeys.ts
+  // logs one [hotkeys] line if it can't load or start it.
+  const hookFile = join(packagedRoot, "resources", "app", "node_modules", "uiohook-napi", "prebuilds", `${process.platform}-${process.arch}`, "uiohook-napi.node");
+  check(existsSync(hookFile), `keyboard hook native file shipped (${hookFile})`);
+  const hotkeysLine = mainLog.find((l) => /\[hotkeys\]/.test(l));
+  check(!hotkeysLine, `keyboard hook${hotkeysLine ? ` -- ${hotkeysLine.trim()}` : " started, no [hotkeys] warning"}`);
+
+  // The Keyboard Shortcuts window is a second page (out/renderer/shortcuts.html) that main
+  // loads from the package; on the box-art screen it shows gen1's shortcuts.
+  try {
+    const opened = page.context().waitForEvent("page", { timeout: 15000 });
+    await page.evaluate(() => (window as any).api.shortcuts.openMenu());
+    const menu = await opened;
+    await menu.waitForSelector(".row", { timeout: 15000 });
+    const rows = await menu.locator(".row").count();
+    check(/\/resources\/app\/out\/renderer\/shortcuts\.html$/.test(menu.url()) && rows > 40,
+      `Keyboard Shortcuts window opens from the package with gen1's ${rows} actions (${menu.url()})`);
+    await menu.close();
+  } catch (err) {
+    check(false, `Keyboard Shortcuts window opens: ${(err as Error).message}`);
+  }
 
   const blocked = consoleErrors.filter((e) => !/blockedbyclient|ERR_BLOCKED_BY_CLIENT|Failed to fetch|WebSocket|negotiate|signalr|ERR_FAILED/i.test(e));
   check(blocked.length === 0, `no renderer errors beyond the blocked network${blocked.length ? `:\n      ${blocked.join("\n      ")}` : ""}`);

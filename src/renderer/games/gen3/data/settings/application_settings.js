@@ -110,8 +110,6 @@ export const application_settings = [
     [ "finished_run_count",  0,        ],
     [ "split_data",          [],       ],
     [ "simple_data_str",     "",       ],
-    [ "full_data_str",       "",       ],
-    [ "deprecated_data_str", "",       ],
     [ "simple_data",         "",       ],
     [ "testRun",             false,    ],
 

@@ -1,7 +1,7 @@
 import { createServer, type Server } from "http";
 import { readFile } from "fs";
 import timerPage from "./timer-frame.html?raw";
-// `oseb` is one face in gen1/gen2 and another in gen3-5 (each style.css's @font-face); the page picks by generation.
+// `oseb` is one face in gen1/gen2 and another in gen3-5 (the @font-face in gen1/gen2's style.css, gen3-5's core/styles/shared-gen345.css); the page picks by generation.
 import timerFont from "../renderer/fonts/OpenSans-ExtraBold.ttf?asset";
 import timerFontGen345 from "../renderer/fonts/OpenSans-ExtraBold-gen345.ttf?asset";
 

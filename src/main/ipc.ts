@@ -122,7 +122,7 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     return existsSync(target) ? readFileSync(target, "utf-8") : null;
   });
   // Asynchronous, so a settings write never stalls the main process's loop (the control
-  // server and the keyhook forwarder run on it), and serialised per file so two writes to
+  // server and the hotkey forwarder run on it), and serialised per file so two writes to
   // one path land in the order they were sent: `renderer/stores/helper/files.ts` coalesces
   // gen1's per-mutation saves into one write per file per window, and `userState.ts` its
   // own (docs/performance-followups.md, third pass). The invoke resolves when the bytes

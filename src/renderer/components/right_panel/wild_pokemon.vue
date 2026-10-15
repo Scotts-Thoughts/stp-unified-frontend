@@ -90,6 +90,7 @@ import { get_enemy_pkmn_styles } from "../../methods/enemy";
 import PokeData from "~/logic/PokeData";
 import { capitalize_words, move_name } from "../../methods/text_functions";
 import { useMetaStore } from "~/stores/metaStore";
+import { formatStage } from "~/core/logic/statFormat";
 import { defineComponent, inject } from "vue";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
@@ -211,18 +212,16 @@ export default defineComponent({
         },
         stat_mod(modifer) {
             let mod = modifer
-            let mod_string = ""
+            const mod_string = formatStage(mod)
             let style_string = ""
 
             if (mod == 0) {
                 style_string = 'opacity: .7;'
             }
             if (mod > 0) {
-                mod_string = `+${mod}`
                 style_string = 'opacity: .1;'
             }
             if (mod < 0) {
-                mod_string = mod
                 style_string = 'opacity: .1;'
             }
 

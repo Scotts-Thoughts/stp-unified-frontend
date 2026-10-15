@@ -3,7 +3,7 @@ import { PokemonGame } from "~/logic/PokeDataTypes";
 import { loadAppSettings, saveAppSettings, dataPath } from "./helper/files";
 import { formatTime, getTime, Timer, TimerData } from "~/logic/Timer";
 import { findLegacySpeciesEntry } from "~/logic/legacyStorage";
-import { FaultMode } from "./types/FaultMode";
+import { faultMode } from "~/core/logic/faultMode";
 
 /**
  * The species metrics store is in control of the timer and keeps track of relevant run statistics like faults and
@@ -22,16 +22,7 @@ export const useSpeciesMetricsStore = defineStore('species_metrics', {
 	getters: {
 		/** Computed: Whether the user currently has no faults, only blackouts, only resets or both. */
 		faultsMode(state) {
-			if (state.blackouts == 0 && state.resets == 0) {
-				return FaultMode.none;
-			}
-			if (state.blackouts === 0 && state.resets > 0) {
-				return FaultMode.resets;
-			}
-			if (state.blackouts > 0 &&  state.resets === 0) {
-				return FaultMode.blackouts;
-			}
-			return FaultMode.both;
+			return faultMode(state.resets, state.blackouts);
 		},
 		/** Computed: Combined blackouts and resets. */
 		faults(state) {

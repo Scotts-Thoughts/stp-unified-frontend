@@ -1,0 +1,625 @@
+/*
+ * The settings panel's look, shared by all five generations (docs/ui-uniformity-plan.md
+ * stage 3, Scott's decisions 3-5 and 10). Three styles share one set of tokens:
+ *   .stp-theme-dark    dark glass cards (default)
+ *   .stp-theme-light   light frosted cards
+ *   .stp-theme-tinted  dark cards tinted with the overlay's UI colour (--stp-tint)
+ * Each generation's style.css only places `.gen-N .stp-settings` inside its game-capture area.
+ * Everything here is scoped under `.stp-settings` (specificity >= 0,2,0) so the generations'
+ * old control rules can't leak in.
+ */
+
+.stp-settings {
+    --stp-accent: #4fd660;
+    --stp-accent-strong: #36c24a;
+    --stp-accent-text: #04140a;
+    --stp-danger: #ff6b6b;
+    --stp-text: #e8edf2;
+    --stp-muted: #98a4b0;
+    --stp-panel: rgba(12, 16, 22, 0.80);
+    --stp-card: rgba(255, 255, 255, 0.045);
+    --stp-card-border: rgba(255, 255, 255, 0.09);
+    --stp-field: rgba(255, 255, 255, 0.075);
+    --stp-field-hover: rgba(255, 255, 255, 0.12);
+    --stp-field-border: rgba(255, 255, 255, 0.13);
+    --stp-list: #161c24;
+    --stp-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --stp-radius: 10px;
+    --stp-radius-small: 7px;
+    --stp-font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+
+    /* fixed, like the old columns: the coordinates are the 1920x1080 overlay's (each style.css places it) */
+    position: fixed;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px;
+    background: var(--stp-panel);
+    border-radius: 14px;
+    /* No outer shadow: it would paint past the game-capture area onto the filmed frame. */
+    box-shadow: none;
+    color: var(--stp-text);
+    font-family: var(--stp-font);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    text-transform: none;
+    letter-spacing: 0;
+    text-align: left;
+    overflow: hidden;
+    z-index: 20000;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.stp-settings.stp-theme-light {
+    --stp-accent: #1f9d39;
+    --stp-accent-strong: #178031;
+    --stp-accent-text: #ffffff;
+    --stp-danger: #d43c3c;
+    --stp-text: #17202a;
+    --stp-muted: #5d6a77;
+    --stp-panel: rgba(246, 248, 250, 0.86);
+    --stp-card: rgba(255, 255, 255, 0.72);
+    --stp-card-border: rgba(20, 30, 40, 0.10);
+    --stp-field: rgba(20, 30, 40, 0.06);
+    --stp-field-hover: rgba(20, 30, 40, 0.10);
+    --stp-field-border: rgba(20, 30, 40, 0.16);
+    --stp-list: #ffffff;
+    --stp-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.stp-settings.stp-theme-tinted {
+    --stp-tint: #4fd660;
+    --stp-accent: color-mix(in srgb, var(--stp-tint) 80%, white);
+    --stp-accent-strong: var(--stp-tint);
+    --stp-panel: color-mix(in srgb, var(--stp-tint) 22%, rgba(10, 12, 16, 0.84));
+    --stp-card: color-mix(in srgb, var(--stp-tint) 10%, rgba(255, 255, 255, 0.04));
+    --stp-card-border: color-mix(in srgb, var(--stp-tint) 35%, rgba(255, 255, 255, 0.06));
+    --stp-list: color-mix(in srgb, var(--stp-tint) 15%, #12161c);
+}
+
+.stp-settings *,
+.stp-settings *::before,
+.stp-settings *::after {
+    box-sizing: border-box;
+}
+
+/* columns */
+.stp-settings .stp-settings-col {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    width: auto;
+    margin: 0;
+    padding: 0 2px 0 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--stp-field-border) transparent;
+    font: inherit;
+    line-height: inherit;
+    text-transform: none;
+    border: 0;
+    background: none;
+    filter: none;
+}
+
+.stp-settings .stp-settings-col::-webkit-scrollbar {
+    width: 6px;
+}
+
+.stp-settings .stp-settings-col::-webkit-scrollbar-thumb {
+    background: var(--stp-field-border);
+    border-radius: 3px;
+}
+
+/* groups */
+.stp-settings .stp-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px 10px;
+    background: var(--stp-card);
+    border: 1px solid var(--stp-card-border);
+    border-radius: var(--stp-radius);
+    flex: 0 0 auto;
+}
+
+.stp-settings .stp-group-title {
+    margin: 0 0 1px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--stp-muted);
+}
+
+/* rows */
+.stp-settings .stp-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 22px;
+    margin: 0;
+}
+
+.stp-settings .stp-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--stp-text);
+    overflow-wrap: anywhere;
+}
+
+.stp-settings .stp-field > .stp-label,
+.stp-settings .stp-label-block {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 12px;
+    color: var(--stp-muted);
+}
+
+.stp-settings .stp-field {
+    display: block;
+    margin: 0;
+}
+
+.stp-settings .stp-value {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--stp-text);
+}
+
+.stp-settings .stp-value-small {
+    min-width: 34px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--stp-muted);
+}
+
+.stp-settings .stp-inline {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.stp-settings .stp-readout .stp-label {
+    color: var(--stp-muted);
+}
+
+/* fields */
+.stp-settings .stp-select,
+.stp-settings .stp-input,
+.stp-settings .stp-slot input[type="text"],
+.stp-settings .stp-slot input[type="number"],
+.stp-settings .stp-slot select {
+    width: 100%;
+    height: 28px;
+    margin: 0;
+    padding: 0 9px;
+    background: var(--stp-field);
+    color: var(--stp-text);
+    border: 1px solid var(--stp-field-border);
+    border-radius: var(--stp-radius-small);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    outline: none;
+    filter: none;
+    box-shadow: none;
+    transition: background-color 120ms, border-color 120ms;
+}
+
+.stp-settings .stp-select:hover,
+.stp-settings .stp-input:hover,
+.stp-settings .stp-slot select:hover {
+    background: var(--stp-field-hover);
+}
+
+.stp-settings .stp-select:focus,
+.stp-settings .stp-input:focus,
+.stp-settings .stp-slot input:focus,
+.stp-settings .stp-slot select:focus {
+    border-color: var(--stp-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--stp-accent) 30%, transparent);
+}
+
+.stp-settings select.stp-select,
+.stp-settings .stp-slot select {
+    appearance: none;
+    padding-right: 26px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--stp-muted) 50%),
+        linear-gradient(135deg, var(--stp-muted) 50%, transparent 50%);
+    background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.stp-settings select option {
+    background: var(--stp-list);
+    color: var(--stp-text);
+}
+
+.stp-settings .stp-input::placeholder,
+.stp-settings .stp-picker-input::placeholder {
+    color: var(--stp-muted);
+}
+
+/* buttons */
+.stp-settings .stp-btn,
+.stp-settings .stp-slot button {
+    display: block;
+    width: 100%;
+    min-height: 28px;
+    margin: 0;
+    padding: 4px 10px;
+    background: var(--stp-field);
+    color: var(--stp-text);
+    border: 1px solid var(--stp-field-border);
+    border-radius: var(--stp-radius-small);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    filter: none;
+    box-shadow: none;
+    transition: background-color 120ms, transform 80ms;
+}
+
+.stp-settings .stp-btn:hover,
+.stp-settings .stp-slot button:hover {
+    background: var(--stp-field-hover);
+}
+
+.stp-settings .stp-btn:active,
+.stp-settings .stp-slot button:active {
+    transform: translateY(1px);
+}
+
+.stp-settings .stp-btn-primary {
+    min-height: 36px;
+    background: var(--stp-accent);
+    color: var(--stp-accent-text);
+    border-color: transparent;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.stp-settings .stp-btn-primary:hover {
+    background: var(--stp-accent-strong);
+}
+
+.stp-settings .stp-btn-danger {
+    color: var(--stp-danger);
+}
+
+.stp-settings .stp-btn-small {
+    width: auto;
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 2px 10px;
+    font-size: 12px;
+}
+
+/* switches */
+.stp-settings .stp-switch,
+.stp-settings .stp-slot input[type="checkbox"] {
+    appearance: none;
+    flex: 0 0 auto;
+    position: relative;
+    width: 30px;
+    height: 17px;
+    margin: 0;
+    border-radius: 9px;
+    background: var(--stp-field-border);
+    cursor: pointer;
+    transition: background-color 140ms;
+}
+
+.stp-settings .stp-switch::after,
+.stp-settings .stp-slot input[type="checkbox"]::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    transition: transform 140ms;
+}
+
+.stp-settings .stp-switch:checked,
+.stp-settings .stp-slot input[type="checkbox"]:checked {
+    background: var(--stp-accent);
+}
+
+.stp-settings .stp-switch:checked::after,
+.stp-settings .stp-slot input[type="checkbox"]:checked::after {
+    transform: translateX(13px);
+}
+
+.stp-settings .stp-toggle {
+    cursor: pointer;
+}
+
+/* counters */
+.stp-settings .stp-counter .stp-value {
+    min-width: 28px;
+    text-align: right;
+}
+
+.stp-settings .stp-round {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    border: 1px solid var(--stp-field-border);
+    background: var(--stp-field);
+    color: var(--stp-text);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+    filter: none;
+    box-shadow: none;
+}
+
+.stp-settings .stp-round.stp-plus:hover {
+    background: var(--stp-accent);
+    color: var(--stp-accent-text);
+}
+
+.stp-settings .stp-round.stp-minus:hover {
+    background: var(--stp-danger);
+    color: #fff;
+}
+
+/* sliders */
+.stp-settings .stp-slider .stp-label {
+    flex: 0 0 38%;
+}
+
+.stp-settings .stp-range,
+.stp-settings .stp-slot input[type="range"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    accent-color: var(--stp-accent);
+    cursor: pointer;
+}
+
+/* read-only grids */
+.stp-settings .stp-statgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 10px;
+}
+
+.stp-settings .stp-statgrid-title {
+    grid-column: 1 / -1;
+    color: var(--stp-muted);
+    font-size: 12px;
+}
+
+.stp-settings .stp-statgrid-cell {
+    display: flex;
+    gap: 4px;
+    align-items: baseline;
+}
+
+.stp-settings .stp-statgrid-cell .stp-label {
+    flex: 0 0 34px;
+    color: var(--stp-muted);
+}
+
+.stp-settings .stp-extra {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--stp-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* the species picker */
+.stp-settings .stp-picker {
+    position: relative;
+}
+
+.stp-settings .stp-picker-input {
+    cursor: text;
+}
+
+.stp-settings .stp-picker-list {
+    max-height: 240px;
+    margin: 4px 0 0;
+    padding: 4px;
+    overflow-y: auto;
+    list-style: none;
+    background: var(--stp-list);
+    border: 1px solid var(--stp-field-border);
+    border-radius: var(--stp-radius-small);
+    scrollbar-width: thin;
+}
+
+.stp-settings .stp-picker-list li {
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stp-settings .stp-picker-list li.stp-picker-current {
+    font-weight: 700;
+}
+
+.stp-settings .stp-picker-list li.stp-picker-active {
+    background: var(--stp-accent);
+    color: var(--stp-accent-text);
+}
+
+.stp-settings .stp-picker-list li.stp-picker-empty {
+    color: var(--stp-muted);
+    cursor: default;
+    white-space: normal;
+}
+
+/* the game picker (keeps the start screen's .gameToggle/.gameToggleImg classes) */
+.stp-settings .stp-editions.gameToggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    justify-content: flex-start;
+}
+
+.stp-settings .stp-editions.gameToggle .gameToggleImg {
+    height: 50px;
+    width: auto;
+    max-width: 100%;
+    margin: 0;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    opacity: 0.5;
+    filter: grayscale(0.7);
+    cursor: pointer;
+    transform: none;
+    box-shadow: none;
+    transition: opacity 120ms, filter 120ms, border-color 120ms;
+}
+
+.stp-settings .stp-editions.gameToggle .gameToggleImg:hover {
+    opacity: 0.85;
+    filter: none;
+}
+
+.stp-settings .stp-editions.gameToggle .gameToggleImg.selected {
+    opacity: 1;
+    filter: none;
+    border-color: var(--stp-accent);
+}
+
+/* slots: per-generation markup inside the panel, in the panel's look */
+.stp-settings .stp-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stp-settings .stp-slot table {
+    width: 100%;
+    border-collapse: collapse;
+    font: inherit;
+}
+
+.stp-settings .stp-slot td {
+    padding: 1px 0;
+    vertical-align: middle;
+}
+
+.stp-settings .stp-hint {
+    font-size: 11px;
+    color: var(--stp-muted);
+}
+
+/* the nature +/- grid (gens 3-5; keeps their nature_grid_* classes) */
+.stp-settings .nature_grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.stp-settings .nature_grid_row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stp-settings .nature_grid_label {
+    flex: 0 0 14px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.stp-settings .nature_grid_raise { color: #ff7a7a; }
+
+.stp-settings .nature_grid_lower { color: #7aa6ff; }
+
+.stp-settings.stp-theme-light .nature_grid_raise { color: #c62f2f; }
+
+.stp-settings.stp-theme-light .nature_grid_lower { color: #2f5fc6; }
+
+.stp-settings .stp-slot .nature_grid_btn {
+    display: inline-block;
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    min-height: 0;
+    height: 22px;
+    padding: 0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.stp-settings .stp-slot .nature_grid_raise_on {
+    background: #d83a3a;
+    border-color: transparent;
+    color: #fff;
+}
+
+.stp-settings .stp-slot .nature_grid_lower_on {
+    background: #3a6fd8;
+    border-color: transparent;
+    color: #fff;
+}
+
+/* small two-column tables of values inside a slot (IV readouts, manual IV fields) */
+.stp-settings .stp-ivgrid {
+    display: grid;
+    grid-template-columns: repeat(3, auto 1fr);
+    gap: 4px 6px;
+    align-items: center;
+    font-size: 12px;
+}
+
+.stp-settings .stp-ivgrid.stp-ivgrid-2 {
+    grid-template-columns: repeat(2, auto 1fr);
+}
+
+.stp-settings .stp-ivgrid > span:nth-child(odd) {
+    color: var(--stp-muted);
+}
+
+.stp-settings .stp-slot .stp-ivgrid input[type="text"] {
+    height: 24px;
+    padding: 0 6px;
+    text-align: right;
+}
+
+.stp-settings .stp-readout-wrap .stp-value {
+    flex: 1 1 auto;
+    text-align: right;
+    overflow-wrap: anywhere;
+    font-weight: 500;
+}

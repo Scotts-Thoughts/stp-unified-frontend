@@ -21,7 +21,7 @@ const NON_STYLE_KEYS = new Set([
     'simple_data', 'timer_startTimeOffset', 'timer_startTime', 'timer_pause',
     'timer_formatted_time', 'timer_pause_time', 'time_h', 'time_m', 'time_s',
     'time_ms', 'time_split_start', 'battle_start', 'current_splits', 'previous_splits', 'previous_splits_source',
-    'overlay_color', 'imageXOffset', 'imageYOffset', 'imageScale', 'imageFlip', 'imageSat',
+    'overlay_color', 'imageXOffset', 'imageYOffset', 'imageScale', 'imageFlip', 'imageSat', 'imageRotation',
     'backgroundBlur', 'backgroundScale', 'backgroundUrl', 'backgroundFlip', 'backgroundXFlip',
     'use_custom_background', 'backgroundXOffset', 'backgroundYOffset', 'backgroundTexture',
     'backgroundBrightness', 'backgroundContrast', 'backgroundSaturation', 'backgroundHue',
@@ -42,6 +42,7 @@ export const GEN2_STYLE_PROPERTIES: readonly string[] = [
     'imageScale',
     'imageFlip',
     'imageSat',
+    'imageRotation',
     'backgroundTexture',
     'backgroundBlur',
     'backgroundHue',
@@ -85,6 +86,9 @@ export async function loadGen2StyleDefaults(): Promise<StyleSettingsStore> {
         isStyleKey: isGen2StyleKey,
         sourceDir: "games/gen2/data/style",
         exportProperties: GEN2_STYLE_PROPERTIES,
+        // gen4's debounce (flushed on unload): the legacy store wrote the species file on every
+        // edit, so a slider drag was a blocking file write per input event (known-legacy-bugs).
+        writeDebounceMs: 500,
     });
     return styleSettingsManager;
 }

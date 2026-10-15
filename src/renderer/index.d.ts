@@ -1,5 +1,6 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 import type { SplitComparison } from '../main/splitComparison'
+import type { ShortcutCatalog, ShortcutEdit } from '../shared/shortcuts'
 
 /** One entry of a directory listing returned by the splits/data IPC helpers. */
 export interface DirectoryEntry {
@@ -13,11 +14,6 @@ export type ControlHandler = (
   query: Record<string, string>,
 ) => Promise<Record<string, unknown>> | Record<string, unknown>
 
-export interface KeyEvent {
-  down: boolean
-  keyCode: number
-  time: number
-}
 
 declare global {
   interface Window {
@@ -58,7 +54,20 @@ declare global {
       },
       obsAuth: (password: string, salt: string, challenge: string) => Promise<string>,
       onControlRequest: (handler: ControlHandler) => () => void,
-      onKeyEvent: (handler: (key: KeyEvent) => void) => () => void,
+      shortcuts: {
+        register: (accelerators: string[]) => void,
+        onPressed: (handler: (accelerator: string) => void) => () => void,
+        publishCatalog: (catalog: ShortcutCatalog) => void,
+        onEdit: (handler: (edit: ShortcutEdit) => void) => () => void,
+        onRefresh: (handler: () => void) => () => void,
+        openMenu: () => void,
+        getCatalog: () => Promise<ShortcutCatalog | null>,
+        onCatalog: (handler: (catalog: ShortcutCatalog) => void) => () => void,
+        edit: (edit: ShortcutEdit) => void,
+        refresh: () => void,
+        suspend: () => void,
+        resume: () => void,
+      },
     }
   }
 }

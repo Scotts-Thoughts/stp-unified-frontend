@@ -263,8 +263,9 @@ The same pattern for gen4/gen5/gen3/gen1, in whatever order Scott records next.
 
 ## 7. Rules this plan keeps
 
-- **Decision 26 (no visual unification).** Classic stays per generation and untouched. A theme that looks alike
-  across generations is opt-in, not a change to the shipped look.
+- **Decision 26 (a guideline since 2026-10-14).** It used to keep Classic per generation and untouched. Classic
+  itself may now grow more uniform through the UI-uniformity work (`docs/ui-uniformity-plan.md`); Classic is
+  simply the shipped look at the time. A theme is still a separate, opt-in layer on top of it.
 - **§4 CSS rules.** The shipped `style.css` files aren't edited for themes; theme CSS is a separate layer on top.
 - **Invariants (ARCHITECTURE §10).** No renames; no `localStorage` (the choice is in `user_state.json`);
   `core/theme` never imports `games/`; the renderer gets files only through `window.api` and `stp-theme://`.

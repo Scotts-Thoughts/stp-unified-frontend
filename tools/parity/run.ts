@@ -154,7 +154,9 @@ export async function run(opts: RunOptions): Promise<RunResult> {
         consoleLog.push({ type: msg.type(), text: msg.text() });
       }
     });
-    page.on("pageerror", (err) => consoleLog.push({ type: "pageerror", text: String(err) }));
+    // STP_PAGEERROR_STACK=1 adds each page error's stack (to find which component threw); off by default because
+    // the stack's bundle positions would differ between any two builds (oracle 9 compares this text).
+    page.on("pageerror", (err) => consoleLog.push({ type: "pageerror", text: process.env.STP_PAGEERROR_STACK ? `${String(err)}\n${err.stack ?? ""}` : String(err) }));
     // "Failed to load resource" in the console does not say *which* resource; without
     // the URL a missing asset is impossible to chase down from a report.
     page.on("requestfailed", (request) => {

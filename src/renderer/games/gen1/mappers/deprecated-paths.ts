@@ -249,6 +249,8 @@ export const GEN1_DEPRECATED_READS: readonly string[] = [
     "player.team.0.statusCondition",
     "player.team.0.type1",
     "player.team.0.type2",
+    // The settings panel's "Player Party Count" readout (games/gen1/settingsPanel.ts, 2026-10-14).
+    "player.teamCount",
     "rival.finalTeam",
     "screen.menu.currentItem",
     "screen.text.prompt",

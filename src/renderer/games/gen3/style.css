@@ -5,9 +5,10 @@
  * variants; `*` dropped because core/styles/base.css carries the reset; a `@font-face` for a file the legacy app
  * does not ship and no rule uses is dropped too. `url(fonts/...)` re-based to `../../fonts/` (OpenSans-ExtraBold.ttf -> OpenSans-ExtraBold-gen345.ttf);
  * `url(images/...)` -> `url(images/gen3/...)` (tools/port/lift_assets.py).
- * Do not edit by hand -- re-run the tool.
+ * Edited by hand since (do NOT re-run the tool: it would throw the edits away). 2026-10-14: rules that
+ * could never apply were removed with tools/css/dead-css.ts (docs/ui-uniformity-plan.md stage 2).
  *
- * One edit after the lift (2026-09-13, re-run the tool with --font-weight to keep it):
+ * One edit after the lift (2026-09-13):
  * every `@font-face` whose file is already bold declares `font-weight: 700`. Chromium
  * 138 (Electron 37) synthesises bold on a face declared at the default weight whenever
  * a rule asks for 700 -- even when the file is bold -- where the legacy Electron 25 did
@@ -172,13 +173,6 @@
 }
 
 /* the non-custom-property half of :root */
-html:has(.gen-3) {    height: 1920px; /* Fixed canvas size */
-    width: 1080px;}
-
-html:has(.gen-3) {
-    height: 100%;
-    width: 100%;
-}
 
 body:has(.gen-3) {
     height: 100%;
@@ -206,13 +200,6 @@ body:has(.gen-3) {
 /*  replace font to change - leave label  */
 /*  ------------------------------------  */
 
-/* TIMER/RESETS */
-@font-face {
-    src: url(../../fonts/OpenSans-ExtraBold-gen345.ttf);
-    font-family: oseb;
-    font-weight: 700;
-}
-
 @font-face {
     src: url(../../fonts/Play-Bold.ttf);
     font-family: osb;
@@ -220,17 +207,6 @@ body:has(.gen-3) {
 }
 
 /* TITLES FONT */
-/* replace font to change - leave label */
-@font-face {
-    src: url(../../fonts/TitanOne-Regular.ttf);
-    font-family: titan;
-}
-
-@font-face { /* replace font to change - leave label */
-    src: url(../../fonts/Play-Bold.ttf);
-    font-family: play;
-    font-weight: 700;
-}
 
 @font-face {
     src: url(../../fonts/LeagueGothic.ttf);
@@ -240,9 +216,6 @@ body:has(.gen-3) {
 /*  ------------------------------------  */
 /*  --------------- CSS ----------------  */
 /*  ------------------------------------  */
-.gen-3 .posAbs {
-    position: absolute;
-}
 
 .gen-3 .ePkmnTypeIcons {
     position: absolute;
@@ -337,16 +310,6 @@ body:has(.gen-3) {
     z-index: -100;
 }
 
-.gen-3 .defaultTexture {
-	display: block;
-    width:1920px;
-    position: fixed;
-    /* filter: blur(4px); */
-    top: 0px;
-    left: 0px;
-    z-index: -95;
-}
-
 .gen-3 .frame {
 	display: block;
     max-width:1920px;
@@ -385,188 +348,6 @@ body:has(.gen-3) {
     z-index: -75;
 }
 
-/* .statsContainer {
-    display: block;
-    position: relative;
-    top: 460px;
-    left: 60px;
-    z-index: -75;
-} */
-.gen-3 .dropdownMenu {
-    pointer-events: auto; 
-    position: relative; 
-    width: 280px; 
-    height: 21px; 
-    font-size: 14px; 
-    background: #72fd4f; 
-    font-family: Play;
-    border-radius: 10px;
-    filter: drop-shadow(0px 0px 2px #000000c5);
-}
-
-.gen-3 .dropdown_menu_short {
-    width: 170px;
-}
-
-.gen-3 .gameToggle {
-    pointer-events: auto;
-    position: relative;
-    width: 280px;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    filter: drop-shadow(0px 0px 2px #000000c5);
-}
-
-.gen-3 .gameToggleImg {
-    width: 130px;
-    height: auto;
-    cursor: pointer;
-    border-radius: 6px;
-    opacity: 0.45;
-    filter: grayscale(70%);
-    transition: opacity 0.15s, filter 0.15s, transform 0.15s, box-shadow 0.15s;
-    box-sizing: border-box;
-    border: 2px solid transparent;
-}
-
-.gen-3 .gameToggleImg:hover {
-    opacity: 0.85;
-    filter: grayscale(20%);
-    transform: scale(1.05);
-}
-
-.gen-3 .gameToggleImg.selected {
-    opacity: 1;
-    filter: none;
-    border-color: #11ce18;
-    box-shadow: 0 0 6px #11ce18;
-    transform: scale(1.05);
-}
-
-.gen-3 .dropdown_menu_column3 {
-    width: 210px;
-}
-
-.gen-3 .nature_grid {
-    pointer-events: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    width: 144px;
-}
-
-.gen-3 .nature_grid_row {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.gen-3 .nature_grid_label {
-    width: 12px;
-    flex-shrink: 0;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.gen-3 .nature_grid_raise { color: #d83a3a; }
-
-.gen-3 .nature_grid_lower { color: #3a6fd8; }
-
-.gen-3 .nature_grid_btn {
-    pointer-events: auto;
-    position: relative;
-    flex: 1;
-    min-width: 0;
-    height: 20px;
-    padding: 0;
-    font-size: 11px;
-    background: #72fd4f;
-    border: none;
-    border-radius: 10px;
-    filter: drop-shadow(0px 0px 2px #000000c5);
-    cursor: pointer;
-}
-
-.gen-3 .nature_grid_btn:hover {
-    background: #14d61a;
-}
-
-.gen-3 .nature_grid_raise_on {
-    color: #fff;
-    background: #d83a3a;
-}
-
-.gen-3 .nature_grid_raise_on:hover {
-    background: #c43030;
-}
-
-.gen-3 .nature_grid_lower_on {
-    color: #fff;
-    background: #3a6fd8;
-}
-
-.gen-3 .nature_grid_lower_on:hover {
-    background: #3060c4;
-}
-
-.gen-3 .hidden_power_values {
-    font-size: 11px;
-}
-
-.gen-3 .hidden_power_values td {
-    padding-left: 4px;
-    white-space: nowrap;
-}
-
-.gen-3 .dropdownMenu:hover {
-    background: #11ce18; 
-}
-
-.gen-3 .buttonStyle {
-    pointer-events: auto; 
-    position: relative; 
-    width: 280px; 
-    height: 21px; 
-    font-size: 15px; 
-    background: #72fd4f; 
-    font-family: Play;
-    border-radius: 10px;
-    /* filter: drop-shadow(0px 0px 1px #000000c5); */
-}
-
-.gen-3 .buttonStyle_column3 {
-    width: 210px; 
-}
-
-.gen-3 .new_run_button {
-    margin-top: 8px;
-    margin-bottom: 8px;
-    font-size: 21px;
-    width: 280px;
-    height: 28px;
-}
-
-.gen-3 .set_starter_button {
-    margin-top: 1px;
-    margin-bottom: 2px;
-    font-size: 13px;
-    width: 210px; 
-    height: 18px;
-}
-
-.gen-3 .comparison_button {
-    margin-bottom: 8px;
-    font-size: 12px;
-    width: 210px; 
-    height: 21px;
-}
-
-.gen-3 .buttonStyle:hover {
-    background: #14d61a; 
-}
-
 /* TYPE ICON CLASSES */
 .gen-3 .typeIconContainer {
     position: absolute;
@@ -586,28 +367,6 @@ body:has(.gen-3) {
 .gen-3 .types {
     width: 38%;
 }
-
-/* .monoType {
-    position: absolute;
-    transform: scale(.095);
-    top: 300px;
-    left: -625px;
-    z-index: -70;
-}
-.type1 {
-    position: absolute;
-    transform: scale(.095);
-    top: 300px;
-    left: -705px;
-    z-index: -70;
-}
-.type2 {
-    position: absolute;
-    transform: scale(.095);
-    top: 300px;
-    left: -545px;
-    z-index: -70;
-} */
 .gen-3 .abilityHeldItemLabelStyle {
     font-size: 28px;
     position: fixed;
@@ -673,19 +432,6 @@ body:has(.gen-3) {
     font-weight: 500
 }
 
-.gen-3 .labelGametime {
-    font-size: 19px;
-    position: fixed;
-    line-height: 37.3px;
-    top: 15px;
-    left: 133px;
-    opacity: .7;
-    z-index: 30002;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500
-}
-
 .gen-3 .labelEXP {
     font-size: 14px;
     position: fixed;
@@ -702,12 +448,6 @@ body:has(.gen-3) {
 }
 
 /* STATS (INDEX 0 to 10) */
-.gen-3 .statsGraphic {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: 0;
-}
 
 .gen-3 .stats_header {
     font-size: 32px;
@@ -746,60 +486,10 @@ body:has(.gen-3) {
     /* background:rgb(0, 217, 255); */
 }
 
-.gen-3 .inputContainer {
-    font-size: 18px;
-    text-align: right;
-    background: #a3fc8b;
-    font-family: Play;
-    width: 130px;
-}
-
-/* Manual IVs: six two-digit fields on one row of the hidden_power_values table. */
+/* Manual IVs: the six two-digit fields in the settings panel's IV grid. */
 .gen-3 .manual_iv_input {
     font-size: 11px;
     width: 26px;
-}
-
-.gen-3 .timerOffsetControls {
-    display: inline-flex;
-    width: 169px;
-    vertical-align: middle;
-    gap: 4px;
-    align-items: stretch;
-}
-
-.gen-3 .timerOffsetControls .inputContainer {
-    flex: 1;
-    min-width: 0;
-    width: auto;
-    font-size: 14px;
-}
-
-.gen-3 .timerOffsetClearButton {
-    pointer-events: auto;
-    position: relative;
-    flex-shrink: 0;
-    width: 54px;
-    min-width: 54px;
-    font-size: 13px;
-    background: #72fd4f;
-    font-family: Play;
-    border: none;
-    border-radius: 4px;
-    padding: 0 4px;
-    white-space: nowrap;
-    box-sizing: border-box;
-    cursor: pointer;
-}
-
-.gen-3 .timerOffsetClearButton:hover {
-    background: #14d61a;
-}
-
-.gen-3 .ev_table td:nth-child(2) {
-    text-align: right;
-    width: 48px;
-    padding-left: 12px;
 }
 
 .gen-3 .timerTitle {
@@ -833,23 +523,6 @@ body:has(.gen-3) {
 .gen-3 .blackout_2_reset_label {
     top: 166px;
     left: 182px;
-}
-
-.gen-3 .resetsTitle {
-    position: absolute;
-    font-family: titan;
-    opacity: .7;
-    padding-left: 25px;
-    padding-top: 127px;
-}
-
-.gen-3 .blackoutsTitle {
-    position: absolute;
-    font-family: titan;
-    opacity: .7;
-    padding-left: 25px;
-    padding-top: 129px;
-    font-size: 13px;
 }
 
 .gen-3 .gametimeClock {
@@ -886,131 +559,7 @@ body:has(.gen-3) {
     height: 100px;
 }
 
-.gen-3 .statsLabelsColumn1 {
-    font-size: 30px;
-    position: absolute;
-    line-height: 58px;
-    top: 883px;
-    left: -25px;
-    z-index: 3;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .statsLabelsColumn2 {
-    font-size: 30px;
-    position: absolute;
-    line-height: 59px;
-    top: 883px;
-    left: 184px;
-    z-index: 3;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .statsColumn1 {
-    display: block;
-    font-size: 50px;
-    position: absolute;
-    line-height: 61.5px;
-    top: 873px;
-    right: 1751px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .statsColumn2 {
-    display: block;
-    font-size: 50px;
-    position: absolute;
-    line-height: 61.5px;
-    top: 873px;
-    right: 1583px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .statsIvsColumn1 {
-    display: block;
-    font-size: 33px;
-    position: absolute;
-    line-height: 61.7px;
-    top: 873px;
-    right: 1751px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .statsIvsColumn2 {
-    display: block;
-    font-size: 33px;
-    position: absolute;
-    line-height: 61.7px;
-    top: 873px;
-    right: 1583px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .statsEvsColumn1 {
-    display: block;
-    font-size: 25px;
-    position: absolute;
-    line-height: 61.9px;
-    top: 873.5px;
-    right: 1751px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .statsEvsColumn2 {
-    display: block;
-    font-size: 25px;
-    position: absolute;
-    line-height: 61.9px;
-    top: 873.5px;
-    right: 1583px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
 /* BACKUP STATS POSITIONS */
-/* .statsColumn1 {
-    font-size: 56px;
-    position: absolute;
-    line-height: 60px;
-    top: 881px;
-    right: 1743px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-.statsColumn2 {
-    font-size: 56px;
-    position: absolute;
-    line-height: 60px;
-    top: 881px;
-    right: 1576px;
-    z-index: 4;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-} */
 .gen-3 .absolute {
     position: absolute;
 }
@@ -1123,25 +672,10 @@ body:has(.gen-3) {
 }
 
 .gen-3 .badges {
-    display: block;
-    max-width:192px;
-    max-height:94px;
-    position: absolute;
-    top: 993px;
-    left: 329px;
     z-index: 2000;
 }
 
 /* PACKAGE CONTENTS */
-.gen-3 .overlayStarter {
-	display: block;
-    max-width:1920px;
-    max-height:1080px;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: -50;
-}
 
 .gen-3 .titles {
     font-size: 35px;
@@ -1195,14 +729,6 @@ body:has(.gen-3) {
     left: 182px;
 }
 
-.gen-3 .popup {
-    position: absolute;
-    top: 250px;
-    left: 20px;
-    z-index: 900;
-    scale: 15;
-}
-
 /* ENEMY STATS */
 .gen-3 .enemyGraphic {
     display: block;
@@ -1212,209 +738,6 @@ body:has(.gen-3) {
     left: 1540px;
     border: 1px solid rgba(255, 0, 0, 0);
     z-index: 0;
-}
-
-.gen-3 .enemyPng {
-    display: block;
-    position: absolute;
-    top: 0px;
-    width: 1920px;
-    object-fit: cover;
-    object-position: top right;
-    height: 1080px;
-    z-index: -1;
-}
-
-.gen-3 .eAbilities {
-    display: block;
-    position: absolute;
-    top: 0px;
-    width: 1920px;
-    object-fit: cover;
-    object-position: top right;
-    height: 1080px;
-    z-index: 250;
-}
-
-.gen-3 .abilitiesPng {
-    display: block;
-    position: absolute;
-    top: 0px;
-    width: 1920px;
-    object-fit: cover;
-    object-position: top right;
-    height: 1080px;
-    opacity: .8;
-    z-index: 1;
-}
-
-.gen-3 .enemyPokemonName {
-    display: block;
-    font-size: 32px;
-    width: 400px;
-    text-align: center; /* need a fix */
-    position: fixed;
-    top: 40px;
-    left: 1518px;
-    font-family: titan;
-    z-index: 600;
-}
-
-.gen-3 .enemyMoves {
-    display: block;
-    width: 400px;
-    font-size: 42px;
-    position: fixed;
-    text-align: center;
-    top: 80px;
-    left: 1518px;
-    line-height: 60px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 720;
-}
-
-.gen-3 .enemyHpLabel {
-    font-size: 30px;
-    position: fixed;
-    text-align: left;
-    top: 320px;
-    left: 1558px;
-    line-height: 50px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 720;
-}
-
-.gen-3 .enemyHp {
-    font-size: 40px;
-    position: fixed;
-    text-align: right;
-    top: 320px;
-    left: 1664px;
-    line-height: 50px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 722;
-}
-
-.gen-3 .enemyPhysicalLabel {
-    font-size: 30px;
-    position: fixed;
-    text-align: left;
-    top: 368px;
-    left: 1558px;
-    line-height: 50px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 722;
-}
-
-.gen-3 .enemySpdSpcLabel {
-    font-size: 30px;
-    position: fixed;
-    text-align: left;
-    top: 368px;
-    left: 1734px;
-    line-height: 50px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 722;
-}
-
-.gen-3 .enemyPhysical {
-    font-size: 40px;
-    position: fixed;
-    text-align: right;
-    top: 368px;
-    left: 1664px;
-    line-height: 50px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 722;
-}
-
-.gen-3 .enemySpdSpc {
-    font-size: 40px;
-    position: fixed;
-    text-align: right;
-    top: 368px;
-    left: 1834px;
-    line-height: 50px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 722;
-}
-
-.gen-3 .slideR-enter-active {
-    transition: all 1s ease-out;
-}
-
-.gen-3 .slideR-leave-active {
-    transition: all .7s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.gen-3 .slideR-enter-from {
-    transform: translateX(2300px);
-}
-
-.gen-3 .slideR-leave-to {
-    opacity: 0;
-}
-
-.gen-3 .slideL-enter-active {
-    transition: all 1s ease-out;
-}
-
-.gen-3 .slideL-leave-active {
-    transition: all .7s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.gen-3 .slideL-enter-from {
-    transform: translateX(-400px);
-}
-
-.gen-3 .slideL-leave-to {
-    opacity: 0;
-}
-
-/* .encounterInfo {
-    font-size: 25px;
-    position: absolute;
-    top: 96px;
-    left: 1566px;
-    line-height: 26px;
-    font-family: play;
-    font-weight: 700;
-}
-
-.encounterData {
-    font-size: 25px;
-    position: absolute;
-    top: 96px;
-    left: 1668px;
-    line-height: 26px;
-    font-family: play;
-    font-weight: 700;
-} */
-.gen-3 .encounterInfo {
-    font-size: 20px;
-    position: absolute;
-    top: 44px;
-    left: 414px;
-    line-height: 22px;
-    font-family: play;
-    font-weight: 700;
-}
-
-.gen-3 .encounterData {
-    font-size: 20px;
-    position: absolute;
-    top: 44px;
-    left: 504px;
-    line-height: 22px;
-    font-family: play;
-    font-weight: 700;
 }
 
 /* MOVEPOOL */
@@ -1479,69 +802,8 @@ body:has(.gen-3) {
 }
 
 /* BAG INFO BLOCK (BEHIND THE SCENES) */
-.gen-3 .bagLineLabelInfo {
-    font-size: 24px;
-    position: absolute;
-    top: 440px;
-    left: 1134px;
-    line-height: 26px;
-    font-family: play;
-    font-weight: 700;
-}
-
-.gen-3 .bagItemInfo {
-    font-size: 24px;
-    position: absolute;
-    top: 440px;
-    left: 1230px;
-    line-height: 26px;
-    font-family: play;
-    font-weight: 700;
-}
-
-.gen-3 .bagQuantityInfo {
-    font-size: 24px;
-    position: absolute;
-    top: 440px;
-    left: 1470px;
-    line-height: 26px;
-    font-family: play;
-    font-weight: 700;
-}
 
 /* BAG OVERLAY */
-.gen-3 .bagLineLabel {
-    font-size: 38px;
-    position: absolute;
-    top: 112px;
-    left: 1556px;
-    line-height: 42px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 500;
-}
-
-.gen-3 .bagItem {
-    font-size: 38px;
-    position: absolute;
-    top: 112px;
-    left: 1556px;
-    line-height: 42px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 500;
-}
-
-.gen-3 .bagQuantity {
-    font-size: 38px;
-    position: absolute;
-    top: 112px;
-    left: 1856px;
-    line-height: 42px;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 500;
-}
 
 .gen-3 .parent {
     text-align: right;
@@ -1549,17 +811,6 @@ body:has(.gen-3) {
 }
 
 /* UI ELEMENTS */
-.gen-3 .timerUI {
-	display: block;
-    max-width:1920px;
-    max-height:1080px;
-    position: fixed;
-    transform: scale(.2);
-    opacity: .8;
-    top: -160px;
-    left: -760px;
-    z-index: 3;
-}
 
 .gen-3 .movesetUI {
 	display: block;
@@ -1571,167 +822,6 @@ body:has(.gen-3) {
     top: -230px;
     left: -760px;
     z-index: 3;
-}
-
-.gen-3 .resetsUI {
-	display: block;
-    max-width:1920px;
-    max-height:1080px;
-    position: fixed;
-    opacity: .8;
-    top: 333px;
-    left: 7px;
-    z-index: 3;
-}
-
-.gen-3 .barRight {
-	display: flex;
-    position: fixed;
-    opacity: .8;
-    top: 35px;
-    right: 14px;
-    z-index: 3;
-}
-
-.gen-3 .barLeft {
-	display: flex;
-    position: fixed;
-    left: 14px;
-    top: 35px;
-    z-index: 3;
-}
-
-.gen-3 .battleOverlay {
-	display: block;
-    position: fixed;
-    opacity: .8;
-    top: 0px;
-    right: 0px;
-    z-index: 100;
-}
-
-@keyframes blur-out {
-    0% {
-         transform: scale(1);
-         animation-timing-function: ease;
-    }
-    50% {
-        transform: scale(1.015);
-        opacity: 1;
-        animation-timing-function: ease;
-    }
-    100% {
-        transform: scale(1.05);
-        opacity: 0;
-        animation-timing-function: ease;
-    }
-}
-
-.gen-3 .fade1-enter-from {
-	opacity: 0;
-}
-
-.gen-3 .fade1-enter-to {
-	opacity: 1;
-}
-
-.gen-3 .fade1-enter-active {
-	transition: opacity .5s ease;
-}
-
-.gen-3 .fade1-leave-from {
-	opacity: 1;
-}
-
-.gen-3 .fade1-leave-to {
-	opacity: 0;
-}
-
-.gen-3 .fade1-leave-active {
-	transition: opacity .2s ease;
-}
-
-.gen-3 .fade1x-enter-from {
-	opacity: 0;
-}
-
-.gen-3 .fade1x-enter-to {
-	opacity: 1;
-}
-
-.gen-3 .fade1x-enter-active {
-	transition: opacity 2s ease;
-}
-
-.gen-3 .fade1x-leave-from {
-	opacity: 1;
-}
-
-.gen-3 .fade1x-leave-to {
-	opacity: 0;
-}
-
-.gen-3 .fade1x-leave-active {
-	transition: opacity .2s ease;
-}
-
-.gen-3 .fade2-enter-from {
-	opacity: 0;
-}
-
-.gen-3 .fade2-enter-to {
-	opacity: 1;
-}
-
-.gen-3 .fade2-enter-active {
-	transition: opacity 1s ease;
-}
-
-.gen-3 .fade2-leave-from {
-	opacity: 1;
-}
-
-.gen-3 .fade2-leave-to {
-	opacity: 0;
-}
-
-.gen-3 .fade2-leave-active {
-	transition: opacity .3s ease;
-}
-
-.gen-3 .fade3-enter-from {
-	opacity: 0;
-}
-
-.gen-3 .fade3-enter-to {
-	opacity: 1;
-}
-
-.gen-3 .fade3-enter-active {
-	transition: opacity .3s ease;
-}
-
-.gen-3 .fade3-leave-from {
-	opacity: 1;
-}
-
-.gen-3 .fade3-leave-to {
-	opacity: 0;
-}
-
-.gen-3 .fade3-leave-active {
-	transition: opacity 1.5s ease;
-}
-
-.gen-3 .righttitles {
-    font-size: 35px;
-    position: relative;
-    top: 1080px;
-    right: 0px;
-    text-align: right;
-    line-height: 60px;
-    font-family: oseb;
-    font-weight: 700;
 }
 
 .gen-3 .badges {
@@ -1807,123 +897,6 @@ body:has(.gen-3) {
     text-align: right;
     font-family: osb;
     font-weight: 500
-}
-
-.gen-3 .labelHp {
-    font-size: 24px;
-    position: fixed;
-    line-height: 37.3px;
-    color:rgb(68, 68, 68);
-    top: 885px;
-    left: 20px;
-    opacity: 1;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .labelAtk {
-    font-size: 24px;
-    position: fixed;
-    line-height: 37.3px;
-    color:rgb(68, 68, 68);
-    top: 947px;
-    left: 20px;
-    opacity: 1;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500;
-    z-index: 10;
-}
-
-.gen-3 .labelDef {
-    font-size: 24px;
-    position: fixed;
-    line-height: 37.3px;
-    color:rgb(68, 68, 68);
-    top: 1009px;
-    left: 20px;
-    opacity: 1;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500;
-    z-index: 50;
-
-}
-
-.gen-3 .labelSpcAtk {
-    font-size: 24px;
-    position: fixed;
-    line-height: 27px;
-    color:rgb(68, 68, 68);
-    top: 876px;
-    left: 187px;
-    opacity: 1;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500;
-    z-index: 50;
-
-}
-
-.gen-3 .labelSpcDef {
-    font-size: 24px;
-    position: fixed;
-    line-height: 27px;
-    color:rgb(68, 68, 68);
-    top: 937px;
-    left: 187px;
-    opacity: 1;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500;
-    z-index: 50;
-
-}
-
-.gen-3 .labelSpcAtk2 {
-    font-size: 24px;
-    position: fixed;
-    line-height: 27px;
-    color:rgb(68, 68, 68);
-    top: 890px;
-    left: 187px;
-    opacity: 1;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500;
-    z-index: 50;
-
-}
-
-.gen-3 .labelSpcDef2 {
-    font-size: 24px;
-    position: fixed;
-    line-height: 27px;
-    color:rgb(68, 68, 68);
-    top: 952px;
-    left: 187px;
-    opacity: 1;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500;
-    z-index: 50;
-}
-
-.gen-3 .labelSpd {
-    font-size: 24px;
-    position: fixed;
-    line-height: 37.3px;
-    color:rgb(68, 68, 68);
-    z-index: 1000;
-    top: 1009px;
-    left: 187px;
-    opacity: .75;
-    text-align: left;
-    font-family: osb;
-    font-weight: 500;
-    z-index: 50;
-
 }
 
 .gen-3 .stats_container {
@@ -2010,22 +983,6 @@ body:has(.gen-3) {
     font-size: 15px;
 }
 
-.gen-3 .stat_medn {
-    padding-top: 18px;
-    font-size: 15px;
-}
-
-.gen-3 .stat_base {
-    padding-top: 36px;
-    font-size: 15px;
-}
-
-.gen-3 .comparison_stat_row_1 { top: 39px; }
-
-.gen-3 .comparison_stat_row_2 { top: 101px; }
-
-.gen-3 .comparison_stat_row_3 { top: 163px; }
-
 .gen-3 .stat_comparison_value_style {
     position: absolute;
     padding-left: 1px;
@@ -2057,77 +1014,6 @@ body:has(.gen-3) {
     line-height: 16px;
 }
 
-.gen-3 .atkMod {
-    font-size: 28px;
-    color: rgb(0, 0, 0);
-    position: absolute;
-    line-height: 37.3px;
-    z-index: 1000;
-    top: 946px;
-    left: 48px;
-    right: 1920px;
-    text-align: right;
-    font-family: play;
-    font-weight: 500
-}
-
-.gen-3 .defMod {
-    font-size: 28px;
-    color: rgb(0, 0, 0);
-    position: absolute;
-    line-height: 37.3px;
-    z-index: 1000;
-    top: 1002px;
-    left: 58px;
-    right: 1920px;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-    
-}
-
-.gen-3 .spcAMod {
-    font-size: 28px;
-    color: rgb(0, 0, 0);
-    position: absolute;
-    line-height: 37.3px;
-    z-index: 1000;
-    top: 946px;
-    left: 218px;
-    right: 1920px;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .spcDMod {
-    font-size: 28px;
-    color: rgb(0, 0, 0);
-    position: absolute;
-    line-height: 37.3px;
-    z-index: 1000;
-    top: 1002px;
-    left: 218px;
-    right: 1920px;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
-.gen-3 .spdMod {
-    font-size: 28px;
-    color: rgb(0, 0, 0);
-    position: fixed;
-    line-height: 37.3px;
-    z-index: 1000;
-    top: 886px;
-    left: 218px;
-    right: 1920px;
-    text-align: right;
-    font-family: osb;
-    font-weight: 500
-}
-
 .gen-3 .aDMods {
     font-size: 40px;
     color: rgb(54, 54, 54);
@@ -2156,123 +1042,7 @@ body:has(.gen-3) {
     font-weight: 500
 }
 
-.gen-3 .statusCond {
-    display: block;
-    position: fixed;
-    top: 250px;
-    left: 6px;
-    width: 150px;
-    filter: drop-shadow(3px 3px 7px #000)
-}
-
-.gen-3 .playerMoves {
-    font-size: 26px;
-    position: fixed;
-    left: 35px;
-    top: 188px;
-    bottom: 0px;
-    right: 0px;
-    z-index: 5;
-    line-height: 34px;
-    text-transform: capitalize;
-    text-align: left;
-    font-family: osb;
-    font-weight: 700
-}
-
 /* INFO AREA */
-.gen-3 .ui_border {
-    border: 1px solid #ff000000;
-}
-
-.gen-3 .ui_style {
-    font-size: 14px;
-    position: fixed;
-    line-height: 14px;
-    text-transform: capitalize;
-    text-align: left;
-    font-family: osb;
-    font-weight: 700;
-    z-index: 20000;
-}
-
-.gen-3 .ui1 {
-    left: 372px;
-    top: 30px;
-    width: 280px;
-    height: 780px;
-}
-
-.gen-3 .ui2 {
-    left: 688px;
-    top: 30px;
-    width: 350px;
-    height: 780px;
-}
-
-.gen-3 .ui3 {
-    left: 1072px;
-    top: 30px;
-    width: 220px;
-    height: 780px;
-}
-
-.gen-3 .ui4 {
-    left: 1322px;
-    top: 30px;
-    width: 220px;
-    height: 780px;
-}
-
-.gen-3 .ui5 {
-    left: 1072px;
-    top: 500px;
-    width: 470px;
-    height: 250px;
-    pointer-events: none;
-}
-
-.gen-3 .smallButtonStyle {
-    pointer-events: auto; 
-    position: relative; 
-    font-size: 16px; 
-    background: #72fd4f; 
-    font-family: Play;
-    border-radius: 12px;
-    padding-left: 4px;
-    padding-right: 4px;
-    width: 18px;
-    height: 18px;
-}
-
-.gen-3 .smallButtonStyle2 {
-    pointer-events: auto; 
-    position: relative; 
-    font-size: 16px; 
-    background: #cc5353; 
-    font-family: Play;
-    border-radius: 12px;
-    padding-left: 4px;
-    padding-right: 4px;
-    width: 18px;
-    height: 18px;
-}
-
-.gen-3 .increment {
-    background: #29c702;
-}
-
-.gen-3 .decrement {
-    background: #cc5353;
-}
-
-.gen-3 .smallButtonStyle:hover {
-    background: #14d61a; 
-}
-
-.gen-3 .smallButtonStyle2:hover {
-    background: #fd6e6e; 
-}
 
 .gen-3 .nature {
     font-size: 18px;
@@ -2427,15 +1197,7 @@ body:has(.gen-3) {
 }
 
 .gen-3 .movepoolTitle {
-    display: block;
-    border: 1px solid rgba(255, 0, 0, 0);
-    font-size: 24px;
-    width: 338px;
-    text-align: center; /* need a fix */
-    position: absolute;
-    top: 26px;
-    left: 1570px;
-    font-family: titan;
+    width: 338px; /* need a fix */
     line-height: 34px;
     z-index: 600;
 }
@@ -2454,15 +1216,7 @@ body:has(.gen-3) {
 }
 
 .gen-3 .enemy_trainer_name {
-    display: block;
-    border: 1px solid rgba(255, 0, 0, 0);
-    font-size: 24px;
-    width: 338px;
-    text-align: center; /* need a fix */
-    position: absolute;
-    top: 26px;
-    left: 1570px;
-    font-family: titan;
+    width: 338px; /* need a fix */
     line-height: 34px;
     z-index: 600;
 }
@@ -2622,142 +1376,6 @@ body:has(.gen-3) {
     z-index: -100;
 }
 
-.gen-3 .leftBarFixed {
-    display: block;
-    position: fixed;
-    left: 12px;
-    top: 24px;
-    z-index: 10000;
-}
-
-.gen-3 .rightBarFixed {
-    display: block;
-    position: fixed;
-    right: 12px;
-    top: 24px;
-    z-index: 10000;
-}
-
-.gen-3 .slideInTop-enter-from {
-    transform: translateY(-100%);
-    opacity: 0;
-}
-
-.gen-3 .slideInTop-enter-active {
-    transition: transform .5s ease, opacity .3s ease;
-}
-
-.gen-3 .slideInTop-enter-to {
-    transform: translateY(0%);
-    opacity: 1;
-}
-
-.gen-3 .slideInTop-leave-active {
-    animation: blur-out 0.4s;
-}
-
-.gen-3 .slideInBottom-enter-from {
-    transform: translateY(+100%);
-    opacity: 0;
-}
-
-.gen-3 .slideInBottom-enter-active {
-    transition: transform .5s ease, opacity .3s ease;
-}
-
-.gen-3 .slideInBottom-enter-to {
-    transform: translateY(0%);
-    opacity: 1;
-}
-
-.gen-3 .slideInBottom-leave-active {
-    animation: blur-out 0.4s;
-}
-
-.gen-3 .slideInLeft-enter-from,
-.gen-3 .slideInLeft-leave-to {
-    transform: translateX(-100%);
-    opacity: 0;
-}
-
-.gen-3 .slideInLeft-enter-active,
-.gen-3 .slideInLeft-leave-active {
-    transition: transform .5s ease, opacity .3s ease;
-}
-
-.gen-3 .slideInLeft-enter-to {
-    transform: translateX(0%);
-    opacity: 1;
-}
-
-.gen-3 .slideInRight-enter-from,
-.gen-3 .slideInRight-leave-to {
-    transform: translateX(100%);
-    opacity: 0;
-}
-
-.gen-3 .slideInRight-enter-active,
-.gen-3 .slideInRight-leave-active {
-    transition: transform .5s ease, opacity .3s ease;
-}
-
-.gen-3 .slideInRight-enter-to {
-    transform: translateX(0%);
-    opacity: 1;
-}
-
-.gen-3 .scaleResets-enter-from,
-.gen-3 .scaleResets-leave-to {
-    transform: scale(115%);
-}
-
-.gen-3 .scaleResets-enter-active {
-    transition: transform 1s ease;
-}
-
-.gen-3 .scaleResets-leave-active {
-    transition: transform 1s ease;
-}
-
-.gen-3 .scaleResets-enter-to {
-    transform: scale(115%);
-}
-
-@keyframes blur-out {
-    0% {
-         transform: scale(1);
-         animation-timing-function: ease;
-    }
-    50% {
-        transform: scale(1.015);
-        opacity: 1;
-        animation-timing-function: ease;
-    }
-    100% {
-        transform: scale(1.05);
-        opacity: 0;
-        animation-timing-function: ease;
-    }
-}
-
-.gen-3 .fadeScale-enter-from {
-    transform: scale(100%,100%);
-    opacity: 0;
-}
-
-.gen-3 .fadeScale-enter-active {
-    transition: transform 2s ease, opacity 1s ease;
-}
-
-.gen-3 .fadeScale-enter-to {
-    transform: scale(50%,50%);
-    opacity: 1;
-}
-
-.gen-3 .fadeScale-leave-active {
-    animation: blur-out 0.4s;
-}
-
 .gen-3 .status-enter-from {
     filter: blur(25px);
     opacity: 0;
@@ -2778,36 +1396,6 @@ body:has(.gen-3) {
     opacity: 0;
 }
 
-/* TEXT UPDATES (MOVE, MOVE POWER, PP) */
-/* .fadeText-enter-from, .fadeText-leave-to {
-    opacity: 0;
-}
-.fadeText-enter-active {
-    transition: opacity .6s ease-in;
-}
-.fadeText-enter-to, .fadeText-leave-from {
-    opacity: 1;
-}
-.fadeText-leave-active {
-    transition: opacity .1s ease-in;
-}  */
-@keyframes blur-out {
-    0% {
-         transform: scale(1);
-         animation-timing-function: ease;
-    }
-    50% {
-        transform: scale(1.015);
-        opacity: 1;
-        animation-timing-function: ease;
-    }
-    100% {
-        transform: scale(1.05);
-        opacity: 0;
-        animation-timing-function: ease;
-    }
-}
-
 /* BATTLE GRAPHIC APPEARS */
 .gen-3 .battleGraphic-enter-active {
     animation: battleIntroAnimationFull 2.7s;
@@ -2826,84 +1414,8 @@ body:has(.gen-3) {
 }
 
 /* There are roughly 2.65s from the black screen to when the player gains control of the Pokemon (637 frames @ 240fps) */
-/* DURATION: 2.65s */
-@keyframes battleIntroAnimationFull {
-    /* Black (from the first black frane to when the screen turns white) */
-    0% {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    /* Grayscale Trainer Scroll (from the white frame until the first colour frame) */
-    13% {
-        opacity: 0;
-        transform: translateX(100%);
-        animation-timing-function: ease;
-    }
-    /* Trainers Send Their Pokemon In (starts with "TRAINER wants to fight!") */
-    36% {
-        opacity: 1;
-        transform: translateX(25%);
-        animation-timing-function: ease;
-    }
-    /* Opponent's Pokemon Fully Rendered (health bar appears) */
-    65% {
-        opacity: 1;
-        transform: translateX(0%);
-        animation-timing-function: ease;
-        }
-    /* Player Pokemon Text (player off screen, text scroll) */
-    73% {
-        opacity: 1;
-        transform: translateX(0%);
-    }
-    /* Player Pokemon Text (player off screen, text scroll) */
-    86% {
-        opacity: 1;
-        transform: translateX(0%);
-    }
-    /* Player Gains Control (fight, item, pkmn, run) */
-    100% {
-        opacity: 1;
-        transform: translateX(0%);
-    }
-}
-
-.gen-3 .battleEnemyText-enter-from,
-.gen-3 .battleEnemyText-leave-to {
-    opacity: 0;
-}
-
-.gen-3 .battleEnemyText-enter-active {
-    animation: battleTextIntroAnimationFull 3.7s;
-}
-
-.gen-3 .battleEnemyText-leave-active {
-    animation: blur-out 0.2s;
-}
-
-.gen-3 .battleEnemyText-enter-to {
-    opacity: 1;
-}
 
 /* There are roughly 2.65s from the black screen to when the player gains control of the Pokemon (637 frames @ 240fps) */
-/* DURATION: 2.65s */
-@keyframes battleTextIntroAnimationFull {
-    0% {
-        opacity: 0;
-        transform: translateX(25%);
-    }
-    /* Starts animating when the battle is starting */
-    72% {
-        opacity: 0;
-        transform: translateX(25%);
-        animation-timing-function: ease;
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0%);
-        animation-timing-function: ease;
-    }
-}
 
 .gen-3 .movepool-enter-from {
     transform: translateY(+100%);
@@ -2921,28 +1433,6 @@ body:has(.gen-3) {
 
 .gen-3 .movepool-leave-active {
     animation: blur-out-movepool 0.42s;
-}
-
-@keyframes blur-out-movepool {
-    0% {
-         transform: scale(1);
-         animation-timing-function: ease;
-    }
-    24% {
-        transform: scale(1);
-        opacity: 1;
-        animation-timing-function: ease;
-    }
-    50% {
-        transform: scale(1.015);
-        opacity: 1;
-        animation-timing-function: ease;
-    }
-    100% {
-        transform: scale(1.05);
-        opacity: 0;
-        animation-timing-function: ease;
-    }
 }
 
 .gen-3 .fadeBattle-enter-from { opacity: 0; }
@@ -2970,18 +1460,6 @@ body:has(.gen-3) {
 
 .gen-3 .castformFade-leave-active { transition: opacity 750ms ease-in-out; }
 
-.gen-3 .fadeBattleEnemy-enter-from { opacity: 0; }
-
-.gen-3 .fadeBattleEnemy-enter-to { opacity: 1; }
-
-.gen-3 .fadeBattleEnemy-enter-active { transition: opacity 500ms ease-in-out 500ms; }
-
-.gen-3 .fadeBattleEnemy-leave-from { opacity: 1; }
-
-.gen-3 .fadeBattleEnemy-leave-to { opacity: 0; }
-
-.gen-3 .fadeBattleEnemy-leave-active { transition: opacity 500ms ease-in-out; }
-
 .gen-3 .fadeDelayed-enter-from { opacity: 0; }
 
 .gen-3 .fadeDelayed-enter-to { opacity: 1; }
@@ -2993,30 +1471,6 @@ body:has(.gen-3) {
 .gen-3 .fadeDelayed-leave-to { opacity: 0; }
 
 .gen-3 .fadeDelayed-leave-active { transition: opacity 200ms ease-in-out; }
-
-.gen-3 .fade2-enter-from { opacity: 0; }
-
-.gen-3 .fade2-enter-to { opacity: 1; }
-
-.gen-3 .fade2-enter-active { transition: opacity 500ms ease-in-out; }
-
-.gen-3 .fade2-leave-from { opacity: 1; }
-
-.gen-3 .fade2-leave-to { opacity: 0; }
-
-.gen-3 .fade2-leave-active { transition: opacity 500ms ease-in-out 400ms; }
-
-.gen-3 .fadeMod-enter-from { opacity: 0; }
-
-.gen-3 .fadeMod-enter-to { opacity: 1; }
-
-.gen-3 .fadeMod-enter-active { transition: opacity 400ms ease-in; }
-
-.gen-3 .fadeMod-leave-from { opacity: 1; }
-
-.gen-3 .fadeMod-leave-to { opacity: 0; }
-
-.gen-3 .fadeMod-leave-active { transition: opacity 400ms ease-out; }
 
 .gen-3 .opacityTransition { transition: opacity 500ms ease-in-out;}
 
@@ -3075,24 +1529,6 @@ body:has(.gen-3) {
     top: 22px;
     transform-origin: 50% 50%;
     transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
-}
-
-.gen-3 .ePkmnSpriteResizing {
-    outline: 2px dashed #00ffff;
-    outline-offset: 2px;
-}
-
-.gen-3 .ePkmnSpriteResizeHandle {
-    position: fixed;
-    width: 16px;
-    height: 16px;
-    background: #00ffff;
-    border: 2px solid #000;
-    border-radius: 50%;
-    cursor: nwse-resize;
-    z-index: 2147483647;
-    pointer-events: auto;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
 }
 
 .gen-3 .ePkmnMoveStyle {
@@ -3284,76 +1720,6 @@ body:has(.gen-3) {
     left: 122px;
 }
 
-.gen-3 .seHp {
-    position: absolute;
-    /* border: 1px solid rgb(255, 0, 0); */
-    text-align: center;
-    font-size: 16px;
-    width: 100px;
-    left: 4px;
-    top: 858px;
-}
-
-.gen-3 .seAtk {
-    position: absolute;
-    /* border: 1px solid rgb(255, 0, 0); */
-    text-align: center;
-    font-size: 16px;
-    width: 100px;
-    left: 4px;
-    top: 920px;
-}
-
-.gen-3 .seDef {
-    position: absolute;
-    /* border: 1px solid rgb(255, 0, 0); */
-    text-align: center;
-    font-size: 16px;
-    width: 100px;
-    left: 3px;
-    top: 982px;
-}
-
-.gen-3 .seSpe {
-    position: absolute;
-    /* border: 1px solid rgb(255, 0, 0); */
-    text-align: center;
-    font-size: 16px;
-    width: 100px;
-    left: 186px;
-    top: 858px;
-}
-
-.gen-3 .seSpc1 {
-    position: absolute;
-    /* border: 1px solid rgb(255, 0, 0); */
-    text-align: center;
-    font-size: 16px;
-    width: 100px;
-    left: 187px;
-    top: 920px;
-}
-
-.gen-3 .seSpc2 {
-    position: absolute;
-    /* border: 1px solid rgb(255, 0, 0); */
-    text-align: center;
-    font-size: 16px;
-    width: 100px;
-    left: 187px;
-    top: 982px;
-}
-
-.gen-3 .seHpVitamin {
-    position: absolute;
-    /* border: 1px solid rgb(255, 0, 0); */
-    text-align: center;
-    font-size: 42px;
-    width: 100px;
-    left: 1px;
-    top: 865px;
-}
-
 .gen-3 .movesetLabel {
     position: absolute;
     font-family: play;
@@ -3471,12 +1837,6 @@ body:has(.gen-3) {
     padding-right: 1px;
 }
 
-.gen-3 .inventory_header {
-    background-color: #8d8d8d;
-    line-height: 17px;
-    border: 2px solid #00000000;
-}
-
 .gen-3 .splits_table {
     display: block;
     position: absolute;
@@ -3493,10 +1853,6 @@ body:has(.gen-3) {
     border: none;
 }
 
-.gen-3 .splits_table tr:nth-child(odd) {
-    background-color: #cfcfcf;
-}
-
 .gen-3 .scaled_icon {
     padding-top: 3px;
     margin: 0; /* Remove any margin */
@@ -3504,58 +1860,6 @@ body:has(.gen-3) {
     width: 33.7px;
     filter: saturate(1.1) contrast(1.1) drop-shadow(0 0 1px #000000);
 }
-
-.gen-3 .inventory_demo {
-    display: block;
-    position: absolute;
-    /* border: 1px solid #00ff0d00; */
-    background-color: #ffffff;
-    font-size: 12px;
-    line-height: 20px;
-    line-height: 18px;
-    width: 328px;
-    height: 1001px;
-    font-family: play;
-    left: 1576px;
-    top: 57px;
-    opacity: .9;
-    border: none;
-}
-
-.gen-3 .inventory_demo th:nth-child(1) {
-    width: 42px;
-}
-
-.gen-3 .inventory_demo th:nth-child(2) {
-    width: 22px;
-}
-
-.gen-3 .inventory_demo th:nth-child(3) {
-    width: 126px;
-}
-
-.gen-3 .inventory_demo th:nth-child(4) {
-    width: 20px;
-    text-align: center;
-}
-
-.gen-3 .inventory_demo th:nth-child(5) {
-    width: 46px;
-    text-align: right;
-}
-
-.gen-3 .inventory_demo th:nth-child(6) {
-    width: 46px;
-    text-align: right;
-}
-
-.gen-3 .inventory_demo tr:nth-child(odd) {
-    background-color: #cfcfcf;
-}
-
-/* :nth-child(odd) {
-    background-color: #7e7e7e;
-} */
 .gen-3 .movepool_header {
     line-height: 17px;
 }
@@ -3604,16 +1908,8 @@ body:has(.gen-3) {
     width: 44px;
 }
 
-.gen-3 .movepoolDemo th:nth-child(6) {
-    width: 40px;
-}
-
 .gen-3 .movepoolTable {
     font-size: 17px;
-}
-
-.gen-3 .movepoolDemo tr:nth-child(odd) {
-    background-color: #cfcfcf;
 }
 
 .gen-3 .enemyStatsArea {
@@ -3624,12 +1920,6 @@ body:has(.gen-3) {
     top: 0px;
     left: 0px;
     transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
-}
-
-.gen-3 .uiPngElement {
-    position: absolute;
-    left: 0px;
-    top: 0px;
 }
 
 .gen-3 .accEvaStyle {
@@ -3670,20 +1960,6 @@ body:has(.gen-3) {
 .gen-3 .evasionMod {
     left: 240px;
     top: 274px;
-}
-
-.gen-3 .playerFieldEffects {
-    position: absolute;
-    border: 1px solid #ff000000;
-    width: 102px;
-    height: 65px;
-    top: 441px;
-    left: 14px;
-    text-align: center;
-    font-family: play;
-    font-size: 14px;
-    line-height: 21px;
-    transition: opacity 500ms ease-in-out, filter 500ms ease-in-out;
 }
 
 .gen-3 .playerFieldEffectsLarge {
@@ -3736,4 +2012,13 @@ body:has(.gen-3) {
 
 .gen-3 .speedMod {
     top: 38px;
+}
+
+/* The settings panel (core/settings, docs/ui-uniformity-plan.md stages 3-4): inside the game-capture area, so it
+   never reaches the filmed part of the overlay. */
+.gen-3 .stp-settings {
+    left: 366px;
+    top: 25px;
+    width: 1188px;
+    height: 788px;
 }

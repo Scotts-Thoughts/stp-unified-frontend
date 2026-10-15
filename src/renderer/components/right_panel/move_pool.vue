@@ -1,54 +1,33 @@
 <template>
     <div class="movepool-container">
-        <table class="movepoolDemo" cellspacing="0" :style="mew_movepool_style">
-            <tbody>
-                <tr :class="`movepool_header background-${starter_type_2}`" style="outline: 2px solid #000">
-                    <th class="movepool_header movepool_way">Way</th>
-                    <th class="movepool_header movepool_move">Move</th>
-                    <th class="movepool_header movepool_type">Type</th>
-                    <th class="movepool_header movepool_tableC">Pwr.</th>
-                    <th class="movepool_header movepool_tableC">Acc.</th>
-                    <th class="movepool_header movepool_tableC">PP</th>
-                </tr>
-                <tr v-for="(x, index) in moves.level" :class="{ 'first-row': index === 0 }">
-                    <td class="movepool_way">{{x.Level}}</td>
-                    <td class="movepool_move">{{x.move}}</td>
-                    <td :class="`movepool_type background-${x.type.toLowerCase()}`">{{x.type}}</td>
-                    <td class="movepool_tableC">{{x.power && x.power !== 1 ? x.power : '-'}}</td>
-                    <td class="movepool_tableC">{{x.accuracy ?? '-'}}%</td>
-                    <td class="movepool_tableC">{{x.pp}}</td>
-                </tr>
-                <tr v-for="x in moves.tmhm">
-                    <td class="movepool_way">{{x.tmhm}}</td>
-                    <td class="movepool_move">{{x.move}}</td>
-                    <td :class="`movepool_type background-${x.type.toLowerCase()}`">{{x.type}}</td>
-                    <td class="movepool_tableC">{{x.power && x.power !== 1 ? x.power : '-'}}</td>
-                    <td class="movepool_tableC">{{x.accuracy ?? '-'}}%</td>
-                    <td class="movepool_tableC">{{x.pp}}</td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="tinted-box" style="--url: url(images/ui/movepool.svg); --drop-shadow: 0px 0px 1px #000;"></div>
-        <div class="movepoolLabel">Movepool</div>
+        <movepool :view="view">
+            <div class="tinted-box" style="--url: url(images/ui/movepool.svg); --drop-shadow: 0px 0px 1px #000;"></div>
+        </movepool>
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, inject } from "vue";
 import PokeData from "~/logic/PokeData";
-import { PokemonMovePool } from "~/logic/PokeDataTypes";
+import { PokemonMove, PokemonMovePool } from "~/logic/PokeDataTypes";
 import { useMetaStore } from "~/stores/metaStore";
+import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
+import { GameHookProperty } from "~/packages/gameHookMapperClient";
+import { unobtainable_moves } from "~/games/gen1/data/unobtainable_moves";
+import Movepool from "~/core/overlay/Movepool.vue";
+import { crossOutActive, struckMoves, type StruckMoves } from "~/core/logic/unobtainableMoves";
+import type { MovepoolRow, MovepoolView } from "~/core/overlay/movepoolView";
+
 export default defineComponent({
+    components: { movepool: Movepool },
     data() {
-        return { meta: useMetaStore() };
+        return {
+            meta: useMetaStore(),
+            settings: useOverlaySettingsStore(),
+            game_properties: inject<Record<string, any>>("game_properties", {}),
+        };
     },
     computed: {
-        mew_movepool_style(): string {
-            if (this.meta.starter == "Mew") {
-                return "font-size: 15px; line-height: 15.5px;"
-            }
-            return "";
-        },
         moves(): PokemonMovePool {
             const species = this.meta.currentSpecies === 'Backport'
                 ? this.meta.starter
@@ -59,7 +38,43 @@ export default defineComponent({
         },
         starter_type_2(): string {
             return (PokeData.findSpecies(this.meta.starter)?.type_2 ?? "Normal").toLowerCase();
-        }
+        },
+        /** The "Unobtainable Moves" setting's crossed-out moves (core/logic/unobtainableMoves.ts). */
+        struck(): StruckMoves {
+            const active = crossOutActive(this.settings.right_panel.movepool.unobtainable_moves, {
+                starterObtained: (this.game_properties.meta?.state as GameHookProperty | undefined)?.value != "No Pokemon",
+                firstBadge: this.game_properties.player?.badges?.badge1?.value == true,
+            });
+            return struckMoves(active, { everywhere: unobtainable_moves.Banned });
+        },
+        /** The rows for the shared table (core/overlay/Movepool.vue). */
+        view(): MovepoolView {
+            const row = (x: PokemonMove, way: unknown, first?: boolean): MovepoolRow => ({
+                way,
+                move: x.move,
+                type: x.type,
+                typeClass: `background-${x.type.toLowerCase()}`,
+                // gen1's data gives one-hit KO moves power 1, the game's placeholder.
+                power: x.power && x.power !== 1 ? x.power : '-',
+                accuracy: x.accuracy ?? '-',
+                pp: x.pp,
+                first,
+            });
+            return {
+                title: "Movepool",
+                titleClass: "movepoolLabel",
+                titleFirst: false,
+                dc: false,
+                headerClass: `movepool_header background-${this.starter_type_2}`,
+                // 966px table, less the 19px header and the first row's 1px. Only Mew (60 rows) overflows;
+                // its font stays about 15px, as gen1's own Mew rule had it.
+                fit: { containerHeight: 946, lineHeight: 20, fontSize: 16, shrinkFactor: 0.25, normalFromCss: true },
+                groups: [
+                    { rows: this.moves.level.map((x, index) => row(x, x.Level, index === 0)), struck: this.struck.everywhere },
+                    { rows: this.moves.tmhm.map((x) => row(x, x.tmhm)), struck: this.struck.machines },
+                ],
+            };
+        },
     },
 });
 </script>

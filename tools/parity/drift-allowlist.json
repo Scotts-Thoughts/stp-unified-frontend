@@ -18,7 +18,7 @@
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 24L, gen5 30L)",
       "bodies": {
         "gen4": "b08e14f5ee2f",
-        "gen5": "effd6dd858f9"
+        "gen5": "611fc1702279"
       }
     },
     {
@@ -30,16 +30,6 @@
         "gen3": "1d2f93f2320a",
         "gen4": "4e6e04028908",
         "gen5": "4e6e04028908"
-      }
-    },
-    {
-      "section": "computed",
-      "name": "blackouts_resets",
-      "reason": "same logic, different spelling: gen4 selects the Shuckie/local counters with ternaries where gen2/gen3 use an if/else.",
-      "bodies": {
-        "gen2": "04fad202ebe6",
-        "gen3": "04fad202ebe6",
-        "gen4": "c7da097db84a"
       }
     },
     {
@@ -105,9 +95,8 @@
       "name": "examined_trainer_data",
       "reason": "UNREVIEWED: gen4=gen5 | gen2 (gen2 6L, gen4 8L, gen5 8L)",
       "bodies": {
-        "gen2": "6d67d57f8cf5",
-        "gen4": "737d0020a08a",
-        "gen5": "737d0020a08a"
+        "gen2": "b9a977c9bfdb",
+        "gen4": "737d0020a08a"
       }
     },
     {
@@ -139,16 +128,6 @@
         "gen3": "4a56d5f85b75",
         "gen4": "1074d71b3030",
         "gen5": "1074d71b3030"
-      }
-    },
-    {
-      "section": "computed",
-      "name": "filtered_trainer_list",
-      "reason": "UNREVIEWED: gen4=gen5 | gen2 (gen2 7L, gen4 7L, gen5 7L)",
-      "bodies": {
-        "gen2": "84ebcfea146d",
-        "gen4": "76e17d5881df",
-        "gen5": "76e17d5881df"
       }
     },
     {
@@ -233,6 +212,28 @@
     },
     {
       "section": "computed",
+      "name": "movepoolStruck",
+      "reason": "Reviewed 2026-10-15 (by design): each generation builds the shared cross-out sets (core/logic/unobtainableMoves.ts) from its own edition lists, run bans and first-run rule; gen4 and gen5 share a body.",
+      "bodies": {
+        "gen2": "c3b9df0a0a8e",
+        "gen3": "5994feb0c5cc",
+        "gen4": "41d385b4133d",
+        "gen5": "41d385b4133d"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "movepoolView",
+      "reason": "Reviewed 2026-10-14 (by design): each generation builds the shared Movepool's view from its own rows, title class and fit rule (core/overlay/Movepool.vue).",
+      "bodies": {
+        "gen2": "6c8f410af981",
+        "gen3": "907ec9b16a2b",
+        "gen4": "98c55bc924f4",
+        "gen5": "7b3c21256a56"
+      }
+    },
+    {
+      "section": "computed",
       "name": "pkmnGrowthRate",
       "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 8L, gen4 8L, gen5 8L)",
       "bodies": {
@@ -274,6 +275,17 @@
     },
     {
       "section": "computed",
+      "name": "settingsPanel",
+      "reason": "Reviewed 2026-10-14 (by design): each generation returns its own description (genNSettingsPanel(this), games/genN/settingsPanel.ts); the panel itself is shared (core/settings).",
+      "bodies": {
+        "gen2": "80933ee9b890",
+        "gen3": "af5cbe767dcb",
+        "gen4": "09b5ce01d592",
+        "gen5": "3295641c999a"
+      }
+    },
+    {
+      "section": "computed",
       "name": "solo_mon",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 17L, gen5 17L)",
       "bodies": {
@@ -288,6 +300,17 @@
       "bodies": {
         "gen4": "dbc54b1d7fbf",
         "gen5": "87d954dcb9f4"
+      }
+    },
+    {
+      "section": "computed",
+      "name": "splitsView",
+      "reason": "Reviewed 2026-10-15 (by design): each generation builds the shared SplitsPanel view (core/overlay/SplitsPanel.vue, one look since decision 29) from its own split rows: its mode setting (toggle_compare_splits / splits_display / split_type), name lookup, icon path and art; only gens 1-2 have the battle-summary data for Followup + Summary; gen5 shows a previous 0:00 as -.",
+      "bodies": {
+        "gen2": "150dd11efe0a",
+        "gen3": "36ade71bfbf1",
+        "gen4": "a7183486d2a6",
+        "gen5": "47ce6e071626"
       }
     },
     {
@@ -312,12 +335,12 @@
     {
       "section": "computed",
       "name": "stats_header",
-      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 38L, gen3 38L, gen4 60L, gen5 83L)",
+      "reason": "Reviewed 2026-10-15: the four shared names come from core/logic/statFormat.ts statsHeaderNames (decision 21); each generation keeps its own other modes (Detailed, Level, Vitamins, Hidden Power, Comparison), which differ by game.",
       "bodies": {
-        "gen2": "21676d310f2b",
-        "gen3": "4e387a23dc20",
-        "gen4": "34632895aee1",
-        "gen5": "b0b1517ff106"
+        "gen2": "cc293becdac1",
+        "gen3": "498712ef5994",
+        "gen4": "e278c4418ad0",
+        "gen5": "0609cdf838b5"
       }
     },
     {
@@ -415,7 +438,7 @@
       "name": "battlePokemonCrop",
       "reason": "UNREVIEWED: gen2 | gen3 (gen2 22L, gen3 12L)",
       "bodies": {
-        "gen2": "ace9247927ac",
+        "gen2": "7c8d9c8c417f",
         "gen3": "40f51bf9a82d"
       }
     },
@@ -432,12 +455,12 @@
     {
       "section": "methods",
       "name": "calcExpStats",
-      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 27L, gen3 44L, gen4 27L, gen5 29L)",
+      "reason": "Reviewed 2026-10-15: core/logic/expCurve.ts expProgress; gen5 keeps its own guard that shows an empty bar (0) instead of NaN past the level-100 threshold.",
       "bodies": {
-        "gen2": "4d0d48f1b4d5",
-        "gen3": "0ce4d1350743",
-        "gen4": "087c1d589594",
-        "gen5": "6a5c5642554f"
+        "gen2": "49f3b7071d0f",
+        "gen3": "49f3b7071d0f",
+        "gen4": "49f3b7071d0f",
+        "gen5": "d7755c2c7859"
       }
     },
     {
@@ -462,17 +485,6 @@
     },
     {
       "section": "methods",
-      "name": "clear_overlay_color",
-      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 7L, gen3 7L, gen4 9L, gen5 6L)",
-      "bodies": {
-        "gen2": "7697b1fe20f9",
-        "gen3": "ab525b264832",
-        "gen4": "d822b1586976",
-        "gen5": "8aa53e0a0f80"
-      }
-    },
-    {
-      "section": "methods",
       "name": "convertDurationToSeconds",
       "reason": "UNREVIEWED (omission?): gen2 and gen5 each guard a non-string duration (gen2 logs an error and returns 0, gen5 returns 0 silently); gen3 and gen4 have no guard and throw on undefined.",
       "bodies": {
@@ -488,18 +500,8 @@
       "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 98L, gen4 90L, gen5 98L)",
       "bodies": {
         "gen3": "b2ab9448d209",
-        "gen4": "df52d3df12a6",
-        "gen5": "c17177ba5138"
-      }
-    },
-    {
-      "section": "methods",
-      "name": "copy_overlay_properties",
-      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 32L, gen4 46L, gen5 78L)",
-      "bodies": {
-        "gen3": "626d0792a212",
-        "gen4": "2c54adc27ff2",
-        "gen5": "11cb1fc6d3cf"
+        "gen4": "73aff6f2e4fe",
+        "gen5": "4ca5828ab23b"
       }
     },
     {
@@ -948,17 +950,6 @@
     },
     {
       "section": "methods",
-      "name": "getUnobtainableMoveStyle",
-      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 28L, gen3 27L, gen4 26L, gen5 25L)",
-      "bodies": {
-        "gen2": "a4bff1bdaf0c",
-        "gen3": "7bfdd218b19a",
-        "gen4": "e9b30786a70c",
-        "gen5": "99370c044c07"
-      }
-    },
-    {
-      "section": "methods",
       "name": "get_base_stat",
       "reason": "UNREVIEWED: gen3 | gen4 (gen3 5L, gen4 5L)",
       "bodies": {
@@ -1091,9 +1082,9 @@
       "name": "loadEvolutionStyle",
       "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 113L, gen4 91L, gen5 91L)",
       "bodies": {
-        "gen3": "de27f703df0a",
-        "gen4": "23725418f5c8",
-        "gen5": "93d95cc7f293"
+        "gen3": "020bc4d9a60f",
+        "gen4": "af9d5cbf92dd",
+        "gen5": "6286f422f3d0"
       }
     },
     {
@@ -1101,10 +1092,10 @@
       "name": "load_all_settings",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 91L, gen3 198L, gen4 169L, gen5 155L)",
       "bodies": {
-        "gen2": "6f0aa4ce34cd",
-        "gen3": "91d36c67fe64",
-        "gen4": "d25d21580456",
-        "gen5": "76273132542c"
+        "gen2": "5dcb5ccb3d3e",
+        "gen3": "78e9bc1b5068",
+        "gen4": "72132efa7e2b",
+        "gen5": "22979fde8386"
       }
     },
     {
@@ -1112,7 +1103,7 @@
       "name": "load_pokemon_sprite_settings",
       "reason": "UNREVIEWED: gen2 | gen3 (gen2 10L, gen3 15L)",
       "bodies": {
-        "gen2": "405cc9782211",
+        "gen2": "9b8c2ad51d81",
         "gen3": "6424d48f3a87"
       }
     },
@@ -1195,17 +1186,7 @@
         "gen2": "ffb27ee8216c",
         "gen3": "d8ecd9d96f30",
         "gen4": "e7d1d7a97bff",
-        "gen5": "9c7682dbe0d7"
-      }
-    },
-    {
-      "section": "methods",
-      "name": "movepoolResizeCalc",
-      "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 62L, gen4 69L, gen5 72L)",
-      "bodies": {
-        "gen3": "b895b770647d",
-        "gen4": "e511dadb376b",
-        "gen5": "2f9e0d169273"
+        "gen5": "6a4f886fce07"
       }
     },
     {
@@ -1216,7 +1197,7 @@
         "gen2": "679b266aa39b",
         "gen3": "92dc1f887f01",
         "gen4": "e4272fa99168",
-        "gen5": "1300e6599947"
+        "gen5": "bdfcaa79a38d"
       }
     },
     {
@@ -1227,7 +1208,7 @@
         "gen2": "516c1965fe17",
         "gen3": "56660d52b71a",
         "gen4": "1be814255f47",
-        "gen5": "36c19f5bb606"
+        "gen5": "ab8b7b383a45"
       }
     },
     {
@@ -1236,8 +1217,8 @@
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 75L, gen3 41L, gen4 26L, gen5 17L)",
       "bodies": {
         "gen2": "302cc90d4514",
-        "gen3": "bfb3f97e3a8d",
-        "gen4": "419ec85858a7",
+        "gen3": "5e94a809b23e",
+        "gen4": "8f1f70539568",
         "gen5": "01fecc821851"
       }
     },
@@ -1299,10 +1280,10 @@
       "name": "reset",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 13L, gen3 13L, gen4 13L, gen5 13L)",
       "bodies": {
-        "gen2": "d9ccd9341bbe",
-        "gen3": "e17c5d97e263",
-        "gen4": "18764ffcc34a",
-        "gen5": "6e02a350ee2d"
+        "gen2": "b9c8658c8a14",
+        "gen3": "bcad83925fa4",
+        "gen4": "9ac4d6b2ddcc",
+        "gen5": "778b5e635213"
       }
     },
     {
@@ -1321,7 +1302,7 @@
       "name": "resetCurrentPokemonToDefaults",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 31L, gen3 16L, gen4 15L, gen5 11L)",
       "bodies": {
-        "gen2": "efbd8452148c",
+        "gen2": "9656b5ab02ad",
         "gen3": "4a6ac0256c4d",
         "gen4": "7037e5227090",
         "gen5": "53b0fd8655a5"
@@ -1403,10 +1384,10 @@
       "name": "speed_comparison",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 41L, gen3 39L, gen4 22L, gen5 28L)",
       "bodies": {
-        "gen2": "45f9cb2e6ee1",
-        "gen3": "3a045ec17577",
-        "gen4": "8d9dd8e97371",
-        "gen5": "5c453e44fee8"
+        "gen2": "59f036595b42",
+        "gen3": "61a9c9783a07",
+        "gen4": "f098e1dc2bcd",
+        "gen5": "1c68ac3ba2a6"
       }
     },
     {
@@ -1414,9 +1395,9 @@
       "name": "stageModifiers",
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 (gen2 15L, gen3 17L, gen4 15L)",
       "bodies": {
-        "gen2": "a889f594f32b",
-        "gen3": "3ea4f6f76fd9",
-        "gen4": "0b3b30ee3e54"
+        "gen2": "3fb90cc24935",
+        "gen3": "5cb73d1e4e88",
+        "gen4": "451e3b523e99"
       }
     },
     {
@@ -1454,10 +1435,10 @@
       "name": "svgColorClass",
       "reason": "quirk: gen4's speed_comparison vocabulary is Outspeeds/Speed-Tied/Underspeeds with no fainted check; gen5 reads the enemy hp under stats.hp (its mapper shape); gen2/gen3 share the Outsped/Speed-tie form.",
       "bodies": {
-        "gen2": "2be3540aea80",
-        "gen3": "2be3540aea80",
-        "gen4": "913ba250f7ce",
-        "gen5": "f5b962a2883d"
+        "gen2": "a974bb6eeed5",
+        "gen3": "a974bb6eeed5",
+        "gen4": "32b5976178d1",
+        "gen5": "b55603ad7e08"
       }
     },
     {
@@ -1564,17 +1545,6 @@
     },
     {
       "section": "watch",
-      "name": "blackout_counter",
-      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 6L, gen3 23L, gen4 19L, gen5 19L)",
-      "bodies": {
-        "gen2": "f9546cac70c8",
-        "gen3": "7c45464ad803",
-        "gen4": "2ed10d75fe27",
-        "gen5": "ce81f77a8a31"
-      }
-    },
-    {
-      "section": "watch",
       "name": "catch_rate",
       "reason": "UNREVIEWED: gen3 | gen4 (gen3 21L, gen4 8L)",
       "bodies": {
@@ -1616,17 +1586,6 @@
     },
     {
       "section": "watch",
-      "name": "playerResets",
-      "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 43L, gen3 14L, gen4 30L, gen5 30L)",
-      "bodies": {
-        "gen2": "6d4c44bc6233",
-        "gen3": "a586c8890d50",
-        "gen4": "f7e0483477fd",
-        "gen5": "c9096fa627a4"
-      }
-    },
-    {
-      "section": "watch",
       "name": "previous_splits",
       "reason": "quirk (consistent typo): gen2 persists under the key 'this.previous_splits'; its data() reads the same key, so it round-trips, and renaming would orphan the stored value.",
       "bodies": {
@@ -1641,9 +1600,9 @@
       "name": "selected_evolution_species",
       "reason": "UNREVIEWED: gen3 | gen4 | gen5 (gen3 32L, gen4 77L, gen5 32L)",
       "bodies": {
-        "gen3": "15a91362a07a",
-        "gen4": "04aa0c59b435",
-        "gen5": "b863aab8e690"
+        "gen3": "13cb43074656",
+        "gen4": "f920cfe06d50",
+        "gen5": "01aac3b00b14"
       }
     },
     {
@@ -1651,9 +1610,9 @@
       "name": "starter",
       "reason": "UNREVIEWED: gen2 | gen4 | gen5 (gen2 29L, gen4 147L, gen5 117L)",
       "bodies": {
-        "gen2": "a74be0ab03b1",
-        "gen4": "9101fe70e2f5",
-        "gen5": "327a5ed50f3f"
+        "gen2": "4bf13fdaa80d",
+        "gen4": "630a62f133fd",
+        "gen5": "91609d60ad2b"
       }
     },
     {

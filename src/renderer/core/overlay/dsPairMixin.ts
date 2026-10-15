@@ -17,10 +17,10 @@ import type { ComponentOptionsMixin } from "vue";
 
 // The legacy scripts assigned these without declaring them (sloppy-mode globals); the lift
 // declares them as module-level `let`s in each overlay, and the methods that moved here
-// (`damageCalculation`, `getNature`, `getSoloNature`, `shuckie_faults_check`) keep that shape.
+// (`damageCalculation`, `getNature`, `getSoloNature`) keep that shape.
 // Each assigns before it reads, so a separate variable per module changes nothing;
 // tools/port/check-undefined.ts over this file is the guard.
-let damageMax, damageMin, maxPercentage, minPercentage, nature, part1, part2, part3, part4, pid, shuckie_blackouts, shuckie_resets;
+let damageMax, damageMin, maxPercentage, minPercentage, nature, part1, part2, part3, part4, pid;
 
 export const dsPairMixin = {
     methods: {
@@ -438,28 +438,6 @@ export const dsPairMixin = {
             if (this.game.properties.meta.game_name.value == "Platinum") { return this.platinum_trainers }
             else if (this.game.meta.game_name == "HeartGold and SoulSilver") { return }
             else { return }
-        },
-        shuckie_faults_check() {
-            shuckie_resets    = this.emulatorStats?.counters?.playerResets
-            shuckie_blackouts = this.emulatorStats?.counters?.blackout_counter
-            if (shuckie_resets == undefined && shuckie_blackouts == undefined) {
-                return true
-            }
-            else if (shuckie_resets == 0 && shuckie_blackouts == 0) {
-                return true
-            }
-            else if (shuckie_resets == undefined && shuckie_blackouts == 0) {
-                return true
-            }
-            else if (shuckie_resets == 0 && shuckie_blackouts == undefined) {
-                return true
-            }
-            else if (shuckie_resets > 0 || shuckie_blackouts > 0) {
-                return false
-            }
-            else {
-                return false
-            }
         },
     },
 } satisfies ComponentOptionsMixin;

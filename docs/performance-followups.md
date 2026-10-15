@@ -177,6 +177,10 @@ comparisons), the cache write and the debounced `schedule()` early-return -- is 
   overlay). The two source-level mitigations both risk the pixel oracle: `contain: paint` on
   `.gametime` clips overflowing text, and giving it its own compositing layer switches its
   text from subpixel to grayscale antialiasing. Left for a session with DevTools open.
+  **Measured 2026-10-15** (`npm run parity:art-layers`, numbers in `docs/ui-uniformity-plan.md` §6.2 under decision
+  32). The full-screen tinted art layers add 2–5 ms of GPU-process time per idle frame, and the idle frame rate held.
+  An overlay-colour fade costs 27–34 ms a frame, so it plays at about 35–45 fps. Most of that comes from the number of
+  layers; the filters and blend are a small part.
 
 ## Left for a second pass (as written before the pass above)
 

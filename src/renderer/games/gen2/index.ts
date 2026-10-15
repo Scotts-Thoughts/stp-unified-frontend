@@ -17,8 +17,8 @@ import { dexDataCrystal } from "./data/pokemon_crystal.js";
  * Generation 2: Crystal, and Gold & Silver (plan 2.4, lifted 2026-09-10).
  *
  * A lifted module: `Overlay.vue` is the legacy component with its infrastructure
- * swapped for core (see its header), so the run hooks, state machine and hotkeys
- * live inside it rather than in module fields -- `hooks` and `hotkeys` here are the
+ * swapped for core (see its header), so the run hooks, state machine and shortcuts
+ * live inside it rather than in module fields -- `hooks` here (and the absent `shortcuts`) are the
  * no-ops that say so. The fields that *are* data are the ones the shell needs before
  * the component exists: the profiles, the editions, the stylesheet, the asset base
  * and the control routes.
@@ -61,8 +61,7 @@ export const gen2: GameModule = {
     data: {
         splits: { autosplitter, split_trainers, trainer_name_lookup },
     },
-    // Bound from Overlay.vue's `mounted`, see games/gen2/hotkeys.ts.
-    hotkeys: () => ({}),
+    // No `shortcuts`: the overlay binds games/gen2/actions.ts from its `mounted`.
     control: (ctx) => gen2ControlRoutes(ctx.overlay),
     chapterMarkers: {
         battleIn: (trainerClass) => "IN - " + trainerClass,

@@ -1,5 +1,6 @@
 import type { GameModule } from "~/core/game/GameModule";
 import { moduleBase } from "~/core/game/ModuleManifest";
+import { joinStyleSheets } from "~/core/styles/joinStyleSheets";
 import { gen3Manifest } from "./manifest";
 import { autosplitter } from "./data/autosplitter.js";
 import { gen3ControlRoutes } from "./control";
@@ -11,7 +12,7 @@ import { loadGen3StyleDefaults } from "./storage";
  *
  * A lifted module, like gen2, gen4 and gen5: `Overlay.vue` is the legacy component
  * with its infrastructure swapped for core (see its header), so the run hooks, state
- * machine and hotkeys live inside it -- `hooks` and `hotkeys` here are the no-ops that
+ * machine and shortcuts live inside it -- `hooks` here (and the absent `shortcuts`) are the no-ops that
  * say so. What the shell needs before the component exists is here: the profiles, the
  * editions, the stylesheet, the class gen3 keeps on `#app` itself, and the control
  * routes. gen3's legacy client debounced nothing and its `index.html` had no
@@ -56,8 +57,7 @@ export const gen3: GameModule = {
     data: {
         splits: { autosplitter },
     },
-    // Bound from Overlay.vue's `mounted`, see games/gen3/hotkeys.ts.
-    hotkeys: () => ({}),
+    // No `shortcuts`: the overlay binds games/gen3/actions.ts from its `mounted`.
     control: (ctx) => gen3ControlRoutes(ctx.overlay),
     chapterMarkers: {
         battleIn: (trainerName) => "IN - " + trainerName,
@@ -76,7 +76,8 @@ export const gen3: GameModule = {
     cssClass: "gen-3",
     // The legacy `<div id="app" class="mainContainer">`: #app is the overlay grid.
     appClass: "mainContainer",
-    styles: () => import("./style.css?inline").then((m) => m.default),
+    // shared-gen345.css first: rules gens 3-5 had verbatim (tools/css/share-css.ts)
+    styles: () => joinStyleSheets("gen-3", [import("~/core/styles/shared-gen345.css?inline"), import("./style.css?inline")]),
     assetPrefix: "images/gen3/",
     prepare: async () => {
         await loadGen3StyleDefaults();

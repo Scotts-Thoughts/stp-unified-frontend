@@ -7,19 +7,19 @@ import { ControlServer } from "./control-server";
 import { TimerFrameServer } from "./timer-frame-server";
 import { registerIpc } from "./ipc";
 import { appRoot } from "./paths";
-import { startKeyhook, stopKeyhook } from "./keyhook";
+import { clearHotkeysForReload, startHotkeys, stopHotkeys } from "./hotkeys";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
 import { cutterArgs, runCutter } from "./cutter";
 
 /**
  * Started by the Cutter editor (`--cutter-frame-server` / `--cutter-configure`,
  * src/main/cutter.ts): none of the ordinary app below runs — no control server,
- * no key hook, no legacy import, no window of the usual kind.
+ * no hotkeys, no legacy import, no window of the usual kind.
  */
 const cutter = cutterArgs();
 
 /**
- * The one overlay window. The control server (port 30159) and the keyhook forwarder
+ * The one overlay window. The control server (port 30159) and the hotkey forwarder
  * both need it, and both outlive a renderer reload, so it is held here rather than
  * passed around.
  */
@@ -152,7 +152,13 @@ function createWindow() {
         })
     })
 
+    // A reload replaces the page that owns the shortcut bindings; the new page sends its
+    // own once a generation mounts (src/main/hotkeys.ts).
+    mainWindow.webContents.on('did-navigate', () => clearHotkeysForReload());
+
     mainWindow.on('closed', () => {
+        // The Keyboard Shortcuts window must not keep the app alive without its overlay.
+        stopHotkeys();
         mainWindow = null;
     })
 
@@ -221,17 +227,15 @@ if (!cutter) app.whenReady().then(() => {
     });
     timerFrameUrl = timerFrame.start();
     createWindow();
-    // After the window: spawning keyhook.exe is a synchronous CreateProcess, and the
-    // antivirus on this machine has held that call for over a minute while it scanned
-    // a freshly restored copy of the exe (the parity harness then saw no window at all).
-    // The forwarder looks the window up per key event, so nothing needs it earlier.
-    startKeyhook(() => mainWindow);
+    // Shortcut IPC (src/main/hotkeys.ts); it looks the window up per message, and the page
+    // cannot send anything before this line has run.
+    startHotkeys(() => mainWindow);
 })
 
 if (!cutter) app.on('will-quit', () => {
     controlServer.stop();
     timerFrame.stop();
-    stopKeyhook();
+    stopHotkeys();
 })
 
 // In this file you can include the rest of your app's specific main process

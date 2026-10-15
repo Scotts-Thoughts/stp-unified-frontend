@@ -30,7 +30,9 @@ export function gen5ControlRoutes(vm: () => any): ControlRoutes {
                 selected_evolution_species: v?.selected_evolution_species,
                 gameName: v?.game?.properties?.meta?.game_name?.value,
                 selected_game: v?.selected_game,
+                // The preference; `right_panel_active` is what shows now (a post-battle Splits, decision 27).
                 right_ui: v?.right_ui,
+                right_panel_active: v?.right_panel_mode,
                 hidden_power_type: v?.hidden_power_type,
                 nature: v?.pkmnNature,
                 ability: v?.pkmn_ability,
@@ -68,8 +70,8 @@ export function gen5ControlRoutes(vm: () => any): ControlRoutes {
             },
             "/set-right-panel": (query) => {
                 if (!query.panel) return missing("panel");
-                vm().right_ui = query.panel;
-                return { ok: true, right_ui: vm().right_ui };
+                // Old values ("Battle Graphic"...) map to the modes (core/overlay/rightPanelMode.ts).
+                return { ok: true, right_ui: vm().set_right_panel(query.panel) };
             },
             "/set-hidden-power": (query) => {
                 if (!query.type) return missing("type");

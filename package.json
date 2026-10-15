@@ -5,7 +5,7 @@
   "main": "./out/main/index.js",
   "build": {
     "electronLanguages": "en-US",
-    "compression": "store",
+    "compression": "normal",
     "appId": "com.scottsthoughts.stp-overlay",
     "asar": false,
     "files": [
@@ -15,7 +15,8 @@
     ],
     "extraFiles": [
       "storage/**",
-      "resources/**"
+      "resources/**",
+      "!resources/keyhook.exe"
     ],
     "extraResources": [
       {
@@ -23,6 +24,7 @@
         "to": "images"
       }
     ],
+    "afterPack": "./tools/build/after-pack.mjs",
     "productName": "stp-overlay",
     "linux": {
       "target": "AppImage"
@@ -53,8 +55,14 @@
     "parity:accuracy": "tsx tools/parity/accuracy-selftest.ts",
     "parity:move-power": "tsx tools/parity/move-power-selftest.ts",
     "parity:debounce": "tsx tools/parity/debounce-selftest.ts",
+    "parity:shortcuts": "tsx tools/parity/shortcuts-selftest.ts",
+    "parity:action-ids": "tsx --tsconfig tsconfig.web.json tools/parity/action-ids.ts",
+    "css:dead": "tsx tools/css/dead-css.ts",
+    "css:share": "tsx tools/css/share-css.ts",
+    "parity:shortcuts-app": "tsx tools/parity/shortcuts-app-check.ts",
     "parity:drift": "tsx tools/parity/drift-check.ts",
     "parity:manual-ivs": "tsx tools/parity/manual-ivs-check.ts",
+    "parity:art-layers": "tsx tools/parity/art-layers-check.ts",
     "parity:mock": "tsx tools/parity/mock-pokeabyte/cli.ts",
     "parity:scan": "tsx tools/parity/scan-fixture.ts",
     "parity:run": "tsx tools/parity/run.ts",
@@ -102,6 +110,7 @@
     "node-key-sender": "^1.0.11",
     "pinia": "^3.0.3",
     "pinia-plugin-watch": "^1.0.1",
+    "uiohook-napi": "1.5.5",
     "vue": "^3.5.17"
   },
   "overrides": {

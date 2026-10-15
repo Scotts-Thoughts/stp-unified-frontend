@@ -1,10 +1,6 @@
 <template>
-    <div class="typeContainer">
-        <div class="type">
-            <img :src="'images/elements/types/' + get_type(1) + '.webp'" />
-            <img v-if="get_type(1) != get_type(2)" :src="'images/elements/types/' + get_type(2) + '.webp'" />
-        </div>
-    </div>
+    <!-- The type badges (core/overlay/player/TypeBadges.ts, laid out in games/gen1/playerPanel.ts) -->
+    <type-badges v-bind="type_badges"></type-badges>
 </template>
 
 <script lang="ts">
@@ -13,14 +9,30 @@ import PokeData from "~/logic/PokeData";
 import { useMetaStore } from "~/stores/metaStore";
 import { GameState } from "~/stores/types/GameState";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
+import { TypeBadges } from "~/core/overlay/player/TypeBadges";
+import { typeBadgesLayout } from "~/games/gen1/playerPanel";
 
 export default defineComponent({
+    components: { TypeBadges },
     data() {
         return {
             /** Provided by the `frontend` component. */
             game_properties: inject<Record<string, GameHookProperty>>("game_properties", {}),
             meta: useMetaStore(),
         }
+    },
+    computed: {
+        /** The badges' pictures, each type worked out once per change. */
+        type_badges() {
+            const type1 = this.get_type(1);
+            const type2 = this.get_type(2);
+            return {
+                layout: typeBadgesLayout,
+                src1: 'images/elements/types/' + type1 + '.webp',
+                src2: 'images/elements/types/' + type2 + '.webp',
+                dual: type1 != type2,
+            };
+        },
     },
     methods: {
         /**

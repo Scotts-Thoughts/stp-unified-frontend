@@ -7,8 +7,9 @@ import { electronAPI } from '@electron-toolkit/preload'
  * `settings_dir` is gen1's original channel and keeps its name and shape. Everything
  * else is new in the unified app: the file helpers replace `require("fs")` calls in the
  * renderer (plan 1.6), `onControlRequest` carries the queuer's control-server calls
- * (plan 1.8, docs/external-contracts.md section 2), and `onKeyEvent` carries decoded
- * keyhook.exe output (plan 1.1).
+ * (plan 1.8, docs/external-contracts.md section 2), and `shortcuts` carries the keyboard
+ * shortcuts between the overlay, main's global shortcuts and the Keyboard Shortcuts
+ * window (src/main/hotkeys.ts, docs/shortcuts-menu-plan.md).
  *
  * Every `on*` returns an unsubscribe function, because the renderer registers these
  * from component lifecycle hooks that run again after a hot reload.
@@ -126,11 +127,50 @@ const api = {
     return () => ipcRenderer.removeListener('control-request', listener)
   },
 
-  /** Decoded keyhook.exe events: `{ down, keyCode, time }`. */
-  onKeyEvent: (handler) => {
-    const listener = (_event, key) => handler(key)
-    ipcRenderer.on('keyhook:key', listener)
-    return () => ipcRenderer.removeListener('keyhook:key', listener)
+  /**
+   * Keyboard shortcuts (src/main/hotkeys.ts). Fire-and-forget sends rather than
+   * `invoke`, so the parity harness's idle counter never waits on them.
+   */
+  shortcuts: {
+    /** Overlay: register exactly these accelerators as global shortcuts. */
+    register: (accelerators) => ipcRenderer.send('hotkeys:set', accelerators),
+    /** Overlay: a registered accelerator was pressed. */
+    onPressed: (handler) => {
+      const listener = (_event, accelerator) => handler(accelerator)
+      ipcRenderer.on('hotkeys:pressed', listener)
+      return () => ipcRenderer.removeListener('hotkeys:pressed', listener)
+    },
+    /** Overlay: the active generation's actions and bindings, for the window. */
+    publishCatalog: (catalog) => ipcRenderer.send('shortcuts:catalog', catalog),
+    /** Overlay: an edit made in the window. */
+    onEdit: (handler) => {
+      const listener = (_event, edit) => handler(edit)
+      ipcRenderer.on('shortcuts:edit', listener)
+      return () => ipcRenderer.removeListener('shortcuts:edit', listener)
+    },
+    /** Overlay: the window wants a fresh catalog. */
+    onRefresh: (handler) => {
+      const listener = () => handler()
+      ipcRenderer.on('shortcuts:refresh', listener)
+      return () => ipcRenderer.removeListener('shortcuts:refresh', listener)
+    },
+    /** Either window: open (or focus) the Keyboard Shortcuts window. */
+    openMenu: () => ipcRenderer.send('shortcuts:open-menu'),
+    /** Window: the catalog main has, or null before any generation published one. */
+    getCatalog: () => ipcRenderer.invoke('shortcuts:get-catalog'),
+    /** Window: each catalog the overlay publishes. */
+    onCatalog: (handler) => {
+      const listener = (_event, catalog) => handler(catalog)
+      ipcRenderer.on('shortcuts:catalog', listener)
+      return () => ipcRenderer.removeListener('shortcuts:catalog', listener)
+    },
+    /** Window: send an edit to the overlay. */
+    edit: (edit) => ipcRenderer.send('shortcuts:edit', edit),
+    /** Window: ask the overlay to publish again. */
+    refresh: () => ipcRenderer.send('shortcuts:refresh'),
+    /** Window: unregister every shortcut while a key is recorded, then put them back. */
+    suspend: () => ipcRenderer.send('hotkeys:suspend'),
+    resume: () => ipcRenderer.send('hotkeys:resume'),
   },
 }
 

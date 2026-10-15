@@ -211,6 +211,7 @@ npm run parity:bookmarks                     # 22 checks: core/logic/shuckieBook
 npm run parity:replay-splits                 # 50 checks: split bookmark names and rows, the .replay bookmark-section reader (vs the recorder's encoding and a converter-written fixture), the comparison loader, the playback store vs a fake Super Shuckie
 npm run parity:debounce                      # 38 checks: the client's debounce frame loop survives every connection path (known-legacy-bugs.md #29), and disconnect() cancels an armed 5 s retry
 npm run parity:manual-ivs                    # Manual DVs/IVs on every fixture: readout + writes (tools/parity/manual-ivs-check.ts)
+npm run parity:art-layers                    # measure only: art-layer counts, colour-change and idle frame cost (CDP trace), gen4/gen5 doubled-layer screenshots (tools/parity/art-layers-check.ts; --target=unified@<dir>, --only, --reps, --dry-run)
 npm run parity:drift                         # gens 2-5's overlays: a shared member whose bodies differ must be in drift-allowlist.json (--report, --update, --strict fails on UNREVIEWED entries); also duplicate members, overlays overriding a core/overlay mixin member, undeclared names in the mixins
 npm run parity:scan -- <fixture> --out=tools/reports
 npm run parity:run  -- <target> <fixture> --out=<dir> [--control]
@@ -224,6 +225,16 @@ A script that imports `run()` can pass `beforeReplay` / `afterReplay` page hooks
 the warm-up and the first batch, and after the captures are on disk. That is how a setting with no control route
 is put in place before the fixture acts, with every oracle still recording; real input is ignored during a run, so
 a hook drives the DOM through `page.evaluate`. `manual-ivs-check.ts` is the worked example.
+
+Performance measuring from a hook (`art-layers-check.ts`):
+- **Skip the captures.** Pass `only` a checkpoint id that doesn't exist: the fixture still replays in full, but
+  nothing is captured.
+- **The fake clock.** It is still paused in `afterReplay`, so no `requestAnimationFrame` runs, but CSS transitions
+  still do (they run on real time).
+- **Running the overlay's clock.** `page.clock.resume()` makes it follow real time.
+- **Measuring.** Don't time `requestAnimationFrame`, because it is faked. `Tracing.start` / `Tracing.end` on a CDP
+  session for the page works in Electron 37 and records every process, including the GPU process. Mark the window
+  with `console.timeStamp()`.
 
 ### Determinism is not free — twelve things the runner has to do
 
@@ -340,6 +351,8 @@ the real ports) is dropped the moment the new document is created (`framenavigat
 settles -- by then the new document has connected to the armed mock and run its boot, and a reset there
 erased every boot-time error on both sides for the first week of the harness's life. `STP_PARITY_KEEP_SANDBOX=1`
 skips the legacy sandbox refresh so an instrumented copy (a stashed trace in a legacy method) survives a run.
+`STP_PAGEERROR_STACK=1` appends each uncaught error's stack to its console entry, to find which component threw
+(read the bundle at the given line); leave it off for comparison runs.
 Errors are compared by message, with stack frames dropped (bundle names and line numbers differ between any
 two builds by design) and file URLs folded: the app's own root to `<app>/out/renderer/`, and an image URL to
 its path under the image root -- `<sandbox>/app-tree/app/images/x.png` on the legacy side is
@@ -375,12 +388,13 @@ or a 150%-scaled monitor a 1920x1080 content window ends up 1914x1063 whatever `
 runner moves it to the primary display's work-area corner before sizing and locking it, and again before a
 capture that finds it drifted (`ensureContentSize`).
 
-`resources/keyhook.exe` is copied into the sandbox for every run when it is present. It is no longer tracked in
-git (removed in `5dce66a`), so place a copy there by hand; when it is missing or something outside git has
-quarantined it, the sandbox logs that and the run proceeds without hotkeys -- no oracle presses a key. The same scanner held the app's synchronous spawn of a freshly restored `keyhook.exe` for over a minute,
-which showed up as Playwright's 60 s `firstWindow` timeout with the main process alive and no window: the app
-now creates its window before it spawns the hook (`src/main/index.ts`), and the run log carries the main
-process's own output (`[app] ...`) so a launch that fails says why.
+`resources/keyhook.exe` is copied into the sandbox of every **legacy** run when it is present. The unified app
+no longer uses it (its keys come from the `uiohook-napi` keyboard hook, `src/main/hotkeys.ts`). It isn't tracked in git (removed
+in `5dce66a`), so place a copy there by hand from `A:\Programs\gen2-stp-frontend`. When it is missing, or something
+outside git has quarantined it, the sandbox logs that and the run proceeds without hotkeys; no oracle presses a key.
+The same scanner once held a synchronous spawn of a freshly restored `keyhook.exe` for over a minute, which showed
+up as Playwright's 60 s `firstWindow` timeout with the main process alive and no window. The run log carries the
+main process's own output (`[app] ...`), so a launch that fails says why.
 
 ### `unified@<dir>`: the no-change check against the previous commit
 

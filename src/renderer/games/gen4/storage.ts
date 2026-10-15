@@ -48,6 +48,7 @@ export const GEN4_STYLE_PROPERTIES: readonly string[] = [
     'backgroundScale',
     'backgroundUrl',
     'backgroundFlip',
+    'backgroundXFlip',
     'use_custom_background',
     'backgroundXOffset',
     'backgroundYOffset',

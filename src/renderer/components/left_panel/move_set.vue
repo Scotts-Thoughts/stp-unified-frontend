@@ -1,41 +1,6 @@
 <template>
     <div>
-        <div class="movesetLabel labelMoves">moves</div>
-        <div class="movesetLabel labelPwr">pwr.</div>
-        <div class="movesetLabel labelAcc">acc.</div>
-        <div class="movesetLabel labelPP">pp</div>
-        <div class="movesetContainer" v-if="meta.gameState != 'No Pokemon'">
-            <!-- Out of PP on every move: the game forces Struggle. -->
-            <div v-if="struggle_check">
-                <img class="movesetStyling iconStyling move1icon" :src="'images/elements/type-icons/normal.webp'" />
-                <div class="movesetStyling moveStyling move1">Struggle</div>
-                <div class="movesetStyling powerStyling move1">{{ type_effectiveness(dynamic_mon, 'move1', game_properties.battle.enemyPokemon, true) || "-" }}</div>
-                <div class="movesetStyling accuracyStyling move1">{{ accuracy_text(moveAccuracyEvasionDynamic('Struggle')) }}<span style="font-size: 20px;">%</span></div>
-                <div class="movesetStyling ppStyling move1">-</div>
-            </div>
-            <template v-else>
-                <div v-for="move in pkmnMoves">
-                    <div v-if="game_properties.player.team[0].level.value > 0 && game_properties.player.team[0][move].value != null">
-                        <img :class="'movesetStyling iconStyling ' + move + 'icon'" :src="moveTypeIcon(get_backport_move(move))" />
-                        <div :class="'movesetStyling moveStyling ' + move">
-                            {{ display_name(get_backport_move(move)) }}
-                        </div>
-                        <div :class="'movesetStyling powerStyling ' + move"
-                            :key="type_effectiveness(dynamic_mon, move, game_properties.battle.enemyPokemon)"
-                        >
-                            {{ type_effectiveness(dynamic_mon, move, game_properties.battle.enemyPokemon) || "-" }}
-                        </div>
-                        <div :class="'movesetStyling accuracyStyling ' + move">
-                            {{ accuracy_text(moveAccuracyEvasionDynamic(get_backport_move(move))) }}
-                            <span style="font-size: 20px;">%</span>
-                        </div>
-                        <div :class="'movesetStyling ppStyling ' + move">
-                            {{ move_pp(move) }}
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </div>
+        <move-list :list="move_list" :layout="moveListLayout" />
     </div>
 </template>
 
@@ -49,6 +14,8 @@ import { gen1OhkoFails, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccur
 import { capitalize_words, move_name } from "../../methods/text_functions";
 import { defineComponent, inject } from "vue";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
+import { MoveList, type MoveRow } from "~/core/overlay/player/MoveList";
+import { moveListLayout, type MoveListData } from "~/games/gen1/playerPanel";
 
 /** Moves whose damage is fixed or stored rather than worked out from power (gen1 data spellings). */
 const FIXED_DAMAGE_MOVES = new Set(["Seismic Toss", "Night Shade", "SonicBoom", "Dragon Rage", "Super Fang", "Psywave", "Counter", "Bide"]);
@@ -72,6 +39,10 @@ const HIGH_CRIT_MOVES = ["RAZOR LEAF", "CRABHAMMER", "SLASH", "KARATE CHOP", "AE
 const MIST_BLOCKED_MOVES = new Set(["Growl", "Tail Whip", "Leer", "String Shot", "Sand-Attack", "SmokeScreen", "Kinesis", "Flash", "Screech"]);
 
 export default defineComponent({
+    components: { MoveList },
+    setup() {
+        return { moveListLayout };
+    },
     data() {
         return {
             /** Provided by the `frontend` component. */
@@ -132,6 +103,37 @@ export default defineComponent({
                 return false;
             }
             return this.pkmnMoves.every(move => (mon[move + "pp"]?.value ?? 0) == 0);
+        },
+        /** What the move list shows (games/gen1/playerPanel.ts moveListLayout), worked out once per change. */
+        move_list(): MoveListData {
+            const shown = this.meta.gameState != 'No Pokemon';
+            if (!shown) {
+                return { shown, struggle: null, rows: [] };
+            }
+            const enemy = this.game_properties.battle.enemyPokemon;
+            if (this.struggle_check) {
+                return { shown, rows: [], struggle: {
+                    power: this.type_effectiveness(this.dynamic_mon, 'move1', enemy, true) || "-",
+                    accuracy: this.accuracy_text(this.moveAccuracyEvasionDynamic('Struggle')),
+                } };
+            }
+            const team0 = this.game_properties.player.team[0];
+            const rows = this.pkmnMoves.map((move: string): MoveRow | null => {
+                if (!(team0.level.value > 0 && team0[move].value != null)) {
+                    return null;
+                }
+                const backport = this.get_backport_move(move);
+                const power = this.type_effectiveness(this.dynamic_mon, move, enemy);
+                return {
+                    icon: this.moveTypeIcon(backport),
+                    name: this.display_name(backport),
+                    powerKey: power,
+                    power: power || "-",
+                    accuracy: this.accuracy_text(this.moveAccuracyEvasionDynamic(backport)),
+                    pp: this.move_pp(move),
+                };
+            });
+            return { shown, struggle: null, rows };
         },
     },
     methods: {

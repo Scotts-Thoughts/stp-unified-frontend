@@ -19,7 +19,7 @@
  *
  * Every run gets --redirect-ports (no port has to be free) and --control (oracle 6).
  * A launch that times out on `firstWindow` -- the antivirus stalling keyhook.exe's
- * first spawn after a restore -- is retried once; that is the one failure that has
+ * first spawn after a restore (legacy apps only; the unified app no longer runs it) -- is retried once; that is the one failure that has
  * never been the app's.
  */
 import { execFileSync } from "node:child_process";

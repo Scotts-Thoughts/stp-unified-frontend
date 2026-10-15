@@ -3,6 +3,7 @@ import { loadAppSettings, saveAppSettings, dataPath } from "./helper/files";
 import { deepMerge } from "./helper/merge";
 import { findLegacySpeciesEntry } from "~/logic/legacyStorage";
 import { textures } from "~/data/textures";
+import { hasUntouchedFilters, textureLook, texturePath } from "~/core/overlay/textureLooks";
 
 const SETTINGS_FILE_NAME = "settings.json";
 
@@ -59,6 +60,7 @@ export const useGameSpeciesData = defineStore("game_species_data", {
 			if (loaded && JSON.stringify(next.styling) === JSON.stringify(defaults.styling)) {
 				next.styling = presetStyling(game, starter) ?? next.styling;
 			}
+			applyTextureLook(next.styling);
 			// Replace the state in one go so that subscribers get a single, synchronous notification.
 			this.$patch((state) => { Object.assign(state, next); });
 		},
@@ -72,6 +74,7 @@ export const useGameSpeciesData = defineStore("game_species_data", {
 			const styling = loaded?.styling
 				? deepMerge(defaults.styling, loaded.styling)
 				: (presetStyling(game, starter) ?? defaults.styling);
+			applyTextureLook(styling);
 			this.$patch((state) => { state.styling = styling; });
 		},
 		// Aliases kept for the buttons on the style panel.
@@ -86,6 +89,17 @@ export const useGameSpeciesData = defineStore("game_species_data", {
 
 type GameSpeciesData = ReturnType<typeof defaultGameSpeciesSettings>;
 type StylingSettings = GameSpeciesData["styling"];
+
+/**
+ * Gives an unstyled background (all four filters at their plain values) its texture's default look, the same rule
+ * gens 2-5 apply through overlayCommonMixin's `apply_texture_look` (core/overlay/textureLooks.ts).
+ */
+function applyTextureLook(styling: StylingSettings): void {
+	const b = styling.background;
+	if (!hasUntouchedFilters(b.brightness, b.contrast, b.saturation, b.blur)) return;
+	const look = textureLook(texturePath(textures, b.texture));
+	if (look) Object.assign(b, look);
+}
 
 /** Convert a styling preset from the old `Storage.json` file to the current format. */
 function presetStyling(game: string, starter: string): StylingSettings | null {

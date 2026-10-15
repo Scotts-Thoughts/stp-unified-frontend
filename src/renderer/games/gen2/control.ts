@@ -22,7 +22,10 @@ export function gen2ControlRoutes(vm: () => any): ControlRoutes {
                 starter: v?.starter,
                 gameName: v?.game?.properties?.meta?.gameName?.value,
                 selected_game: v?.game_selection,
-                right_panel: v?.right_panel,
+                // The preference. The queuer sets and checks "Battle Graphic" for gen2, so Automatic keeps that
+                // name here (docs/external-contracts.md); `right_panel_active` is what shows now (a post-battle Splits).
+                right_panel: v?.right_panel == "Automatic" ? "Battle Graphic" : v?.right_panel,
+                right_panel_active: v?.right_panel_mode,
                 bonk: v?.bonk,
                 repel_counter: v?.repel_counter,
                 splits: v?.toggle_compare_splits,
@@ -48,8 +51,9 @@ export function gen2ControlRoutes(vm: () => any): ControlRoutes {
             },
             "/set-right-panel": (query) => {
                 if (!query.panel) return missing("panel");
-                vm().right_panel = query.panel;
-                return { ok: true, right_panel: vm().right_panel };
+                // Old values map to the modes (core/overlay/rightPanelMode.ts); the reply names Automatic as /status does.
+                const mode = vm().set_right_panel(query.panel);
+                return { ok: true, right_panel: mode == "Automatic" ? "Battle Graphic" : mode };
             },
             "/set-counters": (query) => {
                 if (query.bonk !== undefined) vm().bonk = query.bonk === "true";

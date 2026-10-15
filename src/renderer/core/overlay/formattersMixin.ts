@@ -178,12 +178,6 @@ export const formattersMixin = {
             if (split == undefined) return
             return split["realtime.end.hours"] + ":" + split["realtime.end.minutes"] + ":" + split["realtime.end.seconds"]
         },
-        split_diff_color(difference_string) {
-            if (difference_string === "-")          { return "color: black" }
-            if (difference_string === "+0:00")      { return "color: black" }
-            if (difference_string.charAt(0) == "+") { return "color: red" }
-            if (difference_string.charAt(0) == "-") { return "color: green" }
-        },
         sleep(ms) {
             return new Promise((res) => setTimeout(res, ms))
         },

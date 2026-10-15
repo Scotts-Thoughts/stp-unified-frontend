@@ -42,7 +42,7 @@ and more. A refactor is done when the harness shows no difference.
 ## 2. Code map
 
 ```
-src/main/         Electron main process (Node). Window, file IPC, control server, keyhook, cutter mode.
+src/main/         Electron main process (Node). Window, file IPC, control server, shortcuts, cutter mode.
 src/preload/      index.js defines window.api, the renderer's entire view of main. Types: src/renderer/index.d.ts
 src/shared/       Pure TS used by both sides: user-state file format, split/replay bookmark formats.
 src/renderer/
@@ -61,15 +61,25 @@ docs/             Reference docs. See §13.
 
 ### src/main
 
-- `index.ts`: window creation, first-launch legacy imports, IPC registration, control server, then keyhook
-  (last on purpose, because antivirus delays the spawn). The window has `backgroundThrottling: false`: OBS
+- `index.ts`: window creation, first-launch legacy imports, IPC registration, control server, then the shortcut
+  IPC (after the window, which it sends presses to). The window has `backgroundThrottling: false`: OBS
   captures it while it may be covered or minimised, and a throttled window stops `requestAnimationFrame`.
 - `paths.ts`: `appRoot()`, `splitsRoot()`, `userDataRoot()`, etc. `resolveInside()` guards every IPC path.
 - `ipc.ts`: all file IPC. Writes to `storage/` and source files are refused in a packaged build.
 - `control-server.ts`: `ControlServer` on `127.0.0.1:30159` (`STP_CONTROL_PORT` overrides it).
   - `/quit`, `/reload` and `/load-split-file` are answered in main.
   - Every other route is forwarded to the renderer (`control-request` / `control-reply`, 5 s timeout).
-- `keyhook.ts`: spawns `keyhook.exe` (Windows only) and forwards key lines as `keyhook:key`.
+- `hotkeys.ts`: keyboard shortcuts and the Keyboard Shortcuts window (§4 "Shortcuts").
+  - Watches every key press through the `uiohook-napi` keyboard hook (an npm package with prebuilt native files;
+    not on Linux), matches it exactly against the accelerators the overlay sends (`hotkeys:set`) and sends each
+    match back (`hotkeys:pressed`). The hook starts the first time something is bound. It is `require`d inside a
+    try, so a broken native file costs the shortcuts, not the app; it then logs one `[hotkeys]` line.
+  - A key-down of a key already down is an auto-repeat and is ignored, so a held key fires once (a key silent for
+    1 s counts as released, in case a key-up was missed).
+  - Opens the window (`shortcuts.html`, a second renderer page) and relays between it and the overlay: the
+    catalog one way (with the keys main can't listen for added), edits the other.
+  - `hotkeys:suspend`/`resume` stop presses running actions while the window records a key.
+  - A reload of the overlay page (`did-navigate`) drops its bindings; closing the overlay closes the window.
 - `timer-frame-server.ts`: serves `timer-frame.html`, the clock page, on `127.0.0.1:30160` (§8). The page and
   its two fonts are bundled with the main process (`?raw` and electron-vite's `?asset` imports). `STP_TIMER_FRAME=off`
   skips it; the URL reaches the renderer as `--timer-frame-url=` (`window.api.timerFrameUrl`).
@@ -86,8 +96,8 @@ docs/             Reference docs. See §13.
 | `persistence/` | `userState.ts` (debounced JSON store), `styleSettings.ts` (layered style defaults), `splitFiles.ts` (serial queue over the splits IPC) |
 | `stores/` | `useEmulatorStatsStore` (Super Shuckie poll), `useReplaySplitsStore` |
 | `control/` | `registerControlServer`: turns forwarded requests into per-generation route calls and builds `/status` |
-| `hotkeys/` | `KeyHook`, `bindHotkeys(table)` |
-| `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), `LiveText`, and `ClockFrame` (the clock in its own process, below) |
+| `shortcuts/` | The shortcut engine (`bindShortcuts`), the action builders, accelerator spelling, the shell's binder (`Shortcuts.vue`) and the Keyboard Shortcuts window (`ShortcutsMenu.vue`). §4 "Shortcuts" |
+| `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), `LiveText`, and `ClockFrame` (the clock in its own process, below). `overlay/player/`: on-stream player pieces used by all five generations (`FaultsBox`, `GameClock`, `StatTiles`, `ExpBar`, `BadgeRow`, `MoveList`, `PopupBox`, `SpeciesArt`, `TypeBadges`, `InfoRow`), each fed by `games/genN/playerPanel.ts`. `SpeciesArt` is the solo Pokémon's art `<img>` and its slider transform/outline filter (gens 2–5 hand it `overlayCommonMixin.species_art_look`); a new picture cross-fades in all five (the generation's `transition` name; the key is the picture's path unless `art-key` is given). At run end (`run_complete`) gens 2–5 hide the type badges and show the "gametime" box in their place: the last split's in-game time, `simple_data[7]` (`gametimeSplit`, h:mm from the mapper's `gameTime.*` in gens 2–3, `game_time.*` in gens 4–5). It is set at the final battle in Gen2, Emerald, HG/SS and gen5, at the Hall of Fame in FRLG; never in Platinum or D/P, whose Hall of Fame shows the time. `newRun` clears it. `TypeBadges` draws the type pictures from the generation's `typeBadgesLayout`; which types show stays the generation's rule (`typeBadges(vm)`, gen1's `get_type`). `InfoRow` is a caption and value pair (gens 4–5's Nature and Friendship/Total rows); gen2's Held Item and gen3's rows keep their markup, because gen3's captions sit apart from their values in the DOM. `MoveList` is the player's move list and its column headers: the generation's `moveListLayout` draws the plain rows its overlay's `player_move_list` computed once per change (`playerMoveList(vm)`; gen1 `move_set.vue`'s `move_list`). Headers are Title Case like the movepool's. A Struggle row replaces the moves when every move's PP is 0 (`core/logic/struggle.ts`; gen1 and gen3 keep their own copy of that rule): Normal type and the usual power maths in gen1, "???" icon and power 50 from gen2 on, because the engines skip STAB and the type chart for Struggle. `PopupBox` is one pop-up box (fade, frame, caption, value): accuracy, evasion, field/screens, repel, bonks, Vs. Seeker. Each generation's `popupBoxes` holds the captions (lowercase, no colon) and classes, and its `battle_popups` computed works out when each box shows and its value (stages signed with `formatStage`). A wrapper that hides several boxes stays in the overlay's markup. `StatTiles` draws an element tree that the generation's `statTiles(vm)` builds in one computed (`stat_tiles`), each value worked out once per change; a `key` on a node stands for a template `v-if` branch, so a mode switch makes new elements as before. `ExpBar` owns the fill element and the level-up animation (`animate`, timed per generation); the generation's watchers decide when it moves, through `this.$refs.expBar.setWidth / setTransition / animate`, never the fill's `style`. The exp curves are `core/logic/expCurve.ts` (one copy for gens 1-5, both growth-rate spellings). `BadgeRow`'s fade (`badge-fade`) is `core/styles/player.css`, one rule for all five; the stats header's shared mode names are `statsHeaderNames` in `core/logic/statFormat.ts` (each generation's `statHeaders`). `FaultsBox` draws an element tree the generation describes as data, because the five trees differ and the layout oracle compares every element. The faults rule (`core/logic/faultMode.ts`) and the count's shrink at 3/4 digits are the same in all five; nothing else may set the count's font size. `backgroundTexture.ts`: the background texture's filter and transform for all five generations (gen1's `graphics.vue`, gen2–5 via `overlayCommonMixin.background_texture_style`). It draws the scale no smaller than what covers 1920×1080 once the X/Y offset and 3× the blur (a CSS blur fades the image's own border) are taken off; saved values are untouched. `textureLooks.ts`: each texture's default brightness/contrast/saturation/blur, keyed by image file because the generations name one picture differently (gen5 "Water" = gen3 "Dark Water"). A background whose four filters are all plain (100/100/100/0) gets its texture's look on load and reset (`apply_texture_look` in gen2–5, `applyTextureLook` in gen1's `useGameSpeciesData`), and when the texture is changed if the filters are plain or still the old texture's look. A hand-styled background is never changed. Edit a row there to change a texture's default in every generation |
 | `logic/` | Cross-generation helpers: OBS (`obs.ts`), Shuckie bookmarks, split comparison, enemy sprite scales, starter IVs, move reminder, battle mechanics (speed, accuracy, move power, OHKO; §4) |
 | `window/` | `scaleToFit`, virtual keys |
 | `styles/base.css` | The document reset only. Each generation's look is in `games/genN/style.css` |
@@ -128,15 +138,25 @@ Every `games/genN/` has:
 - `manifest.ts`: mapper profiles and editions, known before the module loads;
 - `index.ts`: the `GameModule`;
 - `mappers/`: `MapperProfile`s and the `*-paths.ts` read/write tables;
-- `style.css`;
+- `style.css`. Gens 3–5 load `core/styles/shared-gen345.css` (gens 4–5 also `shared-gen45.css`) before it, in one
+  `<style>` (`core/styles/joinStyleSheets.ts` swaps their `.gen-N` for the generation's class): the rules the sheets had
+  verbatim, moved by `tools/css/share-css.ts` only where the earlier position can't change a winner. Edit a shared
+  rule there (all those generations change), or override it in one `style.css`; re-run the tool (`npm run css:share`)
+  after editing the sheets, and remember `css:dead` reads only `style.css`;
 - `data/`.
 
 **gen1 (refactored).**
-- `games/gen1/` holds the module, `hooks.ts`, `state.ts`, `hotkeys.ts`, `control.ts`, `markers.ts` and the
-  split tables.
+- `games/gen1/` holds the module, `hooks.ts`, `state.ts`, `actions.ts`, `control.ts`, `markers.ts` and the
+  split tables. What the settings buttons do lives in `components/settings/commands.ts`, shared by the panels
+  and the shortcut actions.
 - The overlay itself is `src/renderer/components/Overlay.vue` (~200 lines), built from `components/left_panel/`,
   `right_panel/` and `settings/`, with the Pinia stores in `src/renderer/stores/`.
 - gen1's data layer is `logic/PokeData.ts` over `data/`.
+- The `game_properties` injection is a **ref**, though it is typed as a plain record. Templates and Options-API
+  `this.game_properties` unwrap it; `<script setup>` code (a `computed`, a watcher) must use
+  `unref(game_properties)`, or it reads `.player` of the ref and the render throws, freezing the overlay. Also
+  in `<script setup>`, a tag like `<badge-row>` resolves to *any* binding named `badgeRow`, data included:
+  import a layout object under a different name.
 - The ROM starter (`patch.hChosenStarter`, HRAM `$FFDF`) is reset by the patch's `Init` on every soft reset
   and power-on: stp-pokered writes `$FF` (default starters), stp-pokeyellow `SPECIES_STARTER` (Backport, or Mew
   without backports). `components/settings/interface_2.vue` watches the byte and writes the solo Pokemon again,
@@ -149,15 +169,14 @@ Every `games/genN/` has:
 
 **gen2–5 (lifted).**
 - `games/genN/Overlay.vue` is a single Options-API component of 7,000–10,000 lines. Around it sit:
-  - `hotkeys.ts` (`genNHotkeys(vm)`), bound by the overlay's own `mounted`;
+  - `actions.ts` (`genNActions(vm)`), the shortcut actions, bound by the overlay's own `mounted`;
   - `control.ts` (`genNControlRoutes(vm)`);
   - `storage.ts` (`MyStorage`, style defaults);
   - `splits.js` (split CSV writing);
   - `data/`.
 - Per-generation extras:
   - gen2: `backports.js` and `backportOverrides.ts`;
-  - gen3 and gen5: `logic/Timer.js` and `PubSub.js`, and a small `components/` folder (`Timer.js`; gen5 also
-    has `ShuckieTimer.js`);
+  - gen3 and gen5: `logic/Timer.js` and `PubSub.js`, and a small `components/` folder (`Timer.js`);
   - gen4 and gen5: `forms.js`;
   - gen2–5: `enemySprites.ts`.
 - The seams where the legacy code was re-plumbed (`this.game.*` instead of `this.mapper.*`, the IPC in place of
@@ -227,6 +246,126 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
 - Checked on the Mac with the page frozen for 2 s: the frame's worst gap was 10-12 ms in every generation, the
   page's own clock 2 s. The Shuckie-timer mode shows the last posted emulator time, so it still stalls with the page.
 
+**Shortcuts (all five generations, 2026-10-14; `docs/shortcuts-menu-plan.md`).**
+- Every generation lists its shortcut actions in `games/genN/actions.ts`: first the F-keys it shipped with
+  (group "Original F-keys", bound by default, bodies and `console.log` text unchanged, quirks included), then one
+  action per settings control, unbound by default, derived from the settings panel's description
+  (`panelActions(genNSettingsPanel(...))`, below). gen1's list is `GameModule.shortcuts`, bound by the shell
+  (`core/shortcuts/Shortcuts.vue`, on the box-art screen too); gen2–5 bind theirs from the overlay's `mounted`.
+- Build actions with `core/shortcuts/build.ts`: `toggle` for a checkbox, `press` for a button, `choice` for a short
+  fixed dropdown (one action per option, plus next and previous), `cycle` for a dropdown fed by data. `run` must do
+  what the control does (assign the same field, call the same `@change` handler or `@click` method), so watchers
+  and saving behave as for a click. `available` greys out a control that does nothing in this game or for this
+  species; "Show Advanced Settings" is not a gate.
+- **Action ids are persisted** (`shortcuts` in each generation's section of `user_state.json`, changes from the
+  defaults only, `null` = default cleared). Renaming an id silently drops a user's key.
+- **A settings control gets its action from the panel description**: add the control to
+  `games/genN/settingsPanel.ts` and its action exists; `noAction: true` for the ones left out below. After a change
+  to a description, `npm run parity:action-ids -- --compare=<list from before>` must show no missing id.
+- Left out on purpose: text and number fields, styling sliders, the starter and edition pickers, dev-only and
+  Style Mode tools, the ROM-writing debug editors, and colour pickers (the browser opens one only from a click).
+- The Keyboard Shortcuts window is a separate `BrowserWindow`, so it never shows in the OBS capture. Every
+  overlay's first settings column has a "Keyboard Shortcuts" button for it (gen2–5 through
+  `overlayCommonMixin.open_shortcuts_menu`); gen4 and gen5's button used to open a static help popup.
+- A typing key (letters, digits, Space, arrows…) with no modifier, or with only Shift, is refused: it would
+  fire every time it was typed, in any program. `npm run parity:shortcuts` tests the engine;
+  `npm run parity:shortcuts-app` (Windows, after a build) drives the window and presses real keys in every generation.
+- **`parity:shortcuts-app` presses real, global keys and takes focus for minutes.** Never run it while Scott is
+  using the machine (an emulator in front once got its keys); ask first. It brings its own window to the front
+  before each press and sends nothing if that fails. Injected keys carry no scan code, so the page sees an empty
+  `KeyboardEvent.code` (check `key`).
+
+**The settings panel (all five generations, 2026-10-14; `docs/ui-uniformity-plan.md` stages 3-4).**
+- One shared panel, `core/settings/SettingsPanel.vue`, in four columns: Run · Solo Pokémon · Style · Display. Each
+  generation describes its controls as data in `games/genN/settingsPanel.ts` (`core/settings/types.ts`: toggle,
+  button, choice, counter, slider, text, readout, statGrid, component, slot, actions), every `get`/`set`/`run`
+  touching the same field or method the old template control did. gens 2-5 render it from the overlay
+  (`settingsPanel()` computed, `markRaw`, built once); gen1 from `components/game_area.vue`, where the old
+  `components/settings/interface_1/2`, `metrics` and `encounters` components still mount first but draw nothing:
+  they keep their watchers and subscriptions (ROM starter, Oak's Lab encounter writes, comparison) in the old order.
+- Being a child component, the panel re-renders only when something it shows changes, not on every overlay update.
+- **Slots** (`kind: "slot"`) are the few pieces that stay as the generation's markup inside `<settings-panel>`: the
+  DV/IV readout and manual fields (`tools/parity/manual-ivs-check.ts` finds `manual_iv_input`/`manual_dv_input` and
+  the "Hidden Power: X (Y)" text; the DV/IV mode must stay the only Automatic/Manual `<select>`), the nature grid,
+  the Pokemon Editor, dev tools, gen2's Rare Candies and backport importer.
+- Dropdown option values are the saved values as text (`select.value = "Manual"` works); a relabelled option pins
+  its old shortcut id part with `slug`.
+- The look is `core/styles/settings.css` (tokens; three styles behind the global `settings_panel_theme` key,
+  "Panel Style" in the Style column). Each `style.css` only places `.gen-N .stp-settings` inside its game-capture
+  area: the panel must never reach the filmed part of the overlay.
+- Shared pickers: `SpeciesPicker.vue` (type to filter, case/space/punctuation-insensitive; list opens in place,
+  emits `change` only on a user pick) and `EditionPicker.vue` (the start screen's box art from `manifest.editions`).
+- gen5 mapper notes found on the way: the Black patch block's variables start at game variable 0x4030, not 0x4000;
+  the Black 2 mapper has `encounter_psyduck`/`encounter_pidove` commented out (known-legacy-bugs #113).
+
+**The movepool (all five generations, 2026-10-15; `docs/ui-uniformity-plan.md` step 5.1).**
+- One table, `core/overlay/Movepool.vue`, fed a plain `view` (`core/overlay/movepoolView.ts`) by one computed per
+  generation: gen1's `components/right_panel/move_pool.vue`, gens 2-5's `movepoolView` in the overlay. Each
+  generation's game rules (Hidden Power type, Return power, Curse "???", forms, damage class) stay in that computed;
+  the art behind the table is the component's slot.
+- Fit (`core/logic/movepoolFit.ts`, decision 28): a list that fits keeps the generation's normal row height with space
+  below; a longer one shrinks its rows to fill the panel. The per-generation numbers are in each view's `fit`.
+- Cross-out (`core/logic/unobtainableMoves.ts`): the "Unobtainable Moves" setting decides when; each generation's
+  `movepoolStruck` computed builds the sets once per change. Run-rule bans (`Banned`) and the first-run Hidden Power
+  are struck in every row group, an edition's unobtainable TMs only in TM/HM and tutor rows. An edition with no list
+  strikes nothing. gen1's list (Double Team) is `games/gen1/data/unobtainable_moves.ts`.
+- The cross-out is an inline style, not a class, on purpose: the harness keys elements by their class list.
+
+**The Splits panel (all five generations, 2026-10-15; `docs/ui-uniformity-plan.md` step 5.3).**
+- One component, `core/overlay/SplitsPanel.vue`, fed a plain `view` (`core/overlay/splitsView.ts`) by one computed
+  per generation: gen1's `splitsView` in `components/right_panel.vue`, gens 2-5's `splitsView` in the overlay (gen5
+  also `secondScreenSplitsView`). Which trainers, their order, names and icons stay in that computed (and its
+  `compare_splits`); the generation hands over only its table and icon classes. The overlay keeps the panel's
+  wrappers and (gens 1, 2, 5) its title.
+- One look (decision 29), inline in the component: rows at natural height (`display: block` on the table, so rows
+  never stretch over the box `style.css` gives it), underlined header with a 1px outline, 16px text, the name
+  column takes what the times leave. Each `style.css` still places and sizes the table and the icons.
+- Followup + Summary exists only in gens 1-2: only their patches record the battle statistics it shows
+  (`patch.battle_info.*`); gens 3-5's mappers have none.
+- The difference colour is `splitDiffColor` in `splitsView.ts` (the mixin's `split_diff_color` is gone).
+
+**The enemy team panel (all five generations, 2026-10-15; `docs/ui-uniformity-plan.md` step 5.4).**
+- One render-function component, `core/overlay/EnemyTeamPanel.ts`, fed a plain `view` (`core/overlay/enemyTeamView.ts`)
+  by one computed per generation (gen1's `enemy_team_view` in `components/right_panel/enemy_graphic.vue`, gens 2-5's
+  `enemy_team_view` in the overlay) and drawn by the generation's `layout`; both are in `games/genN/enemyPanel.ts`. The
+  trees differ (gen1/gen2, gen3 and gens 4-5 have three designs), and the harness compares every element, so the tree
+  is data, as for `MoveList`. Each value (above all the speed label, which calls `get_stat` in gens 4-5) is worked
+  out once per change; the overlay keeps the branch that decides when the panel shows.
+- The speed label's words and its picture's colour are `core/logic/speedLabel.ts` (`speedLabel(order, wording)`,
+  `speedColorClass`); who moves first stays in each generation's `speed_comparison`. All five say it of the enemy
+  (decision 16): "Outsped" when the player moves first. gen4's Payback reads the order back with `speedLabelOrder`.
+- One wording and faint look (decision 26): `ENEMY_STAT_LABELS`, `enemyLevelText` ("Lv:12"), `FAINTED_TEXT` /
+  `FAINTED_PICTURE` in `enemyTeamView.ts`. The column order HP/Atk./Def. | SpA./SpD./Spe. is each `style.css`'s
+  positions (gen4 by stat class, gen5 by `eLabel1-3`, plus the `e_<stat>` stage badges).
+- **Trainers** (decision 14), a right-panel option in all five: outside a trainer battle the panel previews the team
+  of the trainer picked in the "Trainers" settings group (search + "Trainer", saved as `examined_trainer`, gen1
+  `right_panel.trainer.examined`); a trainer battle shows the live panel as Automatic would.
+  `core/logic/trainerPreview.ts` reads the trainer tables into one shape; each `enemyPanel.ts` has
+  `trainerPreviewView`. gen5's table (`games/gen5/data/trainers_black.js`, from the legacy app) covers Black and
+  White only; Black 2 / White 2 have no trainer data, so their picker is empty.
+- The sprite keeps `ePkmnSprite`, `ePkmnSpriteResizing`, `data-enemy-slot` and `data-enemy-species`: the sprite resize
+  tool finds the sprite by them.
+
+**The right panel's mode (all five generations, 2026-10-15; `docs/ui-uniformity-plan.md` step 5.2).**
+- One model, gen1's (`core/overlay/rightPanelMode.ts`): a saved **preference** (Automatic, Movepool, Splits, Trainers,
+  that order everywhere) and a **post-battle Splits override** that is never saved. gen1 keeps it in its settings store
+  (`mode` / `mode_override`); gens 2-5 use `rightPanelModeMixin(key)` on their saved field (`right_panel` gens 2-3,
+  `right_ui` gens 4-5), and their templates test `right_panel_mode` (override, else preference).
+- Never write the saved field from code that isn't the operator: an operator pick goes through `set_right_panel(v)`
+  (settings panel, shortcuts, `/set-right-panel`; it maps old values and ends the override), the post-battle switch
+  through `show_post_battle_splits()`, its end through `clear_right_panel_override()`. Where the override ends is each
+  generation's old moment: gen1/gen2 the next trainer To Battle (gen2 also the north of Ilex Forest), gen3 the next
+  To Battle with a panel (trainer, or wild with the wild panel on), gen4 the next Battle, gen5 when the next trainer's
+  panel comes up. gens 4-5 show the enemy team by the *preference*, so a gym leader's team stays up through From Battle
+  and the splits follow, as before.
+- Old saved values are read through `readRightPanelMode`: "Battle Graphic", "Inventory", "Movepool+" = Automatic,
+  "Wild" = Automatic with "Show Wild Battles" on. gen2/gen3's `/status` still report Automatic as "Battle Graphic"
+  (the queuer sets and checks that name); `right_panel_active` in every generation is what shows now.
+- "Show Wild Battles" (`display.wild_battles`, decision 30, off by default): gen1 `right_panel/wild_pokemon.vue`, gen3
+  its own wild block; gens 2, 4, 5 draw the wild Pokémon with the trainer preview (`wildPreview` in each
+  `enemyPanel.ts`: the battle's copy in gen2, the opponent party in memory in gens 4-5, header "Wild <species>"), so
+  it has no stat stages and the preview's speed label.
+
 **Adding a mapper or edition.**
 - A new `games/genN/mappers/<x>.ts` profile, listed in that generation's `manifest.ts`.
 - An `editions` entry (box art, split folder, icon).
@@ -253,6 +392,9 @@ in `tools/parity/drift-allowlist.json`. `npm run parity:drift` fails otherwise.
 - A method the template calls must not write `data()` that the template reads. Vue queues the render again and
   loops until the value settles, all before the first paint (gen4's stat countdown ran 43 renders per battle
   exit, known-legacy-bugs #80). Existing writers: `get_stat` (`stat_fix_*`), gen5 `typeEffectiveness`.
+- A render-function component that copies a template's `<transition>` around a `v-show` child must leave out
+  `persisted`. Only the dev template compiler adds it (compiler-dom's `transformTransition` is dev-only), so the
+  built app has none (`PopupBox`, `BadgeRow`).
 - Each template is over a thousand lines and re-renders on any mapper value it reads. Something that changes
   often (per frame, per poll, per step) belongs in a small child or a computed (`LiveText`, `on_starter_spot`),
   and a lookup the template repeats belongs in an index (`core/logic/firstMatchIndex.ts`,
@@ -268,7 +410,10 @@ in `tools/parity/drift-allowlist.json`. `npm run parity:drift` fails otherwise.
   - A move and a rewrite never share a commit.
   - CSS classes and element ids do not change.
   - A difference between generations becomes data or a variant component, never an `if (gen === …)` in `core/`.
-  - No visual unification (decision 26).
+  - Making the generations look and behave alike is a goal, not a breach (decision 26, a guideline since
+    2026-10-14): fewer lines, better performance, one user experience, with every control as clear as before and
+    doing the same thing. Do it in its own commit, never inside a move. The audit and order of work:
+    `docs/ui-uniformity-plan.md`.
 
 ## 6. Data files
 
@@ -296,14 +441,12 @@ Files of 5,000 to 14,000 lines:
 - gen3's `gen3data.js`;
 - `games/gen2/style.css`.
 
-**Dead copies. Editing these has no effect.**
-- In `src/renderer/data/pokedex/`, only `YellowDex` and `RedAndBlueDex` are wired in. The eight other-generation
-  dexes there are unused; the live ones are in `games/genN/data/`.
-- `src/renderer/data/moves/gen2.js`, `gen3.js` and `gen4.js` are unused.
-- Also unimported:
-  - gen3: `gen1data.js`, `gen1moves.js`, `gen1dataGrowthMovepool.js`;
-  - gen4 and gen5: `natureDefinitions.js`;
-  - gen2: `battle_summary_properties.js`.
+**Dead copies were deleted (2026-10-14).** Seventeen data files nothing imported (about 365,000 lines) are gone.
+They were the eight other-generation dexes in `src/renderer/data/pokedex/`, `data/moves/gen2–4.js`, gen3's
+`gen1data*.js`/`gen1moves.js`, gen4/gen5's `natureDefinitions.js` and gen2's `battle_summary_properties.js`.
+The build output was byte-identical before and after. Get one back from git history if a generation ever
+moves onto gen1's data layer. Before deleting a "dead" file, check for imports written with a `.js` suffix:
+`data/trainers/trainers.ts` imports `./YellowTrainers.js`, which resolves to the `.ts` file.
 
 **Near-duplicates.**
 - `cross_generation_moves.js` exists in gen2–5. gen2, gen3 and gen5 are identical; gen4 differs.
@@ -335,6 +478,7 @@ Files of 5,000 to 14,000 lines:
 | Per-generation and global settings (what the legacy apps kept in `localStorage`) | `<userData>/stp-overlay/data/user_state.json`, sections `gen1`…`gen5` and `global` | `core/persistence/userState.ts`; format in `src/shared/userStateFormat.ts` |
 | gen1 overlay settings; per-species settings and metrics | `<userData>/stp-overlay/data/overlay_settings.json`, `data/<game>/<species>/` | `src/renderer/stores/*` via `stores/helper/files.ts` |
 | gen2–5 user overrides | `user_*` keys in `user_state.json` | `games/genN/storage.ts` |
+| Keyboard shortcut bindings (changes from the defaults) | `shortcuts` in each generation's section of `user_state.json` | `core/shortcuts/engine.ts` |
 | Shipped style defaults | `games/genN/data/style/*.json` (§6) | `core/persistence/styleSettings.ts` (gen3 has its own manager) |
 | Split CSVs | `<appRoot>/splits/` (folder names kept from the five legacy apps) | `core/persistence/splitFiles.ts` + `games/genN/splits.js` |
 | Legacy gen1 presets (read-only) | `<appRoot>/storage/Storage.json` | `logic/Storage.ts` |
@@ -353,7 +497,7 @@ flags it.
 | Recording queuer | calls our control server on `:30159` | `src/main/control-server.ts`, `core/control/`, `games/genN/control.ts` |
 | Super Shuckie (emulator) | `http://127.0.0.1:30158` | `core/stores/useEmulatorStatsStore.ts`, `core/logic/shuckieBookmarks.ts` |
 | OBS | `ws://localhost:4455` | `core/logic/obs.ts` |
-| keyhook.exe (F13–F24 hotkeys) | child process, Windows only | `src/main/keyhook.ts`, then `core/hotkeys/KeyHook.ts` |
+| Keyboard shortcuts | `uiohook-napi` keyboard hook (Windows and Mac) | `src/main/hotkeys.ts`, then `core/shortcuts/engine.ts` |
 | air_cutter (video tool) | launches the app with `--cutter-*` | `src/main/cutter.ts`, `tools/cutter/` |
 | The clock page (our own) | `http://127.0.0.1:30160/timer` | `src/main/timer-frame-server.ts`, `core/overlay/ClockFrame.ts` |
 
@@ -364,21 +508,34 @@ flags it.
 
 Treat those as fixed interfaces. Another program depends on each one.
 
-`keyhook.exe` is not in the repo; it is build output and was removed in `5dce66a`. Main looks for it at:
-1. `<appRoot>/keyhook.exe`
-2. `<appRoot>/resources/keyhook.exe`
-3. the packaged `resources/` folder
+**Shortcuts share their keys.** The keyboard hook only watches, as `keyhook.exe` did: every key still reaches
+the program in front, so F24 pauses both the overlay's timer and the emulator, and OBS or a second overlay can use
+the same keys. Electron's `globalShortcut` (Win32 `RegisterHotKey`), used for one day in 2026-10, took bound keys
+from every other program and stopped the emulator pausing; don't go back to it. On the Mac the hook needs the
+Accessibility permission: the first launch asks, every shortcut stays off with one `[hotkeys]` line, and they
+work after a restart once it is allowed. The
+app no longer uses `keyhook.exe` (until 2026-10 it did; `docs/hotkeys-without-keyhook-plan.md` says why). Only
+the legacy apps in the parity sandbox still need the exe, as `resources/keyhook.exe`. `build.extraFiles` leaves
+it out of the package.
 
-Without it, the app runs and logs that hotkeys are disabled.
+**Building the Windows package.** `npm run build:win`, or `npm run build:unpack` and then
+`npx electron-builder --win --prepackaged dist/win-unpacked` to zip a tree you already have.
+The zip is compressed (`build.compression: "normal"`, since 2026-10-14; it was `store`). The images are
+already compressed and stay their size, but Electron and the code drop from about 308 MB to about 121 MB.
 
-**Building the Windows package.** `npm run build:win` does not add `keyhook.exe`, so build in three steps:
-1. `npm run build:unpack`
-2. copy `keyhook.exe` (the one in `A:\Programs\gen2-stp-frontend`) to `dist/win-unpacked/resources/`
-3. `npx electron-builder --win --prepackaged dist/win-unpacked` to make the zip
+The package ships each image once. About half the pool is byte-identical copies across the `genN/` folders
+(1.4 GB of 2.7 GB in 2026-10), which the renderer addresses per generation, so the source tree keeps them all.
+`tools/build/after-pack.mjs` (`build.afterPack`) deletes the copies from the packed tree and lists each group,
+kept file first, in `resources/image-copies.json`. On every launch, `ensureImagePool()` recreates any missing
+copy as a hard link, or as a plain copy on a drive without hard links. This is safe only because nothing writes
+into the pool at runtime: a write through one hard link would change every copy. `--prepackaged` skips the hook.
+The app writes into its own folder on first launch (the copies, the junction below), so it needs a writable
+install folder. The Windows zip has one; a read-only AppImage or a signed macOS bundle would not.
 
 Make the zip **before** launching the packaged app, or run `packaged:probe` only after zipping. On first launch
-the app creates the `resources/app/out/renderer/images` junction, and the zip step follows it, storing the
-image pool twice (5.9 GB instead of 3 GB). If that junction is already there, remove it with
+the app restores the duplicate images and creates the `resources/app/out/renderer/images` junction. The zip
+step stores the restored copies in full and follows the junction, storing the pool twice. If that junction is
+already there, remove it with
 `[System.IO.Directory]::Delete(path, $false)`, which deletes only the link; `rm -rf` would follow it. The
 `!out/renderer/images` entry in `build.files` keeps the dev build's junction, which points into
 `src/renderer/public/images`, out of the package. Before that entry was added, the package worked only on the
@@ -398,6 +555,8 @@ machine that built it.
 - **Autosplitting.**
   - gen1: `src/renderer/autosplitter/` with its tables in `games/gen1/data/`.
   - gen2–5: `games/genN/splits.js` plus `data/autosplitter*.js`.
+  - Only the simple CSV is written (2026-10-14). Its name has no `-simple`, which makes it the name the old
+    deprecated CSV had in gens 1–3. File names per generation: `docs/external-contracts.md` §5.
 - **Comparing against a previous run.** `core/logic/splitComparison.ts` and `core/stores/useReplaySplitsStore.ts`.
 
 ## 10. Invariants
@@ -421,7 +580,7 @@ These hold across the codebase. Breaking one is a bug even if nothing visibly fa
   - `console` output.
 - **Some `GameModule` fields do nothing yet.**
   - Nothing in the shell reads `features`, `components`, `hooks`, `chapterMarkers` or `logCopyVariant`.
-  - gen2–5's `hotkeys: () => ({})` is intentionally empty; each overlay binds its own keys.
+  - gen2–5 have no `shortcuts`; each overlay binds its own actions (§4 "Shortcuts").
   - Wiring new behaviour into these fields for gen2–5 does nothing until Phase 6 connects them.
 - **The generated-code headers are out of date.** Files headed "generated by lift-genN.py, do not edit" are
   edited by hand now. The lift can't be re-run (§12).
@@ -453,7 +612,11 @@ From cheapest to most expensive:
 |---|---|---|---|
 | Typecheck | `npm run typecheck` | ~15 s | Always. Covers renderer, shared and preload, but **not** `src/main` |
 | Drift | `npm run parity:drift` | ~3 s | Any gen2–5 overlay or mixin edit |
-| Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:debounce`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits or import code |
+| Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:debounce`, `parity:shortcuts`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits, shortcuts or import code |
+| Action ids | `npm run parity:action-ids -- --out=<file>` before, `-- --compare=<file>` after | seconds, no build | When a change rebuilds a generation's shortcut actions (settings panel descriptors): no persisted id may go missing |
+| Dead CSS | `npm run css:dead` (report), `-- --gen=N --write` | seconds, no build | After a change that stops using classes; the harness must then show no pixel/layout difference |
+| Shared CSS | `npm run css:share` (report), `-- --write` | seconds, no build | After editing gens 3-5's `style.css` or `core/styles/shared-gen*.css`: moves rules identical in gens 3-5 (or 4-5) to the shared sheets only where the cascade can't change |
+| Art-layer cost | `npm run parity:art-layers -- [--only=genN] [--target=unified@<dir>]` | minutes per generation, built app | Measuring paint/GPU cost of the full-screen art layers and the C10 side-by-side (`docs/ui-uniformity-plan.md` 5.7) |
 | Harness, one generation | `npm run build`, then `npm run parity:all -- --only=genN` | ~2 min per fixture | Anything that changes what an overlay shows, writes or sends |
 
 There are no unit tests and no linter; the self-tests and the harness are the tests.
@@ -512,6 +675,7 @@ shows under the old renderer, such as the synthetic-bold drift in known-legacy-b
 Re-running them would overwrite months of hand edits.
 
 **Still in use.** `tools/assets/to-webp.ts` converts any new PNG to WebP. `tools/cutter/` is still in use.
+`tools/build/after-pack.mjs` runs inside every electron-builder pack (§8, "Building the Windows package").
 
 ## 13. Documents, and which parts are live
 
@@ -524,7 +688,10 @@ Re-running them would overwrite months of hand edits.
 | `docs/game-support-gaps.md` | Adding or fixing support for a game or edition |
 | `docs/performance-followups.md` | Performance work. It records what four passes did and what is still open |
 | `docs/themes-plan.md` | Themes (per-generation looks). A proposed plan, not built yet |
-| `docs/hotkeys-without-keyhook-plan.md` | Hotkeys or `keyhook.exe`. A proposed plan to replace the exe with Electron's built-in shortcuts; not built yet |
+| `docs/ui-uniformity-plan.md` | Making the generations look and behave alike, cutting CSS and template lines (decision 26 as a guideline). The order of work and Scott's open questions; `docs/ui-audit/A-E` hold the 2026-10-14 audit with file:line detail |
+| `docs/ui-uniformity-log.md` | The uniformity work step by step (2026-10-14/15): a git tree snapshot per step and what the harness showed against the step before; for reviewing or committing the steps one at a time |
+| `docs/shortcuts-menu-plan.md` | Shortcuts or the settings controls. The plan behind the Keyboard Shortcuts window and the per-generation action lists (built 2026-10-14), with an inventory of each generation's controls and the old F-key quirks |
+| `docs/hotkeys-without-keyhook-plan.md` | Hotkeys. The plan that replaced `keyhook.exe`: Electron global shortcuts first (2026-10-13), then the `uiohook-napi` hook (2026-10-14) because global shortcuts took the keys from the emulator |
 | `docs/CRITICAL_ITEM_CHAPTER_MARKER.md`, `docs/NEW_MOVE_CHAPTER_MARKER.md` | OBS marker logic |
 | `docs/inputs.lock.md`, `docs/queuer-unified.patch`, `docs/battle-timing-notes.animations.css` | Rarely. These are port inputs, the queuer-side patch, and timing notes |
 

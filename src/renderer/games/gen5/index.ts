@@ -1,5 +1,6 @@
 import type { GameModule } from "~/core/game/GameModule";
 import { moduleBase } from "~/core/game/ModuleManifest";
+import { joinStyleSheets } from "~/core/styles/joinStyleSheets";
 import { gen5Manifest } from "./manifest";
 import { autosplitter } from "./data/autosplitter.js";
 import { gen5ControlRoutes } from "./control";
@@ -11,7 +12,7 @@ import { loadGen5StyleDefaults } from "./storage";
  *
  * A lifted module, like gen2 and gen4: `Overlay.vue` is the legacy component with its
  * infrastructure swapped for core (see its header), so the run hooks, state machine
- * and hotkeys live inside it -- `hooks` and `hotkeys` here are the no-ops that say
+ * and shortcuts live inside it -- `hooks` here (and the absent `shortcuts`) are the no-ops that say
  * so. What the shell needs before the component exists is here: the profiles, the
  * editions, the stylesheet, the fit-to-window flag, the control routes, and the four
  * mapper paths the legacy client debounced for fifteen frames.
@@ -54,8 +55,7 @@ export const gen5: GameModule = {
     data: {
         splits: { autosplitter },
     },
-    // Bound from Overlay.vue's `mounted`, see games/gen5/hotkeys.ts.
-    hotkeys: () => ({}),
+    // No `shortcuts`: the overlay binds games/gen5/actions.ts from its `mounted`.
     control: (ctx) => gen5ControlRoutes(ctx.overlay),
     chapterMarkers: {
         battleIn: (trainerClass) => "IN - " + trainerClass,
@@ -68,7 +68,8 @@ export const gen5: GameModule = {
     },
     overlay: Overlay,
     cssClass: "gen-5",
-    styles: () => import("./style.css?inline").then((m) => m.default),
+    // shared-gen345.css and shared-gen45.css first: rules gens 3-5 had verbatim (tools/css/share-css.ts)
+    styles: () => joinStyleSheets("gen-5", [import("~/core/styles/shared-gen345.css?inline"), import("~/core/styles/shared-gen45.css?inline"), import("./style.css?inline")]),
     assetPrefix: "images/gen5/",
     // The 16:9 fit-to-window script at the bottom of the legacy index.html.
     scaleToFit: true,

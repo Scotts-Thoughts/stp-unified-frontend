@@ -1,6 +1,6 @@
 import { isPackaged } from "~/core/env";
 import { getUserState, setUserState, userStateKeys } from "~/core/persistence/userState";
-import { writeStyleDefaultsFile } from "~/core/persistence/styleSettings";
+import { createDebouncedStyleWriter, writeStyleDefaultsFile } from "~/core/persistence/styleSettings";
 
 /**
  * gen3's `MyStorage` and `StyleSettingsUtils` (the first 200 lines of its
@@ -11,7 +11,9 @@ import { writeStyleDefaultsFile } from "~/core/persistence/styleSettings";
  * `..._<Family>-line-<Species>`, for the six gen3 game names) reads as the bare key
  * merged over the shipped default, else the default; a write always lands on the bare
  * key and, in dev mode, *replaces* the shipped default (not merges) and rewrites the
- * file; a null write removes the key (and the default, in dev mode);
+ * file; a null write removes the key (and the default, in dev mode). The file rewrite
+ * is debounced per key, 500 ms after the last edit and flushed on unload, as gen4's is
+ * (the legacy wrote on every slider step; known-legacy-bugs);
  * `resetToDefaults` removes the bare key; `exportCurrentAsDefaults` folds every bare
  * style key into the defaults. Plain keys are plain values. Kept as its own store
  * because those are different rules, not a different configuration of the shared one.
@@ -56,6 +58,14 @@ function table(): Record<string, Record<string, unknown>> {
 // The legacy rule: dev mode is "not packaged", not "Vite dev server" (core/env.ts).
 const isDev = () => !isPackaged();
 
+// A slider drag sets a style key on every input event; the file is rewritten once the key has been
+// still for 500 ms (gen4's value), with whatever the table holds then (null once removed).
+let debouncedWrite: ((key: string) => void) | null = null;
+function writeDefaultsFile(key: string): void {
+    debouncedWrite ??= createDebouncedStyleWriter((k) => writeStyleDefaultsFile(SOURCE_DIR, k, table()[k], TAG, false), 500, true);
+    debouncedWrite(key);
+}
+
 const styleSettingsManager = {
     isStyleSettingsKey: isGen3StyleKey,
     get(key: string): unknown {
@@ -77,7 +87,7 @@ const styleSettingsManager = {
         }
         if (isGen3StyleKey(key) && isDev()) {
             table()[key] = value as Record<string, unknown>;
-            writeStyleDefaultsFile(SOURCE_DIR, key, table()[key], TAG, false);
+            writeDefaultsFile(key);
         }
         setUserState(key, value);
     },
@@ -85,7 +95,7 @@ const styleSettingsManager = {
         setUserState(key, null);
         if (isGen3StyleKey(key) && isDev()) {
             delete table()[key];
-            writeStyleDefaultsFile(SOURCE_DIR, key, undefined, TAG, false);
+            writeDefaultsFile(key);
         }
     },
     resetToDefaults(key: string): void {

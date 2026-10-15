@@ -1,28 +1,18 @@
 <template>
-    <div>
-        <div>DVs:</div>
-        <select v-model="runConfig.config.dvs.mode" class="dropdownMenu dropdown_menu_column3">
-            <option>{{ IV_MODE.automatic }}</option>
-            <option>{{ IV_MODE.manual }}</option>
-        </select>
-        <div v-if="runConfig.config.dvs.mode == IV_MODE.manual">
-            <table class="ui_table">
-                <tbody>
-                    <tr>
-                        <td>Atk:</td><td><input type="text" class="inputContainer manual_dv_input" :value="dvs.atk" @change="set_dv('atk', $event)"/></td>
-                        <td style="padding-left: 12px;">Spe:</td><td><input type="text" class="inputContainer manual_dv_input" :value="dvs.spe" @change="set_dv('spe', $event)"/></td>
-                    </tr>
-                    <tr>
-                        <td>Def:</td><td><input type="text" class="inputContainer manual_dv_input" :value="dvs.def" @change="set_dv('def', $event)"/></td>
-                        <td style="padding-left: 12px;">Spc:</td><td><input type="text" class="inputContainer manual_dv_input" :value="dvs.spc" @change="set_dv('spc', $event)"/></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="opacity: .7;">HP: {{ hp_dv }} (from the other four)</div>
-            <div style="opacity: .7;">Written when the starter is received.</div>
+    <!-- The "dvs" slot of the settings panel (games/gen1/settingsPanel.ts): the DVs dropdown above it is a
+         panel control. tools/parity/manual-ivs-check.ts fills the manual_dv_input fields in this order
+         (Atk, Spe, Def, Spc) and reads the "HP: X (from the other four)" line. -->
+    <template v-if="runConfig.config.dvs.mode == IV_MODE.manual">
+        <div class="stp-ivgrid" style="grid-template-columns: repeat(2, auto 1fr);">
+            <span>Atk</span><input type="text" class="manual_dv_input" :value="dvs.atk" @change="set_dv('atk', $event)">
+            <span>Spe</span><input type="text" class="manual_dv_input" :value="dvs.spe" @change="set_dv('spe', $event)">
+            <span>Def</span><input type="text" class="manual_dv_input" :value="dvs.def" @change="set_dv('def', $event)">
+            <span>Spc</span><input type="text" class="manual_dv_input" :value="dvs.spc" @change="set_dv('spc', $event)">
         </div>
-        <div v-else style="opacity: .7;">The ROM patch's DVs.</div>
-    </div>
+        <div class="stp-hint">HP: {{ hp_dv }} (from the other four)</div>
+        <div class="stp-hint">Written when the starter is received.</div>
+    </template>
+    <div v-else class="stp-hint">The ROM patch's DVs.</div>
 </template>
 
 <script lang="ts">
