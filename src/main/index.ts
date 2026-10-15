@@ -60,6 +60,22 @@ function boundsOnScreen(bounds) {
     })
 }
 
+/**
+ * Zooms the overlay page so its 1920x1080 design fits the window's content area: the
+ * smaller of the two ratios, so a window that is not 16:9 (maximised, full screen on
+ * another shape of display) shows all of it. The page's CSS viewport stays 1920x1080
+ * whatever the window's size. A minimised window is left alone: Windows reports a tiny
+ * size for it, and OBS keeps capturing it.
+ */
+function fitZoom() {
+    if (!mainWindow || mainWindow.isDestroyed() || mainWindow.isMinimized()) return;
+    const [width, height] = mainWindow.getContentSize();
+    const zoomFactor = Math.min(width / 1920, height / 1080);
+    if (zoomFactor > 0 && zoomFactor !== mainWindow.webContents.getZoomFactor()) {
+        mainWindow.webContents.setZoomFactor(zoomFactor);
+    }
+}
+
 function createWindow() {
     // The queuer pre-writes this file with the display it wants the overlay on (plan
     // 3.5: honoured in dev as today and, additively, in a packaged build).
@@ -114,36 +130,41 @@ function createWindow() {
             mainWindow.setSize(1920 + borderWidth * 2, 1080 + titleBarHeight);
     }
 
-    let isFullScreenMode = false;
-
-    const adjustWindowSize = () => {
-        const contentBounds = mainWindow.getContentBounds();
-        const titleBarHeight = 1080 - contentBounds.height;
-        const borderWidth = (1920 - contentBounds.width) / 2;
-        if (titleBarHeight > 0 && borderWidth > 0) {
-            mainWindow.setSize(1920 + borderWidth * 2, 1080 + titleBarHeight);
-        }
+    // The page is laid out at 1920x1080 and zoomed to fit the window (fitZoom), so the
+    // user can resize it freely: a drag keeps the content area 16:9 and the zoom follows.
+    // macOS holds the content area to the ratio. Windows holds the whole window, title
+    // bar and borders included, ignores setAspectRatio's `extraSize`, and resizes the
+    // window as soon as a ratio is set. So there the ratio given is the window's own at
+    // its current, 16:9-content size: a no-op when set, and a drag drifts a few pixels
+    // from 16:9 (the frame does not scale), which `resized` -- the end of a user resize,
+    // never a programmatic one -- takes back before setting the ratio again.
+    // Only a normal window is measured: a full-screen one (the queuer starts it so) has
+    // no frame, and a maximised one hides part of it.
+    const isNormal = () => !mainWindow.isFullScreen() && !mainWindow.isMaximized() && !mainWindow.isMinimized();
+    const snapTo16x9 = () => {
+        if (!isNormal()) return;
+        const [width, height] = mainWindow.getContentSize();
+        const wanted = Math.round(width * 9 / 16);
+        if (Math.abs(height - wanted) > 1) mainWindow.setContentSize(width, wanted);
     };
+    const lockAspect = () => {
+        if (!isNormal()) return;
+        snapTo16x9();
+        const [outerWidth, outerHeight] = mainWindow.getSize();
+        const [contentWidth, contentHeight] = mainWindow.getContentSize();
+        mainWindow.setAspectRatio(process.platform === 'darwin' ? 16 / 9 : outerWidth / outerHeight);
+        // Chromium will not zoom below 0.25, so a smaller window would crop the overlay.
+        mainWindow.setMinimumSize(480 + outerWidth - contentWidth, 270 + outerHeight - contentHeight);
+    };
+    lockAspect();
 
-    mainWindow.on('enter-full-screen', () => {
-        isFullScreenMode = true;
-    });
-
-    mainWindow.on('leave-full-screen', () => {
-        isFullScreenMode = false;
-        adjustWindowSize();
-    });
-
-    mainWindow.on('resize', () => {
-        if (isFullScreenMode) {
-            return;
-        }
-        // Existing resizing logic here...
-    });
-
-    if (!useSaved) {
-        adjustWindowSize();
-    }
+    mainWindow.on('resized', lockAspect);
+    // Back from full screen the window has its old bounds again (the legacy code here
+    // assumed they were 1920x1080, and made any other size enormous).
+    mainWindow.on('leave-full-screen', lockAspect);
+    mainWindow.on('unmaximize', lockAspect);
+    mainWindow.on('resize', fitZoom);
+    mainWindow.on('restore', fitZoom);
 
     mainWindow.on('close', () => {
         saveDevWindowState({
@@ -164,21 +185,7 @@ function createWindow() {
 
     mainWindow.on('ready-to-show', () => {
         //zoom the window appropriately before showing
-        const { width } = mainWindow.getContentBounds();
-        const { height } = mainWindow.getContentBounds();
-        const horizontalZoomFactor = width / 1920;
-        const verticalZoomFactor = height / 1080;
-        let zoomFactor = 1;
-        //take the smaller factor
-        if (horizontalZoomFactor > verticalZoomFactor) {
-            zoomFactor = verticalZoomFactor;
-        }
-        else {
-            zoomFactor = horizontalZoomFactor;
-        }
-        if (zoomFactor > 0) {
-            mainWindow.webContents.setZoomFactor(zoomFactor);
-        }
+        fitZoom();
         mainWindow.show();
         // mainWindow.webContents.openDevTools()
     })

@@ -64,6 +64,16 @@ docs/             Reference docs. See §13.
 - `index.ts`: window creation, first-launch legacy imports, IPC registration, control server, then the shortcut
   IPC (after the window, which it sends presses to). The window has `backgroundThrottling: false`: OBS
   captures it while it may be covered or minimised, and a throttled window stops `requestAnimationFrame`.
+  - **Window size.** The page always lays out at 1920x1080 CSS px; main sets the Chromium zoom factor to
+    `min(contentWidth/1920, contentHeight/1080)` on every `resize` (`fitZoom`), so every generation scales,
+    gen3 included (it has no `scaleToFit`). The user can resize the window; it is held to 16:9 content, and its
+    minimum is 480x270 content, because Chromium won't zoom below 0.25.
+  - Trap: on Windows, Electron 37's `setAspectRatio` holds the *outer* window (title bar included) to the
+    ratio, ignores `extraSize`, and resizes the window as soon as it's called. So the ratio passed is the
+    window's own outer ratio at a 16:9-content size, and `resized` (end of a user drag) snaps the height back
+    to 16:9. Programmatic `setSize`/`setContentSize` (the harness) bypass all of it.
+  - Trap: zoom is shared per host. In `npm run dev` the Keyboard Shortcuts window (same `localhost` origin)
+    takes the overlay's zoom; in a packaged build each `file://` page keeps its own.
 - `paths.ts`: `appRoot()`, `splitsRoot()`, `userDataRoot()`, etc. `resolveInside()` guards every IPC path.
 - `ipc.ts`: all file IPC. Writes to `storage/` and source files are refused in a packaged build.
 - `control-server.ts`: `ControlServer` on `127.0.0.1:30159` (`STP_CONTROL_PORT` overrides it).
@@ -557,6 +567,11 @@ machine that built it.
   - gen2–5: `games/genN/splits.js` plus `data/autosplitter*.js`.
   - Only the simple CSV is written (2026-10-14). Its name has no `-simple`, which makes it the name the old
     deprecated CSV had in gens 1–3. File names per generation: `docs/external-contracts.md` §5.
+- **gen1 repeated rival splits.** A rival fight can be seen where there is none (a replay had a phantom
+  `RIVAL1` battle overlapping the Mt Moon Rocket after a reset, which logged a second "Rival1-Lab"). Comparisons
+  keep the last split per trainer, so that overwrote the real Lab time. `games/gen1/hooks.ts` now skips a rival
+  split already logged this run unless it is the latest split. The phantom battle's IN/OUT chapter markers
+  still appear.
 - **Comparing against a previous run.** `core/logic/splitComparison.ts` and `core/stores/useReplaySplitsStore.ts`.
 
 ## 10. Invariants

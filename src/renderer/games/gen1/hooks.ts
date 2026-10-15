@@ -26,6 +26,13 @@ import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
  */
 export function installGen1RunHooks(vm: any): void {
 
+    // The split names logged this run, in order (2026-10-15). A rival split already in the
+    // list is skipped unless it is the latest split: a phantom rival battle after a reset
+    // once logged a second "Rival1-Lab" at Mt Moon (ARCHITECTURE §9). Re-beating the rival
+    // straight after a reset still replaces the time. Empty after an app restart mid-run.
+    let runSplits: string[] = [];
+    const isRepeatedRivalSplit = (trainer: string, name: string): boolean =>
+        trainer.startsWith("RIVAL") && runSplits.includes(name) && runSplits[runSplits.length - 1] !== name;
 
     // RESET - Identifies when a reset occurs and publishes an event
     vm.game.properties.player.playerId.change((newProp, oldProp) => {
@@ -53,6 +60,7 @@ export function installGen1RunHooks(vm: any): void {
                 return
             }
             PubSub.publish("@run/new_run_started", vm.metrics.player_id);
+            runSplits = [];
             // The previous run's post-battle splits (or its summary) stay up until the
             // next run starts; from here the right panel is the setting's again.
             vm.settings.clearRightPanelOverride();
@@ -90,6 +98,7 @@ export function installGen1RunHooks(vm: any): void {
             let trainer = vm.game.properties.battle.trainer.class.value
             let id = vm.game.properties.battle.trainer.number.value
             let unique = `${trainer}_${id}`
+            const splitName = vm.format_trainer_name(trainer, id)
             const gameName = vm.gameLetter;
             const gameName_Path = vm.gamePath; // Used for split data
             const advanced = vm.runConfig.advanced;
@@ -104,6 +113,7 @@ export function installGen1RunHooks(vm: any): void {
                 // The same split into the replay (2026-09-23): simple_data[2] is the trainer
                 // key current_splits holds, [3] the CSV's real_time_hmmss.
                 addSplitBookmark(vm.simple_data[2], vm.simple_data[3])
+                runSplits.push(splitName)
             }
             //log simple data for only these trainers
             switch (trainer) {
@@ -120,6 +130,10 @@ export function installGen1RunHooks(vm: any): void {
                 case "BRUNO":
                 case "AGATHA":
                 case "LANCE": {
+                    if (isRepeatedRivalSplit(trainer, splitName)) {
+                        console.log(`Autosplitter - Skipped repeated split: ${splitName}`)
+                        break
+                    }
                     simpleSplit()
                     if (vm.settings.right_panel.post_battle_splits == true) {
                         vm.settings.setRightPanelOverride(RightPanelMode.splits);
