@@ -38,8 +38,11 @@ export interface EnemyStatView {
 
 /** One Pokémon of the enemy team. */
 export interface EnemySlotView {
-    /** Party slot, from 0. */
+    /** Party slot, from 0: what the slot's data, `data-enemy-slot` and the sprite resize tool go by. */
     slot: number;
+    /** Where the slot is drawn, from 0 (the position classes `ePkmnN` and the numbered position art); the send-out
+     * order (`core/logic/sendOutOrder.ts` `orderSlots`) sets it. Omitted: the party slot. Read it with `rowOf`. */
+    row?: number;
     species: unknown;
     level: unknown;
     /** gens 3-5. */
@@ -61,6 +64,11 @@ export interface EnemyTeamView<Slot extends EnemySlotView = EnemySlotView> {
     slots: Slot[];
     /** The speed label is shown (gens 1-3 keep a flag for it; no control sets it). */
     speedShown?: boolean;
+}
+
+/** The row a slot is drawn in: its send-out position, or its party slot when there is no order. */
+export function rowOf(slot: { slot: number; row?: number }): number {
+    return slot.row ?? slot.slot;
 }
 
 // The one wording and faint look of the enemy panel in all five generations (docs/ui-uniformity-plan.md decision 26).

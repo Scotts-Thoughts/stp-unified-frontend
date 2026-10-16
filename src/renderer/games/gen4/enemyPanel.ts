@@ -6,9 +6,62 @@
  */
 import { toDisplayString, type StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
-import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_PICTURE, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
+import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_PICTURE, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
+import { moveCategoryOf, movePowerOf, orderSlots, predictGen4, SendOutOrderCache, type SendOutMon, type SendOutPlayer } from "~/core/logic/sendOutOrder";
+
+/** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
+const liveOrder = new SendOutOrderCache();
+
+function speciesTypes(vm: any, species: unknown): [string, string] {
+    const entry = vm.g4PokemonData[species as string];
+    const type1 = entry?.type_1 ?? "Normal";
+    return [type1, entry?.type_2 ?? type1];
+}
+
+/** A trainer table Pokémon (`enemy_mon_static`, the preview's party) as gen 4's send-out rule reads it: types, moves,
+ * and for the damage step its level, Attack, Sp. Atk, ability and item; Hidden Power's type when it is known. */
+function sendOutMon(vm: any, mon: any, hiddenPowerType: string | null = null): SendOutMon {
+    const species = String(mon?.species?.value ?? mon?.species);
+    return {
+        species,
+        types: speciesTypes(vm, species),
+        moves: (mon?.moves ?? []).filter(Boolean).map((name: string) => {
+            const data = vm.generation4_moves_new?.[name];
+            const power = movePowerOf(data?.power);
+            return { name, type: data?.type ?? "Normal", power, category: moveCategoryOf(data?.category, data?.type, power) };
+        }),
+        level: Number(mon?.level) || 1,
+        attack: Number(mon?.stats?.attack) || 0,
+        specialAttack: Number(mon?.stats?.special_attack) || 0,
+        ability: mon?.ability ?? null,
+        item: mon?.held_item ?? mon?.item ?? null,
+        hiddenPowerType,
+    };
+}
+
+/**
+ * The order the trainer's AI sends its team out in against the player's Pokémon (core/logic/sendOutOrder.ts), as
+ * party slots; null when the "Predicted Send-Out Order" setting is off. The player is the Pokémon in the party (its
+ * Defense, Sp. Def, ability and item); the species pickers only stand in before there is one. `live` keeps the order
+ * for the battle.
+ */
+function sendOutOrder(vm: any, party: SendOutMon[], live: boolean): number[] | null {
+    if (vm.send_out_order != true || !party.length) return null;
+    const lead = vm.game.properties.player.team[0];
+    const species = lead?.species?.value ?? (vm.evolution ? vm.selected_evolution_species : vm.starter);
+    const player: SendOutPlayer = {
+        species: String(species),
+        types: speciesTypes(vm, species),
+        defense: Number(lead?.stats?.defense?.value) || 1,
+        specialDefense: Number(lead?.stats?.special_defense?.value) || 1,
+        ability: lead?.ability?.value ?? null,
+        item: lead?.held_item?.value ?? null,
+    };
+    const compute = () => predictGen4(party, player);
+    return live ? liveOrder.get(party, String(species), compute) : compute();
+}
 
 /**
  * The first trainer's stats in label order (decision 26: HP, Atk., Def., SpA., SpD., Spe.): label column, class part,
@@ -163,12 +216,20 @@ export function enemyTeamView(vm: any): Gen4EnemyTeam {
         };
     });
     const graphic = vm.getTrainerGraphic();
+    const double = battle.opponent_2.value != null;
+    // A double battle picks against a random target: no order.
+    const count = double || trainerTable(vm)?.[battle.opponent.id.value]?.is_double_battle ? 0 : Math.min(6, battle.opponent.team_count.value ?? 0);
+    const party = vm.pkmnSlots.slice(0, count).map((x: number) => {
+        const mon = vm.enemy_mon_static[x];
+        const hiddenPower = mon?.moves?.includes("Hidden Power") ? vm.eHPType(null, "Hidden Power", x) : null;
+        return sendOutMon(vm, mon, hiddenPower);
+    });
     return {
-        double: battle.opponent_2.value != null,
+        double,
         trainer: battle.opponent_2.value == null ? vm.get_trainer_name(battle.opponent.trainer.value, battle.opponent.id.value) : "Double Battle Team",
         crop: vm.battlePokemonCrop,
         overlayColor: vm.overlay_color,
-        slots,
+        slots: orderSlots(slots, sendOutOrder(vm, party, true)),
         second,
         art: graphic.state == true ? graphic.graphic : null,
     };
@@ -229,12 +290,14 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen4EnemyT
                 : { known: false, name: undefined }),
         };
     });
+    // The wild panel (a header, no trainer) keeps its order; so does a double battle.
+    const ordered = !trainer.header && !trainerTable(vm)?.[vm.examined_trainer]?.is_double_battle;
     return {
         double: false,
         trainer: trainer.header ?? trainer.name,
         crop: `height: ${HEIGHTS[trainer.party.length]}; filter: saturate(${vm.ui_saturation}) drop-shadow(0px 0px 1px #000000)`,
         overlayColor: vm.overlay_color,
-        slots,
+        slots: orderSlots(slots, ordered ? sendOutOrder(vm, trainer.party.map((mon) => sendOutMon(vm, mon)), false) : null),
         second: [],
         art: null,
     };
@@ -297,7 +360,7 @@ function slotNodes(view: Gen4EnemyTeam, slot: Gen4EnemySlot): EnemyNode {
         class: "eFaintTransition",
         style: slot.faint,
         children: [!slot.present ? null : {
-            class: `border slots ePkmnStyle ePkmn${x}`,
+            class: `border slots ePkmnStyle ePkmn${rowOf(slot)}`,
             children: [
                 {
                     tag: "img",
@@ -404,9 +467,9 @@ export function enemyTeamLayout(view: Gen4EnemyTeam): EnemyChild[] {
         ...view.slots.map((slot): EnemyNode => ({
             children: [!slot.present ? null : {
                 children: [
-                    { style: slot.ui, children: [{ class: "enemyStatsArea colored-image", style: `--overlay-color: ${view.overlayColor}; --url: url(images/gen4/new_ui/enemy_moves/${slot.slot}.svg)` }] },
-                    { tag: "img", class: ["enemyStatsArea eFaintTransition", slot.speed.svgClass], style: slot.faint, src: `images/gen4/new_ui/comp/${slot.slot}.svg` },
-                    { tag: "img", src: `images/gen4/new_ui/stats/${slot.slot}.svg`, class: "enemyPng eFaintTransition", style: slot.faint },
+                    { style: slot.ui, children: [{ class: "enemyStatsArea colored-image", style: `--overlay-color: ${view.overlayColor}; --url: url(images/gen4/new_ui/enemy_moves/${rowOf(slot)}.svg)` }] },
+                    { tag: "img", class: ["enemyStatsArea eFaintTransition", slot.speed.svgClass], style: slot.faint, src: `images/gen4/new_ui/comp/${rowOf(slot)}.svg` },
+                    { tag: "img", src: `images/gen4/new_ui/stats/${rowOf(slot)}.svg`, class: "enemyPng eFaintTransition", style: slot.faint },
                 ],
             }],
         })),

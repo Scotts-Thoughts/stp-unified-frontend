@@ -1001,6 +1001,8 @@ export default defineComponent({
             testRun:             MyStorage['testRun']             ?? false,
             // Decision 30: off for new users (was on); a saved choice is kept, and a saved "Wild" right panel turns it on.
             show_wild_battles:   MyStorage['show_wild_battles']   ?? readRightPanelMode(MyStorage['right_panel']).wild,
+            // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
+            send_out_order:      MyStorage['send_out_order']      ?? true,
             // The trainer the "Trainers" right panel previews (a trainer-table id), and the picker's search text.
             examined_trainer:    MyStorage['examined_trainer']    ?? "",
             search_trainers:     "",
@@ -1121,6 +1123,7 @@ export default defineComponent({
                 "disable_right_hotkeys",
                 "automatic_post_battle_splits",
                 "show_wild_battles",
+                "send_out_order",
                 "examined_trainer",
                 "no_counters",
                 "legacy_state",

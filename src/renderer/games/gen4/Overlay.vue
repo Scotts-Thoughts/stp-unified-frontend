@@ -600,6 +600,8 @@ export default defineComponent({
             wild_pokemon_display   : false,
             // Decision 30: the wild panel, off by default.
             show_wild_battles      : MyStorage['show_wild_battles']    ?? false,
+            // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
+            send_out_order         : MyStorage['send_out_order']       ?? true,
             stats_setting          : MyStorage['stats_setting']        ?? "Automatic",
             expBarToggle           : MyStorage['expBarToggle']         ?? true,
             show_nature_changes    : MyStorage['show_nature_changes']  ?? true,

@@ -58,6 +58,7 @@ export const auto_save_settings = [
     "set_rom_starter_automatically",
     "right_ui",
     "show_wild_battles",
+    "send_out_order",
     "examined_trainer",
     "previous_label",
     "current_label",

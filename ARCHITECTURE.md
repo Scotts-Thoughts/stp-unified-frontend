@@ -211,7 +211,9 @@ Every `games/genN/` has:
   `battleSpeed.ts` (gens 4-5 turn-order Speed and who moves first, `parity:speed`), `moveAccuracy.ts`
   (gens 3-5 accuracy, `parity:accuracy`), `movePower.ts` (Flail/Reversal, Gyro Ball, Wring Out, Trump Card,
   Punishment, and gen5's Stored Power, Electro Ball and Heavy Slam, `parity:move-power`),
-  `ohkoAccuracy.ts` (`parity:ohko`). Add a mechanic there, not as another copy in each overlay.
+  `ohkoAccuracy.ts` (`parity:ohko`), `sendOutOrder.ts` (trainer AI send-out order, with gen 3/4 AI damage
+  formulas; `parity:send-order`). `typeMatchups.ts` is the ROM's own type chart in ROM order, for code that must
+  repeat the engine's integer steps. Add a mechanic there, not as another copy in each overlay.
 - **One-hit KO moves show "KO" in the power column** (Scott's rule, all five generations): `ohkoPowerText` in
   `ohkoAccuracy.ts`, or 0 in battle when the type chart (or Levitate, Wonder Guard...) leaves them no effect.
   gen1's data gives them power 1, the game's own placeholder, which used to show as 1.
@@ -355,6 +357,12 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   White only; Black 2 / White 2 have no trainer data, so their picker is empty.
 - The sprite keeps `ePkmnSprite`, `ePkmnSpriteResizing`, `data-enemy-slot` and `data-enemy-species`: the sprite resize
   tool finds the sprite by them.
+- **Send-out order** (gens 2-5, 2026-10-15; `docs/send-out-order.md`): the slots are listed in the order the trainer's
+  AI will send them out against the player's Pokémon (`core/logic/sendOutOrder.ts`, from the decompilations; gen1's
+  order is party order). A slot's `slot` is its party slot (its data, `data-enemy-slot`, stages, faints); its `row`
+  (`rowOf`) is where it is drawn, so a layout puts the row, never the slot, in an `ePkmnN` class or a numbered
+  position picture (`stats/N.svg`, `speed_comp/N.svg`...: full-canvas art placed by its number). The order is frozen
+  for the battle; "Predicted Send-Out Order" (Display, `send_out_order`, on by default) turns it off.
 
 **The right panel's mode (all five generations, 2026-10-15; `docs/ui-uniformity-plan.md` step 5.2).**
 - One model, gen1's (`core/overlay/rightPanelMode.ts`): a saved **preference** (Automatic, Movepool, Splits, Trainers,

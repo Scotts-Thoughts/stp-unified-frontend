@@ -585,6 +585,8 @@ export default defineComponent({
             right_ui                     : readRightPanelMode(MyStorage['right_ui']).mode,
             // Decision 30: the wild panel, off by default.
             show_wild_battles            : MyStorage['show_wild_battles']      ?? false,
+            // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
+            send_out_order               : MyStorage['send_out_order']         ?? true,
             previous_label               : MyStorage['previous_label']         ?? "Previous",
             current_label                : MyStorage['current_label']          ?? "Current",
             collect_split_data           : MyStorage['collect_split_data']     ?? true,

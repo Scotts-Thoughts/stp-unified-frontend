@@ -54,6 +54,7 @@
     "parity:speed": "tsx tools/parity/battle-speed-selftest.ts",
     "parity:accuracy": "tsx tools/parity/accuracy-selftest.ts",
     "parity:move-power": "tsx tools/parity/move-power-selftest.ts",
+    "parity:send-order": "tsx tools/parity/send-out-order-selftest.ts",
     "parity:debounce": "tsx tools/parity/debounce-selftest.ts",
     "parity:shortcuts": "tsx tools/parity/shortcuts-selftest.ts",
     "parity:action-ids": "tsx --tsconfig tsconfig.web.json tools/parity/action-ids.ts",

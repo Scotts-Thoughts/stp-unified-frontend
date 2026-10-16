@@ -6,9 +6,83 @@
  */
 import type { StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
-import { ENEMY_STAT_LABELS, enemyLevelText, FAINTED_TEXT, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
+import { ENEMY_STAT_LABELS, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
-import { gen3PreviewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
+import { gen3PreviewOf, trainerOptions, type PreviewPokemon, type PreviewTrainer } from "~/core/logic/trainerPreview";
+import { moveCategoryOf, movePowerOf, orderSlots, predictGen3, SendOutOrderCache, strongestMove, type SendOutMon, type SendOutMove, type SendOutPlayer } from "~/core/logic/sendOutOrder";
+
+/** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
+const liveOrder = new SendOutOrderCache();
+
+/** The move table by spelling-free name: the trainer tables say "Double Slap" / "Lock On", the move table
+ * "DoubleSlap" / "Lock-On". */
+const movesByKey = new WeakMap<object, Map<string, any>>();
+function moveData(vm: any, name: unknown): any {
+    const table = vm.generation_3_moves;
+    const exact = table[name as string];
+    if (exact) return exact;
+    let index = movesByKey.get(table);
+    if (!index) {
+        index = new Map(Object.entries(table).map(([key, data]) => [key.toLowerCase().replace(/[^a-z0-9]/g, ""), data]));
+        movesByKey.set(table, index);
+    }
+    return index.get(String(name).toLowerCase().replace(/[^a-z0-9]/g, ""));
+}
+
+function sendOutMove(vm: any, name: unknown): SendOutMove {
+    const data = moveData(vm, name);
+    const power = movePowerOf(data?.power);
+    return { name: String(name), type: data?.type ?? "Normal", power, category: moveCategoryOf(data?.category, data?.type, power) };
+}
+
+function speciesTypes(vm: any, species: unknown): [string, string] {
+    const dex = vm.game_data?.dexData?.[species as string];
+    const type1 = dex?.type_1 ?? "Normal";
+    return [type1, dex?.type_2 ?? type1];
+}
+
+/** A trainer's Pokémon as gen 3's send-out rule reads it (the trainer table: types, moves, and for the damage step
+ * its level, Attack, Sp. Atk, ability and item). */
+function sendOutMon(vm: any, mon: PreviewPokemon): SendOutMon {
+    return {
+        species: mon.species,
+        types: speciesTypes(vm, mon.species),
+        moves: mon.moves.filter(Boolean).map((name) => sendOutMove(vm, name)),
+        level: Number(mon.level) || 1,
+        attack: Number(mon.stats.attack) || 0,
+        specialAttack: Number(mon.stats.special_attack) || 0,
+        ability: mon.ability == null ? null : String(mon.ability),
+        item: mon.item == null ? null : String(mon.item),
+    };
+}
+
+/**
+ * The order the trainer's AI sends its team out in against the player's Pokémon (core/logic/sendOutOrder.ts), as
+ * party slots; null when the "Predicted Send-Out Order" setting is off. The player is the Pokémon in the party (its
+ * Defense, Sp. Def, ability, item, the Defense/Special badge boosts, and its strongest move as the knock-out move);
+ * the species pickers only stand in before there is one. `live` keeps the order for the battle.
+ */
+function sendOutOrder(vm: any, party: PreviewPokemon[], live: boolean): number[] | null {
+    if (vm.send_out_order != true || !party.length) return null;
+    const props = vm.game.properties;
+    const lead = props.player.team[0];
+    const inParty = lead?.species?.value;
+    const species = inParty ?? (vm.evolution ? vm.selected_evolution_species : vm.starterString);
+    const player: SendOutPlayer = {
+        species: String(species),
+        types: speciesTypes(vm, species),
+        defense: Number(lead?.defense?.value) || 1,
+        specialDefense: Number(lead?.specialDefense?.value) || 1,
+        ability: lead?.ability?.value ?? null,
+        item: lead?.itemHeld?.value ?? null,
+        koMove: strongestMove([1, 2, 3, 4].map((i) => lead?.[`move${i}`]?.value).filter(Boolean).map((name) => sendOutMove(vm, name))),
+        defenseBadge: props.player.badges?.badge5?.value == true,
+        specialDefenseBadge: props.player.badges?.badge7?.value == true,
+    };
+    const mons = party.map((mon) => sendOutMon(vm, mon));
+    const compute = () => predictGen3(mons, player);
+    return live ? liveOrder.get(mons, String(species), compute) : compute();
+}
 
 /** The six stats in label order: label column, class part of the label and of the value. */
 const STATS: [column: 1 | 2, label: string, value: string][] = [
@@ -102,10 +176,12 @@ export function enemyTeamView(vm: any): EnemyTeamView<Gen3EnemySlot> & { overlay
             stats: values.map((value, i) => ({ value, labelStyle: labelStyles[i] })),
         };
     });
+    // A double battle picks against a random target: no order.
+    const table = vm.enemyTrainer?.is_double_battle ? null : gen3PreviewOf(vm.enemyTrainer);
     return {
         trainer: vm.special_trainer_names(vm.enemyTrainerName),
         crop: vm.battlePokemonCrop(),
-        slots,
+        slots: orderSlots(slots, table ? sendOutOrder(vm, table.party, true) : null),
         speedShown: vm.speed_comparison_toggle == true,
         overlayColor: vm.overlay_color,
     };
@@ -170,7 +246,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamV
     return {
         trainer: vm.special_trainer_names(trainer.name),
         crop: `height: ${HEIGHTS[trainer.party.length]}; filter: saturate(${vm.ui_saturation}) drop-shadow(0px 0px 1px #000000)`,
-        slots,
+        slots: orderSlots(slots, trainerTable(vm)?.[vm.examined_trainer]?.is_double_battle ? null : sendOutOrder(vm, trainer.party, false)),
         speedShown: vm.speed_comparison_toggle == true,
         overlayColor: vm.overlay_color,
     };
@@ -179,19 +255,20 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamV
 function slotNodes(view: EnemyTeamView<Gen3EnemySlot> & { overlayColor: unknown }, slot: Gen3EnemySlot): EnemyChild[] {
     if (!slot.present) return [null, null];
     const x = slot.slot;
+    const row = rowOf(slot);
     const { icons, text } = slot.styles;
     const labelClass = slot.evs ? "opacityTransition" : "enemy_stat_opacity_transition";
     const labels = slot.evs ? EV_LABELS : LABELS;
     return [
         {
             children: [
-                { style: slot.styles.ui, children: [{ class: "enemyStatsArea colored-image", style: `--overlay-color: ${view.overlayColor}; --url: url(images/gen3/new_ui/enemy_ui/${x}.svg)` }] },
-                { tag: "img", class: ["enemyStatsArea", slot.speed.svgClass], src: `images/gen3/new_ui/comp/${x}.svg` },
-                { style: slot.styles.ui, children: [{ tag: "img", style: slot.styles.statsArt, class: "enemyStatsArea", src: `images/gen3/new_ui/enemy_stats/${x}.svg` }] },
+                { style: slot.styles.ui, children: [{ class: "enemyStatsArea colored-image", style: `--overlay-color: ${view.overlayColor}; --url: url(images/gen3/new_ui/enemy_ui/${row}.svg)` }] },
+                { tag: "img", class: ["enemyStatsArea", slot.speed.svgClass], src: `images/gen3/new_ui/comp/${row}.svg` },
+                { style: slot.styles.ui, children: [{ tag: "img", style: slot.styles.statsArt, class: "enemyStatsArea", src: `images/gen3/new_ui/enemy_stats/${row}.svg` }] },
             ],
         },
         {
-            class: `ePkmnStyle ePkmn${x + 1}`,
+            class: `ePkmnStyle ePkmn${row + 1}`,
             children: [
                 {
                     tag: "img",

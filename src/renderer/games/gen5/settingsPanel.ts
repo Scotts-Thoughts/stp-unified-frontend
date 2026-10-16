@@ -403,6 +403,8 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                 },
                 // Decision 30: the wild panel in wild battles (Automatic / Trainers), off by default.
                 flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles", { visible: () => !vm.second_screen_mode }),
+                // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
+                flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order", { visible: () => !vm.second_screen_mode }),
                 {
                     kind: "choice", id: "display.unobtainable_moves", label: "Unobtainable Moves",
                     options: ["Never Cross Out", "Cross Out When Starter is Obtained", "Cross Out After First Badge", "Always Cross Out"],

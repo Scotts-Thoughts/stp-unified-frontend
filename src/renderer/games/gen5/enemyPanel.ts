@@ -6,10 +6,43 @@
  */
 import { toDisplayString, type StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
-import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_TEXT, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
+import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { trainers_black } from "./data/trainers_black.js";
+import { moveCategoryOf, movePowerOf, orderSlots, predictGen5, SendOutOrderCache, type SendOutMon } from "~/core/logic/sendOutOrder";
+
+/** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
+const liveOrder = new SendOutOrderCache();
+
+/** One Pokémon as gen 5's send-out rule reads it: its moves' type, category and base power (pokebw2 reads only those);
+ * the species' types for the player. */
+function sendOutMon(vm: any, species: unknown, moves: unknown[]): SendOutMon {
+    const entry = vm.g5PokemonData[species as string];
+    const type1 = entry?.type_1 ?? "Normal";
+    return {
+        species: String(species),
+        types: [type1, entry?.type_2 ?? type1],
+        moves: moves.filter(Boolean).map((name) => {
+            const data = vm.black_moves[name as string];
+            const power = movePowerOf(data?.power);
+            return { name: String(name), type: data?.type ?? "Normal", power, category: moveCategoryOf(data?.category, data?.type, power) };
+        }),
+    };
+}
+
+/**
+ * The order the trainer's AI sends its team out in against the player's Pokémon (core/logic/sendOutOrder.ts), as
+ * party slots; null when the "Predicted Send-Out Order" setting is off. The player's Pokémon is the one in the party
+ * (the species pickers only stand in before there is one). `live` keeps the order for the battle.
+ */
+function sendOutOrder(vm: any, party: SendOutMon[], live: boolean): number[] | null {
+    if (vm.send_out_order != true || !party.length) return null;
+    const species = vm.game.properties.player.team[0]?.species?.value ?? (vm.evolution ? vm.selected_evolution_species : vm.starter);
+    const player = sendOutMon(vm, species, []);
+    const compute = () => predictGen5(party, player);
+    return live ? liveOrder.get(party, String(species), compute) : compute();
+}
 
 /**
  * The stats in label order (decision 26: HP, Atk., Def. on the left, SpA., SpD., Spe. on the right): label, side and
@@ -89,13 +122,20 @@ export function enemyTeamView(vm: any): Gen5EnemyTeam {
         };
     });
     const graphic = vm.getTrainerGraphic();
+    const double = props.battle.opponent_2?.value != null;
+    // The order is for a single battle against one trainer.
+    const count = double ? 0 : Math.min(6, opponent.team_count.value ?? 0);
+    const party = vm.pkmnSlots.slice(0, count).map((x: number) => {
+        const team = opponent.team[x];
+        return sendOutMon(vm, team?.species?.value, [0, 1, 2, 3].map((i) => team?.moves?.[i]?.move?.value));
+    });
     return {
-        double: props.battle.opponent_2?.value != null,
+        double,
         trainer: props.battle.opponent_2?.value == null ? toDisplayString(opponent.trainer.value) + "'s Team" : "Double Battle Team",
         crop: vm.battlePokemonCrop,
         overlayColor: vm.overlay_color,
         statsArt: vm.ui_type_color_modifier,
-        slots,
+        slots: orderSlots(slots, sendOutOrder(vm, party, true)),
         art: graphic.state == true ? graphic.graphic : null,
         secondScreen: !!vm.second_screen_check,
     };
@@ -160,13 +200,15 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen5EnemyT
             mods: null,
         };
     });
+    const party = trainer.party.map((mon) => sendOutMon(vm, mon.species, mon.moves));
     return {
         double: false,
         trainer: trainer.header ?? trainer.name + "'s Team",
         crop: `height: ${HEIGHTS[trainer.party.length]}; filter: saturate(${vm.ui_saturation}) drop-shadow(0px 0px 1px #000000)`,
         overlayColor: vm.overlay_color,
         statsArt: vm.ui_type_color_modifier,
-        slots,
+        // The wild panel (a header, no trainer) keeps its order.
+        slots: orderSlots(slots, trainer.header ? null : sendOutOrder(vm, party, false)),
         art: null,
         secondScreen: false,
     };
@@ -209,7 +251,7 @@ function slotNodes(slot: Gen5EnemySlot): EnemyNode {
         class: "eFaintTransition",
         style: slot.styles.faint,
         children: [!slot.present ? null : {
-            class: `border slots ePkmnStyle ePkmn${x}`,
+            class: `border slots ePkmnStyle ePkmn${rowOf(slot)}`,
             children: [{
                 style: slot.styles.mon,
                 class: "eFaintTransition",
@@ -285,9 +327,9 @@ export function enemyTeamLayout(view: Gen5EnemyTeam): EnemyChild[] {
             style: slot.styles.stats,
             children: [!slot.present ? null : {
                 children: [
-                    { tag: "img", class: ["canvas eFaintTransition", slot.speed.svgClass], style: [slot.styles.comparison, { left: "-1px" }], src: `images/gen5/ui/speed_comp/${slot.slot}.svg` },
-                    { class: "colored-image", style: `--overlay-color: ${view.overlayColor}; --url: url(images/gen5/ui/enemy_ui/${slot.slot}.svg)` },
-                    { tag: "img", src: `images/gen5/enemy-area/stats/${view.statsArt}/${slot.slot}.svg`, style: slot.styles.mon, class: "enemyPng eFaintTransition" },
+                    { tag: "img", class: ["canvas eFaintTransition", slot.speed.svgClass], style: [slot.styles.comparison, { left: "-1px" }], src: `images/gen5/ui/speed_comp/${rowOf(slot)}.svg` },
+                    { class: "colored-image", style: `--overlay-color: ${view.overlayColor}; --url: url(images/gen5/ui/enemy_ui/${rowOf(slot)}.svg)` },
+                    { tag: "img", src: `images/gen5/enemy-area/stats/${view.statsArt}/${rowOf(slot)}.svg`, style: slot.styles.mon, class: "enemyPng eFaintTransition" },
                 ],
             }],
         })),

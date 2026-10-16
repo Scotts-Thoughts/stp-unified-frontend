@@ -5,9 +5,41 @@
  */
 import type { StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
-import { ENEMY_STAT_LABELS, enemyLevelText, FAINTED_TEXT, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
+import { ENEMY_STAT_LABELS, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
+import { movePowerOf, orderSlots, predictGen2, SendOutOrderCache, type SendOutMon } from "~/core/logic/sendOutOrder";
+
+/** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
+const liveOrder = new SendOutOrderCache();
+
+/** One Pokémon as the send-out rule reads it: its species' types and its moves' types (pokecrystal reads only those). */
+function sendOutMon(vm: any, species: unknown, moves: unknown[]): SendOutMon {
+    const dex = vm.dexDataCrystal[species as string];
+    const type1 = dex?.type_1 ?? "Normal";
+    return {
+        species: String(species),
+        types: [type1, dex?.type_2 ?? type1],
+        moves: moves.filter(Boolean).map((name) => {
+            const data = vm.g2MoveData[name as string];
+            return { name: String(name), type: data?.Type ?? "Normal", power: movePowerOf(data?.Power), category: "Physical" as const };
+        }),
+    };
+}
+
+/**
+ * The order the trainer's AI sends its team out in against the player's Pokémon (core/logic/sendOutOrder.ts), as
+ * party slots; null when the "Predicted Send-Out Order" setting is off. The player's Pokémon is the one in the party
+ * (the species picker only stands in before there is one, or for a Backport). `live` keeps the order for the battle.
+ */
+function sendOutOrder(vm: any, party: SendOutMon[], live: boolean): number[] | null {
+    if (vm.send_out_order != true || !party.length) return null;
+    const lead = vm.game.properties.player.team[0]?.species?.value;
+    const species = lead == null || lead == "Backport" ? vm.starter : lead;
+    const player = sendOutMon(vm, species, []);
+    const compute = () => predictGen2(party, player);
+    return live ? liveOrder.get(party, String(species), compute) : compute();
+}
 
 /** `stat_object`'s classes and labels, in its order (HP first). */
 const ABRV = ["Hp", "Atk", "Def", "SpA", "SpD", "Spe"];
@@ -93,10 +125,15 @@ export function enemyTeamView(vm: any): EnemyTeamView<Gen2EnemySlot> {
             statMode,
         };
     });
+    const count = props.battle.trainer.totalPokemon.value ?? 0;
+    const party = vm.pkmnSlots.slice(0, count).map((x: number) => {
+        const mon = batt.trainer.team[x];
+        return sendOutMon(vm, mon.species.value, [1, 2, 3, 4].map((i) => vm.move_name(mon[`move${i}`]?.value)));
+    });
     return {
         trainer: vm.capitalization_format(vm.fixTrainerName(batt.trainer.class.value, batt.trainer.id.value)) + "'s Team",
         crop: vm.battlePokemonCrop(),
-        slots,
+        slots: orderSlots(slots, sendOutOrder(vm, party, true)),
         speedShown: vm.speed_comparison_toggle == true,
     };
 }
@@ -163,10 +200,12 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamV
             statMode,
         };
     });
+    const party = trainer.party.map((mon) => sendOutMon(vm, mon.species, mon.moves.map((move) => vm.move_name(move))));
     return {
         trainer: trainer.header ?? trainer.name + "'s Team",
         crop: `height: ${HEIGHTS[trainer.party.length]}; filter: saturate(${vm.ui_saturation}) drop-shadow(0px 0px 1px #000000)`,
-        slots,
+        // The wild panel (a header, no trainer) keeps its order.
+        slots: orderSlots(slots, trainer.header ? null : sendOutOrder(vm, party, false)),
         speedShown: vm.speed_comparison_toggle == true,
     };
 }
@@ -200,6 +239,7 @@ export function wildPreview(vm: any): PreviewTrainer | null {
 
 function slotNodes(view: EnemyTeamView<Gen2EnemySlot>, slot: Gen2EnemySlot): EnemyNode {
     const x = slot.slot;
+    const row = rowOf(slot);
     const text = slot.styles.text;
     // Each stat after HP sits in a wrapper of its own (the old template's `v-for` + `v-if`); HP's wrapper is empty.
     const wrapped = (node: (i: number) => EnemyNode): EnemyNode[] => ABRV.map((_, i) => ({ children: [i > 0 ? node(i) : null] }));
@@ -209,7 +249,7 @@ function slotNodes(view: EnemyTeamView<Gen2EnemySlot>, slot: Gen2EnemySlot): Ene
         : { key: slot.statMode, children: [value(0), ...wrapped(value)] };
     return {
         show: slot.shown,
-        class: `ePkmnStyle ePkmn${x + 1}`,
+        class: `ePkmnStyle ePkmn${row + 1}`,
         children: [
             slot.shown ? {
                 tag: "img",
@@ -219,7 +259,7 @@ function slotNodes(view: EnemyTeamView<Gen2EnemySlot>, slot: Gen2EnemySlot): Ene
                 src: slot.sprite.src,
             } : null,
             { class: "ePkmnSpecies opacityTransition", style: slot.styles.species, text: slot.species },
-            { tag: "img", class: "enemyStatsArea", style: slot.styles.statsArea, src: `images/gen2/stats/${x}.svg` },
+            { tag: "img", class: "enemyStatsArea", style: slot.styles.statsArea, src: `images/gen2/stats/${row}.svg` },
             { tag: "img", class: "ePkmnTypeIcons ePkmnType_1 ds opacityTransition", style: slot.styles.icons, src: slot.types[0].src },
             slot.types[1].shown ? { tag: "img", style: slot.styles.icons, class: "ePkmnTypeIcons ePkmnType_2 ds opacityTransition", src: slot.types[1].src } : null,
             // Moves
@@ -255,7 +295,7 @@ export function enemyTeamLayout(view: EnemyTeamView<Gen2EnemySlot>): EnemyChild[
         { class: "trainerLabel", text: view.trainer },
         { class: "colored-image", style: [view.crop, { "--url": "url(images/gen2/ui/opponent.svg)" }] },
         ...view.slots.map((slot): EnemyNode => ({
-            children: [{ tag: "img", show: slot.speedPictureShown, class: ["canvas", slot.speed.svgClass], src: `images/gen2/ui/speed_comp/${slot.slot}.svg` }],
+            children: [{ tag: "img", show: slot.speedPictureShown, class: ["canvas", slot.speed.svgClass], src: `images/gen2/ui/speed_comp/${rowOf(slot)}.svg` }],
         })),
         ...view.slots.map((slot) => ({ class: "enemyGraphic", children: [slotNodes(view, slot)] })),
     ];

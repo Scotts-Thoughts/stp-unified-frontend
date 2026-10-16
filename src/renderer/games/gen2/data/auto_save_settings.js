@@ -15,6 +15,7 @@ export const auto_save_settings = [
     "typeCalcs",
     "showCritMultiplierInEP",
     "show_wild_battles",
+    "send_out_order",
     "automaticallySavePBSplits",
     "help_menus",
     "lastExecuted",

@@ -23,6 +23,8 @@ export interface PreviewPokemon {
     species: string;
     level: unknown;
     ability?: unknown;
+    /** The held item, where the table has one (the send-out order's damage step reads it). */
+    item?: unknown;
     moves: string[];
     stats: PreviewStats;
 }
@@ -39,14 +41,14 @@ export interface TrainerEntry {
     name?: string;
     trainer_class?: string;
     location?: string | null;
-    party?: { species: string; level: unknown; ability?: unknown; stats?: Partial<PreviewStats>; moves?: string[] }[];
+    party?: { species: string; level: unknown; ability?: unknown; held_item?: unknown; stats?: Partial<PreviewStats>; moves?: string[] }[];
 }
 
 /** gen3's table shape (pokeemerald / pokefirered trainer parties with the stats worked out). */
 export interface Gen3TrainerEntry {
     trainer_name?: string;
     trainer_location?: string | null;
-    pokemon?: { species: string; level: unknown; ability?: unknown; hp: unknown; atk: unknown; def: unknown; spa: unknown; spd: unknown; spe: unknown; moves?: string[] }[];
+    pokemon?: { species: string; level: unknown; ability?: unknown; held_item?: unknown; hp: unknown; atk: unknown; def: unknown; spa: unknown; spd: unknown; spe: unknown; moves?: string[] }[];
 }
 
 const STAT_KEYS = ["hp", "attack", "defense", "special_attack", "special_defense", "speed"] as const;
@@ -60,6 +62,7 @@ export function previewOf(entry: TrainerEntry | undefined | null, name?: string)
             species: mon.species,
             level: mon.level,
             ability: mon.ability,
+            item: mon.held_item,
             moves: (mon.moves ?? []).filter(Boolean),
             stats: Object.fromEntries(STAT_KEYS.map((key) => [key, mon.stats?.[key]])) as unknown as PreviewStats,
         })),
@@ -75,6 +78,7 @@ export function gen3PreviewOf(entry: Gen3TrainerEntry | undefined | null): Previ
             species: mon.species,
             level: mon.level,
             ability: mon.ability,
+            item: mon.held_item,
             moves: (mon.moves ?? []).filter(Boolean),
             stats: { hp: mon.hp, attack: mon.atk, defense: mon.def, special_attack: mon.spa, special_defense: mon.spd, speed: mon.spe },
         })),
