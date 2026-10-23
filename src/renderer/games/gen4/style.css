@@ -839,17 +839,17 @@
     top: 110px;
 }
 
-/* Column 2 reads SpA., SpD., Spe. from the top, as gen3 and the player's stats (decision 26). */
+/* Column 2 reads Spe., SpA., SpD. from the top, tiled like the player's stats (decision 26). */
 .gen-4 .ePkmnSpaLabel {
-    top: 35px;
-}
-
-.gen-4 .ePkmnSpdLabel {
     top: 73px;
 }
 
-.gen-4 .ePkmnSpeLabel {
+.gen-4 .ePkmnSpdLabel {
     top: 110px;
+}
+
+.gen-4 .ePkmnSpeLabel {
+    top: 35px;
 }
 
 .gen-4 .ePkmnStatsStyle {
@@ -874,15 +874,15 @@
 }
 
 .gen-4 .ePkmnSpa {
-    top: 50px;
-}
-
-.gen-4 .ePkmnSpd {
     top: 88px;
 }
 
-.gen-4 .ePkmnSpe {
+.gen-4 .ePkmnSpd {
     top: 125px;
+}
+
+.gen-4 .ePkmnSpe {
+    top: 50px;
 }
 
 .gen-4 .icons {
@@ -1958,11 +1958,11 @@
 
 .gen-4 .e_defense { top: 88px; left: -20px; }
 
-.gen-4 .e_special_attack { top: 13px; left: 50px; }
+.gen-4 .e_special_attack { top: 51px; left: 50px; }
 
-.gen-4 .e_special_defense { top: 51px; left: 50px; }
+.gen-4 .e_special_defense { top: 88px; left: 50px; }
 
-.gen-4 .e_speed { top: 88px; left: 50px; }
+.gen-4 .e_speed { top: 13px; left: 50px; }
 
 .gen-4 .attackMod {
     top: 32px;

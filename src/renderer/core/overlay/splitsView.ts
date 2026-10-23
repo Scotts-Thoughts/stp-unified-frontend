@@ -57,8 +57,12 @@ export interface SplitsView {
     rows: SplitsRow[];
     /** The battle summary, in Followup + Summary. */
     summary?: SplitsSummary;
-    /** The panel art after the tables. */
-    art: { class: string; style: StyleValue };
+    /**
+     * The panel art after the tables: a full-canvas 1920×1080 picture. `frameBottom` is the y, in that picture, of
+     * the inner edge of the frame's bottom border; the panel shortens the frame's sides so that border sits right
+     * under the last row, and the header keeps its height.
+     */
+    art: { class: string; style: StyleValue; frameBottom?: number };
 }
 
 /** The difference cell's colour: black for none, red behind, green ahead. */

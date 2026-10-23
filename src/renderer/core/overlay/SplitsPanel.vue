@@ -2,7 +2,7 @@
     <div v-if="view.title" :class="view.title.class">{{ view.title.text }}</div>
     <div v-if="summary?.labelFirst" class="battle_summary_label">{{ summary.header }}</div>
     <table :class="table.class" :style="TABLE" cellspacing="0">
-        <tbody>
+        <tbody ref="rowsBody">
             <tr :style="headRowStyle">
                 <td v-for="(text, i) in view.head" :class="table.headClass" :style="headStyles[i]">{{ text }}</td>
             </tr>
@@ -15,7 +15,7 @@
     <template v-if="summary">
         <div v-if="!summary.labelFirst" class="battle_summary_label">{{ summary.header }}</div>
         <table class="battle_summary_table" :style="TABLE" cellspacing="0">
-            <tbody>
+            <tbody ref="summaryBody">
                 <tr :style="headRowStyle">
                     <td :style="HEAD + NAME">Metric</td>
                     <td :style="HEAD + LAST">Value</td>
@@ -33,19 +33,23 @@
             </tbody>
         </table>
     </template>
-    <div :class="view.art.class" :style="view.art.style"></div>
+    <div ref="art" :class="view.art.class" :style="[view.art.style, frameFit?.top]"></div>
+    <div v-if="frameFit" :class="view.art.class" :style="[view.art.style, frameFit.bottom]"></div>
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType, type StyleValue } from "vue";
+import { defineComponent, markRaw, type PropType, type StyleValue } from "vue";
 import type { SplitsSummary, SplitsTable, SplitsView } from "./splitsView";
 
-// The one look (docs/ui-uniformity-plan.md decision 29): rows at their natural height (the table is a block, so its
-// rows never stretch over the box `style.css` gives it), an underlined header with a 1px outline, 16px text. The name
-// column takes the width the times leave; each `style.css` keeps the table's place and size and the icon's size.
+// The one look (docs/ui-uniformity-plan.md decision 29): rows at their natural height (the table is a block as tall as
+// its rows, so they never stretch, and its background ends with them, where the frame now ends), an underlined header
+// with a 1px outline, 16px text. The name column takes the width the times leave; each `style.css` keeps the table's
+// place and width and the icon's size.
 const FONT = "font-size: 16px;";
 const HEAD = FONT + " text-decoration: underline;";
-const ICON = " width: 40px; text-align: left; padding-left: 5px;";
+// The icon keeps 3px above and below, so it never touches the next icon, the header or the frame (each style.css's own
+// vertical padding was lost to a `td { padding: 0 }` rule or only set the top).
+const ICON = " width: 40px; text-align: left; padding-left: 5px; padding-top: 3px; padding-bottom: 3px;";
 const NAME = " width: 100%; text-align: left; padding-left: 5px;";
 const TIME = " text-align: right; padding-left: 8px; white-space: nowrap;";
 const LAST = TIME + " padding-right: 7px;";
@@ -60,6 +64,10 @@ const LAST = TIME + " padding-right: 7px;";
  * Every class is the one the generations' own tables had (`splits_table`, `splits_table_old`,
  * `second_screen_splits_table`, `battle_summary_table`, `battle_summary_label`, `scaled_icon`,
  * `splitIcon`, `movepool_header`…), since each `style.css` and the parity harness key on them.
+ *
+ * The art's frame is drawn to the rows' height (`art.frameBottom`): the picture is cut just above its bottom
+ * border, and that border, drawn a second time, is moved up to meet the last row. The sides are straight there,
+ * so only they get shorter; the header is untouched.
  */
 export default defineComponent({
     name: "SplitsPanel",
@@ -67,9 +75,33 @@ export default defineComponent({
         view: { type: Object as PropType<SplitsView>, required: true },
     },
     data() {
-        return { FONT, HEAD, NAME, LAST, TABLE: "display: block;", ICON_CELL: FONT + ICON };
+        return {
+            FONT, HEAD, NAME, LAST, TABLE: "display: block; height: auto;", ICON_CELL: FONT + ICON,
+            /** How far, in the art's px, the frame's bottom border moves up (0: drawn as the picture has it). */
+            frameShift: 0,
+            resizeObserver: null as ResizeObserver | null,
+        };
+    },
+    mounted() {
+        this.resizeObserver = markRaw(new ResizeObserver(() => this.fitFrame()));
+        this.observeRows();
+    },
+    updated() {
+        this.observeRows();
+    },
+    beforeUnmount() {
+        this.resizeObserver?.disconnect();
     },
     computed: {
+        /** The two pieces' clips when the frame is shortened, else `null` (one piece, the whole picture). */
+        frameFit(): { top: StyleValue; bottom: StyleValue } | null {
+            const bottom = this.view.art.frameBottom;
+            if (bottom === undefined || this.frameShift <= 0) return null;
+            return {
+                top: { "clip-path": `inset(0 0 ${1080 - (bottom - this.frameShift)}px 0)` },
+                bottom: { "clip-path": `inset(${bottom}px 0 0 0)`, transform: `translateY(-${this.frameShift}px)` },
+            };
+        },
         table(): SplitsTable {
             return this.view.table;
         },
@@ -96,6 +128,35 @@ export default defineComponent({
             const outline = { outline: "1px solid #000" };
             const color = this.summary?.sectionColor;
             return color === undefined ? outline : { "background-color": color, ...outline };
+        },
+    },
+    methods: {
+        rowBodies(): HTMLElement[] {
+            return [this.$refs.rowsBody, this.$refs.summaryBody].filter((el): el is HTMLElement => el instanceof HTMLElement);
+        },
+        /** Watches the row bodies' size (rows added, fonts loaded) and fits the frame to them. */
+        observeRows(): void {
+            const observer = this.resizeObserver;
+            if (!observer) return;
+            observer.disconnect();
+            for (const body of this.rowBodies()) observer.observe(body);
+            this.fitFrame();
+        },
+        /** Moves the frame's bottom border up to the lowest row, never below where the picture has it. */
+        fitFrame(): void {
+            const bottom = this.view.art.frameBottom;
+            const art = this.$refs.art;
+            const bodies = this.rowBodies();
+            if (bottom === undefined || !(art instanceof HTMLElement) || bodies.length === 0) {
+                this.frameShift = 0;
+                return;
+            }
+            // In the art's own px: the picture is 1080 high, whatever scale the overlay is drawn at.
+            const box = art.getBoundingClientRect();
+            if (box.height === 0) return;
+            const rowsBottom = Math.max(...bodies.map((body) => body.getBoundingClientRect().bottom));
+            const shift = Math.max(0, bottom - Math.ceil(((rowsBottom - box.top) * 1080) / box.height));
+            if (shift !== this.frameShift) this.frameShift = shift;
         },
     },
 });

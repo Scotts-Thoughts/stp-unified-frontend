@@ -133,7 +133,7 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
                     props: () => ({ editions: gen1Manifest.editions, modelValue: settings().edition }),
                     on: { "update:modelValue": (v: string) => { settings().edition = v as any; } },
                 },
-                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: newRun },
+                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => newRun() },
             ],
         },
         {
@@ -154,6 +154,22 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
             controls: [
                 { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: openSplitsFolder },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: openShortcutsMenu },
+            ],
+        },
+        {
+            title: "Readouts",
+            controls: [
+                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (properties().player.teamCount.value > 6 ? 0 : properties().player.teamCount.value) },
+                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
+                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().statusCondition.value ?? "None" },
+                {
+                    kind: "statGrid", id: "readout.stat_exp", label: "Stat Experience",
+                    items: () =>
+                        [["HP", "statExpHp"], ["Spe", "statExpSpeed"], ["Atk", "statExpAttack"], ["Spc", "statExpSpecial"], ["Def", "statExpDefense"]].map(([label, key]) => {
+                            const value = team0()[key].value;
+                            return { label, value, extra: `(${usableVitamins(value)})` };
+                        }),
+                },
             ],
         },
         {
@@ -199,22 +215,6 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
             tier: "dev",
             visible: showAdvanced,
             controls: [{ kind: "slot", id: "slot.devtools", slot: "devtools" }],
-        },
-        {
-            title: "Readouts",
-            controls: [
-                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (properties().player.teamCount.value > 6 ? 0 : properties().player.teamCount.value) },
-                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
-                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().statusCondition.value ?? "None" },
-                {
-                    kind: "statGrid", id: "readout.stat_exp", label: "Stat Experience",
-                    items: () =>
-                        [["HP", "statExpHp"], ["Spe", "statExpSpeed"], ["Atk", "statExpAttack"], ["Spc", "statExpSpecial"], ["Def", "statExpDefense"]].map(([label, key]) => {
-                            const value = team0()[key].value;
-                            return { label, value, extra: `(${usableVitamins(value)})` };
-                        }),
-                },
-            ],
         },
         {
             title: "Debugging",

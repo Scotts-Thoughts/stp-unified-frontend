@@ -835,15 +835,13 @@
 .gen-5 .splitIcon {
     width: 43.8px;
     height: 43.8px;
-    margin-top: 3px;
-    margin-bottom: 3px;
+    /* 3px above and below comes from the icon cell (core/overlay/SplitsPanel.vue) */
 }
 
 .gen-5 .splitIcon_2 {
     width: 40.15px;
     height: 40.15px;
-    margin-top: 3px;
-    margin-bottom: 3px;
+    /* 3px above and below comes from the icon cell (core/overlay/SplitsPanel.vue) */
 }
 
 .gen-5 .specialMod {
@@ -2016,12 +2014,12 @@
 
 .gen-5 .e_defense { top: 88px; left: -31px }
 
-/* Right column: SpA., SpD., Spe. from the top (decision 26). */
-.gen-5 .e_speed { top: 88px; left: 36px }
+/* Right column: Spe., SpA., SpD. from the top, tiled like the player's stats (decision 26). */
+.gen-5 .e_speed { top: 15px; left: 36px }
 
-.gen-5 .e_special_attack { top: 15px; left: 36px }
+.gen-5 .e_special_attack { top: 52px; left: 36px }
 
-.gen-5 .e_special_defense { top: 52px; left: 36px }
+.gen-5 .e_special_defense { top: 88px; left: 36px }
 
 .gen-5 .attackMod {
     top: 32px;

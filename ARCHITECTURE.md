@@ -96,6 +96,14 @@ docs/             Reference docs. See §13.
 - `importLegacy.ts`, `leveldb.ts`, `localStorageImport.ts`: the one-time seeding from the legacy apps' profiles.
 - `splitComparison.ts`, `replayFile.ts`: read split comparisons from `.replay` bookmarks or legacy CSVs.
 - `cutter.ts`: the air_cutter editor modes (`--cutter-*` flags), which replace the normal boot.
+- `report.ts`: the Report button's back end (`core/report/ReportButton.vue`, in the settings panel's and the start
+  screen's top right). From window creation it keeps the last 5,000 log lines: the page's `console-message`s plus
+  main's own console, wrapped so the output itself is unchanged (the harness compares console output). `report:capture`
+  takes `webContents.capturePage()` (the window only, not the desktop) and freezes the log; `report:save` writes
+  `<appRoot>/reports/<YYYY-MM-DD> <title>.zip` (report.txt, screenshot.png, screenshot-annotated.png if drawn on,
+  console.log, and the whole user-data folder as `settings/`) with its own small zip writer, then shows it in the
+  file manager. The renderer side flushes pending settings writes first and gets its facts from the shell
+  (`core/report/context.ts`, registered in main.ts). Keyboard shortcuts are suspended while the report is open.
 
 ### src/renderer/core
 
@@ -110,6 +118,7 @@ docs/             Reference docs. See §13.
 | `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), `LiveText`, and `ClockFrame` (the clock in its own process, below). `overlay/player/`: on-stream player pieces used by all five generations (`FaultsBox`, `GameClock`, `StatTiles`, `ExpBar`, `BadgeRow`, `MoveList`, `PopupBox`, `SpeciesArt`, `TypeBadges`, `InfoRow`), each fed by `games/genN/playerPanel.ts`. `SpeciesArt` is the solo Pokémon's art `<img>` and its slider transform/outline filter (gens 2–5 hand it `overlayCommonMixin.species_art_look`); a new picture cross-fades in all five (the generation's `transition` name; the key is the picture's path unless `art-key` is given). At run end (`run_complete`) gens 2–5 hide the type badges and show the "gametime" box in their place: the last split's in-game time, `simple_data[7]` (`gametimeSplit`, h:mm from the mapper's `gameTime.*` in gens 2–3, `game_time.*` in gens 4–5). It is set at the final battle in Gen2, Emerald, HG/SS and gen5, at the Hall of Fame in FRLG; never in Platinum or D/P, whose Hall of Fame shows the time. `newRun` clears it. `TypeBadges` draws the type pictures from the generation's `typeBadgesLayout`; which types show stays the generation's rule (`typeBadges(vm)`, gen1's `get_type`). `InfoRow` is a caption and value pair (gens 4–5's Nature and Friendship/Total rows); gen2's Held Item and gen3's rows keep their markup, because gen3's captions sit apart from their values in the DOM. `MoveList` is the player's move list and its column headers: the generation's `moveListLayout` draws the plain rows its overlay's `player_move_list` computed once per change (`playerMoveList(vm)`; gen1 `move_set.vue`'s `move_list`). Headers are Title Case like the movepool's. A Struggle row replaces the moves when every move's PP is 0 (`core/logic/struggle.ts`; gen1 and gen3 keep their own copy of that rule): Normal type and the usual power maths in gen1, "???" icon and power 50 from gen2 on, because the engines skip STAB and the type chart for Struggle. `PopupBox` is one pop-up box (fade, frame, caption, value): accuracy, evasion, field/screens, repel, bonks, Vs. Seeker. Each generation's `popupBoxes` holds the captions (lowercase, no colon) and classes, and its `battle_popups` computed works out when each box shows and its value (stages signed with `formatStage`). A wrapper that hides several boxes stays in the overlay's markup. `StatTiles` draws an element tree that the generation's `statTiles(vm)` builds in one computed (`stat_tiles`), each value worked out once per change; a `key` on a node stands for a template `v-if` branch, so a mode switch makes new elements as before. `ExpBar` owns the fill element and the level-up animation (`animate`, timed per generation); the generation's watchers decide when it moves, through `this.$refs.expBar.setWidth / setTransition / animate`, never the fill's `style`. The exp curves are `core/logic/expCurve.ts` (one copy for gens 1-5, both growth-rate spellings). `BadgeRow`'s fade (`badge-fade`) is `core/styles/player.css`, one rule for all five; the stats header's shared mode names are `statsHeaderNames` in `core/logic/statFormat.ts` (each generation's `statHeaders`). `FaultsBox` draws an element tree the generation describes as data, because the five trees differ and the layout oracle compares every element. The faults rule (`core/logic/faultMode.ts`) and the count's shrink at 3/4 digits are the same in all five; nothing else may set the count's font size. `backgroundTexture.ts`: the background texture's filter and transform for all five generations (gen1's `graphics.vue`, gen2–5 via `overlayCommonMixin.background_texture_style`). It draws the scale no smaller than what covers 1920×1080 once the X/Y offset and 3× the blur (a CSS blur fades the image's own border) are taken off; saved values are untouched. `textureLooks.ts`: each texture's default brightness/contrast/saturation/blur, keyed by image file because the generations name one picture differently (gen5 "Water" = gen3 "Dark Water"). A background whose four filters are all plain (100/100/100/0) gets its texture's look on load and reset (`apply_texture_look` in gen2–5, `applyTextureLook` in gen1's `useGameSpeciesData`), and when the texture is changed if the filters are plain or still the old texture's look. A hand-styled background is never changed. Edit a row there to change a texture's default in every generation |
 | `logic/` | Cross-generation helpers: OBS (`obs.ts`), Shuckie bookmarks, split comparison, enemy sprite scales, starter IVs, move reminder, battle mechanics (speed, accuracy, move power, OHKO; §4) |
 | `window/` | `scaleToFit`, virtual keys |
+| `report/` | The Report button and its drawing/details screens (teleported to `<body>`); the back end is `src/main/report.ts` (§2) |
 | `styles/base.css` | The document reset only. Each generation's look is in `games/genN/style.css` |
 
 ## 3. How a game gets on screen
@@ -176,6 +185,13 @@ Every `games/genN/` has:
   every flag with the run's settings when the player leaves the lab before the Pokedex (`set_encounters`), and
   writes a single flag when its checkbox changes. Mt Moon checks Geodude before Paras, so a Geodude flag left on
   wins. The patch clears a flag when that species is caught. The gen1 smoke fixture never takes this path.
+  Defaults apply only to a game and species with no saved value yet: everything off, except Red and Blue,
+  which starts with No Moon, Geodude, Paras and Doduo on. Guaranteed Catches defaults to on, once per install.
+- Guaranteed catches (`patch.hStpCatchRate`) is HRAM `$FFFC` in Red/Blue (`$FFF2` in Yellow). After a hard
+  reset the stack pointer is still the boot ROM's `$FFFE` until `Init` reaches `ld sp, wStack`, so `call
+  DisableLCD` puts its return address on `$FFFC`. Writing the byte in that window crashes the game to a white
+  screen. `encounters.vue` therefore answers changes of the byte one second late (2026-10-21; before that, a
+  hard reset with the setting off crashed every time). Never write HRAM near `$FFFE` the instant it changes.
 
 **gen2–5 (lifted).**
 - `games/genN/Overlay.vue` is a single Options-API component of 7,000–10,000 lines. Around it sit:
@@ -332,6 +348,16 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
 - One look (decision 29), inline in the component: rows at natural height (`display: block` on the table, so rows
   never stretch over the box `style.css` gives it), underlined header with a 1px outline, 16px text, the name
   column takes what the times leave. Each `style.css` still places and sizes the table and the icons.
+- The frame is drawn to the rows (2026-10-17): each view's `art.frameBottom` is the y of the inner edge of the frame's
+  bottom border in its full-canvas SVG. The panel measures the lowest row body and draws the art twice: the top cut
+  just under the rows, and the bottom border moved up to meet it, so only the straight sides get shorter. The tables
+  are `height: auto` inline, so their white background ends there too. A new splits SVG needs its `frameBottom`.
+- A new run clears `current_splits` where the timer starts on its own (gen1 new-run hook, gen2 new player id, gen3
+  `newRun()`, gen4/gen5 new-game flags, Super Shuckie start included), so a forgotten New Run press leaves no old times.
+- The **manual** New Run (button, F23, `/new-run`) goes through `core/logic/newRunGuard.ts` in every generation and
+  does nothing while the Shuckie timer is on and Super Shuckie's `/stats` says `is_recording` (it logs
+  `[new run] <source> ignored`; `/new-run` answers `{ ok: true, ignored: true }`). A stray New Run mid-run wiped every
+  split and made the next reload count as a new run. New trigger sites must call it, not `newRun()` directly.
 - Followup + Summary exists only in gens 1-2: only their patches record the battle statistics it shows
   (`patch.battle_info.*`); gens 3-5's mappers have none.
 - The difference colour is `splitDiffColor` in `splitsView.ts` (the mixin's `split_diff_color` is gone).
@@ -355,6 +381,8 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   `core/logic/trainerPreview.ts` reads the trainer tables into one shape; each `enemyPanel.ts` has
   `trainerPreviewView`. gen5's table (`games/gen5/data/trainers_black.js`, from the legacy app) covers Black and
   White only; Black 2 / White 2 have no trainer data, so their picker is empty.
+- gen2's header is the trainer's class and name ("Schoolboy Chad", `trainerHeader` in `games/gen2/enemyPanel.ts`, from
+  `crystal_trainers`' names minus their rematch numbers and M/F; grunts are "Rocket Grunt", rivals "Rival"), 26px as gens 4-5.
 - The sprite keeps `ePkmnSprite`, `ePkmnSpriteResizing`, `data-enemy-slot` and `data-enemy-species`: the sprite resize
   tool finds the sprite by them.
 - **Send-out order** (gens 2-5, 2026-10-15; `docs/send-out-order.md`): the slots are listed in the order the trainer's

@@ -35,7 +35,15 @@ const ENCOUNTER_FLAGS = {
     ],
 };
 
-const MT_MOON_MAPS = ["Mt Moon - 1", "Mt Moon - 2", "Mt Moon - 3"];
+/** The settings a new Red and Blue run starts with turned on. */
+const RED_BLUE_DEFAULTS_ON = {
+    wEarlyEncountersNoMoon: true,
+    EVENT_ENCOUNTER_MTMOON_GEODUDE: true,
+    EVENT_ENCOUNTER_MTMOON_PARAS: true,
+    EVENT_ENCOUNTER_ROUTE16_DODUO: true,
+};
+
+const MT_MOON_MAPS =["Mt Moon - 1", "Mt Moon - 2", "Mt Moon - 3"];
 
 export default defineComponent({
     inject: ["game"],
@@ -70,13 +78,19 @@ export default defineComponent({
         );
     },
     methods: {
-        /** All encounter settings default to off, just like before the settings refactor. */
+        /**
+         * Encounter settings default to off, except in Red and Blue, which start with No Moon and the
+         * Geodude, Paras and Doduo flags on (2026-10-22).
+         */
         default_encounter_settings() {
             const defaults = { wEarlyEncounters: false, wEarlyEncountersNoMoon: false };
             for (const flags of Object.values(ENCOUNTER_FLAGS)) {
                 for (const flag of flags) {
                     defaults[flag] = false;
                 }
+            }
+            if (this.overlaySettings.game === "Red and Blue") {
+                Object.assign(defaults, RED_BLUE_DEFAULTS_ON);
             }
             return defaults;
         },
@@ -169,8 +183,14 @@ export default defineComponent({
         }
         // Guaranteed catches, as gen2 does it: synced on load, and written again whenever the
         // ROM's byte changes away from the setting (the patch clears it on every reset).
+        // The ROM's changes are answered a second late: in Red/Blue the byte (0xFFFC) is the top of
+        // the boot stack until Init moves SP, and writing it then corrupts a return address and
+        // crashes the game on every hard reset with the setting off.
         this.sync_guaranteed_catches();
-        this.game.properties.patch?.hStpCatchRate?.change(() => this.sync_guaranteed_catches());
+        this.game.properties.patch?.hStpCatchRate?.change(() => {
+            clearTimeout(this.catchRateTimer);
+            this.catchRateTimer = setTimeout(() => this.sync_guaranteed_catches(), 1000);
+        });
         //HM Encounters
         this.game.properties.overworld.map.change((newValue, oldValue) => {
             const encounterSettings = this.runConfig.config.gameSpecific;
@@ -189,6 +209,9 @@ export default defineComponent({
                 this.game.properties.patch.wEarlyEncounters.set("Off", false)
             }
         })
+    },
+    beforeUnmount() {
+        clearTimeout(this.catchRateTimer);
     },
     render() {
         return null;

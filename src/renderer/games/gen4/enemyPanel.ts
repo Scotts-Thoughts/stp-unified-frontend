@@ -64,7 +64,7 @@ function sendOutOrder(vm: any, party: SendOutMon[], live: boolean): number[] | n
 }
 
 /**
- * The first trainer's stats in label order (decision 26: HP, Atk., Def., SpA., SpD., Spe.): label column, class part,
+ * The first trainer's stats in label order (decision 26: HP, Atk., Def., SpA., SpD., Spe.; drawn HP|Spe, Atk|SpA, Def|SpD like the player's stats): label column, class part,
  * label, and the modifier's / `getEnemyStat`'s stat name. Each class's place is in style.css.
  */
 const STATS: [column: 1 | 2, cls: string, label: string, stat: string][] = [

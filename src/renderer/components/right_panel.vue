@@ -213,7 +213,7 @@ export default defineComponent({
 						cells: [lookup.basic[split.trainer]?.trainer, split.previous_time, split.current_time, split.difference],
 						diffStyle: splitDiffColor(split.difference),
 					})),
-				art: { class: "tinted-box", style: "--url: url(images/ui/movepool.svg)" },
+				art: { class: "tinted-box", style: "--url: url(images/ui/movepool.svg)", frameBottom: 1037 },
 			};
 			if (mode === "Followup + Summary") {
 				const stats = this.battle.statistics as Record<string, any>;

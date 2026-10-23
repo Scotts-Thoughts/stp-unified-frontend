@@ -1807,7 +1807,7 @@ export default defineComponent({
                         : [split.trainer, split.previous_time, split.current_time, split.difference],
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
-                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen4/new_ui/splits.svg)"] },
+                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen4/new_ui/splits.svg)"], frameBottom: 780 },
             }
         },
         /**
@@ -7404,6 +7404,7 @@ export default defineComponent({
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
                         this.attempt_number++
+                        this.current_splits = [] // a new run starts with an empty splits panel
                     }
                     if (this.emulatorStats.time_current > 0 && newProp.value == false && oldProp.value == true) {
                         this.blackout = false;
@@ -7421,6 +7422,7 @@ export default defineComponent({
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
                         this.attempt_number++
+                        this.current_splits = [] // a new run starts with an empty splits panel
                     }
                     if (parseInt(this.timer_formatted_time[0]) > 0 && newProp.value == false && oldProp.value == true) {
                         this.blackout = false;
@@ -7441,6 +7443,7 @@ export default defineComponent({
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
                         this.attempt_number++
+                        this.current_splits = [] // a new run starts with an empty splits panel
                     }
                     if (this.emulatorStats.time_current > 0 && newProp.value != 0 && this.game.properties.overworld.map_name.value != 'Pokemon League - Map 7') {
                         this.blackout = false;
@@ -7456,6 +7459,7 @@ export default defineComponent({
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
                         this.attempt_number++
+                        this.current_splits = [] // a new run starts with an empty splits panel
                     }
                     if (parseInt(this.timer_formatted_time[0]) > 0 && newProp.value != 0 && this.game.properties.overworld.map_name.value != 'Pokemon League - Map 7') { // TODO How do resets work in HGSS?
                         this.blackout = false;

@@ -1,3 +1,4 @@
+import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import { panelThemeControl } from "~/core/settings/theme";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
@@ -87,7 +88,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                     props: () => ({ editions: gen5Manifest.editions.filter((e) => !e.devOnly || vm.isInDevMode), modelValue: vm.selected_game }),
                     on: { "update:modelValue": (v: string) => { vm.selected_game = v; } },
                 },
-                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => vm.newRun() },
+                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => manualNewRun(vm.shuckie_timer, vm.emulatorStats, "button", () => vm.newRun()) },
             ],
         },
         {
@@ -116,6 +117,25 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
             ],
         },
         {
+            title: "Readouts",
+            controls: [
+                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.team_count.value > 6 ? 0 : vm.game.properties.player.team_count.value) },
+                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
+                { kind: "readout", id: "readout.status", label: "Status", value: () => (team0().status_condition.value == null ? "None" : team0().status_condition.value) },
+                {
+                    kind: "statGrid", id: "readout.evs", label: "EVs",
+                    items: () => [
+                        { label: "HP", value: evs().hp, extra: evBenefit("hp") },
+                        { label: "Spe", value: evs().speed, extra: evBenefit("speed") },
+                        { label: "Atk", value: evs().attack, extra: evBenefit("attack") },
+                        { label: "SpA", value: evs().special_attack, extra: evBenefit("special_attack") },
+                        { label: "Def", value: evs().defense, extra: evBenefit("defense") },
+                        { label: "SpD", value: evs().special_defense, extra: evBenefit("special_defense") },
+                    ],
+                },
+            ],
+        },
+        {
             title: "Advanced",
             controls: [
                 flag(vm, "advanced.show_settings", "Show Advanced Settings", "show_advanced_settings"),
@@ -137,25 +157,6 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
             tier: "advanced",
             visible: () => vm.debugging_mode == true,
             controls: [{ kind: "slot", id: "slot.devtools", slot: "devtools" }],
-        },
-        {
-            title: "Readouts",
-            controls: [
-                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.team_count.value > 6 ? 0 : vm.game.properties.player.team_count.value) },
-                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
-                { kind: "readout", id: "readout.status", label: "Status", value: () => (team0().status_condition.value == null ? "None" : team0().status_condition.value) },
-                {
-                    kind: "statGrid", id: "readout.evs", label: "EVs",
-                    items: () => [
-                        { label: "HP", value: evs().hp, extra: evBenefit("hp") },
-                        { label: "Spe", value: evs().speed, extra: evBenefit("speed") },
-                        { label: "Atk", value: evs().attack, extra: evBenefit("attack") },
-                        { label: "SpA", value: evs().special_attack, extra: evBenefit("special_attack") },
-                        { label: "Def", value: evs().defense, extra: evBenefit("defense") },
-                        { label: "SpD", value: evs().special_defense, extra: evBenefit("special_defense") },
-                    ],
-                },
-            ],
         },
         {
             title: "Debugging",

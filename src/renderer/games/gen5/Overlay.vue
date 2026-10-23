@@ -1751,7 +1751,7 @@ export default defineComponent({
                         : [split.trainer, split.previous_time == "0:00" ? "-" : split.previous_time, split.current_time, split.difference],
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
-                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/splits.svg)"] },
+                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/splits.svg)"], frameBottom: 780 },
             }
         },
         /** The second-screen layout's copy of the Splits panel: its own table and icon classes and art. */
@@ -1760,7 +1760,7 @@ export default defineComponent({
             return view && {
                 ...view,
                 table: { class: "second_screen_splits_table", icon: { imgClass: "icons splitIcon_2" } },
-                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/second_screen_splits.svg)"] },
+                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/second_screen_splits.svg)"], frameBottom: 729 },
             }
         },
         /**
@@ -7805,6 +7805,7 @@ export default defineComponent({
                         console.log("Setting options...")
                         this.set_options()
                         this.attempt_number++
+                        this.current_splits = [] // a new run starts with an empty splits panel
                     }
                 }
                 else {
@@ -7814,6 +7815,7 @@ export default defineComponent({
                         console.log("Setting options...")
                         this.set_options()
                         this.attempt_number++
+                        this.current_splits = [] // a new run starts with an empty splits panel
                     }
                 }
             })

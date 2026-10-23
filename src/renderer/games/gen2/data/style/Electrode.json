@@ -1,5 +1,5 @@
 {
-  "attempt_number": 2,
+  "attempt_number": 6,
   "backgroundHue": "146",
   "backgroundContrast": "161",
   "backgroundBrightness": "65",
@@ -16,6 +16,7 @@
   "backgroundTexture": "electric",
   "imageFlip": true,
   "backgroundSaturation": "0",
-  "kanto_badges": true,
-  "finished_run_count": 1
+  "kanto_badges": false,
+  "finished_run_count": 2,
+  "imageXOffset": 0
 }

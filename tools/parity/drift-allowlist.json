@@ -307,10 +307,10 @@
       "name": "splitsView",
       "reason": "Reviewed 2026-10-15 (by design): each generation builds the shared SplitsPanel view (core/overlay/SplitsPanel.vue, one look since decision 29) from its own split rows: its mode setting (toggle_compare_splits / splits_display / split_type), name lookup, icon path and art; only gens 1-2 have the battle-summary data for Followup + Summary; gen5 shows a previous 0:00 as -.",
       "bodies": {
-        "gen2": "150dd11efe0a",
-        "gen3": "36ade71bfbf1",
-        "gen4": "a7183486d2a6",
-        "gen5": "47ce6e071626"
+        "gen2": "e162d5ac0fa0",
+        "gen3": "d6fb97c974bd",
+        "gen4": "2e6cca01dbd1",
+        "gen5": "b591912d6039"
       }
     },
     {

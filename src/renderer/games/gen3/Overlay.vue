@@ -2103,7 +2103,7 @@ export default defineComponent({
                         : [name(split.trainer), split.previous_time, split.current_time, split.difference],
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
-                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen3/ui/splits.svg)"] },
+                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen3/ui/splits.svg)"], frameBottom: 811 },
             }
         },
         /**

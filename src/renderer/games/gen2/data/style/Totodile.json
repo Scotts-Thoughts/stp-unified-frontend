@@ -8,6 +8,7 @@
   "imageXOffset": "0",
   "backgroundScale": "164",
   "backgroundYOffset": "32",
-  "backgroundContrast": "136",
-  "backgroundXFlip": false
+  "backgroundContrast": 130,
+  "backgroundXFlip": false,
+  "backgroundBrightness": 85
 }

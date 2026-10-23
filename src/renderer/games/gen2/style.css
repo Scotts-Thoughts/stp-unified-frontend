@@ -1378,8 +1378,8 @@ body:has(.gen-2) {
     position: absolute;
     font-family: titan;
     /* border: 1px solid rgb(255, 0, 0); */
-    font-size: 30px;
-    top: 40px;
+    font-size: 26px; /* gens 4-5's size; was 30px, top 40px (2px lower keeps the text's centre) */
+    top: 42px;
     left: 1520px;
     text-align: center;
     width: 400px;

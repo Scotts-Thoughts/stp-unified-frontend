@@ -10,6 +10,7 @@ import { appRoot } from "./paths";
 import { clearHotkeysForReload, startHotkeys, stopHotkeys } from "./hotkeys";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
 import { cutterArgs, runCutter } from "./cutter";
+import { registerReportIpc, startReportLog } from "./report";
 
 /**
  * Started by the Cutter editor (`--cutter-frame-server` / `--cutter-configure`,
@@ -117,6 +118,8 @@ function createWindow() {
 
     // Create the browser window.
     mainWindow = new BrowserWindow(windowOptions);
+    // The Report button's log (src/main/report.ts), from before the page's first line runs.
+    startReportLog(mainWindow);
 
     if (useSaved && savedState.isFullScreen) {
         mainWindow.setFullScreen(true)
@@ -223,6 +226,7 @@ if (!cutter) app.whenReady().then(() => {
     importLegacyLocalStorage();
     ensureImagePool();
     registerIpc(() => mainWindow);
+    registerReportIpc(() => mainWindow);
     controlServer.start();
 
     // Default open or close DevTools by F12 in development

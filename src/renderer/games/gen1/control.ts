@@ -16,6 +16,7 @@
  * setting that would do nothing.
  */
 import PubSub from "~/logic/PubSub";
+import { newRun } from "~/components/settings/commands";
 import { RightPanelMode } from "~/stores/types/RightPanelMode";
 import { SplitsMode } from "~/stores/types/SplitsMode";
 import { useGameSpeciesData } from "~/stores/useGameSpeciesData";
@@ -86,7 +87,8 @@ export function gen1ControlRoutes(isReady: () => boolean): ControlRoutes {
       },
 
       "/new-run": () => {
-        PubSub.publish("@run/cleared");
+        // Ignored while a replay records with the Shuckie timer on (core/logic/newRunGuard.ts).
+        if (!newRun("/new-run")) return { ok: true, ignored: true, reason: "Super Shuckie is recording a replay" };
         return { ok: true };
       },
 

@@ -61,6 +61,8 @@ export function installGen1RunHooks(vm: any): void {
             }
             PubSub.publish("@run/new_run_started", vm.metrics.player_id);
             runSplits = [];
+            // A new run starts with an empty splits panel, even if New Run wasn't pressed.
+            vm.current_splits = [];
             // The previous run's post-battle splits (or its summary) stay up until the
             // next run starts; from here the right panel is the setting's again.
             vm.settings.clearRightPanelOverride();

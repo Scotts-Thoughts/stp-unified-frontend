@@ -106,6 +106,15 @@ const api = {
     write: (relative, contents) => invoke('source:write', relative, contents),
   },
 
+  /** The Report button (src/main/report.ts). */
+  report: {
+    /** The window's picture now, as a PNG data URL; main keeps it and the log until save or cancel. */
+    capture: () => invoke('report:capture'),
+    /** Writes `reports/<date> <title>.zip`, shows it in the file manager and returns its path. */
+    save: (payload) => invoke('report:save', payload),
+    cancel: () => invoke('report:cancel'),
+  },
+
   /** OBS WebSocket 5 auth string; the sha256 pair used to live in the renderer. */
   obsAuth: (password, salt, challenge) => invoke('obs:auth', password, salt, challenge),
 

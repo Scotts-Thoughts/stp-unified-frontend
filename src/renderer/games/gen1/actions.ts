@@ -1,4 +1,4 @@
-import PubSub from "~/logic/PubSub";
+import { newRun } from "~/components/settings/commands";
 import { RightPanelMode } from "~/stores/types/RightPanelMode";
 import { StatsPanelMode } from "~/stores/types/StatsPanelMode";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
@@ -98,7 +98,7 @@ function legacyFKeys(): ShortcutAction[] {
     }, { defaultShortcut: "F19" }),
     press("legacy.f23", "New Run", LEGACY, () => {
       console.log("Key: F23 pressed. Starting a new run.");
-      PubSub.publish("@run/cleared");
+      newRun("F23");
     }, { defaultShortcut: "F23" }),
     press("legacy.f24", "Play/Pause the overlay's timer (ignores Shuckie Timer)", LEGACY, () => {
       metrics().toggleTimer();

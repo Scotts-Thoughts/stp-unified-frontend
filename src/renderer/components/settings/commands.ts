@@ -7,6 +7,7 @@ import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
+import { manualNewRun } from "~/core/logic/newRunGuard";
 
 /**
  * What gen1's settings buttons do, shared by the panels and the shortcut actions
@@ -54,8 +55,14 @@ export function openSplitsFolder(): void {
     revealSplitFolder(splitPath(meta.game as string, meta.starter, "finishes"));
 }
 
-export function newRun(): void {
-    PubSub.publish("@run/cleared");
+/**
+ * The manual New Run (button, F23, `/new-run`); ignored while a replay records with the Shuckie timer on
+ * (core/logic/newRunGuard.ts). Returns whether it ran.
+ */
+export function newRun(source = "button"): boolean {
+    return manualNewRun(useOverlaySettingsStore().shuckie.timer, useEmulatorStatsStore().stats, source, () => {
+        PubSub.publish("@run/cleared");
+    });
 }
 
 export function incrementMetric(property: keyof SpeciesMetrics): void {

@@ -25053,7 +25053,7 @@ export const trainers_plat = {
                 ]
             },
             {
-                "species": "Wormadam (Trash)",
+                "species": "Wormadam (Sandy)",
                 "level": 24,
                 "experience_yield": 817,
                 "nature": "Jolly",
@@ -25061,11 +25061,11 @@ export const trainers_plat = {
                 "held_item": null,
                 "stats": {
                     "hp": 62,
-                    "attack": 33,
-                    "defense": 45,
+                    "attack": 42,
+                    "defense": 55,
                     "speed": 24,
-                    "special_attack": 37,
-                    "special_defense": 55
+                    "special_attack": 29,
+                    "special_defense": 45
                 },
                 "moves": [
                     "Protect",
@@ -25075,7 +25075,7 @@ export const trainers_plat = {
                 ]
             },
             {
-                "species": "Wormadam (Sandy)",
+                "species": "Wormadam (Trash)",
                 "level": 24,
                 "experience_yield": 817,
                 "nature": "Jolly",
@@ -25083,11 +25083,11 @@ export const trainers_plat = {
                 "held_item": null,
                 "stats": {
                     "hp": 62,
-                    "attack": 33,
-                    "defense": 45,
+                    "attack": 38,
+                    "defense": 50,
                     "speed": 24,
-                    "special_attack": 37,
-                    "special_defense": 55
+                    "special_attack": 34,
+                    "special_defense": 50
                 },
                 "moves": [
                     "Protect",

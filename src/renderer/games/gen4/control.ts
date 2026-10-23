@@ -1,3 +1,4 @@
+import { manualNewRun } from "~/core/logic/newRunGuard";
 import { setUserState } from "~/core/persistence/userState";
 import { missing, type ControlReply, type ControlRoutes } from "~/core/control/useControlServer";
 import { MyStorage } from "./storage";
@@ -81,7 +82,11 @@ export function gen4ControlRoutes(vm: () => any): ControlRoutes {
                 return { ok: true };
             },
             "/new-run": () => {
-                vm().newRun();
+                const v = vm();
+                // Ignored while a replay records with the Shuckie timer on (core/logic/newRunGuard.ts).
+                if (!manualNewRun(v.shuckie_timer, v.emulatorStats, "/new-run", () => v.newRun())) {
+                    return { ok: true, ignored: true, reason: "Super Shuckie is recording a replay" };
+                }
                 return { ok: true };
             },
             "/set-right-panel": (query) => {

@@ -35,7 +35,7 @@ entry, a `USE_UNIFIED_FRONTEND` switch that makes `detectGenContext` return `gen
 unified overlay by `/status.app === "stp-overlay"`. It is **not applied**: the queuer's working tree carries
 uncommitted edits, so the patch is for Scott to apply (`git apply docs/queuer-unified.patch` in the queuer
 folder) and dry-run in Test Mode and Capture Fixtures mode before switching the default (decision 12). The
-unified app's `package.json` name is `stp-overlay` (3.1.0), so `%APPDATA%\stp-overlay` is where the queuer's
+unified app's `package.json` name is `stp-overlay` (3.2.0), so `%APPDATA%\stp-overlay` is where the queuer's
 window-state file goes; the app reads it in dev and, additively, when packaged.
 
 ## 2. Overlay control server — `http://127.0.0.1:30159`
@@ -72,7 +72,7 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 | `GET /set-right-panel` | `panel=Battle Graphic` (gen1/2/3) or `panel=Automatic` (gen4/5) | all | gen1 has no "Battle Graphic" mode: the unified app takes it as `Automatic` and reports `Automatic`, which the queuer's gen1 verification rejects -- `docs/queuer-unified.patch` sends gen1 `Automatic`. Since 2026-10-15 (decision 27) every generation's modes are Automatic / Movepool / Splits / Trainers; gens 2-5 map old values ("Battle Graphic", "Inventory", "Movepool+" -> Automatic, "Wild" -> Automatic + Show Wild Battles), and gens 2-3 still report Automatic as `"Battle Graphic"` in the reply and in `/status` `right_panel`, so the queuer's check passes unchanged. `/status` `right_panel_active` (all five) is what shows now, a post-battle Splits included |
 | `GET /set-splits` | `mode=First|Followup` | all | |
 | `GET /load-split-file` | `file=<absolute path>` (a CSV the queuer's user dragged in, `encodeURIComponent`ed; since 2026-09-23 also a Super Shuckie `.replay`, by extension) | only with `item.splitFile` | loads a previous run's splits for comparison; the unified main process reads the path as it is (`src/main/splitComparison.ts`: a CSV as `fs.readFileSync` + the legacy columns, as gen2-5 did; a `.replay` through its bookmark section, section 5) and hands the rows to the active generation's route as `__splits`, the file's name as `__source`. A replay it cannot read (format v3/v4, never closed) is a 500 with the reason. The reply body is unchanged: `{ ok, splits_loaded }` |
-| `GET /new-run` | – | all | same as the F23 hotkey / "New Run" button |
+| `GET /new-run` | – | all | same as the F23 hotkey / "New Run" button. Since 2026-10-22 ignored while the Shuckie timer is on and Super Shuckie is recording a replay: the reply is then `{ ok: true, ignored: true, reason }` (`core/logic/newRunGuard.ts`) |
 | `GET /reload` | – | all | `location.reload()` after 200 ms |
 | `GET /quit` | – | gen2–5 | `window.close()` after 200 ms |
 

@@ -1,3 +1,4 @@
+import { manualNewRun } from "~/core/logic/newRunGuard";
 import { panelActions } from "~/core/settings/toActions";
 import { press } from "~/core/shortcuts/build";
 import type { ShortcutAction } from "~/core/shortcuts/types";
@@ -90,7 +91,7 @@ function legacyFKeys(vm: any): ShortcutAction[] {
       console.log(`Key: F22 pressed. This shortcut is currently unused...`)
     }, { defaultShortcut: "F22" }),
     press("legacy.f23", "New Run", LEGACY, () => { // Clear Timer and Metrics
-      vm.newRun()
+      manualNewRun(vm.shuckie_timer, vm.emulatorStats, "F23", () => vm.newRun())
     }, { defaultShortcut: "F23" }),
     press("legacy.f24", "Play/Pause the timer", LEGACY, () => { // Pause
       vm.pauseUnpauseTime()

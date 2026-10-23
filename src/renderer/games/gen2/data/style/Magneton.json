@@ -1,11 +1,11 @@
 {
-  "finished_run_count": 3,
-  "attempt_number": 12,
-  "kanto_badges": false,
+  "finished_run_count": 4,
+  "attempt_number": 14,
+  "kanto_badges": true,
   "backgroundHue": "320",
   "backgroundSaturation": 100,
-  "backgroundContrast": "152",
-  "backgroundBrightness": "81",
+  "backgroundContrast": 175,
+  "backgroundBrightness": 70,
   "backgroundTexture": "electric",
   "overlay_color": "#be9f37",
   "backgroundUrl": false,
@@ -16,6 +16,6 @@
   "backgroundScale": "163",
   "backgroundYOffset": "-124",
   "backgroundXOffset": "313",
-  "backgroundBlur": "0",
+  "backgroundBlur": 0,
   "toggle_compare_splits": "Followup"
 }

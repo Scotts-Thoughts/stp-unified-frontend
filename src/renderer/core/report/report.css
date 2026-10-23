@@ -1,0 +1,225 @@
+/*
+ * The Report button and its screens (ReportButton.vue). The button sits in the top right of
+ * the settings panel or the start screen; the layer is on <body>, over the whole window.
+ * Every rule sets what it needs, because the generations' style.css files style bare
+ * `button`, `input` and `h2` elements.
+ */
+
+.stp-report-btn {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 20px;
+    margin: 0;
+    padding: 0 9px;
+    border: 1px solid rgba(255, 120, 120, 0.55);
+    border-radius: 6px;
+    background: rgba(70, 18, 18, 0.85);
+    color: #ffd9d9;
+    font: 600 11px/1 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: none;
+    box-shadow: none;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.stp-report-btn:hover {
+    background: rgba(110, 26, 26, 0.95);
+    color: #ffffff;
+}
+
+.stp-report-btn:disabled {
+    cursor: progress;
+    opacity: 0.7;
+}
+
+.stp-report-btn.stp-report-btn-saved {
+    border-color: rgba(120, 230, 140, 0.6);
+    background: rgba(16, 60, 26, 0.9);
+    color: #d6ffdd;
+}
+
+.stp-report-btn svg {
+    flex: none;
+}
+
+/* the layer over the whole window */
+.stp-report-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    overflow: hidden;
+    background: #000;
+    font: 400 15px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    color: #e8edf2;
+    text-transform: none;
+    letter-spacing: 0;
+    text-align: left;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.stp-report-shot,
+.stp-report-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: 0;
+    filter: none;
+    transform: none;
+}
+
+.stp-report-canvas.stp-report-canvas-live {
+    cursor: crosshair;
+    outline: 4px solid rgba(255, 42, 42, 0.8);
+    outline-offset: -4px;
+}
+
+.stp-report-bar {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 8px 16px;
+    border-radius: 12px;
+    background: rgba(12, 16, 22, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    white-space: nowrap;
+}
+
+.stp-report-hint kbd {
+    display: inline-block;
+    padding: 0 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 13px;
+}
+
+.stp-report-action {
+    height: 30px;
+    margin: 0;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e8edf2;
+    font: 600 14px/1 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    text-transform: none;
+    text-shadow: none;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.stp-report-action:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.stp-report-action:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.stp-report-action.stp-report-primary {
+    border-color: #36c24a;
+    background: #36c24a;
+    color: #04140a;
+}
+
+.stp-report-action.stp-report-primary:hover:not(:disabled) {
+    background: #4fd660;
+}
+
+/* the title and description */
+.stp-report-backdrop {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.stp-report-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 640px;
+    margin: 0;
+    padding: 24px 26px;
+    border-radius: 14px;
+    background: #141a22;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+    user-select: text;
+}
+
+.stp-report-dialog h2 {
+    margin: 0;
+    font-family: inherit;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #ffffff;
+    text-transform: none;
+}
+
+.stp-report-dialog label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #98a4b0;
+}
+
+.stp-report-dialog input,
+.stp-report-dialog textarea {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 9px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #e8edf2;
+    font: 400 15px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    text-transform: none;
+    resize: vertical;
+    outline: none;
+}
+
+.stp-report-dialog input:focus,
+.stp-report-dialog textarea:focus {
+    border-color: #4fd660;
+}
+
+.stp-report-note {
+    margin: 0;
+    font-size: 13px;
+    color: #98a4b0;
+}
+
+.stp-report-error {
+    margin: 0;
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.stp-report-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

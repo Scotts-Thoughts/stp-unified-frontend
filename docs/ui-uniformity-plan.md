@@ -212,7 +212,7 @@ report.
     time. Other games keep today's run-end behaviour. (C8)
 25. gen3 shows **"Total:"** in Base Stats/IVs/EVs modes, like gens 4–5. (C9)
 26. **Enemy panel:** "HP, Atk., Def., SpA., SpD., Spe." (gen1 keeps Spc./Crit.), "Lv:12", fainted Pokémon greyscale at
-    half opacity. (D9)
+    half opacity. (D9) Gens 2–5 tile the stats like the player's: HP|Spe, Atk|SpA, Def|SpD (stage badges follow).
 27. **Right panel:** Automatic / Movepool / Splits in all five (old saved values mapped on read: "Battle Graphic" →
     Automatic, "Wild" → Automatic + wild on), the post-battle Splits switch is never saved, and "Movepool" keeps the
     movepool up during gen4 battles. (D7)

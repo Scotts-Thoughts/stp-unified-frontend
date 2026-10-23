@@ -1,3 +1,4 @@
+import { manualNewRun } from "~/core/logic/newRunGuard";
 import { panelActions } from "~/core/settings/toActions";
 import { press } from "~/core/shortcuts/build";
 import type { ShortcutAction } from "~/core/shortcuts/types";
@@ -77,7 +78,7 @@ function legacyFKeys(vm: any): ShortcutAction[] {
             vm.set_right_panel("Movepool");
         }, { defaultShortcut: "F19" }),
         press("legacy.f23", "New Run", LEGACY, async () => { // Clear Timer and Metrics
-            vm.newRun()
+            manualNewRun(vm.shuckie_timer, vm.emulatorStats, "F23", () => vm.newRun())
         }, { defaultShortcut: "F23" }),
         press("legacy.f24", "Play/Pause the overlay's timer (ignores Shuckie Timer)", LEGACY, async () => { // Pause
             vm.timer.pauseUnpauseTime();

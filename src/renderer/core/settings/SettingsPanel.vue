@@ -15,12 +15,14 @@
                 </section>
             </template>
         </div>
+        <report-button></report-button>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
 import SettingsControl from "./SettingsControl.vue";
+import ReportButton from "../report/ReportButton.vue";
 import { panelTheme } from "./theme";
 import type { SettingsPanelSpec, Tier } from "./types";
 import "../styles/settings.css";
@@ -36,7 +38,7 @@ import "../styles/settings.css";
  */
 export default defineComponent({
     name: "SettingsPanel",
-    components: { SettingsControl },
+    components: { SettingsControl, ReportButton },
     props: {
         panel: { type: Object as PropType<SettingsPanelSpec>, required: true },
     },

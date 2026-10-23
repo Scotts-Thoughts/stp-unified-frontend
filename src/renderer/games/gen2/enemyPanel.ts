@@ -28,6 +28,21 @@ function sendOutMon(vm: any, species: unknown, moves: unknown[]): SendOutMon {
 }
 
 /**
+ * The team header: the trainer's class and name, as the game shows them ("Schoolboy Chad"), from the trainer
+ * table's `name`. The table's own additions go: rematch numbers, "Unused", the M/F of Cooltrainer, Swimmer and Pokefan, and the
+ * numbers of Rocket's unnamed grunts and executives ("ROCKET GRUNT" in the game) and of the rival's battles (the
+ * rival's name is the player's choice, not in the mapper). `fallback` is for a trainer the table doesn't have.
+ */
+export function trainerHeader(name: string | undefined, fallback: string): string {
+    if (!name) return fallback;
+    const base = name.replace(/ Rematch \d+$| Unused$/i, "");
+    const rocket = /^(Grunt|Executive) [MF] \d+$/.exec(base);
+    if (rocket) return "Rocket " + rocket[1];
+    if (/^Rival\d /.test(base)) return "Rival";
+    return base.replace(/^(Cooltrainer|Swimmer|Pokefan) [MF] /, "$1 ");
+}
+
+/**
  * The order the trainer's AI sends its team out in against the player's Pokémon (core/logic/sendOutOrder.ts), as
  * party slots; null when the "Predicted Send-Out Order" setting is off. The player's Pokémon is the one in the party
  * (the species picker only stands in before there is one, or for a Backport). `live` keeps the order for the battle.
@@ -131,7 +146,7 @@ export function enemyTeamView(vm: any): EnemyTeamView<Gen2EnemySlot> {
         return sendOutMon(vm, mon.species.value, [1, 2, 3, 4].map((i) => vm.move_name(mon[`move${i}`]?.value)));
     });
     return {
-        trainer: vm.capitalization_format(vm.fixTrainerName(batt.trainer.class.value, batt.trainer.id.value)) + "'s Team",
+        trainer: trainerHeader(vm.enemy_trainer?.name, vm.capitalization_format(vm.fixTrainerName(batt.trainer.class.value, batt.trainer.id.value))),
         crop: vm.battlePokemonCrop(),
         slots: orderSlots(slots, sendOutOrder(vm, party, true)),
         speedShown: vm.speed_comparison_toggle == true,
@@ -202,7 +217,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamV
     });
     const party = trainer.party.map((mon) => sendOutMon(vm, mon.species, mon.moves.map((move) => vm.move_name(move))));
     return {
-        trainer: trainer.header ?? trainer.name + "'s Team",
+        trainer: trainer.header ?? trainerHeader(trainer.name, trainer.name),
         crop: `height: ${HEIGHTS[trainer.party.length]}; filter: saturate(${vm.ui_saturation}) drop-shadow(0px 0px 1px #000000)`,
         // The wild panel (a header, no trainer) keeps its order.
         slots: orderSlots(slots, trainer.header ? null : sendOutOrder(vm, party, false)),

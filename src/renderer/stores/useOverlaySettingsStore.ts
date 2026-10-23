@@ -131,7 +131,7 @@ function defaultOverlaySettings() {
 		 * generation, as gen2's `toggle_wGuaranteedCatches`. The patch clears the byte on
 		 * boot, so `settings/encounters.vue` writes it again whenever the ROM disagrees.
 		 */
-		guaranteed_catches: false as boolean,
+		guaranteed_catches: true as boolean,
 		/**
 		 * "Show Advanced Settings" in the settings panel (games/gen1/settingsPanel.ts, 2026-10-14):
 		 * Super Shuckie, Automatic Post-Battle Splits, the Pokemon Editor and the dev-only run modes

@@ -1423,7 +1423,7 @@ export default defineComponent({
                         cells: [lookup.basic[split.trainer]?.trainer, split.previous_time, split.current_time, split.difference],
                         diffStyle: splitDiffColor(split.difference),
                     })),
-                art: { class: "colored-image", style: [`filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`, "--url: url(images/gen2/ui/movepool.svg)"] },
+                art: { class: "colored-image", style: [`filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`, "--url: url(images/gen2/ui/movepool.svg)"], frameBottom: 1037 },
             }
             if (mode === "Followup + Summary") {
                 const metric = (stat) => ({ label: [stat.name], value: this[stat.data_name] != 0 ? this[stat.data_name] : "-" })
@@ -5320,6 +5320,7 @@ export default defineComponent({
                         }
                     }
                     this.startTime();
+                    this.current_splits = [] // a new run starts with an empty splits panel
 
                     this.playerId = newProp.value;
                 }

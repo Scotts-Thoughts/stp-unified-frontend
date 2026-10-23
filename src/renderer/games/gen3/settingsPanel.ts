@@ -1,3 +1,4 @@
+import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import { panelThemeControl } from "~/core/settings/theme";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
@@ -90,7 +91,7 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
                     props: () => ({ editions: gen3Manifest.editions.filter((e) => !e.devOnly || vm.isInDevMode), modelValue: vm.gameSelection }),
                     on: { "update:modelValue": (v: string) => { vm.gameSelection = v; } },
                 },
-                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => vm.newRun() },
+                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => manualNewRun(vm.shuckie_timer, vm.emulatorStats, "button", () => vm.newRun()) },
             ],
         },
         {
@@ -128,6 +129,26 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
             ],
         },
         {
+            title: "Readouts",
+            controls: [
+                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.teamCount.value > 6 ? 0 : vm.game.properties.player.teamCount.value) },
+                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
+                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().statusCondition.value ?? "None" },
+                {
+                    kind: "statGrid", id: "readout.evs", label: "EVs",
+                    items: () => [
+                        { label: "HP", value: team0().evHp.value },
+                        { label: "Spe", value: team0().evSpeed.value },
+                        { label: "Atk", value: team0().evAttack.value },
+                        { label: "SpA", value: team0().evSpecialAttack.value },
+                        { label: "Def", value: team0().evDefense.value },
+                        { label: "SpD", value: team0().evSpecialDefense.value },
+                    ],
+                },
+                { kind: "readout", id: "readout.ev_total", label: "EV Total", value: () => `${vm.ev_total}/510` },
+            ],
+        },
+        {
             title: "Advanced",
             controls: [
                 flag(vm, "settings.show_advanced", "Show Advanced Settings", "show_advanced_settings"),
@@ -147,26 +168,6 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
             tier: "dev",
             visible: () => advanced() && vm.debugging == true,
             controls: [{ kind: "slot", id: "slot.devtools", slot: "devtools" }],
-        },
-        {
-            title: "Readouts",
-            controls: [
-                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.teamCount.value > 6 ? 0 : vm.game.properties.player.teamCount.value) },
-                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
-                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().statusCondition.value ?? "None" },
-                {
-                    kind: "statGrid", id: "readout.evs", label: "EVs",
-                    items: () => [
-                        { label: "HP", value: team0().evHp.value },
-                        { label: "Spe", value: team0().evSpeed.value },
-                        { label: "Atk", value: team0().evAttack.value },
-                        { label: "SpA", value: team0().evSpecialAttack.value },
-                        { label: "Def", value: team0().evDefense.value },
-                        { label: "SpD", value: team0().evSpecialDefense.value },
-                    ],
-                },
-                { kind: "readout", id: "readout.ev_total", label: "EV Total", value: () => `${vm.ev_total}/510` },
-            ],
         },
         {
             title: "Debugging",

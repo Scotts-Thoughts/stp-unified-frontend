@@ -18,6 +18,7 @@ import { setActiveNamespace } from "~/core/persistence/userState";
 import { useReplaySplitsStore } from "~/core/stores/useReplaySplitsStore";
 import { initEnv } from "~/core/env";
 import { installScaleToFit, removeScaleToFit } from "~/core/window/scaleToFit";
+import { setReportContext } from "~/core/report/context";
 
 /**
  * Applies a module's presentation to the document (plan 3.1, brought forward for
@@ -179,6 +180,23 @@ const main = defineComponent({
         // gen3/4/5 stopped their hub connection on unload so a reload (the queuer's
         // /reload) did not leave PokeAByte a dangling client (plan 3.3, gen3's disconnect()).
         window.addEventListener("beforeunload", () => { void this.mapper?.disconnect(); });
+
+        // What the Report button writes into report.txt, and the settings it flushes so
+        // the zip's copy of them is current (core/report/).
+        setReportContext({
+            describe: () => ({
+                overlay_ready: this.ready,
+                generation: this.session ? this.module.generation : null,
+                module: this.session?.module.id ?? null,
+                game: this.session?.game ?? null,
+                mapper_path: (this.mapper?.meta?.path as string | undefined) ?? null,
+                unsupported_mapper: this.unsupportedMapper,
+                memory_tool: (window as any).api?.cutter?.toolUrl ?? (window as any).api?.toolUrl ?? "default (http://localhost:8085)",
+                window: `${window.innerWidth}x${window.innerHeight} CSS px, device pixel ratio ${window.devicePixelRatio}`,
+                user_agent: navigator.userAgent,
+            }),
+            flush: () => Promise.all([flushUserState(), flushAppSettings()]),
+        });
 
         // The boot counter is for the parity harness: from connect() to `ready` the
         // app is driven by real-time pipes the harness cannot all see -- the SignalR

@@ -45,12 +45,12 @@ function sendOutOrder(vm: any, party: SendOutMon[], live: boolean): number[] | n
 }
 
 /**
- * The stats in label order (decision 26: HP, Atk., Def. on the left, SpA., SpD., Spe. on the right): label, side and
+ * The stats in label order (decision 26: HP, Atk., Def. on the left, Spe., SpA., SpD. on the right, tiled like the player's stats): label, side and
  * row (the position classes), and the stat (its modifier hides the label; HP's label always shows).
  */
 const STATS: [label: string, side: "Left" | "Right", row: 1 | 2 | 3, stat: string][] = [
     [L.hp, "Left", 1, "hp_max"], [L.attack, "Left", 2, "attack"], [L.defense, "Left", 3, "defense"],
-    [L.special_attack, "Right", 1, "special_attack"], [L.special_defense, "Right", 2, "special_defense"], [L.speed, "Right", 3, "speed"],
+    [L.special_attack, "Right", 2, "special_attack"], [L.special_defense, "Right", 3, "special_defense"], [L.speed, "Right", 1, "speed"],
 ];
 
 export interface Gen5EnemySlot extends EnemySlotView {

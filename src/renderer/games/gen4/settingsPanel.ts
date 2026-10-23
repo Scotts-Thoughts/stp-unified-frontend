@@ -1,3 +1,4 @@
+import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import { panelThemeControl } from "~/core/settings/theme";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
@@ -104,7 +105,7 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
                     props: () => ({ editions: gen4Manifest.editions.filter((e) => !e.devOnly || vm.isInDevMode), modelValue: vm.selected_game }),
                     on: { "update:modelValue": (v: string) => { vm.selected_game = v; } },
                 },
-                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => vm.newRun() },
+                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => manualNewRun(vm.shuckie_timer, vm.emulatorStats, "button", () => vm.newRun()) },
             ],
         },
         {
@@ -128,25 +129,6 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
             ],
         },
         {
-            title: "Advanced",
-            controls: [
-                flag(vm, "settings.show_advanced", "Show Advanced Settings", "show_advanced_settings"),
-                flag(vm, "shuckie.timer", "Shuckie Timer", "shuckie_timer", { tier: "advanced" }),
-                flag(vm, "shuckie.counters", "Shuckie Counters", "shuckie_counters", { tier: "advanced" }),
-                flag(vm, "shuckie.bookmarks", "Shuckie Bookmarks", "shuckie_bookmarks", { tier: "advanced" }),
-                flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", { tier: "advanced" }),
-                flag(vm, "settings.editor", "Pokemon Editor", "editor", { tier: "advanced", noAction: true }),
-                flag(vm, "settings.debugging_mode", "Debugging", "debugging_mode", { tier: "advanced" }),
-            ],
-        },
-        { title: "Pokemon Editor", tier: "advanced", visible: () => vm.editor == true, controls: [{ kind: "slot", id: "slot.editor", slot: "editor" }] },
-        {
-            title: "Style Settings",
-            tier: "advanced",
-            visible: () => vm.debugging_mode == true,
-            controls: [{ kind: "slot", id: "slot.devtools", slot: "devtools" }],
-        },
-        {
             title: "Readouts",
             controls: [
                 { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.team_count.value > 6 ? 0 : vm.game.properties.player.team_count.value) },
@@ -165,6 +147,25 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
                 },
                 { kind: "readout", id: "readout.ev_total", label: "EV Total", value: () => vm.get_effort_values() },
             ],
+        },
+        {
+            title: "Advanced",
+            controls: [
+                flag(vm, "settings.show_advanced", "Show Advanced Settings", "show_advanced_settings"),
+                flag(vm, "shuckie.timer", "Shuckie Timer", "shuckie_timer", { tier: "advanced" }),
+                flag(vm, "shuckie.counters", "Shuckie Counters", "shuckie_counters", { tier: "advanced" }),
+                flag(vm, "shuckie.bookmarks", "Shuckie Bookmarks", "shuckie_bookmarks", { tier: "advanced" }),
+                flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", { tier: "advanced" }),
+                flag(vm, "settings.editor", "Pokemon Editor", "editor", { tier: "advanced", noAction: true }),
+                flag(vm, "settings.debugging_mode", "Debugging", "debugging_mode", { tier: "advanced" }),
+            ],
+        },
+        { title: "Pokemon Editor", tier: "advanced", visible: () => vm.editor == true, controls: [{ kind: "slot", id: "slot.editor", slot: "editor" }] },
+        {
+            title: "Style Settings",
+            tier: "advanced",
+            visible: () => vm.debugging_mode == true,
+            controls: [{ kind: "slot", id: "slot.devtools", slot: "devtools" }],
         },
         {
             title: "Debugging",

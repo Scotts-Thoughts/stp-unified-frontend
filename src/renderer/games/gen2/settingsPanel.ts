@@ -1,3 +1,4 @@
+import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import { panelThemeControl } from "~/core/settings/theme";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
@@ -61,7 +62,7 @@ export function gen2SettingsPanel(vm: any): SettingsPanelSpec {
                     props: () => ({ editions: gen2Manifest.editions.filter((e) => !e.devOnly || vm.isInDevMode), modelValue: vm.game_selection }),
                     on: { "update:modelValue": (v: string) => { vm.game_selection = v; } },
                 },
-                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => vm.newRun() },
+                { kind: "button", id: "run.new", label: "New Run", variant: "primary", run: () => manualNewRun(vm.shuckie_timer, vm.emulatorStats, "button", () => vm.newRun()) },
             ],
         },
         {
@@ -83,6 +84,25 @@ export function gen2SettingsPanel(vm: any): SettingsPanelSpec {
                 // gen2's only caller has always passed `Crystal` as the game folder, whatever the edition.
                 { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: () => vm.openFolder(`splits`, `Crystal`, vm.starter, "finishes") },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: () => vm.open_shortcuts_menu() },
+            ],
+        },
+        {
+            title: "Readouts",
+            controls: [
+                { kind: "readout", id: "readout.return_power", label: "Return Base Power", value: () => vm.g2ReturnPowerCalc(team0()) },
+                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.teamCount.value > 6 ? 0 : vm.game.properties.player.teamCount.value) },
+                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
+                { kind: "readout", id: "readout.status", label: "Status", value: () => (team0().statusCondition.value == null ? "None" : team0().statusCondition.value) },
+                {
+                    kind: "statGrid", id: "readout.stat_exp", label: "Stat Experience",
+                    items: () => [
+                        { label: "HP", value: statExp("statExpHp"), extra: statExpBenefit("statExpHp") },
+                        { label: "Spe", value: statExp("statExpSpeed"), extra: statExpBenefit("statExpSpeed") },
+                        { label: "Atk", value: statExp("statExpAttack"), extra: statExpBenefit("statExpAttack") },
+                        { label: "Spc", value: statExp("statExpSpecial"), extra: statExpBenefit("statExpSpecial") },
+                        { label: "Def", value: statExp("statExpDefense"), extra: statExpBenefit("statExpDefense") },
+                    ],
+                },
             ],
         },
         {
@@ -123,25 +143,6 @@ export function gen2SettingsPanel(vm: any): SettingsPanelSpec {
             tier: "dev",
             visible: () => !!vm.show_advanced_settings && !!vm.debugging,
             controls: [{ kind: "slot", id: "slot.devtools", slot: "devtools" }],
-        },
-        {
-            title: "Readouts",
-            controls: [
-                { kind: "readout", id: "readout.return_power", label: "Return Base Power", value: () => vm.g2ReturnPowerCalc(team0()) },
-                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.teamCount.value > 6 ? 0 : vm.game.properties.player.teamCount.value) },
-                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
-                { kind: "readout", id: "readout.status", label: "Status", value: () => (team0().statusCondition.value == null ? "None" : team0().statusCondition.value) },
-                {
-                    kind: "statGrid", id: "readout.stat_exp", label: "Stat Experience",
-                    items: () => [
-                        { label: "HP", value: statExp("statExpHp"), extra: statExpBenefit("statExpHp") },
-                        { label: "Spe", value: statExp("statExpSpeed"), extra: statExpBenefit("statExpSpeed") },
-                        { label: "Atk", value: statExp("statExpAttack"), extra: statExpBenefit("statExpAttack") },
-                        { label: "Spc", value: statExp("statExpSpecial"), extra: statExpBenefit("statExpSpecial") },
-                        { label: "Def", value: statExp("statExpDefense"), extra: statExpBenefit("statExpDefense") },
-                    ],
-                },
-            ],
         },
         {
             title: "Debugging",
