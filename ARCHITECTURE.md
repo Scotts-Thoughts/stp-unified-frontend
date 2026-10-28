@@ -96,6 +96,13 @@ docs/             Reference docs. See §13.
 - `importLegacy.ts`, `leveldb.ts`, `localStorageImport.ts`: the one-time seeding from the legacy apps' profiles.
 - `splitComparison.ts`, `replayFile.ts`: read split comparisons from `.replay` bookmarks or legacy CSVs.
 - `cutter.ts`: the air_cutter editor modes (`--cutter-*` flags), which replace the normal boot.
+- `updater/`: the self-updater, on only in a packaged Windows build. It checks GitHub releases at start-up, downloads
+  only the files that changed, and swaps them in with `apply.ps1` while the app is closed. The replaced files stay
+  in `<install>/updates/previous/` for one local rollback. Its window is `updates.html` (`core/updates/`), opened by
+  the Updates button beside the Report button, which only shows when updating is on. Releases are made by
+  `.github/workflows/release.yml` from a `vX.Y.Z` commit summary. Everything is in `docs/updates.md`. Traps:
+  - Don't turn electron-builder's exe editing back on, or every update re-downloads the 197 MB exe.
+  - The pool's hard-linked duplicates go stale when an image changes, so the swap deletes them.
 - `report.ts`: the Report button's back end (`core/report/ReportButton.vue`, in the settings panel's and the start
   screen's top right). From window creation it keeps the last 5,000 log lines: the page's `console-message`s plus
   main's own console, wrapped so the output itself is unchanged (the harness compares console output). `report:capture`
@@ -352,6 +359,11 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   bottom border in its full-canvas SVG. The panel measures the lowest row body and draws the art twice: the top cut
   just under the rows, and the bottom border moved up to meet it, so only the straight sides get shorter. The tables
   are `height: auto` inline, so their white background ends there too. A new splits SVG needs its `frameBottom`.
+- A list too long for its frame shrinks its icons, and so its rows, until the last row ends at `frameBottom`
+  (`fitIcons`, 2026-10-26); a list that fits keeps the icon size its `style.css` gives. Without it, gen3 (19 rows),
+  gen4 Platinum (13) and gen5 (14) ran past the frame once the icon cells got 3px above and below. The icons are
+  `display: block` so no line gap under them changes with their size; mind `box-sizing` (gen3's is border-box, so
+  its `max-height` takes the image's padding in).
 - A new run clears `current_splits` where the timer starts on its own (gen1 new-run hook, gen2 new player id, gen3
   `newRun()`, gen4/gen5 new-game flags, Super Shuckie start included), so a forgotten New Run press leaves no old times.
 - The **manual** New Run (button, F23, `/new-run`) goes through `core/logic/newRunGuard.ts` in every generation and
@@ -499,6 +511,10 @@ moves onto gen1's data layer. Before deleting a "dead" file, check for imports w
 - gen3 imports both `pokedex/firered_leafgreen.js` and `firered_leafgreen.js`.
 - gen4 imports both `moves.js` and `platinum_moves.js`.
 - A data fix may belong in more than one file. Check with grep.
+- Field names differ between generations. gen3's `dexData*` entries keep their base stats flat (`base_hp`,
+  `base_atk`, …; the overlay's `stat_object[].base_stat_path`) and have no `base_stats` object as gens 4–5 do.
+  Code that reads `base_stats` there gets nothing: until 2026-10-26 gen3's "Total:" row always showed 0. gen3's
+  `get_base_stat_total` and `calculate_ev_benefit` still read it, and nothing calls either one.
 
 **Style defaults.**
 - `games/genN/data/style/*.json` are per-species layout defaults. A dev-mode edit in the running app rewrites
@@ -743,6 +759,7 @@ Re-running them would overwrite months of hand edits.
 | `docs/ui-uniformity-log.md` | The uniformity work step by step (2026-10-14/15): a git tree snapshot per step and what the harness showed against the step before; for reviewing or committing the steps one at a time |
 | `docs/shortcuts-menu-plan.md` | Shortcuts or the settings controls. The plan behind the Keyboard Shortcuts window and the per-generation action lists (built 2026-10-14), with an inventory of each generation's controls and the old F-key quirks |
 | `docs/hotkeys-without-keyhook-plan.md` | Hotkeys. The plan that replaced `keyhook.exe`: Electron global shortcuts first (2026-10-13), then the `uiohook-napi` hook (2026-10-14) because global shortcuts took the keys from the emulator |
+| `docs/updates.md` | Releases, the self-updater, packs and the manifest, rollback, and their tests |
 | `docs/CRITICAL_ITEM_CHAPTER_MARKER.md`, `docs/NEW_MOVE_CHAPTER_MARKER.md` | OBS marker logic |
 | `docs/inputs.lock.md`, `docs/queuer-unified.patch`, `docs/battle-timing-notes.animations.css` | Rarely. These are port inputs, the queuer-side patch, and timing notes |
 

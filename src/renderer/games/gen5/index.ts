@@ -62,6 +62,7 @@ export const gen5: GameModule = {
         battleOut: (trainerClass) => "OUT - " + trainerClass,
         reset: () => "RESET",
         blackout: () => "BLACKOUT",
+        mapChange: (map) => `Map Change - ${map}`,
         rareCandy: () => "Rare Candy Used",
         nextPokemon: () => "Next Pokemon",
         enemyFainted: () => "Enemy Fainted",

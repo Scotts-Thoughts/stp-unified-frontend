@@ -2771,6 +2771,7 @@ export default defineComponent({
                 'player.name':                              'RESET marker',
                 'battle.other.battle':                      'BLACKOUT markers',
                 'battle.opponent.trainer':                  'trainer IN / OUT markers',
+                'overworld.map_index':                      '"Map Change" markers',
                 'meta.state':                               '"Rare Candy Used" marker',
                 'player.team.0.level':                      '"Rare Candy Used" marker',
                 'battle.opponent.party_position':           '"Next Pokemon" marker',
@@ -8587,6 +8588,14 @@ export default defineComponent({
             if (oldProp?.value === 0) return;
             console.log("Chapter Detected: Enemy Fainted");
             this.sendObsChapterMarker("Enemy Fainted");
+        });
+
+        // MAP CHANGE CHAPTER MARKER
+        // Fires "Map Change" whenever overworld.map_index changes value, as gen 4 does.
+        // Cutter's Run Cutter cuts by map between story battles (b-vs-landorus-tornadus-thundurus).
+        this.game.properties.overworld?.map_index?.change?.((newProp, oldProp) => {
+            if (newProp?.value === oldProp?.value) return;
+            this.sendObsChapterMarker(`Map Change - ${newProp.value}`);
         });
 
         this.game.properties.player.team[0].exp.change(async (newProp, oldProp) => {

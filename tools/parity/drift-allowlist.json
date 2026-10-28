@@ -213,9 +213,9 @@
     {
       "section": "computed",
       "name": "movepoolStruck",
-      "reason": "Reviewed 2026-10-15 (by design): each generation builds the shared cross-out sets (core/logic/unobtainableMoves.ts) from its own edition lists, run bans and first-run rule; gen4 and gen5 share a body.",
+      "reason": "Reviewed 2026-10-15 (by design): each generation builds the shared cross-out sets (core/logic/unobtainableMoves.ts) from its own edition lists, run bans and first-run rule; gen4 and gen5 share a body. gen2 re-reviewed 2026-10-27: first-run Hidden Power now applies in every edition (known-legacy-bugs #146).",
       "bodies": {
-        "gen2": "c3b9df0a0a8e",
+        "gen2": "acf547f17698",
         "gen3": "5994feb0c5cc",
         "gen4": "41d385b4133d",
         "gen5": "41d385b4133d"

@@ -1,6 +1,6 @@
 {
   "name": "stp-overlay",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Scott's Thoughts Overlay.",
   "main": "./out/main/index.js",
   "build": {
@@ -32,7 +32,8 @@
     "win": {
       "executableName": "stp-overlay",
       "target": "zip",
-      "icon": "./icon.png"
+      "icon": "./icon.png",
+      "signAndEditExecutable": false
     },
     "npmRebuild": false
   },
@@ -76,7 +77,10 @@
     "import:dump": "tsx tools/import/dump-localstorage.ts",
     "packaged:probe": "tsx tools/parity/packaged-probe.ts",
     "cutter:describe": "tsx tools/cutter/describe.ts",
-    "cutter:selftest": "tsx tools/cutter/selftest.ts"
+    "cutter:selftest": "tsx tools/cutter/selftest.ts",
+    "release:make": "node tools/release/make-release.mjs",
+    "updates:selftest": "tsx tools/updates/selftest.ts",
+    "updates:e2e": "tsx tools/updates/e2e.ts"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -93,6 +97,7 @@
     "pixelmatch": "^7.2.0",
     "playwright-core": "^1.63.0",
     "pngjs": "^7.0.0",
+    "rcedit": "4.0.1",
     "tsx": "^4.23.13",
     "typescript": "^5.8.3",
     "vite": "^6.0.5",

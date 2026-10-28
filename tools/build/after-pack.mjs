@@ -12,12 +12,23 @@
  * dropped copies back as hard links on first launch (`restoreImageCopies` in
  * src/main/importLegacy.ts). No image is changed.
  *
+ * On Windows it then does two things for the updater (docs/updates.md):
+ *
+ *   - stamps the exe's icon and names with rcedit, in place of electron-builder
+ *     (`win.signAndEditExecutable: false`). electron-builder writes the app's version
+ *     into the exe, so the 197 MB exe would differ in every release and every update
+ *     would download it; here it carries Electron's version, and changes only with Electron.
+ *   - writes `resources/install-manifest.json` (update-manifest.mjs), last, so it
+ *     describes the files exactly as they ship.
+ *
  * Runs whenever electron-builder packs (`build:unpack`, `build:win`); `--prepackaged`
  * skips it, and zips a tree that came through here already.
  */
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import rcedit from "rcedit";
+import { writeUpdateManifest } from "./update-manifest.mjs";
 
 /** Read by src/main/importLegacy.ts under the same name. */
 const MANIFEST = "image-copies.json";
@@ -40,6 +51,57 @@ export async function afterPack(context) {
     }
     writeFileSync(join(resources, MANIFEST), JSON.stringify({ format: 1, copies: groups }));
     console.log(`  • [after-pack] image pool: dropped ${dropped} duplicate files (${(bytes / 2 ** 20).toFixed(0)} MB) in ${groups.length} groups, listed in resources/${MANIFEST}`);
+
+    if (context.electronPlatformName !== "win32") return;
+    const electron = JSON.parse(readFileSync(join(context.packager.projectDir, "node_modules", "electron", "package.json"), "utf-8")).version;
+    await stampExe(context, electron);
+    writeUpdateManifest(context.appOutDir, context.packager.appInfo.version, electron);
+}
+
+/**
+ * The exe's icon and version resource. The version fields hold Electron's version, never
+ * the app's (see the header); the names are what electron-builder wrote before.
+ */
+async function stampExe(context, electron) {
+    const exe = join(context.appOutDir, `${context.packager.platformSpecificBuildOptions.executableName ?? context.packager.appInfo.productFilename}.exe`);
+    if (!existsSync(exe)) throw new Error(`[after-pack] no exe at ${exe}`);
+    const ico = join(context.outDir, ".stp-icon", "icon.ico");
+    mkdirSync(join(context.outDir, ".stp-icon"), { recursive: true });
+    writeFileSync(ico, pngToIco(readFileSync(join(context.packager.projectDir, "icon.png"))));
+    const name = context.packager.appInfo.productName;
+    await rcedit(exe, {
+        icon: ico,
+        "file-version": electron,
+        "product-version": electron,
+        "version-string": {
+            FileDescription: name,
+            ProductName: name,
+            InternalName: name,
+            OriginalFilename: `${name}.exe`,
+            CompanyName: "Scott's Thoughts",
+            LegalCopyright: "Scott's Thoughts",
+        },
+    });
+    console.log(`  • [after-pack] stamped ${exe} (icon, version ${electron})`);
+}
+
+/** An .ico holding one PNG image (allowed since Windows Vista); icon.png is 256x256. */
+function pngToIco(png) {
+    const width = png.readUInt32BE(16);
+    const height = png.readUInt32BE(20);
+    const header = Buffer.alloc(22);
+    header.writeUInt16LE(0, 0); // reserved
+    header.writeUInt16LE(1, 2); // type: icon
+    header.writeUInt16LE(1, 4); // one image
+    header.writeUInt8(width >= 256 ? 0 : width, 6);
+    header.writeUInt8(height >= 256 ? 0 : height, 7);
+    header.writeUInt8(0, 8); // no palette
+    header.writeUInt8(0, 9);
+    header.writeUInt16LE(1, 10); // colour planes
+    header.writeUInt16LE(32, 12); // bits per pixel
+    header.writeUInt32LE(png.length, 14);
+    header.writeUInt32LE(22, 18); // image data follows the header
+    return Buffer.concat([header, png]);
 }
 
 /** Every set of byte-identical files under `pool`, as '/'-separated relative paths, the kept one first. */

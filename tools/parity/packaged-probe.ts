@@ -52,6 +52,8 @@ const app = await electron.launch({
     LOCALAPPDATA: join(sandbox, "AppData", "Local"),
     ELECTRON_ENABLE_LOGGING: "1",
     STP_CONTROL_PORT: String(CONTROL_PORT),
+    // No update check against GitHub from a smoke test (src/main/updater/).
+    STP_UPDATES: "off",
   },
   timeout: 60000,
 });

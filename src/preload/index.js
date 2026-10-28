@@ -115,6 +115,26 @@ const api = {
     cancel: () => invoke('report:cancel'),
   },
 
+  /** The updater (src/main/updater/, docs/updates.md). */
+  updates: {
+    getState: () => ipcRenderer.invoke('updates:get-state'),
+    check: () => ipcRenderer.invoke('updates:check'),
+    /** Download and install a release from the list (main asks to confirm first). */
+    install: (version) => ipcRenderer.invoke('updates:install', version),
+    /** Put back the previous version from updates/previous (main asks to confirm first). */
+    rollback: () => ipcRenderer.invoke('updates:rollback'),
+    /** Install the downloaded update now: the app closes and opens again. */
+    restart: () => ipcRenderer.invoke('updates:restart'),
+    cancel: () => ipcRenderer.send('updates:cancel'),
+    openWindow: () => ipcRenderer.send('updates:open-window'),
+    openPage: (url) => ipcRenderer.send('updates:open-page', url),
+    onState: (handler) => {
+      const listener = (_event, state) => handler(state)
+      ipcRenderer.on('updates:state', listener)
+      return () => ipcRenderer.removeListener('updates:state', listener)
+    },
+  },
+
   /** OBS WebSocket 5 auth string; the sha256 pair used to live in the renderer. */
   obsAuth: (password, salt, challenge) => invoke('obs:auth', password, salt, challenge),
 

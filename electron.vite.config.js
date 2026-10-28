@@ -66,12 +66,14 @@ export default defineConfig({
     assetsInclude: ['**/*.svg', '**/*.png'],
     build: {
       copyPublicDir: false,
-      // Two pages: the overlay, and the Keyboard Shortcuts window (src/main/hotkeys.ts),
-      // which main opens as its own BrowserWindow so it never shows up in the OBS capture.
+      // Three pages: the overlay, the Keyboard Shortcuts window (src/main/hotkeys.ts) and the
+      // Updates window (src/main/updater/), which main opens as their own BrowserWindows so
+      // they never show up in the OBS capture.
       rollupOptions: {
         input: {
           index: resolve('src/renderer/index.html'),
           shortcuts: resolve('src/renderer/shortcuts.html'),
+          updates: resolve('src/renderer/updates.html'),
         },
       },
     },

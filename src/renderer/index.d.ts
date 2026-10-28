@@ -2,6 +2,7 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 import type { SplitComparison } from '../main/splitComparison'
 import type { ShortcutCatalog, ShortcutEdit } from '../shared/shortcuts'
 import type { ReportPayload } from '../shared/report'
+import type { UpdateState } from '../shared/updates'
 
 /** One entry of a directory listing returned by the splits/data IPC helpers. */
 export interface DirectoryEntry {
@@ -57,6 +58,17 @@ declare global {
         capture: () => Promise<string>,
         save: (payload: ReportPayload) => Promise<string>,
         cancel: () => Promise<void>,
+      },
+      updates: {
+        getState: () => Promise<UpdateState>,
+        check: () => Promise<UpdateState>,
+        install: (version: string) => Promise<UpdateState>,
+        rollback: () => Promise<UpdateState>,
+        restart: () => Promise<UpdateState>,
+        cancel: () => void,
+        openWindow: () => void,
+        openPage: (url: string) => void,
+        onState: (handler: (state: UpdateState) => void) => () => void,
       },
       obsAuth: (password: string, salt: string, challenge: string) => Promise<string>,
       onControlRequest: (handler: ControlHandler) => () => void,

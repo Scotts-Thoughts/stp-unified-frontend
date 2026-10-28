@@ -1,0 +1,89 @@
+# Builds and publishes a release when a push to main has a version in its last commit's
+# summary line, such as "v3.3.0" or "v3.3.0 faster splits". No version, or a version
+# already released: nothing happens. docs/updates.md explains the release's files and
+# how the app's updater uses them.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.find.outputs.version }}
+    steps:
+      - id: find
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          summary="$(printf '%s\n' "$MESSAGE" | head -n 1)"
+          version="$(printf '%s\n' "$summary" | grep -oE '(^|[^A-Za-z0-9.])v[0-9]+\.[0-9]+\.[0-9]+([^A-Za-z0-9.]|$)' | head -n 1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)"
+          if [ -z "$version" ]; then
+            echo "No vX.Y.Z in \"$summary\"; nothing to release."
+            exit 0
+          fi
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "::warning::v$version is already released; nothing to do."
+            exit 0
+          fi
+          echo "Releasing v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    if: needs.version.outputs.version != ''
+    runs-on: windows-latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Set the version
+        shell: bash
+        run: npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Build
+        shell: bash
+        run: |
+          npm run build
+          npx electron-builder --win --publish never
+
+      - name: Make the release files
+        run: node tools/release/make-release.mjs
+
+      - name: Publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MESSAGE: ${{ github.event.head_commit.message }}
+        # Uploaded as a draft and published once every file is up: the app never sees a
+        # release whose manifest names a pack that is not there yet.
+        run: |
+          printf '%s\n' "$MESSAGE" > release-notes.txt
+          gh release create "v$VERSION" dist/release/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "v$VERSION" \
+            --notes-file release-notes.txt \
+            --draft
+          gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft=false --latest

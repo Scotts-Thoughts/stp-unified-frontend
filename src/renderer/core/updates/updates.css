@@ -1,0 +1,44 @@
+/*
+ * The Updates button (UpdatesButton.vue), left of the Report button (core/report/report.css),
+ * in the top right of the settings panel or the start screen. Every rule sets what it needs,
+ * because the generations' style.css files style bare `button` elements.
+ */
+
+.stp-updates-btn {
+    position: absolute;
+    top: 14px;
+    right: 116px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 20px;
+    margin: 0;
+    padding: 0 9px;
+    border: 1px solid rgba(130, 170, 255, 0.55);
+    border-radius: 6px;
+    background: rgba(18, 32, 70, 0.85);
+    color: #d9e4ff;
+    font: 600 11px/1 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: none;
+    box-shadow: none;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.stp-updates-btn:hover {
+    background: rgba(26, 46, 110, 0.95);
+    color: #ffffff;
+}
+
+.stp-updates-btn.stp-updates-btn-new {
+    border-color: rgba(120, 230, 140, 0.7);
+    background: rgba(16, 60, 26, 0.9);
+    color: #d6ffdd;
+}
+
+.stp-updates-btn svg {
+    flex: none;
+}

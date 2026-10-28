@@ -342,8 +342,12 @@ export function friendshipRow(vm: any): { label: string; value: string } {
     const mode = vm.stats;
     const team0 = vm.game.properties.player.team[0];
     if (mode == "Base Stats" || vm.stats_header == "Base Stats") {
-        const species = vm.evolution ? vm.selected_evolution_species : vm.starterString;
-        return { label: "Total:", value: String(vm.game_data?.dexData?.[species]?.base_stats ? vm.get_base_stat_total() : 0) };
+        // The six "Base Stats" tiles added up (gen3's dex has base_hp etc., no base_stats object).
+        const species = vm.statsDisplaySpecies;
+        const total = vm.stat_object.reduce((sum: number, stat: any) => sum + (Number(species == "Deoxys"
+            ? vm.deoxys_form_base_stats?.[stat.name]
+            : vm.game_data?.dexData?.[species]?.[stat.base_stat_path]) || 0), 0);
+        return { label: "Total:", value: String(total) };
     }
     if (mode == "IVs") {
         const ivs = ["ivHp", "ivAttack", "ivDefense", "ivSpecialAttack", "ivSpecialDefense", "ivSpeed"];

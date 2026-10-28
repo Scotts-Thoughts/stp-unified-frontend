@@ -1358,18 +1358,18 @@ export default defineComponent({
         },
         /**
          * The moves the "Unobtainable Moves" setting crosses out (core/logic/unobtainableMoves.ts): the
-         * run rules' bans everywhere, the edition's unobtainable TMs in TM/HM and tutor rows. Hidden Power
-         * is in Crystal's list for the first run only: not once a run is finished, nor with "HP Banned for
-         * 1st Run" off. Gold & Silver has no list, so nothing there is crossed out (known-legacy-bugs #112).
+         * run rules' bans and, until a run is finished with "HP Banned for 1st Run" on, Hidden Power
+         * everywhere (every edition, known-legacy-bugs #146); the edition's unobtainable TMs in TM/HM and
+         * tutor rows. Gold & Silver has no TM list (known-legacy-bugs #112).
          */
         movepoolStruck() {
             const active = crossOutActive(this.unobtainable_moves_toggle, {
                 starterObtained: this.g2stateVariable != "No Pokemon",
                 firstBadge: this.game.properties.player.badges.badge1.value == true,
             })
-            const hiddenPowerAllowed = this.finished_run_count > 0 || this.banned_hidden_power == false
-            const machines = (this.unobtainable_moves_object[this.game_selection] ?? []).filter(move => !(move == "Hidden Power" && hiddenPowerAllowed))
-            return struckMoves(active, { everywhere: this.unobtainable_moves_object["Banned"], machines })
+            const lists = this.unobtainable_moves_object
+            const firstRun = (this.finished_run_count > 0 || this.banned_hidden_power == false) ? [] : lists["First Playthrough"]
+            return struckMoves(active, { everywhere: [...lists["Banned"], ...firstRun], machines: lists[this.game_selection] })
         },
         /**
          * What the shared movepool table (core/overlay/Movepool.vue) shows: gen2's own Hidden Power,

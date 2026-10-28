@@ -11,6 +11,7 @@ import { clearHotkeysForReload, startHotkeys, stopHotkeys } from "./hotkeys";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
 import { cutterArgs, runCutter } from "./cutter";
 import { registerReportIpc, startReportLog } from "./report";
+import { startUpdater } from "./updater";
 
 /**
  * Started by the Cutter editor (`--cutter-frame-server` / `--cutter-configure`,
@@ -241,6 +242,9 @@ if (!cutter) app.whenReady().then(() => {
     // Shortcut IPC (src/main/hotkeys.ts); it looks the window up per message, and the page
     // cannot send anything before this line has run.
     startHotkeys(() => mainWindow);
+    // The updater (src/main/updater/, docs/updates.md): IPC for the Updates window, and in a
+    // packaged Windows build a check for a newer release a few seconds after start-up.
+    startUpdater(() => mainWindow);
 })
 
 if (!cutter) app.on('will-quit', () => {

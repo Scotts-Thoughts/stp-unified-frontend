@@ -35,7 +35,7 @@ entry, a `USE_UNIFIED_FRONTEND` switch that makes `detectGenContext` return `gen
 unified overlay by `/status.app === "stp-overlay"`. It is **not applied**: the queuer's working tree carries
 uncommitted edits, so the patch is for Scott to apply (`git apply docs/queuer-unified.patch` in the queuer
 folder) and dry-run in Test Mode and Capture Fixtures mode before switching the default (decision 12). The
-unified app's `package.json` name is `stp-overlay` (3.2.0), so `%APPDATA%\stp-overlay` is where the queuer's
+unified app's `package.json` name is `stp-overlay` (3.3.0), so `%APPDATA%\stp-overlay` is where the queuer's
 window-state file goes; the app reads it in dev and, additively, when packaged.
 
 ## 2. Overlay control server — `http://127.0.0.1:30159`
