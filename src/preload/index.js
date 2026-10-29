@@ -125,6 +125,8 @@ const api = {
     rollback: () => ipcRenderer.invoke('updates:rollback'),
     /** Install the downloaded update now: the app closes and opens again. */
     restart: () => ipcRenderer.invoke('updates:restart'),
+    /** Change whether and when the start-up question appears ({ silenced }, { skipped }, { remindAfter: null }). */
+    setPrefs: (change) => ipcRenderer.invoke('updates:set-prefs', change),
     cancel: () => ipcRenderer.send('updates:cancel'),
     openWindow: () => ipcRenderer.send('updates:open-window'),
     openPage: (url) => ipcRenderer.send('updates:open-page', url),

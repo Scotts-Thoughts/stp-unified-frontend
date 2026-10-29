@@ -2,7 +2,7 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 import type { SplitComparison } from '../main/splitComparison'
 import type { ShortcutCatalog, ShortcutEdit } from '../shared/shortcuts'
 import type { ReportPayload } from '../shared/report'
-import type { UpdateState } from '../shared/updates'
+import type { UpdatePrefsChange, UpdateState } from '../shared/updates'
 
 /** One entry of a directory listing returned by the splits/data IPC helpers. */
 export interface DirectoryEntry {
@@ -65,6 +65,7 @@ declare global {
         install: (version: string) => Promise<UpdateState>,
         rollback: () => Promise<UpdateState>,
         restart: () => Promise<UpdateState>,
+        setPrefs: (change: UpdatePrefsChange) => Promise<UpdateState>,
         cancel: () => void,
         openWindow: () => void,
         openPage: (url: string) => void,

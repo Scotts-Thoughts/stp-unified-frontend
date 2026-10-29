@@ -18,6 +18,22 @@ export type UpdateJob =
     | { kind: "ready"; version: string }
     | { kind: "restarting"; version: string };
 
+/**
+ * What the user chose about being told of new versions, saved in `<userData>/updates.json`.
+ * None of it stops the Updates window from listing and installing any version.
+ */
+export interface UpdatePrefs {
+    /** Never check or ask at start-up; the Updates button stays quiet. */
+    silenced: boolean;
+    /** Not asked about this version, or any older one, again; a newer one is asked about. */
+    skipped: string | null;
+    /** ISO date: "Remind me tomorrow" was pressed, so no start-up question before this (the next midnight). */
+    remindAfter: string | null;
+}
+
+/** What the window may change: `true`/`false` for `silenced`, `null` to clear a skip or a reminder. */
+export type UpdatePrefsChange = { silenced?: boolean; skipped?: string | null; remindAfter?: null };
+
 export interface UpdateState {
     /** False in development, on a Mac, under the parity harness, or without an install manifest. */
     enabled: boolean;
@@ -28,6 +44,9 @@ export interface UpdateState {
     previous: string | null;
     /** The newest release, when it is newer than `current`. */
     available: string | null;
+    /** True when `available` is one the user asked not to hear about now (silenced, skipped, or until tomorrow). */
+    quiet: boolean;
+    prefs: UpdatePrefs;
     checking: boolean;
     /** ISO date of the last successful check. */
     lastChecked: string | null;

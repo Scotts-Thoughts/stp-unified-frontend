@@ -49,8 +49,15 @@ On only in a packaged Windows build with an install manifest, and not when `STP_
 
 - **Start-up.** 5 s after launch it lists releases (GitHub API, unauthenticated, 60 checks/hour per IP;
   `STP_UPDATE_FEED` overrides the URL with any server answering the same JSON). If the newest is newer and not
-  skipped, a native dialog asks: Update now / Later / Skip this version (saved in `<userData>/updates.json`). Native
-  dialogs and the Updates window are separate windows, so OBS's window capture of the overlay never shows them.
+  the user hasn't asked to be left alone about it, a native dialog asks: Update now / Remind me tomorrow / Skip this
+  version / Never ask me. Native dialogs and the Updates window are separate windows, so OBS's window capture of the
+  overlay never shows them.
+- **The user's choices** (`<userData>/updates.json`, `UpdatePrefs`; Scott's rule: the user decides which version they
+  run, and the app must never nag). `silenced` ("Never ask me", or the checkbox in the window): no start-up check at
+  all, not even a request to GitHub. `skipped`: no question about that version or older; a newer one is asked about.
+  `remindAfter` ("Remind me tomorrow", also what closing the dialog does): no question before the next local midnight.
+  In all three cases `state.quiet` is true and the Updates button doesn't turn green. The Updates window shows and
+  undoes all three, and always checks and installs whatever the user picks.
 - **Download** (`download.ts`) into `updates/staging/`, only files the install lacks at that path with that content,
   each from the cheapest place: already staged (a stopped download resumes), the same content elsewhere in the
   install or in `updates/previous/` (copied), or the release. Every file is checked against its SHA-256.

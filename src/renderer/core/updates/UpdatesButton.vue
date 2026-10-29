@@ -33,18 +33,22 @@ export default defineComponent({
         };
     },
     computed: {
+        /** A newer version the user hasn't silenced, skipped or put off until tomorrow. */
+        announce(): boolean {
+            return !!this.state?.available && !this.state.quiet;
+        },
         highlight(): boolean {
-            return !!this.state && (!!this.state.available || this.state.job?.kind === "ready");
+            return !!this.state && (this.announce || this.state.job?.kind === "ready");
         },
         label(): string {
             if (this.state?.job?.kind === "ready") return "Restart to update";
             if (this.state?.job?.kind === "downloading") return "Downloading…";
-            return this.state?.available ? "Update available" : "Updates";
+            return this.announce ? "Update available" : "Updates";
         },
         title(): string {
             const state = this.state;
             if (!state) return "";
-            return state.available ? `Version ${state.available} is available (you have ${state.current})` : `Version ${state.current}: updates and rollback`;
+            return this.announce ? `Version ${state.available} is available (you have ${state.current})` : `Version ${state.current}: updates and rollback`;
         },
     },
     async mounted() {

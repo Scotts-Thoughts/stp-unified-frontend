@@ -60,15 +60,43 @@
 				</template>
 			</section>
 
-			<section v-else-if="state.available" class="card highlight">
+			<section v-else-if="state.available" class="card" :class="{ highlight: !state.quiet }">
 				<p>Version <b>{{ state.available }}</b> is available.</p>
 				<div class="row-buttons">
 					<button type="button" class="primary" :disabled="busy" @click="install(state.available)">Update to {{ state.available }}</button>
+					<button v-if="!skippedAvailable" type="button" :disabled="busy" @click="setPrefs({ skipped: state.available })">Skip this version</button>
 				</div>
+				<p v-if="skippedAvailable" class="muted small">You skipped this version, so you won't be asked about it. You will be asked about the next one.</p>
 			</section>
 
 			<section v-else-if="state.lastChecked && !state.error" class="card">
 				<p>You have the newest version.</p>
+			</section>
+
+			<section class="card">
+				<h2>Update questions</h2>
+				<label class="check">
+					<input type="checkbox" :checked="!state.prefs.silenced" :disabled="busy" @change="setPrefs({ silenced: !($event.target as HTMLInputElement).checked })" />
+					Ask me when a new version comes out
+				</label>
+				<p class="muted small">
+					<template v-if="state.prefs.silenced">
+						Off: the overlay never checks or asks on its own, and you stay on the version you have. You can still check and
+						install any version from this window.
+					</template>
+					<template v-else>
+						When the overlay starts, it looks for a new version and asks before downloading anything. Nothing is ever
+						installed without you saying so.
+					</template>
+				</p>
+				<p v-if="state.prefs.skipped" class="small">
+					Skipped: version {{ state.prefs.skipped }} and older.
+					<a href="#" class="link" @click.prevent="setPrefs({ skipped: null })">Stop skipping</a>
+				</p>
+				<p v-if="remindLater" class="small">
+					Reminding you tomorrow.
+					<a href="#" class="link" @click.prevent="setPrefs({ remindAfter: null })">Clear</a>
+				</p>
 			</section>
 
 			<section class="card">
@@ -122,7 +150,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { UpdateJob, UpdateRelease, UpdateState } from "../../../shared/updates";
+import type { UpdateJob, UpdatePrefsChange, UpdateRelease, UpdateState } from "../../../shared/updates";
 
 /**
  * The Updates window (updates.html). It holds no state of its own: the updater in main
@@ -142,6 +170,13 @@ export default defineComponent({
 		jobRunning(): boolean {
 			const job = this.state?.job;
 			return !!job && job.kind !== "ready";
+		},
+		skippedAvailable(): boolean {
+			return !!this.state?.available && this.state.available === this.state.prefs.skipped;
+		},
+		remindLater(): boolean {
+			const until = this.state?.prefs.remindAfter;
+			return !!until && Date.now() < Date.parse(until);
 		},
 	},
 	async mounted() {
@@ -173,6 +208,9 @@ export default defineComponent({
 		},
 		restart() {
 			return this.run(() => window.api.updates.restart());
+		},
+		setPrefs(change: UpdatePrefsChange) {
+			return this.run(() => window.api.updates.setPrefs(change));
 		},
 		cancel() {
 			window.api.updates.cancel();
@@ -314,6 +352,13 @@ button.primary {
 	border-color: var(--accent);
 	background: var(--accent);
 	color: #fff;
+}
+.check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 6px;
+	cursor: pointer;
 }
 .row-buttons {
 	display: flex;

@@ -3,7 +3,7 @@ import { app, BrowserWindow, dialog, ipcMain, shell, type MessageBoxOptions } fr
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { UpdateJob, UpdateState } from "../../shared/updates";
+import type { UpdateJob, UpdatePrefs, UpdatePrefsChange, UpdateState } from "../../shared/updates";
 import { appRoot } from "../paths";
 import applyScript from "./apply.ps1?raw";
 import { planDownload, readPreviousManifest, resetStagingFor, runDownload, sizeOf } from "./download";
@@ -52,6 +52,8 @@ const state: UpdateState = {
     current: app.getVersion(),
     previous: null,
     available: null,
+    quiet: false,
+    prefs: { silenced: false, skipped: null, remindAfter: null },
     checking: false,
     lastChecked: null,
     releases: [],
@@ -88,24 +90,51 @@ function readText(path: string): string | null {
     }
 }
 
-// ---- settings: the version the user chose to skip --------------------------------------
+// ---- settings: whether, and about which version, the user wants to be asked --------------
 
 const settingsFile = () => join(app.getPath("userData"), "updates.json");
 
-function readSettings(): { skipped?: string } {
+function readSettings(): UpdatePrefs {
+    let saved: Partial<UpdatePrefs> = {};
     try {
-        return JSON.parse(readFileSync(settingsFile(), "utf-8"));
+        saved = JSON.parse(readFileSync(settingsFile(), "utf-8")) ?? {};
     } catch {
-        return {};
+        // none yet, or unreadable: the defaults
     }
+    return {
+        silenced: saved.silenced === true,
+        skipped: typeof saved.skipped === "string" ? saved.skipped : null,
+        remindAfter: typeof saved.remindAfter === "string" ? saved.remindAfter : null,
+    };
 }
 
-function writeSettings(settings: { skipped?: string }): void {
+function writeSettings(change: Partial<UpdatePrefs>): void {
+    const settings = { ...readSettings(), ...change };
     try {
         writeFileSync(settingsFile(), JSON.stringify(settings));
     } catch (err) {
         console.error("[updates] could not save updates.json:", err);
     }
+    refreshQuiet(settings);
+}
+
+/** The next local midnight: "Remind me tomorrow" asks again on the first launch of the next day. */
+function nextMidnight(): string {
+    const date = new Date();
+    date.setHours(24, 0, 0, 0);
+    return date.toISOString();
+}
+
+/** Whether the user asked not to be told about `version` now. */
+function isQuiet(version: string, settings: UpdatePrefs): boolean {
+    if (settings.silenced) return true;
+    if (settings.skipped && compareVersions(version, settings.skipped) <= 0) return true;
+    return !!settings.remindAfter && Date.now() < Date.parse(settings.remindAfter);
+}
+
+function refreshQuiet(settings = readSettings()): void {
+    state.prefs = settings;
+    state.quiet = !!state.available && isQuiet(state.available, settings);
 }
 
 // ---- state --------------------------------------------------------------------------------
@@ -247,9 +276,10 @@ async function check(prompt: boolean): Promise<void> {
         state.error = `Could not check for updates: ${messageOf(err)}`;
     } finally {
         state.checking = false;
+        refreshQuiet();
         broadcast();
     }
-    if (prompt && state.available && readSettings().skipped !== state.available && !state.job) {
+    if (prompt && state.available && !state.quiet && !state.job) {
         await promptUpdate(releases[0]).catch((err) => {
             console.error("[updates] prompt failed:", err);
         });
@@ -276,11 +306,24 @@ async function promptUpdate(release: Release): Promise<void> {
         title: "Update available",
         message: `Version ${release.version} of stp-overlay is available.`,
         detail: `You have ${state.current}. The update downloads ${formatBytes(bytes)}.${notes ? `\n\n${notes}` : ""}`,
-        buttons: ["Update now", "Later", "Skip this version"],
+        buttons: ["Update now", "Remind me tomorrow", "Skip this version", "Never ask me"],
         defaultId: 0,
         cancelId: 1,
     });
-    if (choice === 2) writeSettings({ ...readSettings(), skipped: release.version });
+    // Closing the dialog counts as "Remind me tomorrow". "Never ask me" can be undone in the Updates window.
+    if (choice === 1) writeSettings({ remindAfter: nextMidnight() });
+    if (choice === 2) writeSettings({ skipped: release.version, remindAfter: null });
+    if (choice === 3) {
+        writeSettings({ silenced: true });
+        await showBox({
+            type: "info",
+            title: "Update questions turned off",
+            message: "stp-overlay won't ask about new versions again.",
+            detail: `You stay on version ${state.current}. To check or update yourself, or to turn the questions back on, use the Updates button next to the Report button.`,
+            buttons: ["OK"],
+        });
+    }
+    broadcast();
     if (choice !== 0) return;
     openUpdatesWindow();
     await install(release, target);
@@ -503,6 +546,15 @@ export function startUpdater(getWindow: () => BrowserWindow | null): void {
     ipcMain.handle("updates:install", (_event, version: string) => guarded(() => installFromWindow(String(version)))());
     ipcMain.handle("updates:rollback", guarded(rollback));
     ipcMain.handle("updates:restart", guarded(restart));
+    ipcMain.handle("updates:set-prefs", (_event, change: UpdatePrefsChange) => {
+        const next: Partial<UpdatePrefs> = {};
+        if (typeof change?.silenced === "boolean") next.silenced = change.silenced;
+        if (change?.skipped === null || typeof change?.skipped === "string") next.skipped = change.skipped;
+        if (change?.remindAfter === null) next.remindAfter = null;
+        writeSettings(next);
+        broadcast();
+        return state;
+    });
     ipcMain.on("updates:cancel", () => abort?.abort());
     ipcMain.on("updates:open-window", () => openUpdatesWindow());
     ipcMain.on("updates:open-page", (_event, url: unknown) => {
@@ -511,6 +563,7 @@ export function startUpdater(getWindow: () => BrowserWindow | null): void {
 
     state.disabledReason = disabledReason();
     state.enabled = state.disabledReason === null;
+    refreshQuiet();
     if (!state.enabled) return;
 
     try {
@@ -535,6 +588,7 @@ export function startUpdater(getWindow: () => BrowserWindow | null): void {
             state.error = `The last update could not be installed: ${failedResult}`;
             failedResult = null;
         }
-        await check(true);
+        // Silenced: not even a look at GitHub; the Updates window still checks when opened.
+        if (!readSettings().silenced) await check(true);
     }, STARTUP_CHECK_DELAY);
 }
