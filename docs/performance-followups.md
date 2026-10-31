@@ -501,3 +501,25 @@ to the harness (it runs with the frame off).
   write debounce, so a slider drag blocks main once per input event (dev builds only).
 - The Super Shuckie poll does not wait for the previous fetch; a stalled emulator stacks requests. Changing it
   changes poll timing, which the harness sees.
+
+## Start-up (measured 2026-10-29)
+
+Built app (`out/`), launched through Playwright with no mapper and every non-file request blocked, on Windows.
+
+- **Warm** (files in the OS cache): about 0.75 s from launch to a visible start screen. Electron itself ~100 ms,
+  main process to page start ~250 ms, the page ~300 ms to DOMContentLoaded.
+- **Cold** (first launch after a while): 1.8-4.4 s, almost all of it reading files from disk.
+- **SignalR loads Node packages in the page.** The renderer has `nodeIntegration`, so `@microsoft/signalr`'s
+  `Platform.isNode` is true and `connect()` (called from `main.ts` `created()`) `require`s `ws`, `eventsource`,
+  `tough-cookie`, `fetch-cookie`, `psl` and friends: 37 files, read synchronously before the first paint, so before
+  `ready-to-show`. Profiled at 240-715 ms of `readFileUtf8`; ~80 ms or less once warm. Passing `WebSocket` /
+  `httpClient` options does not stop it: `HttpConnection`'s constructor requires `ws` and `eventsource` whenever
+  `isNode` is true. It also means SignalR talks to PokeAByte through Node's `ws` and fetch, not Chromium's, so a
+  switch to the browser ones changes CORS and cookies and needs a test against the real PokeAByte.
+  **Done (2026-10-29):** the shell now connects after main reports the window shown (`window:shown`, ARCHITECTURE
+  §3), so the reads land after the first paint. 8 launches each: median 753 -> 621 ms from main start to a visible
+  window, slowest 1,461 -> 861 ms; fully warm launches are unchanged (~600 ms). Stopping the reads altogether
+  (making SignalR take its browser path) is still open, for the reason above.
+- **The entry chunk is 2.5 MB; 1.8 MB of it is gen1's trainer and dex tables, both editions.** It compiled in
+  ~10-20 ms warm (V8 parses lazily), so moving it out would barely move start-up. The 5-10 MB gen2-5 chunks
+  load when a game is detected, not at launch.

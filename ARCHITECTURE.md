@@ -133,7 +133,10 @@ docs/             Reference docs. See §13.
 All of this is in `src/renderer/main.ts`.
 
 1. **Startup.** It loads env, user state and legacy storage. It styles the pre-mapper screen with gen1's module
-   (gen1 is imported eagerly; gen2–5 are lazy chunks). It creates `GameHookMapperClient` and connects.
+   (gen1 is imported eagerly; gen2–5 are lazy chunks). It creates `GameHookMapperClient` and connects once main
+   says the window is shown (`window_shown`, IPC `window:shown`): SignalR's connect reads ~37 Node files
+   synchronously, which otherwise delays the first paint and so the window. Don't wait on a page timer instead:
+   the harness pauses the page clock, and a boot that waits on it stalls its warm-up barrier.
 2. **Mapper loads.**
    - `detect()` in `games/registry.ts` walks every manifest's `MapperProfile`s. It tries the path pattern
      first, then the identity rule.

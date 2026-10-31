@@ -1,6 +1,6 @@
 // Modules to control application life and create native browser window
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
-import { app, shell, BrowserWindow, screen, type BrowserWindow as BrowserWindowType } from 'electron'
+import { app, ipcMain, shell, BrowserWindow, screen, type BrowserWindow as BrowserWindowType } from 'electron'
 import path from "path";
 import fs from "fs";
 import { ControlServer } from "./control-server";
@@ -30,6 +30,22 @@ const controlServer = new ControlServer(() => mainWindow);
 /** The out-of-process clock page (port 30160); its URL reaches the renderer as `--timer-frame-url=`. */
 const timerFrame = new TimerFrameServer();
 let timerFrameUrl: string | null = null;
+
+/**
+ * `window:shown` (preload's `window_shown`): resolves once the overlay window has been
+ * shown, at once if it already has (a reload). The page waits for it before connecting
+ * to the memory tool: SignalR's connect `require`s ~37 Node files synchronously
+ * (docs/performance-followups.md, "Start-up"), and before the first paint that held
+ * `ready-to-show` back by 250-700 ms on a cold launch. Never waits more than 2 s.
+ */
+let windowShown = false;
+let shownWaiters: (() => void)[] = [];
+function markWindowShown(): void {
+    windowShown = true;
+    const waiters = shownWaiters;
+    shownWaiters = [];
+    for (const resolve of waiters) resolve();
+}
 
 const devStateFile = () => path.join(app.getPath('userData'), 'dev-window-state.json')
 
@@ -185,12 +201,14 @@ function createWindow() {
         // The Keyboard Shortcuts window must not keep the app alive without its overlay.
         stopHotkeys();
         mainWindow = null;
+        markWindowShown();
     })
 
     mainWindow.on('ready-to-show', () => {
         //zoom the window appropriately before showing
         fitZoom();
         mainWindow.show();
+        markWindowShown();
         // mainWindow.webContents.openDevTools()
     })
 
@@ -228,6 +246,10 @@ if (!cutter) app.whenReady().then(() => {
     ensureImagePool();
     registerIpc(() => mainWindow);
     registerReportIpc(() => mainWindow);
+    ipcMain.handle('window:shown', () => windowShown ? undefined : new Promise<void>((resolve) => {
+        shownWaiters.push(resolve);
+        setTimeout(resolve, 2000);
+    }));
     controlServer.start();
 
     // Default open or close DevTools by F12 in development

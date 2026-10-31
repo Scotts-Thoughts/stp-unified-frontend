@@ -71,6 +71,8 @@ const api = {
   app_root: () => invoke('app_root'),
   /** `app.isPackaged`; the legacy style managers' dev/prod switch (core/env.ts). */
   is_packaged: () => invoke('is_packaged'),
+  /** Resolves once the overlay window is on screen (src/main/index.ts); rejects in Cutter mode, which has no handler. */
+  window_shown: () => invoke('window:shown'),
   /** Taskbar icon: a file under resources/icons/, or "" for the portrait. Fire and forget. */
   set_game_icon: (relative) => ipcRenderer.send('set-game-icon', relative),
   /** gen5's second-screen key sender (node-key-sender in the main process, decision 9). Fire and forget. */

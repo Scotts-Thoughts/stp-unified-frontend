@@ -302,7 +302,13 @@ const main = defineComponent({
             applyScaleToFit(gen1);
             void applyModuleStyles(gen1).then(() => this.settings.reapplyCss());
         };
-        this.mapper.connect();
+        // Connect once the window is on screen (src/main/index.ts, `window:shown`):
+        // SignalR's connect reads ~37 Node files synchronously, and done here it held the
+        // first paint, and so the window, back. The wait is IPC, not a page timer, so the
+        // harness's paused clock does not hold it, and the boot counter above covers it.
+        // Cutter mode has no handler; there the rejection connects straight away.
+        const connect = () => { void this.mapper?.connect(); };
+        (window.api?.window_shown?.() ?? Promise.resolve()).then(connect, connect);
 
         // The queuer drives the overlay over http://127.0.0.1:30159 (plan 1.8). The
         // route table is the active module's (gen1's before a mapper is known, so

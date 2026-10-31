@@ -28,6 +28,8 @@ declare global {
       settings_dir: () => Promise<string>,
       app_root: () => Promise<string>,
       is_packaged: () => Promise<boolean>,
+      /** Resolves once the overlay window is on screen; rejects in Cutter mode. */
+      window_shown: () => Promise<void>,
       /** A file under resources/icons/, or "" to put the portrait back. */
       set_game_icon: (relative: string) => void,
       send_virtual_key: (keyName: string | number) => void,
