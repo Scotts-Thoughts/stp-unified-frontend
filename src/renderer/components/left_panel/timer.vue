@@ -7,6 +7,7 @@
 
 <script lang="ts">
 import PubSub from "~/logic/PubSub";
+import { Timer } from "~/logic/Timer";
 import { computed, defineComponent } from "vue";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
@@ -53,6 +54,17 @@ export default defineComponent({
             };
         },
     },
+    watch: {
+        // The timer's frame loop ends while it has nothing to draw (logic/Timer.ts `updateLoop`):
+        // restart it when the timer may have started -- by a button, a hotkey or the store loading
+        // from disk -- and stop or restart it as the out-of-process clock appears or goes away.
+        "metrics.timer.paused"() {
+            Timer.ensure(this.metrics).wake();
+        },
+        frameLive(live: boolean) {
+            Timer.ensure(this.metrics).setFrameLive(live);
+        },
+    },
     methods: {
         onTimeUpdate(value: string[]) {
             this.localTime = value[0];
@@ -61,6 +73,7 @@ export default defineComponent({
     },
     created() {
         PubSub.subscribe("@timer/update", this.onTimeUpdate);
+        Timer.ensure(this.metrics).wake(); // the loop ends when nobody is subscribed
     },
     // Was `onUnmounted`, which the Options API never calls: every overlay unmount
     // left the old instance subscribed, so the timer loop kept publishing into dead

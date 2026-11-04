@@ -35,7 +35,7 @@ entry, a `USE_UNIFIED_FRONTEND` switch that makes `detectGenContext` return `gen
 unified overlay by `/status.app === "stp-overlay"`. It is **not applied**: the queuer's working tree carries
 uncommitted edits, so the patch is for Scott to apply (`git apply docs/queuer-unified.patch` in the queuer
 folder) and dry-run in Test Mode and Capture Fixtures mode before switching the default (decision 12). The
-unified app's `package.json` name is `stp-overlay` (3.3.0), so `%APPDATA%\stp-overlay` is where the queuer's
+unified app's `package.json` name is `stp-overlay` (3.3.1), so `%APPDATA%\stp-overlay` is where the queuer's
 window-state file goes; the app reads it in dev and, additively, when packaged.
 
 ## 2. Overlay control server — `http://127.0.0.1:30159`
@@ -45,6 +45,8 @@ the queuer's `isGen1` guards skip *some* of its calls there (the column below is
 in its `main.js`, 2026-09-12 -- it is not "everything but `/set-starter`"). The unified app moves the server
 to the main process (one implementation, `src/main/control-server.ts`) and must answer every route below
 with the same semantics. Port 30159 is single-tenant: only one overlay can run at a time.
+Since 2026-10-29 a request carrying `Sec-Fetch-Site: cross-site` (a browser's mark on a request a foreign
+web page makes to 127.0.0.1) is refused with a 403 `{ ok: false, error }`; the queuer sends no such header.
 
 The queuer's `overlayFetch` **throws** on a connection failure or a non-2xx reply, and
 `configureAndVerifyOverlay` gives up after three attempts. So against the legacy gen1 a queue item never got

@@ -12,11 +12,6 @@ class Timer {
 		// We do not keep formatted_time in storage, because we can always reconstruct it from the 3 variables we do
 		// store.
 		this.storage = storage;
-		/** 
-		 * An array with formatted time information. First item is the general time as `hh:mm:ss`. 
-		 * Second is the number of milliseconds elapsed as `.ms` 
-		 */
-		this.formatted_time  = ["0", ".00"];
 		this.update();     // update once to set everything correctly.
 		this.updateLoop(); // then start the timer loop.
 		// We may be paused, so the update() is necessary, since the loop does no updates when paused.
@@ -27,6 +22,42 @@ class Timer {
 		if (!this.storage.timer_pause) {
 			this.update();
 		}
+		// Not in the legacy file (2026-11-02): a paused timer has nothing to draw, so the loop ends,
+		// and `startTime` and `pauseUnpauseTime` start it again through `wakeLoop` when they unpause.
+		// It used to run every frame for the life of the overlay, waking the page at the display's
+		// refresh rate while idle.
+		// Not in the legacy file either (2026-11-03): nor while the out-of-process clock shows
+		// (`setFrameLive`). Then only the hidden, frozen in-page clock would read the published
+		// text, and the loop alone kept the overlay drawing a frame per display refresh.
+		if (this.storage.timer_pause || this.frameLive) {
+			this.looping = false;
+			return;
+		}
+		this.looping = true;
+		window.requestAnimationFrame(this.updateLoop);
+	}
+
+	looping = false;
+
+	/** The out-of-process clock (core/overlay/ClockFrame.ts) is showing; set by the overlay. */
+	frameLive = false;
+
+	/**
+	 * Called by the overlay when the out-of-process clock appears or goes away. When it goes
+	 * away the in-page clock shows again, so it gets the current time and the loop restarts.
+	 */
+	setFrameLive = (live) => {
+		this.frameLive = live;
+		if (!live) {
+			this.update();
+			this.wakeLoop();
+		}
+	}
+
+	/** Restarts an ended `updateLoop` on the next frame; a no-op while it runs. */
+	wakeLoop = () => {
+		if (this.stopped || this.looping) return;
+		this.looping = true;
 		window.requestAnimationFrame(this.updateLoop);
 	}
 
@@ -71,6 +102,7 @@ class Timer {
 		this.setTimer(startTimeOffset);
 		this.storage.timer_pause = false;
 		this.update();
+		this.wakeLoop();
 		this.onChange?.();
 	}
 
@@ -82,6 +114,7 @@ class Timer {
 			this.storage.timer_pause = false;
 			this.storage.timer_startTime += Date.now() - this.storage.timer_pause_time;
 			this.update();
+			this.wakeLoop();
 		}
 		else {
 			this.storage.timer_pause = true;
@@ -116,18 +149,38 @@ class Timer {
 	}
 
 	/**
-	 * Updates the {@link formatted_time} and publishes a `time_update` event which the "Timer" vue component listens for.
+	 * An array with formatted time information. First item is the general time as `hh:mm:ss`.
+	 * Second is the number of milliseconds elapsed as `.ms`
+	 *
+	 * As of the last `update()`, as in the legacy file -- except while the out-of-process clock
+	 * shows (2026-11-03): the frame loop is off then, so the time is worked out when read, for
+	 * the split and autosplitter code that needs the time at that moment.
+	 */
+	get formatted_time() {
+		return this.frameLive ? this.format() : this._formatted;
+	}
+
+	/** The last `update()`'s {@link formatted_time}. */
+	_formatted = ["0", ".00"];
+
+	/** The current time, formatted as {@link formatted_time}. */
+	format = () => {
+		const {ms: ms, seconds: s, minutes: m, hours: h} = this.getTime();
+		if (h != 0) {
+			return [ h + ":" + f(m) + ":" + f(s), "." + f(ms), h + "h" + m + "m" + s + "s", ]
+		} else if (m != 0) {
+			return [ m + ":" + f(s), "." + f(ms), h + "h" + m + "m" + s + "s", ]
+		} else {
+			return [ s, "." + f(ms), h + "h" + m + "m" + s + "s", ]
+		}
+	}
+
+	/**
+	 * Publishes the {@link formatted_time} as a `time_update` event, which the in-page clock listens for.
 	 */
 	update = () => {
-		const {ms: ms, seconds: s, minutes: m, hours: h} = this.getTime();		
-		if (h != 0) {
-			this.formatted_time = [ h + ":" + f(m) + ":" + f(s), "." + f(ms), h + "h" + m + "m" + s + "s", ]
-		} else if (m != 0) {
-			this.formatted_time = [ m + ":" + f(s), "." + f(ms), h + "h" + m + "m" + s + "s", ]
-		} else {
-			this.formatted_time = [ s, "." + f(ms), h + "h" + m + "m" + s + "s", ]
-		}
-		PubSub.publish("time_update", this.formatted_time);
+		this._formatted = this.format();
+		PubSub.publish("time_update", this._formatted);
 	}
 
 	/**

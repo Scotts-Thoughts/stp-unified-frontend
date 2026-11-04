@@ -88,6 +88,8 @@ export interface RunOptions {
   /** Inspection hooks for a script that imports `run()`; see the header. */
   beforeReplay?: (page: Page) => Promise<void>;
   afterReplay?: (page: Page) => Promise<void>;
+  /** More Chromium/Electron switches for the app, e.g. a fake microphone (tools/parity/voice-app.ts). */
+  extraArgs?: string[];
   log?: (msg: string) => void;
 }
 
@@ -145,7 +147,7 @@ export async function run(opts: RunOptions): Promise<RunResult> {
   const captured: string[] = [];
 
   try {
-    const launched = await launch(target, log);
+    const launched = await launch(target, log, opts.extraArgs ?? []);
     app = launched.app;
     const page = launched.page;
 
@@ -417,14 +419,14 @@ export async function run(opts: RunOptions): Promise<RunResult> {
   };
 }
 
-async function launch(target: Target, log: (m: string) => void): Promise<{ app: ElectronApplication; page: Page }> {
+async function launch(target: Target, log: (m: string) => void, extraArgs: string[]): Promise<{ app: ElectronApplication; page: Page }> {
   if (!existsSync(target.executablePath)) {
     throw new Error(`Electron not found at ${target.executablePath} -- run npm ci in that repo first.`);
   }
   log(`[run] launching ${target.executablePath} ${target.appArg} (cwd ${target.cwd})`);
   const app = await electron.launch({
     executablePath: target.executablePath,
-    args: [target.appArg, "--force-device-scale-factor=1", `--user-data-dir=${target.userDataDir}`],
+    args: [target.appArg, "--force-device-scale-factor=1", `--user-data-dir=${target.userDataDir}`, ...extraArgs],
     cwd: target.cwd,
     env: {
       ...process.env,
@@ -454,7 +456,7 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
   const page = await app.firstWindow({ timeout: 60000 });
   // 1920x1080 content at zoom 1 is the parity claim; a display that cannot fit it
   // would silently rescale every rect.
-  const bounds = await app.evaluate(async ({ BrowserWindow, screen }) => {
+  const bounds = await app.evaluate(async ({ BrowserWindow, screen }, at) => {
     const win = BrowserWindow.getAllWindows()[0];
     // Chromium opens a new window on the display the user is working on, and a
     // 1920x1080 content window does not survive every display: a 1080-tall one has
@@ -463,7 +465,8 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
     // whole run came back 1914x1063 while someone was working at another monitor. So
     // the window goes to the primary display's work-area corner first -- the display
     // every green run has used -- and only then is sized and locked.
-    const corner = screen.getPrimaryDisplay().workArea;
+    // STP_PARITY_DISPLAY_AT (displayAt()) picks another display, so a run can stay off the one being worked at.
+    const corner = (at ? screen.getDisplayNearestPoint(at) : screen.getPrimaryDisplay()).workArea;
     win.setPosition(corner.x, corner.y);
     win.setContentSize(1920, 1080);
     win.webContents.setZoomFactor(1);
@@ -475,7 +478,7 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
     win.setMinimumSize(win.getSize()[0], win.getSize()[1]);
     win.setMaximumSize(win.getSize()[0], win.getSize()[1]);
     return win.getContentBounds();
-  });
+  }, displayAt());
   if (bounds.width !== 1920 || bounds.height !== 1080) {
     throw new Error(
       `Content size is ${bounds.width}x${bounds.height}, not 1920x1080. ` +
@@ -486,24 +489,35 @@ async function launch(target: Target, log: (m: string) => void): Promise<{ app: 
 }
 
 /**
+ * The display the app window goes to: `STP_PARITY_DISPLAY_AT=x,y` (desktop coordinates, any point
+ * on that display, e.g. `-3440,0`) keeps runs off the monitor someone is working at. Unset, the
+ * primary display, as every baseline so far was captured on. The display must fit 1920x1080
+ * content at 100% scaling, or launch() stops with a size error.
+ */
+function displayAt(): { x: number; y: number } | null {
+  const m = /^\s*(-?\d+)\s*,\s*(-?\d+)\s*$/.exec(process.env.STP_PARITY_DISPLAY_AT ?? "");
+  return m ? { x: Number(m[1]), y: Number(m[2]) } : null;
+}
+
+/**
  * Re-asserts the 1920x1080 content size before a capture and says so if it had drifted.
  * Returns true when it had to fix anything, so the caller can settle two more frames
  * for the layout to catch up.
  */
 async function ensureContentSize(app: ElectronApplication, log: (m: string) => void): Promise<boolean> {
-  const bounds = await app.evaluate(async ({ BrowserWindow, screen }) => {
+  const bounds = await app.evaluate(async ({ BrowserWindow, screen }, at) => {
     const win = BrowserWindow.getAllWindows()[0];
     const before = win.getContentBounds();
     if (before.width !== 1920 || before.height !== 1080) {
       // Back to the primary display first: on a scaled or short one the size call
       // alone lands at 1914x1063 again (see launch()).
-      const corner = screen.getPrimaryDisplay().workArea;
+      const corner = (at ? screen.getDisplayNearestPoint(at) : screen.getPrimaryDisplay()).workArea;
       win.setPosition(corner.x, corner.y);
       win.setContentSize(1920, 1080);
       win.webContents.setZoomFactor(1);
     }
     return { before, after: win.getContentBounds() };
-  });
+  }, displayAt());
   if (bounds.before.width === 1920 && bounds.before.height === 1080) return false;
   log(`[run] window content was ${bounds.before.width}x${bounds.before.height}; restored to ${bounds.after.width}x${bounds.after.height}`);
   return true;

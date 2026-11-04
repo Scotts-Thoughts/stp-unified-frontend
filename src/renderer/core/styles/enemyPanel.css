@@ -1,0 +1,23 @@
+/*
+ * The enemy team panel's pictures (core/overlay/EnemyTeamPanel.ts), in all five generations. Unscoped: the attributes
+ * are set by nothing else.
+ *
+ * A picture is hidden until it has loaded, so one named from a value the mapper has not sent yet, or one that fails,
+ * never shows the broken-image icon; once loaded it fades in. A sprite that arrives after the panel (the species a few
+ * frames behind the team count) fades in on its own instead of popping in part-way through the panel's fade.
+ */
+img[data-stp-fade]:not([data-stp-state="loaded"]),
+img[data-stp-fade][data-stp-missing] {
+    visibility: hidden;
+}
+
+/* No `to`: it ends at the picture's own opacity (a fainted Pokémon's half opacity). */
+img[data-stp-fade][data-stp-state="loaded"] {
+    animation: enemy-picture-in 300ms ease-in-out;
+}
+
+@keyframes enemy-picture-in {
+    from {
+        opacity: 0;
+    }
+}

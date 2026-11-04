@@ -117,6 +117,21 @@ const api = {
     cancel: () => invoke('report:cancel'),
   },
 
+  /**
+   * Voice control (src/main/voice/). `start` loads the keyword spotter (rejects if the Mac
+   * refuses the microphone); `audio` is a fire-and-forget send, ~10 a second while on.
+   */
+  voice: {
+    start: () => ipcRenderer.invoke('voice:start'),
+    stop: () => ipcRenderer.invoke('voice:stop'),
+    audio: (samples, sampleRate) => ipcRenderer.send('voice:audio', samples, sampleRate),
+    onEvent: (handler) => {
+      const listener = (_event, voiceEvent) => handler(voiceEvent)
+      ipcRenderer.on('voice:event', listener)
+      return () => ipcRenderer.removeListener('voice:event', listener)
+    },
+  },
+
   /** The updater (src/main/updater/, docs/updates.md). */
   updates: {
     getState: () => ipcRenderer.invoke('updates:get-state'),

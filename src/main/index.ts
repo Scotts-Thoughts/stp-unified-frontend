@@ -12,6 +12,7 @@ import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from 
 import { cutterArgs, runCutter } from "./cutter";
 import { registerReportIpc, startReportLog } from "./report";
 import { startUpdater } from "./updater";
+import { registerVoiceIpc, stopVoice } from "./voice";
 
 /**
  * Started by the Cutter editor (`--cutter-frame-server` / `--cutter-configure`,
@@ -19,6 +20,11 @@ import { startUpdater } from "./updater";
  * no hotkeys, no legacy import, no window of the usual kind.
  */
 const cutter = cutterArgs();
+
+// Greyscale text antialiasing everywhere, as composited layers already draw it: with the art flips
+// as 2D transforms (SpeciesArt.ts, backgroundTexture.ts) less of the page is composited, and that text
+// would otherwise switch to coloured subpixel edges (docs/performance-followups.md, fifth pass).
+app.commandLine.appendSwitch('disable-lcd-text');
 
 /**
  * The one overlay window. The control server (port 30159) and the hotkey forwarder
@@ -195,11 +201,13 @@ function createWindow() {
 
     // A reload replaces the page that owns the shortcut bindings; the new page sends its
     // own once a generation mounts (src/main/hotkeys.ts).
-    mainWindow.webContents.on('did-navigate', () => clearHotkeysForReload());
+    // Voice control's thread stops with the page that owned the microphone (src/main/voice/).
+    mainWindow.webContents.on('did-navigate', () => { clearHotkeysForReload(); stopVoice(); });
 
     mainWindow.on('closed', () => {
         // The Keyboard Shortcuts window must not keep the app alive without its overlay.
         stopHotkeys();
+        stopVoice();
         mainWindow = null;
         markWindowShown();
     })
@@ -213,7 +221,9 @@ function createWindow() {
     })
 
     mainWindow.webContents.setWindowOpenHandler((details) => {
-        shell.openExternal(details.url);
+        // Only web links leave the app. `openExternal` on a file: or custom-scheme URL
+        // would start whatever program owns it.
+        if (/^https?:\/\//i.test(details.url)) shell.openExternal(details.url);
         return { action: 'deny' };
     });
 
@@ -246,6 +256,8 @@ if (!cutter) app.whenReady().then(() => {
     ensureImagePool();
     registerIpc(() => mainWindow);
     registerReportIpc(() => mainWindow);
+    // Voice control (src/main/voice/): nothing loads until the overlay switches it on.
+    registerVoiceIpc(() => mainWindow);
     ipcMain.handle('window:shown', () => windowShown ? undefined : new Promise<void>((resolve) => {
         shownWaiters.push(resolve);
         setTimeout(resolve, 2000);
@@ -273,6 +285,7 @@ if (!cutter) app.on('will-quit', () => {
     controlServer.stop();
     timerFrame.stop();
     stopHotkeys();
+    stopVoice();
 })
 
 // In this file you can include the rest of your app's specific main process

@@ -1021,6 +1021,12 @@ export default defineComponent({
     },
 
     watch: {
+        // While the out-of-process clock shows, `updateTime` stops asking for frames; when it goes
+        // away, the in-page clock shows again and the loop restarts (docs/performance-followups.md,
+        // sixth pass).
+        timer_frame_live(live) {
+            if (!live) this.updateTime()
+        },
         toggle_wEarlyEncounters(newValue) {
             if (newValue == true) {
                 this.game.properties.patch.wEarlyEncounters.set("On", false)
@@ -2088,7 +2094,13 @@ export default defineComponent({
                 
                 return stats;
             } catch (error) {
-                console.error('Error fetching emulator stats:', error);
+                // Super Shuckie is not answering: try again in 1 s rather than on the next 10 ms tick, and log
+                // once per 5 s. Every failure used to log, 100 errors a second for as long as it was closed.
+                this._emulatorStatsRetryAt = Date.now() + 1000;
+                if (!(Date.now() - (this._emulatorStatsErrorLoggedAt || 0) < 5000)) {
+                    this._emulatorStatsErrorLoggedAt = Date.now();
+                    console.error('Error fetching emulator stats:', error);
+                }
                 return null;
             }
         },
@@ -2967,8 +2979,16 @@ export default defineComponent({
             else {
                 this.timer_formatted_time = [ s, "." + f(c), h + "h" + m + "m" + s + "s", ]
             }
-            if (this.timer_pause == false && !this._unmounted) {
-                requestAnimationFrame(this.updateTime)
+            // Not in the legacy app (2026-11-03): no frames while the out-of-process clock shows, since
+            // only the hidden in-page clock reads these per frame; the split code calls this first to
+            // read the current time. One frame in flight at most, where a quick pause and resume, or a
+            // call while running, used to start a second loop.
+            if (this.timer_pause == false && !this._unmounted && !this.timer_frame_live && !this._timerFrameQueued) {
+                this._timerFrameQueued = true
+                requestAnimationFrame(() => {
+                    this._timerFrameQueued = false
+                    this.updateTime()
+                })
             }
         },
         //pause the timer
@@ -4932,7 +4952,8 @@ export default defineComponent({
             // fault counters, the split log -- is behind one of the two flags, so with both
             // off nothing observes the pause and the idle overlay stops making 100 requests
             // a second (docs/performance-followups.md).
-            if (this.ready && (this.shuckie_timer || this.shuckie_counters)) { // Only poll when mapper is ready and a shuckie feature is on
+            // `_emulatorStatsRetryAt`: after a failed poll (Super Shuckie not running) the next try waits 1 s.
+            if (this.ready && (this.shuckie_timer || this.shuckie_counters) && !(Date.now() < (this._emulatorStatsRetryAt || 0))) { // Only poll when mapper is ready and a shuckie feature is on
                 await this.fetchEmulatorStats();
             }
         }, 10); // 100ms = 10 times per second (adjust as needed)
@@ -5398,6 +5419,7 @@ export default defineComponent({
         //*Autosplitter
         //log the start of a battle
         this.game.properties.battle.mode.change((newProp) => {
+            if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
             var logStr = `Autosplitter - Battle Started: ${this.game.properties.battle.trainer.class.value} started at ${this.timer_formatted_time[0]}${this.timer_formatted_time[1]} (Gametime: ${this.gametimeSplit})`
             var log_start = (x) => console.log(logStr)
             if (newProp.value == "Trainer") {
@@ -5435,9 +5457,13 @@ export default defineComponent({
             }
         });
 
-        const log_split = (x) => console.log(`Autosplitter - Battle Ended: Split: ${this.game.properties.battle.trainer.class.value} at ${this.timer_formatted_time[0]}${this.timer_formatted_time[1]} (Gametime: ${this.gametimeSplit})`)
+        const log_split = (x) => {
+            if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
+            console.log(`Autosplitter - Battle Ended: Split: ${this.game.properties.battle.trainer.class.value} at ${this.timer_formatted_time[0]}${this.timer_formatted_time[1]} (Gametime: ${this.gametimeSplit})`)
+        }
         const autosplitter_process = () => {
             if (this.autosplitter_toggle == true) {
+                if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
                 battle_end = Date.now()
                 //data to be collected with the autosplitter
                 let player_name  = this.game.properties.player.name.value

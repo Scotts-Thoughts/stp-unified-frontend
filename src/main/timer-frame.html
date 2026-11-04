@@ -87,6 +87,7 @@
         if (!d || d.type !== 'overlay-timer' || !d.state) return;
         state = { ...state, ...d.state };
         if (d.state.color) hostEl.style.color = d.state.color;
+        wake();
     });
 
     const pad = (x) => x.toString().padStart(2, '0');
@@ -112,9 +113,19 @@
         const [clock, frames] = format(ms);
         if (clock !== lastClock) { clockEl.textContent = clock; lastClock = clock; }
         if (frames !== lastFrames) { framesEl.textContent = frames; lastFrames = frames; }
+        // Only a running local timer moves between messages: the paused one is fixed and the
+        // emulator time arrives in messages. The loop stops otherwise and a message restarts it
+        // (`wake`), so a paused clock costs no frames at all; a running one still draws every frame.
+        if (state.mode !== 'emulator' && !state.pause) requestAnimationFrame(tick);
+        else looping = false;
+    }
+    let looping = false;
+    function wake() {
+        if (looping) return;
+        looping = true;
         requestAnimationFrame(tick);
     }
-    requestAnimationFrame(tick);
+    wake();
 
     // Tell the overlay this page is up -- once the font is in, so the first visible frame is
     // already in the right face -- and keep telling it, so it can fall back to its own clock

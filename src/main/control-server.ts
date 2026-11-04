@@ -94,6 +94,17 @@ export class ControlServer {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Access-Control-Allow-Origin", "*");
 
+    // A web page open in a browser on this machine can send a GET to 127.0.0.1 as well,
+    // and could quit the overlay, start a new run or point `/load-split-file` at any file.
+    // Browsers mark such a request `Sec-Fetch-Site: cross-site`; the queuer (Node) sends
+    // no such header, and a page served from localhost itself counts as same-site, so
+    // neither is affected. (2026-10-29)
+    if (req.headers["sec-fetch-site"] === "cross-site") {
+      res.statusCode = 403;
+      res.end(JSON.stringify({ ok: false, error: "Cross-site requests are refused" }));
+      return;
+    }
+
     const parsed = new URL(req.url ?? "/", `http://${HOST}:${PORT}`);
     const route = parsed.pathname;
     const query = Object.fromEntries(parsed.searchParams.entries());

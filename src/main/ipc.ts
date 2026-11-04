@@ -69,17 +69,18 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
   });
 
   // --- gen5's second-screen key sender (decision 9) --------------------------------
-  // node-key-sender calls a Java helper; the legacy renderer required it directly and
-  // logged the failure when Java was missing. Same here, from the main process.
+  // The legacy renderer sent these through `node-key-sender`, a Java helper. That package
+  // was dropped on 2026-10-29: it builds a shell command out of the key it is given
+  // (GHSA-4xrw-wvmq-8jmh, critical, no fixed version), has had no release since 2022,
+  // and needs a Java install the overlay never asked for. The feature was already marked
+  // "probably broken" (docs/known-legacy-bugs.md #16: the legacy call passes a number
+  // where the package wants a key name). The channel stays so gen5's call site is
+  // unchanged; it says once that nothing is sent.
+  let virtualKeyWarned = false;
   ipcMain.on("send-virtual-key", (_e, keyName: string | number) => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const keySender = require("node-key-sender") as { sendKey(key: string | number): unknown };
-      keySender.sendKey(keyName);
-      console.log(`Virtual key sent: ${keyName}`);
-    } catch (error) {
-      console.error(`Failed to send virtual key ${keyName}:`, error);
-    }
+    if (virtualKeyWarned) return;
+    virtualKeyWarned = true;
+    console.warn(`[virtual-key] second-screen key ${keyName} not sent: the key sender was removed (src/main/ipc.ts)`);
   });
 
   /** The "open splits folder" button; creates the folder first, as the legacy code did. */

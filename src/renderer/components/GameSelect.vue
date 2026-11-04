@@ -1,6 +1,7 @@
 <template>
     <div class="game-select">
         <report-button></report-button>
+        <voice-button></voice-button>
         <updates-button></updates-button>
         <header class="gs-header">
             <h1 class="gs-title">Scott's Thoughts Overlay</h1>
@@ -82,12 +83,13 @@ import { getUserState, setUserState } from "~/core/persistence/userState";
 import { MANIFESTS } from "~/games/registry";
 import ReportButton from "~/core/report/ReportButton.vue";
 import UpdatesButton from "~/core/updates/UpdatesButton.vue";
+import VoiceButton from "~/core/voice/VoiceButton.vue";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 
 const SELECTED_GENERATION_KEY = "selected_generation";
 
 export default defineComponent({
-    components: { ReportButton, UpdatesButton },
+    components: { ReportButton, UpdatesButton, VoiceButton },
     props: {
         /** The `/mapper` path of a mapper no module claims (main.ts), shown as a warning. */
         unsupportedMapper: { type: String as () => string | null, default: null },

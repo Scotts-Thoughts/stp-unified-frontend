@@ -133,6 +133,8 @@ export interface GameModule {
      * connecting. main.ts applies them once the mapper is detected as this module's.
      */
     debouncePaths?: readonly string[];
+    /** Paths (prefixes) under `debouncePaths` that are applied at once all the same. */
+    debounceExcept?: readonly string[];
     /** How many frames the client holds a debounced update: gen4 left the client's 10, gen5 set 15. */
     debounceFrames?: number;
     /**

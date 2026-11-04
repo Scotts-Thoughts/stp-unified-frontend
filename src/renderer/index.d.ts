@@ -3,6 +3,7 @@ import type { SplitComparison } from '../main/splitComparison'
 import type { ShortcutCatalog, ShortcutEdit } from '../shared/shortcuts'
 import type { ReportPayload } from '../shared/report'
 import type { UpdatePrefsChange, UpdateState } from '../shared/updates'
+import type { VoiceEvent } from '../shared/voiceCommands'
 
 /** One entry of a directory listing returned by the splits/data IPC helpers. */
 export interface DirectoryEntry {
@@ -60,6 +61,12 @@ declare global {
         capture: () => Promise<string>,
         save: (payload: ReportPayload) => Promise<string>,
         cancel: () => Promise<void>,
+      },
+      voice: {
+        start: () => Promise<void>,
+        stop: () => Promise<void>,
+        audio: (samples: Float32Array, sampleRate: number) => void,
+        onEvent: (handler: (event: VoiceEvent) => void) => () => void,
       },
       updates: {
         getState: () => Promise<UpdateState>,

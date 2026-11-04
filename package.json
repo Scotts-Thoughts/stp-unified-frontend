@@ -1,6 +1,6 @@
 {
   "name": "stp-overlay",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Scott's Thoughts Overlay.",
   "main": "./out/main/index.js",
   "build": {
@@ -35,6 +35,11 @@
       "icon": "./icon.png",
       "signAndEditExecutable": false
     },
+    "mac": {
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Voice control: say \"Hey Rotom\" and a command to change the overlay's settings."
+      }
+    },
     "npmRebuild": false
   },
   "scripts": {
@@ -59,6 +64,7 @@
     "parity:debounce": "tsx tools/parity/debounce-selftest.ts",
     "parity:shortcuts": "tsx tools/parity/shortcuts-selftest.ts",
     "parity:action-ids": "tsx --tsconfig tsconfig.web.json tools/parity/action-ids.ts",
+    "parity:voice": "tsx --tsconfig tsconfig.web.json tools/parity/voice-selftest.ts",
     "css:dead": "tsx tools/css/dead-css.ts",
     "css:share": "tsx tools/css/share-css.ts",
     "parity:shortcuts-app": "tsx tools/parity/shortcuts-app-check.ts",
@@ -88,7 +94,6 @@
     "@types/node": "^22.16.5",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-vue": "^6.0.0",
-    "@vue/devtools": "^7.7.7",
     "electron": "^37.2.3",
     "electron-builder": "^26.0.12",
     "electron-devtools-installer": "^4.0.0",
@@ -101,23 +106,16 @@
     "tsx": "^4.23.13",
     "typescript": "^5.8.3",
     "vite": "^6.0.5",
-    "vite-plugin-electron": "^0.29.0",
-    "vite-plugin-electron-renderer": "^0.14.6",
-    "vite-plugin-static-copy": "^3.1.1",
-    "vite-plugin-vue-devtools": "^7.7.7",
     "vue": "^3.5.17",
     "vue-tsc": "^3.0.3",
     "ws": "^8.21.3"
   },
   "dependencies": {
     "@electron-toolkit/utils": "^4.0.0",
-    "@microsoft/signalr": "^7.0.14",
-    "@vitejs/plugin-vue": "^6.0.0",
-    "node-key-sender": "^1.0.11",
+    "@microsoft/signalr": "7.0.14",
     "pinia": "^3.0.3",
-    "pinia-plugin-watch": "^1.0.1",
-    "uiohook-napi": "1.5.5",
-    "vue": "^3.5.17"
+    "sherpa-onnx": "2.0.1",
+    "uiohook-napi": "1.5.5"
   },
   "overrides": {
     "tar": "^7.5.13"

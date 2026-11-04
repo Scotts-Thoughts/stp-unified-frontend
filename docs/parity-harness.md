@@ -69,8 +69,13 @@ client and the vendored `gameHookMapperClient.js` in gen2–5, which are the sam
 - `POST /mapper/set-property-value/`, `/mapper/set-property-bytes/`, `/mapper/set-properties-by-bits/`
   (trailing slash tolerated; `/` in paths → `.`; the legacy client only converts the *first* dot, the server
   converts all slashes back, so accept both). Each call is appended to the **write log** (oracle 5), applied to
-  the replay state, and echoed on the next tick as a `PropertiesChanged` entry with `fieldsChanged`
-  `["bytes","value"]` (plus `"isFrozen","frozen"` when `freeze` is true — PokeAByte emits the duplicate token).
+  the replay state, and echoed on the next tick as a `PropertiesChanged` entry whose `fieldsChanged` lists only
+  what the write actually changed: `"bytes"`, `"value"`, and `"isFrozen","frozen"` when the freeze flag flipped
+  (PokeAByte emits the duplicate token). A write that changes nothing is not echoed at all, as in PokeAByte,
+  whose property setters only flag a field that differs (`_PokeAByteProperty_Malleable.cs`). Until 2026-11-02
+  the mock echoed every write, and an overlay handler that rewrites the property it listens to (gen4
+  Platinum's `encounter_rates.walking.change()` → `disable_encounters()`) looped with it: hundreds of hub
+  frames a second and a 5 s barrier timeout at every step.
   A `--writes=ignore` mode keeps the log but does not apply, for fixtures where the recording already contains
   the effect of the write. A `set-property-bytes` also *decodes* the bytes into the value, as PokeAByte's next
   read would -- an integer over the property's bytes, through the glossary when it has a reference (gen3's

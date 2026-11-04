@@ -1139,6 +1139,11 @@ export default defineComponent({
         );
     },
     watch: {
+        // The out-of-process clock showing or not decides whether the timer's frame loop runs
+        // (logic/Timer.js `setFrameLive`, docs/performance-followups.md, sixth pass).
+        timer_frame_live(live) {
+            this.timer.setFrameLive(live)
+        },
         enemy_graphic(newValue) {
             if (newValue == false && this.prepare_for_splits == true) {
                 this.prepare_for_splits = false
@@ -1178,31 +1183,13 @@ export default defineComponent({
         previous_splits_source(newVal) {
             MyStorage['previous_splits_source'] = newVal
         },
-        encounters_route_1(newValue) {
-            if (this.game.properties.overworld.map_index.value == 317) {
-                this.game.properties.overworld.encounters_enabled.set(newValue, false)
-            }
-        },
-        encounters_route_2(newValue) {
-            if (this.game.properties.overworld.map_index.value == 319) {
-                this.game.properties.overworld.encounters_enabled.set(newValue, false)
-            }
-        },
-        encounters_route_19(newValue) {
-            if (this.game.properties.overworld.map_index.value == 320) {
-                this.game.properties.overworld.encounters_enabled.set(newValue, false)
-            }
-        },
-        encounters_route_20(newValue) {
-            if (this.game.properties.overworld.map_index.value == 321) {
-                this.game.properties.overworld.encounters_enabled.set(newValue, false)
-            }
-        },
-        encounters_flocessy_ranch(newValue) {
-            if (this.game.properties.overworld.map_index.value == 322) {
-                this.game.properties.overworld.encounters_enabled.set(newValue, false)
-            }
-        },
+        // Each applies to the map the player is on (encounter_toggle_here). The Black 2 / White 2 ones checked maps
+        // 320-322, which are not the maps the toggles are for (124, 125, 130 everywhere else), so they never applied.
+        encounters_route_1()        { this.apply_encounter_toggle() },
+        encounters_route_2()        { this.apply_encounter_toggle() },
+        encounters_route_19()       { this.apply_encounter_toggle() },
+        encounters_route_20()       { this.apply_encounter_toggle() },
+        encounters_flocessy_ranch() { this.apply_encounter_toggle() },
         // encounters_psyduck(newValue) {
         //     const variable = this.game.properties.patch.encounter_psyduck.value
         //     if (variable == 2) {
@@ -2770,12 +2757,15 @@ export default defineComponent({
                 'flags.new_game':                           'RESET marker',
                 'player.name':                              'RESET marker',
                 'battle.other.battle':                      'BLACKOUT markers',
-                'battle.opponent.trainer':                  'trainer IN / OUT markers',
+                'battle.opponent.trainer':                  'trainer IN / OUT and "IN - Wild" markers',
                 'overworld.map_index':                      '"Map Change" markers',
-                'meta.state':                               '"Rare Candy Used" marker',
+                'meta.state':                               '"Rare Candy Used" and "IN - Wild" markers',
                 'player.team.0.level':                      '"Rare Candy Used" marker',
                 'battle.opponent.party_position':           '"Next Pokemon" marker',
                 'battle.opponent.active_pokemon.stats.hp':  '"Enemy Fainted" marker',
+                'battle.player.active_pokemon.level':       '"Level Up" markers',
+                'battle.player.active_pokemon.species':     '"Level Up" markers (a switch is told from a level up)',
+                'player.team.0.held_item':                  '"Held Item" markers',
             });
         },
                 /**
@@ -2915,7 +2905,13 @@ export default defineComponent({
                 
                 return stats;
             } catch (error) {
-                console.error('Error fetching emulator stats:', error);
+                // Super Shuckie is not answering: try again in 1 s rather than on the next 10 ms tick, and log
+                // once per 5 s. Every failure used to log, 100 errors a second for as long as it was closed.
+                this._emulatorStatsRetryAt = Date.now() + 1000;
+                if (!(Date.now() - (this._emulatorStatsErrorLoggedAt || 0) < 5000)) {
+                    this._emulatorStatsErrorLoggedAt = Date.now();
+                    console.error('Error fetching emulator stats:', error);
+                }
                 this.failCounter += 1;
                 if (this.failCounter >= 10 ) {
                     window.clearInterval(this.emulatorStatsInterval);
@@ -3111,21 +3107,26 @@ export default defineComponent({
             this.encounters_route_19 = !this.encounters_route_19
             this.encounters_route_20 = !this.encounters_route_20
             this.encounters_flocessy_ranch = !this.encounters_flocessy_ranch
-            if (this.game.properties.overworld.map_index.value == 317) {
-                this.game.properties.overworld.encounters_enabled.set(this.encounters_route_1, false)
+            // The watchers apply it.
+        },
+        // The encounter toggle for the map the player is on, or null when the map has none. Map numbers are only
+        // meaningful within a pair of games: Black 2's 124 is not Route 19 in Black.
+        encounter_toggle_here() {
+            const map = this.game.properties.overworld.map_index.value
+            if (this.selected_game == "Black" || this.selected_game == "White") {
+                if (map == 317) return this.encounters_route_1
+                if (map == 319) return this.encounters_route_2
             }
-            if (this.game.properties.overworld.map_index.value == 319) {
-                this.game.properties.overworld.encounters_enabled.set(this.encounters_route_2, false)
+            if (this.selected_game == "Black 2" || this.selected_game == "White 2") {
+                if (map == 124) return this.encounters_route_19
+                if (map == 125) return this.encounters_route_20
+                if (map == 130) return this.encounters_flocessy_ranch
             }
-            if (this.game.properties.overworld.map_index.value == 124) {
-                this.game.properties.overworld.encounters_enabled.set(this.encounters_route_19, false)
-            }
-            if (this.game.properties.overworld.map_index.value == 125) {
-                this.game.properties.overworld.encounters_enabled.set(this.encounters_route_20, false)
-            }
-            if (this.game.properties.overworld.map_index.value == 130) {
-                this.game.properties.overworld.encounters_enabled.set(this.encounters_flocessy_ranch, false)
-            }
+            return null
+        },
+        apply_encounter_toggle() {
+            const wanted = this.encounter_toggle_here()
+            if (wanted !== null) this.game.properties.overworld.encounters_enabled.set(wanted, false)
         },
         calculate_ev_benefit(stat_name) {
             const state = this.game.properties.meta.state.value
@@ -7621,7 +7622,8 @@ export default defineComponent({
             // fault counters, the split log -- is behind one of the two flags, so with both
             // off nothing observes the pause and the idle overlay stops making 100 requests
             // a second (docs/performance-followups.md).
-            if (this.ready && (this.shuckie_timer || this.shuckie_counters)) { // Only poll when mapper is ready and a shuckie feature is on
+            // `_emulatorStatsRetryAt`: after a failed poll (Super Shuckie not running) the next try waits 1 s.
+            if (this.ready && (this.shuckie_timer || this.shuckie_counters) && !(Date.now() < (this._emulatorStatsRetryAt || 0))) { // Only poll when mapper is ready and a shuckie feature is on
                 await this.fetchEmulatorStats();
             }
         }, 10); // 100ms = 10 times per second (adjust as needed)
@@ -7839,19 +7841,13 @@ export default defineComponent({
             }
         })
 
-        // Fix for Black2 and White2 resetting the encounter rate when you pass through the Flocessy Ranch Gate
+        // The flag is part of the map's encounter table, which the game loads as the player enters the map, often a
+        // few frames after the map number changes, over the "off" written below. Turned back on on a map whose toggle
+        // is off, it is turned off again. Was only for Black 2 and White 2 (the Flocessy Ranch Gate), so Routes 1 and
+        // 2 kept their encounters until the player left and came back or flipped the toggle.
         this.game.properties.overworld.encounters_enabled.change(async (newProp, oldProp) => {
-            if (this.selected_game == "Black 2" || this.selected_game == "White 2") {
-                // console.log(newProp.value)
-                if (newProp.value == true && this.encounters_route_19 == false && this.game.properties.overworld.map_index.value == 124) {
-                    this.game.properties.overworld.encounters_enabled.set(false, false)
-                }
-                if (newProp.value == true && this.encounters_route_20 == false && this.game.properties.overworld.map_index.value == 125) {
-                    this.game.properties.overworld.encounters_enabled.set(false, false)
-                }
-                if (newProp.value == true && this.encounters_flocessy_ranch == false && this.game.properties.overworld.map_index.value == 130) {
-                    this.game.properties.overworld.encounters_enabled.set(false, false)
-                }
+            if (newProp.value == true && this.encounter_toggle_here() === false) {
+                this.game.properties.overworld.encounters_enabled.set(false, false)
             }
         })
         // Options
@@ -7867,21 +7863,7 @@ export default defineComponent({
                 this.set_options()
             }
 
-            // Black and White
-            if (newProp.value == 317 && this.encounters_route_1 == false) {
-                this.game.properties.overworld.encounters_enabled.set(false, false)
-            }
-            if (newProp.value == 319 && this.encounters_route_2 == false) {
-                this.game.properties.overworld.encounters_enabled.set(false, false)
-            }
-            // Black2 and White2
-            if (newProp.value == 124 && this.encounters_route_19 == false) {
-                this.game.properties.overworld.encounters_enabled.set(false, false)
-            }
-            if (newProp.value == 125 && this.encounters_route_20 == false) {
-                this.game.properties.overworld.encounters_enabled.set(false, false)
-            }
-            if (newProp.value == 130 && this.encounters_flocessy_ranch == false) {
+            if (this.encounter_toggle_here() === false) {
                 this.game.properties.overworld.encounters_enabled.set(false, false)
             }
 
@@ -8051,9 +8033,51 @@ export default defineComponent({
         // post-battle cutscene still mark cleanly. Dedupe on (direction, trainer) so multi-phase
         // fights where the trainer property bounces don't spam duplicate markers, but a genuine
         // hand-off to a different trainer still fires.
+        // IN markers go through a short queue (gen 4's), so a wild entry pre-empts the trainer IN that
+        // a phantom trainer ("Jaden", "Alf & Fred", which the frontend reads around battles) would
+        // otherwise write; the pre-empted trainer's OUT is dropped with it. An OUT that follows its
+        // IN within the queue's delay cancels that IN. Other OUTs fire at once.
+        const BATTLE_IN_DEBOUNCE_MS = 250
+        let pendingBattleIn = null // { name, trainer, timer }
+        const droppedBattleIns = new Set()
+        let wildInThisBattle = false
         let lastBattleMarker = null
         const isTrainerValue = (v) => v != null && v !== "" && v !== "--"
+        const queueTrainerIn = (trainer) => {
+            if (wildInThisBattle) { droppedBattleIns.add(trainer); return }
+            if (pendingBattleIn) {
+                clearTimeout(pendingBattleIn.timer)
+                this.sendObsChapterMarker(pendingBattleIn.name)
+            }
+            const entry = { name: "IN - " + trainer, trainer, timer: null }
+            entry.timer = setTimeout(() => {
+                pendingBattleIn = null
+                this.sendObsChapterMarker(entry.name)
+            }, BATTLE_IN_DEBOUNCE_MS)
+            pendingBattleIn = entry
+        }
+        // WILD BATTLE: the opponent trainer reads "--" while meta.state is Battle. Looked at once the
+        // state and trainer have settled (a trainer battle after a wild one still reads "--" for a moment).
+        let wildCheckTimer = null
+        const scheduleWildCheck = () => {
+            if (wildCheckTimer) clearTimeout(wildCheckTimer)
+            wildCheckTimer = setTimeout(() => {
+                wildCheckTimer = null
+                if (wildInThisBattle) return
+                if (this.game.properties.meta.state.value !== "Battle") return
+                if (this.game.properties.battle.opponent.trainer.value !== "--") return
+                wildInThisBattle = true
+                if (pendingBattleIn) {
+                    clearTimeout(pendingBattleIn.timer)
+                    droppedBattleIns.add(pendingBattleIn.trainer)
+                    pendingBattleIn = null
+                }
+                console.log("Chapter Detected: IN - Wild")
+                this.sendObsChapterMarker("IN - Wild")
+            }, BATTLE_IN_DEBOUNCE_MS)
+        }
         this.game.properties.battle.opponent.trainer.change(async (newProp, oldProp) => {
+            if (newProp.value === "--") scheduleWildCheck()
             const newIsTrainer = isTrainerValue(newProp.value)
             const oldIsTrainer = isTrainerValue(oldProp.value)
             let direction = null
@@ -8068,7 +8092,23 @@ export default defineComponent({
             if (direction == null) return
             if (lastBattleMarker?.direction === direction && lastBattleMarker?.trainer === trainer) return
             lastBattleMarker = { direction, trainer }
-            this.sendObsChapterMarker(direction + " - " + trainer)
+            if (direction === "IN") { queueTrainerIn(trainer); return }
+            if (droppedBattleIns.delete(trainer)) { lastBattleMarker = null; return }
+            if (pendingBattleIn?.trainer === trainer) {
+                clearTimeout(pendingBattleIn.timer)
+                pendingBattleIn = null
+                lastBattleMarker = null
+                return
+            }
+            this.sendObsChapterMarker("OUT - " + trainer)
+        })
+        this.game.properties.meta.state.change(async (newProp) => {
+            if (newProp.value === "Battle") {
+                scheduleWildCheck()
+            } else {
+                wildInThisBattle = false
+                if (wildCheckTimer) { clearTimeout(wildCheckTimer); wildCheckTimer = null }
+            }
         })
 
         this.game.properties.meta.state.change(async (newProp, oldProp) => {
@@ -8495,6 +8535,49 @@ export default defineComponent({
             }
         }
 
+        // HELD ITEM CHAPTER MARKER
+        // Fires "Held Item - <name>" when a critical item (the "Item" markers' set) is newly held by a
+        // party member: the number of that item across the six held slots goes up. Counting means a
+        // party reorder (which swaps held slots) fires nothing, and a reset or load repopulating the
+        // team (player.name blanks, then returns) is re-baselined rather than reported.
+        const readHeldCounts = () => {
+            const counts = new Map();
+            const team = this.game.properties.player.team;
+            for (let i = 0; i < 6; i++) {
+                const v = team[i]?.held_item?.value;
+                if (v == null || v === '') continue;
+                counts.set(v, (counts.get(v) ?? 0) + 1);
+            }
+            return counts;
+        };
+        const HELD_RESET_GRACE_MS = 5000;
+        let lastHeldCounts = readHeldCounts();
+        let heldGraceUntil = 0;
+        let heldCheckTimer = null;
+        const checkHeldItems = () => {
+            heldCheckTimer = null;
+            const previous = lastHeldCounts;
+            const current = readHeldCounts();
+            lastHeldCounts = current;
+            if (Date.now() < heldGraceUntil) return;
+            for (const [name, count] of current) {
+                if (count <= (previous.get(name) ?? 0)) continue;
+                if (!isCriticalGenericItem(name)) continue;
+                const chapterName = "Held Item - " + name;
+                console.log("Chapter Detected: " + chapterName);
+                this.sendObsChapterMarker(chapterName);
+            }
+        };
+        for (let i = 0; i < 6; i++) {
+            this.game.properties.player.team[i]?.held_item?.change?.(() => {
+                if (heldCheckTimer) clearTimeout(heldCheckTimer);
+                heldCheckTimer = setTimeout(checkHeldItems, 100);
+            });
+        }
+        this.game.properties.player.name.change((newProp, oldProp) => {
+            if (newProp.value === '' || oldProp.value === '') heldGraceUntil = Date.now() + HELD_RESET_GRACE_MS;
+        });
+
         // RARE CANDY USED CHAPTER MARKER
         // Fires "Rare Candy Used" when (in Overworld) the lead's level increments by 1 AND the
         // total Rare Candy count across bag.medicine decrements by 1 within a short window.
@@ -8588,6 +8671,33 @@ export default defineComponent({
             if (oldProp?.value === 0) return;
             console.log("Chapter Detected: Enemy Fainted");
             this.sendObsChapterMarker("Enemy Fainted");
+        });
+
+        // LEVEL UP CHAPTER MARKERS (Battle only), as gen 2's
+        // "Level Up - <n>" (Battle or From Battle) and "Battle Level Up" (Battle) fire when the
+        // battling Pokemon's level goes up by 1. Sending out a Pokemon one level higher moves the
+        // same property, so a level change right next to a species change is a switch, not a level up.
+        // Rare Candy level-ups happen in the Overworld and only write "Rare Candy Used".
+        const LEVEL_SWITCH_WINDOW_MS = 150
+        let lastActiveSpeciesChangeAt = 0
+        this.game.properties.battle.player.active_pokemon?.species?.change?.(() => {
+            lastActiveSpeciesChangeAt = Date.now()
+        });
+        this.game.properties.battle.player.active_pokemon?.level?.change?.((newProp, oldProp) => {
+            const state = this.game.properties.meta.state.value;
+            if (state !== 'Battle' && state !== 'From Battle') return;
+            const oldLevel = oldProp?.value ?? 0;
+            const newLevel = newProp?.value ?? 0;
+            if (oldLevel <= 0 || newLevel !== oldLevel + 1) return;
+            const changedAt = Date.now();
+            setTimeout(() => {
+                if (Math.abs(lastActiveSpeciesChangeAt - changedAt) <= LEVEL_SWITCH_WINDOW_MS) return;
+                console.log("Chapter Detected: Level Up - " + newLevel);
+                this.sendObsChapterMarker(`Level Up - ${newLevel}`);
+                if (state === 'Battle') {
+                    this.sendObsChapterMarker("Battle Level Up");
+                }
+            }, LEVEL_SWITCH_WINDOW_MS);
         });
 
         // MAP CHANGE CHAPTER MARKER

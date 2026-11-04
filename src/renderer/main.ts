@@ -19,6 +19,7 @@ import { useReplaySplitsStore } from "~/core/stores/useReplaySplitsStore";
 import { initEnv } from "~/core/env";
 import { installScaleToFit, removeScaleToFit } from "~/core/window/scaleToFit";
 import { setReportContext } from "~/core/report/context";
+import { startVoiceIfEnabled } from "~/core/voice/voice";
 
 /**
  * Applies a module's presentation to the document (plan 3.1, brought forward for
@@ -167,6 +168,9 @@ const main = defineComponent({
         this.overlayLoaded = Promise.all([initEnv(), loadLegacyStorage(), loadUserState()])
             .then(() => this.settings.overlay.load())
             .catch((err) => console.error("[main] Failed to load the overlay settings:", err));
+        // Voice control comes back on if it was left on (core/voice/); off by default, so the
+        // harness never opens a microphone.
+        void this.overlayLoaded.then(() => startVoiceIfEnabled());
 
         // The pre-mapper screen is styled by gen1's stylesheet, as it always was, and
         // scaled to the window as gen1's index.html script did.
@@ -247,7 +251,7 @@ const main = defineComponent({
                 // gen4 and gen5 debounce four property groups by ten or fifteen frames (plan 2.4); the list is
                 // the module's, applied now that the module is known and cleared for one
                 // that declares none, so a mapper switch never inherits the previous list.
-                this.mapper!.setDebouncePaths([...(module.debouncePaths ?? [])], module.debounceFrames ?? 10);
+                this.mapper!.setDebouncePaths([...(module.debouncePaths ?? [])], module.debounceFrames ?? 10, [...(module.debounceExcept ?? [])]);
 
                 // Everything the module needs in memory, then its presentation, then the
                 // session -- the overlay mounts on the next tick after `ready`. What gen1

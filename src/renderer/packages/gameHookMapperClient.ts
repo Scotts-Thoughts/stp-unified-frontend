@@ -269,6 +269,8 @@ export class GameHookMapperClient {
     _propertiesMap: Map<string, GameHookProperty> | null = null;
     _debouceTimeout = 10;
     _debouceList: string[] = [];
+    /** Paths (prefixes) inside `_debouceList` that are applied at once all the same (`setDebouncePaths`). */
+    _debounceExcept: string[] = [];
     _debouceMap: Map<string, { property: GameHookProperty; timeoutFrames: number; newProperty: any }> | null = null;
     meta;
     properties: Record<string, GameHookProperty> = {};
@@ -425,7 +427,7 @@ export class GameHookMapperClient {
         const map = markRaw(new Map<string, { property: GameHookProperty; timeoutFrames: number; newProperty: any }>())
         this._debouceList.forEach(x => {
             this._properties.forEach(y => {
-                if (y.path.startsWith(x)) {
+                if (y.path.startsWith(x) && !this._debounceExcept.some(e => y.path.startsWith(e))) {
                     map.set(y.path, previous?.get(y.path) ?? {
                         property: y,
                         timeoutFrames: -1,
@@ -473,10 +475,12 @@ export class GameHookMapperClient {
      * `connect()`, so its map was built by the first `loadMapper()`; the unified app
      * knows which module's paths apply only once the mapper is loaded and detected
      * (main.ts), so the map is rebuilt then -- entries already counting down are kept
-     * -- and every later `loadMapper()` builds it from the same list.
+     * -- and every later `loadMapper()` builds it from the same list. `except` names paths under
+     * `paths` that are applied at once all the same (gen5's held item).
      */
-    setDebouncePaths(paths: string[], frames = 10) {
+    setDebouncePaths(paths: string[], frames = 10, except: string[] = []) {
         this._debouceList = [...paths]
+        this._debounceExcept = [...except]
         this._debouceTimeout = frames
         if (!this._properties || this._properties.length === 0) return
         this._buildDebounceMap(this._debouceMap)
@@ -970,6 +974,7 @@ export class GameHookMapperClient {
             // The map is null until a mapper is loaded (and again after it unloads);
             // the walk is over a raw Map (A), not a reactive iterator.
             const debounceMap = that._debouceMap
+            let pending = false
             if (debounceMap) {
                 for (const value of debounceMap.values()) {
                     if (value.timeoutFrames > 0) {
@@ -978,9 +983,14 @@ export class GameHookMapperClient {
                         that._updateProperty(value.newProperty)
                         value.timeoutFrames = -1
                     }
+                    if (value.timeoutFrames >= 0) pending = true
                 }
             }
-            if (that.connected === true)
+            // With nothing counting down the chain ends (2026-11-02): it used to run every frame for the
+            // whole connection, which kept the page waking at the display's refresh rate while idle.
+            // `_handlePropertiesChanged` restarts it for the next frame when it arms an entry
+            // (`_wakeDebounceLoop`), so a count still starts on the frame after the change.
+            if (that.connected === true && pending)
                 requestAnimationFrame(debouce)
             else
                 that._debounceLoopRunning = false
@@ -1089,6 +1099,7 @@ export class GameHookMapperClient {
                     if (debounced) {
                         debounced.timeoutFrames = this._debouceTimeout
                         debounced.newProperty = propertyChanged
+                        this._wakeDebounceLoop()
                     } else {
                         this._updateProperty(propertyChanged)
                     }
@@ -1099,6 +1110,16 @@ export class GameHookMapperClient {
         } catch (e) {
             console.error(e);
         }
+    }
+
+    /**
+     * Restarts an idle debounce chain on the next frame, never in this task: an entry armed now is
+     * first counted down on the next frame, as when the chain ran every frame.
+     */
+    _wakeDebounceLoop() {
+        if (!this.connected || this._debounceLoopRunning || !this._debounceTick) return
+        this._debounceLoopRunning = true
+        requestAnimationFrame(this._debounceTick)
     }
 
     /** Starts the debounce frame loop if connected and no chain of it is running. */

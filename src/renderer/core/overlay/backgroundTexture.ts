@@ -62,6 +62,6 @@ export function backgroundTextureStyle(s: BackgroundTextureSettings): { filter: 
     const scale = coveringBackgroundScale(s.scale, s.offsetX, s.offsetY, s.blur);
     return {
         filter: `blur(${s.blur}px) hue-rotate(${s.hue}deg) brightness(${s.brightness}%) contrast(${s.contrast}%) saturate(${s.saturation}%)`,
-        transform: `scale(${scale}%) ${s.flip ? 'rotateY(180deg)' : ''} ${s.flipY ? 'rotateX(180deg)' : ''} translate(${s.offsetX}px, ${-(s.offsetY as number)}px)`,
+        transform: `scale(${scale}%) ${s.flip ? 'scaleX(-1)' : ''} ${s.flipY ? 'scaleY(-1)' : ''} translate(${s.offsetX}px, ${-(s.offsetY as number)}px)`,
     };
 }

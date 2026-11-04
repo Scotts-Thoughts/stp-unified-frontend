@@ -19,7 +19,7 @@ export interface SpeciesArtLook {
 export function speciesArtStyle(look: SpeciesArtLook): { transform: string; filter: string } {
     const outline = "drop-shadow(0 0 0.4px #000) ".repeat(6);
     return {
-        transform: `scale(${look.scale}) ${look.flip ? "rotateY(180deg)" : ""} translate(${look.offsetX}px, ${-(look.offsetY as number)}px) rotate(${look.rotation}deg)`,
+        transform: `scale(${look.scale}) ${look.flip ? "scaleX(-1)" : ""} translate(${look.offsetX}px, ${-(look.offsetY as number)}px) rotate(${look.rotation}deg)`,
         filter: `saturate(${look.saturation}%) ${outline}drop-shadow(${look.flip ? "-3px" : "3px"} 3px 3px #000)`,
     };
 }

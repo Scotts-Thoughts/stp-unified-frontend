@@ -523,3 +523,141 @@ Built app (`out/`), launched through Playwright with no mapper and every non-fil
 - **The entry chunk is 2.5 MB; 1.8 MB of it is gen1's trainer and dex tables, both editions.** It compiled in
   ~10-20 ms warm (V8 parses lazily), so moving it out would barely move start-up. The 5-10 MB gen2-5 chunks
   load when a game is detected, not at launch.
+
+## Fifth pass (2026-11-02): measured on the real app
+
+Measured on the built app outside the harness, on Windows: the clock frame on, the fixture served by the mock
+PokeAByte on another port (`--tool-url=`), every other request blocked, the window visible. **The harness's own
+numbers are no good for CPU/GPU**: its fake clock and CDP traffic put gen5 at ~55% of a core sitting idle, where
+the real app used ~2-8%. **The window must be visible** (not covered, not minimised): Windows stops drawing a
+covered window, and the GPU cost then reads as zero. Per-process CPU came from `Win32_Process` user+kernel time;
+GPU work from a CDP trace (`CrGpuMain` RunTask ms/s, `Display::DrawAndSwap` on the viz thread). Process CPU
+was noisy on a machine in use; the trace counts were steady.
+
+gen5 smoke fixture, before this pass (one core = 100%):
+
+| | total | GPU process | overlay page | clock page |
+|---|---|---|---|---|
+| idle, timer paused | ~2-8% | ~1-3% | ~1-5% | ~1% |
+| idle, timer running | ~20-31% | ~6% | ~1-5% | **12-19%** |
+| fixture playing at 1x | 67-94% | **43-55%** | 10-20% | 12-16% |
+
+### 1. Loading a game took 2.4-2.9 s, nearly all of it waiting (gens 2-5) (*measured*)
+
+Mapper loaded -> overlay mounted: gen4 2,851 ms, gen5 2,431 ms. Compiling and running the 5-10 MB chunk was
+~70-85 ms of that (V8 `compileModule` + `evaluateModule`), so turning the data tables into `JSON.parse` strings
+would have saved tens of ms and was not done. The rest was `loadGenNStyleDefaults()` awaiting its 140-390
+per-species style files (`data/style/*.json`, one lazy chunk each) one after another, ~7 ms apiece. They are
+requested together now (`core/persistence/styleFiles.ts`, `loadStyleFiles`), and the table is built in the same
+order: gen4 470-635 ms, gen5 430-470 ms, gen3 670-815 ms.
+
+### 2. Every clock tick recomposited the full-screen art layers (all generations) (*measured*)
+
+The page itself hardly repaints during play; the cost is the compositor. Each clock tick (~100 a second, in the
+clock frame or the in-page clock alike) makes viz draw a new frame, and the GPU process's per-frame work scales with
+the number of full-screen composited layers. The layers come from the species art's and the background texture's
+**flip**: `rotateY(180deg)` / `rotateX(180deg)` (`SpeciesArt.ts`, `backgroundTexture.ts`) is a 3D transform, which
+gives that image its own compositing layer, and every full-screen `.colored-image` art layer painted above it then
+gets one too (compositing reason `Overlap`): four 1920x1080 layers in gen5's smoke state.
+
+Measured with the timer running, gen5 (trace, two runs each):
+
+| variant | GPU main ms/s | viz draw ms/s |
+|---|---|---|
+| as is | 193-583 | 111-130 |
+| flip as `scaleX(-1)` / `scaleY(-1)` | 64-77 | 30-32 |
+| the same, with `--disable-lcd-text` | 40-51 | 14-17 |
+| `scaleX(-1)` + `will-change: transform` (keeps the layer) | 263-582 | 125-130 |
+| art layers hidden (reference) | 154-176 | 116-118 |
+| `will-change: transform` on the art layers | 812 (53 fps) | 97 |
+| `contain`/`isolation`/`will-change` on the clock iframe | 470-514 | 109-123 |
+
+So the 2D flip removes ~75-90% of the GPU-side work, but it is **not pixel-identical**: the flipped image is then
+rasterised with the page instead of sampled by the compositor (the species art is resampled very slightly: edge
+pixels move by up to a pixel at 4x zoom), and text near it that is no longer composited gets subpixel (coloured)
+antialiasing instead of greyscale. `--disable-lcd-text` (a Chromium switch, `app.commandLine.appendSwitch`) keeps
+all text greyscale, which made the text look as it does today in a side-by-side crop (the art's edge pixels still
+differ, and most of the screen by +-1 level). Scott approved the change (2026-11-03): the flips are now
+`scaleX(-1)` / `scaleY(-1)` and `src/main/index.ts` appends `disable-lcd-text`. **Don't bring a 3D transform
+(`rotateX/Y`, `translateZ`, `will-change: transform`) back onto the art or texture**: it puts the full-screen layers
+back on the compositor. The switch is app-wide, so it applies to Cutter's frame server too. Harness check against
+the previous build (2026-11-03, all five smoke fixtures): only pixels differ, and every transform is the same 2D
+matrix. Where an art layer is flipped (gen3, gen5) it is the art's edge pixels and +-1 levels elsewhere; where none is
+(gen1, gen2 and some gen4 states) the text loses its coloured subpixel fringes and is greyscale, the same at 1x.
+
+### 3. Smaller, behaviour-identical
+
+- **The clock frame's loop stops when nothing can change** (`src/main/timer-frame.html`): a paused local timer,
+  or emulator mode (its time arrives in messages). A message restarts it. A running clock still draws every frame.
+- **The mapper client's debounce loop stops when nothing is counting down** (`gameHookMapperClient.ts`), and
+  `_wakeDebounceLoop()` restarts it on the *next* frame when `_handlePropertiesChanged` arms an entry, so a count
+  starts on the same frame as before. `parity:debounce` passes.
+- **gen3/gen5 `Timer.js` loop stops while paused**, restarted by `startTime` and `pauseUnpauseTime` (the only
+  places that unpause it). gen1's `logic/Timer.ts` was left: its paused flag lives in a store loaded from disk
+  after the singleton starts, so a stopped loop could miss an unpause; its loop already does no work while paused.
+- **A closed Super Shuckie** (gens 2-5, Shuckie timer or counters on): the 10 ms poll logged
+  `Error fetching emulator stats` on every failure, 100 a second, each one also kept by the Report log. A failed
+  poll now waits 1 s before the next try and logs at most once per 5 s; polling is back to 10 ms as soon as one
+  succeeds. gen5's give-up-after-ten (drift allowlist) is unchanged.
+
+### Verification
+
+Baseline: a copy of the working tree just before this pass (it held other sessions' uncommitted work) with these
+edits reversed, run as `unified@<copy>`; the working tree as `unified`; `diff.ts` between them, every generation's
+fixture (gen2: the Crystal recording). gen1, gen2, gen3: all oracles green, pixels exact. gen4 and gen5: green but
+for 5 pixels (2-3 levels) at the corners of the settings panel's header boxes in one capture each. Not these edits:
+the baseline re-run matched itself, and the baseline copy *with all of them applied* matched the baseline exactly,
+so the 5 pixels come from running in a different folder. `typecheck`, `parity:drift`, `parity:selftest`,
+`parity:debounce` pass. The clock frame (never in a harness capture) was checked in the real app, gens 3 and 5:
+it ticks, holds while paused, resumes from the paused time, and survives a pause and resume within 300 ms.
+
+### Left alone
+
+- `JSON.parse` for the data tables: measured above, not worth it.
+- Capping the clock below the display's refresh rate: it would cut the per-tick cost on 120-165 Hz monitors, but
+  the centiseconds would step less smoothly there; a 60 Hz monitor (most low-end machines) already gets 60.
+- Electron's spellchecker: on Windows and macOS it uses the OS's, nothing is downloaded; turning it off would only
+  remove the red underlines in the settings text boxes.
+
+## Sixth pass (2026-11-03): where the time goes now, and the overlay's timer loop
+
+Real app, 144 Hz monitor, after the fifth pass's flip change, traced (ms of work per second, all processes, the GPU
+process's vsync wait left out; method in ARCHITECTURE §12).
+
+- **Incoming game data is cheap.** Replaying the real gen2 recording (~270 changes/s), the client's websocket handling
+  and the overlay's reactions cost ~7 ms/s. Not worth optimising.
+- **The clock frame is the floor while the timer runs**: ~100 ms/s in its renderer and ~60 ms/s in the GPU process,
+  per 144 frames/s (it scales with the refresh rate; a 60 Hz monitor draws 60). Its text changes 100 times a second,
+  so this is the price of the centiseconds.
+- **The overlay page kept a frame loop it no longer needed** (*fixed, below*). gen3/gen5 `logic/Timer.js` `updateLoop` and gen2/gen4's
+  `updateTime` request a frame every display refresh while the timer runs, though the clock frame shows the time and
+  the in-page clock is frozen behind it. That keeps the overlay renderer drawing 144 frames/s. Stopping it (probe:
+  `requestAnimationFrame` stubbed in the overlay page): gen5 216-217 -> 167-169 ms/s, gen2 200-201 -> 169-178.
+  gen1's `logic/Timer.ts` loop runs for the life of the page, **paused or not**: idle 35 -> 10 ms/s without it.
+  The loop's values are read elsewhere at event time (split times, the autosplitter's logs, `set_rom_starter`
+  checks, gen2/gen4's saved `time_*` fields), so stopping it means those must compute the time when read.
+
+### The timer loop stops while the clock frame shows (all generations) (*measured*)
+
+- gen3/gen5 `logic/Timer.js`: `updateLoop` also ends while `frameLive`; the overlay's `timer_frame_live` watcher
+  calls `timer.setFrameLive`, which on the frame going away publishes the time and restarts the loop.
+  `formatted_time` is a getter: the last `update()`'s value as before, but worked out when read while the frame
+  shows, so the split and autosplitter code reads the time at that moment.
+- gen2/gen4 `updateTime`: no next frame while `timer_frame_live`, and at most one frame in flight
+  (`_timerFrameQueued`; a quick pause and resume used to start a second loop). The code that reads `time_*` /
+  `timer_formatted_time` at an event (gen2's battle start, both gens' split log and autosplitter, gen4's reset and
+  new-game checks) first calls `updateTime()` **when the frame shows**. Without that, gen2/gen4 read "0.00" in the
+  real app (checked). The watcher restarts the loop when the frame goes away.
+- gen1 `logic/Timer.ts`: `updateLoop` ends while paused, while the frame shows or with no subscriber; `timer.vue`
+  wakes it on mount and when `metrics.timer.paused` changes (also covers the store loading a running timer from disk),
+  and calls `setFrameLive`.
+- Behaviour with the frame off (the harness, or the frame never coming up) is the legacy apps': the same per-frame
+  values are read. Harness, all five fixtures, against the build just before: every oracle green, pixels exact (gen5:
+  1 pixel in one capture, the run-to-run noise seen before).
+- Real app, every generation: no overlay frames while the timer runs with the frame showing; the frame ticks, holds
+  when paused, resumes; the split code's read matches the frame's time; taking the frame away restarts the loop at
+  the refresh rate and the in-page clock shows the current time; putting it back, or pausing, stops it again.
+- Traced: the overlay renderer went from ~41 ms/s at 144 frames/s to ~7 ms/s and no frames (gen2, gen5). Whole-app
+  totals moved with machine load between runs (the clock frame's renderer measured 98-120 ms/s), so the same-run
+  stub comparison above (14-22% of all work while the timer runs) is the better figure.
+- Not checked in the real app: the gen1 store loading a *running* timer from disk while the frame is down.

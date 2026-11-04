@@ -16,6 +16,7 @@
             </template>
         </div>
         <report-button></report-button>
+        <voice-button></voice-button>
         <updates-button></updates-button>
     </div>
 </template>
@@ -25,6 +26,7 @@ import { defineComponent, type PropType } from "vue";
 import SettingsControl from "./SettingsControl.vue";
 import ReportButton from "../report/ReportButton.vue";
 import UpdatesButton from "../updates/UpdatesButton.vue";
+import VoiceButton from "../voice/VoiceButton.vue";
 import { panelTheme } from "./theme";
 import type { SettingsPanelSpec, Tier } from "./types";
 import "../styles/settings.css";
@@ -40,7 +42,7 @@ import "../styles/settings.css";
  */
 export default defineComponent({
     name: "SettingsPanel",
-    components: { SettingsControl, ReportButton, UpdatesButton },
+    components: { SettingsControl, ReportButton, UpdatesButton, VoiceButton },
     props: {
         panel: { type: Object as PropType<SettingsPanelSpec>, required: true },
     },

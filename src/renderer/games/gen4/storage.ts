@@ -1,3 +1,4 @@
+import { loadStyleFiles } from "../../core/persistence/styleFiles";
 import { createStyleSettingsStore, type StyleSettingsStore } from "~/core/persistence/styleSettings";
 
 /**
@@ -71,13 +72,7 @@ let styleSettingsManager: StyleSettingsStore | null = null;
 /** Reads every species file and builds the store. Idempotent. */
 export async function loadGen4StyleDefaults(): Promise<StyleSettingsStore> {
     if (styleSettingsManager) return styleSettingsManager;
-    const defaults: Record<string, Record<string, unknown>> = {};
-    for (const [path, load] of Object.entries(styleFiles)) {
-        const name = path.slice(path.lastIndexOf("/") + 1, -".json".length);
-        if (name === "index") continue;
-        const value = await load();
-        if (value && typeof value === "object") defaults[name] = value as Record<string, unknown>;
-    }
+    const defaults = await loadStyleFiles(styleFiles);
     styleSettingsManager = createStyleSettingsStore({
         defaults,
         isStyleKey: isGen4StyleKey,

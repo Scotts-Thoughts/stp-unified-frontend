@@ -108,19 +108,48 @@ export class Timer {
 	}
 
 	/**
-	 * The one frame loop, alive for the life of the page (the singleton outlives the
-	 * overlay, which unmounts on `InstanceReset`). It only formats and publishes while
-	 * the timer is running *and* a `timer.vue` is subscribed; with the overlay gone
-	 * there is nobody to publish to, and `formatted_time` has no other reader (the
-	 * split log formats its own from the store). The explicit `update()` calls in
-	 * `set`/`start`/`toggle` and `initialize` are not gated, so a component that
-	 * mounts while the timer is paused still gets its value the way it always did.
+	 * The frame loop. It formats and publishes only while the timer is running, a `timer.vue` is
+	 * subscribed and the out-of-process clock is not showing (`setFrameLive`); with the overlay
+	 * gone there is nobody to publish to, and `formatted_time` has no other reader (the split log
+	 * formats its own from the store). Otherwise it ends (2026-11-03: it used to request a frame at
+	 * the display's refresh rate for the life of the page, paused or not), and `wake` restarts it:
+	 * `timer.vue` calls it when the timer's paused flag or the clock frame changes, which also covers
+	 * the store loading a running timer from disk. The explicit `update()` calls in
+	 * `set`/`start`/`toggle` and `initialize` are not gated, so a component that mounts while the
+	 * timer is paused still gets its value the way it always did.
 	 */
 	updateLoop = () => {
-		if (!this._store.timer.paused && PubSub.hasSubscribers("@timer/update")) {
-			this.update();
+		if (this._store.timer.paused || this.frameLive || !PubSub.hasSubscribers("@timer/update")) {
+			this.looping = false;
+			return;
 		}
+		this.update();
+		this.looping = true;
 		window.requestAnimationFrame(this.updateLoop);
+	}
+
+	looping = false;
+
+	/** The out-of-process clock (core/overlay/ClockFrame.ts) is showing; set by `timer.vue`. */
+	frameLive = false;
+
+	/** Restarts an ended `updateLoop` on the next frame; a no-op while it runs. */
+	wake = () => {
+		if (this.looping) return;
+		this.looping = true;
+		window.requestAnimationFrame(this.updateLoop);
+	}
+
+	/**
+	 * Called by `timer.vue` when the out-of-process clock appears or goes away. When it goes away
+	 * the in-page clock shows again, so it gets the current time and the loop restarts.
+	 */
+	setFrameLive = (live: boolean) => {
+		this.frameLive = live;
+		if (!live) {
+			this.update();
+			this.wake();
+		}
 	}
 
 	/**
@@ -146,6 +175,7 @@ export class Timer {
 		this.set(startTimeOffset);
 		this._store.timer.paused = false;
 		this.update();
+		this.wake();
 	}
 
 	/**
@@ -156,6 +186,7 @@ export class Timer {
 			this._store.timer.paused = false;
 			this._store.timer.started_at += Date.now() - this._store.timer.paused_at;
 			this.update();
+			this.wake();
 		}
 		else {
 			this._store.timer.paused = true;

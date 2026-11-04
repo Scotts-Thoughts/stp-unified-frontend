@@ -478,9 +478,9 @@
       "name": "checkMapperForChapterMarkerProperties",
       "reason": "mapper shape: the shared walk is core/logic/chapterMarkerProperties.ts; each generation passes the table of mapper paths its own `mounted` subscribes for OBS markers (gen3 the sStp pointers/patch, gen4 the DPPt/HGSS reset flag by selected game, gen5 flags.new_game and player.name).",
       "bodies": {
-        "gen3": "ed290a3f1ae8",
-        "gen4": "d06c97cd2ac7",
-        "gen5": "58643355ae40"
+        "gen3": "1d164fdf3946",
+        "gen4": "7bbad4f45736",
+        "gen5": "9443dcadbbec"
       }
     },
     {
@@ -741,12 +741,12 @@
     {
       "section": "methods",
       "name": "fetchEmulatorStats",
-      "reason": "UNREVIEWED (omission?): gen5 counts failed /stats fetches and clears the poll interval after ten; gens 2-4 keep polling a dead Super Shuckie every tick.",
+      "reason": "UNREVIEWED (omission?): gen5 counts failed /stats fetches and clears the poll interval after ten; gens 2-4 keep polling a dead Super Shuckie (once a second since 2026-11-02, all four log a failure at most once per 5 s).",
       "bodies": {
-        "gen2": "325a1e4a0cba",
-        "gen3": "325a1e4a0cba",
-        "gen4": "325a1e4a0cba",
-        "gen5": "14c473250e10"
+        "gen2": "faea79db467b",
+        "gen3": "faea79db467b",
+        "gen4": "faea79db467b",
+        "gen5": "fa9672cc561a"
       }
     },
     {
@@ -1476,8 +1476,8 @@
       "name": "updateTime",
       "reason": "UNREVIEWED: gen2 | gen4 (gen2 28L, gen4 30L)",
       "bodies": {
-        "gen2": "3f0237c4fa6f",
-        "gen4": "82d9d8b41cc8"
+        "gen2": "8eefd69e5332",
+        "gen4": "08de9cf14d31"
       }
     },
     {
@@ -1613,6 +1613,17 @@
         "gen2": "4bf13fdaa80d",
         "gen4": "630a62f133fd",
         "gen5": "91609d60ad2b"
+      }
+    },
+    {
+      "section": "watch",
+      "name": "timer_frame_live",
+      "reason": "timer design: gen3/gen5 keep the time in logic/Timer.js, so the watcher hands the clock frame's state to it (setFrameLive); gen2/gen4 keep it in the component, so updateTime itself checks timer_frame_live and the watcher only restarts the loop when the frame goes away.",
+      "bodies": {
+        "gen2": "155a5115b5bb",
+        "gen3": "cbc0e62eb814",
+        "gen4": "155a5115b5bb",
+        "gen5": "cbc0e62eb814"
       }
     },
     {

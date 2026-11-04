@@ -2,6 +2,7 @@ import PubSub from "~/logic/PubSub";
 import { logData, logCopy } from "~/autosplitter/autosplitter_functions.js";
 import { addSplitBookmark, sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
+import { installGen1MarkerHooks } from "~/games/gen1/markerHooks";
 import { applyManualStarterDvs, OAKS_LAB } from "~/games/gen1/starterDvs";
 import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
 
@@ -228,4 +229,8 @@ export function installGen1RunHooks(vm: any): void {
         if (vm.game.properties.overworld.map.value != OAKS_LAB) return;
         await applyManualStarterDvs(vm.game, vm.runConfig.config.dvs, vm.meta.starter);
     });
+
+    // The chapter markers beyond IN / OUT / RESET / BLACKOUT (2026-10-29). Last, so every
+    // subscription above -- the IN / OUT handler above all -- runs before these on a shared edge.
+    installGen1MarkerHooks(vm);
 }

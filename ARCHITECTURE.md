@@ -77,6 +77,11 @@ docs/             Reference docs. See §13.
 - `paths.ts`: `appRoot()`, `splitsRoot()`, `userDataRoot()`, etc. `resolveInside()` guards every IPC path.
 - `ipc.ts`: all file IPC. Writes to `storage/` and source files are refused in a packaged build.
 - `control-server.ts`: `ControlServer` on `127.0.0.1:30159` (`STP_CONTROL_PORT` overrides it).
+  - A request whose `Sec-Fetch-Site` header is `cross-site` gets a 403 (2026-10-29): that header is what a
+    browser puts on a request a web page makes to 127.0.0.1, and such a page could otherwise quit the overlay
+    or point `/load-split-file` at any file. The queuer (Node) sends no such header, and a page served from
+    localhost is same-site, so neither is touched. Don't drop the check to make a browser client work; serve
+    that client from localhost instead.
   - `/quit`, `/reload` and `/load-split-file` are answered in main.
   - Every other route is forwarded to the renderer (`control-request` / `control-reply`, 5 s timeout).
 - `hotkeys.ts`: keyboard shortcuts and the Keyboard Shortcuts window (§4 "Shortcuts").
@@ -111,6 +116,36 @@ docs/             Reference docs. See §13.
   console.log, and the whole user-data folder as `settings/`) with its own small zip writer, then shows it in the
   file manager. The renderer side flushes pending settings writes first and gets its facts from the shell
   (`core/report/context.ts`, registered in main.ts). Keyboard shortcuts are suspended while the report is open.
+  The settings copy has its secrets blanked (`redactSecrets`): any JSON value under a key that looks like a
+  password, token or secret (today the OBS WebSocket password, `obs_websocket_password`) is `<redacted>`,
+  because a report is something the user sends to someone else.
+- `voice/`: **voice control** (2026-10-31). Say "Hey Rotom", then within 5 s a command ("show IVs", "show EVs",
+  "show regular stats", "show base stats", "show automatic right panel", "show splits"), and the overlay runs that
+  setting's shortcut action. The pieces:
+  - The microphone button sits left of the Report button (`core/voice/VoiceButton.vue`); its colour shows the state
+    and its tooltip what it last did. On/off is the global key `voice_control`, off by default, so the harness never
+    opens a microphone. The shell starts it at boot if it was left on (`startVoiceIfEnabled` in `main.ts`).
+  - The overlay (`core/voice/voice.ts`) captures the mic with an AudioWorklet (from a Blob URL) at 16 kHz and sends
+    ~100 ms chunks over `voice:audio`. A worker thread (`src/main/voice/worker.ts`, built as its own file through
+    `?modulePath`) runs a **sherpa-onnx keyword spotter**: the npm `sherpa-onnx` WebAssembly build (no native files,
+    works on the Mac), and the 3.3M-parameter English model in `resources/voice/` (5 MB, Apache-2.0). It only
+    listens for the phrases in `src/shared/voiceCommands.ts`; nothing else is transcribed. About 2% of one core.
+  - It runs actions through `runShortcutAction` (`core/shortcuts/engine.ts`): the first id in
+    `core/voice/commands.ts` that the bound generation has and can do, so a command is exactly a key press.
+    Nothing runs on the box-art screen. A command without the wake phrase just before it is ignored.
+  - A new phrase is spelled in the model's word pieces with `tools/voice/tokenize.py`.
+  - Traps, measured on recorded clips (the comments in `worker.ts` have the numbers):
+    - **Exact digital silence** (a muted mic) spoils the stream for the speech after it, so the worker adds
+      seeded dither.
+    - After a detection the stream hears worse. `reset()` there, or a new stream there, made it worse, and a new
+      stream is deaf for a moment. So the worker does nothing at a detection and replaces the stream at the next
+      pause after a *command* (or after the 6 s window when a wake phrase gets no command).
+    - Spelling "IVs" as one word as well as letter by letter made "E V S" be heard as IVs. A wrong command is
+      worse than a missed one.
+  - Tuning was done on Windows text-to-speech voices, not a real one. Re-tune the wake phrase's `:boost #threshold`
+    in `voiceCommands.ts` once a real voice has been tried.
+  - Checks: `npm run parity:voice` (self-test, after a build) and `tools/parity/voice-app.ts`. The second drives the
+    real app with Chromium's fake microphone playing a fixture clip and checks that the Stats dropdown changes. (§12)
 
 ### src/renderer/core
 
@@ -126,7 +161,30 @@ docs/             Reference docs. See §13.
 | `logic/` | Cross-generation helpers: OBS (`obs.ts`), Shuckie bookmarks, split comparison, enemy sprite scales, starter IVs, move reminder, battle mechanics (speed, accuracy, move power, OHKO; §4) |
 | `window/` | `scaleToFit`, virtual keys |
 | `report/` | The Report button and its drawing/details screens (teleported to `<body>`); the back end is `src/main/report.ts` (§2) |
+| `voice/` | Voice control: the microphone button, mic capture and the wake/command logic, and which shortcut action each command runs; the back end is `src/main/voice/` (§2) |
 | `styles/base.css` | The document reset only. Each generation's look is in `games/genN/style.css` |
+
+### Dependencies
+
+- **Every package in `package.json` is imported somewhere.** On 2026-10-29 six were not (`vite-plugin-electron`,
+  `vite-plugin-electron-renderer`, `vite-plugin-static-copy`, `vite-plugin-vue-devtools`, `@vue/devtools`,
+  `pinia-plugin-watch`) and were removed; `git grep` the name before adding one back. The build tool is
+  `electron-vite`, not `vite-plugin-electron`.
+- **`node-key-sender` is gone** (gen5's second-screen key, `send-virtual-key` in `ipc.ts`): a critical,
+  unfixable command-injection advisory, no release since 2022, and it needed Java. The IPC channel stays and
+  logs once. If the feature is ever wanted, `uiohook-napi` (already a dependency) has `keyTap`, but it takes
+  libuiohook keycodes, not the Windows `0x83`/`0x84` the legacy code sent.
+- **`rcedit` is marked deprecated on npm** (every version; the GitHub project is electron/node-rcedit). It is
+  used only by `tools/build/after-pack.mjs`, at build time, on our own exe, and it stays pinned at 4.0.1 because
+  nothing newer exists. The pure-JS `resedit` package is the replacement candidate when someone has time to
+  rewrite `stampExe` and check the stamped exe.
+- **Electron stays on 37 until a harness run says otherwise.** `npm audit` wants 43+ (its bundled `extract-zip`),
+  and 45 is current, but a Chromium change moves pixels, and §2's `setAspectRatio` trap was measured on 37.
+  Upgrade it in its own change: bump, `npm run build`, then the harness for all five generations against a
+  HEAD-worktree capture (§12). The same goes for `vite` 8 / `electron-vite` 6, `pinia` 4 and TypeScript 7
+  (the native port): majors with no security need behind them.
+- **`@types/node` follows Electron's Node**, not npm's latest (Electron 37 ships Node 22).
+- `npm audit` after `npm update` should report only Electron's own `extract-zip`; anything else is new.
 
 ## 3. How a game gets on screen
 
@@ -144,6 +202,9 @@ All of this is in `src/renderer/main.ts`.
 3. **Module loads.**
    - `loadModule(manifest)` imports `games/genN/index.ts`.
    - The module's `prepare()` runs, and its stylesheet goes into `<style id="stp-gen-style">`, scoped under `.gen-N`.
+     Gens 2-5's `prepare()` reads their per-species style files (`data/style/*.json`, one lazy chunk each) through
+     `loadStyleFiles` (`core/persistence/styleFiles.ts`), all at once. Awaited one by one they were 2.5 s of a
+     2.9 s game load (docs/performance-followups.md, fifth pass).
    - The active module and user-state namespace are set, then `activate()` runs.
 4. **Overlay mounts.** `module.overlay` is mounted with a `game` prop: `{module, profile, game, properties, meta, setBits}`.
    - `properties` is the profile's **canonical view** (`buildCanonicalView`). Its leaves are the client's live
@@ -281,6 +342,11 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   `MyStorage` on `Timer.onChange` (their storage
   proxy is not reactive, and must not be read through the reactive `timer`, whose Symbol-key probes its get trap
   cannot take); gen1 from `useSpeciesMetricsStore().timer`.
+- While the frame is live, the overlay's own timer loop is **off** (all five; docs/performance-followups.md, sixth
+  pass), so the per-frame timer values go stale. Code that reads the time at an event must get it fresh: gen3/gen5
+  read `timer.formatted_time` (a getter that works the time out while the frame is live); gen2/gen4 call
+  `if (this.timer_frame_live) this.updateTime()` before reading `time_*` / `timer_formatted_time`; gen1 reads
+  `useSpeciesMetricsStore().getTime()`, never `Timer.formatted_time`.
 - Checked on the Mac with the page frozen for 2 s: the frame's worst gap was 10-12 ms in every generation, the
   page's own clock 2 s. The Shuckie-timer mode shows the last posted emulator time, so it still stalls with the page.
 
@@ -296,7 +362,8 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   and saving behave as for a click. `available` greys out a control that does nothing in this game or for this
   species; "Show Advanced Settings" is not a gate.
 - **Action ids are persisted** (`shortcuts` in each generation's section of `user_state.json`, changes from the
-  defaults only, `null` = default cleared). Renaming an id silently drops a user's key.
+  defaults only, `null` = default cleared). Renaming an id silently drops a user's key, and voice commands run
+  actions by id too (`core/voice/commands.ts`; `npm run parity:voice` checks them in every generation).
 - **A settings control gets its action from the panel description**: add the control to
   `games/genN/settingsPanel.ts` and its action exists; `noAction: true` for the ones left out below. After a change
   to a description, `npm run parity:action-ids -- --compare=<list from before>` must show no missing id.
@@ -563,6 +630,7 @@ flags it.
 | Super Shuckie (emulator) | `http://127.0.0.1:30158` | `core/stores/useEmulatorStatsStore.ts`, `core/logic/shuckieBookmarks.ts` |
 | OBS | `ws://localhost:4455` | `core/logic/obs.ts` |
 | Keyboard shortcuts | `uiohook-napi` keyboard hook (Windows and Mac) | `src/main/hotkeys.ts`, then `core/shortcuts/engine.ts` |
+| Microphone (voice control) | `getUserMedia`, only while the mic button is on | `core/voice/voice.ts`, then `src/main/voice/` (§2) |
 | air_cutter (video tool) | launches the app with `--cutter-*` | `src/main/cutter.ts`, `tools/cutter/` |
 | The clock page (our own) | `http://127.0.0.1:30160/timer` | `src/main/timer-frame-server.ts`, `core/overlay/ClockFrame.ts` |
 
@@ -572,6 +640,17 @@ flags it.
 - OBS marker names.
 
 Treat those as fixed interfaces. Another program depends on each one.
+
+**Writes the game undoes.** Per-map data (gen5's `overworld.encounters_enabled`, Platinum's
+`overworld.encounter_rates.walking`) is reloaded by the game as the player enters a map, often a few frames after
+the map number changes, so a value written on the map change is overwritten. Write it on the map change *and* again
+from a `.change` on the value itself (gen5 `encounter_toggle_here`, gen4 Platinum in `mounted`). Patch flags
+(gen3 `overworld.encounters.*`, HG/SS `patch.stpEncounterRate`) are not reloaded.
+
+**Debounced paths apply late.** gens 4-5 hold each path under `debouncePaths` for 10-15 animation frames, each on its
+own timer, so values that arrive together can apply frames apart (a team count before its species). A value that
+must show at once goes in `debounceExcept` (gen5's held item). The enemy team panel hides each picture until it
+loads (`core/styles/enemyPanel.css`), so a picture named from a value not yet applied (`null.webp`) never shows.
 
 **Shortcuts share their keys.** The keyboard hook only watches, as `keyhook.exe` did: every key still reaches
 the program in front, so F24 pauses both the overlay's timer and the emulator, and OBS or a second overlay can use
@@ -615,6 +694,11 @@ machine that built it.
 - **Marker names.**
   - gen1 keeps them in `games/gen1/markers.ts`.
   - gen2–5 hard-code them inline in `Overlay.vue` (grep `sendChapterMarker`).
+  - gen5 (2026-10-29, mirrored in legacy `app/frontend.js`) writes `IN - Wild` (state Battle and opponent
+    trainer `--`, checked after a 250 ms settle, via the same IN queue as gen4 so phantom trainers like
+    "Jaden" lose to it), `Level Up - <n>` / `Battle Level Up` (battle only, as gen2) and `Held Item - <name>`.
+    It has no `Text Box` or `Turn`: the gen5 mappers expose no property for either. No `OUT - Wild` is written,
+    as in gen2/gen4: Cutter closes a wild fight on `Enemy Fainted`, and an `OUT - Wild` would pair as a trainer OUT.
   - The specs for the "Item" and "New Move" markers are `docs/CRITICAL_ITEM_CHAPTER_MARKER.md` and
     `docs/NEW_MOVE_CHAPTER_MARKER.md`. They cite legacy `app/frontend.js`, which is now gen2's `Overlay.vue`.
 - **Autosplitting.**
@@ -683,6 +767,7 @@ From cheapest to most expensive:
 | Typecheck | `npm run typecheck` | ~15 s | Always. Covers renderer, shared and preload, but **not** `src/main` |
 | Drift | `npm run parity:drift` | ~3 s | Any gen2–5 overlay or mixin edit |
 | Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:debounce`, `parity:shortcuts`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits, shortcuts or import code |
+| Voice | `npm run parity:voice` (needs a build); `npx tsx --tsconfig tsconfig.web.json tools/parity/voice-app.ts --gen=N` | ~1 min; ~2 min | Voice control, its phrases, or the shortcut action ids it uses (§2 `voice/`) |
 | Action ids | `npm run parity:action-ids -- --out=<file>` before, `-- --compare=<file>` after | seconds, no build | When a change rebuilds a generation's shortcut actions (settings panel descriptors): no persisted id may go missing |
 | Dead CSS | `npm run css:dead` (report), `-- --gen=N --write` | seconds, no build | After a change that stops using classes; the harness must then show no pixel/layout difference |
 | Shared CSS | `npm run css:share` (report), `-- --write` | seconds, no build | After editing gens 3-5's `style.css` or `core/styles/shared-gen*.css`: moves rules identical in gens 3-5 (or 4-5) to the shared sheets only where the cascade can't change |
@@ -698,6 +783,16 @@ build does not check types. To check a main-process edit, compare that command's
 **Harness facts** (full reference: `docs/parity-harness.md`):
 - It always runs the built app in `out/`, so run `npm run build` first.
 - Harness runs must go one at a time.
+- `STP_PARITY_DISPLAY_AT=x,y` (desktop coordinates of any point on a display) puts the harness window on that
+  display instead of the primary one, so a run stays off the monitor Scott is working at. It must fit 1920x1080
+  content at 100% scaling. Never make a test window always-on-top.
+- The harness is no good for CPU/GPU numbers: its fake clock and CDP traffic cost more than the app. Measure the
+  built app against the mock PokeAByte on another port (`--tool-url=`), with a visible window (Windows stops
+  drawing a covered one; launch with `--disable-features=CalculateNativeWinOcclusion` so it can't). Compare
+  **trace** totals (ms of thread work per second, per process) rather than OS CPU samples: on a busy machine the same
+  state sampled 1-60% of a core, while traces repeat within a few percent. The smoke fixtures are synthetic (~4
+  value changes/s); the gen2 recording is real play (~270/s median, ~950 peak). How, and the numbers:
+  docs/performance-followups.md, fifth and sixth passes.
 - The harness runs the app with `STP_TIMER_FRAME=off` (`run.ts`), so the overlay draws its own clock and the
   oracles compare what they always did; the clock frame (§2 `core/overlay`) never appears in a capture.
 - Fixtures live in `tools/fixtures/genN/`. There is one synthetic smoke fixture each for gen1, gen3, gen4 and

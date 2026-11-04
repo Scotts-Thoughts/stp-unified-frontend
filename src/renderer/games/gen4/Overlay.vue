@@ -1181,6 +1181,12 @@ export default defineComponent({
         }
     },
     watch: {
+        // While the out-of-process clock shows, `updateTime` stops asking for frames; when it goes
+        // away, the in-page clock shows again and the loop restarts (docs/performance-followups.md,
+        // sixth pass).
+        timer_frame_live(live) {
+            if (!live) this.updateTime()
+        },
         encounters_route_201(newValue) {
             MyStorage['encounters_route_201'] = newValue;
             this.disable_encounters();
@@ -2739,6 +2745,10 @@ export default defineComponent({
                 'player.team.0.level':                      '"Rare Candy Used" marker',
                 'battle.opponent.party_position':           '"Next Pokemon" marker',
                 'battle.opponent.active_pokemon.stats.hp':  '"Enemy Fainted" marker',
+                'battle.player.active_pokemon.level':       '"Level Up" / "Battle Level Up" markers',
+                'player.team.0.held_item':                  '"Held Item" marker',
+                // Only the Platinum mapper has a battle-level turn counter; DP/HGSS have no "Turn" marker.
+                ...(this.selected_game == "Platinum" ? { 'battle.turn_counter': '"Turn" marker' } : {}),
             });
         },
         /**
@@ -2845,7 +2855,13 @@ export default defineComponent({
                 
                 return stats;
             } catch (error) {
-                console.error('Error fetching emulator stats:', error);
+                // Super Shuckie is not answering: try again in 1 s rather than on the next 10 ms tick, and log
+                // once per 5 s. Every failure used to log, 100 errors a second for as long as it was closed.
+                this._emulatorStatsRetryAt = Date.now() + 1000;
+                if (!(Date.now() - (this._emulatorStatsErrorLoggedAt || 0) < 5000)) {
+                    this._emulatorStatsErrorLoggedAt = Date.now();
+                    console.error('Error fetching emulator stats:', error);
+                }
                 return null;
             }
         },
@@ -4472,9 +4488,17 @@ export default defineComponent({
             else {
                 this.timer_formatted_time = [ s, "." + f(c), h + "h" + m + "m" + s + "s", ]
             }
-            if (this.timer_pause == false && !this._unmounted) {
+            // Not in the legacy app (2026-11-03): no frames while the out-of-process clock shows, since
+            // only the hidden in-page clock reads these per frame; the split code calls this first to
+            // read the current time. One frame in flight at most, where a quick pause and resume, or a
+            // call while running, used to start a second loop.
+            if (this.timer_pause == false && !this._unmounted && !this.timer_frame_live && !this._timerFrameQueued) {
+                this._timerFrameQueued = true
                 setImmediate(() => {
-                    requestAnimationFrame(this.updateTime)
+                    requestAnimationFrame(() => {
+                        this._timerFrameQueued = false
+                        this.updateTime()
+                    })
                 })
             }
         },
@@ -7143,7 +7167,8 @@ export default defineComponent({
         // In mounted hook (around line 6897)
         // Poll for emulator stats continuously
         this.emulatorStatsInterval = setInterval(async () => {
-            if (this.ready && (this.shuckie_timer || this.shuckie_counters)) { // Only poll when mapper is ready and a shuckie feature is on
+            // `_emulatorStatsRetryAt`: after a failed poll (Super Shuckie not running) the next try waits 1 s.
+            if (this.ready && (this.shuckie_timer || this.shuckie_counters) && !(Date.now() < (this._emulatorStatsRetryAt || 0))) { // Only poll when mapper is ready and a shuckie feature is on
                 await this.fetchEmulatorStats();
             }
         }, 10); // 100ms = 10 times per second (adjust as needed)
@@ -7384,6 +7409,14 @@ export default defineComponent({
                 this.stats_setting = "Automatic";
             }
         });
+        // Platinum's walking rate is part of the map's encounter data, which the game loads as the player enters the
+        // map, sometimes after map_name has changed, over the rate written above: a route toggled off kept its
+        // encounters until the player left and came back. Whenever the game rewrites it, the toggle is applied again
+        // (disable_encounters leaves maps without a toggle alone; HeartGold and SoulSilver use a patch flag the game
+        // does not reload).
+        if (this.selected_game == "Platinum") {
+            this.game.properties.overworld.encounter_rates.walking.change(async () => { this.disable_encounters() })
+        }
         // HeartGold and SoulSilver fix
         // if (this.selected_game == "HeartGold and SoulSilver") {
         //     this.game.properties.overworld.encounter_rates.walking.change(async (newProp) => {
@@ -7397,6 +7430,7 @@ export default defineComponent({
         // Resets
         if (this.selected_game == "Platinum" || this.selected_game == "Diamond and Pearl") {
             this.game.properties?.flags?.new_game_1.change(async (newProp, oldProp) => {
+                if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
                 if (this.shuckie_timer == true) {
                     if (newProp.value == true && this.emulatorStats.time_current == null) {
                         console.log("Sending emulator start")
@@ -7436,6 +7470,7 @@ export default defineComponent({
         }
         if (this.selected_game == "HeartGold and SoulSilver") {
             this.game.properties?.variables?.game_started.change(async (newProp, oldProp) => {
+                if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
                 if (this.shuckie_timer == true) {
                     if (newProp.value == 56150 && this.emulatorStats.time_current == null) {
                         console.log("Sending emulator start")
@@ -7939,6 +7974,59 @@ export default defineComponent({
             this.sendObsChapterMarker("Enemy Fainted");
         });
 
+        // LEVEL UP CHAPTER MARKERS (gen2's logic, on the in-battle level)
+        // "Battle Level Up" fires when the active battler's level rises by 1 during Battle;
+        // "Level Up - <n>" when it rises by 1 during Battle or From Battle. Gen4 has no level-up
+        // outside battle except Rare Candy, which already has its own marker, so an overworld
+        // lead level-up is deliberately not marked. old == 0 (battle struct populating) is ignored.
+        this.game.properties.battle.player.active_pokemon?.level?.change((newProp, oldProp) => {
+            const state = this.game?.properties?.meta?.state?.value;
+            const oldLevel = oldProp?.value ?? 0;
+            if (oldLevel <= 0 || (newProp?.value ?? 0) !== oldLevel + 1) return;
+            if (state === 'Battle') {
+                console.log("Chapter Detected: Battle Level Up");
+                this.sendObsChapterMarker("Battle Level Up");
+            }
+            if (state === 'Battle' || state === 'From Battle') {
+                const chapterName = `Level Up - ${newProp.value}`;
+                console.log("Chapter Detected: " + chapterName);
+                this.sendObsChapterMarker(chapterName);
+            }
+        });
+
+        // HELD ITEM CHAPTER MARKER
+        // Fires "Held Item - <item>" whenever the lead's held item changes to a non-null value.
+        // Item-removal transitions (value -> null) are ignored, and so is a change that comes with
+        // a new lead species (a party reorder, or the team repopulating after a reset or load):
+        // checked 200 ms later, since the two properties can update in either order.
+        let leadSpeciesChangedAt = 0;
+        const HELD_ITEM_SPECIES_GRACE_MS = 1000;
+        this.game.properties.player.team[0]?.species?.change(() => { leadSpeciesChangedAt = Date.now(); });
+        this.game.properties.player.team[0]?.held_item?.change((newProp, oldProp) => {
+            const newVal = newProp?.value;
+            if (newVal == null || newVal === '') return;
+            if (newVal === oldProp?.value) return;
+            setTimeout(() => {
+                if (Date.now() - leadSpeciesChangedAt < HELD_ITEM_SPECIES_GRACE_MS) return;
+                if (this.game.properties.player.team[0]?.held_item?.value !== newVal) return;
+                const chapterName = "Held Item - " + newVal;
+                console.log("Chapter Detected: " + chapterName);
+                this.sendObsChapterMarker(chapterName);
+            }, 200);
+        });
+
+        // TURN CHAPTER MARKER (Battle only; Platinum only)
+        // Fires "Turn" whenever battle.turn_counter increments during Battle. Only the Platinum
+        // mapper has battle.turn_counter (the battle context's turn total). Diamond/Pearl and
+        // HeartGold/SoulSilver have no battle-level turn property, so no "Turn" markers there.
+        // Counter resets between battles produce a decrement, not an increment, so they don't fire.
+        this.game.properties.battle.turn_counter?.change((newProp, oldProp) => {
+            if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
+            if ((newProp?.value ?? 0) <= (oldProp?.value ?? 0)) return;
+            console.log("Chapter Detected: Turn");
+            this.sendObsChapterMarker("Turn");
+        });
+
         const setStartingStats = async () => {
             //256 * 25 * 10 = 70400, gives a clean starting point where modulo 25 and modulo 256 are both 0
             //this can really be anything divisible by 256 though
@@ -8142,10 +8230,14 @@ export default defineComponent({
         })
 
         //*Autosplitter
-        const log_split = (x) => console.log(`Autosplitter - Battle Ended - Split: ${this.game.properties.battle.opponent.name.value} at ${this.timer_formatted_time[0]}${this.timer_formatted_time[1]} (Gametime: ${this.gametimeSplit})`)
+        const log_split = (x) => {
+            if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
+            console.log(`Autosplitter - Battle Ended - Split: ${this.game.properties.battle.opponent.name.value} at ${this.timer_formatted_time[0]}${this.timer_formatted_time[1]} (Gametime: ${this.gametimeSplit})`)
+        }
         const autosplitter_process = (optional_trainer_data = null) => {
             // console.log("Checking if autosplitter is on...")
             if (this.autosplitter_toggle == true) {
+                if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
                 // console.log("Began Autosplitter Process")
                 battle_end = Date.now()
                 //data to be collected with the autosplitter

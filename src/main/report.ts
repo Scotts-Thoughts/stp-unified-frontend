@@ -180,7 +180,38 @@ function freeName(folder: string, base: string): string {
     return candidate;
 }
 
-/** Every file under the user-data folder (the settings), as `settings/...` entries. */
+/**
+ * A settings file with its secrets blanked. The user state holds the OBS WebSocket
+ * password (`obs_websocket_password`, core/logic/obs.ts), and a report is something
+ * the user sends to someone else, so any JSON value whose key looks like a password,
+ * token or secret is replaced with "<redacted>". A file that is not JSON is unchanged.
+ */
+function redactSecrets(name: string, data: Buffer): Buffer {
+    if (!name.toLowerCase().endsWith(".json")) return data;
+    let changed = false;
+    const walk = (value: unknown): unknown => {
+        if (Array.isArray(value)) return value.map(walk);
+        if (!value || typeof value !== "object") return value;
+        const out: Record<string, unknown> = {};
+        for (const [key, inner] of Object.entries(value as Record<string, unknown>)) {
+            if (/password|passwd|secret|token/i.test(key) && typeof inner === "string" && inner !== "") {
+                out[key] = "<redacted>";
+                changed = true;
+            } else {
+                out[key] = walk(inner);
+            }
+        }
+        return out;
+    };
+    try {
+        const redacted = walk(JSON.parse(data.toString("utf-8")));
+        return changed ? Buffer.from(JSON.stringify(redacted, null, 2), "utf-8") : data;
+    } catch {
+        return data;
+    }
+}
+
+/** Every file under the user-data folder (the settings), as `settings/...` entries, secrets blanked. */
 function settingsEntries(): ZipEntry[] {
     const root = userDataRoot();
     const entries: ZipEntry[] = [];
@@ -190,7 +221,7 @@ function settingsEntries(): ZipEntry[] {
             const full = join(folder, item.name);
             if (item.isDirectory()) walk(full);
             else if (item.isFile() && statSync(full).size <= 20 * 1024 * 1024) {
-                entries.push({ name: `settings/${relative(root, full).split("\\").join("/")}`, data: readFileSync(full) });
+                entries.push({ name: `settings/${relative(root, full).split("\\").join("/")}`, data: redactSecrets(item.name, readFileSync(full)) });
             }
         }
     };

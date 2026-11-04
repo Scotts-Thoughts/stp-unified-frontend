@@ -63,6 +63,10 @@ export const gen5: GameModule = {
         reset: () => "RESET",
         blackout: () => "BLACKOUT",
         mapChange: (map) => `Map Change - ${map}`,
+        wildIn: () => "IN - Wild",
+        levelUp: (level) => `Level Up - ${level}`,
+        battleLevelUp: () => "Battle Level Up",
+        heldItem: (name) => `Held Item - ${name}`,
         rareCandy: () => "Rare Candy Used",
         nextPokemon: () => "Next Pokemon",
         enemyFainted: () => "Enemy Fainted",
@@ -83,6 +87,8 @@ export const gen5: GameModule = {
         "battle.opponent.team_count",
         "player.team.0",
     ],
+    // A held item given in the overworld showed up late: nothing it feeds flickers, so it is applied at once.
+    debounceExcept: ["player.team.0.held_item"],
     debounceFrames: 15,
     prepare: async () => {
         await loadGen5StyleDefaults();

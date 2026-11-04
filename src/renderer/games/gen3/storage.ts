@@ -1,3 +1,4 @@
+import { loadStyleFiles } from "../../core/persistence/styleFiles";
 import { isPackaged } from "~/core/env";
 import { getUserState, setUserState, userStateKeys } from "~/core/persistence/userState";
 import { createDebouncedStyleWriter, writeStyleDefaultsFile } from "~/core/persistence/styleSettings";
@@ -40,13 +41,7 @@ const TAG = "[StyleSettingsManager]";
 /** Reads every species file. Idempotent; the module's `prepare()`. */
 export async function loadGen3StyleDefaults(): Promise<void> {
     if (defaults) return;
-    const loaded: Record<string, Record<string, unknown>> = {};
-    for (const [path, load] of Object.entries(styleFiles)) {
-        const name = path.slice(path.lastIndexOf("/") + 1, -".json".length);
-        if (name === "index") continue;
-        const value = await load();
-        if (value && typeof value === "object") loaded[name] = value as Record<string, unknown>;
-    }
+    const loaded = await loadStyleFiles(styleFiles);
     defaults = loaded;
 }
 

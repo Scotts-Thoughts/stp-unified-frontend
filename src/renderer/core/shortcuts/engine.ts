@@ -182,6 +182,27 @@ function applyEdit(edit: ShortcutEdit): void {
 function onPressed(accelerator: string): void {
     const action = current?.byAccelerator.get(accelerator);
     if (!action || !isAvailable(action)) return;
+    runAction(action);
+}
+
+/**
+ * Runs the first of `ids` the bound generation has and can do now, as a key press would;
+ * voice control's way in (core/voice/). Returns that action, or null when there is none or
+ * no game is loaded (the box-art screen binds gen1's list too).
+ */
+export function runShortcutAction(ids: readonly string[]): ShortcutAction | null {
+    if (!current?.gameLoaded) return null;
+    for (const id of ids) {
+        const action = current.actions.find((a) => a.id === id);
+        if (action && isAvailable(action)) {
+            runAction(action);
+            return action;
+        }
+    }
+    return null;
+}
+
+function runAction(action: ShortcutAction): void {
     try {
         const result = action.run();
         if (result instanceof Promise) result.catch((err) => console.error(`[shortcuts] ${action.id}:`, err));

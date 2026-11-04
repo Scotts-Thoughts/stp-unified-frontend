@@ -267,7 +267,14 @@ export class MockPokeAByte {
       if (prop.isReadOnly) return json(res, 400, "Property is read only.");
       if (this.writes === "ignore") continue;
 
-      const changed: string[] = ["bytes", "value"];
+      // PokeAByte flags a field only when it differs (`_PokeAByteProperty_Malleable.cs`: the
+      // Value and Bytes setters return early on an equal value), and sends a property only
+      // when something is flagged. So a write of the value already there is silent. The mock
+      // used to echo every write, and gen4's Platinum `encounter_rates.walking.change()`
+      // handler, which rewrites the rate, then looped with it for the rest of the replay.
+      const beforeValue = JSON.stringify(prop.value ?? null);
+      const beforeBytes = JSON.stringify(prop.bytes ?? null);
+      const beforeFrozen = !!prop.isFrozen;
       if (endpoint === "set-property-bytes" || endpoint === "set-properties-by-bits") {
         if (Array.isArray(item.bytes)) {
           prop.bytes = item.bytes.slice();
@@ -278,11 +285,13 @@ export class MockPokeAByte {
       } else if (endpoint === "set-property-value") {
         prop.value = item.value;
       }
-      if (item.freeze !== undefined) {
-        prop.isFrozen = !!item.freeze;
-        // PokeAByte emits the duplicated token; the clients ignore it either way.
-        changed.push("isFrozen", "frozen");
-      }
+      if (item.freeze !== undefined) prop.isFrozen = !!item.freeze;
+      const changed: string[] = [];
+      if (JSON.stringify(prop.bytes ?? null) !== beforeBytes) changed.push("bytes");
+      if (JSON.stringify(prop.value ?? null) !== beforeValue) changed.push("value");
+      // PokeAByte emits the duplicated token; the clients ignore it either way.
+      if (!!prop.isFrozen !== beforeFrozen) changed.push("isFrozen", "frozen");
+      if (changed.length === 0) continue;
       prop.fieldsChanged = changed;
       this.pushChanges([prop]);
     }

@@ -1,4 +1,5 @@
 import { createCommentVNode, defineComponent, h, toDisplayString, Transition, vShow, withDirectives, type PropType, type StyleValue, type VNode } from "vue";
+import "../styles/enemyPanel.css";
 
 /**
  * One element of a generation's enemy team panel (`games/genN/enemyPanel.ts`). Strings in `children` are text;
@@ -27,6 +28,40 @@ export interface EnemyNode {
 }
 export type EnemyChild = EnemyNode | string | null;
 
+/**
+ * A picture named from a value the mapper has not sent yet: `images/gen5/pokemon/null.webp`, a type icon's
+ * `undefined.webp`. The team count can arrive a few frames before the species (gens 4-5 debounce each path on its
+ * own), and such a picture showed the broken-image icon until the species came.
+ */
+const MISSING_PICTURE = /(^|\/)(null|undefined)([-.][^/]*)?$/;
+
+/** The load state `core/styles/enemyPanel.css` reads: a picture is hidden until it has loaded, then fades in. */
+const STATE = "data-stp-state";
+function onPictureLoad(event: Event) {
+    (event.target as HTMLElement).setAttribute(STATE, "loaded");
+}
+function onPictureError(event: Event) {
+    (event.target as HTMLElement).setAttribute(STATE, "error");
+}
+/** A missing picture forgets it had loaded, so the real one fades in when it comes instead of popping in. */
+function forgetLoad(vnode: VNode) {
+    if (vnode.props?.["data-stp-missing"] !== undefined) (vnode.el as HTMLElement | null)?.removeAttribute(STATE);
+}
+
+/** Props an `<img>` of the panel gets on top of its own (see `onPictureLoad`). */
+function pictureProps(src: string | null | undefined): Record<string, unknown> {
+    const missing = !src || MISSING_PICTURE.test(src);
+    return {
+        src: missing ? null : src,
+        "data-stp-fade": "",
+        "data-stp-missing": missing ? "" : undefined,
+        onLoad: onPictureLoad,
+        onError: onPictureError,
+        onVnodeMounted: forgetLoad,
+        onVnodeUpdated: forgetLoad,
+    };
+}
+
 function draw(child: EnemyChild): VNode | string {
     if (child === null) return createCommentVNode("v-if", true);
     if (typeof child === "string") return child;
@@ -35,7 +70,8 @@ function draw(child: EnemyChild): VNode | string {
     if (child.class !== undefined) props.class = child.class;
     if (child.id !== undefined) props.id = child.id;
     if (child.style !== undefined) props.style = child.style;
-    if (child.src !== undefined) props.src = child.src;
+    if (child.tag === "img") Object.assign(props, pictureProps(child.src));
+    else if (child.src !== undefined) props.src = child.src;
     const content = "text" in child ? toDisplayString(child.text) : child.children?.map(draw);
     const element = h(child.tag ?? "div", props, content);
     const vnode = child.show === undefined ? element : withDirectives(element, [[vShow, child.show]]);
