@@ -6,12 +6,18 @@
  *   - the renderer loaded from resources/app/out/renderer
  *   - the image pool: ensureImagePool()'s junction, the duplicate images it restores,
  *     and the box-art grid's images
+ *   - the fonts: the stylesheet's faces loaded (they depend on the install folder's name)
  *   - the shipped defaults: storage/Storage.json readable through the storage IPC
  *   - the keyboard hook's native file (uiohook-napi) shipped, and the hook started
  *   - the Keyboard Shortcuts window loading its page from the package
  *   - the control server answering /status on STP_CONTROL_PORT
  *
- *   npx tsx tools/parity/packaged-probe.ts [--exe=<path>]
+ *   npx tsx tools/parity/packaged-probe.ts [--exe=<path>] [--no-junction]
+ *
+ * --no-junction: the build has a real folder at resources/app/out/renderer/images (put an
+ * empty one there), which reaches the fallback that serves images without a junction on
+ * a drive that could have one. `--exe` a build in a folder named like `Kyle's (1)`, moved
+ * after a first launch, to cover the stale junction and the fonts.
  *
  * Nothing here is a parity claim; the harness runs the app from `out/` and this only
  * proves the packaged shape puts the same files where the main process looks.
@@ -23,6 +29,7 @@ import { _electron as electron } from "playwright-core";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const exeFlag = process.argv.find((a) => a.startsWith("--exe="));
 const exe = resolve(exeFlag ? exeFlag.slice("--exe=".length) : join(REPO, "dist", "win-unpacked", "stp-overlay.exe"));
+const noJunction = process.argv.includes("--no-junction");
 const CONTROL_PORT = 30259;
 
 if (!existsSync(exe)) {
@@ -90,7 +97,8 @@ try {
   const packagedRoot = dirname(exe);
   const junction = join(packagedRoot, "resources", "app", "out", "renderer", "images");
   const junctionOk = existsSync(junction) && lstatSync(junction).isSymbolicLink();
-  check(junctionOk, `image pool junction ${junction}`);
+  if (noJunction) check(existsSync(junction) && !lstatSync(junction).isSymbolicLink(), `no junction at ${junction}, a real folder is in the way`);
+  else check(junctionOk, `image pool junction ${junction}`);
   check(existsSync(join(packagedRoot, "resources", "images", "gen2")), "resources/images carries the generation trees");
 
   // The package ships each identical image once (tools/build/after-pack.mjs) and
@@ -129,6 +137,13 @@ try {
   // gen1 Yellow/Red/Blue + gen2 2 + gen3 2 + gen4 3 + gen5 4.
   check(tiles.length === 14, `box-art grid shows ${tiles.length} tiles (14 expected)`);
   check(unloaded.length === 0, `every tile image loaded${unloaded.length ? `: ${unloaded.map((t) => t.src).join(", ")} did not` : ""}`);
+
+  const faces = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return Array.from(document.fonts).map((face) => `${face.family}:${face.status}`);
+  });
+  const badFaces = faces.filter((face) => !/:(loaded|unloaded)$/.test(face));
+  check(faces.length >= 3 && badFaces.length === 0, `stylesheet fonts: ${faces.length} faces${badFaces.length ? `, failed: ${badFaces.join(", ")}` : ""}`);
 
   const storage = await page.evaluate(async () => {
     try {

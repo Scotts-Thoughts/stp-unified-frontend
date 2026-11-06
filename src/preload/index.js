@@ -98,6 +98,12 @@ const api = {
     list: (relative) => invoke('data:list', relative),
   },
 
+  presets: {
+    /** A file the user picks, as `{ name, contents }`, or null; opens at `relative` under the presets folder. */
+    pick: (relative) => invoke('presets:pick', relative),
+    remove: (relative) => invoke('presets:remove', relative),
+  },
+
   storage: {
     read: (relative) => invoke('storage:read', relative),
     write: (relative, contents) => invoke('storage:write', relative, contents),
@@ -118,7 +124,7 @@ const api = {
   },
 
   /**
-   * Voice control (src/main/voice/). `start` loads the keyword spotter (rejects if the Mac
+   * Voice control (src/main/voice/). `start` loads the speech model (rejects if the Mac
    * refuses the microphone); `audio` is a fire-and-forget send, ~10 a second while on.
    */
   voice: {

@@ -21,7 +21,8 @@ export type UserStateSections = Record<string, Record<string, unknown>>;
  * is the box-art grid's one highlighted tile (components/GameSelect.vue): which
  * generation's stored edition the user picked last. `shuckie_bookmarks` is the switch for
  * the Super Shuckie bookmark at every chapter marker (core/logic/shuckieBookmarks.ts).
- * `settings_panel_theme` is the settings panel's look (core/settings/theme.ts).
+ * `settings_panel_theme` was the settings panel's look: nothing reads it now, and it stays
+ * listed so an old saved value keeps being filed where it always was.
  * `voice_control` is the microphone button's on/off (core/voice/voice.ts).
  */
 export function isGlobalKey(key: string): boolean {

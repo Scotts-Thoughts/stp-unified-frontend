@@ -50,6 +50,10 @@ declare global {
         write: (relative: string, contents: string) => Promise<string>,
         list: (relative: string) => Promise<DirectoryEntry[]>,
       },
+      presets: {
+        pick: (relative: string) => Promise<{ name: string, contents: string } | null>,
+        remove: (relative: string) => Promise<void>,
+      },
       storage: {
         read: (relative: string) => Promise<string | null>,
         write: (relative: string, contents: string) => Promise<string>,

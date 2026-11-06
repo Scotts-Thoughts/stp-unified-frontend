@@ -333,7 +333,8 @@ export const pokedex_hgss = {
             "Confuse Ray",
             "Mud Sport",
             "Refresh",
-            "Supersonic"
+            "Supersonic",
+            "Muddy Water"
         ],
         "weight": 22.6,
         "evolution_family": [
@@ -455,7 +456,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Spite",
             "Thunder Fang",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Feint"
         ],
         "weight": 10.8,
         "evolution_family": [
@@ -571,7 +573,10 @@ export const pokedex_hgss = {
             "Lick",
             "Perish Song",
             "Signal Beam",
-            "Slam"
+            "Slam",
+            "Spit Up",
+            "Stockpile",
+            "Swallow"
         ],
         "weight": 120.0,
         "evolution_family": [
@@ -688,7 +693,8 @@ export const pokedex_hgss = {
             "Double-Edge",
             "Explosion",
             "Magnitude",
-            "Rollout"
+            "Rollout",
+            "Head Smash"
         ],
         "weight": 97.0,
         "evolution_family": [
@@ -1031,7 +1037,10 @@ export const pokedex_hgss = {
             "Superpower",
             "Tickle",
             "Thrash",
-            "Worry Seed"
+            "Worry Seed",
+            "Spit Up",
+            "Stockpile",
+            "Swallow"
         ],
         "weight": 97.0,
         "evolution_family": [
@@ -1769,7 +1778,8 @@ export const pokedex_hgss = {
             "Confuse Ray",
             "Mud Sport",
             "Refresh",
-            "Supersonic"
+            "Supersonic",
+            "Muddy Water"
         ],
         "weight": 27.0,
         "evolution_family": [
@@ -2315,7 +2325,8 @@ export const pokedex_hgss = {
             "Sand Tomb",
             "Scary Face",
             "Thrash",
-            "Twister"
+            "Twister",
+            "Mud Shot"
         ],
         "weight": 56.0,
         "evolution_family": [
@@ -2454,7 +2465,8 @@ export const pokedex_hgss = {
             "Perish Song",
             "Psywave",
             "ThunderPunch",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Disable"
         ],
         "weight": 40.5,
         "evolution_family": [
@@ -2855,7 +2867,8 @@ export const pokedex_hgss = {
             "Revenge",
             "Sand Tomb",
             "Swift",
-            "Toxic Spikes"
+            "Toxic Spikes",
+            "Power Trick"
         ],
         "weight": 125.8,
         "evolution_family": [
@@ -3204,7 +3217,8 @@ export const pokedex_hgss = {
             "Double-Edge",
             "Explosion",
             "Magnitude",
-            "Rollout"
+            "Rollout",
+            "Head Smash"
         ],
         "weight": 340.0,
         "evolution_family": [
@@ -3326,7 +3340,8 @@ export const pokedex_hgss = {
             "Stockpile",
             "Swallow",
             "Water Sport",
-            "Yawn"
+            "Yawn",
+            "Aqua Ring"
         ],
         "weight": 150.6,
         "evolution_family": [
@@ -3461,7 +3476,9 @@ export const pokedex_hgss = {
             "Refresh",
             "Stomp",
             "Uproar",
-            "Whirlpool"
+            "Whirlpool",
+            "Sludge",
+            "Yawn"
         ],
         "weight": 81.9,
         "evolution_family": [
@@ -3832,7 +3849,8 @@ export const pokedex_hgss = {
             "Pursuit",
             "Substitute",
             "Whirlwind",
-            "Zen Headbutt"
+            "Zen Headbutt",
+            "Counter"
         ],
         "weight": 105.0,
         "evolution_family": [
@@ -4416,7 +4434,8 @@ export const pokedex_hgss = {
             "Magical Leaf",
             "Seed Bomb",
             "SmellingSalt",
-            "Teeter Dance"
+            "Teeter Dance",
+            "Nasty Plot"
         ],
         "weight": 77.4,
         "evolution_family": [
@@ -4534,7 +4553,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 26.5,
         "evolution_family": [
@@ -4668,7 +4688,8 @@ export const pokedex_hgss = {
             "Night Slash",
             "Razor Wind",
             "Sand Tomb",
-            "Wing Attack"
+            "Wing Attack",
+            "Power Trick"
         ],
         "weight": 64.8,
         "evolution_family": [
@@ -4802,7 +4823,8 @@ export const pokedex_hgss = {
             "Punishment",
             "Pursuit",
             "Reflect",
-            "Spite"
+            "Spite",
+            "Assist"
         ],
         "weight": 28.0,
         "evolution_family": [
@@ -4905,7 +4927,8 @@ export const pokedex_hgss = {
             "Howl",
             "Quick Attack",
             "Reversal",
-            "Thrash"
+            "Thrash",
+            "Extrasensory"
         ],
         "weight": 7.9,
         "evolution_family": [
@@ -5300,7 +5323,8 @@ export const pokedex_hgss = {
             "Moonlight",
             "Nasty Plot",
             "Psych Up",
-            "Recover"
+            "Recover",
+            "Feint"
         ],
         "weight": 11.0,
         "evolution_family": [
@@ -5444,7 +5468,8 @@ export const pokedex_hgss = {
             "Psych Up",
             "Teeter Dance",
             "Trick",
-            "Wake-Up Slap"
+            "Wake-Up Slap",
+            "Nasty Plot"
         ],
         "weight": 54.5,
         "evolution_family": [
@@ -5562,7 +5587,8 @@ export const pokedex_hgss = {
             "Psybeam",
             "Pursuit",
             "Screech",
-            "Sweet Scent"
+            "Sweet Scent",
+            "Agility"
         ],
         "weight": 29.5,
         "evolution_family": [
@@ -5689,7 +5715,8 @@ export const pokedex_hgss = {
             "Ice Punch",
             "Karate Chop",
             "Meditate",
-            "Rolling Kick"
+            "Rolling Kick",
+            "Feint"
         ],
         "weight": 138.6,
         "evolution_family": [
@@ -5817,7 +5844,8 @@ export const pokedex_hgss = {
             "Substitute",
             "Superpower",
             "Supersonic",
-            "Tickle"
+            "Tickle",
+            "Body Slam"
         ],
         "weight": 28.5,
         "evolution_family": [
@@ -5942,7 +5970,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Fury Cutter",
             "Gust",
-            "Quick Attack"
+            "Quick Attack",
+            "Mud Shot"
         ],
         "weight": 82.0,
         "evolution_family": [
@@ -6077,7 +6106,8 @@ export const pokedex_hgss = {
             "Seismic Toss",
             "Sleep Talk",
             "Take Down",
-            "Yawn"
+            "Yawn",
+            "Belly Drum"
         ],
         "weight": 125.8,
         "evolution_family": [
@@ -6196,7 +6226,10 @@ export const pokedex_hgss = {
             "Rollout",
             "Scary Face",
             "Stomp",
-            "Yawn"
+            "Yawn",
+            "Spit Up",
+            "Stockpile",
+            "Swallow"
         ],
         "weight": 220.0,
         "evolution_family": [
@@ -6476,7 +6509,8 @@ export const pokedex_hgss = {
             "Punishment",
             "Substitute",
             "Sucker Punch",
-            "Zen Headbutt"
+            "Zen Headbutt",
+            "Megahorn"
         ],
         "weight": 47.0,
         "evolution_family": [
@@ -6597,7 +6631,8 @@ export const pokedex_hgss = {
             "Disable",
             "Haze",
             "Hypnosis",
-            "Memento"
+            "Memento",
+            "Weather Ball"
         ],
         "weight": 1.2,
         "evolution_family": [
@@ -6985,7 +7020,8 @@ export const pokedex_hgss = {
             "Mean Look",
             "Memento",
             "Shadow Sneak",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Encore"
         ],
         "weight": 52.0,
         "evolution_family": [
@@ -7102,7 +7138,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 24.5,
         "evolution_family": [
@@ -7352,7 +7389,8 @@ export const pokedex_hgss = {
             "Knock Off",
             "Metal Claw",
             "Mud Sport",
-            "Superpower"
+            "Superpower",
+            "Dragon Dance"
         ],
         "weight": 32.8,
         "evolution_family": [
@@ -7601,7 +7639,8 @@ export const pokedex_hgss = {
             "Magic Coat",
             "Rock Slide",
             "Snore",
-            "Trump Card"
+            "Trump Card",
+            "Agility"
         ],
         "weight": 14.0,
         "evolution_family": [
@@ -7734,7 +7773,8 @@ export const pokedex_hgss = {
             "Mean Look",
             "Memento",
             "Shadow Sneak",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Encore"
         ],
         "weight": 48.4,
         "evolution_family": [
@@ -7863,7 +7903,8 @@ export const pokedex_hgss = {
             "Perish Song",
             "Psywave",
             "ThunderPunch",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Disable"
         ],
         "weight": 0.1,
         "evolution_family": [
@@ -7991,7 +8032,8 @@ export const pokedex_hgss = {
             "Tickle",
             "Uproar",
             "Wish",
-            "Zen Headbutt"
+            "Zen Headbutt",
+            "Mud Bomb"
         ],
         "weight": 11.0,
         "evolution_family": [
@@ -8092,7 +8134,8 @@ export const pokedex_hgss = {
             "Mud Shot",
             "Rapid Spin",
             "Screech",
-            "Take Down"
+            "Take Down",
+            "Rock Blast"
         ],
         "weight": 132.5,
         "evolution_family": [
@@ -8351,7 +8394,8 @@ export const pokedex_hgss = {
             "Howl",
             "Quick Attack",
             "Reversal",
-            "Thrash"
+            "Thrash",
+            "Extrasensory"
         ],
         "weight": 79.5,
         "evolution_family": [
@@ -8459,7 +8503,8 @@ export const pokedex_hgss = {
             "Howl",
             "Hypnosis",
             "Psych Up",
-            "Spite"
+            "Spite",
+            "Power Swap"
         ],
         "weight": 19.9,
         "evolution_family": [
@@ -8578,7 +8623,8 @@ export const pokedex_hgss = {
             "Magical Leaf",
             "Seed Bomb",
             "SmellingSalt",
-            "Teeter Dance"
+            "Teeter Dance",
+            "Nasty Plot"
         ],
         "weight": 51.3,
         "evolution_family": [
@@ -8722,7 +8768,8 @@ export const pokedex_hgss = {
             "Last Resort",
             "Metronome",
             "Present",
-            "Substitute"
+            "Substitute",
+            "Mud Bomb"
         ],
         "weight": 34.6,
         "evolution_family": [
@@ -8850,7 +8897,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Spite",
             "Thunder Fang",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Feint"
         ],
         "weight": 35.0,
         "evolution_family": [
@@ -8987,7 +9035,8 @@ export const pokedex_hgss = {
             "Present",
             "Splash",
             "Substitute",
-            "Wish"
+            "Wish",
+            "Aromatherapy"
         ],
         "weight": 40.0,
         "evolution_family": [
@@ -9109,7 +9158,8 @@ export const pokedex_hgss = {
             "Magical Leaf",
             "Mud Sport",
             "Synthesis",
-            "Worry Seed"
+            "Worry Seed",
+            "Razor Wind"
         ],
         "weight": 5.0,
         "evolution_family": [
@@ -9217,7 +9267,8 @@ export const pokedex_hgss = {
             "Fissure",
             "Focus Energy",
             "Ice Shard",
-            "Snore"
+            "Snore",
+            "Head Smash"
         ],
         "weight": 33.5,
         "evolution_family": [
@@ -9436,7 +9487,8 @@ export const pokedex_hgss = {
             "Revenge",
             "Sand Tomb",
             "Swift",
-            "Toxic Spikes"
+            "Toxic Spikes",
+            "Power Trick"
         ],
         "weight": 7.2,
         "evolution_family": [
@@ -9647,7 +9699,8 @@ export const pokedex_hgss = {
             "Mud-Slap",
             "Mud Sport",
             "Psybeam",
-            "Sleep Talk"
+            "Sleep Talk",
+            "Body Slam"
         ],
         "weight": 15.0,
         "evolution_family": [
@@ -10023,7 +10076,8 @@ export const pokedex_hgss = {
             "Rapid Spin",
             "Rock Slide",
             "Safeguard",
-            "Swords Dance"
+            "Swords Dance",
+            "Mud Shot"
         ],
         "weight": 12.0,
         "evolution_family": [
@@ -10201,7 +10255,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Rock Slide",
             "SmellingSalt",
-            "Swagger"
+            "Swagger",
+            "FeatherDance"
         ],
         "weight": 19.5,
         "evolution_family": [
@@ -10336,7 +10391,8 @@ export const pokedex_hgss = {
             "Sky Uppercut",
             "Sweet Kiss",
             "Switcheroo",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Flail"
         ],
         "weight": 33.3,
         "evolution_family": [
@@ -10461,7 +10517,8 @@ export const pokedex_hgss = {
             "Mean Look",
             "Memento",
             "Shadow Sneak",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Encore"
         ],
         "weight": 6.6,
         "evolution_family": [
@@ -10574,7 +10631,8 @@ export const pokedex_hgss = {
             "Pursuit",
             "Scary Face",
             "Slam",
-            "Spite"
+            "Spite",
+            "Switcheroo"
         ],
         "weight": 6.9,
         "evolution_family": [
@@ -10705,7 +10763,8 @@ export const pokedex_hgss = {
             "Odor Sleuth",
             "Psych Up",
             "Punishment",
-            "Spite"
+            "Spite",
+            "Tail Whip"
         ],
         "weight": 32.0,
         "evolution_family": [
@@ -10986,7 +11045,8 @@ export const pokedex_hgss = {
             "Fake Out",
             "Magic Coat",
             "Nasty Plot",
-            "Trick"
+            "Trick",
+            "Recover"
         ],
         "weight": 22.0,
         "evolution_family": [
@@ -11092,7 +11152,8 @@ export const pokedex_hgss = {
             "Ice Fang",
             "Quick Attack",
             "Take Down",
-            "Thunder Fang"
+            "Thunder Fang",
+            "Night Slash"
         ],
         "weight": 42.0,
         "evolution_family": [
@@ -11310,7 +11371,8 @@ export const pokedex_hgss = {
             "Stockpile",
             "Swallow",
             "Water Sport",
-            "Yawn"
+            "Yawn",
+            "Aqua Ring"
         ],
         "weight": 39.5,
         "evolution_family": [
@@ -11435,7 +11497,8 @@ export const pokedex_hgss = {
             "Nasty Plot",
             "Role Play",
             "Psycho Cut",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Guard Swap"
         ],
         "weight": 32.4,
         "evolution_family": [
@@ -11678,7 +11741,8 @@ export const pokedex_hgss = {
             "Stockpile",
             "Swallow",
             "Water Sport",
-            "Yawn"
+            "Yawn",
+            "Aqua Ring"
         ],
         "weight": 87.6,
         "evolution_family": [
@@ -11855,7 +11919,8 @@ export const pokedex_hgss = {
             "Fissure",
             "Focus Energy",
             "Ice Shard",
-            "Snore"
+            "Snore",
+            "Head Smash"
         ],
         "weight": 120.0,
         "evolution_family": [
@@ -12160,7 +12225,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Rock Slide",
             "Swords Dance",
-            "Thunder Fang"
+            "Thunder Fang",
+            "Skull Bash"
         ],
         "weight": 120.0,
         "evolution_family": [
@@ -12413,7 +12479,8 @@ export const pokedex_hgss = {
             "Metal Claw",
             "Outrage",
             "Rock Slide",
-            "Swords Dance"
+            "Swords Dance",
+            "Counter"
         ],
         "weight": 90.5,
         "evolution_family": [
@@ -12631,7 +12698,8 @@ export const pokedex_hgss = {
             "Mud-Slap",
             "Mud Sport",
             "Psybeam",
-            "Sleep Talk"
+            "Sleep Talk",
+            "Body Slam"
         ],
         "weight": 39.0,
         "evolution_family": [
@@ -13027,7 +13095,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Rock Slide",
             "Swords Dance",
-            "Thunder Fang"
+            "Thunder Fang",
+            "Skull Bash"
         ],
         "weight": 115.0,
         "evolution_family": [
@@ -13267,7 +13336,10 @@ export const pokedex_hgss = {
             "Superpower",
             "Thrash",
             "Tickle",
-            "Worry Seed"
+            "Worry Seed",
+            "Spit Up",
+            "Stockpile",
+            "Swallow"
         ],
         "weight": 10.2,
         "evolution_family": [
@@ -13375,7 +13447,8 @@ export const pokedex_hgss = {
             "Ice Fang",
             "Swift",
             "Thunder Fang",
-            "Uproar"
+            "Uproar",
+            "Switcheroo"
         ],
         "weight": 15.2,
         "evolution_family": [
@@ -13485,7 +13558,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Pursuit",
             "Supersonic",
-            "Take Down"
+            "Take Down",
+            "Skull Bash"
         ],
         "weight": 20.0,
         "evolution_family": [
@@ -13609,7 +13683,9 @@ export const pokedex_hgss = {
             "Refresh",
             "Stomp",
             "Uproar",
-            "Whirlpool"
+            "Whirlpool",
+            "Sludge",
+            "Yawn"
         ],
         "weight": 28.0,
         "evolution_family": [
@@ -13729,7 +13805,8 @@ export const pokedex_hgss = {
             "Knock Off",
             "Slam",
             "Swords Dance",
-            "Tickle"
+            "Tickle",
+            "Agility"
         ],
         "weight": 6.5,
         "evolution_family": [
@@ -14090,7 +14167,10 @@ export const pokedex_hgss = {
             "Rollout",
             "Scary Face",
             "Stomp",
-            "Yawn"
+            "Yawn",
+            "Spit Up",
+            "Stockpile",
+            "Swallow"
         ],
         "weight": 24.0,
         "evolution_family": [
@@ -14326,7 +14406,8 @@ export const pokedex_hgss = {
             "Block",
             "Disable",
             "Rollout",
-            "Spikes"
+            "Spikes",
+            "Weather Ball"
         ],
         "weight": 16.8,
         "evolution_family": [
@@ -14554,7 +14635,8 @@ export const pokedex_hgss = {
             "Reflect",
             "Synthesis",
             "Tickle",
-            "Worry Seed"
+            "Worry Seed",
+            "Weather Ball"
         ],
         "weight": 6.4,
         "evolution_family": [
@@ -14771,7 +14853,8 @@ export const pokedex_hgss = {
             "Punishment",
             "Pursuit",
             "Scary Face",
-            "Smog"
+            "Smog",
+            "Haze"
         ],
         "weight": 19.2,
         "evolution_family": [
@@ -14902,7 +14985,8 @@ export const pokedex_hgss = {
             "Sand Tomb",
             "Scary Face",
             "Thrash",
-            "Twister"
+            "Twister",
+            "Mud Shot"
         ],
         "weight": 95.0,
         "evolution_family": [
@@ -15157,7 +15241,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Heat Wave",
             "Helping Hand",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Assist"
         ],
         "weight": 22.0,
         "evolution_family": [
@@ -15400,7 +15485,8 @@ export const pokedex_hgss = {
             "Haze",
             "Light Screen",
             "Mist",
-            "Supersonic"
+            "Supersonic",
+            "ExtremeSpeed"
         ],
         "weight": 3.3,
         "evolution_family": [
@@ -15643,7 +15729,8 @@ export const pokedex_hgss = {
             "Metal Claw",
             "Night Slash",
             "Razor Wind",
-            "Roar"
+            "Roar",
+            "Disable"
         ],
         "weight": 40.3,
         "evolution_family": [
@@ -16020,7 +16107,8 @@ export const pokedex_hgss = {
             "Headbutt",
             "Rock Blast",
             "Scary Face",
-            "Screech"
+            "Screech",
+            "Counter"
         ],
         "weight": 149.5,
         "evolution_family": [
@@ -16151,7 +16239,8 @@ export const pokedex_hgss = {
             "Meditate",
             "Miracle Eye",
             "Psych Up",
-            "Wish"
+            "Wish",
+            "Nasty Plot"
         ],
         "weight": 40.6,
         "evolution_family": [
@@ -16391,7 +16480,8 @@ export const pokedex_hgss = {
             "Iron Head",
             "Screech",
             "SmellingSalt",
-            "Stomp"
+            "Stomp",
+            "Head Smash"
         ],
         "weight": 120.0,
         "evolution_family": [
@@ -16511,7 +16601,8 @@ export const pokedex_hgss = {
             "SmokeScreen",
             "Snore",
             "Swagger",
-            "Take Down"
+            "Take Down",
+            "Hammer Arm"
         ],
         "weight": 40.5,
         "evolution_family": [
@@ -16659,7 +16750,8 @@ export const pokedex_hgss = {
             "Last Resort",
             "Metronome",
             "Present",
-            "Substitute"
+            "Substitute",
+            "Mud Bomb"
         ],
         "weight": 46.8,
         "evolution_family": [
@@ -16776,7 +16868,8 @@ export const pokedex_hgss = {
             "Nature Power",
             "Psych Up",
             "Reflect",
-            "Synthesis"
+            "Synthesis",
+            "Power Swap"
         ],
         "weight": 2.5,
         "evolution_family": [
@@ -16874,7 +16967,8 @@ export const pokedex_hgss = {
             "Flame Wheel",
             "Horn Drill",
             "Hypnosis",
-            "Thrash"
+            "Thrash",
+            "Morning Sun"
         ],
         "weight": 30.0,
         "evolution_family": [
@@ -17103,7 +17197,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Rock Slide",
             "SmellingSalt",
-            "Swagger"
+            "Swagger",
+            "FeatherDance"
         ],
         "weight": 2.5,
         "evolution_family": [
@@ -17336,7 +17431,8 @@ export const pokedex_hgss = {
             "Ice Fang",
             "Quick Attack",
             "Take Down",
-            "Thunder Fang"
+            "Thunder Fang",
+            "Night Slash"
         ],
         "weight": 9.5,
         "evolution_family": [
@@ -17767,7 +17863,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Muddy Water",
             "Refresh",
-            "Yawn"
+            "Yawn",
+            "Water Spout"
         ],
         "weight": 9.0,
         "evolution_family": [
@@ -17894,7 +17991,8 @@ export const pokedex_hgss = {
             "Spite",
             "Swagger",
             "Thrash",
-            "Zen Headbutt"
+            "Zen Headbutt",
+            "Megahorn"
         ],
         "weight": 71.2,
         "evolution_family": [
@@ -18267,7 +18365,8 @@ export const pokedex_hgss = {
             "Razor Wind",
             "Nasty Plot",
             "Take Down",
-            "Worry Seed"
+            "Worry Seed",
+            "Power Swap"
         ],
         "weight": 28.0,
         "evolution_family": [
@@ -18389,7 +18488,8 @@ export const pokedex_hgss = {
             "Spikes",
             "Supersonic",
             "Toxic Spikes",
-            "Wring Out"
+            "Wring Out",
+            "Muddy Water"
         ],
         "weight": 35.0,
         "evolution_family": [
@@ -18716,7 +18816,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Snore",
             "Supersonic",
-            "Yawn"
+            "Yawn",
+            "FeatherDance"
         ],
         "weight": 5.2,
         "evolution_family": [
@@ -18839,7 +18940,8 @@ export const pokedex_hgss = {
             "Mach Punch",
             "Mega Punch",
             "Screech",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Belly Drum"
         ],
         "weight": 68.0,
         "evolution_family": [
@@ -19327,7 +19429,8 @@ export const pokedex_hgss = {
             "Swords Dance",
             "Synthesis",
             "Tickle",
-            "Worry Seed"
+            "Worry Seed",
+            "Weather Ball"
         ],
         "weight": 4.0,
         "evolution_family": [
@@ -19429,7 +19532,8 @@ export const pokedex_hgss = {
             "Mud Shot",
             "Rapid Spin",
             "Screech",
-            "Take Down"
+            "Take Down",
+            "Rock Blast"
         ],
         "weight": 4.0,
         "evolution_family": [
@@ -19529,7 +19633,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Fury Cutter",
             "Gust",
-            "Quick Attack"
+            "Quick Attack",
+            "Mud Shot"
         ],
         "weight": 15.0,
         "evolution_family": [
@@ -19656,7 +19761,8 @@ export const pokedex_hgss = {
             "Hydro Pump",
             "Rock Slide",
             "Thrash",
-            "Water Sport"
+            "Water Sport",
+            "Aqua Jet"
         ],
         "weight": 25.0,
         "evolution_family": [
@@ -19793,7 +19899,8 @@ export const pokedex_hgss = {
             "Slam",
             "Stomp",
             "Thrash",
-            "Whirlwind"
+            "Whirlwind",
+            "Curse"
         ],
         "weight": 102.5,
         "evolution_family": [
@@ -20040,7 +20147,8 @@ export const pokedex_hgss = {
             "Foresight",
             "Helping Hand",
             "Revenge",
-            "Wake-Up Slap"
+            "Wake-Up Slap",
+            "Feint"
         ],
         "weight": 86.4,
         "evolution_family": [
@@ -20161,7 +20269,8 @@ export const pokedex_hgss = {
             "Sand-Attack",
             "Screech",
             "Swords Dance",
-            "Rapid Spin"
+            "Rapid Spin",
+            "Curse"
         ],
         "weight": 68.2,
         "evolution_family": [
@@ -20261,7 +20370,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Splash",
             "Supersonic",
-            "Water Sport"
+            "Water Sport",
+            "Aqua Jet"
         ],
         "weight": 8.7,
         "evolution_family": [
@@ -20613,7 +20723,8 @@ export const pokedex_hgss = {
             "Present",
             "Psych Up",
             "Psycho Shift",
-            "Substitute"
+            "Substitute",
+            "Extrasensory"
         ],
         "weight": 1.5,
         "evolution_family": [
@@ -20969,7 +21080,8 @@ export const pokedex_hgss = {
             "Eruption",
             "Fissure",
             "Sleep Talk",
-            "Yawn"
+            "Yawn",
+            "Skull Bash"
         ],
         "weight": 80.4,
         "evolution_family": [
@@ -21102,7 +21214,8 @@ export const pokedex_hgss = {
             "Pursuit",
             "Substitute",
             "Whirlwind",
-            "Zen Headbutt"
+            "Zen Headbutt",
+            "Counter"
         ],
         "weight": 460.0,
         "evolution_family": [
@@ -21202,7 +21315,8 @@ export const pokedex_hgss = {
             "Quick Attack",
             "Razor Wind",
             "Take Down",
-            "Worry Seed"
+            "Worry Seed",
+            "Power Swap"
         ],
         "weight": 4.0,
         "evolution_family": [
@@ -21425,7 +21539,8 @@ export const pokedex_hgss = {
             "Block",
             "Disable",
             "Rollout",
-            "Spikes"
+            "Spikes",
+            "Weather Ball"
         ],
         "weight": 256.5,
         "evolution_family": [
@@ -21551,7 +21666,8 @@ export const pokedex_hgss = {
             "Rapid Spin",
             "Rock Slide",
             "Safeguard",
-            "Swords Dance"
+            "Swords Dance",
+            "Mud Shot"
         ],
         "weight": 29.5,
         "evolution_family": [
@@ -21780,7 +21896,8 @@ export const pokedex_hgss = {
             "Rock Slide",
             "Rolling Kick",
             "SmellingSalt",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Power Trick"
         ],
         "weight": 70.5,
         "evolution_family": [
@@ -21884,7 +22001,8 @@ export const pokedex_hgss = {
             "Razor Leaf",
             "Swords Dance",
             "Synthesis",
-            "Tickle"
+            "Tickle",
+            "Teeter Dance"
         ],
         "weight": 8.6,
         "evolution_family": [
@@ -22118,7 +22236,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Rock Slide",
             "Thrash",
-            "Water Sport"
+            "Water Sport",
+            "Aqua Jet"
         ],
         "weight": 9.5,
         "evolution_family": [
@@ -22229,7 +22348,8 @@ export const pokedex_hgss = {
             "Magical Leaf",
             "Mist",
             "Seed Bomb",
-            "Stomp"
+            "Stomp",
+            "Skull Bash"
         ],
         "weight": 50.5,
         "evolution_family": [
@@ -22346,7 +22466,8 @@ export const pokedex_hgss = {
             "Punishment",
             "Pursuit",
             "Scary Face",
-            "Smog"
+            "Smog",
+            "Haze"
         ],
         "weight": 38.0,
         "evolution_family": [
@@ -22498,7 +22619,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Rock Slide",
             "Swords Dance",
-            "Thunder Fang"
+            "Thunder Fang",
+            "Skull Bash"
         ],
         "weight": 282.8,
         "evolution_family": [
@@ -23103,7 +23225,8 @@ export const pokedex_hgss = {
             "Pursuit",
             "Rock Slide",
             "Screech",
-            "Uproar"
+            "Uproar",
+            "Reversal"
         ],
         "weight": 33.3,
         "evolution_family": [
@@ -23337,7 +23460,8 @@ export const pokedex_hgss = {
             "Iron Head",
             "Screech",
             "SmellingSalt",
-            "Stomp"
+            "Stomp",
+            "Head Smash"
         ],
         "weight": 60.0,
         "evolution_family": [
@@ -23576,7 +23700,8 @@ export const pokedex_hgss = {
             "Knock Off",
             "Slam",
             "Swords Dance",
-            "Tickle"
+            "Tickle",
+            "Agility"
         ],
         "weight": 60.0,
         "evolution_family": [
@@ -23697,7 +23822,8 @@ export const pokedex_hgss = {
             "Fake Tears",
             "Quick Attack",
             "Sand-Attack",
-            "Tail Whip"
+            "Tail Whip",
+            "Flail"
         ],
         "weight": 43.8,
         "evolution_family": [
@@ -23931,7 +24057,9 @@ export const pokedex_hgss = {
             "Nature Power",
             "Petal Dance",
             "Safeguard",
-            "Skull Bash"
+            "Skull Bash",
+            "Power Whip",
+            "Sludge"
         ],
         "weight": 6.9,
         "evolution_family": [
@@ -24139,7 +24267,8 @@ export const pokedex_hgss = {
             "ThunderPunch",
             "Tickle",
             "Volt Tackle",
-            "Wish"
+            "Wish",
+            "Flail"
         ],
         "weight": 2.0,
         "evolution_family": [
@@ -24245,7 +24374,8 @@ export const pokedex_hgss = {
             "Mud Shot",
             "Refresh",
             "Splash",
-            "Water Sport"
+            "Water Sport",
+            "Encore"
         ],
         "weight": 12.4,
         "evolution_family": [
@@ -24362,7 +24492,9 @@ export const pokedex_hgss = {
             "Refresh",
             "Stomp",
             "Uproar",
-            "Whirlpool"
+            "Whirlpool",
+            "Sludge",
+            "Yawn"
         ],
         "weight": 7.6,
         "evolution_family": [
@@ -24472,7 +24604,10 @@ export const pokedex_hgss = {
             "Lick",
             "Perish Song",
             "Signal Beam",
-            "Slam"
+            "Slam",
+            "Spit Up",
+            "Stockpile",
+            "Swallow"
         ],
         "weight": 90.0,
         "evolution_family": [
@@ -24597,7 +24732,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Heat Wave",
             "Helping Hand",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Assist"
         ],
         "weight": 6.2,
         "evolution_family": [
@@ -24719,7 +24855,8 @@ export const pokedex_hgss = {
             "Substitute",
             "Superpower",
             "Supersonic",
-            "Tickle"
+            "Tickle",
+            "Body Slam"
         ],
         "weight": 8.5,
         "evolution_family": [
@@ -24835,7 +24972,8 @@ export const pokedex_hgss = {
             "Mud Shot",
             "Refresh",
             "Splash",
-            "Water Sport"
+            "Water Sport",
+            "Encore"
         ],
         "weight": 20.0,
         "evolution_family": [
@@ -25062,7 +25200,8 @@ export const pokedex_hgss = {
             "Haze",
             "Light Screen",
             "Mist",
-            "Supersonic"
+            "Supersonic",
+            "ExtremeSpeed"
         ],
         "weight": 16.5,
         "evolution_family": [
@@ -25307,7 +25446,8 @@ export const pokedex_hgss = {
             "Counter",
             "Sucker Punch",
             "Supersonic",
-            "Take Down"
+            "Take Down",
+            "Head Smash"
         ],
         "weight": 9.0,
         "evolution_family": [
@@ -25535,7 +25675,8 @@ export const pokedex_hgss = {
             "Safeguard",
             "Spit Up",
             "Stockpile",
-            "Swallow"
+            "Swallow",
+            "Recover"
         ],
         "weight": 75.0,
         "evolution_family": [
@@ -25764,7 +25905,8 @@ export const pokedex_hgss = {
             "Leech Seed",
             "Nature Power",
             "Vine Whip",
-            "Wring Out"
+            "Wring Out",
+            "Body Slam"
         ],
         "weight": 100.5,
         "evolution_family": [
@@ -25905,7 +26047,8 @@ export const pokedex_hgss = {
             "Low Kick",
             "Mind Reader",
             "Sky Uppercut",
-            "Vacuum Wave"
+            "Vacuum Wave",
+            "Follow Me"
         ],
         "weight": 54.0,
         "evolution_family": [
@@ -25994,7 +26137,8 @@ export const pokedex_hgss = {
             "Confuse Ray",
             "Mud Sport",
             "Refresh",
-            "Supersonic"
+            "Supersonic",
+            "Muddy Water"
         ],
         "weight": 52.5,
         "evolution_family": [
@@ -26498,7 +26642,8 @@ export const pokedex_hgss = {
             "Leech Seed",
             "Mega Drain",
             "Nature Power",
-            "Reflect"
+            "Reflect",
+            "Power Swap"
         ],
         "weight": 35.0,
         "evolution_family": [
@@ -26944,7 +27089,8 @@ export const pokedex_hgss = {
             "Flame Wheel",
             "Horn Drill",
             "Hypnosis",
-            "Thrash"
+            "Thrash",
+            "Morning Sun"
         ],
         "weight": 95.0,
         "evolution_family": [
@@ -27044,7 +27190,8 @@ export const pokedex_hgss = {
             "Slack Off",
             "Spit Up",
             "Stockpile",
-            "Swallow"
+            "Swallow",
+            "Revenge"
         ],
         "weight": 49.5,
         "evolution_family": [
@@ -27163,7 +27310,8 @@ export const pokedex_hgss = {
             "Knock Off",
             "Metal Claw",
             "Mud Sport",
-            "Superpower"
+            "Superpower",
+            "Dragon Dance"
         ],
         "weight": 11.5,
         "evolution_family": [
@@ -27274,7 +27422,8 @@ export const pokedex_hgss = {
             "Ice Punch",
             "Karate Chop",
             "Meditate",
-            "Rolling Kick"
+            "Rolling Kick",
+            "Feint"
         ],
         "weight": 23.5,
         "evolution_family": [
@@ -27401,7 +27550,8 @@ export const pokedex_hgss = {
             "Seismic Toss",
             "Sleep Talk",
             "Take Down",
-            "Yawn"
+            "Yawn",
+            "Belly Drum"
         ],
         "weight": 8.8,
         "evolution_family": [
@@ -27499,7 +27649,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 6.5,
         "evolution_family": [
@@ -28031,7 +28182,8 @@ export const pokedex_hgss = {
             "Magical Leaf",
             "Mist",
             "Seed Bomb",
-            "Stomp"
+            "Stomp",
+            "Skull Bash"
         ],
         "weight": 135.5,
         "evolution_family": [
@@ -28155,7 +28307,8 @@ export const pokedex_hgss = {
             "Psybeam",
             "Psychic",
             "Refresh",
-            "Yawn"
+            "Yawn",
+            "Encore"
         ],
         "weight": 19.6,
         "evolution_family": [
@@ -28360,7 +28513,8 @@ export const pokedex_hgss = {
             "Nature Power",
             "Razor Leaf",
             "Sweet Scent",
-            "Tickle"
+            "Tickle",
+            "Weather Ball"
         ],
         "weight": 3.3,
         "evolution_family": [
@@ -28474,7 +28628,8 @@ export const pokedex_hgss = {
             "Metal Claw",
             "Outrage",
             "Rock Slide",
-            "Swords Dance"
+            "Swords Dance",
+            "Counter"
         ],
         "weight": 8.5,
         "evolution_family": [
@@ -28819,7 +28974,8 @@ export const pokedex_hgss = {
             "Nature Power",
             "Razor Wind",
             "Slam",
-            "Synthesis"
+            "Synthesis",
+            "Dragon Dance"
         ],
         "weight": 100.0,
         "evolution_family": [
@@ -29043,7 +29199,8 @@ export const pokedex_hgss = {
             "Sing",
             "Substitute",
             "Sweet Kiss",
-            "Wish"
+            "Wish",
+            "Discharge"
         ],
         "weight": 4.2,
         "evolution_family": [
@@ -29154,7 +29311,8 @@ export const pokedex_hgss = {
             "Mach Punch",
             "Mega Punch",
             "Screech",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Belly Drum"
         ],
         "weight": 44.5,
         "evolution_family": [
@@ -29421,7 +29579,9 @@ export const pokedex_hgss = {
             "Spit Up",
             "Stockpile",
             "Swallow",
-            "Yawn"
+            "Yawn",
+            "Sludge",
+            "Trump Card"
         ],
         "weight": 29.9,
         "evolution_family": [
@@ -29619,7 +29779,8 @@ export const pokedex_hgss = {
             "Refresh",
             "Sing",
             "Slam",
-            "Tickle"
+            "Tickle",
+            "Body Slam"
         ],
         "weight": 2.0,
         "evolution_family": [
@@ -29910,7 +30071,8 @@ export const pokedex_hgss = {
             "Screech",
             "Snore",
             "Supersonic",
-            "Thunder Wave"
+            "Thunder Wave",
+            "Water Spout"
         ],
         "weight": 12.0,
         "evolution_family": [
@@ -30029,7 +30191,8 @@ export const pokedex_hgss = {
             "Screech",
             "Sky Attack",
             "Whirlwind",
-            "Wing Attack"
+            "Wing Attack",
+            "Brave Bird"
         ],
         "weight": 2.1,
         "evolution_family": [
@@ -30374,7 +30537,8 @@ export const pokedex_hgss = {
             "Ice Shard",
             "Quick Attack",
             "Rapid Spin",
-            "Splash"
+            "Splash",
+            "Fake Out"
         ],
         "weight": 16.0,
         "evolution_family": [
@@ -30600,7 +30764,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Pursuit",
             "Supersonic",
-            "Take Down"
+            "Take Down",
+            "Skull Bash"
         ],
         "weight": 7.0,
         "evolution_family": [
@@ -30727,7 +30892,8 @@ export const pokedex_hgss = {
             "Mist",
             "Nature Power",
             "Rock Slide",
-            "Screech"
+            "Screech",
+            "Curse"
         ],
         "weight": 5.0,
         "evolution_family": [
@@ -30865,7 +31031,8 @@ export const pokedex_hgss = {
             "Present",
             "Psych Up",
             "Psycho Shift",
-            "Substitute"
+            "Substitute",
+            "Extrasensory"
         ],
         "weight": 3.2,
         "evolution_family": [
@@ -31180,7 +31347,8 @@ export const pokedex_hgss = {
             "Heat Wave",
             "Howl",
             "Safeguard",
-            "Thrash"
+            "Thrash",
+            "Morning Sun"
         ],
         "weight": 19.0,
         "evolution_family": [
@@ -31404,7 +31572,8 @@ export const pokedex_hgss = {
             "Perish Song",
             "Psywave",
             "ThunderPunch",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Disable"
         ],
         "weight": 0.1,
         "evolution_family": [
@@ -31508,7 +31677,8 @@ export const pokedex_hgss = {
             "Ice Fang",
             "Quick Attack",
             "Take Down",
-            "Thunder Fang"
+            "Thunder Fang",
+            "Night Slash"
         ],
         "weight": 30.5,
         "evolution_family": [
@@ -31634,7 +31804,8 @@ export const pokedex_hgss = {
             "FeatherDance",
             "Haze",
             "Pursuit",
-            "Rage"
+            "Rage",
+            "Power Swap"
         ],
         "weight": 20.6,
         "evolution_family": [
@@ -31745,7 +31916,9 @@ export const pokedex_hgss = {
             "Flail",
             "Octazooka",
             "Signal Beam",
-            "Splash"
+            "Splash",
+            "Muddy Water",
+            "Razor Wind"
         ],
         "weight": 25.0,
         "evolution_family": [
@@ -31981,7 +32154,8 @@ export const pokedex_hgss = {
             "Screech",
             "Sky Attack",
             "Whirlwind",
-            "Wing Attack"
+            "Wing Attack",
+            "Brave Bird"
         ],
         "weight": 27.3,
         "evolution_family": [
@@ -32561,7 +32735,8 @@ export const pokedex_hgss = {
             "Rock Slide",
             "Rolling Kick",
             "SmellingSalt",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Power Trick"
         ],
         "weight": 130.0,
         "evolution_family": [
@@ -32667,7 +32842,8 @@ export const pokedex_hgss = {
             "SmokeScreen",
             "Snore",
             "Swagger",
-            "Take Down"
+            "Take Down",
+            "Hammer Arm"
         ],
         "weight": 16.3,
         "evolution_family": [
@@ -32792,7 +32968,8 @@ export const pokedex_hgss = {
             "Block",
             "Disable",
             "Rollout",
-            "Spikes"
+            "Spikes",
+            "Weather Ball"
         ],
         "weight": 26.6,
         "evolution_family": [
@@ -32912,7 +33089,8 @@ export const pokedex_hgss = {
             "Haze",
             "Poison Jab",
             "Signal Beam",
-            "Supersonic"
+            "Supersonic",
+            "Aqua Jet"
         ],
         "weight": 3.9,
         "evolution_family": [
@@ -33028,7 +33206,8 @@ export const pokedex_hgss = {
             "Ice Punch",
             "Karate Chop",
             "Meditate",
-            "Rolling Kick"
+            "Rolling Kick",
+            "Feint"
         ],
         "weight": 30.0,
         "evolution_family": [
@@ -33137,7 +33316,8 @@ export const pokedex_hgss = {
             "Recover",
             "Rock Slide",
             "Tickle",
-            "Wring Out"
+            "Wring Out",
+            "Curse"
         ],
         "weight": 23.8,
         "evolution_family": [
@@ -33270,7 +33450,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Snore",
             "Supersonic",
-            "Yawn"
+            "Yawn",
+            "FeatherDance"
         ],
         "weight": 84.5,
         "evolution_family": [
@@ -33389,7 +33570,8 @@ export const pokedex_hgss = {
             "Sweet Scent",
             "Synthesis",
             "Tickle",
-            "Water Gun"
+            "Water Gun",
+            "Counter"
         ],
         "weight": 32.5,
         "evolution_family": [
@@ -33504,7 +33686,8 @@ export const pokedex_hgss = {
             "Fake Tears",
             "Quick Attack",
             "Sand-Attack",
-            "Tail Whip"
+            "Tail Whip",
+            "Flail"
         ],
         "weight": 3.9,
         "evolution_family": [
@@ -34131,7 +34314,8 @@ export const pokedex_hgss = {
             "Iron Head",
             "Screech",
             "SmellingSalt",
-            "Stomp"
+            "Stomp",
+            "Head Smash"
         ],
         "weight": 360.0,
         "evolution_family": [
@@ -34271,7 +34455,8 @@ export const pokedex_hgss = {
             "Sleep Talk",
             "SmellingSalt",
             "Snore",
-            "Substitute"
+            "Substitute",
+            "Muddy Water"
         ],
         "weight": 140.0,
         "evolution_family": [
@@ -34408,7 +34593,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Pursuit",
             "Supersonic",
-            "Take Down"
+            "Take Down",
+            "Skull Bash"
         ],
         "weight": 60.0,
         "evolution_family": [
@@ -34537,7 +34723,8 @@ export const pokedex_hgss = {
             "Razor Wind",
             "Nasty Plot",
             "Take Down",
-            "Worry Seed"
+            "Worry Seed",
+            "Power Swap"
         ],
         "weight": 59.6,
         "evolution_family": [
@@ -34877,7 +35064,8 @@ export const pokedex_hgss = {
             "Recover",
             "Rock Slide",
             "Tickle",
-            "Wring Out"
+            "Wring Out",
+            "Curse"
         ],
         "weight": 60.4,
         "evolution_family": [
@@ -35413,7 +35601,8 @@ export const pokedex_hgss = {
             "Nature Power",
             "Psych Up",
             "Reflect",
-            "Synthesis"
+            "Synthesis",
+            "Power Swap"
         ],
         "weight": 120.0,
         "evolution_family": [
@@ -35678,7 +35867,8 @@ export const pokedex_hgss = {
             "Meditate",
             "SmellingSalt",
             "Vacuum Wave",
-            "Wake-Up Slap"
+            "Wake-Up Slap",
+            "Counter"
         ],
         "weight": 44.4,
         "evolution_family": [
@@ -35808,7 +35998,10 @@ export const pokedex_hgss = {
             "Superpower",
             "Thrash",
             "Tickle",
-            "Worry Seed"
+            "Worry Seed",
+            "Spit Up",
+            "Stockpile",
+            "Swallow"
         ],
         "weight": 310.0,
         "evolution_family": [
@@ -36049,7 +36242,8 @@ export const pokedex_hgss = {
             "Odor Sleuth",
             "Psych Up",
             "Punishment",
-            "Spite"
+            "Spite",
+            "Tail Whip"
         ],
         "weight": 4.2,
         "evolution_family": [
@@ -36498,7 +36692,8 @@ export const pokedex_hgss = {
             "Mud-Slap",
             "Night Slash",
             "Quick Attack",
-            "Steel Wing"
+            "Steel Wing",
+            "Leaf Blade"
         ],
         "weight": 15.0,
         "evolution_family": [
@@ -37044,7 +37239,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Snore",
             "Supersonic",
-            "Yawn"
+            "Yawn",
+            "FeatherDance"
         ],
         "weight": 23.0,
         "evolution_family": [
@@ -37275,7 +37471,8 @@ export const pokedex_hgss = {
             "Leech Seed",
             "Nature Power",
             "Vine Whip",
-            "Wring Out"
+            "Wring Out",
+            "Body Slam"
         ],
         "weight": 15.8,
         "evolution_family": [
@@ -37410,7 +37607,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Revenge",
             "Rock Slide",
-            "SmellingSalt"
+            "SmellingSalt",
+            "Encore"
         ],
         "weight": 32.0,
         "evolution_family": [
@@ -38042,7 +38240,8 @@ export const pokedex_hgss = {
             "Sleep Talk",
             "SmellingSalt",
             "Snore",
-            "Substitute"
+            "Substitute",
+            "Muddy Water"
         ],
         "weight": 65.5,
         "evolution_family": [
@@ -38309,7 +38508,8 @@ export const pokedex_hgss = {
             "Counter",
             "Sucker Punch",
             "Supersonic",
-            "Take Down"
+            "Take Down",
+            "Head Smash"
         ],
         "weight": 62.0,
         "evolution_family": [
@@ -38424,7 +38624,9 @@ export const pokedex_hgss = {
             "Nature Power",
             "Petal Dance",
             "Safeguard",
-            "Skull Bash"
+            "Skull Bash",
+            "Power Whip",
+            "Sludge"
         ],
         "weight": 13.0,
         "evolution_family": [
@@ -38675,7 +38877,8 @@ export const pokedex_hgss = {
             "Nasty Plot",
             "Role Play",
             "Psycho Cut",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Guard Swap"
         ],
         "weight": 75.6,
         "evolution_family": [
@@ -38810,7 +39013,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Muddy Water",
             "Refresh",
-            "Yawn"
+            "Yawn",
+            "Water Spout"
         ],
         "weight": 85.5,
         "evolution_family": [
@@ -39034,7 +39238,8 @@ export const pokedex_hgss = {
             "Headbutt",
             "Rock Blast",
             "Scary Face",
-            "Screech"
+            "Screech",
+            "Counter"
         ],
         "weight": 57.0,
         "evolution_family": [
@@ -39248,7 +39453,8 @@ export const pokedex_hgss = {
             "ThunderPunch",
             "Tickle",
             "Volt Tackle",
-            "Wish"
+            "Wish",
+            "Flail"
         ],
         "weight": 6.0,
         "evolution_family": [
@@ -39573,7 +39779,8 @@ export const pokedex_hgss = {
             "Sky Attack",
             "Tri Attack",
             "Uproar",
-            "Whirlwind"
+            "Whirlwind",
+            "FeatherDance"
         ],
         "weight": 38.0,
         "evolution_family": [
@@ -39695,7 +39902,8 @@ export const pokedex_hgss = {
             "Low Kick",
             "Mind Reader",
             "Sky Uppercut",
-            "Vacuum Wave"
+            "Vacuum Wave",
+            "Follow Me"
         ],
         "weight": 20.2,
         "evolution_family": [
@@ -39809,7 +40017,8 @@ export const pokedex_hgss = {
             "Flail",
             "Hammer Arm",
             "Mega Punch",
-            "Rock Slide"
+            "Rock Slide",
+            "Curse"
         ],
         "weight": 20.0,
         "evolution_family": [
@@ -39925,7 +40134,8 @@ export const pokedex_hgss = {
             "Sand Tomb",
             "Scary Face",
             "Thrash",
-            "Twister"
+            "Twister",
+            "Mud Shot"
         ],
         "weight": 20.5,
         "evolution_family": [
@@ -40171,7 +40381,8 @@ export const pokedex_hgss = {
             "Rock Slide",
             "Screech",
             "Skull Bash",
-            "Swords Dance"
+            "Swords Dance",
+            "Detect"
         ],
         "weight": 45.0,
         "evolution_family": [
@@ -40418,7 +40629,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 25.0,
         "evolution_family": [
@@ -40542,7 +40754,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 29.0,
         "evolution_family": [
@@ -40783,7 +40996,8 @@ export const pokedex_hgss = {
             "Howl",
             "Hypnosis",
             "Psych Up",
-            "Spite"
+            "Spite",
+            "Power Swap"
         ],
         "weight": 9.9,
         "evolution_family": [
@@ -41152,7 +41366,8 @@ export const pokedex_hgss = {
             "Drill Peck",
             "Pursuit",
             "Sky Attack",
-            "Whirlwind"
+            "Whirlwind",
+            "Guard Swap"
         ],
         "weight": 50.5,
         "evolution_family": [
@@ -41261,7 +41476,8 @@ export const pokedex_hgss = {
             "Howl",
             "Quick Attack",
             "Reversal",
-            "Thrash"
+            "Thrash",
+            "Extrasensory"
         ],
         "weight": 19.0,
         "evolution_family": [
@@ -41527,7 +41743,8 @@ export const pokedex_hgss = {
             "Present",
             "Splash",
             "Substitute",
-            "Wish"
+            "Wish",
+            "Aromatherapy"
         ],
         "weight": 7.5,
         "evolution_family": [
@@ -41647,7 +41864,8 @@ export const pokedex_hgss = {
             "Pursuit",
             "Scary Face",
             "Slam",
-            "Spite"
+            "Spite",
+            "Switcheroo"
         ],
         "weight": 65.0,
         "evolution_family": [
@@ -41747,7 +41965,8 @@ export const pokedex_hgss = {
             "Razor Leaf",
             "Swords Dance",
             "Synthesis",
-            "Tickle"
+            "Tickle",
+            "Teeter Dance"
         ],
         "weight": 5.8,
         "evolution_family": [
@@ -41846,7 +42065,8 @@ export const pokedex_hgss = {
             "Razor Leaf",
             "Swords Dance",
             "Synthesis",
-            "Tickle"
+            "Tickle",
+            "Teeter Dance"
         ],
         "weight": 18.6,
         "evolution_family": [
@@ -41970,7 +42190,8 @@ export const pokedex_hgss = {
             "Sky Uppercut",
             "Sweet Kiss",
             "Switcheroo",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Flail"
         ],
         "weight": 5.5,
         "evolution_family": [
@@ -42312,7 +42533,8 @@ export const pokedex_hgss = {
             "Skull Bash",
             "Sleep Talk",
             "Snore",
-            "Water Sport"
+            "Water Sport",
+            "Muddy Water"
         ],
         "weight": 23.4,
         "evolution_family": [
@@ -42650,7 +42872,8 @@ export const pokedex_hgss = {
             "Scary Face",
             "Spit Up",
             "Stockpile",
-            "Swallow"
+            "Swallow",
+            "Switcheroo"
         ],
         "weight": 52.5,
         "evolution_family": [
@@ -43003,7 +43226,8 @@ export const pokedex_hgss = {
             "Snore",
             "Swagger",
             "Thrash",
-            "Tickle"
+            "Tickle",
+            "Aqua Ring"
         ],
         "weight": 398.0,
         "evolution_family": [
@@ -43245,7 +43469,8 @@ export const pokedex_hgss = {
             "Slam",
             "Stomp",
             "Thrash",
-            "Whirlwind"
+            "Whirlwind",
+            "Curse"
         ],
         "weight": 31.5,
         "evolution_family": [
@@ -43710,7 +43935,8 @@ export const pokedex_hgss = {
             "Mirror Coat",
             "Psych Up",
             "Take Down",
-            "Wish"
+            "Wish",
+            "Razor Wind"
         ],
         "weight": 41.5,
         "evolution_family": [
@@ -43858,7 +44084,8 @@ export const pokedex_hgss = {
             "Haze",
             "Light Screen",
             "Mist",
-            "Supersonic"
+            "Supersonic",
+            "ExtremeSpeed"
         ],
         "weight": 210.0,
         "evolution_family": [
@@ -44096,7 +44323,8 @@ export const pokedex_hgss = {
             "Sweet Scent",
             "Synthesis",
             "Tickle",
-            "Water Gun"
+            "Water Gun",
+            "Counter"
         ],
         "weight": 55.0,
         "evolution_family": [
@@ -44205,7 +44433,8 @@ export const pokedex_hgss = {
             "Knock Off",
             "Mirror Coat",
             "Rapid Spin",
-            "Safeguard"
+            "Safeguard",
+            "Muddy Water"
         ],
         "weight": 45.5,
         "evolution_family": [
@@ -44426,7 +44655,8 @@ export const pokedex_hgss = {
             "Mud Sport",
             "Muddy Water",
             "Refresh",
-            "Yawn"
+            "Yawn",
+            "Water Spout"
         ],
         "weight": 22.5,
         "evolution_family": [
@@ -44894,7 +45124,8 @@ export const pokedex_hgss = {
             "Tickle",
             "Uproar",
             "Wish",
-            "Zen Headbutt"
+            "Zen Headbutt",
+            "Mud Bomb"
         ],
         "weight": 32.6,
         "evolution_family": [
@@ -45156,7 +45387,8 @@ export const pokedex_hgss = {
             "Rock Slide",
             "Screech",
             "Skull Bash",
-            "Swords Dance"
+            "Swords Dance",
+            "Detect"
         ],
         "weight": 6.5,
         "evolution_family": [
@@ -45286,7 +45518,8 @@ export const pokedex_hgss = {
             "Leech Seed",
             "Mega Drain",
             "Nature Power",
-            "Reflect"
+            "Reflect",
+            "Power Swap"
         ],
         "weight": 128.6,
         "evolution_family": [
@@ -45630,7 +45863,9 @@ export const pokedex_hgss = {
             "Nature Power",
             "Petal Dance",
             "Safeguard",
-            "Skull Bash"
+            "Skull Bash",
+            "Power Whip",
+            "Sludge"
         ],
         "weight": 100.0,
         "evolution_family": [
@@ -46017,7 +46252,8 @@ export const pokedex_hgss = {
             "Night Slash",
             "Razor Wind",
             "Sand Tomb",
-            "Wing Attack"
+            "Wing Attack",
+            "Power Trick"
         ],
         "weight": 42.5,
         "evolution_family": [
@@ -46131,7 +46367,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Fury Cutter",
             "Gust",
-            "Quick Attack"
+            "Quick Attack",
+            "Mud Shot"
         ],
         "weight": 15.3,
         "evolution_family": [
@@ -46246,7 +46483,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 25.9,
         "evolution_family": [
@@ -46367,7 +46605,8 @@ export const pokedex_hgss = {
             "Spikes",
             "Supersonic",
             "Toxic Spikes",
-            "Wring Out"
+            "Wring Out",
+            "Muddy Water"
         ],
         "weight": 7.5,
         "evolution_family": [
@@ -47104,7 +47343,8 @@ export const pokedex_hgss = {
             "ThunderPunch",
             "Tickle",
             "Volt Tackle",
-            "Wish"
+            "Wish",
+            "Flail"
         ],
         "weight": 30.0,
         "evolution_family": [
@@ -47294,7 +47534,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Revenge",
             "Rock Slide",
-            "SmellingSalt"
+            "SmellingSalt",
+            "Encore"
         ],
         "weight": 28.0,
         "evolution_family": [
@@ -47835,7 +48076,8 @@ export const pokedex_hgss = {
             "Last Resort",
             "Metronome",
             "Present",
-            "Substitute"
+            "Substitute",
+            "Mud Bomb"
         ],
         "weight": 24.4,
         "evolution_family": [
@@ -47963,7 +48205,8 @@ export const pokedex_hgss = {
             "Disable",
             "Haze",
             "Hypnosis",
-            "Memento"
+            "Memento",
+            "Weather Ball"
         ],
         "weight": 15.0,
         "evolution_family": [
@@ -48125,7 +48368,8 @@ export const pokedex_hgss = {
             "FeatherDance",
             "Haze",
             "Pursuit",
-            "Rage"
+            "Rage",
+            "Power Swap"
         ],
         "weight": 1.2,
         "evolution_family": [
@@ -48235,7 +48479,8 @@ export const pokedex_hgss = {
             "Counter",
             "Sucker Punch",
             "Supersonic",
-            "Take Down"
+            "Take Down",
+            "Head Smash"
         ],
         "weight": 19.5,
         "evolution_family": [
@@ -48458,7 +48703,8 @@ export const pokedex_hgss = {
             "Screech",
             "Shadow Sneak",
             "Spite",
-            "Sucker Punch"
+            "Sucker Punch",
+            "Nasty Plot"
         ],
         "weight": 1.0,
         "evolution_family": [
@@ -48564,7 +48810,9 @@ export const pokedex_hgss = {
             "Flail",
             "Octazooka",
             "Signal Beam",
-            "Splash"
+            "Splash",
+            "Muddy Water",
+            "Razor Wind"
         ],
         "weight": 8.0,
         "evolution_family": [
@@ -48819,7 +49067,8 @@ export const pokedex_hgss = {
             "Hydro Pump",
             "Rock Slide",
             "Thrash",
-            "Water Sport"
+            "Water Sport",
+            "Aqua Jet"
         ],
         "weight": 88.8,
         "evolution_family": [
@@ -48928,7 +49177,8 @@ export const pokedex_hgss = {
             "Rock Slide",
             "Sand-Attack",
             "Screech",
-            "Swords Dance"
+            "Swords Dance",
+            "Curse"
         ],
         "weight": 12.5,
         "evolution_family": [
@@ -49031,7 +49281,8 @@ export const pokedex_hgss = {
             "Swords Dance",
             "Synthesis",
             "Tickle",
-            "Worry Seed"
+            "Worry Seed",
+            "Weather Ball"
         ],
         "weight": 15.5,
         "evolution_family": [
@@ -49349,7 +49600,8 @@ export const pokedex_hgss = {
             "Sweet Scent",
             "Synthesis",
             "Tickle",
-            "Water Gun"
+            "Water Gun",
+            "Counter"
         ],
         "weight": 2.6,
         "evolution_family": [
@@ -49910,7 +50162,8 @@ export const pokedex_hgss = {
             "Sing",
             "Substitute",
             "Sweet Kiss",
-            "Wish"
+            "Wish",
+            "Discharge"
         ],
         "weight": 4.2,
         "evolution_family": [
@@ -50047,7 +50300,8 @@ export const pokedex_hgss = {
             "Reversal",
             "Rock Slide",
             "SmellingSalt",
-            "Swagger"
+            "Swagger",
+            "FeatherDance"
         ],
         "weight": 52.0,
         "evolution_family": [
@@ -50172,7 +50426,8 @@ export const pokedex_hgss = {
             "Screech",
             "Snore",
             "Supersonic",
-            "Thunder Wave"
+            "Thunder Wave",
+            "Water Spout"
         ],
         "weight": 28.5,
         "evolution_family": [
@@ -50278,7 +50533,8 @@ export const pokedex_hgss = {
             "Mach Punch",
             "Mega Punch",
             "Screech",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Belly Drum"
         ],
         "weight": 21.4,
         "evolution_family": [
@@ -50412,7 +50668,8 @@ export const pokedex_hgss = {
             "Psybeam",
             "Psychic",
             "Refresh",
-            "Yawn"
+            "Yawn",
+            "Encore"
         ],
         "weight": 76.6,
         "evolution_family": [
@@ -50644,7 +50901,9 @@ export const pokedex_hgss = {
             "Flail",
             "Octazooka",
             "Signal Beam",
-            "Splash"
+            "Splash",
+            "Muddy Water",
+            "Razor Wind"
         ],
         "weight": 152.0,
         "evolution_family": [
@@ -50871,7 +51130,8 @@ export const pokedex_hgss = {
             "Ice Fang",
             "Swift",
             "Thunder Fang",
-            "Uproar"
+            "Uproar",
+            "Switcheroo"
         ],
         "weight": 40.2,
         "evolution_family": [
@@ -51100,7 +51360,8 @@ export const pokedex_hgss = {
             "Swagger",
             "Snore",
             "Thrash",
-            "Tickle"
+            "Tickle",
+            "Aqua Ring"
         ],
         "weight": 130.0,
         "evolution_family": [
@@ -51203,7 +51464,9 @@ export const pokedex_hgss = {
             "Spit Up",
             "Stockpile",
             "Swallow",
-            "Yawn"
+            "Yawn",
+            "Sludge",
+            "Trump Card"
         ],
         "weight": 6.3,
         "evolution_family": [
@@ -51448,7 +51711,8 @@ export const pokedex_hgss = {
             "Mud Shot",
             "Refresh",
             "Splash",
-            "Water Sport"
+            "Water Sport",
+            "Encore"
         ],
         "weight": 33.9,
         "evolution_family": [
@@ -51570,7 +51834,8 @@ export const pokedex_hgss = {
             "Screech",
             "Shadow Sneak",
             "Spite",
-            "Sucker Punch"
+            "Sucker Punch",
+            "Nasty Plot"
         ],
         "weight": 4.4,
         "evolution_family": [
@@ -51685,7 +51950,8 @@ export const pokedex_hgss = {
             "Safeguard",
             "Spit Up",
             "Stockpile",
-            "Swallow"
+            "Swallow",
+            "Recover"
         ],
         "weight": 8.5,
         "evolution_family": [
@@ -51784,7 +52050,8 @@ export const pokedex_hgss = {
             "Razor Leaf",
             "Swords Dance",
             "Synthesis",
-            "Tickle"
+            "Tickle",
+            "Teeter Dance"
         ],
         "weight": 5.4,
         "evolution_family": [
@@ -51898,7 +52165,8 @@ export const pokedex_hgss = {
             "Psybeam",
             "Pursuit",
             "Screech",
-            "Sweet Scent"
+            "Sweet Scent",
+            "Agility"
         ],
         "weight": 5.4,
         "evolution_family": [
@@ -52222,7 +52490,8 @@ export const pokedex_hgss = {
             "Sky Attack",
             "Tri Attack",
             "Uproar",
-            "Whirlwind"
+            "Whirlwind",
+            "FeatherDance"
         ],
         "weight": 2.0,
         "evolution_family": [
@@ -52662,7 +52931,8 @@ export const pokedex_hgss = {
             "Sucker Punch",
             "Swords Dance",
             "Tickle",
-            "Thunder Fang"
+            "Thunder Fang",
+            "Guard Swap"
         ],
         "weight": 11.5,
         "evolution_family": [
@@ -52770,7 +53040,8 @@ export const pokedex_hgss = {
             "Slack Off",
             "Spit Up",
             "Stockpile",
-            "Swallow"
+            "Swallow",
+            "Revenge"
         ],
         "weight": 300.0,
         "evolution_family": [
@@ -52985,7 +53256,8 @@ export const pokedex_hgss = {
             "Spark",
             "Take Down",
             "Thrash",
-            "Whirlpool"
+            "Whirlpool",
+            "Dragon Dance"
         ],
         "weight": 1.9,
         "evolution_family": [
@@ -53113,7 +53385,8 @@ export const pokedex_hgss = {
             "Mean Look",
             "Memento",
             "Shadow Sneak",
-            "Will-O-Wisp"
+            "Will-O-Wisp",
+            "Encore"
         ],
         "weight": 20.2,
         "evolution_family": [
@@ -53337,7 +53610,8 @@ export const pokedex_hgss = {
             "Present",
             "Splash",
             "Substitute",
-            "Wish"
+            "Wish",
+            "Aromatherapy"
         ],
         "weight": 3.0,
         "evolution_family": [
@@ -53454,7 +53728,8 @@ export const pokedex_hgss = {
             "Spark",
             "Take Down",
             "Thrash",
-            "Whirlpool"
+            "Whirlpool",
+            "Dragon Dance"
         ],
         "weight": 23.6,
         "evolution_family": [
@@ -53584,7 +53859,8 @@ export const pokedex_hgss = {
             "Foresight",
             "Helping Hand",
             "Revenge",
-            "Wake-Up Slap"
+            "Wake-Up Slap",
+            "Feint"
         ],
         "weight": 253.8,
         "evolution_family": [
@@ -53838,7 +54114,8 @@ export const pokedex_hgss = {
             "Magical Leaf",
             "Mud Sport",
             "Synthesis",
-            "Worry Seed"
+            "Worry Seed",
+            "Razor Wind"
         ],
         "weight": 52.2,
         "evolution_family": [
@@ -54087,7 +54364,8 @@ export const pokedex_hgss = {
             "Flail",
             "Hammer Arm",
             "Mega Punch",
-            "Rock Slide"
+            "Rock Slide",
+            "Curse"
         ],
         "weight": 300.0,
         "evolution_family": [
@@ -54229,7 +54507,8 @@ export const pokedex_hgss = {
             "Punishment",
             "Pursuit",
             "Reflect",
-            "Spite"
+            "Spite",
+            "Assist"
         ],
         "weight": 34.0,
         "evolution_family": [
@@ -54368,7 +54647,8 @@ export const pokedex_hgss = {
             "Focus Energy",
             "Heat Wave",
             "Helping Hand",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Assist"
         ],
         "weight": 55.0,
         "evolution_family": [
@@ -54490,7 +54770,8 @@ export const pokedex_hgss = {
             "Rock Slide",
             "Rolling Kick",
             "SmellingSalt",
-            "ThunderPunch"
+            "ThunderPunch",
+            "Power Trick"
         ],
         "weight": 19.5,
         "evolution_family": [
@@ -54728,7 +55009,8 @@ export const pokedex_hgss = {
             "Heat Wave",
             "Howl",
             "Safeguard",
-            "Thrash"
+            "Thrash",
+            "Morning Sun"
         ],
         "weight": 155.0,
         "evolution_family": [
@@ -54843,7 +55125,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 27.0,
         "evolution_family": [
@@ -55083,7 +55366,8 @@ export const pokedex_hgss = {
             "Knock Off",
             "Mirror Coat",
             "Rapid Spin",
-            "Safeguard"
+            "Safeguard",
+            "Muddy Water"
         ],
         "weight": 55.0,
         "evolution_family": [
@@ -55588,7 +55872,8 @@ export const pokedex_hgss = {
             "Flail",
             "Tickle",
             "Wish",
-            "Yawn"
+            "Yawn",
+            "Detect"
         ],
         "weight": 25.5,
         "evolution_family": [
@@ -55709,7 +55994,8 @@ export const pokedex_hgss = {
             "Metal Claw",
             "Outrage",
             "Rock Slide",
-            "Swords Dance"
+            "Swords Dance",
+            "Counter"
         ],
         "weight": 19.0,
         "evolution_family": [
@@ -55944,7 +56230,8 @@ export const pokedex_hgss = {
             "Leech Seed",
             "Nature Power",
             "Vine Whip",
-            "Wring Out"
+            "Wring Out",
+            "Body Slam"
         ],
         "weight": 6.4,
         "evolution_family": [
@@ -56524,7 +56811,8 @@ export const pokedex_hgss = {
             "Present",
             "Psych Up",
             "Psycho Shift",
-            "Substitute"
+            "Substitute",
+            "Extrasensory"
         ],
         "weight": 38.0,
         "evolution_family": [
@@ -56999,7 +57287,8 @@ export const pokedex_hgss = {
             "Mud Shot",
             "Refresh",
             "Splash",
-            "Water Sport"
+            "Water Sport",
+            "Encore"
         ],
         "weight": 54.0,
         "evolution_family": [
@@ -57117,7 +57406,8 @@ export const pokedex_hgss = {
             "Flail",
             "Hammer Arm",
             "Mega Punch",
-            "Rock Slide"
+            "Rock Slide",
+            "Curse"
         ],
         "weight": 105.0,
         "evolution_family": [
@@ -57564,7 +57854,8 @@ export const pokedex_hgss = {
             "Psych Up",
             "Teeter Dance",
             "Trick",
-            "Wake-Up Slap"
+            "Wake-Up Slap",
+            "Nasty Plot"
         ],
         "weight": 13.0,
         "evolution_family": [
@@ -57696,7 +57987,8 @@ export const pokedex_hgss = {
             "SmokeScreen",
             "Snore",
             "Swagger",
-            "Take Down"
+            "Take Down",
+            "Hammer Arm"
         ],
         "weight": 84.0,
         "evolution_family": [
@@ -57816,7 +58108,8 @@ export const pokedex_hgss = {
             "Meditate",
             "Miracle Eye",
             "Psych Up",
-            "Wish"
+            "Wish",
+            "Nasty Plot"
         ],
         "weight": 6.0,
         "evolution_family": [
@@ -58059,7 +58352,8 @@ export const pokedex_hgss = {
             "Pursuit",
             "Rock Slide",
             "Screech",
-            "Uproar"
+            "Uproar",
+            "Reversal"
         ],
         "weight": 0.8,
         "evolution_family": [
@@ -58268,7 +58562,8 @@ export const pokedex_hgss = {
             "Nature Power",
             "Razor Leaf",
             "Sweet Scent",
-            "Tickle"
+            "Tickle",
+            "Weather Ball"
         ],
         "weight": 9.3,
         "evolution_family": [
@@ -58401,7 +58696,8 @@ export const pokedex_hgss = {
             "Meditate",
             "SmellingSalt",
             "Vacuum Wave",
-            "Wake-Up Slap"
+            "Wake-Up Slap",
+            "Counter"
         ],
         "weight": 23.0,
         "evolution_family": [
@@ -58646,7 +58942,8 @@ export const pokedex_hgss = {
             "Magical Leaf",
             "Mud Sport",
             "Synthesis",
-            "Worry Seed"
+            "Worry Seed",
+            "Razor Wind"
         ],
         "weight": 21.6,
         "evolution_family": [

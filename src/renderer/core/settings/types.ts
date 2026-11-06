@@ -28,7 +28,7 @@ export interface ControlBase {
     id: string;
     /**
      * What the panel shows (written in Title Case; nothing capitalises it for you). A function for a
-     * label that changes ("Ability (Turtwig Has 1)"); give such a control an `actionLabel`.
+     * label that changes ("Ability (1/2)"); give such a control an `actionLabel`.
      */
     label?: string | (() => string);
     /** The label in the Keyboard Shortcuts window, when it should differ from `label`. */
@@ -44,6 +44,11 @@ export interface ControlBase {
     class?: string;
     /** A one-line tooltip. */
     title?: string;
+    /**
+     * Toggles, choices and sliders are saved in presets (core/presets/presets.ts) while `available`.
+     * false: never (it isn't about the run or the look). "always": even while `available` is false.
+     */
+    preset?: false | "always";
 }
 
 export interface ToggleControl extends ControlBase {
@@ -61,6 +66,8 @@ export interface ButtonControl extends ControlBase {
     confirmLabel?: string;
     /** Label shown instead of `label` while this returns a string (e.g. "Exit Style Mode"). */
     dynamicLabel?: () => string | undefined;
+    /** Show as this small icon at the top right of the group's heading; `label` becomes its tooltip. */
+    icon?: "eyedropper" | "reset";
 }
 
 export interface ChoiceOption {
@@ -82,6 +89,10 @@ export interface ChoiceControl extends ControlBase {
      */
     actions?: "choice" | "cycle";
     placeholder?: string;
+    /** Each option is a hidden power spread: colour its numbers by stat (StatSpreadSelect.ts). */
+    statSpread?: boolean;
+    /** Sit in the group's heading, opposite the title, with no label of its own. */
+    inHeading?: boolean;
 }
 
 export interface CounterControl extends ControlBase {
@@ -123,12 +134,12 @@ export interface StatGridControl extends ControlBase {
 
 /**
  * A shared or per-generation component. The shared ones are named by string ("species-picker",
- * "edition-picker"), so a generation's settingsPanel.ts imports no .vue file and stays loadable by
- * the tsx tools (tools/parity/action-ids.ts).
+ * "solo-picker", "edition-picker"), so a generation's settingsPanel.ts imports no .vue file and stays
+ * loadable by the tsx tools (tools/parity/action-ids.ts).
  */
 export interface ComponentControl extends ControlBase {
     kind: "component";
-    component: Component | "species-picker" | "edition-picker";
+    component: Component | "species-picker" | "solo-picker" | "edition-picker";
     props?: () => Record<string, unknown>;
     on?: Record<string, (...args: any[]) => unknown>;
 }
@@ -182,13 +193,13 @@ export interface SettingsColumn {
     groups: SettingsGroup[];
 }
 
-/** Run · Solo Pokémon · Style · Display (Scott's decision, plan §6 item 1). */
+/** Software · Run · Pokémon · Style. */
 export interface SettingsPanelSpec {
     columns: [SettingsColumn, SettingsColumn, SettingsColumn, SettingsColumn];
     /** Whether "advanced" controls show (the generation's Show Advanced Settings field). */
     showAdvanced: () => boolean;
     /** Whether "dev" controls show (not a packaged build). */
     isDev: () => boolean;
-    /** The overlay's UI colour, for the "tinted" panel style. */
-    tint?: () => string | undefined;
+    /** Save and load presets beside the solo picker; a generation without this has none. */
+    presets?: import("../presets/presets").PresetHost;
 }

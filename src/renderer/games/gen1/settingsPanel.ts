@@ -11,7 +11,7 @@ import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import { IS_DEV } from "~/core/env";
-import { panelThemeControl } from "~/core/settings/theme";
+import { defaultFilters, texturePath } from "~/core/overlay/textureLooks";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
 import { openShortcutsMenu } from "~/core/shortcuts/engine";
 import {
@@ -36,7 +36,7 @@ import { searchTrainers } from "~/core/logic/trainerPreview";
 
 /**
  * gen1's settings panel as data (docs/ui-uniformity-plan.md stages 3-4): the four shared columns,
- * Run · Solo Pokémon · Style · Display, rendered by core/settings/SettingsPanel.vue from
+ * Software · Run · Pokémon · Style, rendered by core/settings/SettingsPanel.vue from
  * components/game_area.vue, and the same list gives the controls' shortcut actions (actions.ts).
  * Ids are the action ids the controls had before (persisted: never rename one).
  *
@@ -124,7 +124,13 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
             ...extra,
         }) as SettingControl;
 
-    const run: SettingsGroup[] = [
+    /** Back to the defaults, with the filters at the texture's own look. The texture itself stays. */
+    const resetBackground = () => {
+        const b = data().background;
+        Object.assign(b, { offset_x: 0, offset_y: 0, scale: 100, hue: 0, flip: false, flip_y: false }, defaultFilters(texturePath(textures, b.texture)));
+    };
+
+    const software: SettingsGroup[] = [
         {
             title: "Game",
             controls: [
@@ -154,22 +160,6 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
             controls: [
                 { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: openSplitsFolder },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: openShortcutsMenu },
-            ],
-        },
-        {
-            title: "Readouts",
-            controls: [
-                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (properties().player.teamCount.value > 6 ? 0 : properties().player.teamCount.value) },
-                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
-                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().statusCondition.value ?? "None" },
-                {
-                    kind: "statGrid", id: "readout.stat_exp", label: "Stat Experience",
-                    items: () =>
-                        [["HP", "statExpHp"], ["Spe", "statExpSpeed"], ["Atk", "statExpAttack"], ["Spc", "statExpSpecial"], ["Def", "statExpDefense"]].map(([label, key]) => {
-                            const value = team0()[key].value;
-                            return { label, value, extra: `(${usableVitamins(value)})` };
-                        }),
-                },
             ],
         },
         {
@@ -231,7 +221,7 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
         },
     ];
 
-    const solo: SettingsGroup[] = [
+    const run: SettingsGroup[] = [
         {
             title: "Solo Pokemon",
             heading: "Solo Pokémon",
@@ -248,7 +238,7 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
         {
             title: "Split Comparison",
             controls: [
-                { kind: "button", id: "splits.load_comparison", label: "Load Replay / Split File", actionLabel: "Load replay / split file to compare", run: loadSplitComparison },
+                { kind: "button", id: "splits.load_comparison", label: "Load Splits", actionLabel: "Load replay / split file to compare", run: loadSplitComparison },
                 { kind: "readout", id: "splits.source", label: "Comparing Against", class: "stp-readout-wrap", visible: () => !!gen1PanelState.comparisonName, value: () => gen1PanelState.comparisonName },
                 { kind: "button", id: "splits.clear_comparison", label: "Clear Loaded Splits", available: () => gen1PanelState.hasComparison, run: clearSplitComparison },
                 {
@@ -276,6 +266,25 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
                 { kind: "readout", id: "readout.faults", label: "Faults", value: () => resets() + blackouts() },
             ],
         },
+        {
+            title: "Readouts",
+            controls: [
+                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (properties().player.teamCount.value > 6 ? 0 : properties().player.teamCount.value) },
+                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
+                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().statusCondition.value ?? "None" },
+                {
+                    kind: "statGrid", id: "readout.stat_exp", label: "Stat Experience",
+                    items: () =>
+                        [["HP", "statExpHp"], ["Spe", "statExpSpeed"], ["Atk", "statExpAttack"], ["Spc", "statExpSpecial"], ["Def", "statExpDefense"]].map(([label, key]) => {
+                            const value = team0()[key].value;
+                            return { label, value, extra: `(${usableVitamins(value)})` };
+                        }),
+                },
+            ],
+        },
+    ];
+
+    const pokemon: SettingsGroup[] = [
         {
             title: "DVs",
             controls: [
@@ -307,57 +316,13 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
     ];
 
     const style: SettingsGroup[] = [
-        { title: "Panel", controls: [panelThemeControl()] },
         {
             title: "UI Color",
             controls: [
-                { kind: "button", id: "style.color_picker", label: "Color Picker", noAction: true, run: pickUiColor },
+                { kind: "button", id: "style.color_picker", icon: "eyedropper", label: "Color Picker", noAction: true, run: pickUiColor },
                 slider("ui_saturation", "Saturation", () => data().ui, "saturation", 0, 2, 0.1),
             ],
         },
-        {
-            title: "Pokemon Image",
-            heading: "Pokémon Image",
-            controls: [
-                slider("artwork_offset_x", "X-Offset", () => data().artwork, "offset_x", -600, 600),
-                slider("artwork_offset_y", "Y-Offset", () => data().artwork, "offset_y", -600, 600),
-                slider("artwork_scale", "Scale", () => data().artwork, "scale", 0.2, 2.5, 0.01),
-                slider("artwork_saturation", "Saturation", () => data().artwork, "saturation", 90, 150),
-                slider("artwork_rotation", "Rotation", () => data().artwork, "rotation", -180, 180, 0.01),
-                flag("style.artwork_flip", "Flip", () => data().artwork, "flip", { actionLabel: "Pokemon Image Flip" }),
-                {
-                    kind: "button", id: "style.reset_pokemon", label: "Reset Pokemon Settings",
-                    run: () => { Object.assign(data().artwork, { offset_x: 0, offset_y: 0, scale: 1, flip: false, saturation: 100, rotation: 0 }); },
-                },
-            ],
-        },
-        {
-            title: "Background",
-            controls: [
-                {
-                    kind: "choice", id: "style.background_texture", label: "Texture", actionLabel: "Background Texture", actions: "cycle",
-                    options: () => Object.keys(textures),
-                    get: () => data().background.texture, set: (v) => { data().background.texture = v; },
-                },
-                slider("background_offset_x", "X-Offset", () => data().background, "offset_x", -400, 400),
-                slider("background_offset_y", "Y-Offset", () => data().background, "offset_y", -400, 400),
-                slider("background_scale", "Scale", () => data().background, "scale", 50, 300),
-                slider("background_brightness", "Brightness", () => data().background, "brightness", 0, 200),
-                slider("background_contrast", "Contrast", () => data().background, "contrast", 0, 200),
-                slider("background_saturation", "Saturation", () => data().background, "saturation", 0, 200),
-                slider("background_blur", "Blur", () => data().background, "blur", 0, 10, 0.1),
-                slider("background_hue", "Hue", () => data().background, "hue", 0, 358),
-                flag("style.background_flip_x", "Flip X", () => data().background, "flip", { actionLabel: "Background Flip X" }),
-                flag("style.background_flip_y", "Flip Y", () => data().background, "flip_y", { actionLabel: "Background Flip Y" }),
-                {
-                    kind: "button", id: "style.reload", label: "Reload Style", run: reloadStyle,
-                    title: "Changes are saved automatically. This re-reads the saved style, discarding unsaved edits.",
-                },
-            ],
-        },
-    ];
-
-    const display: SettingsGroup[] = [
         {
             title: "Display",
             controls: [
@@ -382,7 +347,6 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
                     get: () => settings().right_panel.mode, set: (v) => { settings().setRightPanelMode(v); },
                 },
                 // Decision 30: the wild panel in wild battles (Automatic / Trainers), off by default.
-                flag("display.wild_battles", "Show Wild Battles", () => settings().right_panel, "wild_battles"),
                 {
                     // Decision 15d: crosses out Double Team (games/gen1/data/unobtainable_moves.ts) in the movepool.
                     kind: "choice", id: "display.unobtainable_moves", label: "Unobtainable Moves",
@@ -407,6 +371,7 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
         {
             title: "Toggles",
             controls: [
+                flag("display.wild_battles", "Show Wild Battles", () => settings().right_panel, "wild_battles"),
                 flag("display.count_blackouts", "Count Blackouts", advanced, "count_blackouts", { title: "A blackout counts as a fault" }),
                 // The store field is `right_panel.hotkeys`, and ticked (the default) F17-F19 all pick
                 // Automatic; unticked F18 picks Movepool and F19 Splits (actions.ts legacyFKeys).
@@ -422,17 +387,57 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
                 },
             ],
         },
+        {
+            title: "Pokemon Image",
+            heading: "Pokémon Image",
+            controls: [
+                slider("artwork_offset_x", "X-Offset", () => data().artwork, "offset_x", -600, 600),
+                slider("artwork_offset_y", "Y-Offset", () => data().artwork, "offset_y", -600, 600),
+                slider("artwork_scale", "Scale", () => data().artwork, "scale", 0.2, 2.5, 0.01),
+                slider("artwork_saturation", "Saturation", () => data().artwork, "saturation", 90, 150),
+                slider("artwork_rotation", "Rotation", () => data().artwork, "rotation", -180, 180, 0.01),
+                flag("style.artwork_flip", "Flip", () => data().artwork, "flip", { actionLabel: "Pokemon Image Flip" }),
+                {
+                    kind: "button", id: "style.reset_pokemon", icon: "reset", label: "Reset Pokemon Settings",
+                    run: () => { Object.assign(data().artwork, { offset_x: 0, offset_y: 0, scale: 1, flip: false, saturation: 100, rotation: 0 }); },
+                },
+            ],
+        },
+        {
+            title: "Background",
+            controls: [
+                { kind: "button", id: "style.reset_background", icon: "reset", label: "Reset Background", run: resetBackground },
+                {
+                    kind: "choice", id: "style.background_texture", label: "Texture", actionLabel: "Background Texture", actions: "cycle",
+                    options: () => Object.keys(textures),
+                    get: () => data().background.texture, set: (v) => { data().background.texture = v; },
+                },
+                slider("background_offset_x", "X-Offset", () => data().background, "offset_x", -400, 400),
+                slider("background_offset_y", "Y-Offset", () => data().background, "offset_y", -400, 400),
+                slider("background_scale", "Scale", () => data().background, "scale", 50, 300),
+                slider("background_brightness", "Brightness", () => data().background, "brightness", 0, 200),
+                slider("background_contrast", "Contrast", () => data().background, "contrast", 0, 200),
+                slider("background_saturation", "Saturation", () => data().background, "saturation", 0, 200),
+                slider("background_blur", "Blur", () => data().background, "blur", 0, 10, 0.1),
+                slider("background_hue", "Hue", () => data().background, "hue", 0, 358),
+                flag("style.background_flip_x", "Flip X", () => data().background, "flip", { actionLabel: "Background Flip X" }),
+                flag("style.background_flip_y", "Flip Y", () => data().background, "flip_y", { actionLabel: "Background Flip Y" }),
+                {
+                    kind: "button", id: "style.reload", label: "Reload Style", run: reloadStyle,
+                    title: "Changes are saved automatically. This re-reads the saved style, discarding unsaved edits.",
+                },
+            ],
+        },
     ];
 
     return {
         columns: [
+            { groups: software },
             { groups: run },
-            { groups: solo },
+            { groups: pokemon },
             { groups: style },
-            { groups: display },
         ],
         showAdvanced,
         isDev: () => IS_DEV,
-        tint: () => data().ui.color,
     };
 }

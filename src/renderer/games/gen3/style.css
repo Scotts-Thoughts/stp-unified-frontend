@@ -201,7 +201,7 @@ body:has(.gen-3) {
 /*  ------------------------------------  */
 
 @font-face {
-    src: url(../../fonts/Play-Bold.ttf);
+    src: url("../../fonts/Play-Bold.ttf");
     font-family: osb;
     font-weight: 700;
 }
@@ -209,7 +209,7 @@ body:has(.gen-3) {
 /* TITLES FONT */
 
 @font-face {
-    src: url(../../fonts/LeagueGothic.ttf);
+    src: url("../../fonts/LeagueGothic.ttf");
     font-family: lgothic;
 }
 

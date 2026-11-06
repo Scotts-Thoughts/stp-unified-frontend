@@ -1,15 +1,9 @@
 /*
- * The Updates button (UpdatesButton.vue), left of the microphone button (core/voice/voice.css)
- * and the Report button (core/report/report.css), in the top right of the settings panel or the
- * start screen. Every rule sets what it needs, because the generations' style.css files style
- * bare `button` elements.
+ * The Updates button (UpdatesButton.vue), first in the `.stp-top-buttons` row (core/report/report.css).
+ * Every rule sets what it needs, because the generations' style.css files style bare `button` elements.
  */
 
 .stp-updates-btn {
-    position: absolute;
-    top: 14px;
-    right: 152px;
-    z-index: 5;
     display: inline-flex;
     align-items: center;
     gap: 5px;

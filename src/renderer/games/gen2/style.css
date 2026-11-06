@@ -16,18 +16,18 @@
  * more. The descriptor restores the legacy glyphs and changes no lighter request.
  */
 @font-face {
-    src: url(../../fonts/TitanOne-Regular.ttf);
+    src: url("../../fonts/TitanOne-Regular.ttf");
     font-family: titan;
 }
 
 @font-face {
-    src: url(../../fonts/Play-Bold.ttf);
+    src: url("../../fonts/Play-Bold.ttf");
     font-family: play;
     font-weight: 700;
 }
 
 @font-face {
-    src: url(../../fonts/OpenSans-ExtraBold.ttf);
+    src: url("../../fonts/OpenSans-ExtraBold.ttf");
     font-family: oseb;
     font-weight: 700;
 }
@@ -114,18 +114,18 @@ body:has(.gen-2) {
 /* ANIMATIONS */
 
 @font-face {
-    src: url(../../fonts/TitanOne-Regular.ttf);
+    src: url("../../fonts/TitanOne-Regular.ttf");
     font-family: titan;
 }
 
 @font-face {
-    src: url(../../fonts/Play-Bold.ttf);
+    src: url("../../fonts/Play-Bold.ttf");
     font-family: play;
     font-weight: 700;
 }
 
 @font-face {
-    src: url(../../fonts/OpenSans-ExtraBold.ttf);
+    src: url("../../fonts/OpenSans-ExtraBold.ttf");
     font-family: oseb;
     font-weight: 700;
 }
@@ -1972,7 +1972,7 @@ body:has(.gen-2) {
     height: 996px;
 }
 
-/* The Rare Candies tracker's status pills (.candy-status above), in the settings panel's Display column. */
+/* The Rare Candies tracker's status pills (.candy-status above), in the settings panel's Style column. */
 .gen-2 .rare_candies {
     display: flex;
     flex-wrap: wrap;

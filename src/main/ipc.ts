@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
-import { dirname, join } from "path";
+import { basename, dirname, join } from "path";
 import { app, dialog, ipcMain, nativeImage, shell, type BrowserWindow } from "electron";
 import { appRoot, rendererSourceRoot, resolveInside, splitsRoot, storageRoot, userDataRoot } from "./paths";
 import { loadSplitComparison } from "./splitComparison";
@@ -152,6 +152,29 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
       name: entry.name,
       directory: entry.isDirectory(),
     }));
+  });
+
+  // --- presets: %APPDATA%/<app>/data/presets/** ---------------------------------
+  // The file can be anywhere (one sent from another computer), so the picker runs here and returns
+  // the text; the renderer's core/presets/presets.ts decides whether it is a preset for this game.
+  ipcMain.handle("presets:pick", async (_e, relative: string) => {
+    const root = join(userDataRoot(), "presets");
+    mkdirSync(root, { recursive: true });
+    const folder = resolveInside(root, relative);
+    const window = getWindow();
+    const options = {
+      title: "Load a preset file",
+      defaultPath: existsSync(folder) ? folder : root,
+      properties: ["openFile" as const],
+      filters: [{ name: "Presets", extensions: ["json"] }],
+    };
+    const picked = window && !window.isDestroyed() ? await dialog.showOpenDialog(window, options) : await dialog.showOpenDialog(options);
+    if (picked.canceled || picked.filePaths.length === 0) return null;
+    const file = picked.filePaths[0];
+    return { name: basename(file), contents: readFileSync(file, "utf-8") };
+  });
+  ipcMain.handle("presets:remove", (_e, relative: string) => {
+    rmSync(resolveInside(join(userDataRoot(), "presets"), relative), { force: true });
   });
 
   // --- shipped defaults: <appRoot>/storage/** ----------------------------------

@@ -84,21 +84,21 @@
                 </template>
                 <template #ivs>
                     <div v-if="iv_mode == 'Automatic'" class="stp-ivgrid">
-                        <span>HP</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[0] }}</span>
-                        <span>Atk</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[1] }}</span>
-                        <span>Def</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[2] }}</span>
-                        <span>SpA</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[4] }}</span>
-                        <span>SpD</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[5] }}</span>
-                        <span>Spe</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[3] }}</span>
+                        <span class="stp-stat-hp">HP</span><span class="stp-stat-hp">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[0] }}</span>
+                        <span class="stp-stat-atk">Atk</span><span class="stp-stat-atk">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[1] }}</span>
+                        <span class="stp-stat-def">Def</span><span class="stp-stat-def">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[2] }}</span>
+                        <span class="stp-stat-spa">SpA</span><span class="stp-stat-spa">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[4] }}</span>
+                        <span class="stp-stat-spd">SpD</span><span class="stp-stat-spd">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[5] }}</span>
+                        <span class="stp-stat-spe">Spe</span><span class="stp-stat-spe">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[3] }}</span>
                     </div>
                     <template v-else>
                         <div class="stp-ivgrid">
-                            <span>HP</span><input type="text" class="manual_iv_input" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)">
-                            <span>Atk</span><input type="text" class="manual_iv_input" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)">
-                            <span>Def</span><input type="text" class="manual_iv_input" :value="manual_ivs.def" @change="set_manual_iv('def', $event)">
-                            <span>SpA</span><input type="text" class="manual_iv_input" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)">
-                            <span>SpD</span><input type="text" class="manual_iv_input" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)">
-                            <span>Spe</span><input type="text" class="manual_iv_input" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)">
+                            <span class="stp-stat-hp">HP</span><input type="text" class="manual_iv_input stp-stat-hp" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)">
+                            <span class="stp-stat-atk">Atk</span><input type="text" class="manual_iv_input stp-stat-atk" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)">
+                            <span class="stp-stat-def">Def</span><input type="text" class="manual_iv_input stp-stat-def" :value="manual_ivs.def" @change="set_manual_iv('def', $event)">
+                            <span class="stp-stat-spa">SpA</span><input type="text" class="manual_iv_input stp-stat-spa" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)">
+                            <span class="stp-stat-spd">SpD</span><input type="text" class="manual_iv_input stp-stat-spd" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)">
+                            <span class="stp-stat-spe">Spe</span><input type="text" class="manual_iv_input stp-stat-spe" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)">
                         </div>
                         <div class="stp-hint">Hidden Power: {{ manualHiddenPower.type }} ({{ manualHiddenPower.power }})</div>
                     </template>
@@ -345,7 +345,7 @@
                 </div>
             </transition>
             <transition name="fadeDelayed">
-                <div v-if="((g3stateVariable == `Battle` || g3stateVariable == `To Battle`) && g3trainerEnemySelector(this.opponent) == 1) && showSpecialTrainerGraphics == true && batt.type.trainer.value == true && (right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers')" style="position: absolute;" key="1">
+                <div v-if="((g3stateVariable == `Battle` || g3stateVariable == `To Battle`) && g3trainerEnemySelector(this.opponent) == 1) && showSpecialTrainerGraphics == true && batt.type.trainer.value == true && !second_trainer && (right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers')" style="position: absolute;" key="1">
                     <img class="canvas" :src="specialTrainerGraphics()">
                 </div>
             </transition>
@@ -464,6 +464,7 @@ import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder, speedOrder } from "~/core/logic/speedLabel";
 import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView } from "./enemyPanel";
+import { isTwoTrainerBattle } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { searchTrainers } from "~/core/logic/trainerPreview";
 import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
@@ -716,7 +717,8 @@ export default defineComponent({
             autosplitter_toggle          : MyStorage["autosplitter_toggle"]          ?? true,
             showSpecialTrainerGraphics   : MyStorage['showSpecialTrainerGraphics']   ?? true,
             league_rematches             : MyStorage['league_rematches']             ?? false,
-            display_badge_boosts         : MyStorage['display_badge_boosts']         ?? true,
+            // Always on: its toggle is gone, so an old saved `false` must not stick.
+            display_badge_boosts         : true,
             show_nature_changes          : MyStorage['show_nature_changes']          ?? true,
             automatic_post_battle_splits : MyStorage["automatic_post_battle_splits"] ?? false,
             no_counters                  : MyStorage["no_counters"]                  ?? false,
@@ -2415,6 +2417,14 @@ export default defineComponent({
         enemyTrainerPokemon() {
             return this.enemyTrainer.pokemon;
         },
+        // Emerald's two-trainer battles. The second id stays in memory after one, so the battle's flag decides.
+        // FireRed has no second id (that flag is its ghost battle flag there).
+        second_trainer() {
+            const battle = this.game?.properties?.battle
+            if (battle?.type?.two_opponents?.value != true) return null
+            const id = battle.trainer.opponentBId?.value
+            return isTwoTrainerBattle(this.opponentId, id) ? this.enemyTrainerList[id] ?? null : null
+        },
         enemyTrainer() {
             if(this.opponentId ==0 || !this.opponentId) {
                 this.opponentId.change((newProp) => {
@@ -3139,7 +3149,7 @@ export default defineComponent({
             }
             // console.log(player_speed, enemy_speed)
             if (state == 'To Battle') {
-                enemy_speed = data[`${trainer_number}`].pokemon[enemy_slot]?.spe
+                enemy_speed = (enemy_slot >= 3 && this.second_trainer ? this.second_trainer.pokemon[enemy_slot - 3] : data[`${trainer_number}`].pokemon[enemy_slot])?.spe
             }
             const order = speedOrder(player_speed, enemy_speed)
             object.comparison = speedLabel(order, "enemy")
@@ -5575,7 +5585,9 @@ export default defineComponent({
         type_effectiveness,
 
         battlePokemonCrop() {
-            const totalPokemon = this.enemyTrainerList?.[this.opponentId]?.pokemon?.length;
+            const totalPokemon = this.second_trainer
+                ? Math.min(this.enemyTrainer.pokemon.length, 3) + Math.min(this.second_trainer.pokemon.length, 3)
+                : this.enemyTrainerList?.[this.opponentId]?.pokemon?.length;
             const heights = {
               1: "234px",
               2: "401px",

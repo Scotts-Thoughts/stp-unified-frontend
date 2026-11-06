@@ -95,22 +95,22 @@
                     <template #dvs>
                         <template v-if="dv_mode == 'Automatic'">
                             <div class="stp-ivgrid">
-                                <span>HP</span><span>{{ hpDv(currentHpDVs.atk, currentHpDVs.def, 15, 15) }}</span>
-                                <span>Atk</span><span>{{ currentHpDVs.atk }}</span>
-                                <span>Def</span><span>{{ currentHpDVs.def }}</span>
-                                <span>Spe</span><span>15</span>
-                                <span>Spc</span><span>15</span>
+                                <span class="stp-stat-hp">HP</span><span class="stp-stat-hp">{{ hpDv(currentHpDVs.atk, currentHpDVs.def, 15, 15) }}</span>
+                                <span class="stp-stat-atk">Atk</span><span class="stp-stat-atk">{{ currentHpDVs.atk }}</span>
+                                <span class="stp-stat-def">Def</span><span class="stp-stat-def">{{ currentHpDVs.def }}</span>
+                                <span class="stp-stat-spe">Spe</span><span class="stp-stat-spe">15</span>
+                                <span class="stp-stat-spc">Spc</span><span class="stp-stat-spc">15</span>
                             </div>
                             <div class="stp-hint">Base Power: {{ currentHpPower }}</div>
                         </template>
                         <template v-else>
                             <!-- In Manual the Attack DV field decides the gender (the readout below the fields says which). -->
                             <div class="stp-ivgrid">
-                                <span>Atk</span><input type="text" class="manual_dv_input" :value="manual_dvs.atk" @change="set_manual_dv('atk', $event)">
-                                <span>Spe</span><input type="text" class="manual_dv_input" :value="manual_dvs.spe" @change="set_manual_dv('spe', $event)">
-                                <span>Def</span><input type="text" class="manual_dv_input" :value="manual_dvs.def" @change="set_manual_dv('def', $event)">
-                                <span>Spc</span><input type="text" class="manual_dv_input" :value="manual_dvs.spc" @change="set_manual_dv('spc', $event)">
-                                <span>HP</span><span>{{ starterDVs.hp }}</span>
+                                <span class="stp-stat-atk">Atk</span><input type="text" class="manual_dv_input stp-stat-atk" :value="manual_dvs.atk" @change="set_manual_dv('atk', $event)">
+                                <span class="stp-stat-spe">Spe</span><input type="text" class="manual_dv_input stp-stat-spe" :value="manual_dvs.spe" @change="set_manual_dv('spe', $event)">
+                                <span class="stp-stat-def">Def</span><input type="text" class="manual_dv_input stp-stat-def" :value="manual_dvs.def" @change="set_manual_dv('def', $event)">
+                                <span class="stp-stat-spc">Spc</span><input type="text" class="manual_dv_input stp-stat-spc" :value="manual_dvs.spc" @change="set_manual_dv('spc', $event)">
+                                <span class="stp-stat-hp">HP</span><span class="stp-stat-hp">{{ starterDVs.hp }}</span>
                             </div>
                             <div class="stp-hint">Hidden Power: {{ manualHiddenPower.type }} ({{ manualHiddenPower.power }})</div>
                             <div class="stp-hint">Gender from Atk DV: {{ manualGender }}</div>

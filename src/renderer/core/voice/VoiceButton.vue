@@ -35,7 +35,7 @@ export default defineComponent({
             const last = voiceState.last ? `\nLast: ${voiceState.last}` : "";
             switch (voiceState.status) {
                 case "off":
-                    return 'Voice control is off. Click to turn it on, then say "Hey Rotom" and a command: show IVs, show EVs, show regular stats, show base stats, show automatic right panel, show splits.';
+                    return 'Voice control is off. Click to turn it on, then say "Hey Rotom" and a command: show IVs (or DVs), show EVs, show regular stats, show base stats, reset right panel, show splits.';
                 case "starting":
                     return "Voice control is starting…";
                 case "waiting":

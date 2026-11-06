@@ -54,6 +54,8 @@ export interface SendOutPlayer {
     /** Gen 3: badge stat boosts on the player's side (Emerald/RS badges 5 and 7, FRLG the same flags). */
     defenseBadge?: boolean;
     specialDefenseBadge?: boolean;
+    /** Gen 4: the battle's weather as the mappers name it ("Rain", "Sun", "Sandstorm", "Hail", "Fog"); none for clear. */
+    weather?: string | null;
 }
 
 /** One rule: the slot sent out after `fainted` faints, given who is still to come; null when the game picks at random. */
@@ -261,9 +263,19 @@ const GEN4_PUNCHES = new Set(["icepunch", "firepunch", "thunderpunch", "machpunc
     "dynamicpunch", "hammerarm", "megapunch", "cometpunch", "meteormash", "shadowpunch", "drainpunch", "bulletpunch",
     "skyuppercut"]);
 
-/** `Move_CalcVariableType`: Hidden Power from the IVs, Judgment from the plate; everything else is the move's own
- * type here (Natural Gift's berry type is not modelled; Weather Ball has no weather in a neutral field). */
-function gen4MoveType(mon: SendOutMon, move: SendOutMove): string {
+/** The weather as the battle engine feels it: `NO_CLOUD_NINE` counts living battlers, so of the two here only the
+ * player's ability can switch it off. */
+function gen4Weather(player: SendOutPlayer): string {
+    const ability = key(player.ability);
+    return ability === "cloudnine" || ability === "airlock" ? "" : key(player.weather);
+}
+
+const GEN4_WEATHER_BALL: Record<string, string> = { rain: "Water", sandstorm: "Rock", sun: "Fire", hail: "Ice" };
+
+/** `Move_CalcVariableType`: Hidden Power from the IVs, Judgment from the plate, Weather Ball from the weather;
+ * everything else is the move's own type here (Natural Gift's berry type is not modelled). */
+function gen4MoveType(mon: SendOutMon, move: SendOutMove, weather: string): string {
+    if (key(move.name) === "weatherball" && GEN4_WEATHER_BALL[weather]) return GEN4_WEATHER_BALL[weather];
     if (key(move.name) === "hiddenpower" && mon.hiddenPowerType) return normalType(mon.hiddenPowerType);
     if (key(move.name) === "judgment") return key(mon.item).endsWith("plate") ? GEN4_TYPE_ITEMS[key(mon.item)] ?? "Normal" : "Normal";
     return normalType(move.type);
@@ -283,7 +295,7 @@ export function gen4TypeMatchupMultiplier(attack: string, defend1: string, defen
 /** `BattleSystem_CalcEffectiveness`: does this move come out super effective on the player (status moves too)? */
 function gen4SuperEffective(mon: SendOutMon, move: SendOutMove, player: SendOutPlayer): boolean {
     const ability = key(mon.ability);
-    const type = ability === "normalize" ? "Normal" : gen4MoveType(mon, move);
+    const type = ability === "normalize" ? "Normal" : gen4MoveType(mon, move, gen4Weather(player));
     const [d1, d2] = player.types.map(normalType);
     if (ability !== "moldbreaker" && key(player.ability) === "levitate" && type === "Ground" && key(player.item) !== "ironball") return false;
     let se = false, nve = false;
@@ -312,8 +324,9 @@ const divide = (dividend: number, divisor: number) => {
 /**
  * pokeplatinum `BattleSystem_CalcMoveDamage` then `BattleSystem_ApplyTypeChart`, as `BattleAI_PostKOSwitchIn` calls
  * them: the FAINTED enemy attacks the player with a candidate's move, crit multiplier 1, power multiplier 10, no
- * random roll, neutral stages (the fainted battler's were reset), no status, weather or screens. Its HP is 0, so the
- * pinch abilities apply and Slow Start always halves. Returns the damage and whether the player is immune.
+ * random roll, neutral stages (the fainted battler's were reset), no status or screens, and `player.weather`. Its HP
+ * is 0, so the pinch abilities apply, Slow Start always halves and its own Flower Gift doesn't count. `CalcMoveDamage`
+ * is given no type, so Weather Ball only turns at the type chart. Returns the damage and whether the player is immune.
  * The caller keeps the byte (`u8 score`) after each step.
  */
 export function gen4AiDamage(attacker: SendOutMon, player: SendOutPlayer, move: SendOutMove): { damage: number; immune: boolean } {
@@ -356,6 +369,11 @@ export function gen4AiDamage(attacker: SendOutMon, player: SendOutPlayer, move: 
     if (moveType === "Fire" && defHas("heatproof")) power = Math.floor(power / 2);
     if (moveType === "Fire" && defHas("dryskin")) power = Math.floor(power * 125 / 100);
     if (atkAbility === "ironfist" && GEN4_PUNCHES.has(moveKey)) power = Math.floor(power * 12 / 10);
+    const weather = gen4Weather(player);
+    const [d1, d2] = player.types.map(normalType);
+    if (weather === "sun" && atkAbility === "solarpower") spAttack = Math.floor(spAttack * 15 / 10);
+    if (weather === "sandstorm" && (d1 === "Rock" || d2 === "Rock")) spDefense = Math.floor(spDefense * 15 / 10);
+    if (weather === "sun" && defHas("flowergift")) spDefense = Math.floor(spDefense * 15 / 10);
     if (moveKey === "explosion" || moveKey === "selfdestruct") defense = Math.floor(defense / 2);
     // u16 movePower
     power &= 0xffff;
@@ -363,13 +381,15 @@ export function gen4AiDamage(attacker: SendOutMon, player: SendOutPlayer, move: 
     let damage = 0;
     if (move.category === "Physical") damage = Math.floor(Math.floor(attack * power * levelFactor / Math.max(1, defense)) / 50);
     else if (move.category === "Special") damage = Math.floor(Math.floor(spAttack * power * levelFactor / Math.max(1, spDefense)) / 50);
+    if (["rain", "sandstorm", "hail", "fog"].includes(weather) && moveKey === "solarbeam") damage = Math.floor(damage / 2);
+    if ((weather === "rain" && moveType === "Fire") || (weather === "sun" && moveType === "Water")) damage = Math.floor(damage / 2);
+    if ((weather === "rain" && moveType === "Water") || (weather === "sun" && moveType === "Fire")) damage = Math.floor(damage * 15 / 10);
     damage = u8(damage + 2);
 
     // ApplyTypeChart
     if (moveKey === "struggle") return { damage, immune: false };
-    const type = atkAbility === "normalize" ? "Normal" : gen4MoveType(attacker, move);
+    const type = atkAbility === "normalize" ? "Normal" : gen4MoveType(attacker, move, weather);
     if (attacker.types.map(normalType).includes(type)) damage = atkAbility === "adaptability" ? damage * 2 : Math.floor(damage * 15 / 10);
-    const [d1, d2] = player.types.map(normalType);
     let se = false, nve = false, immune = false;
     if (defHas("levitate") && type === "Ground" && defItem !== "ironball") {
         immune = true;

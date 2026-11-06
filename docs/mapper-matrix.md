@@ -64,3 +64,42 @@ and the fixture headers are the ground truth for which mapper a recording used.
    `GameDexes[game]`, split folder name). Those keys stay the mapper's strings (`Yellow`, `Red and Blue`, …); the
    queuer's `selected_game` strings (`Gold & Silver`, `HGSS`…) are the *edition/folder* vocabulary. Both vocabularies
    are declared per GameModule; nothing is renamed.
+
+## ST/gen5 (2026-11-04)
+
+`ST/gen5/pokemon_{black,white,black_2,white_2}_ne.{xml,js}` are generated from the upstream `STANDARD/gen5` files by
+`tools/mappers/make-gen5-st.py`, so an upstream update can't undo them: after one, re-run the script (it stops if an edit no
+longer applies). Property paths are the same plus `battle.opponent_2.pkmn_ram`, `.active_pokemon`, `.party_position` and
+`battle.TESTING.opponent_2_indirect_1`. Gen5's profiles accept both families; pick `ST/gen5` in the queuer.
+
+What was wrong upstream, each read from real battles in Super Shuckie replays:
+
+- **Battle records with an ally or second opponent.** Normally the records are player, opponent, then both again. With an
+  ally or second opponent they are player x2, opponent x2, ally x2, second opponent x2, so the upstream opponent records were
+  the player's second copy. The second copy has a result before its animation; the first is what the screen shows.
+- **`battle.ally.team_count`:** Black/White had White 2's address and White 2/Black 2 had Black's. It read 0 or junk, which broke
+  `outcome_flags` and `battle_state_ready`, so `meta.state` stuck on "To Battle" (the script's own TODO).
+- **Black 2 only:** `outcome_flags` and `battle_state_ready` took the 0x40 offset off twice, the pointer tables used an old base
+  (0x2257494), and the script set `battle_ram_*_0` before comparing them, so its "changed?" test was always false.
+- Pointer tables are 0x1C apart per client; client 3 is the second opponent.
+
+**Checked in real memory:** Black, White and White 2, two-trainer fights from start to end, against the screen and against
+`K:\Programs\pokemon-data` trainer tables. Upstream vs fixed on frozen frames (single, double, wild, overworld, full party):
+every shared property equal, except `ally.team_count` and clock seconds.
+
+**Black 2 is White 2 at a fixed offset:** every game address is 0x40 lower. `tools/mappers/check-black-2-offset.py` compares all
+489 XML addresses and the script, so run it after `make-gen5-st.py`. Black 2 has no replays, so its battles were never watched;
+they rest on that offset. Its overworld was read on the real game (name, map, clock, position). Triple and rotation battles were
+not seen. White 2's `options.difficulty_keys` and `patch.*` are absent from Black 2 on purpose: `difficulty_keys` is a code patch,
+so the offset can't be assumed, and the overlay writes to both.
+
+`overworld.x/y/z` (White 2: 0x223B488, +8, +4; tiles x 0x10000) were found by walking, and replaced addresses that read junk in
+White 2 and 0 in Black 2. Black/White keep upstream's.
+
+`battle.field.weather` and `weather_count` (White 2: 0x21DD928, +4) replaced an address that read junk: upstream added the White 2
+offset to Black's address. Found by injecting weather moves (`docs/parity-harness.md`) in Elite Four fights: 0 and 255 from battle
+start, then the weather and its turns. Black's 0x21F63F4 was proven the same way against N (Rain 2, turns 4, 3, 2, 1, 0). White's
+(+0x20) shows the same 0, 255 in real battles but no weather was run. Black 2's is White 2's less 0x40, not run.
+
+`battle.opponent_2.party_position` is an index only during the battle (the script clamps it to 0 otherwise).
+`containerprocessor` in the White 2 and Black 2 scripts writes to Black's party address (0x22349B4); that is unchecked.

@@ -1,15 +1,10 @@
 /*
- * The microphone button (VoiceButton.vue), left of the Report button (core/report/report.css),
- * in the top right of the settings panel or the start screen; the Updates button sits left of
- * it (core/updates/updates.css). Every rule sets what it needs, because the generations'
- * style.css files style bare `button` elements.
+ * The microphone button (VoiceButton.vue), between the Updates and Report buttons in the
+ * `.stp-top-buttons` row (core/report/report.css). Every rule sets what it needs, because the
+ * generations' style.css files style bare `button` elements.
  */
 
 .stp-voice-btn {
-    position: absolute;
-    top: 14px;
-    right: 116px;
-    z-index: 5;
     display: inline-flex;
     align-items: center;
     justify-content: center;

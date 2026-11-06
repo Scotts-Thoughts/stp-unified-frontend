@@ -119,31 +119,35 @@ docs/             Reference docs. See §13.
   The settings copy has its secrets blanked (`redactSecrets`): any JSON value under a key that looks like a
   password, token or secret (today the OBS WebSocket password, `obs_websocket_password`) is `<redacted>`,
   because a report is something the user sends to someone else.
-- `voice/`: **voice control** (2026-10-31). Say "Hey Rotom", then within 5 s a command ("show IVs", "show EVs",
-  "show regular stats", "show base stats", "show automatic right panel", "show splits"), and the overlay runs that
-  setting's shortcut action. The pieces:
+- `voice/`: **voice control** (2026-10-31). Say "Hey Rotom", then within 5 s a command ("show IVs" or "show DVs",
+  "show EVs", "show regular stats", "show base stats", "reset right panel", "show splits"), and the overlay runs that
+  setting's shortcut action. IVs, EVs and DVs are said as words ("eye-vees", "ee-vees", "dee-vees"), as the community
+  says them. The pieces:
   - The microphone button sits left of the Report button (`core/voice/VoiceButton.vue`); its colour shows the state
     and its tooltip what it last did. On/off is the global key `voice_control`, off by default, so the harness never
     opens a microphone. The shell starts it at boot if it was left on (`startVoiceIfEnabled` in `main.ts`).
   - The overlay (`core/voice/voice.ts`) captures the mic with an AudioWorklet (from a Blob URL) at 16 kHz and sends
     ~100 ms chunks over `voice:audio`. A worker thread (`src/main/voice/worker.ts`, built as its own file through
-    `?modulePath`) runs a **sherpa-onnx keyword spotter**: the npm `sherpa-onnx` WebAssembly build (no native files,
-    works on the Mac), and the 3.3M-parameter English model in `resources/voice/` (5 MB, Apache-2.0). It only
-    listens for the phrases in `src/shared/voiceCommands.ts`; nothing else is transcribed. About 2% of one core.
+    `?modulePath`) runs a **sherpa-onnx speech recognizer**: the npm `sherpa-onnx` WebAssembly build (no native files,
+    works on the Mac), and the 20M streaming English model in `resources/voice/` (43 MB, Apache-2.0). It writes down
+    what it hears; `findVoiceKeywords` in `src/shared/voiceCommands.ts` searches that text once it has stood still for
+    0.5 s, or at the end of an utterance, and sends each thing found as a `heard` event. The text stays in the worker
+    and is thrown away. About 5% of one core.
   - It runs actions through `runShortcutAction` (`core/shortcuts/engine.ts`): the first id in
     `core/voice/commands.ts` that the bound generation has and can do, so a command is exactly a key press.
     Nothing runs on the box-art screen. A command without the wake phrase just before it is ignored.
-  - A new phrase is spelled in the model's word pieces with `tools/voice/tokenize.py`.
-  - Traps, measured on recorded clips (the comments in `worker.ts` have the numbers):
-    - **Exact digital silence** (a muted mic) spoils the stream for the speech after it, so the worker adds
-      seeded dither.
-    - After a detection the stream hears worse. `reset()` there, or a new stream there, made it worse, and a new
-      stream is deaf for a moment. So the worker does nothing at a detection and replaces the stream at the next
-      pause after a *command* (or after the 6 s window when a wake phrase gets no command).
-    - Spelling "IVs" as one word as well as letter by letter made "E V S" be heard as IVs. A wrong command is
-      worse than a missed one.
-  - Tuning was done on Windows text-to-speech voices, not a real one. Re-tune the wake phrase's `:boost #threshold`
-    in `voiceCommands.ts` once a real voice has been tried.
+  - Adding a phrase: write its pattern from what the model really writes, not from the spelling, and add those
+    spellings to `HEARD_EXAMPLES` in `tools/parity/voice-selftest.ts`. What it wrote for Scott: "eye-vees" is SHOW IVIES,
+    IVIZ or IVISE; "ee-vees" is SHOWY VIZ, SHOWY VS or SHOW YEVIZ; "Rotom" is RHODOM, RHODEM or WROTE HIM. Spellings
+    that could be two commands (SHOEVIZ, heard for both IVs and EVs) match nothing: a wrong command is worse than a
+    missed one. The wake phrase can be loose, because on its own it changes nothing.
+  - Why not the small keyword spotter (the first version, 5 MB, sherpa-onnx `createKws`)? It matches written word
+    pieces, so no spelling could make it hear "eye-vees": it passed text-to-speech clips at 6/10 and never heard a real
+    voice. Text-to-speech clips predict a real voice poorly, which is why the self-test also plays `scott-takes.wav`.
+  - Run the recognizer as one continuous stream: a fresh stream per clip loses the opening words.
+  - Restart the app after changing a pattern: a rebuild alone leaves the running app on the old ones.
+  - One real voice has been tried (Scott, 2026-11-05: 8/10 IVs, 9/10 EVs, no wrong commands). "dee-vees" and other
+    people's voices have not, so `show DVs` rests on text-to-speech clips only.
   - Checks: `npm run parity:voice` (self-test, after a build) and `tools/parity/voice-app.ts`. The second drives the
     real app with Chromium's fake microphone playing a fixture clip and checks that the Stats dropdown changes. (§12)
 
@@ -381,7 +385,7 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   `KeyboardEvent.code` (check `key`).
 
 **The settings panel (all five generations, 2026-10-14; `docs/ui-uniformity-plan.md` stages 3-4).**
-- One shared panel, `core/settings/SettingsPanel.vue`, in four columns: Run · Solo Pokémon · Style · Display. Each
+- One shared panel, `core/settings/SettingsPanel.vue`, in four columns: Software · Run · Pokémon · Style. Each
   generation describes its controls as data in `games/genN/settingsPanel.ts` (`core/settings/types.ts`: toggle,
   button, choice, counter, slider, text, readout, statGrid, component, slot, actions), every `get`/`set`/`run`
   touching the same field or method the old template control did. gens 2-5 render it from the overlay
@@ -389,14 +393,26 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   `components/settings/interface_1/2`, `metrics` and `encounters` components still mount first but draw nothing:
   they keep their watchers and subscriptions (ROM starter, Oak's Lab encounter writes, comparison) in the old order.
 - Being a child component, the panel re-renders only when something it shows changes, not on every overlay update.
+- **Layout traps** (`core/styles/settings.css`). A rule on the panel root with one class loses to gens 4-5's
+  `.gen-N div { margin: 0; padding: 0 }` (`shared-gen45.css`), so the root's padding uses `.stp-settings.stp-settings`.
+  The Updates, microphone and Report buttons share one `.stp-top-buttons` row (`core/report/report.css`), in the
+  panel's own grid strip under column 1, so never position one of them by itself: they would cover controls again.
+  Counters are a joined stepper; its rules need three classes to beat gens 2, 4 and 5's `.increment` colours.
 - **Slots** (`kind: "slot"`) are the few pieces that stay as the generation's markup inside `<settings-panel>`: the
   DV/IV readout and manual fields (`tools/parity/manual-ivs-check.ts` finds `manual_iv_input`/`manual_dv_input` and
   the "Hidden Power: X (Y)" text; the DV/IV mode must stay the only Automatic/Manual `<select>`), the nature grid,
   the Pokemon Editor, dev tools, gen2's Rare Candies and backport importer.
+- A button with `icon` (`ButtonControl`) shows as a small icon at the top right of its group's heading, and is still
+  a normal control for its shortcut action. A choice with `inHeading` sits there too. Stat readouts take their colour
+  from a `stp-stat-<stat>` class.
+- A group with a heading collapses from its title. Which ones are collapsed is the per-generation
+  `settings_collapsed_groups` user-state key (group titles), and the rows stay mounted while hidden.
+- The hidden power spread dropdown (`StatSpreadSelect.ts`) is a Chrome customizable select. `<selectedcontent>` does not
+  follow edits to the chosen option (checked on Electron 37), so it is rebuilt whenever its list changes.
 - Dropdown option values are the saved values as text (`select.value = "Manual"` works); a relabelled option pins
   its old shortcut id part with `slug`.
-- The look is `core/styles/settings.css` (tokens; three styles behind the global `settings_panel_theme` key,
-  "Panel Style" in the Style column). Each `style.css` only places `.gen-N .stp-settings` inside its game-capture
+- The look is `core/styles/settings.css` (tokens; dark glass is the only look, and an old saved
+  `settings_panel_theme` value is ignored). Each `style.css` only places `.gen-N .stp-settings` inside its game-capture
   area: the panel must never reach the filmed part of the overlay.
 - Shared pickers: `SpeciesPicker.vue` (type to filter, case/space/punctuation-insensitive; list opens in place,
   emits `change` only on a user pick) and `EditionPicker.vue` (the start screen's box art from `manifest.editions`).
@@ -467,6 +483,26 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   `crystal_trainers`' names minus their rematch numbers and M/F; grunts are "Rocket Grunt", rivals "Rival"), 26px as gens 4-5.
 - The sprite keeps `ePkmnSprite`, `ePkmnSpriteResizing`, `data-enemy-slot` and `data-enemy-species`: the sprite resize
   tool finds the sprite by them.
+- **Two-trainer battles** (gens 3-5, 2026-11-04; `core/logic/twoTrainerBattle.ts`, `npm run parity:two-trainer`): tag and
+  multi battles such as Mars and Jupiter. The first trainer's team is drawn, then the second's in the rows after it, under
+  a "Mars and Jupiter" header (a long one shrinks to one line); the trainer art is hidden, since six rows leave it no room.
+  A double against one trainer (twins, Alf & Fred) is one team and goes the normal way. Found by reading real memory:
+  - **A second id alone proves nothing.** It is 0 outside these battles in gens 4-5, but gen3's `opponentBId` stays in memory
+    after the battle, so Emerald must also check `battle.type.two_opponents`. That bit is the ghost-battle flag in FireRed,
+    which has no second id at all (its doubles are one trainer's table entry). The games can also pass one id twice.
+  - **Gen4:** the team comes from the trainer table by `battle.opponent_2.id`. Platinum's `opponent_2.team_count` is a wrong
+    address (68 at Spear Pillar), and `.trainer.bytes` is an array, not an id. HG/SS's `opponent_2.active_pokemon` is
+    Platinum's offset, so HG/SS shows no stage badges for the second trainer; Platinum does.
+  - **Gen3 (Emerald):** the game caps each trainer at 3 and puts the second at party slot 3 even when the first has fewer,
+    so `slot` and `row` can differ. The Pokémon that is out for the second trainer is `battle.enemySecondPokemon`.
+  - **Gen5:** there are no Black 2 / White 2 tables, so the team is `battle.opponent_2.team` from memory, and
+    `opponent_2.team_count` is junk outside these battles. Use the `ST/gen5` mappers (`docs/mapper-matrix.md`): only they
+    have correct battle records in these battles. `partySlot` takes a second-trainer slot as 6+ (`getEnemyStat`,
+    `speed_comparison`, `enemy_held_item`, `enemy_form`). On an upstream `STANDARD/gen5` mapper it falls back on the party
+    copy, whose HP only changes when the battle ends. `single_battle` lists Black's four two-trainer ids, for the move-power
+    calculation; `enemy_graphic` lets them through.
+  - **Gens 4-5 set no limit on the two teams together.** Only the first six rows are drawn (`secondTeamRows`).
+  - Super Shuckie replays can check this kind of thing against real memory: see `docs/parity-harness.md` "Real game states".
 - **Send-out order** (gens 2-5, 2026-10-15; `docs/send-out-order.md`): the slots are listed in the order the trainer's
   AI will send them out against the player's Pokémon (`core/logic/sendOutOrder.ts`, from the decompilations; gen1's
   order is party order). A slot's `slot` is its party slot (its data, `data-enemy-slot`, stages, faints); its `row`
@@ -586,6 +622,20 @@ moves onto gen1's data layer. Before deleting a "dead" file, check for imports w
   Code that reads `base_stats` there gets nothing: until 2026-10-26 gen3's "Total:" row always showed 0. gen3's
   `get_base_stat_total` and `calculate_ev_benefit` still read it, and nothing calls either one.
 
+**HG/SS trainer Pokémon carry overrides.** A personality comes from difficulty + level + species + trainer id, rolled
+once per trainer class index, then shifted left 8 and added to `pidGender` (0x78 for a female class, else 0x88). An ability or
+gender override changes `pidGender` for that Pokémon **and every one after it** (pokeheartgold `src/trainer_data.c`), so
+keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. Platinum has no such override. `data_objects` (`generate_heartgold_soulsilver_trainers.py`) has modelled this since 2026-05 and is the reference: the frontend's table had drifted from it, so compare against it before hand-fixing a trainer table.
+
+**Checking a table against `data_objects`.** Compare field by field and settle disagreements with the decomp or ROM; neither side wins by default. Never copy a `data_objects` file over a frontend table:
+- the frontend tables hold species `data_objects` does not (the challenge replacements such as Slither Wing, Mega Froslass, Testmoth) and keep older spellings (`Faint Attack`, `ThunderPunch`) that the move tables are keyed on;
+- `rom_id` means different things (the frontend's is the game's internal id in gens 1 and 3), and `evolution_family` and `egg_moves` are laid out differently, so raw differences there are not errors;
+- the overlay does not read `rare_item`, `common_item` or `base_experience` in gens 3-5, or `catch_rate` from a Pokédex table, so differences there do not reach the screen.
+
+**gen4's `g4PokemonData` is a computed, not the table of that name.** `Overlay.vue` still imports it from `data/g4PokemonDataPlat.js`, but `this.g4PokemonData` and `vm.g4PokemonData` return `pokedex_dp`, `pokedex_plat` or `pokedex_hgss` by edition, so nothing reads the imported table and its learnsets are stale. Fix `data/pokedex/*.js`. `crystal-trainers-otto.js`, `g2trainers-short.js` and gen4's `g4MoveData.js` numbers are unread too (`g4MoveData` supplies move types only, and its power and PP are from later games).
+
+**Stats that look wrong but are real, Platinum trainers.** A trainer's form is set after the Pokémon is built, with no stat recalculation (pokeplatinum `src/trainer_data.c`), so Beauty Devon's Sandy and Trash Wormadam battle with Plant stats. Volkner's Electivire has difficulty 2500, which overflows into the random-IV path, so its IVs are not all equal. `data_objects` models both.
+
 **Style defaults.**
 - `games/genN/data/style/*.json` are per-species layout defaults. A dev-mode edit in the running app rewrites
   them through `source.write`.
@@ -613,9 +663,17 @@ moves onto gen1's data layer. Before deleting a "dead" file, check for imports w
 | Keyboard shortcut bindings (changes from the defaults) | `shortcuts` in each generation's section of `user_state.json` | `core/shortcuts/engine.ts` |
 | Shipped style defaults | `games/genN/data/style/*.json` (§6) | `core/persistence/styleSettings.ts` (gen3 has its own manager) |
 | Split CSVs | `<appRoot>/splits/` (folder names kept from the five legacy apps) | `core/persistence/splitFiles.ts` + `games/genN/splits.js` |
+| Per-Pokémon presets (gen4 so far) | `<userData>/stp-overlay/data/presets/<game>/<species>/<name>.json`, one file each | `core/presets/presets.ts`, `core/settings/SoloPicker.vue`, `games/genN/presets.ts` |
 | Legacy gen1 presets (read-only) | `<appRoot>/storage/Storage.json` | `logic/Storage.ts` |
 
 `<userData>` is `%APPDATA%` on Windows and `~/Library/Application Support` on a Mac.
+
+**Presets** (2026-11-05). A preset belongs to one game + species, like the style storage, and a file for another game is refused.
+- What it holds is the panel: every toggle, choice and slider by control id, unless the control says `preset: false`. A new control is saved without further work; mark it `preset: false` if it isn't about the run or the look (counters aren't saved because they aren't those kinds). `preset: "always"` keeps a value while `available` is false. What has no plain control is the generation's `PresetHost` (`games/genN/presets.ts`).
+- Loading runs the controls' own `set`, in panel order, so a dependent control must come after the one it depends on (Hidden Power type before spread, texture before its sliders). The species' save watchers do the rest: a load replaces what the species has stored.
+- `settle()` after each change is load-bearing. Those watchers skip while `is_loading_evolution_style` is true, so a value set during a species load shows but is never saved. Likewise a texture change resets plain filters set in the same tick. `npm run parity:presets` tests this against a fake overlay.
+- With Evolution on, each family member has its own stored look, so the host carries them all (`family_looks`). Otherwise a refilm would change look at the first evolution.
+- Trap: in a build run from source, the style store keeps only `GEN4_STYLE_PROPERTIES`, which lacks `iv_mode` and `manual_ivs`, so those two are not remembered across species changes there (they are in an installed build). A preset still restores them when loaded.
 
 **Persisted key names are a contract.** Renaming one silently loses a user's settings, and harness oracle 4
 flags it.
@@ -675,6 +733,25 @@ copy as a hard link, or as a plain copy on a drive without hard links. This is s
 into the pool at runtime: a write through one hard link would change every copy. `--prepackaged` skips the hook.
 The app writes into its own folder on first launch (the copies, the junction below), so it needs a writable
 install folder. The Windows zip has one; a read-only AppImage or a signed macOS bundle would not.
+
+The app has to work wherever a user puts it, and two things depend on that (both from user reports, 2026-11):
+
+- **The image junction can't be relied on.** It holds an absolute path, so moving or renaming the folder, or a new
+  drive letter, leaves a dead link; junctions also exist only on NTFS, so a portable exFAT drive can't have one.
+  `ensureImagePool()` replaces a stale junction on every launch. If there can't be one, or a real folder is in the
+  way, it redirects `out/renderer/images/...` requests to the pool with `webRequest.onBeforeRequest`. The pool
+  can't simply move to `out/renderer/images`: every update manifest lists it at `resources/images`. Delete a
+  junction with `unlinkSync`, never `rm -r`. If images are still missing, the user gets an error box.
+- **Image paths are case-sensitive under `npm run dev`, even on Windows.** Vite serves `public/` from a list of the real
+  filenames, so `Fire.webp` is a 404 when the file is `fire.webp`, while the same path loads in a packaged build
+  through `file://`. Type icon filenames are lowercase: lowercase a type name before building a path from it.
+- **Font `url()`s must be quoted in the source CSS.** A `?inline` stylesheet gets each asset's absolute `file://`
+  address, and `.href` leaves `(`, `)` and `'` as they are. Unquoted, a folder like `... (1)` or `Kyle's Games`
+  ends the `url()` early: Chromium drops the rule and the text falls back to serif, while images, which use relative
+  URLs, still load. `after-pack.mjs` fails the build on an unquoted one.
+
+`npm run packaged:probe` covers both: `--exe=` a build moved after a first launch into a folder with those
+characters, and `--no-junction` with an empty real folder at `out/renderer/images` to reach the redirect.
 
 Make the zip **before** launching the packaged app, or run `packaged:probe` only after zipping. On first launch
 the app restores the duplicate images and creates the `resources/app/out/renderer/images` junction. The zip
@@ -767,6 +844,7 @@ From cheapest to most expensive:
 | Typecheck | `npm run typecheck` | ~15 s | Always. Covers renderer, shared and preload, but **not** `src/main` |
 | Drift | `npm run parity:drift` | ~3 s | Any gen2–5 overlay or mixin edit |
 | Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:debounce`, `parity:shortcuts`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits, shortcuts or import code |
+| Presets | `npm run parity:presets` | seconds | `core/presets/`; the fake overlay does not cover a real `PresetHost` (§7) |
 | Voice | `npm run parity:voice` (needs a build); `npx tsx --tsconfig tsconfig.web.json tools/parity/voice-app.ts --gen=N` | ~1 min; ~2 min | Voice control, its phrases, or the shortcut action ids it uses (§2 `voice/`) |
 | Action ids | `npm run parity:action-ids -- --out=<file>` before, `-- --compare=<file>` after | seconds, no build | When a change rebuilds a generation's shortcut actions (settings panel descriptors): no persisted id may go missing |
 | Dead CSS | `npm run css:dead` (report), `-- --gen=N --write` | seconds, no build | After a change that stops using classes; the harness must then show no pixel/layout difference |

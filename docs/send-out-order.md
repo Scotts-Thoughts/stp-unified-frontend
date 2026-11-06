@@ -82,7 +82,9 @@ Version notes:
 - For each (candidate, move) pair with power ≠ 1, take the real damage formula (`CalcMoveDamage`) with **the
   fainted enemy as the attacker** and the candidate's move.
 - The fainted enemy's stat stages are reset, and its HP of 0 always triggers Blaze, Torrent, Overgrow and Swarm.
-- The defender is the player's Pokémon: its stats, stat stages, ability and item, plus screens and weather.
+- The defender is the player's Pokémon: its stats, stat stages, ability and item, plus screens and weather. Weather
+  can decide it: Platinum, Fisherman Travis on rainy Route 212 (replay `p-eevee-1-22928`): Water Pulse 6 × 1.5 = 9 beats
+  Thrash's 8 only in the rain, so Barboach came out before Gyarados.
 - Then the type chart. No random roll; crit multiplier 1.
 - The result is truncated to one byte.
 - Two quirks:
@@ -102,7 +104,8 @@ The rest:
 - The scores are sorted with `for i, for j>i: if p[i] < p[j] swap`, and the top one is sent. Copy that exact
   loop, not a stable sort: with ties it does not always favour the lower slot.
 - The battle's party order is **not** the trainer's: each switch-in swaps the active slot with the newcomer's slot.
-- Black/White 1 are **not verified** (no BW1 decomp). They are almost certainly the same engine.
+- Black/White 1 have no decomp, so this is inferred. Real fights agree (2026-11-04, `b-victini-1-12015`), including
+  Cheren on Route 4: Pidove, Dewott, Pansear, Liepard by `battle.opponent.party_position` and the faint frames.
 
 ## 2. What the feature does
 
@@ -111,7 +114,9 @@ The rest:
    2. "Slot 0 faints" picks the next Pokémon using slot 0 as the fainted enemy.
    3. That one faints, and so on.
 
-   It assumes a neutral field: no stat stages, no screens, no weather, nobody statused, and no voluntary switch.
+   It assumes a neutral field: no stat stages, no screens, nobody statused, and no voluntary switch. Gen 4's rule
+   takes the weather (`SendOutPlayer.weather`), but this panel doesn't pass it yet, so it predicts clear skies. The
+   router's recorder passes it: the game sets the weather just before the first turn, so it predicts again then.
 2. **Rows never move** (Scott, 2026-10-15). The order is frozen for the battle (`SendOutOrderCache`): it is worked
    out again only when the team or the player's Pokémon changes. It is kept as the Pokémon themselves, not slot
    numbers, so a mapper whose party list reorders in battle still finds each one. A voluntary switch or a changed
@@ -132,8 +137,8 @@ The rest:
 
 - `core/logic/sendOutOrder.ts`: `predictGen2/3/4/5(party, player)`, plain data in (`SendOutMon`, `SendOutPlayer`),
   party slots out. Gens 3 and 4 port the damage formulas (`gen3BaseDamage`, `gen4AiDamage`) only as far as this
-  rule uses them; each function says what it leaves out (Natural Gift's berry type, Rivalry's genders, Weather Ball
-  in weather, Iron Ball beyond Ground-on-Flying).
+  rule uses them; each function says what it leaves out (Natural Gift's berry type, Rivalry's genders, Iron Ball
+  beyond Ground-on-Flying).
 - `core/logic/typeMatchups.ts`: the ROM's type chart in ROM order (the engines truncate entry by entry).
 - Each `games/genN/enemyPanel.ts` builds the inputs from what it already reads and calls `orderSlots(slots, order)`:
   - gen2: the party in memory, types from `pokemon_crystal.js`, move types from `g2MoveData`;
@@ -151,10 +156,14 @@ The rest:
 - **Gen3's faint move.** Pass 2 needs the move that caused the faint; the prediction uses the player's strongest
   damaging move. This matters only when no candidate passes Pass 1, and only when a damage value passes 255.
 - **Diamond/Pearl and Black/White 1** are inferred, not read. D/P can be checked on the Mac (`pokediamond`).
-- **Field state:** the prediction assumes no weather, even in a rain or sand area.
+- **Field state:** this panel's prediction assumes no weather, even in a rain or sand area (see §2). Gen 3's Pass 2 has
+  the same gap in its code, and in gen 3 weather only matters when no candidate passes Pass 1.
 - **gen5's party list in battle:** whether the mapper's `battle.opponent.team` follows the battle's own order (which
-  swaps on every switch-in) is unchecked; the frozen order follows the Pokémon either way.
+  swaps on every switch-in) is unchecked; the frozen order follows the Pokémon either way. Don't read `battle.other.battle_end`
+  as "the battle is over" in a trainer battle: in Black it goes to 1 mid-battle (replay `b-victini-1-12015`, frames
+  353644-357081, with three of Cheren's four still to come).
 - **Gen4 forms** (Rotom, Wormadam): their types are not checked in the decomp.
+- **Stage 2 is very sensitive to the fainted Pokémon's stats.** One point of Sp. Atk can decide a pick (HG/SS Red: Frenzy Plant 114 vs Giga Impact 113), so a wrong nature in a trainer table shows up as a wrong order. HG/SS's table was fixed for this (`known-legacy-bugs.md` #152). Check the table's stats first when a gen 4 order is wrong. Confirmed in real memory (2026-11-04, replay `h-porygonz-line-2-20841`, read headlessly with Super Shuckie's core): all six of Red's natures and stats match the table, and the faint order was Pikachu, Blastoise, Venusaur, Charizard, Snorlax, Lapras, as predicted. The STP HG/SS ROM keeps party data unencrypted and unshuffled, so a memory scan must not decrypt it.
 - **Real-run checks for Scott**, one battle each, chosen so Stage 2 / Pass 2 actually decides something:
   - Crystal Red;
   - an Emerald gym leader;

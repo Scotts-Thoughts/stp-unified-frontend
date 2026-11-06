@@ -17,8 +17,8 @@
       "name": "battlePokemonCrop",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 24L, gen5 30L)",
       "bodies": {
-        "gen4": "b08e14f5ee2f",
-        "gen5": "611fc1702279"
+        "gen4": "ce5ddf4164cb",
+        "gen5": "6c5f3f4e9e91"
       }
     },
     {
@@ -66,10 +66,10 @@
     {
       "section": "computed",
       "name": "enemy_2_mon_static",
-      "reason": "UNREVIEWED: gen4 | gen5 (gen4 7L, gen5 5L)",
+      "reason": "Different data: gen4 takes the second trainer's team from its trainer tables (Platinum's mapper has a wrong opponent_2.team_count); gen5 reads opponent_2.team from memory (no Black 2 / White 2 tables). ARCHITECTURE §4 Two-trainer battles.",
       "bodies": {
-        "gen4": "b78eb14a203b",
-        "gen5": "3c90db584d12"
+        "gen4": "6e74c043aa85",
+        "gen5": "244e89abea04"
       }
     },
     {
@@ -78,7 +78,7 @@
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 48L, gen5 69L)",
       "bodies": {
         "gen4": "b040bb42407b",
-        "gen5": "fc42e812426f"
+        "gen5": "86d3b8ff58fb"
       }
     },
     {
@@ -275,12 +275,21 @@
     },
     {
       "section": "computed",
+      "name": "second_team_count",
+      "reason": "Different data: gen4 counts the trainer table's party; gen5 reads opponent_2.team_count from memory and ignores junk over 6. ARCHITECTURE §4 Two-trainer battles.",
+      "bodies": {
+        "gen4": "8ec9f6b5cbaf",
+        "gen5": "75baef33d0a2"
+      }
+    },
+    {
+      "section": "computed",
       "name": "settingsPanel",
       "reason": "Reviewed 2026-10-14 (by design): each generation returns its own description (genNSettingsPanel(this), games/genN/settingsPanel.ts); the panel itself is shared (core/settings).",
       "bodies": {
         "gen2": "80933ee9b890",
         "gen3": "af5cbe767dcb",
-        "gen4": "09b5ce01d592",
+        "gen4": "b2d31c910cb1",
         "gen5": "3295641c999a"
       }
     },
@@ -439,7 +448,7 @@
       "reason": "UNREVIEWED: gen2 | gen3 (gen2 22L, gen3 12L)",
       "bodies": {
         "gen2": "7c8d9c8c417f",
-        "gen3": "40f51bf9a82d"
+        "gen3": "5d57eed96792"
       }
     },
     {
@@ -793,7 +802,7 @@
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 59L, gen5 63L)",
       "bodies": {
         "gen4": "2d89e6999227",
-        "gen5": "550e58bd7d4d"
+        "gen5": "afc7b20fa159"
       }
     },
     {
@@ -867,7 +876,7 @@
       "name": "getMoveType",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 9L, gen5 9L)",
       "bodies": {
-        "gen4": "b17bc299aa6e",
+        "gen4": "88c99e21a212",
         "gen5": "3af7feb0f47c"
       }
     },
@@ -1385,9 +1394,9 @@
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 41L, gen3 39L, gen4 22L, gen5 28L)",
       "bodies": {
         "gen2": "59f036595b42",
-        "gen3": "61a9c9783a07",
+        "gen3": "a6c520db9bac",
         "gen4": "f098e1dc2bcd",
-        "gen5": "1c68ac3ba2a6"
+        "gen5": "76ca368be89a"
       }
     },
     {

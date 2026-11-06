@@ -95,7 +95,7 @@ type Step = "idle" | "capturing" | "draw" | "details" | "saving";
 type Point = [number, number];
 
 /**
- * The Report button (top right of the settings panel and of the start screen) and the
+ * The Report button (bottom left of the settings panel, top right of the start screen) and the
  * steps behind it:
  *
  *   1. main takes the window's picture and the log as they are (src/main/report.ts);

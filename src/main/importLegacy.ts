@@ -1,6 +1,7 @@
-import { copyFileSync, cpSync, existsSync, linkSync, mkdirSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, linkSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { app } from "electron";
+import { pathToFileURL } from "node:url";
+import { app, dialog, session } from "electron";
 import { isGlobalKey, parseUserStateFile, serializeUserState, type UserStateSections } from "../shared/userStateFormat";
 import { readLegacyLocalStorage } from "./localStorageImport";
 import { userDataRoot } from "./paths";
@@ -34,21 +35,70 @@ export function importLegacyUserData(): void {
  * The image pool in a packaged build (plan 3.5 / Phase 4). The renderer addresses
  * images relative to its document (`out/renderer/images/...`); in development that
  * folder is a junction to `src/renderer/public/images` made by the build, and
- * electron-builder ships the pool as `resources/images` instead (`extraResources`),
- * so the packaged app makes the same junction once, on first launch.
+ * electron-builder ships the pool as `resources/images` instead (`extraResources`).
+ * The pool stays there because every update manifest lists it there. A junction gets
+ * the renderer to it at no cost per image, but it can't always exist (see
+ * `linkImagePool`), and then the requests are sent there instead.
+ * The user is told if images are still missing: on its own, this failure looks like
+ * a broken overlay with nothing to explain it.
  */
 export function ensureImagePool(): void {
     if (!app.isPackaged) return;
     const link = join(app.getAppPath(), "out", "renderer", "images");
     const pool = join(process.resourcesPath, "images");
-    if (!existsSync(pool)) return;
-    restoreImageCopies(pool);
-    if (existsSync(link)) return;
+    if (!existsSync(pool)) {
+        console.error(`[images] no image pool at ${pool}`);
+        dialog.showErrorBox("The overlay's images are missing", `This folder is missing:\n${pool}\n\nThe overlay will open without its images. Download the overlay again and unzip all of it.`);
+        return;
+    }
+    const failed = restoreImageCopies(pool);
+    if (failed > 0) {
+        dialog.showErrorBox("Some overlay images could not be set up", `${failed} images could not be created in:\n${pool}\n\nThe overlay needs about 3 GB of free space and a folder it can write to. Free up some space or move the overlay to another folder, then start it again.`);
+    }
+    if (!linkImagePool(link, pool)) redirectImagesToPool(pool);
+}
+
+/**
+ * Makes `link` a junction to `pool`, replacing a stale one; false if that isn't possible.
+ *
+ * A junction holds an absolute path, so moving or renaming the install, or the drive
+ * getting a new letter, leaves one that points at nothing (or at the folder it was
+ * copied from). Junctions also exist only on NTFS, so an exFAT or FAT32 drive, usual
+ * for a portable SSD, can't have one at all. A real folder at `link` (Explorer turns a
+ * junction into one when it copies an install) is left alone and not trusted: updates
+ * only change the pool, so that copy goes out of date.
+ */
+function linkImagePool(link: string, pool: string): boolean {
     try {
+        const entry = lstatSync(link, { throwIfNoEntry: false });
+        if (entry && !entry.isSymbolicLink()) return false;
+        if (entry) {
+            if (existsSync(link) && realpathSync(link) === realpathSync(pool)) return true;
+            // Removes the link only, never what it points at (rm -r would follow it).
+            unlinkSync(link);
+        }
         symlinkSync(pool, link, "junction");
+        return true;
     } catch (err) {
         console.error(`[images] could not junction ${link} -> ${pool}:`, err);
+        return false;
     }
+}
+
+/**
+ * Without a junction: answers the renderer's `.../out/renderer/images/...` requests from
+ * the pool. Each image then costs a trip through this process, so this is only the
+ * fallback. Electron keeps one onBeforeRequest listener per session; the other one
+ * (cutter.ts) belongs to a mode that never reaches ensureImagePool().
+ */
+function redirectImagesToPool(pool: string): void {
+    const marker = "/out/renderer/images/";
+    const poolUrl = pathToFileURL(pool).href;
+    session.defaultSession.webRequest.onBeforeRequest({ urls: [`file:///*${marker}*`] }, (details, callback) => {
+        const at = details.url.indexOf(marker);
+        callback(at < 0 ? {} : { redirectURL: `${poolUrl}/${details.url.slice(at + marker.length)}` });
+    });
+    console.log(`[images] no junction here; loading images from ${pool} directly`);
 }
 
 /**
@@ -59,16 +109,17 @@ export function ensureImagePool(): void {
  * that has none (FAT/exFAT), as plain copies. Copies already there are skipped, so
  * after the first launch this only checks: one listing per folder, ~6 ms for 2,488
  * copies in 68 folders, where an existsSync per copy took ~60 ms on every launch.
+ * Returns how many copies could not be made.
  */
-function restoreImageCopies(pool: string): void {
+function restoreImageCopies(pool: string): number {
     const manifest = join(process.resourcesPath, "image-copies.json");
-    if (!existsSync(manifest)) return;
+    if (!existsSync(manifest)) return 0;
     let groups: string[][];
     try {
         groups = JSON.parse(readFileSync(manifest, "utf-8")).copies;
     } catch (err) {
         console.error(`[images] could not read ${manifest}:`, err);
-        return;
+        return 0;
     }
     const listings = new Map<string, Set<string>>();
     const present = (relative: string): boolean => {
@@ -106,6 +157,7 @@ function restoreImageCopies(pool: string): void {
     if (linked || copied || failed) {
         console.log(`[images] restored duplicate images: ${linked} hard-linked, ${copied} copied${failed ? `, ${failed} failed` : ""}`);
     }
+    return failed;
 }
 
 /** The legacy apps' userData folder names (= their package.json names), by generation. */

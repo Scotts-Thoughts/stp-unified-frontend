@@ -20,7 +20,7 @@
  */
 
 import { backgroundTextureStyle } from "./backgroundTexture";
-import { hasUntouchedFilters, lookAfterTextureChange, textureLook, texturePath } from "./textureLooks";
+import { defaultFilters, hasUntouchedFilters, lookAfterTextureChange, textureLook, texturePath } from "./textureLooks";
 import { faultMode } from "~/core/logic/faultMode";
 import { setShuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { openShortcutsMenu } from "~/core/shortcuts/engine";
@@ -133,6 +133,20 @@ export const overlayCommonMixin = {
         /** The "Keyboard Shortcuts" button: opens (or focuses) the Keyboard Shortcuts window. */
         open_shortcuts_menu() {
             openShortcutsMenu();
+        },
+        /** The Background group's reset button: the defaults, keeping the texture and its look. */
+        resetBackground() {
+            this.backgroundXOffset = 0
+            this.backgroundYOffset = 0
+            this.backgroundScale = 100
+            this.backgroundHue = 0
+            this.backgroundFlip = false
+            this.backgroundXFlip = false
+            const filters = defaultFilters(texturePath(this.textures, this.backgroundTexture))
+            this.backgroundBrightness = filters.brightness
+            this.backgroundContrast = filters.contrast
+            this.backgroundSaturation = filters.saturation
+            this.backgroundBlur = filters.blur
         },
         /**
          * Gives an unstyled background its texture's default look (core/overlay/textureLooks.ts).

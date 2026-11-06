@@ -1,6 +1,6 @@
 {
   "name": "stp-overlay",
-  "version": "3.3.1",
+  "version": "3.4.0",
   "description": "Scott's Thoughts Overlay.",
   "main": "./out/main/index.js",
   "build": {
@@ -61,6 +61,7 @@
     "parity:accuracy": "tsx tools/parity/accuracy-selftest.ts",
     "parity:move-power": "tsx tools/parity/move-power-selftest.ts",
     "parity:send-order": "tsx tools/parity/send-out-order-selftest.ts",
+    "parity:two-trainer": "tsx tools/parity/two-trainer-selftest.ts",
     "parity:debounce": "tsx tools/parity/debounce-selftest.ts",
     "parity:shortcuts": "tsx tools/parity/shortcuts-selftest.ts",
     "parity:action-ids": "tsx --tsconfig tsconfig.web.json tools/parity/action-ids.ts",
@@ -68,6 +69,7 @@
     "css:dead": "tsx tools/css/dead-css.ts",
     "css:share": "tsx tools/css/share-css.ts",
     "parity:shortcuts-app": "tsx tools/parity/shortcuts-app-check.ts",
+    "parity:presets": "tsx --tsconfig tsconfig.web.json tools/parity/presets-selftest.ts",
     "parity:drift": "tsx tools/parity/drift-check.ts",
     "parity:manual-ivs": "tsx tools/parity/manual-ivs-check.ts",
     "parity:art-layers": "tsx tools/parity/art-layers-check.ts",

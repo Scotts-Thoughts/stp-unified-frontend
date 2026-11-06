@@ -1,13 +1,14 @@
 import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
-import { panelThemeControl } from "~/core/settings/theme";
+import { abilityLabel } from "~/core/settings/abilityLabel";
+import type { PresetHost } from "~/core/presets/presets";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
 import { slug } from "~/core/shortcuts/build";
 import { gen4Manifest } from "./manifest";
 
 /**
  * gen4's settings panel as data (docs/ui-uniformity-plan.md stages 3-4): the four shared columns,
- * Run · Solo Pokémon · Style · Display, rendered by core/settings/SettingsPanel.vue, and the same list
+ * Software · Run · Pokémon · Style, rendered by core/settings/SettingsPanel.vue, and the same list
  * gives the controls' shortcut actions (actions.ts). Ids are the action ids the controls had before
  * (persisted: never rename one).
  *
@@ -76,7 +77,7 @@ function slider(vm: any, field: string, label: string, min: number, max: number,
     return { kind: "slider", id: `slider.${field}`, label, min, max, step, noAction: true, get: () => Number(vm[field]), set: (v) => { vm[field] = v; } };
 }
 
-export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
+export function gen4SettingsPanel(vm: any, presets?: PresetHost): SettingsPanelSpec {
     const gameName = () => vm.game?.properties?.meta?.game_name?.value;
     const platinum = () => gameName() == "Platinum";
     const hgss = () => gameName() == "HeartGold and SoulSilver";
@@ -96,7 +97,7 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
             flag(vm, `${idBase}.${field}`, label, `${prefix}_${field}`, { actionLabel: `${label} (${game})`, available }),
         );
 
-    const run: SettingsGroup[] = [
+    const software: SettingsGroup[] = [
         {
             title: "Game",
             controls: [
@@ -129,35 +130,15 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
             ],
         },
         {
-            title: "Readouts",
-            controls: [
-                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.team_count.value > 6 ? 0 : vm.game.properties.player.team_count.value) },
-                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
-                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().status_condition.value ?? "None" },
-                {
-                    kind: "statGrid", id: "readout.evs", label: "EVs",
-                    items: () => [
-                        { label: "HP", value: evs().hp, extra: evBenefit("hp") },
-                        { label: "Spe", value: evs().speed, extra: evBenefit("speed") },
-                        { label: "Atk", value: evs().attack, extra: evBenefit("attack") },
-                        { label: "SpA", value: evs().special_attack, extra: evBenefit("special_attack") },
-                        { label: "Def", value: evs().defense, extra: evBenefit("defense") },
-                        { label: "SpD", value: evs().special_defense, extra: evBenefit("special_defense") },
-                    ],
-                },
-                { kind: "readout", id: "readout.ev_total", label: "EV Total", value: () => vm.get_effort_values() },
-            ],
-        },
-        {
             title: "Advanced",
             controls: [
-                flag(vm, "settings.show_advanced", "Show Advanced Settings", "show_advanced_settings"),
+                flag(vm, "settings.show_advanced", "Show Advanced Settings", "show_advanced_settings", { preset: false }),
                 flag(vm, "shuckie.timer", "Shuckie Timer", "shuckie_timer", { tier: "advanced" }),
                 flag(vm, "shuckie.counters", "Shuckie Counters", "shuckie_counters", { tier: "advanced" }),
                 flag(vm, "shuckie.bookmarks", "Shuckie Bookmarks", "shuckie_bookmarks", { tier: "advanced" }),
                 flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", { tier: "advanced" }),
-                flag(vm, "settings.editor", "Pokemon Editor", "editor", { tier: "advanced", noAction: true }),
-                flag(vm, "settings.debugging_mode", "Debugging", "debugging_mode", { tier: "advanced" }),
+                flag(vm, "settings.editor", "Pokemon Editor", "editor", { tier: "advanced", noAction: true, preset: false }),
+                flag(vm, "settings.debugging_mode", "Debugging", "debugging_mode", { tier: "advanced", preset: false }),
             ],
         },
         { title: "Pokemon Editor", tier: "advanced", visible: () => vm.editor == true, controls: [{ kind: "slot", id: "slot.editor", slot: "editor" }] },
@@ -186,13 +167,13 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
         },
     ];
 
-    const solo: SettingsGroup[] = [
+    const run: SettingsGroup[] = [
         {
             title: "Solo Pokemon",
             heading: "Solo Pokémon",
             controls: [
                 {
-                    kind: "component", id: "solo.species", component: "species-picker", noAction: true,
+                    kind: "component", id: "solo.species", component: "solo-picker", noAction: true,
                     props: () => ({ modelValue: vm.starter, options: vm.pokemon_list }),
                     on: { "update:modelValue": (v: string) => { vm.starter = vm.normalizeSpeciesName(v); } },
                 },
@@ -201,14 +182,14 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
         {
             title: "Split Comparison",
             controls: [
-                { kind: "button", id: "splits.load_comparison", label: "Load Replay / Split File", actionLabel: "Load replay / split file to compare", run: () => vm.load_splits() },
+                { kind: "button", id: "splits.load_comparison", label: "Load Splits", actionLabel: "Load replay / split file to compare", run: () => vm.load_splits() },
                 { kind: "readout", id: "splits.source", label: "Comparing Against", class: "stp-readout-wrap", visible: () => !!vm.previous_splits_source, value: () => vm.previous_splits_source },
                 {
                     kind: "button", id: "splits.clear_comparison", label: "Clear Loaded Splits",
                     available: () => vm.previous_splits.length > 0,
                     run: () => { vm.previous_splits = []; vm.previous_splits_source = null; },
                 },
-                { kind: "choice", id: "splits_compare", label: "Compare Splits", options: ["First", "Followup"], get: () => vm.split_type, set: (v) => { vm.split_type = v; } },
+                { kind: "choice", id: "splits_compare", label: "Compare Splits", preset: false, options: ["First", "Followup"], get: () => vm.split_type, set: (v) => { vm.split_type = v; } },
                 { kind: "text", id: "splits.previous_label", label: "Previous Column Label", noAction: true, get: () => vm.previous_label, set: (v) => { vm.previous_label = v; } },
                 { kind: "text", id: "splits.current_label", label: "Current Column Label", noAction: true, get: () => vm.current_label, set: (v) => { vm.current_label = v; } },
             ],
@@ -223,6 +204,29 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
                 { kind: "readout", id: "readout.faults", label: "Faults", value: () => vm.faults },
             ],
         },
+        {
+            title: "Readouts",
+            controls: [
+                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.team_count.value > 6 ? 0 : vm.game.properties.player.team_count.value) },
+                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
+                { kind: "readout", id: "readout.status", label: "Status", value: () => team0().status_condition.value ?? "None" },
+                {
+                    kind: "statGrid", id: "readout.evs", label: "EVs",
+                    items: () => [
+                        { label: "HP", value: evs().hp, extra: evBenefit("hp") },
+                        { label: "Spe", value: evs().speed, extra: evBenefit("speed") },
+                        { label: "Atk", value: evs().attack, extra: evBenefit("attack") },
+                        { label: "SpA", value: evs().special_attack, extra: evBenefit("special_attack") },
+                        { label: "Def", value: evs().defense, extra: evBenefit("defense") },
+                        { label: "SpD", value: evs().special_defense, extra: evBenefit("special_defense") },
+                    ],
+                },
+                { kind: "readout", id: "readout.ev_total", label: "EV Total", value: () => vm.get_effort_values() },
+            ],
+        },
+    ];
+
+    const pokemon: SettingsGroup[] = [
         {
             title: "Evolution",
             available: () => !!vm.hasMultipleEvolutionStages,
@@ -242,14 +246,15 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
             controls: [
                 { kind: "choice", id: "ivs.mode", label: "IVs", options: [IV_MODE.automatic, IV_MODE.manual], get: () => vm.iv_mode, set: (v) => { vm.iv_mode = v; } },
                 {
-                    kind: "choice", id: "hidden_power.type", label: "Hidden Power", actions: "cycle", available: automaticIvs,
+                    kind: "choice", id: "hidden_power.type", label: "Hidden Power", actions: "cycle", available: automaticIvs, preset: "always",
                     actionLabel: "Hidden Power type", placeholder: "Select a Hidden Power type",
                     options: () => strings(vm.values_function(vm.hiddenPowerTypes)),
                     get: () => `${vm.hidden_power_type}`, set: (v) => { vm.hidden_power_type = v; },
                 },
                 {
-                    kind: "choice", id: "hidden_power.index", actions: "cycle", available: automaticIvs,
+                    kind: "choice", id: "hidden_power.index", actions: "cycle", available: automaticIvs, preset: "always",
                     actionLabel: "Hidden Power index", placeholder: "Select a Hidden Power index",
+                    statSpread: true,
                     options: () => (vm.hiddenpowers[vm.hidden_power_type] ?? []).map((key: unknown, index: number) => ({ value: `${index}`, label: `${key}` })),
                     get: () => `${vm.hidden_power_index}`, set: (v) => { vm.hidden_power_index = v; },
                 },
@@ -260,7 +265,7 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
             title: "Ability & Gender",
             controls: [
                 {
-                    kind: "choice", id: "ability", label: () => `Ability (${species()} Has ${abilities().length})`, actionLabel: "Ability", actions: "cycle",
+                    kind: "choice", id: "ability", label: () => abilityLabel(vm.pkmn_ability, vm.values_function(abilities())), actionLabel: "Ability", actions: "cycle",
                     placeholder: "Select an ability",
                     options: () => strings(vm.values_function(abilities())),
                     get: () => `${vm.pkmn_ability}`, set: (v) => { vm.pkmn_ability = v; },
@@ -273,7 +278,7 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
             title: "Nature",
             controls: [
                 {
-                    kind: "choice", id: "nature", label: "Nature", actions: "cycle", placeholder: "Select a Nature",
+                    kind: "choice", id: "nature", inHeading: true, label: "Nature", actions: "cycle", placeholder: "Select a Nature",
                     options: () => vm.values_function(vm.simple_natures).map((key: unknown) => ({ value: `${key}`, label: vm.natureLabels(`${key}`) })),
                     get: () => `${vm.pkmnNature}`, set: (v) => { vm.pkmnNature = v; },
                 },
@@ -311,51 +316,13 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
     ];
 
     const style: SettingsGroup[] = [
-        { title: "Panel", controls: [panelThemeControl()] },
         {
             title: "UI Color",
             controls: [
-                { kind: "button", id: "style.color_picker", label: "Color Picker", noAction: true, run: () => vm.color_picker() },
+                { kind: "button", id: "style.color_picker", icon: "eyedropper", label: "Color Picker", noAction: true, run: () => vm.color_picker() },
                 slider(vm, "ui_saturation", "Saturation", 0, 2, 0.1),
             ],
         },
-        {
-            title: "Pokemon Image",
-            heading: "Pokémon Image",
-            controls: [
-                slider(vm, "imageXOffset", "X-Offset", -600, 600),
-                slider(vm, "imageYOffset", "Y-Offset", -600, 600),
-                slider(vm, "imageScale", "Scale", 0.2, 2.5, 0.01),
-                slider(vm, "imageSat", "Saturation", 90, 150),
-                slider(vm, "imageRotation", "Rotation", -180, 180, 0.01),
-                flag(vm, "style.artwork_flip", "Flip", "imageFlip", { actionLabel: "Pokemon Image Flip" }),
-                { kind: "button", id: "style.reset_pokemon", label: "Reset Pokemon Settings", run: () => vm.resetPokemon() },
-            ],
-        },
-        {
-            title: "Background",
-            controls: [
-                {
-                    kind: "choice", id: "style.background_texture", label: "Texture", actionLabel: "Background Texture", actions: "cycle",
-                    options: () => vm.dropdownDownMenuKeys.textures,
-                    get: () => vm.backgroundTexture, set: (v) => { vm.backgroundTexture = v; },
-                },
-                slider(vm, "backgroundXOffset", "X-Offset", -400, 400),
-                slider(vm, "backgroundYOffset", "Y-Offset", -400, 400),
-                slider(vm, "backgroundScale", "Scale", 50, 300),
-                slider(vm, "backgroundBrightness", "Brightness", 0, 200),
-                slider(vm, "backgroundContrast", "Contrast", 0, 200),
-                slider(vm, "backgroundSaturation", "Saturation", 0, 200),
-                slider(vm, "backgroundBlur", "Blur", 0, 10, 0.1),
-                slider(vm, "backgroundHue", "Hue", 0, 358),
-                flag(vm, "style.background_flip_x", "Flip X", "backgroundFlip", { actionLabel: "Background Flip X" }),
-                // The legacy field names are crossed: `backgroundXFlip` is the vertical flip (as in gens 2-3).
-                flag(vm, "style.background_flip_y", "Flip Y", "backgroundXFlip", { actionLabel: "Background Flip Y" }),
-            ],
-        },
-    ];
-
-    const display: SettingsGroup[] = [
         {
             title: "Display",
             controls: [
@@ -376,9 +343,7 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
                 // Decision 27: a pick also ends a post-battle Splits (core/overlay/rightPanelMode.ts).
                 { kind: "choice", id: "right_panel", label: "Right Panel", options: ["Automatic", "Movepool", "Splits", "Trainers"], get: () => vm.right_ui, set: (v) => { vm.set_right_panel(v); } },
                 // Decision 30: the wild panel in wild battles (Automatic / Trainers), off by default.
-                flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles"),
                 // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
-                flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order"),
                 {
                     kind: "choice", id: "display.unobtainable_moves", label: "Unobtainable Moves",
                     options: ["Never Cross Out", "Cross Out When Starter is Obtained", "Cross Out After First Badge", "Always Cross Out"],
@@ -393,26 +358,65 @@ export function gen4SettingsPanel(vm: any): SettingsPanelSpec {
             controls: [
                 { kind: "text", id: "trainers.search", label: "Search Trainers", placeholder: "Search for a trainer", noAction: true, get: () => vm.search_trainers, set: (v) => { vm.search_trainers = v; } },
                 {
-                    kind: "choice", id: "trainers.examined", label: "Trainer", actions: "cycle",
+                    kind: "choice", id: "trainers.examined", label: "Trainer", actions: "cycle", preset: false,
                     options: () => vm.filtered_trainer_list, get: () => vm.examined_trainer, set: (v) => { vm.examined_trainer = v; },
                 },
             ],
         },
         {
             title: "Toggles",
-            controls: [flag(vm, "display.show_tutor_moves", "Show Tutor Moves", "show_tutor_moves")],
+            controls: [
+                flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles"),
+                flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order"),
+                flag(vm, "display.show_tutor_moves", "Show Tutor Moves", "show_tutor_moves"),
+            ],
+        },
+        {
+            title: "Pokemon Image",
+            heading: "Pokémon Image",
+            controls: [
+                slider(vm, "imageXOffset", "X-Offset", -600, 600),
+                slider(vm, "imageYOffset", "Y-Offset", -600, 600),
+                slider(vm, "imageScale", "Scale", 0.2, 2.5, 0.01),
+                slider(vm, "imageSat", "Saturation", 90, 150),
+                slider(vm, "imageRotation", "Rotation", -180, 180, 0.01),
+                flag(vm, "style.artwork_flip", "Flip", "imageFlip", { actionLabel: "Pokemon Image Flip" }),
+                { kind: "button", id: "style.reset_pokemon", icon: "reset", label: "Reset Pokemon Settings", run: () => vm.resetPokemon() },
+            ],
+        },
+        {
+            title: "Background",
+            controls: [
+                { kind: "button", id: "style.reset_background", icon: "reset", label: "Reset Background", run: () => vm.resetBackground() },
+                {
+                    kind: "choice", id: "style.background_texture", label: "Texture", actionLabel: "Background Texture", actions: "cycle",
+                    options: () => vm.dropdownDownMenuKeys.textures,
+                    get: () => vm.backgroundTexture, set: (v) => { vm.backgroundTexture = v; },
+                },
+                slider(vm, "backgroundXOffset", "X-Offset", -400, 400),
+                slider(vm, "backgroundYOffset", "Y-Offset", -400, 400),
+                slider(vm, "backgroundScale", "Scale", 50, 300),
+                slider(vm, "backgroundBrightness", "Brightness", 0, 200),
+                slider(vm, "backgroundContrast", "Contrast", 0, 200),
+                slider(vm, "backgroundSaturation", "Saturation", 0, 200),
+                slider(vm, "backgroundBlur", "Blur", 0, 10, 0.1),
+                slider(vm, "backgroundHue", "Hue", 0, 358),
+                flag(vm, "style.background_flip_x", "Flip X", "backgroundFlip", { actionLabel: "Background Flip X" }),
+                // The legacy field names are crossed: `backgroundXFlip` is the vertical flip (as in gens 2-3).
+                flag(vm, "style.background_flip_y", "Flip Y", "backgroundXFlip", { actionLabel: "Background Flip Y" }),
+            ],
         },
     ];
 
     return {
         columns: [
+            { groups: software },
             { groups: run },
-            { groups: solo },
+            { groups: pokemon },
             { groups: style },
-            { groups: display },
         ],
         showAdvanced: () => !!vm.show_advanced_settings,
         isDev: () => !!vm.isInDevMode,
-        tint: () => vm.overlay_color,
+        presets,
     };
 }

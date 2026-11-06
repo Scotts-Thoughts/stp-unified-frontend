@@ -50,6 +50,7 @@ export const unobtainable_moves = {
         "Facade",
         "Body Slam",
         "Swords Dance",
+        "Waterfall",
     ],
     "Diamond and Pearl": [
         "Calm Mind",
@@ -76,6 +77,9 @@ export const unobtainable_moves = {
         "Signal Beam",
         "Superpower",
         "Twister",
+        "Blast Burn",
+        "Frenzy Plant",
+        "Hydro Cannon",
     ],
     "Platinum": [
         "Calm Mind",
@@ -103,6 +107,9 @@ export const unobtainable_moves = {
         "Signal Beam",
         "Superpower",
         "Twister",
+        "Blast Burn",
+        "Frenzy Plant",
+        "Hydro Cannon",
     ],
     "HeartGold and SoulSilver": [
         "Calm Mind",

@@ -4,7 +4,9 @@
  *
  *   npm run parity:send-order
  */
-import { gen4TypeMatchupMultiplier, orderSlots, predictGen2, predictGen3, predictGen4, predictGen5, SendOutOrderCache, type SendOutMon, type SendOutMove, type SendOutPlayer } from "../../src/renderer/core/logic/sendOutOrder.ts";
+import { gen4TypeMatchupMultiplier, moveCategoryOf, movePowerOf, orderSlots, predictGen2, predictGen3, predictGen4, predictGen5, SendOutOrderCache, type SendOutMon, type SendOutMove, type SendOutPlayer } from "../../src/renderer/core/logic/sendOutOrder.ts";
+import * as hgssTrainers from "../../src/renderer/games/gen4/data/trainers/heartgold_soulsilver.js";
+import * as gen4Moves from "../../src/renderer/games/gen4/data/moves.js";
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown): void {
@@ -88,6 +90,20 @@ check("gen4 stage 2 byte overflow", predictGen4([
     mon("Kicker", "Normal", "Normal", [mv("Mega Kick", "Normal", 120)], strong),
     mon("Tackler", "Normal", "Normal", [mv("Tackle", "Normal", 35)], strong),
 ], { species: "Snorlax", types: ["Normal", "Normal"], defense: 100, specialDefense: 100 }), [0, 2, 1]);
+
+// HG/SS Red vs a level 83 Porygon-Z, from the real trainer table: a Pokémon with an ability override changes the
+// personality of every Pokémon after it (pokeheartgold `TrMon_OverridePidGender` keeps `pidGender`), so Blastoise is
+// Naive with 173 Sp. Atk, and Frenzy Plant (114) beats Giga Impact (113). With the old 155 Sp. Atk, Snorlax came third.
+// tsx can load these big tables either way round.
+const moveTable: any = (gen4Moves as any).generation4_moves_new ?? (gen4Moves as any).default?.generation4_moves_new;
+const redTypes: Record<string, [string, string]> = { Pikachu: ["Electric", "Electric"], Lapras: ["Water", "Ice"], Snorlax: ["Normal", "Normal"], Venusaur: ["Grass", "Poison"], Charizard: ["Fire", "Flying"], Blastoise: ["Water", "Water"] };
+const hgssRed: SendOutMon[] = ((hgssTrainers as any).trainers_hgss ?? (hgssTrainers as any).default?.trainers_hgss)[260].party.map((p: any) => mon(p.species, ...redTypes[p.species], p.moves.map((name: string) => {
+    const data = moveTable[name];
+    const power = movePowerOf(data?.power);
+    return mv(name, data?.type ?? "Normal", power, moveCategoryOf(data?.category, data?.type, power));
+}), { level: p.level, attack: p.stats.attack, specialAttack: p.stats.special_attack, ability: p.ability, item: p.held_item }));
+check("gen4 HG/SS Red vs Porygon-Z", predictGen4(hgssRed, { species: "Porygon-Z", types: ["Normal", "Normal"], defense: 159, specialDefense: 161, ability: "Download", item: "Leftovers" }).map((i) => hgssRed[i].species),
+    ["Pikachu", "Blastoise", "Venusaur", "Charizard", "Snorlax", "Lapras"]);
 
 // ---- Gen 5: best move power x chart, sorted by the swap loop; a switch-in swaps battle positions.
 const g5player: SendOutPlayer = { species: "Tepig", types: ["Fire", "Fire"] };

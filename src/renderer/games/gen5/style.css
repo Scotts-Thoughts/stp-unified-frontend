@@ -853,6 +853,7 @@
     font-family: titan;
     border: 1px solid rgba(255, 0, 0, 0);
     font-size: 26px;
+    line-height: 30px; /* fixed, so a shrunk two-trainer header stays centred: twoTrainerHeaderStyle */
     top: 25px;
     left: 1486px;
     text-align: center;

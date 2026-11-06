@@ -1,8 +1,10 @@
 <template>
     <div class="game-select">
-        <report-button></report-button>
-        <voice-button></voice-button>
-        <updates-button></updates-button>
+        <div class="stp-top-buttons">
+            <updates-button></updates-button>
+            <voice-button></voice-button>
+            <report-button></report-button>
+        </div>
         <header class="gs-header">
             <h1 class="gs-title">Scott's Thoughts Overlay</h1>
             <div class="gs-status">
@@ -154,7 +156,7 @@ export default defineComponent({
 .game-select {
     --tile-h: 160px;
     --accent: #11ce18;
-    /* the Report button's corner */
+    /* the top buttons' corner */
     position: relative;
     pointer-events: auto;
     display: flex;

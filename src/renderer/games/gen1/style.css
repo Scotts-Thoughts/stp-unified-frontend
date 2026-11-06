@@ -29,30 +29,30 @@
    measured pixel-identical to the Electron 25 rendering in both cases. `oseb`
    already carried the descriptor. */
 @font-face {
-    src: url(../../fonts/OpenSans-ExtraBold.ttf);
+    src: url("../../fonts/OpenSans-ExtraBold.ttf");
     font-family: oseb;
     font-weight: 700;
 }
 
 @font-face {
-    src: url(../../fonts/Play-Bold.ttf);
+    src: url("../../fonts/Play-Bold.ttf");
     font-family: osb;
     font-weight: 700;
 }
 
 @font-face {
-    src: url(../../fonts/TitanOne-Regular.ttf);
+    src: url("../../fonts/TitanOne-Regular.ttf");
     font-family: titan;
 }
 
 @font-face {
-    src: url(../../fonts/Play-Bold.ttf);
+    src: url("../../fonts/Play-Bold.ttf");
     font-family: play;
     font-weight: 700;
 }
 
 @font-face {
-    src: url(../../fonts/Play-Regular.ttf);
+    src: url("../../fonts/Play-Regular.ttf");
     font-family: play_regular;
 }
 

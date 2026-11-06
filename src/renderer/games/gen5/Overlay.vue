@@ -85,21 +85,21 @@
                 </template>
                 <template #ivs>
                     <div v-if="iv_mode == 'Automatic'" class="stp-ivgrid">
-                        <span>HP</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[0] }}</span>
-                        <span>Atk</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[1] }}</span>
-                        <span>Def</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[2] }}</span>
-                        <span>SpA</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[4] }}</span>
-                        <span>SpD</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[5] }}</span>
-                        <span>Spe</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[3] }}</span>
+                        <span class="stp-stat-hp">HP</span><span class="stp-stat-hp">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[0] }}</span>
+                        <span class="stp-stat-atk">Atk</span><span class="stp-stat-atk">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[1] }}</span>
+                        <span class="stp-stat-def">Def</span><span class="stp-stat-def">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[2] }}</span>
+                        <span class="stp-stat-spa">SpA</span><span class="stp-stat-spa">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[4] }}</span>
+                        <span class="stp-stat-spd">SpD</span><span class="stp-stat-spd">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[5] }}</span>
+                        <span class="stp-stat-spe">Spe</span><span class="stp-stat-spe">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[3] }}</span>
                     </div>
                     <template v-else>
                         <div class="stp-ivgrid">
-                            <span>HP</span><input type="text" class="manual_iv_input" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)">
-                            <span>Atk</span><input type="text" class="manual_iv_input" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)">
-                            <span>Def</span><input type="text" class="manual_iv_input" :value="manual_ivs.def" @change="set_manual_iv('def', $event)">
-                            <span>SpA</span><input type="text" class="manual_iv_input" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)">
-                            <span>SpD</span><input type="text" class="manual_iv_input" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)">
-                            <span>Spe</span><input type="text" class="manual_iv_input" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)">
+                            <span class="stp-stat-hp">HP</span><input type="text" class="manual_iv_input stp-stat-hp" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)">
+                            <span class="stp-stat-atk">Atk</span><input type="text" class="manual_iv_input stp-stat-atk" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)">
+                            <span class="stp-stat-def">Def</span><input type="text" class="manual_iv_input stp-stat-def" :value="manual_ivs.def" @change="set_manual_iv('def', $event)">
+                            <span class="stp-stat-spa">SpA</span><input type="text" class="manual_iv_input stp-stat-spa" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)">
+                            <span class="stp-stat-spd">SpD</span><input type="text" class="manual_iv_input stp-stat-spd" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)">
+                            <span class="stp-stat-spe">Spe</span><input type="text" class="manual_iv_input stp-stat-spe" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)">
                         </div>
                         <div class="stp-hint">Hidden Power: {{ manualHiddenPower.type }} ({{ manualHiddenPower.power }})</div>
                     </template>
@@ -371,6 +371,7 @@ import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder } from "~/core/logic/speedLabel";
 import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
+import { isTwoTrainerBattle, secondTeamRows } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { searchTrainers } from "~/core/logic/trainerPreview";
 import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
@@ -1899,7 +1900,8 @@ export default defineComponent({
             return pokemon_data
         },
         enemy_graphic() {
-            if (this.single_battle == false) {
+            // single_battle lists Black's two-trainer battles by id (62, 63, 401, 402): they show both teams now.
+            if (this.single_battle == false && !this.two_trainer_battle) {
                 return false
             }
             let state = this.game.properties.meta.state.value
@@ -2393,9 +2395,17 @@ export default defineComponent({
             return this.game.properties.battle.opponent.team
         },
         enemy_2_mon_static() {
-            const opponent_id = this.game.properties.battle.opponent_2.id.value
-            const object      = this.platinum_trainers[opponent_id].party
-            return object
+            return this.game.properties.battle.opponent_2?.team
+        },
+        two_trainer_battle() {
+            const battle = this.game.properties.battle
+            return isTwoTrainerBattle(battle.opponent.id.value, battle.opponent_2?.id?.value)
+        },
+        // Memory holds a junk count outside such a battle (the mapper's own script ignores anything over 6).
+        second_team_count() {
+            if (!this.two_trainer_battle) return 0
+            const count = this.game.properties.battle.opponent_2.team_count.value
+            return count > 6 ? 0 : secondTeamRows(this.game.properties.battle.opponent.team_count.value, count)
         },
         heldItem() {
             const state = this.game.properties.meta.state.value
@@ -2459,13 +2469,7 @@ export default defineComponent({
             if (totalPokemon == 0) { 
                 return false 
             }
-            // let game = this.game.properties.meta.game_name.value
-            // let opponent_2            = this.game.properties.battle.opponent_2?.trainer.value
-            // let opponent_team_count   = this.game.properties.battle.opponent.team_count.value;
-            // let opponent_2_team_count = this.game.properties.battle.opponent_2?.team_count.value;
-            // if (opponent_2 && game != "HeartGold and SoulSilver") {
-            //     totalPokemon = opponent_team_count + opponent_2_team_count
-            // }
+            totalPokemon += this.second_team_count
             return `height: ${heights[totalPokemon]}; filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`;
         },
         solo_mon() {
@@ -3319,6 +3323,7 @@ export default defineComponent({
             return index >= 0 && family.slice(index + 1).some(f => this.g5PokemonData?.[f.species])
         },
         enemy_held_item(x) {
+            if (x >= 6) return this.game.properties.battle.opponent_2.team?.[x - 6]?.held_item?.value
             const team   = this.game?.properties?.battle?.opponent?.team
             const active = this.activeOpponent()
             const activePid = active?.internals?.personality_value?.value
@@ -3370,7 +3375,7 @@ export default defineComponent({
             return `images/gen5/inventory_sprites/hold-item_${normalize(itemName)}.webp`
         },
         enemy_form(x, species) {
-            const pokemon_data = this.game.properties.battle.opponent.team[x]
+            const pokemon_data = x >= 6 ? this.game.properties.battle.opponent_2.team[x - 6] : this.game.properties.battle.opponent.team[x]
             const form = pokemon_data.flags.alternate_form.value
             const gender = pokemon_data.gender.value
             switch (species) {
@@ -3925,6 +3930,8 @@ export default defineComponent({
             }
         },
         speed_comparison(enemy_slot, enemy_speed_incoming) {
+            const side = enemy_slot >= 6 ? this.game.properties.battle.opponent_2 : this.game.properties.battle.opponent
+            const x = enemy_slot >= 6 ? enemy_slot - 6 : enemy_slot
             let object = {
                 comparison: "Outspeeds",
                 color: "background-color: rgba(255, 63, 63, 0.6)",
@@ -3936,14 +3943,14 @@ export default defineComponent({
             const trainer_number = this.game.properties.battle.opponent.trainer.bytes
             let player_speed     = this.get_stat().Spe
             // let enemy_speed      = this.game.properties.battle.opponent.pkmn_ram[`pokemon_${enemy_slot}_ram`].stats.speed.value
-            let enemy_speed      = this.getEnemyStat("speed", this.game.properties.battle.opponent.pkmn_ram[`pokemon_${enemy_slot}_ram`].stats.speed.value, enemy_slot)
+            let enemy_speed      = this.getEnemyStat("speed", side.pkmn_ram[`pokemon_${x}_ram`].stats.speed.value, enemy_slot)
             let enemy_hp         = 1
             // Who moves first: Lagging Tail and Stall as the game orders them (core/logic/battleSpeed.ts).
             // Trick Room is not in the gen5 mapper.
             const player = state == 'Battle' ? this.game.properties.battle.player.active_pokemon : this.game.properties.player.team[0]
             const order = gen45TurnOrder(
                 { speed: player_speed, ability: state == 'Battle' ? player?.ability_temp?.value : player?.ability?.value, item: player?.held_item?.value },
-                { speed: enemy_speed, ability: this.game.properties.battle.opponent.team?.[enemy_slot]?.ability?.value, item: this.enemy_held_item(enemy_slot) },
+                { speed: enemy_speed, ability: side.team?.[x]?.ability?.value, item: this.enemy_held_item(enemy_slot) },
                 false,
             )
 
@@ -5455,20 +5462,23 @@ export default defineComponent({
             return return_value
         },
         getEnemyStat(statName, statValue, slotIndex) { //stat = the name of the stat ie. "hp", "attack", "defense", etc.
+            // A slot of 6 or more is the second trainer's, as enemyFaint.
+            const side = slotIndex >= 6 ? this.game.properties.battle.opponent_2 : this.game.properties.battle.opponent
+            const x = slotIndex >= 6 ? slotIndex - 6 : slotIndex
             const weather = this.game.properties.battle?.field?.weather?.value
-            const ability = this.game?.properties?.battle?.opponent?.team?.[slotIndex]?.ability?.value
-            const species = this.game?.properties?.battle?.opponent?.team?.[slotIndex]?.species?.value
+            const ability = side?.team?.[x]?.ability?.value
+            const species = side?.team?.[x]?.species?.value
             const held_item = this.enemy_held_item(slotIndex)
             if (statName == 'speed') {
                 // The Speed the game compares for turn order (core/logic/battleSpeed.ts)
                 const in_battle = this.game.properties.meta.state.value == `Battle`
-                const active = in_battle && this.game.properties.battle.opponent.party_position == slotIndex
+                const active = in_battle && side.party_position == x
                 const speed = gen45TurnOrderSpeed(5, {
-                    speed: this.game?.properties?.battle?.opponent?.team?.[slotIndex]?.stats?.speed?.value,
-                    stage: active ? this.game?.properties?.battle?.opponent?.pkmn_ram?.[`pokemon_${slotIndex}_ram`]?.modifiers?.speed?.value : 0,
+                    speed: side?.team?.[x]?.stats?.speed?.value,
+                    stage: active ? side?.pkmn_ram?.[`pokemon_${x}_ram`]?.modifiers?.speed?.value : 0,
                     ability, item: held_item, species,
                     // The party copy's status: the battle structure's is not mapped (pokemon_black.xml battle_structure)
-                    status: this.game?.properties?.battle?.opponent?.team?.[slotIndex]?.status_condition?.value,
+                    status: side?.team?.[x]?.status_condition?.value,
                     weather: in_battle ? weather : null,
                     weatherSuppressed: this.weatherSuppressed(),
                 })
@@ -5512,10 +5522,10 @@ export default defineComponent({
                 }
             }
             let currentStat = 0
-            if (this.game.properties.meta.state.value == `Battle` && this.game.properties.battle.opponent.party_position == slotIndex) {
-                currentStat = this.game?.properties?.battle?.opponent?.team?.[slotIndex]?.stats?.[statName]?.value
+            if (this.game.properties.meta.state.value == `Battle` && side.party_position == x) {
+                currentStat = side?.team?.[x]?.stats?.[statName]?.value
 
-                let modifier = this.game?.properties?.battle?.opponent?.pkmn_ram?.[`pokemon_${slotIndex}_ram`]?.modifiers?.[statName]?.value
+                let modifier = side?.pkmn_ram?.[`pokemon_${x}_ram`]?.modifiers?.[statName]?.value
                 let stageModification = this.stageModifiersData?.stats?.[modifier]
                 if (stageModification == null) {
                     return Math.floor(currentStat * weatherMod * itemMod)
@@ -5527,7 +5537,7 @@ export default defineComponent({
                 return calculated_stats
             }
             else {
-                return Math.floor(this.game?.properties?.battle?.opponent?.team?.[slotIndex]?.stats?.[statName]?.value * weatherMod * itemMod)
+                return Math.floor(side?.team?.[x]?.stats?.[statName]?.value * weatherMod * itemMod)
             }
         },
         enemyMove(slot, moveNumber) {

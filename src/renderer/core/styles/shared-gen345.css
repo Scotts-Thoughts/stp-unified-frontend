@@ -13,7 +13,7 @@ html:has(.gen-N) {
 /* TIMER/RESETS */
 
 @font-face {
-    src: url(../../fonts/OpenSans-ExtraBold-gen345.ttf);
+    src: url("../../fonts/OpenSans-ExtraBold-gen345.ttf");
     font-family: oseb;
     font-weight: 700;
 }
@@ -21,12 +21,12 @@ html:has(.gen-N) {
 /* replace font to change - leave label */
 
 @font-face {
-    src: url(../../fonts/TitanOne-Regular.ttf);
+    src: url("../../fonts/TitanOne-Regular.ttf");
     font-family: titan;
 }
 
 @font-face { /* replace font to change - leave label */
-    src: url(../../fonts/Play-Bold.ttf);
+    src: url("../../fonts/Play-Bold.ttf");
     font-family: play;
     font-weight: 700;
 }

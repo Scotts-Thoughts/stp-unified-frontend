@@ -11,7 +11,7 @@ import { voiceCommand } from "./commands";
  * saved (`voice_control`, a global key) and the shell starts it at boot when it was left on.
  *
  * This side captures the microphone and sends it to main ~10 times a second; main's worker
- * thread (src/main/voice/) spots the phrases and sends back each one heard. Off by default,
+ * thread (src/main/voice/) finds the phrases and sends back each one heard. Off by default,
  * so the parity harness never opens a microphone or loads the model.
  */
 
@@ -97,7 +97,7 @@ async function startVoice(): Promise<void> {
             return;
         }
         current.mic = mic;
-        // 16 kHz is what the model takes, so the least audio crosses to main; the spotter
+        // 16 kHz is what the model takes, so the least audio crosses to main; the recognizer
         // resamples whatever rate it is given.
         const context = new AudioContext({ sampleRate: 16000 });
         current.context = context;

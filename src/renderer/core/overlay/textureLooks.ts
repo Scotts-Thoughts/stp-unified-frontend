@@ -232,6 +232,11 @@ export function hasUntouchedFilters(brightness: unknown, contrast: unknown, satu
     return Number(brightness) === 100 && Number(contrast) === 100 && Number(saturation) === 100 && Number(blur) === 0;
 }
 
+/** What a reset sets the four filters to: the texture's look, or the plain values if it has none. */
+export function defaultFilters(src: unknown): TextureLook {
+    return textureLook(src) ?? { brightness: 100, contrast: 100, saturation: 100, blur: 0 };
+}
+
 /**
  * The look to apply when the texture is changed from `oldSrc` to `newSrc`: the new
  * texture's, if the filters are untouched or still exactly the old texture's look (so

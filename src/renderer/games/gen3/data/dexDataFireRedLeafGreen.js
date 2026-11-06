@@ -477,7 +477,8 @@ export const dexDataFireRedLeafGreen =
             "Body Slam",
             "Double-Edge",
             "Mimic",
-            "Substitute"
+            "Substitute",
+            "Frenzy Plant"
         ],
         "egg_moves": [],
         "dex_number": 3,
@@ -847,7 +848,8 @@ export const dexDataFireRedLeafGreen =
             "Seismic Toss",
             "Mimic",
             "Rock Slide",
-            "Substitute"
+            "Substitute",
+            "Blast Burn"
         ],
         "egg_moves": [],
         "dex_number": 6,
@@ -1224,7 +1226,8 @@ export const dexDataFireRedLeafGreen =
             "Counter",
             "Seismic Toss",
             "Mimic",
-            "Substitute"
+            "Substitute",
+            "Hydro Cannon"
         ],
         "egg_moves": [],
         "dex_number": 9,

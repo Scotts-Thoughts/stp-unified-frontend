@@ -1,13 +1,14 @@
 /**
  * gen4's enemy team panel (trainer battles) as data for the shared `core/overlay/EnemyTeamPanel.ts`: what the overlay
  * computes (`enemyTeamView`, read exactly as the old template read it, each value once per change) and the elements
- * it draws (`enemyTeamLayout`). The slots read the trainer data (`enemy_mon_static`); a Platinum or D/P double battle
- * against two trainers adds the second trainer's team (`enemy_2_mon_static`) after the first.
+ * it draws (`enemyTeamLayout`). The slots read the trainer data (`enemy_mon_static`); a battle against two trainers
+ * adds the second trainer's team (`enemy_2_mon_static`) after the first (core/logic/twoTrainerBattle.ts).
  */
 import { toDisplayString, type StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
 import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_PICTURE, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
+import { twoTrainerHeader, twoTrainerHeaderStyle } from "~/core/logic/twoTrainerBattle";
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen4, SendOutOrderCache, type SendOutMon, type SendOutPlayer } from "~/core/logic/sendOutOrder";
 
@@ -90,29 +91,12 @@ export interface Gen4EnemySlot extends EnemySlotView {
     stages: StageCells | null;
 }
 
-/** A Pokémon of the second trainer in a two-trainer double battle (Platinum, D/P). */
-export interface Gen4SecondSlot {
-    present: boolean;
-    /** `enemyFaint(x + 6)`. */
-    faint: StyleValue;
-    /** Its `ePkmnN` class number: the slot after the first trainer's team. */
-    position: number;
-    sprite: string;
-    species: unknown;
-    level: unknown;
-    ability: unknown;
-    types: { src: string; shown: boolean }[];
-    /** In battle: the labels (in two orders, by whether the player's Pokémon has HP), the values, then the raw stats. */
-    stats: { labels: StyleValue[]; playerUp: boolean; values: unknown[]; raw: unknown[] } | null;
-    stages: StageCells | null;
-    moves: { known: boolean; icon?: string; name: unknown; power?: unknown }[];
-}
-
 export interface Gen4EnemyTeam extends EnemyTeamView<Gen4EnemySlot> {
-    /** "Double Battle Team" for a second trainer, else the trainer's name. */
+    /** Two trainers are being fought. */
     double: boolean;
     overlayColor: unknown;
-    second: Gen4SecondSlot[];
+    /** The second trainer's Pokémon, drawn in the rows after the first's. `slot` is the party slot + 6, as `enemyFaint`. */
+    second: Gen4EnemySlot[];
     /** `getTrainerGraphic()`'s art, when it has one. */
     art: string | null;
 }
@@ -180,43 +164,46 @@ export function enemyTeamView(vm: any): Gen4EnemyTeam {
                 : { known: false, name: undefined }),
         };
     });
-    const second = vm.pkmnSlots.map((x: number): Gen4SecondSlot => {
+    const firstCount = Math.min(6, battle.opponent.team_count.value ?? 0);
+    const second = vm.pkmnSlots.map((x: number): Gen4EnemySlot => {
         const faint = vm.enemyFaint(x + 6) ? FAINTED_PICTURE : undefined;
-        if (!(x < battle.opponent_2.team_count.value && battle.opponent_2.trainer.value != null && props.meta.game_name.value != "HeartGold and SoulSilver")) {
-            return { present: false, faint } as Gen4SecondSlot;
-        }
+        if (!(x < vm.second_team_count)) return { slot: x + 6, present: false, faint } as Gen4EnemySlot;
         const mon = vm.enemy_2_mon_static[x];
-        const active = battle.opponent_2.active_pokemon;
-        const playerUp = state == "Battle" && battle.player.active_pokemon.stats.hp.value > 0;
-        const label = (stat: string) => vm.enemyStatLabelOpacity(active.modifiers?.[stat], x);
-        const status = () => vm.enemyStatusLabelOpacity(active.status_condition, x);
+        const member = battle.opponent_2.team[x];
+        const species = mon?.species;
+        const speed = speedLabel(speedOrder(vm.get_stat().Spe || 0, mon?.stats.speed), "enemy");
+        const statsShown = state == "Battle" || state == "From Battle";
+        // HG/SS's mapper has no valid address for the second trainer's battler (it is Platinum's offset, marked TODO).
+        const active = props.meta.game_name.value != "HeartGold and SoulSilver" ? battle.opponent_2.active_pokemon : null;
+        const moveType = (move: unknown) => move == "Hidden Power" ? vm.hiddenPowerTypeCalc(member) : vm.platinum_moves[String(move)]?.Type?.toLowerCase();
         return {
+            slot: x + 6,
+            row: firstCount + x,
             present: true,
             faint,
-            position: x + battle.opponent.team_count.value,
-            sprite: `images/gen4/pokemon/${vm.speciesSpecialCharacters(vm.enemy_2_mon_static?.[x]?.species)}.webp`,
-            species: mon?.species,
+            ui: vm.enemyPkmnUI(member),
+            speed: { label: speed, svgClass: vm.svgColorClass(speed, member) },
+            sprite: {
+                src: `images/gen4/pokemon/${vm.speciesSpecialCharacters(species)}.webp`,
+                style: { transform: vm.enemyTransformFor(species), filter: `drop-shadow(${vm.getEnemySpriteFlipped(species) ? -2 : 2}px 2px 2px #000) saturate(1.1)` },
+                species,
+                resizing: false,
+            },
+            species,
             level: mon?.level,
             ability: mon?.ability,
             types: types(mon),
-            stats: state == "Battle" ? {
-                playerUp,
-                labels: playerUp
-                    ? [status(), label("attack"), label("defense"), label("speed"), label("special_attack"), label("special_defense")]
-                    : [status(), label("attack"), label("defense"), label("special_attack"), label("special_defense"), label("speed")],
-                values: [mon?.stats.hp, ...["attack", "defense", "speed", "special_attack", "special_defense"].map((stat) => vm.getEnemyStat(stat, mon?.stats[stat], x))],
-                raw: [mon?.stats.hp, mon?.stats.attack, mon?.stats.defense, mon?.stats.special_attack, mon?.stats.special_defense, mon?.stats.speed],
-            } : null,
-            // As the legacy template: the second trainer's badges show the first trainer's stages, and its status is always "BRN" (D9 of the UI audit).
-            stages: state == "Battle" && battle.opponent_2.party_position.value == x
-                ? stageCells(vm, active, () => "BRN", battle.opponent.active_pokemon) : null,
+            statsShown,
+            stats: statsShown ? STATS.map(([, , , stat]) => ({ value: mon?.stats[stat], labelStyle: undefined })) : [],
+            stages: active && state == "Battle" && battle.opponent_2.party_position.value == x
+                ? stageCells(vm, active, (value) => vm.enemy_status(value), active) : null,
             moves: [0, 1, 2, 3].map((i) => mon?.moves[i] != undefined
-                ? { known: true, icon: moveIcon(x, i), name: mon?.moves[i], power: vm.enemy_effective_power(mon?.moves[i], battle.opponent_2.team[x], x) }
+                ? { known: true, icon: `images/gen4/type-icons-circular/${moveType(mon.moves[i])}.webp`, name: mon.moves[i] }
                 : { known: false, name: undefined }),
         };
     });
     const graphic = vm.getTrainerGraphic();
-    const double = battle.opponent_2.value != null;
+    const double = vm.two_trainer_battle;
     // A double battle picks against a random target: no order.
     const count = double || trainerTable(vm)?.[battle.opponent.id.value]?.is_double_battle ? 0 : Math.min(6, battle.opponent.team_count.value ?? 0);
     const party = vm.pkmnSlots.slice(0, count).map((x: number) => {
@@ -226,12 +213,13 @@ export function enemyTeamView(vm: any): Gen4EnemyTeam {
     });
     return {
         double,
-        trainer: battle.opponent_2.value == null ? vm.get_trainer_name(battle.opponent.trainer.value, battle.opponent.id.value) : "Double Battle Team",
+        trainer: double ? twoTrainerHeader(battle.opponent.trainer.value, battle.opponent_2.trainer.value) : vm.get_trainer_name(battle.opponent.trainer.value, battle.opponent.id.value),
         crop: vm.battlePokemonCrop,
         overlayColor: vm.overlay_color,
         slots: orderSlots(slots, sendOutOrder(vm, party, true)),
         second,
-        art: graphic.state == true ? graphic.graphic : null,
+        // Six rows leave no room for the trainer's art over them.
+        art: graphic.state == true && !double ? graphic.graphic : null,
     };
 }
 
@@ -411,60 +399,12 @@ function slotNodes(view: Gen4EnemyTeam, slot: Gen4EnemySlot): EnemyNode {
     };
 }
 
-function secondNodes(slot: Gen4SecondSlot): EnemyNode {
-    const stats = slot.stats;
-    return {
-        class: "eFaintTransition",
-        style: slot.faint,
-        children: [!slot.present ? null : {
-            class: `border slots ePkmnStyle ePkmn${slot.position}`,
-            children: [
-                { tag: "img", class: "ePkmnSprite", src: slot.sprite },
-                { class: "ePkmnLvlSpecies", text: toDisplayString(slot.species) + " " + enemyLevelText(slot.level) },
-                { class: "ePkmnAbility", style: "opacity: .7;", text: slot.ability },
-                typing(slot.types),
-                stats === null ? null : {
-                    class: "border ePkmnStats",
-                    children: [
-                        {
-                            key: stats.playerUp ? 0 : 1,
-                            children: (stats.playerUp ? [L.hp, L.attack, L.defense, L.speed, L.special_attack, L.special_defense] : [L.hp, L.attack, L.defense, L.special_attack, L.special_defense, L.speed])
-                                .map((label, i): EnemyNode => ({ class: "enemyStatLabel", style: stats.labels[i], text: label })),
-                        },
-                        ...stats.values.map((value): EnemyNode => ({ text: value })),
-                        { children: stats.raw.map((value): EnemyNode => ({ text: value })) },
-                    ],
-                },
-                stageTable(slot.stages),
-                {
-                    class: "border ePkmnMoves",
-                    children: [{
-                        tag: "table",
-                        class: "enemyMovesetTable",
-                        children: [{
-                            tag: "tbody",
-                            children: slot.moves.map((move): EnemyNode => ({
-                                tag: "tr",
-                                children: move.known ? [
-                                    { tag: "th", children: [{ tag: "img", class: "icons moveIcon", src: move.icon }] },
-                                    { tag: "th", class: "align_left", style: "font-size: 14px;", text: move.name },
-                                    { tag: "th", style: "opacity: 1; font-size: 14px;", class: "align_right", children: [{ text: move.power }] },
-                                ] : [null, null, null],
-                            })),
-                        }],
-                    }],
-                },
-            ],
-        }],
-    };
-}
-
 /** The panel inside the overlay's enemy team branch. */
 export function enemyTeamLayout(view: Gen4EnemyTeam): EnemyChild[] {
     return [
-        { key: view.double ? 1 : 0, class: "trainerLabel", text: view.trainer },
+        { key: view.double ? 1 : 0, class: "trainerLabel", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 26, 24) : undefined, text: view.trainer },
         { class: "colored-image ds", style: [view.crop, { "--url": "url(images/gen4/new_ui/enemy.svg)" }] },
-        ...view.slots.map((slot): EnemyNode => ({
+        ...[...view.slots, ...view.second.filter((slot) => slot.present)].map((slot): EnemyNode => ({
             children: [!slot.present ? null : {
                 children: [
                     { style: slot.ui, children: [{ class: "enemyStatsArea colored-image", style: `--overlay-color: ${view.overlayColor}; --url: url(images/gen4/new_ui/enemy_moves/${rowOf(slot)}.svg)` }] },
@@ -475,7 +415,7 @@ export function enemyTeamLayout(view: Gen4EnemyTeam): EnemyChild[] {
         })),
         {
             class: "enemyGraphic",
-            children: [...view.slots.map((slot) => slotNodes(view, slot)), ...view.second.map(secondNodes)],
+            children: [...view.slots, ...view.second].map((slot) => slotNodes(view, slot)),
         },
         view.art === null ? null : { tag: "img", src: view.art, style: "position: absolute; top: 0px;" },
     ];

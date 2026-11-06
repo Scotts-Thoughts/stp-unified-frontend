@@ -258,7 +258,8 @@ export const pokedex_frlg = {
             "Body Slam",
             "Double-Edge",
             "Mimic",
-            "Substitute"
+            "Substitute",
+            "Frenzy Plant"
         ],
         "egg_moves": [],
         "weight": 100.0,
@@ -553,7 +554,8 @@ export const pokedex_frlg = {
             "Seismic Toss",
             "Mimic",
             "Rock Slide",
-            "Substitute"
+            "Substitute",
+            "Blast Burn"
         ],
         "egg_moves": [],
         "weight": 90.5,
@@ -846,7 +848,8 @@ export const pokedex_frlg = {
             "Counter",
             "Seismic Toss",
             "Mimic",
-            "Substitute"
+            "Substitute",
+            "Hydro Cannon"
         ],
         "egg_moves": [],
         "weight": 85.5,
@@ -35348,8 +35351,8 @@ export const pokedex_frlg = {
             "hp": 50,
             "attack": 180,
             "defense": 20,
-            "speed": 180,
-            "special_attack": 150,
+            "speed": 150,
+            "special_attack": 180,
             "special_defense": 20
         },
         "ev_yield": {

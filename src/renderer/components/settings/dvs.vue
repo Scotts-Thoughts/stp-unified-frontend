@@ -4,10 +4,10 @@
          (Atk, Spe, Def, Spc) and reads the "HP: X (from the other four)" line. -->
     <template v-if="runConfig.config.dvs.mode == IV_MODE.manual">
         <div class="stp-ivgrid" style="grid-template-columns: repeat(2, auto 1fr);">
-            <span>Atk</span><input type="text" class="manual_dv_input" :value="dvs.atk" @change="set_dv('atk', $event)">
-            <span>Spe</span><input type="text" class="manual_dv_input" :value="dvs.spe" @change="set_dv('spe', $event)">
-            <span>Def</span><input type="text" class="manual_dv_input" :value="dvs.def" @change="set_dv('def', $event)">
-            <span>Spc</span><input type="text" class="manual_dv_input" :value="dvs.spc" @change="set_dv('spc', $event)">
+            <span class="stp-stat-atk">Atk</span><input type="text" class="manual_dv_input stp-stat-atk" :value="dvs.atk" @change="set_dv('atk', $event)">
+            <span class="stp-stat-spe">Spe</span><input type="text" class="manual_dv_input stp-stat-spe" :value="dvs.spe" @change="set_dv('spe', $event)">
+            <span class="stp-stat-def">Def</span><input type="text" class="manual_dv_input stp-stat-def" :value="dvs.def" @change="set_dv('def', $event)">
+            <span class="stp-stat-spc">Spc</span><input type="text" class="manual_dv_input stp-stat-spc" :value="dvs.spc" @change="set_dv('spc', $event)">
         </div>
         <div class="stp-hint">HP: {{ hp_dv }} (from the other four)</div>
         <div class="stp-hint">Written when the starter is received.</div>

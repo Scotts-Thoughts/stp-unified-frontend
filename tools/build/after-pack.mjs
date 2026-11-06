@@ -35,6 +35,7 @@ const MANIFEST = "image-copies.json";
 
 export async function afterPack(context) {
     const resources = context.packager.getResourcesDir(context.appOutDir);
+    checkCssUrlsQuoted(join(resources, "app", "out", "renderer", "assets"));
     const pool = join(resources, "images");
     if (!existsSync(pool)) throw new Error(`[after-pack] no image pool at ${pool}`);
 
@@ -56,6 +57,18 @@ export async function afterPack(context) {
     const electron = JSON.parse(readFileSync(join(context.packager.projectDir, "node_modules", "electron", "package.json"), "utf-8")).version;
     await stampExe(context, electron);
     writeUpdateManifest(context.appOutDir, context.packager.appInfo.version, electron);
+}
+
+/**
+ * A stylesheet imported with `?inline` gets the absolute file:// address of each asset it
+ * references, so the install folder's name lands inside its `url()`. `(`, `)` and `'` are
+ * legal in a folder name, are left as they are in a URL, and end an unquoted `url()`: the
+ * rule is dropped and the text falls back to a serif font (`stp-overlay-3.3.1-win (1)`).
+ * Quoted in the source CSS, the build keeps the quotes. Fails the build if one isn't.
+ */
+function checkCssUrlsQuoted(assets) {
+    const unquoted = readdirSync(assets).filter((name) => name.endsWith(".js") && /url\(["'`]\s*\+\s*new URL\(|url\(\$\{new URL\(/.test(readFileSync(join(assets, name), "utf-8")));
+    if (unquoted.length) throw new Error(`[after-pack] unquoted url() in ${unquoted.join(", ")}: quote it in the source CSS, as url("...")`);
 }
 
 /**

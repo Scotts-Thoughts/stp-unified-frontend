@@ -103,27 +103,11 @@ export const pokedex_dp = {
             "Cut",
             "Fly",
             "Surf",
-            "Whirlpool",
+            "Defog",
             "Waterfall"
         ],
         "tutor_learnset": [
-            "Dive",
-            "Draco Meteor",
-            "Fury Cutter",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Outrage",
-            "Role Play",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
+            "Draco Meteor"
         ],
         "egg_moves": [],
         "weight": 40.0,
@@ -212,19 +196,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 31.6,
         "evolution_family": [
@@ -316,16 +290,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Icy Wind",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Ring",
             "Barrier",
@@ -431,18 +396,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Counter",
@@ -553,14 +507,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Signal Beam",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Disable",
             "Encore",
@@ -664,23 +611,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Iron Defense",
-            "Magic Coat",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Block",
             "Double-Edge",
@@ -783,21 +714,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Super Fang",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Brave Bird",
             "Curse",
@@ -899,16 +818,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Mud-Slap",
-            "Snore",
-            "String Shot",
-            "Spite",
-            "Sucker Punch",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bug Bite",
             "Bug Buzz",
@@ -1010,16 +920,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Headbutt",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Body Slam",
@@ -1126,18 +1027,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Crush Claw",
@@ -1197,11 +1087,7 @@ export const pokedex_dp = {
             [20, "Hidden Power"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 3.4,
         "evolution_family": [
@@ -1290,19 +1176,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Last Resort",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "Worry Seed",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 2.1,
         "evolution_family": [
@@ -1410,15 +1284,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bug Bite",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Confuse Ray",
@@ -1530,21 +1396,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Headbutt",
-            "Ice Punch",
-            "Knock Off",
-            "Ominous Wind",
-            "Rollout",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Bug Bite",
@@ -1648,18 +1500,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Gravity",
-            "Icy Wind",
-            "Magic Coat",
-            "Pain Split",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 34.5,
         "evolution_family": [
@@ -1746,17 +1587,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Ring",
             "Barrier",
@@ -1850,19 +1681,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Air Cutter",
             "Air Slash",
@@ -1964,22 +1785,10 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Icy Wind",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 55.4,
         "evolution_family": [
@@ -2060,19 +1869,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Endeavor",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Double-Edge",
@@ -2184,20 +1983,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Gravity",
-            "Helping Hand",
-            "Iron Head",
-            "Magic Coat",
-            "Pain Split",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 168.0,
         "evolution_family": [
@@ -2292,16 +2078,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Body Slam",
@@ -2426,22 +2203,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Ominous Wind",
-            "Pain Split",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "ThunderPunch",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Explosion",
@@ -2584,24 +2346,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 122.0,
         "evolution_family": [
@@ -2705,24 +2450,10 @@ export const pokedex_dp = {
             "Substitute",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Aqua Tail",
-            "Earth Power",
-            "Headbutt",
-            "Heat Wave",
-            "Iron Head",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assurance",
             "Curse",
@@ -2831,19 +2562,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Bug Bite",
-            "Gravity",
-            "Headbutt",
-            "Iron Defense",
-            "Magnet Rise",
-            "Pain Split",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Double-Edge",
@@ -2944,15 +2663,7 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Helping Hand",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Aromatherapy",
@@ -3053,22 +2764,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Last Resort",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Disable",
@@ -3178,24 +2874,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Iron Defense",
-            "Iron Head",
-            "Magic Coat",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Block",
             "Double-Edge",
@@ -3299,20 +2978,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Block",
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Signal Beam",
-            "Rollout",
-            "Snore",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Fissure",
@@ -3428,21 +3094,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Aqua Tail",
-            "AncientPower",
-            "Dive",
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Hydro Cannon",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Snore",
-            "Superpower"
+            "Hydro Cannon"
         ],
         "egg_moves": [
             "AncientPower",
@@ -3569,23 +3221,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Ice Punch",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Extrasensory",
@@ -3697,22 +3333,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Curse",
@@ -3809,19 +3430,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 28.4,
         "evolution_family": [
@@ -3910,14 +3521,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Baton Pass",
@@ -4041,21 +3645,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "ThunderPunch",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Destiny Bond",
             "Faint Attack",
@@ -4157,16 +3747,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Bite",
@@ -4282,21 +3863,7 @@ export const pokedex_dp = {
             "Cut",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Superpower",
-            "Synthesis",
-            "ThunderPunch",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acid",
             "Counter",
@@ -4401,19 +3968,7 @@ export const pokedex_dp = {
             "Trick Room",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -4534,19 +4089,10 @@ export const pokedex_dp = {
             "Substitute",
             "Cut",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Snore",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Baton Pass",
@@ -4667,18 +4213,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bite",
             "Counter",
@@ -4775,14 +4310,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Covet",
             "Crush Claw",
@@ -4882,19 +4410,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Air Cutter",
             "Air Slash",
@@ -4998,16 +4516,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Magic Coat",
-            "Magnet Rise",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Sucker Punch",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 66.6,
         "evolution_family": [
@@ -5163,28 +4672,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Trick",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Flatter",
             "Moonlight",
@@ -5308,21 +4796,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Iron Defense",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Confuse Ray",
@@ -5431,16 +4905,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Knock Off",
-            "Seed Bomb",
-            "Snore",
-            "String Shot",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bug Bite",
             "Counter",
@@ -5558,19 +5023,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Cross Chop",
@@ -5676,20 +5129,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Superpower",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Aqua Jet",
@@ -5806,26 +5246,11 @@ export const pokedex_dp = {
             "Substitute",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Draco Meteor",
-            "Earth Power",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "ThunderPunch",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Flail",
@@ -5938,23 +5363,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Close Combat",
             "Counter",
@@ -6067,15 +5476,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Headbutt",
-            "Heat Wave",
-            "Iron Head",
-            "Mud-Slap",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -6194,19 +5595,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Role Play",
-            "Spite",
-            "Sucker Punch",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Confuse Ray",
@@ -6337,22 +5726,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Superpower",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assurance",
             "Baton Pass",
@@ -6463,24 +5837,9 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute",
             "Cut",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Tailwind",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Destiny Bond",
@@ -6580,16 +5939,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "BubbleBeam",
@@ -6711,18 +6061,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Gravity",
-            "Headbutt",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 108.0,
         "evolution_family": [
@@ -6847,25 +6186,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Knock Off",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "ThunderPunch",
-            "Vacuum Wave",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Destiny Bond",
@@ -6970,17 +6291,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Last Resort",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -7085,23 +6396,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Endeavor",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Covet",
             "Faint Attack",
@@ -7218,20 +6513,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Dive",
-            "Endeavor",
-            "Fury Cutter",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -7334,21 +6616,7 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Headbutt",
-            "Ice Punch",
-            "Knock Off",
-            "Ominous Wind",
-            "Rollout",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Bug Bite",
@@ -7464,20 +6732,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Endeavor",
-            "Headbutt",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Astonish",
@@ -7596,23 +6851,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Destiny Bond",
@@ -7726,20 +6965,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "ThunderPunch",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Explosion",
@@ -7852,19 +7078,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Fake Out",
@@ -7962,14 +7176,7 @@ export const pokedex_dp = {
             "Substitute",
             "Surf"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Icy Wind",
-            "Iron Defense",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "BubbleBeam",
@@ -8082,21 +7289,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Double-Edge",
@@ -8212,17 +7405,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Blast Burn",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
+            "Blast Burn"
         ],
         "egg_moves": [
             "Covet",
@@ -8321,17 +7504,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Ominous Wind",
-            "Pain Split",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Disable",
             "Energy Ball",
@@ -8439,20 +7612,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Synthesis",
-            "ThunderPunch",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acid",
             "Counter",
@@ -8581,22 +7741,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aromatherapy",
             "Counter",
@@ -8710,18 +7855,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Counter",
@@ -8839,28 +7973,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Endeavor",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Belly Drum",
@@ -8968,19 +8081,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fury Cutter",
-            "Headbutt",
-            "Low Kick",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "ThunderPunch",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Crunch",
             "Crush Claw",
@@ -9080,19 +8181,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Gunk Shot",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -9190,18 +8279,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Earth Power",
-            "Headbutt",
-            "Helping Hand",
-            "Low Kick",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Defense Curl",
             "Harden",
@@ -9300,16 +8378,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Gravity",
-            "Headbutt",
-            "Iron Defense",
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Double-Edge",
@@ -9408,16 +8477,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Endeavor",
-            "Helping Hand",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Uproar",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Encore",
@@ -9511,17 +8571,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Fury Cutter",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Tail",
             "Haze",
@@ -9624,27 +8674,10 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute",
             "Surf",
-            "Whirlpool",
+            "Defog",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Gunk Shot",
-            "Headbutt",
-            "Helping Hand",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Haze",
             "Hydro Pump",
@@ -9760,24 +8793,9 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Magic Coat",
-            "Ominous Wind",
-            "Pain Split",
-            "Signal Beam",
-            "Sky Attack",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Drill Peck",
             "Faint Attack",
@@ -9886,17 +8904,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Super Fang",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Crush Claw",
@@ -9954,10 +8962,7 @@ export const pokedex_dp = {
             [1, "String Shot"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 3.2,
         "evolution_family": [
@@ -10056,21 +9061,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Baton Pass",
@@ -10188,24 +9179,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Heal Bell",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Last Resort",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Attract",
             "Double Hit",
@@ -10319,22 +9293,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Destiny Bond",
@@ -10439,15 +9398,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Gastro Acid",
-            "Gunk Shot",
-            "Headbutt",
-            "Seed Bomb",
-            "Snore",
-            "Spite"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Disable",
@@ -10563,19 +9514,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gunk Shot",
-            "Headbutt",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Assist",
@@ -10694,24 +9633,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assist",
             "Charm",
@@ -10838,27 +9760,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "Sucker Punch",
-            "Trick",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Disable",
             "Dizzy Punch",
@@ -10955,16 +9857,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Superpower",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Fire Fang",
             "Howl",
@@ -11069,15 +9962,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 178.0,
         "evolution_family": [
@@ -11167,17 +10052,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Signal Beam",
-            "Rollout",
-            "Snore",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Fissure",
@@ -11291,18 +10166,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Low Kick",
-            "Magic Coat",
-            "Role Play",
-            "Signal Beam",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assist",
             "Barrier",
@@ -11417,20 +10281,7 @@ export const pokedex_dp = {
             "Waterfall",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Super Fang",
-            "Superpower",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Tail",
             "Defense Curl",
@@ -11532,17 +10383,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Signal Beam",
-            "Rollout",
-            "Snore",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Fissure",
@@ -11602,11 +10443,7 @@ export const pokedex_dp = {
             [5, "Poison Sting"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 3.6,
         "evolution_family": [
@@ -11704,22 +10541,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Bounce",
-            "Earth Power",
-            "Endeavor",
-            "Gunk Shot",
-            "Headbutt",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -11814,21 +10636,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Role Play",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Encore",
@@ -12001,26 +10811,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Earth Power",
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Crunch",
@@ -12135,19 +10926,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Outrage",
-            "Snore",
-            "Spite",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 235.0,
         "evolution_family": [
@@ -12255,24 +11034,11 @@ export const pokedex_dp = {
             "Cut",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "Air Cutter",
-            "Blast Burn",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "ThunderPunch",
-            "Twister"
+            "Blast Burn"
         ],
         "egg_moves": [
             "AncientPower",
@@ -12378,16 +11144,7 @@ export const pokedex_dp = {
             "Substitute",
             "Fly"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Endeavor",
-            "Knock Off",
-            "Mud-Slap",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Brave Bird",
             "Endeavor",
@@ -12485,17 +11242,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Fury Cutter",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Tail",
             "Haze",
@@ -12611,26 +11358,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Endeavor",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Covet",
             "Faint Attack",
@@ -12743,25 +11471,11 @@ export const pokedex_dp = {
             "Cut",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "Air Cutter",
-            "Aqua Tail",
-            "Draco Meteor",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Zen Headbutt"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Dragon Dance",
@@ -12874,20 +11588,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Crunch",
@@ -13003,21 +11704,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Magic Coat",
-            "Ominous Wind",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Drill Peck",
             "Faint Attack",
@@ -13120,16 +11807,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Headbutt",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Body Slam",
@@ -13231,14 +11909,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Crunch",
             "Curse",
@@ -13343,13 +12014,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Mud-Slap",
-            "Snore",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Charm",
@@ -13454,21 +12119,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "AncientPower",
-            "Dive",
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Bite",
@@ -13580,17 +12231,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Dive",
-            "Fury Cutter",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "AncientPower",
@@ -13708,25 +12349,10 @@ export const pokedex_dp = {
             "Substitute",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Earth Power",
-            "Heat Wave",
-            "Iron Head",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 199.0,
         "evolution_family": [
@@ -13831,20 +12457,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Knock Off",
-            "Magic Coat",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Encore",
@@ -13943,14 +12556,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -14075,21 +12681,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "ThunderPunch",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Destiny Bond",
             "Faint Attack",
@@ -14184,14 +12776,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Headbutt",
-            "Icy Wind",
-            "Rollout",
-            "Snore",
-            "Spite"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Block",
@@ -14295,21 +12880,9 @@ export const pokedex_dp = {
             "Pluck",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Faint Attack",
@@ -14408,15 +12981,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gastro Acid",
-            "Knock Off",
-            "Seed Bomb",
-            "Snore",
-            "Sucker Punch",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Encore",
             "Ingrain",
@@ -14518,17 +13083,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Earth Power",
-            "Endeavor",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Sucker Punch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 6.5,
         "evolution_family": [
@@ -14623,17 +13178,10 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute",
             "Cut",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Crunch",
@@ -14750,17 +13298,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Aqua Tail",
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Body Slam",
@@ -14880,24 +13418,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Knock Off",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 0.3,
         "evolution_family": [
@@ -15000,22 +13521,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fire Punch",
-            "Gunk Shot",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Blaze Kick",
             "Counter",
@@ -15132,19 +13638,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Ice Punch",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Super Fang",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Close Combat",
             "Crunch",
@@ -15252,14 +13746,7 @@ export const pokedex_dp = {
             "Waterfall"
         ],
         "tutor_learnset": [
-            "Aqua Tail",
-            "Draco Meteor",
-            "Headbutt",
-            "Icy Wind",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "DragonBreath",
@@ -15361,21 +13848,10 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 60.0,
         "evolution_family": [
@@ -15486,22 +13962,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Curse",
@@ -15625,24 +14086,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Crush Claw",
@@ -15751,17 +14195,7 @@ export const pokedex_dp = {
             "Substitute",
             "Flash Cannon"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Iron Defense",
-            "Iron Head",
-            "Magic Coat",
-            "Magnet Rise",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 180.0,
         "evolution_family": [
@@ -15866,19 +14300,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Magic Coat",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Outrage",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -15999,20 +14421,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Fake Out",
             "Ice Punch",
@@ -16112,20 +14521,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Knock Off",
-            "Magic Coat",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Encore",
@@ -16235,22 +14631,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -16359,19 +14740,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Endeavor",
             "Extrasensory",
@@ -16501,23 +14870,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Endeavor",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aromatherapy",
             "Counter",
@@ -16624,16 +14977,7 @@ export const pokedex_dp = {
             "Trick Room",
             "Strength"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Gravity",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Uproar",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Curse",
@@ -16727,13 +15071,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Heat Wave",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Double-Edge",
@@ -16842,24 +15180,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 202.5,
         "evolution_family": [
@@ -16948,16 +15269,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Last Resort",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Baton Pass",
@@ -17071,25 +15383,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Vacuum Wave",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Bullet Punch",
@@ -17188,15 +15482,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Fire Fang",
             "Howl",
@@ -17318,22 +15604,7 @@ export const pokedex_dp = {
             "Waterfall"
         ],
         "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
+            "Draco Meteor"
         ],
         "egg_moves": [],
         "weight": 206.5,
@@ -17439,19 +15710,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "Synthesis",
-            "ThunderPunch",
-            "Vacuum Wave",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Fake Tears",
@@ -17508,11 +15767,7 @@ export const pokedex_dp = {
             [7, "Harden"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Iron Defense",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 9.9,
         "evolution_family": [
@@ -17606,18 +15861,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Jet",
             "Aqua Ring",
@@ -17733,21 +15977,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Gravity",
-            "Headbutt",
-            "Last Resort",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bite",
             "Disable",
@@ -17873,23 +16103,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Block",
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Belly Drum",
             "Block",
@@ -17998,16 +16212,7 @@ export const pokedex_dp = {
             "Substitute",
             "Flash Cannon"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Iron Defense",
-            "Magic Coat",
-            "Magnet Rise",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 60.0,
         "evolution_family": [
@@ -18108,19 +16313,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Swift",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "False Swipe",
@@ -18229,17 +16422,7 @@ export const pokedex_dp = {
             "Waterfall",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "BubbleBeam",
@@ -18343,21 +16526,10 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Cut",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Endeavor",
-            "Fury Cutter",
-            "Knock Off",
-            "Ominous Wind",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 29.5,
         "evolution_family": [
@@ -18455,19 +16627,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Gravity",
-            "Helping Hand",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 85.6,
         "evolution_family": [
@@ -18557,17 +16717,10 @@ export const pokedex_dp = {
             "Substitute",
             "Cut",
             "Surf",
-            "Whirlpool",
+            "Defog",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Aqua Ring",
@@ -18682,16 +16835,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Cross Chop",
@@ -18749,12 +16893,7 @@ export const pokedex_dp = {
             [1, "Take Down"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 95.2,
         "evolution_family": [
@@ -18847,15 +16986,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Super Fang",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Covet",
@@ -18959,19 +17090,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Gravity",
-            "Icy Wind",
-            "Magic Coat",
-            "Pain Split",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 80.0,
         "evolution_family": [
@@ -19064,19 +17183,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gastro Acid",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Mud-Slap",
-            "Pain Split",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acid Armor",
             "Curse",
@@ -19170,15 +17277,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gastro Acid",
-            "Knock Off",
-            "Seed Bomb",
-            "Snore",
-            "Sucker Punch",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Encore",
             "Ingrain",
@@ -19275,13 +17374,7 @@ export const pokedex_dp = {
             "Substitute",
             "Surf"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Icy Wind",
-            "Iron Defense",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "BubbleBeam",
@@ -19376,14 +17469,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Flail",
             "Focus Energy",
@@ -19489,20 +17575,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Crunch",
@@ -19625,23 +17698,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Fire Punch",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Outrage",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Crunch",
             "Double-Edge",
@@ -19751,20 +17808,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Dive",
-            "Headbutt",
-            "Heal Bell",
-            "Icy Wind",
-            "Iron Head",
-            "Outrage",
-            "Signal Beam",
-            "Snore",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Curse",
@@ -19871,20 +17915,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Knock Off",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Counter",
@@ -19994,21 +18025,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Defense",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "String Shot",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Cross Poison",
             "Knock Off",
@@ -20102,13 +18119,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Icy Wind",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Ring",
             "Captivate",
@@ -20208,20 +18219,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Ominous Wind",
-            "Snore",
-            "Super Fang",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Brave Bird",
             "Curse",
@@ -20334,19 +18334,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Headbutt",
-            "Helping Hand",
-            "Icy Wind",
-            "Iron Head",
-            "Outrage",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 88.4,
         "evolution_family": [
@@ -20441,22 +18429,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Endeavor",
-            "Headbutt",
-            "Heal Bell",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Foresight",
             "Future Sight",
@@ -20571,21 +18544,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 205.0,
         "evolution_family": [
@@ -20681,15 +18640,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Headbutt",
-            "Heat Wave",
-            "Iron Defense",
-            "Mud-Slap",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Earthquake",
             "Endure",
@@ -20801,24 +18752,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Fire Punch",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Head",
-            "Last Resort",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Curse",
@@ -20911,15 +18845,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "False Swipe",
@@ -21019,15 +18945,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "DoubleSlap",
@@ -21134,17 +19052,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Spite",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Block",
@@ -21256,17 +19164,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Super Fang",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Crush Claw",
@@ -21368,18 +19266,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Endeavor",
-            "Seed Bomb",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Sucker Punch",
-            "Synthesis",
-            "Uproar",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 6.5,
         "evolution_family": [
@@ -21479,19 +19366,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Close Combat",
@@ -21594,13 +19469,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gastro Acid",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Flail",
@@ -21702,16 +19571,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Endeavor",
-            "Helping Hand",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Uproar",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Encore",
@@ -21815,20 +19675,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "AncientPower",
-            "Dive",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Crunch",
@@ -21933,17 +19780,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Role Play",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Double-Edge",
             "Growth",
@@ -22049,17 +19886,10 @@ export const pokedex_dp = {
             "Substitute",
             "Cut",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Crunch",
@@ -22186,27 +20016,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Earth Power",
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Counter",
             "Crunch",
@@ -22335,19 +20145,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 50.5,
         "evolution_family": [
@@ -22446,20 +20244,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Fire Punch",
-            "Gastro Acid",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Mud-Slap",
-            "Pain Split",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acid Armor",
             "Curse",
@@ -22571,22 +20356,7 @@ export const pokedex_dp = {
             "Waterfall",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "BubbleBeam",
@@ -22686,21 +20456,10 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Surf",
-            "Whirlpool",
+            "Defog",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Icy Wind",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Aqua Tail",
@@ -22806,12 +20565,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Astonish",
@@ -22913,21 +20667,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Bug Bite",
-            "Headbutt",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Faint Attack",
             "Feint",
@@ -23032,22 +20774,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -23156,17 +20883,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Iron Defense",
-            "Knock Off",
-            "Low Kick",
-            "Snore",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Double-Edge",
@@ -23274,17 +20991,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Dive",
-            "Fury Cutter",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "AncientPower",
@@ -23397,18 +21104,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assurance",
             "Bite",
@@ -23513,22 +21209,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Air Cutter",
-            "Bug Bite",
-            "Headbutt",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Faint Attack",
             "Feint",
@@ -23626,17 +21309,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "String Shot",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Charm",
@@ -23730,17 +21403,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Charge",
@@ -23840,13 +21503,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Headbutt",
-            "Helping Hand",
-            "Icy Wind",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "BubbleBeam",
             "Endeavor",
@@ -23947,20 +21604,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Bite",
@@ -24065,14 +21709,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Signal Beam",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Disable",
             "Encore",
@@ -24180,23 +21817,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fire Punch",
-            "Gunk Shot",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Uproar",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Blaze Kick",
             "Counter",
@@ -24298,20 +21919,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Superpower",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Aqua Jet",
@@ -24424,15 +22032,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "BubbleBeam",
             "Endeavor",
@@ -24544,18 +22144,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Icy Wind",
-            "Last Resort",
-            "Magic Coat",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 36.5,
         "evolution_family": [
@@ -24653,14 +22242,7 @@ export const pokedex_dp = {
             "Waterfall"
         ],
         "tutor_learnset": [
-            "Aqua Tail",
-            "Draco Meteor",
-            "Headbutt",
-            "Icy Wind",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "DragonBreath",
@@ -24789,20 +22371,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Headbutt",
-            "Knock Off",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 60.8,
         "evolution_family": [
@@ -24898,14 +22467,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Beat Up",
@@ -24998,14 +22560,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Magnet Rise",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Charge",
@@ -25118,18 +22673,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -25231,19 +22775,7 @@ export const pokedex_dp = {
             "Substitute",
             "Flash Cannon"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Endeavor",
-            "Gunk Shot",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Sucker Punch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 6.5,
         "evolution_family": [
@@ -25346,17 +22878,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "AncientPower",
-            "Frenzy Plant",
-            "Fury Cutter",
-            "Headbutt",
-            "Magic Coat",
-            "Mud-Slap",
-            "Outrage",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
+            "Frenzy Plant"
         ],
         "egg_moves": [
             "AncientPower",
@@ -25481,22 +23003,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Iron Defense",
-            "Low Kick",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Vacuum Wave",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Bite",
@@ -25585,12 +23092,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Icy Wind",
-            "Iron Defense",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Ring",
             "Barrier",
@@ -25702,19 +23204,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Icy Wind",
-            "Last Resort",
-            "Magic Coat",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 34.0,
         "evolution_family": [
@@ -25808,22 +23298,10 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 52.6,
         "evolution_family": [
@@ -25957,36 +23435,13 @@ export const pokedex_dp = {
             "Fly",
             "Surf",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash",
             "Waterfall",
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Gravity",
-            "Icy Wind",
-            "Iron Defense",
-            "Iron Head",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
+            "Draco Meteor"
         ],
         "egg_moves": [],
         "weight": 320.0,
@@ -26084,16 +23539,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Headbutt",
-            "Knock Off",
-            "Pain Split",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Confusion",
@@ -26201,21 +23647,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Last Resort",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Disable",
@@ -26320,14 +23752,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 198.0,
         "evolution_family": [
@@ -26424,20 +23849,7 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Helping Hand",
-            "Ice Punch",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Bug Buzz",
@@ -26534,13 +23946,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Heat Wave",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Double-Edge",
@@ -26632,13 +24038,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Headbutt",
-            "Mud-Slap",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -26745,18 +24145,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Endeavor",
-            "Fury Cutter",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -26853,20 +24242,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Cross Chop",
@@ -26975,21 +24351,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Close Combat",
             "Counter",
@@ -27082,15 +24444,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Last Resort",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -27214,20 +24568,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Fire Punch",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Sucker Punch",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Crush Claw",
@@ -27320,14 +24661,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Mud-Slap",
-            "Snore",
-            "String Shot",
-            "Spite"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bug Bite",
             "Bug Buzz",
@@ -27425,20 +24759,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Ominous Wind",
-            "Snore",
-            "Super Fang",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Brave Bird",
             "Curse",
@@ -27498,14 +24821,7 @@ export const pokedex_dp = {
             [1, "Bide"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Endeavor",
-            "Mud-Slap",
-            "Snore",
-            "String Shot",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 2.2,
         "evolution_family": [
@@ -27612,19 +24928,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Outrage",
-            "Role Play",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Double-Edge",
             "Growth",
@@ -27730,20 +25034,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Worry Seed",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Cross Chop",
@@ -27852,18 +25143,7 @@ export const pokedex_dp = {
             "Waterfall",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 187.0,
         "evolution_family": [
@@ -27944,14 +25224,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Helping Hand",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aromatherapy",
             "GrassWhistle",
@@ -28050,16 +25323,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Beat Up",
@@ -28176,25 +25440,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Fury Cutter",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 550.0,
         "evolution_family": [
@@ -28276,19 +25522,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Endeavor",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Brave Bird",
             "Mirror Move",
@@ -28394,22 +25630,10 @@ export const pokedex_dp = {
             "Cut",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Fury Cutter",
-            "Headbutt",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Snore",
-            "Synthesis",
-            "Tailwind",
-            "Twister",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Headbutt",
@@ -28513,18 +25737,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Assurance",
@@ -28626,19 +25839,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Last Resort",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Sing",
             "Substitute",
@@ -28735,16 +25936,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Cross Chop",
@@ -28871,23 +26063,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Block",
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Belly Drum",
             "Block",
@@ -28996,18 +26172,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Pain Split",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Counter",
@@ -29105,13 +26270,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Bug Bite",
-            "Signal Beam",
-            "String Shot",
-            "Sucker Punch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Disable",
@@ -29198,17 +26357,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Encore",
             "Fake Tears",
@@ -29264,11 +26413,7 @@ export const pokedex_dp = {
             [7, "Harden"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Iron Defense",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 11.5,
         "evolution_family": [
@@ -29369,23 +26514,9 @@ export const pokedex_dp = {
             "Substitute",
             "Fly",
             "Surf",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Gunk Shot",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Seed Bomb",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Aqua Ring",
@@ -29484,18 +26615,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Gunk Shot",
-            "Icy Wind",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "Flail",
@@ -29599,21 +26719,9 @@ export const pokedex_dp = {
             "Pluck",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Icy Wind",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Drill Peck",
@@ -29738,19 +26846,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Ice Punch",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Super Fang",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Close Combat",
             "Crunch",
@@ -29851,20 +26947,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Aqua Ring",
@@ -29950,20 +27035,9 @@ export const pokedex_dp = {
             "Pluck",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Gunk Shot",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Signal Beam",
-            "Sky Attack",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "Future Sight",
@@ -30069,15 +27143,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bug Bite",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Confuse Ray",
@@ -30182,13 +27248,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Mud-Slap",
-            "Snore",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Charm",
@@ -30301,18 +27361,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Aqua Ring",
@@ -30429,29 +27478,10 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute",
             "Fly",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Endeavor",
-            "Headbutt",
-            "Heal Bell",
-            "Heat Wave",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Foresight",
             "Future Sight",
@@ -30558,9 +27588,7 @@ export const pokedex_dp = {
             [30, "Flail"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bounce"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 10.0,
         "evolution_family": [
@@ -30651,17 +27679,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Gastro Acid",
-            "Knock Off",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Leech Seed",
             "Magical Leaf",
@@ -30760,14 +27778,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Crunch",
@@ -30860,15 +27871,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "Uproar",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Cotton Spore",
             "Extrasensory",
@@ -30977,20 +27980,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "ThunderPunch",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Explosion",
@@ -31090,15 +28080,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Fire Fang",
             "Howl",
@@ -31211,19 +28193,7 @@ export const pokedex_dp = {
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "Air Cutter",
-            "Draco Meteor",
-            "Heal Bell",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Agility",
@@ -31322,17 +28292,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Outrage",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "Disable",
@@ -31443,15 +28403,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Defense",
-            "Knock Off",
-            "Snore",
-            "String Shot",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Close Combat",
             "Faint Attack",
@@ -31551,22 +28503,9 @@ export const pokedex_dp = {
             "Pluck",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Spite",
-            "Sucker Punch",
-            "Superpower",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Drill Peck",
@@ -31676,13 +28615,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Destiny Bond",
@@ -31795,22 +28728,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Knock Off",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 0.3,
         "evolution_family": [
@@ -31906,16 +28824,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Icy Wind",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Destiny Bond",
             "Grudge",
@@ -32022,18 +28931,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Bug Bite",
-            "Earth Power",
-            "Headbutt",
-            "Heat Wave",
-            "Iron Defense",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 430.0,
         "evolution_family": [
@@ -32132,19 +29030,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Close Combat",
@@ -32244,18 +29130,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Endeavor",
             "Extrasensory",
@@ -32368,21 +29243,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Block",
@@ -32488,18 +29349,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Pain Split",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "BubbleBeam",
@@ -32602,19 +29452,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Cross Chop",
@@ -32714,18 +29552,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Gastro Acid",
-            "Mud-Slap",
-            "Pain Split",
-            "Seed Bomb",
-            "Snore",
-            "String Shot",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Mirror Coat",
@@ -32838,22 +29665,13 @@ export const pokedex_dp = {
             "Cut",
             "Surf",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash",
             "Waterfall",
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Hydro Cannon",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore"
+            "Hydro Cannon"
         ],
         "egg_moves": [
             "Agility",
@@ -32961,20 +29779,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Flail",
             "Leech Seed",
@@ -33080,17 +29885,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assurance",
             "Bite",
@@ -33182,15 +29977,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Cotton Spore",
             "Extrasensory",
@@ -33298,21 +30085,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Bounce",
-            "Dive",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 1.4,
         "evolution_family": [
@@ -33413,24 +30186,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assist",
             "Baton Pass",
@@ -33544,29 +30300,12 @@ export const pokedex_dp = {
             "Cut",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash",
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Aqua Tail",
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Gravity",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [],
         "weight": 750.0,
@@ -33689,30 +30428,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Earth Power",
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Iron Head",
-            "Low Kick",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -33836,20 +30552,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Block",
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Belly Drum",
@@ -33971,23 +30674,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Earth Power",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Superpower",
-            "Super Fang",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Charm",
@@ -34094,30 +30781,10 @@ export const pokedex_dp = {
             "Substitute",
             "Cut",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bounce",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Synthesis",
-            "Tailwind",
-            "Twister",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "False Swipe",
@@ -34222,19 +30889,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 32.0,
         "evolution_family": [
@@ -34335,21 +30992,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Iron Head",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 230.0,
         "evolution_family": [
@@ -34446,20 +31089,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Gastro Acid",
-            "Headbutt",
-            "Mud-Slap",
-            "Pain Split",
-            "Seed Bomb",
-            "Snore",
-            "String Shot",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Mirror Coat",
@@ -34568,26 +31198,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Endeavor",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Covet",
             "Faint Attack",
@@ -34743,20 +31354,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Air Cutter",
             "Air Slash",
@@ -34867,18 +31467,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Ominous Wind",
-            "Pain Split",
-            "Role Play",
-            "Spite",
-            "Sucker Punch",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Confuse Ray",
@@ -34981,18 +31570,7 @@ export const pokedex_dp = {
             "Trick Room",
             "Strength"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Gravity",
-            "Headbutt",
-            "Low Kick",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Curse",
@@ -35114,19 +31692,7 @@ export const pokedex_dp = {
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Gravity",
-            "Headbutt",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [],
         "weight": 336.0,
@@ -35236,25 +31802,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Super Fang",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Cross Chop",
@@ -35373,18 +31921,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Block",
-            "Earth Power",
-            "Frenzy Plant",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Outrage",
-            "Seed Bomb",
-            "Snore",
-            "Superpower",
-            "Synthesis",
-            "Worry Seed"
+            "Frenzy Plant"
         ],
         "egg_moves": [
             "Amnesia",
@@ -35495,16 +32032,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Heal Bell",
-            "Icy Wind",
-            "Signal Beam",
-            "Snore",
-            "Sucker Punch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Amnesia",
@@ -35612,19 +32140,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Gunk Shot",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Assist",
@@ -35734,21 +32250,7 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Helping Hand",
-            "Ice Punch",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Bug Buzz",
@@ -35845,13 +32347,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Bug Bite",
-            "Signal Beam",
-            "String Shot",
-            "Sucker Punch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Disable",
@@ -35952,21 +32448,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Cut",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Endeavor",
-            "Fury Cutter",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 38.5,
         "evolution_family": [
@@ -36058,22 +32542,9 @@ export const pokedex_dp = {
             "Substitute",
             "Cut",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Uproar",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Covet",
             "Curse",
@@ -36176,16 +32647,7 @@ export const pokedex_dp = {
             "Substitute",
             "Flash Cannon"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Iron Defense",
-            "Magic Coat",
-            "Magnet Rise",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 6.0,
         "evolution_family": [
@@ -36277,14 +32739,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Icy Wind",
-            "Last Resort",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Disable",
@@ -36386,21 +32841,7 @@ export const pokedex_dp = {
             "Surf",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Gunk Shot",
-            "Helping Hand",
-            "Headbutt",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Super Fang",
-            "Swift",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Helping Hand",
@@ -36503,18 +32944,11 @@ export const pokedex_dp = {
             "Cut",
             "Surf",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Signal Beam"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Aqua Ring",
@@ -36626,21 +33060,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 175.0,
         "evolution_family": [
@@ -36733,17 +33153,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Fury Cutter",
-            "Headbutt",
-            "Magic Coat",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Aromatherapy",
@@ -36863,24 +33273,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fire Punch",
-            "Gunk Shot",
-            "Helping Hand",
-            "Headbutt",
-            "Ice Punch",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Role Play",
-            "Seed Bomb",
-            "Spite",
-            "Swift",
-            "ThunderPunch",
-            "Uproar",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Close Combat",
@@ -36987,17 +33380,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Magnet Rise",
-            "Outrage",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Charge",
@@ -37117,25 +33500,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Vacuum Wave",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Bullet Punch",
@@ -37255,20 +33620,7 @@ export const pokedex_dp = {
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "AncientPower",
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Gravity",
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [],
         "weight": 683.0,
@@ -37371,23 +33723,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Knock Off",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 0.3,
         "evolution_family": [
@@ -37496,19 +33832,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Belly Drum",
@@ -37631,25 +33955,11 @@ export const pokedex_dp = {
             "Cut",
             "Fly",
             "Surf",
-            "Whirlpool",
+            "Defog",
             "Waterfall"
         ],
         "tutor_learnset": [
-            "Dive",
-            "Draco Meteor",
-            "Fury Cutter",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
+            "Draco Meteor"
         ],
         "egg_moves": [],
         "weight": 60.0,
@@ -37759,24 +34069,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Earth Power",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Beat Up",
@@ -37877,17 +34170,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "String Shot",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Charm",
@@ -38007,21 +34290,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Gravity",
-            "Helping Hand",
-            "Iron Defense",
-            "Iron Head",
-            "Magic Coat",
-            "Pain Split",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 154.0,
         "evolution_family": [
@@ -38130,18 +34399,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Low Kick",
-            "Magic Coat",
-            "Role Play",
-            "Signal Beam",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assist",
             "Barrier",
@@ -38258,19 +34516,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Hydro Cannon",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Zen Headbutt"
+            "Hydro Cannon"
         ],
         "egg_moves": [
             "Aqua Jet",
@@ -38373,18 +34619,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Bug Bite",
-            "Earth Power",
-            "Headbutt",
-            "Helping Hand",
-            "Gastro Acid",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acupressure",
             "Helping Hand",
@@ -38488,16 +34723,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -38592,21 +34818,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Bounce",
-            "Dive",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 3.1,
         "evolution_family": [
@@ -38697,18 +34909,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Knock Off",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Charge",
@@ -38819,15 +35020,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Super Fang",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Covet",
@@ -38925,19 +35118,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Faint Attack",
@@ -39040,22 +35223,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Iron Defense",
-            "Low Kick",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Vacuum Wave",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Bite",
@@ -39165,19 +35333,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Headbutt",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Block",
             "Flail",
@@ -39278,16 +35434,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Body Slam",
@@ -39402,18 +35549,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Gravity",
-            "Headbutt",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 21.5,
         "evolution_family": [
@@ -39520,22 +35656,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Belly Drum",
@@ -39657,30 +35778,11 @@ export const pokedex_dp = {
             "Fly",
             "Surf",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 216.0,
         "evolution_family": [
@@ -39770,17 +35872,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Heat Wave",
-            "Helping Hand",
-            "Last Resort",
-            "Mud-Slap",
-            "Snore",
-            "Superpower",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -39890,19 +35982,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -40027,21 +36107,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 950.0,
         "evolution_family": [
@@ -40130,17 +36196,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Ominous Wind",
-            "Pain Split",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Disable",
             "Energy Ball",
@@ -40252,17 +36308,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "DoubleSlap",
@@ -40370,24 +36416,7 @@ export const pokedex_dp = {
             "Cut",
             "Surf"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assist",
             "Charm",
@@ -40496,22 +36525,10 @@ export const pokedex_dp = {
             "Flash Cannon",
             "Cut",
             "Fly",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Fury Cutter",
-            "Icy Wind",
-            "Iron Defense",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assurance",
             "Brave Bird",
@@ -40608,15 +36625,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Covet",
             "Crush Claw",
@@ -40723,19 +36732,10 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Cut",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Bug Buzz",
@@ -40861,28 +36861,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Endeavor",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Belly Drum",
@@ -40996,15 +36975,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Gastro Acid",
-            "Gunk Shot",
-            "Headbutt",
-            "Seed Bomb",
-            "Snore",
-            "Spite"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Disable",
@@ -41097,14 +37068,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gastro Acid",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Uproar",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Flail",
@@ -41197,13 +37161,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gastro Acid",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Flail",
@@ -41309,20 +37267,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Endeavor",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Last Resort",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Attract",
             "Double Hit",
@@ -41432,20 +37377,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Cut",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Fury Cutter",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Spite",
-            "String Shot",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bug Bite",
             "Bug Buzz",
@@ -41541,16 +37475,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Heat Wave",
-            "Iron Defense",
-            "Mud-Slap",
-            "Pain Split",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acid Armor",
             "Curse",
@@ -41657,17 +37582,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Aqua Tail",
@@ -41763,16 +37678,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Endeavor",
-            "Fury Cutter",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "String Shot",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 25.5,
         "evolution_family": [
@@ -41880,16 +37786,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Fire Punch",
-            "Gunk Shot",
-            "Ice Punch",
-            "Mud-Slap",
-            "Pain Split",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Explosion",
@@ -41994,16 +37891,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Assurance",
             "Body Slam",
@@ -42102,20 +37990,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Headbutt",
-            "Helping Hand",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Twister",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Counter",
@@ -42222,19 +38097,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Counter",
@@ -42343,16 +38206,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -42463,16 +38317,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Heat Wave",
-            "Iron Defense",
-            "Mud-Slap",
-            "Pain Split",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acid Armor",
             "Curse",
@@ -42582,21 +38427,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Fire Punch",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Crunch",
             "Double-Edge",
@@ -42692,20 +38523,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Endeavor",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Double-Edge",
@@ -42807,20 +38627,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 23.3,
         "evolution_family": [
@@ -42919,20 +38728,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Helping Hand",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Sucker Punch",
-            "Superpower",
-            "Swift",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Counter",
@@ -43048,19 +38844,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Headbutt",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Beat Up",
@@ -43186,31 +38970,12 @@ export const pokedex_dp = {
             "Fly",
             "Surf",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash",
             "Waterfall"
         ],
         "tutor_learnset": [
-            "Air Cutter",
-            "Aqua Tail",
-            "Dive",
-            "Draco Meteor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Snore",
-            "Superpower",
-            "Swift",
-            "ThunderPunch",
-            "Tailwind",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "DragonBreath",
@@ -43322,17 +39087,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Block",
             "Defense Curl",
@@ -43434,20 +39189,7 @@ export const pokedex_dp = {
             "Waterfall",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Flail",
             "Leech Seed",
@@ -43548,13 +39290,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acupressure",
             "Aurora Beam",
@@ -43653,18 +39389,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 0.3,
         "evolution_family": [
@@ -43758,18 +39483,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Jet",
             "Aqua Ring",
@@ -43874,14 +39588,7 @@ export const pokedex_dp = {
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "Draco Meteor",
-            "Fury Cutter",
-            "Headbutt",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Twister",
-            "Zen Headbutt"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Dragon Dance",
@@ -43975,19 +39682,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Endeavor",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Double-Edge",
@@ -44117,21 +39814,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Headbutt",
-            "Iron Defense",
-            "Knock Off",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 60.8,
         "evolution_family": [
@@ -44226,19 +39909,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Fake Out",
@@ -44359,25 +40030,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Fire Punch",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Knock Off",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Beat Up",
@@ -44489,21 +40142,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Endeavor",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Belly Drum",
@@ -44622,18 +40261,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Pain Split",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Confusion",
@@ -44743,18 +40371,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Icy Wind",
-            "Last Resort",
-            "Magic Coat",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 32.5,
         "evolution_family": [
@@ -44841,17 +40458,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Helping Hand",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Haze",
             "Hydro Pump",
@@ -44961,18 +40568,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Block",
-            "Frenzy Plant",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Outrage",
-            "Seed Bomb",
-            "Snore",
-            "String Shot",
-            "Synthesis",
-            "Worry Seed"
+            "Frenzy Plant"
         ],
         "egg_moves": [
             "Amnesia",
@@ -45098,17 +40694,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Gravity",
-            "Iron Head",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 187.0,
         "evolution_family": [
@@ -45216,27 +40802,7 @@ export const pokedex_dp = {
             "Flash Cannon",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Fire Punch",
-            "Gravity",
-            "Helping Hand",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Iron Head",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 1.1,
         "evolution_family": [
@@ -45348,21 +40914,10 @@ export const pokedex_dp = {
             "Substitute",
             "Cut",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Knock Off",
-            "Mud-Slap",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Baton Pass",
@@ -45465,24 +41020,11 @@ export const pokedex_dp = {
             "Substitute",
             "Fly",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Draco Meteor",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Flail",
@@ -45582,18 +41124,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -45702,17 +41233,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Defense",
-            "Knock Off",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "BubbleBeam",
@@ -45817,15 +41338,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Cotton Spore",
             "Extrasensory",
@@ -45927,17 +41440,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Icy Wind",
-            "Iron Head",
-            "Magic Coat",
-            "Mud-Slap",
-            "Snore",
-            "Swift",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "DragonBreath",
@@ -46030,15 +41533,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Icy Wind",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bug Bite",
             "Foresight",
@@ -46165,19 +41660,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Headbutt",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Superpower",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 60.8,
         "evolution_family": [
@@ -46227,11 +41710,7 @@ export const pokedex_dp = {
             [7, "Harden"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Iron Defense",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 10.0,
         "evolution_family": [
@@ -46330,15 +41809,7 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Helping Hand",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Aromatherapy",
@@ -46436,18 +41907,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Knock Off",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bide",
             "Charge",
@@ -46508,17 +41968,7 @@ export const pokedex_dp = {
             [1, "Gust"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Endeavor",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 5.5,
         "evolution_family": [
@@ -46621,24 +42071,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fire Punch",
-            "Gunk Shot",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Role Play",
-            "Seed Bomb",
-            "Spite",
-            "Swift",
-            "ThunderPunch",
-            "Uproar",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Beat Up",
             "Close Combat",
@@ -46743,16 +42176,7 @@ export const pokedex_dp = {
             "Rock Smash"
         ],
         "tutor_learnset": [
-            "Draco Meteor",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Defense",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Snore",
-            "Twister",
-            "Zen Headbutt"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Dragon Dance",
@@ -46856,21 +42280,10 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Surf",
-            "Whirlpool",
+            "Defog",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Icy Wind",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Aqua Tail",
@@ -46962,15 +42375,7 @@ export const pokedex_dp = {
             "Substitute",
             "Fly"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Endeavor",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Brave Bird",
             "Endeavor",
@@ -47055,17 +42460,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Swift",
-            "Uproar",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Counter",
@@ -47165,20 +42560,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Gravity",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aromatherapy",
             "Counter",
@@ -47293,24 +42675,9 @@ export const pokedex_dp = {
             "Substitute",
             "Cut",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Tailwind",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Destiny Bond",
@@ -47365,11 +42732,7 @@ export const pokedex_dp = {
             [7, "Harden"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Iron Defense",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 10.0,
         "evolution_family": [
@@ -47460,19 +42823,7 @@ export const pokedex_dp = {
             "Substitute",
             "Fly"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heal Bell",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Outrage",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Dragon Rush",
@@ -47573,14 +42924,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Beat Up",
@@ -47679,16 +43023,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Magic Coat",
-            "Magnet Rise",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Sucker Punch",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 10.4,
         "evolution_family": [
@@ -47787,20 +43122,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Icy Wind",
-            "Magic Coat",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Destiny Bond",
@@ -47897,17 +43219,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Outrage",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "Disable",
@@ -48010,17 +43322,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Assurance",
@@ -48142,21 +43444,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Aqua Tail",
-            "AncientPower",
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Hydro Cannon",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "Uproar"
+            "Hydro Cannon"
         ],
         "egg_moves": [
             "AncientPower",
@@ -48260,17 +43548,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Defense",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Cross Poison",
             "Knock Off",
@@ -48362,15 +43640,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gastro Acid",
-            "Knock Off",
-            "Seed Bomb",
-            "Snore",
-            "Sucker Punch",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Encore",
             "Ingrain",
@@ -48482,19 +43752,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Heal Bell",
-            "Icy Wind",
-            "Magic Coat",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Extrasensory",
@@ -48575,12 +43833,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Icy Wind",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "DragonBreath",
@@ -48679,15 +43932,7 @@ export const pokedex_dp = {
             "Substitute",
             "Surf"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Icy Wind",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Flail",
             "Leech Seed",
@@ -48794,22 +44039,10 @@ export const pokedex_dp = {
             "Flash Cannon",
             "Cut",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Defense",
-            "Iron Head",
-            "Knock Off",
-            "Ominous Wind",
-            "Snore",
-            "Superpower",
-            "Swift",
-            "Tailwind"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Baton Pass",
             "Bug Buzz",
@@ -48909,21 +44142,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gunk Shot",
-            "Headbutt",
-            "Helping Hand",
-            "Last Resort",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Super Fang",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bite",
             "Covet",
@@ -49024,15 +44243,7 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Headbutt",
-            "Helping Hand",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Aromatherapy",
@@ -49133,19 +44344,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Last Resort",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Sing",
             "Substitute",
@@ -49257,23 +44456,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Blast Burn",
-            "Bounce",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Knock Off",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Superpower",
-            "Swift",
-            "ThunderPunch",
-            "Vacuum Wave"
+            "Blast Burn"
         ],
         "egg_moves": [
             "Agility",
@@ -49390,18 +44573,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Gunk Shot",
-            "Icy Wind",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aurora Beam",
             "Flail",
@@ -49498,16 +44670,7 @@ export const pokedex_dp = {
             "Substitute",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Mud-Slap",
-            "Snore",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Cross Chop",
@@ -49622,22 +44785,7 @@ export const pokedex_dp = {
             "Waterfall",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Dive",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Worry Seed",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Cross Chop",
@@ -49745,18 +44893,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Headbutt",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bite",
             "Counter",
@@ -49860,17 +44997,7 @@ export const pokedex_dp = {
             "Waterfall"
         ],
         "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Draco Meteor",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Outrage",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Twister"
+            "Draco Meteor"
         ],
         "egg_moves": [
             "Aurora Beam",
@@ -49979,20 +45106,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 352.0,
         "evolution_family": [
@@ -50088,14 +45202,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Crunch",
             "Curse",
@@ -50203,17 +45310,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Gravity",
-            "Headbutt",
-            "Icy Wind",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Destiny Bond",
             "Faint Attack",
@@ -50315,14 +45412,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -50414,17 +45504,7 @@ export const pokedex_dp = {
             "Substitute",
             "Surf"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Pain Split",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Counter",
@@ -50539,25 +45619,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Fire Punch",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Knock Off",
-            "Last Resort",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Seed Bomb",
-            "Snore",
-            "Spite",
-            "Swift",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Beat Up",
@@ -50659,15 +45721,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Headbutt",
-            "Helping Hand",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "BubbleBeam",
             "Endeavor",
@@ -50776,20 +45830,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Icy Wind",
-            "Magic Coat",
-            "Ominous Wind",
-            "Pain Split",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Destiny Bond",
@@ -50891,18 +45932,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Rollout",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Body Slam",
@@ -50999,13 +46029,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Gastro Acid",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Flail",
@@ -51106,16 +46130,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Fury Cutter",
-            "Knock Off",
-            "Seed Bomb",
-            "Snore",
-            "String Shot",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bug Bite",
             "Counter",
@@ -51219,20 +46234,9 @@ export const pokedex_dp = {
             "Pluck",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Faint Attack",
@@ -51328,20 +46332,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Endeavor",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Brave Bird",
             "Mirror Move",
@@ -51432,18 +46425,9 @@ export const pokedex_dp = {
             "U-turn",
             "Substitute",
             "Fly",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Heat Wave",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Astonish",
             "Faint Attack",
@@ -51612,19 +46596,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Earth Power",
-            "Headbutt",
-            "Iron Head",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Block",
             "Defense Curl",
@@ -51737,18 +46709,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Headbutt",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "Swift",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bite",
             "Counter",
@@ -51865,22 +46826,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Defense",
-            "Iron Head",
-            "Knock Off",
-            "Magnet Rise",
-            "Mud-Slap",
-            "Pain Split",
-            "Snore",
-            "Sucker Punch",
-            "Super Fang",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "False Swipe",
@@ -51983,14 +46929,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Curse",
@@ -52092,13 +47031,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Pain Split",
-            "Rollout",
-            "Snore",
-            "Spite",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Destiny Bond",
@@ -52196,16 +47129,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Flail",
             "Hydro Pump",
@@ -52316,22 +47240,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Pain Split",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Confuse Ray",
             "Destiny Bond",
@@ -52429,14 +47338,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Fake Tears",
@@ -52537,23 +47439,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Gravity",
-            "Headbutt",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Amnesia",
             "Belly Drum",
@@ -52663,17 +47549,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Bounce",
-            "Dive",
-            "Earth Power",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Flail",
             "Hydro Pump",
@@ -52784,21 +47660,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Iron Head",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Counter",
@@ -52905,20 +47767,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Twister",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Baton Pass",
@@ -53038,19 +47889,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Endeavor",
-            "Frenzy Plant",
-            "Fury Cutter",
-            "Headbutt",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "ThunderPunch",
-            "Worry Seed"
+            "Frenzy Plant"
         ],
         "egg_moves": [
             "Crunch",
@@ -53168,19 +48007,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Sucker Punch",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Crush Claw",
@@ -53293,21 +48120,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Iron Head",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Block",
             "Flail",
@@ -53430,18 +48243,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bite",
             "Counter",
@@ -53567,21 +48369,7 @@ export const pokedex_dp = {
             "Rock Climb"
         ],
         "tutor_learnset": [
-            "Blast Burn",
-            "Endeavor",
-            "Fire Punch",
-            "Gunk Shot",
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Vacuum Wave"
+            "Blast Burn"
         ],
         "egg_moves": [
             "Blaze Kick",
@@ -53690,19 +48478,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Close Combat",
@@ -53822,20 +48598,7 @@ export const pokedex_dp = {
             "Surf",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Block",
-            "Dive",
-            "Headbutt",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Belly Drum",
             "Block",
@@ -53934,15 +48697,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heat Wave",
-            "Helping Hand",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Crunch",
@@ -54046,17 +48801,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Last Resort",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -54173,16 +48918,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Endeavor",
-            "Headbutt",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Bite",
@@ -54290,13 +49026,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Icy Wind",
-            "Knock Off",
-            "Magic Coat",
-            "Snore"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Acupressure",
             "Aurora Beam",
@@ -54408,20 +49138,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Bounce",
-            "Dive",
-            "Fury Cutter",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Super Fang",
-            "Swift",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Double-Edge",
@@ -54521,22 +49238,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Iron Head",
-            "Mud-Slap",
-            "Snore",
-            "Superpower",
-            "ThunderPunch",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 420.0,
         "evolution_family": [
@@ -54657,25 +49359,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Aqua Tail",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Ice Punch",
-            "Iron Head",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Snore",
-            "Spite",
-            "Superpower",
-            "ThunderPunch",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Assurance",
@@ -54783,20 +49467,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Headbutt",
-            "Heal Bell",
-            "Helping Hand",
-            "Knock Off",
-            "Last Resort",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Covet",
@@ -54905,16 +49576,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Fury Cutter",
-            "Headbutt",
-            "Heat Wave",
-            "Mud-Slap",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Beat Up",
@@ -55029,21 +49691,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Defense Curl",
             "Harden",
@@ -55140,17 +49788,7 @@ export const pokedex_dp = {
             "Substitute",
             "Cut"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Fury Cutter",
-            "Headbutt",
-            "Magic Coat",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Aromatherapy",
@@ -55257,19 +49895,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Aqua Tail",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Super Fang",
-            "Superpower",
-            "Swift"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aqua Tail",
             "Defense Curl",
@@ -55368,16 +49994,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Heal Bell",
-            "Magnet Rise",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Body Slam",
             "Charge",
@@ -55483,21 +50100,9 @@ export const pokedex_dp = {
             "Swagger",
             "U-turn",
             "Substitute",
-            "Whirlpool"
+            "Defog"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "Bug Bite",
-            "Icy Wind",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Signal Beam",
-            "Snore",
-            "String Shot",
-            "Swift",
-            "Tailwind",
-            "Twister"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bug Bite",
             "Foresight",
@@ -55594,20 +50199,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Bounce",
-            "Dive",
-            "Fury Cutter",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Spite",
-            "Super Fang",
-            "Swift",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Double-Edge",
@@ -55708,30 +50300,10 @@ export const pokedex_dp = {
             "Pluck",
             "Substitute",
             "Fly",
-            "Whirlpool",
+            "Defog",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Air Cutter",
-            "AncientPower",
-            "Endeavor",
-            "Headbutt",
-            "Heal Bell",
-            "Heat Wave",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Ominous Wind",
-            "Rollout",
-            "Signal Beam",
-            "Sky Attack",
-            "Snore",
-            "Swift",
-            "Tailwind",
-            "Trick",
-            "Twister",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Foresight",
             "Future Sight",
@@ -55844,14 +50416,7 @@ export const pokedex_dp = {
             "Flash Cannon",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Gravity",
-            "Rollout",
-            "Signal Beam",
-            "Snore",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 60.5,
         "evolution_family": [
@@ -55957,25 +50522,7 @@ export const pokedex_dp = {
             "Trick Room",
             "Cut"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Earth Power",
-            "Heal Bell",
-            "Helping Hand",
-            "Last Resort",
-            "Magic Coat",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Signal Beam",
-            "Snore",
-            "Sucker Punch",
-            "Swift",
-            "Synthesis",
-            "Trick",
-            "Uproar",
-            "Worry Seed",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 5.0,
         "evolution_family": [
@@ -56078,21 +50625,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Helping Hand",
-            "Icy Wind",
-            "Last Resort",
-            "Mud-Slap",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Super Fang",
-            "Swift",
-            "Trick"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Helping Hand",
@@ -56195,16 +50728,7 @@ export const pokedex_dp = {
             "Waterfall",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Dive",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Mud-Slap",
-            "Snore",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "BubbleBeam",
             "Endeavor",
@@ -56315,19 +50839,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Fire Punch",
-            "Headbutt",
-            "Mud-Slap",
-            "Rollout",
-            "Snore",
-            "Sucker Punch",
-            "Superpower",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Block",
             "Flail",
@@ -56382,11 +50894,7 @@ export const pokedex_dp = {
             [1, "String Shot"]
         ],
         "tm_hm_learnset": [],
-        "tutor_learnset": [
-            "Bug Bite",
-            "Snore",
-            "String Shot"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 2.9,
         "evolution_family": [
@@ -56489,20 +50997,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "AncientPower",
-            "Block",
-            "Earth Power",
-            "Endeavor",
-            "Fury Cutter",
-            "Headbutt",
-            "Icy Wind",
-            "Iron Head",
-            "Knock Off",
-            "Mud-Slap",
-            "Snore",
-            "Superpower"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Bite",
@@ -56623,20 +51118,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Knock Off",
-            "Magic Coat",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Barrier",
             "Encore",
@@ -56757,17 +51239,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Headbutt",
-            "Helping Hand",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Uproar"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Charm",
             "Confuse Ray",
@@ -56889,20 +51361,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Low Kick",
-            "Mud-Slap",
-            "Outrage",
-            "Rollout",
-            "Snore",
-            "ThunderPunch",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Endeavor",
             "Extrasensory",
@@ -57010,20 +51469,7 @@ export const pokedex_dp = {
             "Substitute",
             "Trick Room"
         ],
-        "tutor_learnset": [
-            "Heal Bell",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Trick",
-            "Uproar",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Fake Out",
             "Ice Punch",
@@ -57149,24 +51595,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gravity",
-            "Headbutt",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Low Kick",
-            "Magic Coat",
-            "Mud-Slap",
-            "Role Play",
-            "Signal Beam",
-            "Snore",
-            "Swift",
-            "ThunderPunch",
-            "Trick",
-            "Zen Headbutt"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [],
         "weight": 60.8,
         "evolution_family": [
@@ -57258,12 +51687,7 @@ export const pokedex_dp = {
             "Cut",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Earth Power",
-            "Mud-Slap",
-            "Snore",
-            "Sucker Punch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "AncientPower",
             "Astonish",
@@ -57365,15 +51789,7 @@ export const pokedex_dp = {
             "Surf",
             "Waterfall"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Dive",
-            "Heal Bell",
-            "Icy Wind",
-            "Signal Beam",
-            "Snore",
-            "Sucker Punch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Agility",
             "Amnesia",
@@ -57467,14 +51883,7 @@ export const pokedex_dp = {
             "Swagger",
             "Substitute"
         ],
-        "tutor_learnset": [
-            "Helping Hand",
-            "Rollout",
-            "Seed Bomb",
-            "Snore",
-            "Synthesis",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Aromatherapy",
             "GrassWhistle",
@@ -57584,25 +51993,7 @@ export const pokedex_dp = {
             "Rock Smash",
             "Rock Climb"
         ],
-        "tutor_learnset": [
-            "Bounce",
-            "Fury Cutter",
-            "Gunk Shot",
-            "Headbutt",
-            "Helping Hand",
-            "Ice Punch",
-            "Icy Wind",
-            "Knock Off",
-            "Low Kick",
-            "Mud-Slap",
-            "Role Play",
-            "Snore",
-            "Spite",
-            "Sucker Punch",
-            "Super Fang",
-            "ThunderPunch",
-            "Vacuum Wave"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Bullet Punch",
             "Cross Chop",
@@ -57713,15 +52104,7 @@ export const pokedex_dp = {
             "Substitute",
             "Strength"
         ],
-        "tutor_learnset": [
-            "Fire Punch",
-            "Gunk Shot",
-            "Ice Punch",
-            "Mud-Slap",
-            "Pain Split",
-            "Snore",
-            "ThunderPunch"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Curse",
             "Explosion",
@@ -57834,19 +52217,7 @@ export const pokedex_dp = {
             "Strength",
             "Rock Smash"
         ],
-        "tutor_learnset": [
-            "Endeavor",
-            "Fury Cutter",
-            "Headbutt",
-            "Low Kick",
-            "Mud-Slap",
-            "Seed Bomb",
-            "Snore",
-            "Swift",
-            "Synthesis",
-            "ThunderPunch",
-            "Worry Seed"
-        ],
+        "tutor_learnset": [],
         "egg_moves": [
             "Crunch",
             "Crush Claw",
@@ -58014,7 +52385,7 @@ export const pokedex_dp = {
             "Fly",
             "Surf",
             "Strength",
-            "Whirlpool",
+            "Defog",
             "Rock Smash",
             "Waterfall",
             "Rock Climb"

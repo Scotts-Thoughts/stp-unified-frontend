@@ -1,15 +1,29 @@
 /*
- * The Report button and its screens (ReportButton.vue). The button sits in the top right of
- * the settings panel or the start screen; the layer is on <body>, over the whole window.
+ * The Report button and its screens (ReportButton.vue). The button sits in the bottom left of
+ * the settings panel or the top right of the start screen; the layer is on <body>, over the whole window.
  * Every rule sets what it needs, because the generations' style.css files style bare
  * `button`, `input` and `h2` elements.
  */
 
-.stp-report-btn {
+/*
+ * The row the Updates, microphone and Report buttons share, so the gaps between them stay even
+ * whichever buttons show and however long the Updates label gets. In the corner of the start
+ * screen; the settings panel gives it its own strip under column 1 (core/styles/settings.css),
+ * so it covers no control. A long Updates label wraps the row rather than pushing out of it.
+ */
+.stp-top-buttons {
     position: absolute;
     top: 14px;
     right: 18px;
     z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px 6px;
+}
+
+.stp-report-btn {
     display: inline-flex;
     align-items: center;
     gap: 5px;

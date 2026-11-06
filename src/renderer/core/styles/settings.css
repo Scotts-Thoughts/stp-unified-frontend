@@ -1,12 +1,13 @@
 /*
  * The settings panel's look, shared by all five generations (docs/ui-uniformity-plan.md
- * stage 3, Scott's decisions 3-5 and 10). Three styles share one set of tokens:
- *   .stp-theme-dark    dark glass cards (default)
- *   .stp-theme-light   light frosted cards
- *   .stp-theme-tinted  dark cards tinted with the overlay's UI colour (--stp-tint)
+ * stage 3): dark glass cards, the one look, set by the tokens on `.stp-settings`.
  * Each generation's style.css only places `.gen-N .stp-settings` inside its game-capture area.
  * Everything here is scoped under `.stp-settings` (specificity >= 0,2,0) so the generations'
  * old control rules can't leak in.
+ *
+ * Height is the scarce thing: gens 3-5 have under 800px for four columns of controls. A label sits
+ * beside its field, neighbouring buttons share a line, and rows are 20px. Adding a control should
+ * keep to those sizes rather than bring back its own.
  */
 
 .stp-settings {
@@ -33,17 +34,18 @@
     box-sizing: border-box;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    padding: 8px;
+    /* The last row is the strip the Updates, microphone and Report buttons sit in, under column 1 only. */
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 6px 8px;
     background: var(--stp-panel);
     border-radius: 14px;
     /* No outer shadow: it would paint past the game-capture area onto the filmed frame. */
     box-shadow: none;
     color: var(--stp-text);
     font-family: var(--stp-font);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 1.3;
+    line-height: 1.2;
     text-transform: none;
     letter-spacing: 0;
     text-align: left;
@@ -53,32 +55,23 @@
     pointer-events: auto;
 }
 
-.stp-settings.stp-theme-light {
-    --stp-accent: #1f9d39;
-    --stp-accent-strong: #178031;
-    --stp-accent-text: #ffffff;
-    --stp-danger: #d43c3c;
-    --stp-text: #17202a;
-    --stp-muted: #5d6a77;
-    --stp-panel: rgba(246, 248, 250, 0.86);
-    --stp-card: rgba(255, 255, 255, 0.72);
-    --stp-card-border: rgba(20, 30, 40, 0.10);
-    --stp-field: rgba(20, 30, 40, 0.06);
-    --stp-field-hover: rgba(20, 30, 40, 0.10);
-    --stp-field-border: rgba(20, 30, 40, 0.16);
-    --stp-list: #ffffff;
-    --stp-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+/* Two classes on purpose: gens 4-5's `.gen-N div { padding: 0 }` (shared-gen45.css) beats one. */
+.stp-settings.stp-settings {
+    padding: 8px 10px;
 }
 
-.stp-settings.stp-theme-tinted {
-    --stp-tint: #4fd660;
-    --stp-accent: color-mix(in srgb, var(--stp-tint) 80%, white);
-    --stp-accent-strong: var(--stp-tint);
-    --stp-panel: color-mix(in srgb, var(--stp-tint) 22%, rgba(10, 12, 16, 0.84));
-    --stp-card: color-mix(in srgb, var(--stp-tint) 10%, rgba(255, 255, 255, 0.04));
-    --stp-card-border: color-mix(in srgb, var(--stp-tint) 35%, rgba(255, 255, 255, 0.06));
-    --stp-list: color-mix(in srgb, var(--stp-tint) 15%, #12161c);
+/* The Updates, microphone and Report buttons (core/report/report.css) sit in the bottom-left corner. */
+.stp-settings > .stp-top-buttons {
+    position: static;
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
 }
+
+.stp-settings > .stp-settings-col:nth-child(1) { grid-column: 1; grid-row: 1; }
+.stp-settings > .stp-settings-col:nth-child(2) { grid-column: 2; grid-row: 1 / -1; }
+.stp-settings > .stp-settings-col:nth-child(3) { grid-column: 3; grid-row: 1 / -1; }
+.stp-settings > .stp-settings-col:nth-child(4) { grid-column: 4; grid-row: 1 / -1; }
 
 .stp-settings *,
 .stp-settings *::before,
@@ -91,7 +84,7 @@
     position: static;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
     min-height: 0;
     height: 100%;
@@ -122,18 +115,105 @@
 /* groups */
 .stp-settings .stp-group {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 8px 10px 10px;
+    flex-flow: row wrap;
+    align-content: flex-start;
+    gap: 3px 6px;
+    padding: 5px 8px 6px;
     background: var(--stp-card);
     border: 1px solid var(--stp-card-border);
     border-radius: var(--stp-radius);
     flex: 0 0 auto;
 }
 
+/* One control to a line, except that plain buttons next to each other share one. */
+.stp-settings .stp-group > * {
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+.stp-settings .stp-group > .stp-btn:not(.stp-btn-primary) {
+    flex: 1 1 calc(50% - 3px);
+    width: auto;
+}
+
+/* A group's heading line: the title, and any small icon buttons at its right (types.ts ButtonControl.icon). */
+.stp-settings .stp-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+/* The title is the button that collapses its group; the rows stay mounted, only hidden. */
+.stp-settings .stp-group-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    filter: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.stp-settings .stp-group-toggle:hover {
+    color: var(--stp-text);
+}
+
+.stp-settings .stp-group-chevron {
+    flex: 0 0 auto;
+    transition: transform 120ms;
+}
+
+.stp-settings .stp-group.stp-group-collapsed .stp-group-chevron {
+    transform: rotate(-90deg);
+}
+
+.stp-settings .stp-group.stp-group-collapsed > :not(.stp-group-head) {
+    display: none;
+}
+
+/* A dropdown in the heading, opposite the title. */
+.stp-settings .stp-group-head > .stp-field {
+    flex: 0 1 72%;
+    min-width: 0;
+}
+
+.stp-settings .stp-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 20px;
+    min-width: 0;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    background: var(--stp-field);
+    color: var(--stp-text);
+    border: 1px solid var(--stp-field-border);
+    border-radius: var(--stp-radius-small);
+    filter: none;
+    box-shadow: none;
+    cursor: pointer;
+    transition: background-color 120ms;
+}
+
+.stp-settings .stp-icon-btn:hover {
+    background: var(--stp-field-hover);
+}
+
 .stp-settings .stp-group-title {
-    margin: 0 0 1px;
-    font-size: 11px;
+    margin: 0;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -145,7 +225,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    min-height: 22px;
+    min-height: 20px;
     margin: 0;
 }
 
@@ -159,14 +239,30 @@
 .stp-settings .stp-field > .stp-label,
 .stp-settings .stp-label-block {
     display: block;
-    margin-bottom: 3px;
-    font-size: 12px;
     color: var(--stp-muted);
 }
 
+.stp-settings .stp-label-block {
+    margin-bottom: 2px;
+}
+
+/* A label beside its field. A field with no label takes the whole line. */
 .stp-settings .stp-field {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin: 0;
+}
+
+.stp-settings .stp-field > .stp-label {
+    flex: 0 1 44%;
+    margin: 0;
+}
+
+.stp-settings .stp-field > .stp-select,
+.stp-settings .stp-field > .stp-inline {
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .stp-settings .stp-value {
@@ -201,15 +297,15 @@
 .stp-settings .stp-slot input[type="number"],
 .stp-settings .stp-slot select {
     width: 100%;
-    height: 28px;
+    height: 22px;
     margin: 0;
-    padding: 0 9px;
+    padding: 0 7px;
     background: var(--stp-field);
     color: var(--stp-text);
     border: 1px solid var(--stp-field-border);
     border-radius: var(--stp-radius-small);
     font: inherit;
-    font-size: 13px;
+    font-size: 12px;
     text-align: left;
     outline: none;
     filter: none;
@@ -234,7 +330,7 @@
 .stp-settings select.stp-select,
 .stp-settings .stp-slot select {
     appearance: none;
-    padding-right: 26px;
+    padding-right: 22px;
     background-image: linear-gradient(45deg, transparent 50%, var(--stp-muted) 50%),
         linear-gradient(135deg, var(--stp-muted) 50%, transparent 50%);
     background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
@@ -258,15 +354,15 @@
 .stp-settings .stp-slot button {
     display: block;
     width: 100%;
-    min-height: 28px;
+    min-height: 22px;
     margin: 0;
-    padding: 4px 10px;
+    padding: 2px 6px;
     background: var(--stp-field);
     color: var(--stp-text);
     border: 1px solid var(--stp-field-border);
     border-radius: var(--stp-radius-small);
     font: inherit;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     text-align: center;
     cursor: pointer;
@@ -286,11 +382,11 @@
 }
 
 .stp-settings .stp-btn-primary {
-    min-height: 36px;
+    min-height: 28px;
     background: var(--stp-accent);
     color: var(--stp-accent-text);
     border-color: transparent;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.02em;
 }
@@ -306,8 +402,8 @@
 .stp-settings .stp-btn-small {
     width: auto;
     flex: 0 0 auto;
-    min-height: 28px;
-    padding: 2px 10px;
+    min-height: 22px;
+    padding: 1px 8px;
     font-size: 12px;
 }
 
@@ -317,10 +413,10 @@
     appearance: none;
     flex: 0 0 auto;
     position: relative;
-    width: 30px;
-    height: 17px;
+    width: 26px;
+    height: 14px;
     margin: 0;
-    border-radius: 9px;
+    border-radius: 7px;
     background: var(--stp-field-border);
     cursor: pointer;
     transition: background-color 140ms;
@@ -332,8 +428,8 @@
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 13px;
-    height: 13px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: #fff;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -347,45 +443,59 @@
 
 .stp-settings .stp-switch:checked::after,
 .stp-settings .stp-slot input[type="checkbox"]:checked::after {
-    transform: translateX(13px);
+    transform: translateX(12px);
 }
 
 .stp-settings .stp-toggle {
     cursor: pointer;
 }
 
-/* counters */
-.stp-settings .stp-counter .stp-value {
-    min-width: 28px;
-    text-align: right;
+/* counters: one joined stepper, − value +. Three classes to beat gens 2, 4 and 5's `.increment` colours. */
+.stp-settings .stp-stepper {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: stretch;
+    height: 20px;
+    overflow: hidden;
+    background: var(--stp-field);
+    border: 1px solid var(--stp-field-border);
+    border-radius: 6px;
 }
 
-.stp-settings .stp-round {
+.stp-settings .stp-stepper .stp-value {
+    min-width: 30px;
+    padding: 0 4px;
+    line-height: 18px;
+    text-align: center;
+}
+
+.stp-settings .stp-stepper .stp-round {
     flex: 0 0 auto;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 18px;
     padding: 0;
     margin: 0;
-    border-radius: 50%;
-    border: 1px solid var(--stp-field-border);
-    background: var(--stp-field);
-    color: var(--stp-text);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--stp-muted);
     font: inherit;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
-    line-height: 20px;
+    line-height: 18px;
     text-align: center;
     cursor: pointer;
     filter: none;
     box-shadow: none;
+    transition: background-color 120ms, color 120ms;
 }
 
-.stp-settings .stp-round.stp-plus:hover {
+.stp-settings .stp-stepper .stp-round.stp-plus:hover {
     background: var(--stp-accent);
     color: var(--stp-accent-text);
 }
 
-.stp-settings .stp-round.stp-minus:hover {
+.stp-settings .stp-stepper .stp-round.stp-minus:hover {
     background: var(--stp-danger);
     color: #fff;
 }
@@ -409,7 +519,7 @@
 .stp-settings .stp-statgrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2px 10px;
+    gap: 1px 10px;
 }
 
 .stp-settings .stp-statgrid-title {
@@ -434,6 +544,119 @@
     font-size: 11px;
     color: var(--stp-muted);
     font-variant-numeric: tabular-nums;
+}
+
+/* Each stat in its own colour, so a readout can be taken in at a glance. */
+.stp-settings .stp-stat-hp { --stp-stat: #66e07a; }
+.stp-settings .stp-stat-atk { --stp-stat: #ffd95a; }
+.stp-settings .stp-stat-def { --stp-stat: #ffa45c; }
+.stp-settings .stp-stat-spa,
+.stp-settings .stp-stat-spc { --stp-stat: #5fe0d6; }
+.stp-settings .stp-stat-spd { --stp-stat: #82b1ff; }
+.stp-settings .stp-stat-spe { --stp-stat: #d29bff; }
+
+.stp-settings .stp-statgrid-cell[class*="stp-stat-"] .stp-label,
+.stp-settings .stp-statgrid-cell[class*="stp-stat-"] .stp-value,
+.stp-settings .stp-ivgrid > span[class*="stp-stat-"],
+.stp-settings .stp-slot .stp-ivgrid input[class*="stp-stat-"] {
+    color: var(--stp-stat);
+}
+
+/* The hidden power spread dropdown (StatSpreadSelect.ts): a customizable select, so the numbers can be coloured. */
+.stp-settings select.stp-select-spread,
+.stp-settings select.stp-select-spread::picker(select) {
+    appearance: base-select;
+}
+
+.stp-settings select.stp-select-spread::picker-icon {
+    display: none;
+}
+
+.stp-settings select.stp-select-spread > button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    filter: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+.stp-settings select.stp-select-spread::picker(select) {
+    margin-top: 2px;
+    padding: 4px;
+    background: var(--stp-list);
+    border: 1px solid var(--stp-field-border);
+    border-radius: var(--stp-radius-small);
+}
+
+.stp-settings select.stp-select-spread option {
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+
+.stp-settings select.stp-select-spread option::checkmark {
+    display: none;
+}
+
+.stp-settings select.stp-select-spread option:hover {
+    background: var(--stp-field-hover);
+}
+
+.stp-settings select.stp-select-spread option:checked {
+    font-weight: 700;
+}
+
+.stp-settings select.stp-select-spread span[class*="stp-stat-"] {
+    color: var(--stp-stat);
+}
+
+/* the species picker with the preset controls around it */
+.stp-settings .stp-solo-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.stp-settings .stp-solo-row:first-child {
+    margin-top: 0;
+}
+
+.stp-settings .stp-solo-row > .stp-picker,
+.stp-settings .stp-solo-row > .stp-solo-name,
+.stp-settings .stp-solo-row > .stp-solo-presets {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.stp-settings .stp-solo-row > .stp-icon-btn {
+    margin-top: 2px;
+}
+
+.stp-settings .stp-solo-delete {
+    width: auto;
+    min-width: 20px;
+    padding: 0 4px;
+}
+
+.stp-settings .stp-solo-note {
+    margin-top: 4px;
+    color: var(--stp-muted);
+    overflow-wrap: anywhere;
+}
+
+.stp-settings .stp-solo-failed {
+    color: var(--stp-danger);
 }
 
 /* the species picker */
@@ -493,7 +716,7 @@
 }
 
 .stp-settings .stp-editions.gameToggle .gameToggleImg {
-    height: 50px;
+    height: 38px;
     width: auto;
     max-width: 100%;
     margin: 0;
@@ -522,7 +745,7 @@
 .stp-settings .stp-slot {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 3px;
 }
 
 .stp-settings .stp-slot table {
@@ -545,14 +768,14 @@
 .stp-settings .nature_grid {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     width: 100%;
 }
 
 .stp-settings .nature_grid_row {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
 }
 
 .stp-settings .nature_grid_label {
@@ -565,19 +788,15 @@
 
 .stp-settings .nature_grid_lower { color: #7aa6ff; }
 
-.stp-settings.stp-theme-light .nature_grid_raise { color: #c62f2f; }
-
-.stp-settings.stp-theme-light .nature_grid_lower { color: #2f5fc6; }
-
 .stp-settings .stp-slot .nature_grid_btn {
     display: inline-block;
     flex: 1 1 0;
     width: auto;
     min-width: 0;
     min-height: 0;
-    height: 22px;
+    height: 18px;
     padding: 0;
-    border-radius: 6px;
+    border-radius: 5px;
     font-size: 11px;
     font-weight: 600;
 }
@@ -598,7 +817,7 @@
 .stp-settings .stp-ivgrid {
     display: grid;
     grid-template-columns: repeat(3, auto 1fr);
-    gap: 4px 6px;
+    gap: 2px 6px;
     align-items: center;
     font-size: 12px;
 }
@@ -607,12 +826,12 @@
     grid-template-columns: repeat(2, auto 1fr);
 }
 
-.stp-settings .stp-ivgrid > span:nth-child(odd) {
+.stp-settings .stp-ivgrid > span:nth-child(odd):not([class*="stp-stat-"]) {
     color: var(--stp-muted);
 }
 
 .stp-settings .stp-slot .stp-ivgrid input[type="text"] {
-    height: 24px;
+    height: 20px;
     padding: 0 6px;
     text-align: right;
 }

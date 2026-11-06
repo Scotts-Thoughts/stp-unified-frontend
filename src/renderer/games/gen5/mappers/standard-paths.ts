@@ -101,6 +101,8 @@ export const GEN5_STANDARD_READS: readonly string[] = [
     "battle.opponentB",
     "battle.opponent_2",
     "battle.opponent_2.id",
+    "battle.opponent_2.party_position",
+    "battle.opponent_2.pkmn_ram",
     "battle.opponent_2.team",
     "battle.opponent_2.team_count",
     "battle.opponent_2.trainer",

@@ -18,19 +18,25 @@
 
     <!-- choice: label above, full-width dropdown -->
     <label v-else-if="c.kind === 'choice'" class="stp-field" :title="c.title">
-        <span v-if="labelText" class="stp-label">{{ labelText }}</span>
-        <select class="stp-select" :class="c.class" :value="selectedValue" @change="onChoice(($event.target as HTMLSelectElement).value)">
+        <span v-if="labelText && !bare" class="stp-label">{{ labelText }}</span>
+        <stat-spread-select
+            v-if="c.statSpread" :options="options" :value="selectedValue"
+            :placeholder="selectedIndex === -1 ? { value: NONE, label: c.placeholder ?? '' } : null" @change="onChoice"
+        ></stat-spread-select>
+        <select v-else class="stp-select" :class="c.class" :value="selectedValue" @change="onChoice(($event.target as HTMLSelectElement).value)">
             <option v-if="selectedIndex === -1" :value="NONE" disabled>{{ c.placeholder ?? "" }}</option>
             <option v-for="(o, i) in options" :key="i" :value="String(o.value)">{{ o.label ?? o.value }}</option>
         </select>
     </label>
 
-    <!-- counter: label, value, - + -->
+    <!-- counter: label, then a joined stepper: - value + -->
     <div v-else-if="c.kind === 'counter'" class="stp-row stp-counter" :title="c.title">
         <span class="stp-label">{{ labelText }}</span>
-        <span class="stp-value">{{ c.get() }}</span>
-        <button type="button" class="stp-round stp-minus decrement" :class="c.class" title="Decrease" @click="c.decrement()">−</button>
-        <button type="button" class="stp-round stp-plus increment" :class="c.class" title="Increase" @click="c.increment()">+</button>
+        <span class="stp-stepper">
+            <button type="button" class="stp-round stp-minus decrement" :class="c.class" title="Decrease" @click="c.decrement()">−</button>
+            <span class="stp-value">{{ c.get() }}</span>
+            <button type="button" class="stp-round stp-plus increment" :class="c.class" title="Increase" @click="c.increment()">+</button>
+        </span>
     </div>
 
     <!-- slider: label, range, value -->
@@ -61,7 +67,7 @@
     <!-- grid of label/value pairs, two per row -->
     <div v-else-if="c.kind === 'statGrid'" class="stp-statgrid" :class="c.class" :title="c.title">
         <div v-if="labelText" class="stp-label stp-statgrid-title">{{ labelText }}</div>
-        <div v-for="item in c.items()" :key="item.label" class="stp-statgrid-cell">
+        <div v-for="item in c.items()" :key="item.label" class="stp-statgrid-cell" :class="`stp-stat-${item.label.toLowerCase()}`">
             <span class="stp-label">{{ item.label }}</span>
             <span class="stp-value">{{ item.value }}</span>
             <span v-if="item.extra !== undefined && item.extra !== null && item.extra !== ''" class="stp-extra">{{ item.extra }}</span>
@@ -79,7 +85,9 @@
 import { defineComponent, type PropType } from "vue";
 import ConfirmButton from "../overlay/ConfirmButton.vue";
 import EditionPicker from "./EditionPicker.vue";
+import SoloPicker from "./SoloPicker.vue";
 import SpeciesPicker from "./SpeciesPicker.vue";
+import StatSpreadSelect from "./StatSpreadSelect";
 import { choiceOptions } from "./toActions";
 import type { SettingControl } from "./types";
 
@@ -89,9 +97,11 @@ const NONE = "__stp_none__";
 /** One control of the settings panel, by kind (types.ts). Slot controls are rendered by the panel. */
 export default defineComponent({
     name: "SettingsControl",
-    components: { ConfirmButton, EditionPicker, SpeciesPicker },
+    components: { ConfirmButton, EditionPicker, SoloPicker, SpeciesPicker, StatSpreadSelect },
     props: {
         control: { type: Object as PropType<SettingControl>, required: true },
+        /** In a group's heading: the title beside it says what it is, so no label. */
+        bare: { type: Boolean, default: false },
     },
     setup() {
         return { NONE };

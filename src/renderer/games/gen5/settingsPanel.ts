@@ -1,13 +1,13 @@
 import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
-import { panelThemeControl } from "~/core/settings/theme";
+import { abilityLabel } from "~/core/settings/abilityLabel";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
 import { slug } from "~/core/shortcuts/build";
 import { gen5Manifest } from "./manifest";
 
 /**
  * gen5's settings panel as data (docs/ui-uniformity-plan.md stages 3-4): the four shared columns,
- * Run · Solo Pokémon · Style · Display, rendered by core/settings/SettingsPanel.vue, and the same list
+ * Software · Run · Pokémon · Style, rendered by core/settings/SettingsPanel.vue, and the same list
  * gives the controls' shortcut actions (actions.ts). Ids are the action ids the controls had before
  * (persisted: never rename one). Laid out like gen4's (games/gen4/settingsPanel.ts).
  *
@@ -79,7 +79,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
             flag(vm, `encounters.${field}`, label, `encounters_${field}`, { actionLabel: `${label} (${game})`, available }),
         );
 
-    const run: SettingsGroup[] = [
+    const software: SettingsGroup[] = [
         {
             title: "Game",
             controls: [
@@ -114,25 +114,6 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
             controls: [
                 { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: () => vm.openSplitsFolder() },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: () => vm.open_shortcuts_menu() },
-            ],
-        },
-        {
-            title: "Readouts",
-            controls: [
-                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.team_count.value > 6 ? 0 : vm.game.properties.player.team_count.value) },
-                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
-                { kind: "readout", id: "readout.status", label: "Status", value: () => (team0().status_condition.value == null ? "None" : team0().status_condition.value) },
-                {
-                    kind: "statGrid", id: "readout.evs", label: "EVs",
-                    items: () => [
-                        { label: "HP", value: evs().hp, extra: evBenefit("hp") },
-                        { label: "Spe", value: evs().speed, extra: evBenefit("speed") },
-                        { label: "Atk", value: evs().attack, extra: evBenefit("attack") },
-                        { label: "SpA", value: evs().special_attack, extra: evBenefit("special_attack") },
-                        { label: "Def", value: evs().defense, extra: evBenefit("defense") },
-                        { label: "SpD", value: evs().special_defense, extra: evBenefit("special_defense") },
-                    ],
-                },
             ],
         },
         {
@@ -178,7 +159,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
         },
     ];
 
-    const solo: SettingsGroup[] = [
+    const run: SettingsGroup[] = [
         {
             title: "Solo Pokemon",
             heading: "Solo Pokémon",
@@ -194,7 +175,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
         {
             title: "Split Comparison",
             controls: [
-                { kind: "button", id: "splits.load_comparison", label: "Load Replay / Split File", actionLabel: "Load replay / split file to compare", run: () => vm.load_splits() },
+                { kind: "button", id: "splits.load_comparison", label: "Load Splits", actionLabel: "Load replay / split file to compare", run: () => vm.load_splits() },
                 { kind: "readout", id: "splits.source", label: "Comparing Against", class: "stp-readout-wrap", visible: () => !!vm.previous_splits_source, value: () => vm.previous_splits_source },
                 // Shown only while splits are loaded, as before; its shortcut works at any time, as before.
                 { kind: "button", id: "splits.clear_comparison", label: "Clear Loaded Splits", visible: () => vm.previous_splits.length > 0, run: () => vm.clear_splits() },
@@ -213,6 +194,28 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                 { kind: "readout", id: "readout.faults", label: "Faults", value: () => vm.faults },
             ],
         },
+        {
+            title: "Readouts",
+            controls: [
+                { kind: "readout", id: "readout.party", label: "Player Party Count", value: () => (vm.game.properties.player.team_count.value > 6 ? 0 : vm.game.properties.player.team_count.value) },
+                { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
+                { kind: "readout", id: "readout.status", label: "Status", value: () => (team0().status_condition.value == null ? "None" : team0().status_condition.value) },
+                {
+                    kind: "statGrid", id: "readout.evs", label: "EVs",
+                    items: () => [
+                        { label: "HP", value: evs().hp, extra: evBenefit("hp") },
+                        { label: "Spe", value: evs().speed, extra: evBenefit("speed") },
+                        { label: "Atk", value: evs().attack, extra: evBenefit("attack") },
+                        { label: "SpA", value: evs().special_attack, extra: evBenefit("special_attack") },
+                        { label: "Def", value: evs().defense, extra: evBenefit("defense") },
+                        { label: "SpD", value: evs().special_defense, extra: evBenefit("special_defense") },
+                    ],
+                },
+            ],
+        },
+    ];
+
+    const pokemon: SettingsGroup[] = [
         {
             title: "Evolution",
             available: () => !!vm.hasMultipleEvolutionStages,
@@ -262,6 +265,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                 {
                     kind: "choice", id: "ivs.hidden_power_index", actions: "cycle", available: automaticIvs,
                     actionLabel: "Hidden Power index", placeholder: "Select a Hidden Power index",
+                    statSpread: true,
                     options: () => (vm.hiddenpowers[vm.hidden_power_type] ?? []).map((key: unknown, index: number) => ({ value: `${index}`, label: `${key}` })),
                     get: () => `${vm.hidden_power_index}`, set: (v) => { vm.hidden_power_index = v; },
                 },
@@ -272,7 +276,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
             title: "Ability & Gender",
             controls: [
                 {
-                    kind: "choice", id: "ability", label: () => `Ability (${vm.starter} Has ${abilities().length})`, actionLabel: "Ability", actions: "cycle",
+                    kind: "choice", id: "ability", label: () => abilityLabel(vm.pkmn_ability, vm.values_function(abilities())), actionLabel: "Ability", actions: "cycle",
                     placeholder: "Select an ability",
                     options: () => strings(vm.values_function(abilities())),
                     get: () => `${vm.pkmn_ability}`, set: (v) => { vm.pkmn_ability = v; },
@@ -291,7 +295,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
             title: "Nature",
             controls: [
                 {
-                    kind: "choice", id: "nature", label: "Nature", actions: "cycle", placeholder: "Select a Nature",
+                    kind: "choice", id: "nature", inHeading: true, label: "Nature", actions: "cycle", placeholder: "Select a Nature",
                     options: () => vm.values_function(vm.simple_natures).map((key: unknown) => ({ value: `${key}`, label: vm.natureLabels(`${key}`) })),
                     get: () => `${vm.pkmnNature}`, set: (v) => { vm.pkmnNature = v; },
                 },
@@ -333,51 +337,13 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
     ];
 
     const style: SettingsGroup[] = [
-        { title: "Panel", controls: [panelThemeControl()] },
         {
             title: "UI Color",
             controls: [
-                { kind: "button", id: "style.color_picker", label: "Color Picker", noAction: true, run: () => vm.color_picker() },
+                { kind: "button", id: "style.color_picker", icon: "eyedropper", label: "Color Picker", noAction: true, run: () => vm.color_picker() },
                 slider(vm, "ui_saturation", "Saturation", 0, 2, 0.1),
             ],
         },
-        {
-            title: "Pokemon Image",
-            heading: "Pokémon Image",
-            controls: [
-                slider(vm, "imageXOffset", "X-Offset", -600, 600),
-                slider(vm, "imageYOffset", "Y-Offset", -600, 600),
-                slider(vm, "imageScale", "Scale", 0.2, 2.5, 0.01),
-                slider(vm, "imageSat", "Saturation", 90, 150),
-                slider(vm, "imageRotation", "Rotation", -180, 180, 0.01),
-                flag(vm, "style.artwork_flip", "Flip", "imageFlip", { actionLabel: "Pokemon Image Flip" }),
-                { kind: "button", id: "style.reset_pokemon", label: "Reset Pokemon Settings", run: () => vm.resetPokemon() },
-            ],
-        },
-        {
-            title: "Background",
-            controls: [
-                {
-                    kind: "choice", id: "style.background_texture", label: "Texture", actionLabel: "Background Texture", actions: "cycle",
-                    options: () => vm.dropdownDownMenuKeys.textures,
-                    get: () => vm.backgroundTexture, set: (v) => { vm.backgroundTexture = v; },
-                },
-                slider(vm, "backgroundXOffset", "X-Offset", -400, 400),
-                slider(vm, "backgroundYOffset", "Y-Offset", -400, 400),
-                slider(vm, "backgroundScale", "Scale", 50, 300),
-                slider(vm, "backgroundBrightness", "Brightness", 0, 200),
-                slider(vm, "backgroundContrast", "Contrast", 0, 200),
-                slider(vm, "backgroundSaturation", "Saturation", 0, 200),
-                slider(vm, "backgroundBlur", "Blur", 0, 10, 0.1),
-                slider(vm, "backgroundHue", "Hue", 0, 358),
-                flag(vm, "style.background_flip_x", "Flip X", "backgroundFlip", { actionLabel: "Background Flip X" }),
-                // The legacy field names are crossed: `backgroundXFlip` is the vertical flip (as in gens 2-3).
-                flag(vm, "style.background_flip_y", "Flip Y", "backgroundXFlip", { actionLabel: "Background Flip Y" }),
-            ],
-        },
-    ];
-
-    const display: SettingsGroup[] = [
         {
             title: "Display",
             controls: [
@@ -403,9 +369,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                     get: () => vm.right_ui, set: (v) => { vm.set_right_panel(v); },
                 },
                 // Decision 30: the wild panel in wild battles (Automatic / Trainers), off by default.
-                flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles", { visible: () => !vm.second_screen_mode }),
                 // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
-                flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order", { visible: () => !vm.second_screen_mode }),
                 {
                     kind: "choice", id: "display.unobtainable_moves", label: "Unobtainable Moves",
                     options: ["Never Cross Out", "Cross Out When Starter is Obtained", "Cross Out After First Badge", "Always Cross Out"],
@@ -428,21 +392,57 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
         {
             title: "Toggles",
             controls: [
+                flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles", { visible: () => !vm.second_screen_mode }),
+                flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order", { visible: () => !vm.second_screen_mode }),
                 // Black 2 / White 2 only (the tutors); any species (it used to sit in the evolution table, known-legacy-bugs #85).
                 flag(vm, "moves.show_tutor_moves", "Show Tutor Moves", "show_tutor_moves", { actionLabel: "Show Tutor Moves (B2/W2)", available: blackWhite2 }),
+            ],
+        },
+        {
+            title: "Pokemon Image",
+            heading: "Pokémon Image",
+            controls: [
+                slider(vm, "imageXOffset", "X-Offset", -600, 600),
+                slider(vm, "imageYOffset", "Y-Offset", -600, 600),
+                slider(vm, "imageScale", "Scale", 0.2, 2.5, 0.01),
+                slider(vm, "imageSat", "Saturation", 90, 150),
+                slider(vm, "imageRotation", "Rotation", -180, 180, 0.01),
+                flag(vm, "style.artwork_flip", "Flip", "imageFlip", { actionLabel: "Pokemon Image Flip" }),
+                { kind: "button", id: "style.reset_pokemon", icon: "reset", label: "Reset Pokemon Settings", run: () => vm.resetPokemon() },
+            ],
+        },
+        {
+            title: "Background",
+            controls: [
+                { kind: "button", id: "style.reset_background", icon: "reset", label: "Reset Background", run: () => vm.resetBackground() },
+                {
+                    kind: "choice", id: "style.background_texture", label: "Texture", actionLabel: "Background Texture", actions: "cycle",
+                    options: () => vm.dropdownDownMenuKeys.textures,
+                    get: () => vm.backgroundTexture, set: (v) => { vm.backgroundTexture = v; },
+                },
+                slider(vm, "backgroundXOffset", "X-Offset", -400, 400),
+                slider(vm, "backgroundYOffset", "Y-Offset", -400, 400),
+                slider(vm, "backgroundScale", "Scale", 50, 300),
+                slider(vm, "backgroundBrightness", "Brightness", 0, 200),
+                slider(vm, "backgroundContrast", "Contrast", 0, 200),
+                slider(vm, "backgroundSaturation", "Saturation", 0, 200),
+                slider(vm, "backgroundBlur", "Blur", 0, 10, 0.1),
+                slider(vm, "backgroundHue", "Hue", 0, 358),
+                flag(vm, "style.background_flip_x", "Flip X", "backgroundFlip", { actionLabel: "Background Flip X" }),
+                // The legacy field names are crossed: `backgroundXFlip` is the vertical flip (as in gens 2-3).
+                flag(vm, "style.background_flip_y", "Flip Y", "backgroundXFlip", { actionLabel: "Background Flip Y" }),
             ],
         },
     ];
 
     return {
         columns: [
+            { groups: software },
             { groups: run },
-            { groups: solo },
+            { groups: pokemon },
             { groups: style },
-            { groups: display },
         ],
         showAdvanced: () => !!vm.show_advanced_settings,
         isDev: () => !!vm.isInDevMode,
-        tint: () => vm.overlay_color,
     };
 }

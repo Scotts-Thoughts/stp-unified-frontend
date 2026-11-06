@@ -8,6 +8,7 @@ import { toDisplayString, type StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
 import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
+import { twoTrainerHeader, twoTrainerHeaderStyle } from "~/core/logic/twoTrainerBattle";
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { trainers_black } from "./data/trainers_black.js";
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen5, SendOutOrderCache, type SendOutMon } from "~/core/logic/sendOutOrder";
@@ -65,7 +66,10 @@ export interface Gen5EnemySlot extends EnemySlotView {
 }
 
 export interface Gen5EnemyTeam extends EnemyTeamView<Gen5EnemySlot> {
+    /** Two trainers are being fought. */
     double: boolean;
+    /** The second trainer's Pokémon, drawn in the rows after the first's. `slot` is the party slot + 6. */
+    second: Gen5EnemySlot[];
     overlayColor: unknown;
     /** The stats art's colour folder (`ui_type_color_modifier`). */
     statsArt: unknown;
@@ -74,14 +78,71 @@ export interface Gen5EnemyTeam extends EnemyTeamView<Gen5EnemySlot> {
     secondScreen: boolean;
 }
 
+/**
+ * A Pokémon of a two-trainer battle. `slot` is the party slot, plus 6 for the second trainer (`getEnemyStat`,
+ * `speed_comparison`, `enemy_held_item`, `enemy_form`). `ram` is its battle record: the ST/gen5 mappers have one for both
+ * trainers. The upstream mappers read the wrong records in these battles and have none for the second trainer, so without
+ * one this falls back on the party copy, whose HP only changes when the battle ends: no faints or stage badges during it.
+ */
+function partySlot(vm: any, team: any, slot: number, row: number, ram: any): Gen5EnemySlot {
+    const species = team?.species?.value;
+    const entry = vm.g5PokemonData[species];
+    const state = vm.game.properties.meta.state.value;
+    const hp = (ram ?? team)?.stats?.hp?.value;
+    const fainted = (ram ? !(hp > 0) : hp === 0) && state != "To Battle";
+    const speed = ram ? vm.speed_comparison(slot, team?.stats?.speed?.value).comparison
+        : speedLabel(speedOrder(vm.get_stat().Spe, team?.stats?.speed?.value), "enemy");
+    const form = species != null ? vm.enemy_form(slot, species) : "";
+    return {
+        slot,
+        row,
+        present: true,
+        styles: {
+            stats: fainted ? "opacity: .5;" : undefined,
+            comparison: fainted ? "opacity: .3; filter: grayscale(100%) drop-shadow(0px 1px 2px #000000);" : undefined,
+            mon: fainted ? "filter: grayscale(100%);" : undefined,
+            text: fainted ? FAINTED_TEXT : undefined,
+            faint: undefined,
+        },
+        speed: { label: speed, svgClass: vm.svgColorClass(speed, ram ?? team) },
+        sprite: {
+            src: `images/gen5/pokemon/${vm.speciesSpecialCharacters(team?.species)}${form}.webp`,
+            style: { transform: vm.enemyTransformFor(species), filter: `drop-shadow(${vm.getEnemySpriteFlipped(species) ? -1 : 1}px 1px 2px)` },
+            species,
+            resizing: false,
+        },
+        types: [
+            { src: `images/gen5/type-icons-circular/${entry?.type_1?.toLowerCase()}.webp`, shown: true },
+            { src: `images/gen5/type-icons-circular/${entry?.type_2?.toLowerCase()}.webp`, shown: entry?.type_1 != entry?.type_2 },
+        ],
+        species: team?.species,
+        level: team?.level,
+        ability: team?.ability,
+        labelsShown: STATS.map(([, , , stat], i) => i === 0 || !ram || ram.modifiers?.[stat].value == 0),
+        stats: STATS.map(([, , , stat], i) => ({ value: toDisplayString(i === 0 || !ram ? team?.stats?.[stat] : vm.getEnemyStat(stat, team?.stats?.[stat], slot)) })),
+        moves: [0, 1, 2, 3].map((i) => {
+            const move = team?.moves?.[i]?.move?.value;
+            return { known: move != null, icon: `images/gen5/type-icons-circular/${vm.black_moves[move]?.type?.toLowerCase()}.webp`, name: move };
+        }),
+        mods: ram && state == "Battle" ? vm.modifier_values.map((name: string) => ({
+            name,
+            shown: ram.modifiers?.[name].value != 0,
+            text: vm.stage_modifiers(ram.modifiers?.[name].value),
+        })) : null,
+    };
+}
+
 export function enemyTeamView(vm: any): Gen5EnemyTeam {
     const props = vm.game.properties;
     const opponent = props.battle.opponent;
+    const secondRecords = props.battle.opponent_2?.pkmn_ram;
     const slots = vm.pkmnSlots.map((x: number): Gen5EnemySlot => {
         // Decision 26: a fainted Pokémon (greyscale, as before) and its art at half opacity (were .3 and .6).
         const stats = vm.fade_stats(x) ? "opacity: .5;" : undefined;
         const faint = vm.enemyFaint(x);
         if (!(x < opponent.team_count.value)) return { slot: x, present: false, styles: { stats, faint } } as Gen5EnemySlot;
+        // The upstream mappers' opponent records are the wrong Pokémon in a two-trainer battle.
+        if (vm.two_trainer_battle && !secondRecords) return partySlot(vm, opponent.team[x], x, x, null);
         const mon = vm.enemy_mon_static[x];
         const team = opponent.team[x];
         const modifiers = opponent.pkmn_ram[`pokemon_${x}_ram`].modifiers;
@@ -121,8 +182,11 @@ export function enemyTeamView(vm: any): Gen5EnemyTeam {
             })) : null,
         };
     });
+    const firstCount = Math.min(6, opponent.team_count.value ?? 0);
+    const second = vm.pkmnSlots.slice(0, vm.second_team_count).map((x: number) =>
+        partySlot(vm, vm.enemy_2_mon_static[x], x + 6, firstCount + x, secondRecords?.[`pokemon_${x}_ram`] ?? null));
     const graphic = vm.getTrainerGraphic();
-    const double = props.battle.opponent_2?.value != null;
+    const double = vm.two_trainer_battle;
     // The order is for a single battle against one trainer.
     const count = double ? 0 : Math.min(6, opponent.team_count.value ?? 0);
     const party = vm.pkmnSlots.slice(0, count).map((x: number) => {
@@ -131,12 +195,14 @@ export function enemyTeamView(vm: any): Gen5EnemyTeam {
     });
     return {
         double,
-        trainer: props.battle.opponent_2?.value == null ? toDisplayString(opponent.trainer.value) + "'s Team" : "Double Battle Team",
+        trainer: double ? twoTrainerHeader(opponent.trainer.value, props.battle.opponent_2.trainer.value) : toDisplayString(opponent.trainer.value) + "'s Team",
         crop: vm.battlePokemonCrop,
         overlayColor: vm.overlay_color,
         statsArt: vm.ui_type_color_modifier,
         slots: orderSlots(slots, sendOutOrder(vm, party, true)),
-        art: graphic.state == true ? graphic.graphic : null,
+        second,
+        // Six rows leave no room for the trainer's art over them.
+        art: graphic.state == true && !double ? graphic.graphic : null,
         secondScreen: !!vm.second_screen_check,
     };
 }
@@ -203,6 +269,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen5EnemyT
     const party = trainer.party.map((mon) => sendOutMon(vm, mon.species, mon.moves));
     return {
         double: false,
+        second: [],
         trainer: trainer.header ?? trainer.name + "'s Team",
         crop: `height: ${HEIGHTS[trainer.party.length]}; filter: saturate(${vm.ui_saturation}) drop-shadow(0px 0px 1px #000000)`,
         overlayColor: vm.overlay_color,
@@ -321,9 +388,9 @@ function slotNodes(slot: Gen5EnemySlot): EnemyNode {
 /** The panel inside the overlay's enemy team branch. */
 export function enemyTeamLayout(view: Gen5EnemyTeam): EnemyChild[] {
     return [
-        { key: view.double ? 1 : 0, class: "trainerLabel", text: view.trainer },
+        { key: view.double ? 1 : 0, class: "trainerLabel", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 26, 24) : undefined, text: view.trainer },
         { class: "colored-image ds", style: [view.crop, { "--url": "url(images/gen5/ui/opponent.svg)" }] },
-        ...view.slots.map((slot): EnemyNode => ({
+        ...[...view.slots, ...view.second].map((slot): EnemyNode => ({
             style: slot.styles.stats,
             children: [!slot.present ? null : {
                 children: [
@@ -333,7 +400,7 @@ export function enemyTeamLayout(view: Gen5EnemyTeam): EnemyChild[] {
                 ],
             }],
         })),
-        { class: "enemyGraphic", children: view.slots.map(slotNodes) },
+        { class: "enemyGraphic", children: [...view.slots, ...view.second].map(slotNodes) },
         view.art === null ? null : { tag: "img", src: view.art, style: "position: absolute; top: 0px;" },
         view.secondScreen ? { tag: "img", class: "canvas", src: "images/gen5/ui/second_screen.webp" } : null,
     ];

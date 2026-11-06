@@ -8,6 +8,7 @@ import type { StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
 import { ENEMY_STAT_LABELS, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
+import { twoTrainerHeader, twoTrainerHeaderStyle } from "~/core/logic/twoTrainerBattle";
 import { gen3PreviewOf, trainerOptions, type PreviewPokemon, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen3, SendOutOrderCache, strongestMove, type SendOutMon, type SendOutMove, type SendOutPlayer } from "~/core/logic/sendOutOrder";
 
@@ -102,6 +103,12 @@ const MODIFIED: [stat: string, field: string, stage: string][] = [
     ["attack", "atk", "modStageAttack"], ["defense", "def", "modStageDefense"], ["specialAttack", "spa", "modStageSpecialAttack"],
     ["specialDefense", "spd", "modStageSpecialDefense"], ["speed", "spe", "modStageSpeed"],
 ];
+export interface Gen3EnemyTeam extends EnemyTeamView<Gen3EnemySlot> {
+    overlayColor: unknown;
+    /** Two trainers are being fought (Emerald). */
+    double?: boolean;
+}
+
 const EV_YIELDS = ["ev_yield_hp", "ev_yield_atk", "ev_yield_def", "ev_yield_spc_atk", "ev_yield_spc_def", "ev_yield_spd"];
 
 export interface Gen3EnemySlot extends EnemySlotView {
@@ -117,17 +124,24 @@ export interface Gen3EnemySlot extends EnemySlotView {
     evs: boolean;
 }
 
-export function enemyTeamView(vm: any): EnemyTeamView<Gen3EnemySlot> & { overlayColor: unknown } {
+export function enemyTeamView(vm: any): Gen3EnemyTeam {
     const props = vm.game.properties;
     const batt = vm.batt;
-    const enemy = batt.enemyPokemon;
     const evs = vm.stats == "EVs" || vm.stats == "Detailed EVs";
-    const slots = vm.pkmnSlots.map((x: number): Gen3EnemySlot => {
-        const pokemon = vm.enemyTrainer.pokemon[x];
-        if (pokemon == undefined) return { slot: x, present: false } as Gen3EnemySlot;
+    // A second trainer (Emerald): the game gives each trainer 3 Pokémon at most, the second's from party slot 3
+    // (pokeemerald CreateNPCTrainerParty), so a slot here can be the row's number or not.
+    const second = vm.second_trainer;
+    const first = second ? vm.enemyTrainer.pokemon.slice(0, 3) : vm.enemyTrainer.pokemon;
+    const team = [...first.map((pokemon: any, slot: number) => ({ pokemon, slot })), ...(second?.pokemon.slice(0, 3) ?? []).map((pokemon: any, i: number) => ({ pokemon, slot: 3 + i }))];
+    const slots = vm.pkmnSlots.map((row: number): Gen3EnemySlot => {
+        const pokemon = team[row]?.pokemon;
+        if (pokemon == undefined) return { slot: row, present: false } as Gen3EnemySlot;
+        const x: number = team[row].slot;
         const mon = batt.trainer.team[x];
+        // Each trainer's Pokémon that is out: the second's is the battle's other enemy.
+        const enemy = second && x >= 3 ? batt.enemySecondPokemon : batt.enemyPokemon;
         const species = pokemon?.species;
-        const speed = vm.speed_comparison(x, vm.enemyStatModification(x, enemy.partyPos.value, "speed", props.battle.trainer.team[x]?.speed.value, enemy.modStageSpeed.value, props.battle.enemyPokemon)).comparison;
+        const speed = vm.speed_comparison(x, vm.enemyStatModification(x, enemy.partyPos.value, "speed", props.battle.trainer.team[x]?.speed.value, enemy.modStageSpeed.value, enemy)).comparison;
         const icons = vm.enemyPkmnFaintTypes(mon);
         // Decision 26: a fainted Pokémon (in From Battle every Pokémon, as before) at half opacity; its sprite and icons
         // greyscale, as they were. Labels follow the slot's faint as they did (not in To Battle).
@@ -135,17 +149,18 @@ export function enemyTeamView(vm: any): EnemyTeamView<Gen3EnemySlot> & { overlay
         const faded = (state == `Battle` || state == `From Battle`) && (mon.hp == 0 || state == `From Battle`);
         const labelFaded = state != "To Battle" && props.battle.trainer.team[x].hp.value == 0;
         const text = faded ? FAINTED_TEXT : vm.enemyPkmnText(mon);
-        const type1 = vm.enemyType1(x);
-        const type2 = vm.enemyType2(x);
+        const dex = vm.game_data?.dexData?.[species];
+        const type1 = x >= 3 && second ? dex?.type_1 : vm.enemyType1(x);
+        const type2 = x >= 3 && second ? dex?.type_2 : vm.enemyType2(x);
         const moves = pokemon?.moves;
         const labelStyles = labelFaded ? LABELS.map(() => FAINTED_TEXT) : [
             vm.enemyHpOpacity(mon, x),
-            ...MODIFIED.map(([, , stage]) => vm.enemyStatLabelOpacity(props.battle.enemyPokemon[stage].value, x)),
+            ...MODIFIED.map(([, , stage]) => vm.enemyStatLabelOpacity(enemy[stage].value, x)),
         ];
         const values = evs
             ? EV_YIELDS.map((field) => vm.game_data.dexData[pokemon?.species][field])
             : [pokemon?.hp, ...MODIFIED.map(([stat, field, stage]) =>
-                vm.enemyStatModification(x, enemy.partyPos.value, stat, pokemon?.[field], enemy[stage].value, props.battle.enemyPokemon))];
+                vm.enemyStatModification(x, enemy.partyPos.value, stat, pokemon?.[field], enemy[stage].value, enemy))];
         return {
             slot: x,
             present: true,
@@ -177,9 +192,10 @@ export function enemyTeamView(vm: any): EnemyTeamView<Gen3EnemySlot> & { overlay
         };
     });
     // A double battle picks against a random target: no order.
-    const table = vm.enemyTrainer?.is_double_battle ? null : gen3PreviewOf(vm.enemyTrainer);
+    const table = vm.enemyTrainer?.is_double_battle || second ? null : gen3PreviewOf(vm.enemyTrainer);
     return {
-        trainer: vm.special_trainer_names(vm.enemyTrainerName),
+        double: !!second,
+        trainer: second ? twoTrainerHeader(vm.special_trainer_names(vm.enemyTrainerName), vm.special_trainer_names(second.trainer_name)) : vm.special_trainer_names(vm.enemyTrainerName),
         crop: vm.battlePokemonCrop(),
         slots: orderSlots(slots, table ? sendOutOrder(vm, table.party, true) : null),
         speedShown: vm.speed_comparison_toggle == true,
@@ -207,7 +223,7 @@ export function previewTrainer(vm: any): PreviewTrainer | null {
  * The trainer preview (decision 14) in the same panel: the picked trainer's team from the trainer table, with the
  * player's Speed as the speed label reads it (`get_stat('Speed', true)`).
  */
-export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamView<Gen3EnemySlot> & { overlayColor: unknown } {
+export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen3EnemyTeam {
     const evs = vm.stats == "EVs" || vm.stats == "Detailed EVs";
     const player_speed = vm.get_stat("Speed", true);
     const plain = { hp: 1 };
@@ -252,7 +268,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamV
     };
 }
 
-function slotNodes(view: EnemyTeamView<Gen3EnemySlot> & { overlayColor: unknown }, slot: Gen3EnemySlot): EnemyChild[] {
+function slotNodes(view: Gen3EnemyTeam, slot: Gen3EnemySlot): EnemyChild[] {
     if (!slot.present) return [null, null];
     const x = slot.slot;
     const row = rowOf(slot);
@@ -317,9 +333,9 @@ function slotNodes(view: EnemyTeamView<Gen3EnemySlot> & { overlayColor: unknown 
 }
 
 /** The panel inside the overlay's "Battle Graphic" branch. */
-export function enemyTeamLayout(view: EnemyTeamView<Gen3EnemySlot> & { overlayColor: unknown }): EnemyChild[] {
+export function enemyTeamLayout(view: Gen3EnemyTeam): EnemyChild[] {
     return [
-        { class: "enemy_trainer_name", text: view.trainer },
+        { class: "enemy_trainer_name", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 24, 20) : undefined, text: view.trainer },
         { class: "colored-image ds", style: [view.crop, { "--url": "url(images/gen3/ui/enemy.svg)" }] },
         ...view.slots.map((slot): EnemyNode => ({ class: "enemyGraphic", children: slotNodes(view, slot) })),
     ];

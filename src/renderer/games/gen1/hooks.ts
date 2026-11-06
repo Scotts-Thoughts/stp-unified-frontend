@@ -74,6 +74,9 @@ export function installGen1RunHooks(vm: any): void {
             if (vm.settings.shuckie.timer && vm.emulator.timeCurrent == null) {
                 vm.emulator.sendStart();
             }
+            // Reset first: start() does nothing to a running timer, so a new save file made without
+            // pressing New Run kept the abandoned attempt's clock (known-legacy-bugs #154).
+            vm.metrics.resetTimer();
             vm.metrics.startTime();
             vm.metrics.update("player_id", newProp.value);
         }

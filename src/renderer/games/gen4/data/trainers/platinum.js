@@ -16466,8 +16466,8 @@ export const trainers_plat = {
                     "attack": 129,
                     "defense": 94,
                     "speed": 109,
-                    "special_attack": 96,
-                    "special_defense": 99
+                    "special_attack": 98,
+                    "special_defense": 97
                 },
                 "moves": [
                     "ThunderPunch",
@@ -25061,11 +25061,11 @@ export const trainers_plat = {
                 "held_item": null,
                 "stats": {
                     "hp": 62,
-                    "attack": 42,
-                    "defense": 55,
+                    "attack": 33,
+                    "defense": 45,
                     "speed": 24,
-                    "special_attack": 29,
-                    "special_defense": 45
+                    "special_attack": 37,
+                    "special_defense": 55
                 },
                 "moves": [
                     "Protect",
@@ -25083,11 +25083,11 @@ export const trainers_plat = {
                 "held_item": null,
                 "stats": {
                     "hp": 62,
-                    "attack": 38,
-                    "defense": 50,
+                    "attack": 33,
+                    "defense": 45,
                     "speed": 24,
-                    "special_attack": 34,
-                    "special_defense": 50
+                    "special_attack": 37,
+                    "special_defense": 55
                 },
                 "moves": [
                     "Protect",

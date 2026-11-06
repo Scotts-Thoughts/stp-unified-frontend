@@ -96,6 +96,7 @@ export const g4tmhmMapping = [
   { tmhmIndex: "HM03", Move: "Surf" },
   { tmhmIndex: "HM04", Move: "Strength" },
   { tmhmIndex: "HM05", Move: "Defog" },
+  { tmhmIndex: "HM05", Move: "Whirlpool" },
   { tmhmIndex: "HM06", Move: "Rock Smash" },
   { tmhmIndex: "HM07", Move: "Waterfall" },
   { tmhmIndex: "HM08", Move: "Rock Climb" },

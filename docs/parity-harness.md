@@ -450,3 +450,53 @@ Still outstanding for a full Phase 0 exit, both blocked on things outside the ha
 - **legacy baselines** (0.4) and the Electron 37 boot check for gen2–5 (checklist step 8): both need ports
   8085/30158/30159 free, i.e. PokeAByte, Super Shuckie and the running overlay closed -- or, since 2026-09-12,
   `--redirect-ports`, which moves all four.
+
+## Real game states from Super Shuckie replays
+
+A smoke fixture's values are chosen. To check the overlay against what a game really has in memory at a moment:
+
+1. **Work on a copy.** Playing a replay can write bookmarks into the `.replay` file. Copy the replay into a scratch
+   folder's `UserData/<rom>-data/replays/`, next to a copy of `supershuckie.exe` and a copy of `UserData/settings.json`.
+   The app reads `./UserData`, so its working directory keeps it isolated. Turn audio off and `bot_control` on.
+2. **The REST port is fixed at 30158.** If Scott's Super Shuckie may be running, replace `127.0.0.1:30158` in the copied exe
+   with another port of the same length. Check `tasklist` for his first.
+3. **Poke-A-Byte's emulator port (55356) and its shared memory are fixed too**, so a second Poke-A-Byte would attach to his
+   emulator. With his Super Shuckie closed, `pokeabyte.enabled` in the copy lets his Poke-A-Byte read the copy:
+   `PUT /mapper-service/change-mapper` with the mapper id as a JSON string. Otherwise read memory with `/read-memory` only.
+4. `/load-rom`, `/load-replay`, `/go-to-frame`, `/set-paused` drive it. Find a frame from the replay's bookmarks
+   (`src/main/replayFile.ts`). Format v3/v4 replays have none, so seek in steps and read a flag or id at each.
+5. Write `GET /mapper` and `/mapper/glossary` out as a fixture (`paths`, `initial`, `glossary`, `meta`), stepping only what
+   triggers a capture (`meta.state`).
+6. **The game must be selected before the replay.** `--control` runs after the captures, so use `run()`'s `beforeReplay` to call
+   `/set-game`; otherwise gens 3-4 read the wrong edition's trainer table.
+7. Gen3 follows the battle through events, so a snapshot alone stays on "Base Stats". Step the callbacks as
+   `scenarios/gen3-firered-smoke.json` does (`CB2_InitBattle`, then `BattleMainCB2` and `battleDialogue` 6).
+
+## Testing a mechanic no replay shows: inject it
+
+Don't ask Scott for a replay or save state because a game state is rare (weather, a status, a move, an item). Change the party and
+play the battle yourself. Found this way in gen 5: the weather addresses (`docs/mapper-matrix.md`).
+
+1. **Use a game with no replay loaded.** Super Shuckie drops every memory write while a replay plays (`enqueue_write`), though
+   Poke-A-Byte still answers 200. `/step` is refused too (409). Its REST API can't stop a replay, and the menu's "Stop playback"
+   needs real input, so boot from an in-game save instead:
+   copy `UserData/<rom>-data/save data/replay.sav` over `default.sav` **in the rig's folder**, then `/load-rom`. `replay.sav` holds
+   the run's party even where `default.sav` is blank. Save copies are throwaway: keep a clean copy and restore it before each boot.
+2. **Get past the title with `/step`.** Hold nothing for 700 frames, then press `start` and `a`, 6 frames on and 44 off, about
+   30 times. `read-memory` tells you when the game is live. `/step` needs `set-paused=true` first.
+3. **Reload the mapper after every `/load-rom`.** Poke-A-Byte loses the session (a write returns 400 until it's back):
+   `change-mapper`, then retry the write, stepping 1 frame between tries.
+4. **Edit the Pokémon as the overlay does** (`write_byte_data`, `encrypt_byte_data` in `games/gen5/Overlay.vue`). Read all 220
+   bytes, decrypt, change them, re-encrypt, and write all 220 at once: `POST /mapper/set-property-bytes/` with
+   `{"path":"player/decrypted_mon_0","bytes":[...],"freeze":false}`. The checksum must be recalculated.
+   `tools/mappers/gen5mon.py` does this (`set_moves`, `moves`, `species`), and only slot 0 has a property. Check the round trip
+   (`rebuild(raw, blocks(raw)) == raw`), then read the party back after one frame; the write's 200 proves nothing.
+5. **Put the move in all four slots,** so mashing `a` can't pick anything else. Inject before the battle starts.
+6. **To find an unknown address,** repeat with each value (Rain 2, Sandstorm 4, Sun 1, Hail 3), scan RAM for the value in each run
+   and intersect the runs. Several spots survive, so then log them through a whole fight: the real one follows the game (rain's
+   turns fell 4, 3, 2, 1, 0). The screen isn't proof: a screenshot rarely shows the weather.
+7. **Finish through the mapper, then the overlay:** read the property, then snapshot a fixture as above.
+
+Gens 3-4 have their own encryption and party layout; check the overlay's writer for that gen before reusing this.
+
+On Windows, the Bash tool collapses a doubled backslash, which breaks a ROM path. Write such a script with the Write tool.

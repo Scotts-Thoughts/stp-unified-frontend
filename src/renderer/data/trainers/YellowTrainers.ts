@@ -21521,10 +21521,10 @@ export const YellowTrainers: Record<string, Trainer> = {
                     "special_defense": 97
                 },
                 "moves": [
-                    "Acid",
                     "Razor Leaf",
                     "Wrap",
-                    "PoisonPowder"
+                    "PoisonPowder",
+                    "Sleep Powder"
                 ]
             }
         ]
@@ -21630,10 +21630,10 @@ export const YellowTrainers: Record<string, Trainer> = {
                     "special_defense": 104
                 },
                 "moves": [
-                    "Sleep Powder",
-                    "Acid",
                     "Petal Dance",
-                    "PoisonPowder"
+                    "PoisonPowder",
+                    "Stun Spore",
+                    "Sleep Powder"
                 ]
             },
             {

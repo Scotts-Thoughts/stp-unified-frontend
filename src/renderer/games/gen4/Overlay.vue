@@ -75,21 +75,21 @@
                 </template>
                 <template #ivs>
                     <div v-if="iv_mode == 'Automatic'" class="stp-ivgrid">
-                        <span>HP</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[0] }}</span>
-                        <span>Atk</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[1] }}</span>
-                        <span>Def</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[2] }}</span>
-                        <span>SpA</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[4] }}</span>
-                        <span>SpD</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[5] }}</span>
-                        <span>Spe</span><span>{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[3] }}</span>
+                        <span class="stp-stat-hp">HP</span><span class="stp-stat-hp">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[0] }}</span>
+                        <span class="stp-stat-atk">Atk</span><span class="stp-stat-atk">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[1] }}</span>
+                        <span class="stp-stat-def">Def</span><span class="stp-stat-def">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[2] }}</span>
+                        <span class="stp-stat-spa">SpA</span><span class="stp-stat-spa">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[4] }}</span>
+                        <span class="stp-stat-spd">SpD</span><span class="stp-stat-spd">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[5] }}</span>
+                        <span class="stp-stat-spe">Spe</span><span class="stp-stat-spe">{{ hiddenpowers[hidden_power_type]?.[hidden_power_index]?.[3] }}</span>
                     </div>
                     <template v-else>
                         <div class="stp-ivgrid">
-                            <span>HP</span><input type="text" class="manual_iv_input" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)">
-                            <span>Atk</span><input type="text" class="manual_iv_input" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)">
-                            <span>Def</span><input type="text" class="manual_iv_input" :value="manual_ivs.def" @change="set_manual_iv('def', $event)">
-                            <span>SpA</span><input type="text" class="manual_iv_input" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)">
-                            <span>SpD</span><input type="text" class="manual_iv_input" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)">
-                            <span>Spe</span><input type="text" class="manual_iv_input" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)">
+                            <span class="stp-stat-hp">HP</span><input type="text" class="manual_iv_input stp-stat-hp" :value="manual_ivs.hp" @change="set_manual_iv('hp', $event)">
+                            <span class="stp-stat-atk">Atk</span><input type="text" class="manual_iv_input stp-stat-atk" :value="manual_ivs.atk" @change="set_manual_iv('atk', $event)">
+                            <span class="stp-stat-def">Def</span><input type="text" class="manual_iv_input stp-stat-def" :value="manual_ivs.def" @change="set_manual_iv('def', $event)">
+                            <span class="stp-stat-spa">SpA</span><input type="text" class="manual_iv_input stp-stat-spa" :value="manual_ivs.spa" @change="set_manual_iv('spa', $event)">
+                            <span class="stp-stat-spd">SpD</span><input type="text" class="manual_iv_input stp-stat-spd" :value="manual_ivs.spd" @change="set_manual_iv('spd', $event)">
+                            <span class="stp-stat-spe">Spe</span><input type="text" class="manual_iv_input stp-stat-spe" :value="manual_ivs.spe" @change="set_manual_iv('spe', $event)">
                         </div>
                         <div class="stp-hint">Hidden Power: {{ manualHiddenPower.type }} ({{ manualHiddenPower.power }})</div>
                     </template>
@@ -401,11 +401,13 @@ import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder } from "~/core/logic/speedLabel";
 import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
+import { isTwoTrainerBattle, secondTeamRows } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { searchTrainers } from "~/core/logic/trainerPreview";
 import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
 import { crossOutActive, struckMoves } from "~/core/logic/unobtainableMoves";
 import { gen4SettingsPanel } from "./settingsPanel";
+import { gen4PresetHost } from "./presets";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { gen45OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
 import { flailReversalPower, gyroBallPower, punishmentPower, trumpCardPower, wringOutPower } from "~/core/logic/movePower";
@@ -1674,7 +1676,7 @@ export default defineComponent({
         // The settings panel's description (settingsPanel.ts). It reads nothing reactive itself, so it is
         // built once; the panel component reads the overlay through its closures as it renders.
         settingsPanel() {
-            return markRaw(gen4SettingsPanel(this));
+            return markRaw(gen4SettingsPanel(this, gen4PresetHost(this)));
         },
         // average_median_stats() for each stat the panel shows, recomputed only when the dex changes
         average_median_by_stat() {
@@ -2291,15 +2293,7 @@ export default defineComponent({
             return data
         },
         double_battle_team_size() {
-            const opponent_2 = this.game.properties.battle.opponent_2.trainer.value
-            const opponent_1_team_count = this.game.properties.battle.opponent.team_count.value
-            const opponent_2_team_count = this.game.properties.battle.opponent_2.team_count.value
-            if (opponent_2) {
-                return opponent_1_team_count + opponent_2_team_count
-            }
-            else {
-                return opponent_1_team_count
-            }
+            return this.game.properties.battle.opponent.team_count.value + this.second_team_count
         },
         stats_header() {
             const toggle    = true
@@ -2415,11 +2409,20 @@ export default defineComponent({
             return object
         },
         enemy_2_mon_static() {
-            const opponent_id = this.game.properties.battle.opponent_2?.trainer?.bytes
-            const object      = this.selected_game == 'Platinum' ? this.platinum_trainers[opponent_id].party : 
-                this.selected_game == 'HeartGold and SoulSilver' ? this.trainers_hgss[opponent_id].party :
-                this.trainers_dp[opponent_id].party
-            return object
+            const opponent_id = this.game.properties.battle.opponent_2?.id?.value
+            const object      = this.selected_game == 'Platinum' ? this.platinum_trainers[opponent_id]?.party : 
+                this.selected_game == 'HeartGold and SoulSilver' ? this.trainers_hgss[opponent_id]?.party :
+                this.trainers_dp[opponent_id]?.party
+            return object ?? []
+        },
+        two_trainer_battle() {
+            const battle = this.game.properties.battle
+            return isTwoTrainerBattle(battle.opponent.id.value, battle.opponent_2?.id?.value)
+        },
+        // From the trainer table: Platinum's mapper reads opponent_2.team_count from a wrong address (68 at Spear Pillar).
+        second_team_count() {
+            if (!this.two_trainer_battle) return 0
+            return secondTeamRows(this.game.properties.battle.opponent.team_count.value, this.enemy_2_mon_static.length)
         },
         heldItem() {
             const state = this.game.properties.meta.state.value
@@ -2498,13 +2501,7 @@ export default defineComponent({
                 return `height: ${heights[totalPokemon]}; filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`;
             }
             totalPokemon = this.game.properties.battle.opponent.team_count.value;
-            let game = this.game.properties.meta.game_name.value
-            let opponent_2            = this.game.properties.battle.opponent_2.trainer.value
-            let opponent_team_count   = this.game.properties.battle.opponent.team_count.value;
-            let opponent_2_team_count = this.game.properties.battle.opponent_2.team_count.value;
-            if (opponent_2 && game != "HeartGold and SoulSilver") {
-                totalPokemon = opponent_team_count + opponent_2_team_count
-            }
+            totalPokemon += this.second_team_count
             return `height: ${heights[totalPokemon]}; filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`;
         },
         solo_mon() {
@@ -4945,7 +4942,7 @@ export default defineComponent({
         getMoveType(x) {
             const move = this.platinum_moves[this.getMove(x)]?.Move
             if (move == 'Natural Gift') {
-                return this.moveType(move)
+                return this.moveType(move).toLowerCase()
             }
             else {
                 return this.platinum_moves[this.getMove(x)]?.Type.toLowerCase()
