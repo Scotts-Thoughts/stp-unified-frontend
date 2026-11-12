@@ -96,6 +96,15 @@ export function unifiedElectron(): string {
   return createRequire(import.meta.url)("electron") as string;
 }
 
+/**
+ * The major version of that Electron. A `legacy:genN@37` target runs on it too: "@37" is the name the
+ * same-Electron baseline got when the repo was on 37, and the sandbox folders keep it.
+ */
+export function unifiedElectronMajor(): number {
+  const { version } = createRequire(import.meta.url)("electron/package.json") as { version: string };
+  return Number(version.split(".")[0]);
+}
+
 export function legacyElectron(gen: Generation): string {
   return join(LEGACY_DIRS[gen], "node_modules", "electron", "dist", "electron.exe");
 }
@@ -131,7 +140,7 @@ export function parseTarget(spec: string): Target {
       userDataDir: join(sandbox, "userData"),
       appName: "stp-overlay",
       controlPort: 30159,
-      electronMajor: 37,
+      electronMajor: unifiedElectronMajor(),
     };
   }
   const m = /^legacy:(gen[1-5])@(25|37)$/.exec(spec);
@@ -150,7 +159,7 @@ export function parseTarget(spec: string): Target {
     userDataDir: join(sandbox, "userData"),
     appName: LEGACY_APP_NAMES[gen],
     controlPort: 30159,
-    electronMajor: major,
+    electronMajor: major === 25 ? 25 : unifiedElectronMajor(),
   };
 }
 

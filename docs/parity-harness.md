@@ -119,8 +119,8 @@ single-tenant).
 | Target | executablePath | args | cwd |
 |---|---|---|---|
 | legacy genN (reference) | `A:\Programs\genN-stp-frontend\node_modules\electron\dist\electron.exe` (25.x) | `["A:\\Programs\\genN-stp-frontend"]` | sandbox dir seeded with `keyhook.exe`, `storage/`, empty `splits/` |
-| legacy genN (same-Electron baseline) | the unified repo's Electron 37 binary | same | same |
-| unified | Electron 37 | the repo root (built with `electron-vite build`; **never** the dev server, its `http://localhost:5173` origin changes `localStorage` scoping) — passing the root, not `out/main/index.js`, makes Electron read `package.json`, so the app name, `main` and `app.isPackaged` are what a real launch sees | sandbox |
+| legacy genN (same-Electron baseline; still spelled `@37`, the repo's Electron when it was named) | the unified repo's Electron binary (45 since 2026-11-11) | same | same |
+| unified | the repo's Electron (45) | the repo root (built with `electron-vite build`; **never** the dev server, its `http://localhost:5173` origin changes `localStorage` scoping) — passing the root, not `out/main/index.js`, makes Electron read `package.json`, so the app name, `main` and `app.isPackaged` are what a real launch sees | sandbox |
 
 Environment for every launch: `NODE_ENV=production`, `ELECTRON_ENABLE_LOGGING=1`, and Chromium switches
 `--force-device-scale-factor=1` and **`--user-data-dir=<sandbox>\userData`**.

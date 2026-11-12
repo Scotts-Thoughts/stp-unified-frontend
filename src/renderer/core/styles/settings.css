@@ -568,6 +568,11 @@
     appearance: base-select;
 }
 
+/* Chromium 156 (Electron 45) gives a customizable select a 24px minimum height; the settings rows are 22px. */
+.stp-settings select.stp-select-spread {
+    min-block-size: 0;
+}
+
 .stp-settings select.stp-select-spread::picker-icon {
     display: none;
 }

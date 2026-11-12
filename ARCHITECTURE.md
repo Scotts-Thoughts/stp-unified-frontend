@@ -186,13 +186,23 @@ docs/             Reference docs. See §13.
   used only by `tools/build/after-pack.mjs`, at build time, on our own exe, and it stays pinned at 4.0.1 because
   nothing newer exists. The pure-JS `resedit` package is the replacement candidate when someone has time to
   rewrite `stampExe` and check the stamped exe.
-- **Electron stays on 37 until a harness run says otherwise.** `npm audit` wants 43+ (its bundled `extract-zip`),
-  and 45 is current, but a Chromium change moves pixels, and §2's `setAspectRatio` trap was measured on 37.
-  Upgrade it in its own change: bump, `npm run build`, then the harness for all five generations against a
-  HEAD-worktree capture (§12). The same goes for `vite` 8 / `electron-vite` 6, `pinia` 4 and TypeScript 7
-  (the native port): majors with no security need behind them.
-- **`@types/node` follows Electron's Node**, not npm's latest (Electron 37 ships Node 22).
-- `npm audit` after `npm update` should report only Electron's own `extract-zip`; anything else is new.
+- **Electron is 45** (Chromium 156, Node 24) since 2026-11-11; it was 37. Upgrade it in its own change: capture all
+  five generations with the harness on the old version (`parity:run … --control`), bump, `npm run build`, capture
+  again, `parity:diff`. Across a Chromium change the diff's styles and pixels oracles drown in new default CSS
+  properties and anti-aliasing, so compare each capture's `styles.json` yourself: same elements, same `text`, same
+  `rect`. Oracles 3-9 must still match exactly. What 37 to 45 needed:
+  - A customizable select (`appearance: base-select`, the Hidden Power spread dropdown) gained a 24px minimum
+    height and pushed the gens 3-5 settings panel down 2px; `settings.css` sets `min-block-size: 0` on it.
+  - Since Electron 42 `npm install` no longer downloads the Electron program. The first `require("electron")`
+    (dev, the harness) fetches it; `npx install-electron` does it by hand. electron-builder fetches its own.
+  - Not rechecked on 45: dragging the window edge with the mouse (§2's `setAspectRatio` trap; the snap to 16:9
+    was checked programmatically), `parity:shortcuts-app` (it needs the keyboard focus), and the Cutter frame
+    server (`cutter.ts` reads `toBitmap`, which Electron 43 changed to always return sRGB).
+- **`vite` 8 / `electron-vite` 6, `pinia` 4 and TypeScript 7** (the native port) are majors with no security need
+  behind them. Each is its own change with the same before/after harness run.
+- **`@types/node` follows Electron's Node**, not npm's latest (Electron 45 ships Node 24).
+- `npm audit` after `npm update` should report only electron-builder's build-time dependencies (moderate; its
+  suggested fix is a downgrade to electron-builder 24, don't take it); anything else is new.
 
 ## 3. How a game gets on screen
 
