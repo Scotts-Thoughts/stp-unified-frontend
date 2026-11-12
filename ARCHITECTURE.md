@@ -82,6 +82,10 @@ docs/             Reference docs. See §13.
     or point `/load-split-file` at any file. The queuer (Node) sends no such header, and a page served from
     localhost is same-site, so neither is touched. Don't drop the check to make a browser client work; serve
     that client from localhost instead.
+  - A request whose `Host` header is not `127.0.0.1`, `localhost` or `[::1]` with the server's port also gets a
+    403, and no `Access-Control-Allow-Origin` is sent (2026-11-11). This closes DNS rebinding, where a web page
+    points its own domain at 127.0.0.1 and the browser stops marking the request cross-site. A client must ask
+    for `http://127.0.0.1:30159` (or `localhost`), not a machine name or LAN address.
   - `/quit`, `/reload` and `/load-split-file` are answered in main.
   - Every other route is forwarded to the renderer (`control-request` / `control-reply`, 5 s timeout).
 - `hotkeys.ts`: keyboard shortcuts and the Keyboard Shortcuts window (§4 "Shortcuts").

@@ -28,6 +28,9 @@ import { loadSplitComparison } from "./splitComparison";
 const PORT = Number(process.env.STP_CONTROL_PORT ?? 30159);
 const HOST = "127.0.0.1";
 
+/** The only `Host` headers answered: this machine's loopback names with the server's port. */
+const ALLOWED_HOSTS = new Set([`127.0.0.1:${PORT}`, `localhost:${PORT}`, `[::1]:${PORT}`]);
+
 /** Routes answered in the main process; everything else is forwarded to the renderer. */
 const MAIN_ROUTES = new Set(["/quit", "/reload", "/load-split-file"]);
 
@@ -92,7 +95,19 @@ export class ControlServer {
 
   private async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     res.setHeader("Content-Type", "application/json");
-    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    // The request must have been addressed to this machine by its loopback name. A web
+    // page can point its own domain name at 127.0.0.1 ("DNS rebinding"); the browser then
+    // treats the request as same-origin, so the `Sec-Fetch-Site` check below never sees
+    // it, but the `Host` header still carries the page's name. The queuer and the harness
+    // ask for 127.0.0.1. No `Access-Control-Allow-Origin` is sent either (the legacy apps
+    // sent `*`): nothing that drives the overlay is a web page, and without it a browser
+    // will not hand a reply to one. (2026-11-11)
+    if (!ALLOWED_HOSTS.has(String(req.headers.host ?? "").toLowerCase())) {
+      res.statusCode = 403;
+      res.end(JSON.stringify({ ok: false, error: "Requests must be addressed to 127.0.0.1" }));
+      return;
+    }
 
     // A web page open in a browser on this machine can send a GET to 127.0.0.1 as well,
     // and could quit the overlay, start a new run or point `/load-split-file` at any file.

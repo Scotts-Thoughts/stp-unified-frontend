@@ -55,6 +55,9 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 (400, 404, 500), never in the body -- `tools/parity/diff.ts` oracle 6 compares the bodies.
 
 ### Routes the queuer calls (in call order for one item)
+Since 2026-11-11 the `Host` header must be `127.0.0.1:30159` or `localhost:30159` (else the same 403), and the
+reply no longer carries `Access-Control-Allow-Origin: *`. The queuer asks for `http://127.0.0.1:30159` from Node,
+so neither affects it; a browser page on another origin can no longer read a reply.
 
 | Route | Query | Gen guard in queuer | Effect |
 |---|---|---|---|
