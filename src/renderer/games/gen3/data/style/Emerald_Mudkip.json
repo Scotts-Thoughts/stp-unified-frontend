@@ -11,9 +11,10 @@
   "backgroundScale": "110",
   "overlay_color": "#6890f0",
   "pkmn_ability": "Torrent",
-  "pkmnNature": "Mild",
+  "pkmnNature": "Modest",
   "hidden_power_type": "Electric",
   "hidden_power_index": "3",
-  "attempt_number": 2,
-  "finished_run_count": 2
+  "attempt_number": 5,
+  "finished_run_count": 4,
+  "splits_display": "Followup"
 }

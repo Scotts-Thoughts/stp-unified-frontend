@@ -82,7 +82,7 @@ export function gen4SettingsPanel(vm: any, presets?: PresetHost): SettingsPanelS
     const platinum = () => gameName() == "Platinum";
     const hgss = () => gameName() == "HeartGold and SoulSilver";
     // The RNG button's own test also falls back to the picked box art before a game is read.
-    const rngPlatinum = () => (gameName() || vm.selected_game) == "Platinum";
+    const rngGame = () => ["Platinum", "HeartGold and SoulSilver"].includes(gameName() || vm.selected_game);
     const familyStyle = () => vm.evolution == true && vm.evolution_family_list.length > 1;
     const automaticIvs = () => vm.iv_mode == IV_MODE.automatic;
     const team0 = () => vm.game.properties.player.team[0];
@@ -137,6 +137,7 @@ export function gen4SettingsPanel(vm: any, presets?: PresetHost): SettingsPanelS
                 flag(vm, "shuckie.counters", "Shuckie Counters", "shuckie_counters", { tier: "advanced" }),
                 flag(vm, "shuckie.bookmarks", "Shuckie Bookmarks", "shuckie_bookmarks", { tier: "advanced" }),
                 flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", { tier: "advanced" }),
+                flag(vm, "advanced.refilming_mode", "Re-filming Mode", "refilming_mode", { tier: "advanced" }),
                 flag(vm, "settings.editor", "Pokemon Editor", "editor", { tier: "advanced", noAction: true, preset: false }),
                 flag(vm, "settings.debugging_mode", "Debugging", "debugging_mode", { tier: "advanced", preset: false }),
             ],
@@ -300,7 +301,7 @@ export function gen4SettingsPanel(vm: any, presets?: PresetHost): SettingsPanelS
             title: "Encounters",
             controls: [
                 flag(vm, "encounters.catch_rate", "Guaranteed Catches", "catch_rate"),
-                { kind: "button", id: "rng.open", label: "RNG Trips", actionLabel: "RNG (Platinum)", available: rngPlatinum, run: () => vm.openRNGModal() },
+                { kind: "button", id: "rng.open", label: "RNG Trips", actionLabel: "RNG (Platinum, HG/SS)", available: rngGame, run: () => vm.openRNGModal() },
                 ...encounterToggles(PLATINUM_ENCOUNTERS, "encounters", "encounters", "Platinum", platinum),
                 ...encounterToggles(HGSS_ENCOUNTERS, "encounters", "encounters", "HGSS", hgss),
             ],

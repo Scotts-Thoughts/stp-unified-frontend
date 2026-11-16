@@ -434,13 +434,19 @@ import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
+import { confirmReset } from "~/core/logic/resetGuard";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { formatStage } from "~/core/logic/statFormat";
 import { gen3OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
 import { gen3IsPhysicalType, moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
 import { bindShortcuts } from "~/core/shortcuts/engine";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
-import { pickSplitComparison } from "~/core/logic/splitComparison";
+import { wireGen3ChapterMarkers } from "./chapterMarkers";
+import { realClock, SettleWindow } from "~/core/logic/battleMarkers";
+import { latestTimePerTrainer, pickSplitComparison } from "~/core/logic/splitComparison";
+
+// Their later rows in a comparison are rematches, after the run is over.
+const FIRST_OCCURRENCE_ONLY = ["ELITE_FOUR_SIDNEY", "ELITE_FOUR_PHOEBE", "ELITE_FOUR_GLACIA", "ELITE_FOUR_DRAKE", "CHAMPION_WALLACE"];
 import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampIvs, IV_MODE } from "~/core/logic/starterIvs";
@@ -662,7 +668,6 @@ export default defineComponent({
             banned_hidden_power      : MyStorage['banned_hidden_power']       ?? true,
             post_kanto_evolutions    : MyStorage['post_kanto_evolutions']     ?? false,
             splits_display           : MyStorage['splits_display']            ?? "First",
-            show_post_battle_splits  : MyStorage['show_post_battle_splits']   ?? true,
  
             // Editors 
             move1_replacement: "",
@@ -720,7 +725,7 @@ export default defineComponent({
             // Always on: its toggle is gone, so an old saved `false` must not stick.
             display_badge_boosts         : true,
             show_nature_changes          : MyStorage['show_nature_changes']          ?? true,
-            automatic_post_battle_splits : MyStorage["automatic_post_battle_splits"] ?? false,
+            automatic_post_battle_splits : MyStorage["automatic_post_battle_splits"] ?? true,
             no_counters                  : MyStorage["no_counters"]                  ?? false,
 
 
@@ -1001,6 +1006,7 @@ export default defineComponent({
             simple_data_str:     MyStorage["simple_data_str"]     ?? "",
             simple_data:         MyStorage["simple_data"]         ?? "",
             testRun:             MyStorage['testRun']             ?? false,
+            refilming_mode:      MyStorage['refilming_mode']      ?? false,
             // Decision 30: off for new users (was on); a saved choice is kept, and a saved "Wild" right panel turns it on.
             show_wild_battles:   MyStorage['show_wild_battles']   ?? readRightPanelMode(MyStorage['right_panel']).wild,
             // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
@@ -1088,6 +1094,7 @@ export default defineComponent({
                 "tutor_moves",
                 "showSpecialTrainerGraphics",
                 "testRun",
+                "refilming_mode",
                 "simple_data_str",
                 "simple_data",
                 "time_split_start",
@@ -1135,7 +1142,6 @@ export default defineComponent({
                 "deoxys_form",
                 "castform_form",
                 "post_kanto_evolutions",
-                "show_post_battle_splits",
                 "shuckie_timer",
                 "shuckie_counters",
                 "banned_hidden_power",
@@ -2252,7 +2258,7 @@ export default defineComponent({
                 // Followup mode: compare against loaded CSV splits
                 const result = []
                 let lastPushedTrainer = null;
-                const firstOccurrenceOnly = ["ELITE_FOUR_SIDNEY", "ELITE_FOUR_PHOEBE", "ELITE_FOUR_GLACIA", "ELITE_FOUR_DRAKE", "CHAMPION_WALLACE"];
+                const firstOccurrenceOnly = FIRST_OCCURRENCE_ONLY;
                 const processedFirstOccurrences = new Set();
 
                 for (const x of this.previous_splits) {
@@ -3050,6 +3056,13 @@ export default defineComponent({
             const fullyEvolved = this.getFullyEvolvedSpecies(starter);
             return `${fullyEvolved}-line`;
         },
+        getFinishFileName() {
+            // Name used for the copy written into finishes/ at the end of a playthrough. getSplitFileName() names the
+            // shared attempts folder after the evolution family, and on a branching line that picks the same branch
+            // whatever is played. A finished run is no longer ambiguous, so it's named after the species in hand.
+            // this.starter follows evolutions; this.starterString stays the species that was picked.
+            return this.evolution ? `${this.starter}-line` : this.getSplitFileName();
+        },
         generateUniqueRunIdentifier() {
             // Generate unique run identifier based on:
             // species index, evolution boolean, player id, and solo mon personality value
@@ -3508,7 +3521,8 @@ export default defineComponent({
             // A replay's SPLIT bookmarks or a split CSV, picked and parsed in main (2026-09-23).
             const comparison = await pickSplitComparison();
             if (!comparison) return;
-            this.previous_splits = comparison.rows;
+            // The Emerald league keeps its first row: anything after it is a rematch once the run is over.
+            this.previous_splits = latestTimePerTrainer(comparison.rows, (trainer) => FIRST_OCCURRENCE_ONLY.includes(trainer));
             this.previous_splits_source = comparison.name;
         },
         stat_label_opacity() {
@@ -4173,7 +4187,6 @@ export default defineComponent({
             this.set_rom_starter_automatically = MyStorage['set_rom_starter_automatically'] ?? true,
             this.catch_rate             = MyStorage['catch_rate'] ?? false,
             this.post_kanto_evolutions  = MyStorage['post_kanto_evolutions'] ?? false,
-            this.show_post_battle_splits = MyStorage['show_post_battle_splits'] ?? false,
 
             this.stat_exp_display =   MyStorage['stat_exp_display']   ?? true,
             this.dv_display =         MyStorage['dv_display']         ?? true,
@@ -4224,6 +4237,7 @@ export default defineComponent({
             this.hm_6_meowth =                MyStorage['hm_6_meowth']                ?? true,
             this.hm_6_pidgey =                MyStorage['hm_6_pidgey']                ?? true,
             this.testRun =                    MyStorage['testRun']                    ?? false
+            this.refilming_mode =             MyStorage['refilming_mode']             ?? false
             this.simple_data_str =            MyStorage['simple_data_str']            ?? ""
             this.simple_data =                MyStorage['simple_data']                ?? ""
             this.time_split_start =           MyStorage['time_split_start']           ?? "00:00:00:00"
@@ -5601,6 +5615,44 @@ export default defineComponent({
         battlePokemonCropWild() {
             return `height: 234px`
         },
+        // What every new-game detection below does.
+        new_run_detected() {
+            if (!this.testRun && this.no_counters == false && this.refilming_mode == false) {
+                this.attempt_number++
+            }
+            this.hallOfFameReset = false;
+            this.newRun();
+            // this.timer.startTime(this.timer_startTimeOffset);
+            if (this.set_rom_starter_automatically) { this.update_rom_starter_and_intro_mon(); }
+        },
+        // What every reset detection below does. A soft reset clears the party (RegisterRamReset in the decompilations'
+        // main.c), which is why the state code watches the same property. The credits end in a soft reset, so the first
+        // one after the champion isn't counted, and neither is one after a finished run, as in the other generations.
+        // The RESET marker is the state handler's (both callbacks null), through the same check.
+        async reset_detected() {
+            if (this._reset_checking) return; // the legacy mapper's reset list can match twice on the way down
+            this._reset_checking = true;
+            let real = false;
+            try {
+                real = await this.reset_confirmed();
+            } finally {
+                this._reset_checking = false;
+            }
+            if (!real) return;
+            if (this.hallOfFameReset == true) {
+                this.hallOfFameReset = false;
+                return;
+            }
+            if (this.run_complete == true && this.league_rematches == false) return;
+            if (this.no_counters == false) {
+                this.playerResets++;
+                if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
+            }
+        },
+        // Whether the reset just seen was real: a soft reset clears the party, a resume from replay brings it back.
+        reset_confirmed() {
+            return confirmReset(() => !!this.game.properties.player.team[0].personalityValue.value);
+        },
         newGame() {
             // console.log("watching for new game")
             // console.log(this.game.properties[this.game_data.newGameFlagContainer][this.game_data.newGameFlag])
@@ -5609,13 +5661,7 @@ export default defineComponent({
                     this.game.properties[this.game_data.newGameFlagContainer][this.game_data.newGameFlag].change((newProp, oldProp) => {
                         if(this.game_data.newGameValueNew.includes(newProp.value) && this.game_data.newGameValueOld.includes(oldProp.value)){
                             // console.log("New run detected... Timer started.")
-                            if (!this.testRun && this.no_counters == false) { 
-                                this.attempt_number++ 
-                            }
-                            this.hallOfFameReset = false;
-                            this.newRun();
-                            // this.timer.startTime(this.timer_startTimeOffset);
-                            if (this.set_rom_starter_automatically) { this.update_rom_starter_and_intro_mon(); }
+                            this.new_run_detected();
                         }
                     })
                 }
@@ -5627,13 +5673,7 @@ export default defineComponent({
                             // console.log(value_current, value_previous)
                             if (value_current == 'CB2_NewGameScene' && (value_previous == 'CB2_TitleScreenRun' || value_previous == 'CB2_MainMenu')) {
                                 // console.log("New run detected... Timer started.")
-                                if (!this.testRun && this.no_counters == false) { 
-                                    this.attempt_number++ 
-                                }
-                                this.hallOfFameReset = false;
-                                this.newRun();
-                                // this.timer.startTime(this.timer_startTimeOffset);
-                                if (this.set_rom_starter_automatically) { this.update_rom_starter_and_intro_mon(); }
+                                this.new_run_detected();
                             }
                         })
                     }
@@ -5641,13 +5681,7 @@ export default defineComponent({
                         this.game.properties[this.game_data.newGameFlagContainer][this.game_data.newGameFlag].change((newProp, oldProp) => {
                             if(this.game_data.newGameValueNew.includes(newProp.value) && this.game_data.newGameValueOld.includes(oldProp.value)){
                                 // console.log("New run detected... Timer started.")
-                                if (!this.testRun && this.no_counters == false) { 
-                                    this.attempt_number++ 
-                                }
-                                this.hallOfFameReset = false;
-                                this.newRun();
-                                // this.timer.startTime(this.timer_startTimeOffset);
-                                if (this.set_rom_starter_automatically) { this.update_rom_starter_and_intro_mon(); }
+                                this.new_run_detected();
                             }
                         })
                     }
@@ -5656,13 +5690,7 @@ export default defineComponent({
                     this.game.properties[this.game_data.newGameFlagContainer][this.game_data.newGameFlag].change((newProp, oldProp) => {
                         if(this.game_data.newGameValueNew.includes(newProp.value) && this.game_data.newGameValueOld.includes(oldProp.value)){
                             // console.log("New run detected... Timer started.")
-                            if (!this.testRun && this.no_counters == false) { 
-                                this.attempt_number++ 
-                            }
-                            this.hallOfFameReset = false;
-                            this.newRun();
-                            // this.timer.startTime(this.timer_startTimeOffset);
-                            if (this.set_rom_starter_automatically) { this.update_rom_starter_and_intro_mon(); }
+                            this.new_run_detected();
                         }
                     })
                 }
@@ -6177,10 +6205,22 @@ export default defineComponent({
             }
         }, 500);
 
+        // A reset or replay load empties the party and the bag, and the save reloads them: while the lead's
+        // personality value is changing (0 on a reset, the save's on a load, another on a party reorder) and
+        // for 2 s after, the items are only recorded, and an item change inside the window opens it again.
+        const itemSettle = new SettleWindow(realClock, 2000);
+        this.game.properties.player.team[0]?.personalityValue?.change?.(() => itemSettle.kick());
+        const leadLoaded = () => !!this.game.properties.player.team[0]?.personalityValue?.value;
+
         let ownedCheckTimer = null;
         const checkForNewOwnedItems = () => {
             const now = Date.now();
             const current = readOwnedItemSet();
+            if (!itemSettle.settled || !leadLoaded()) {
+                itemSettle.kick();
+                for (const name of current) lastSeenOwned.set(name, now);
+                return;
+            }
             for (const name of current) {
                 if (!isCriticalBagItem(name)) continue;
                 const lastSeen = lastSeenOwned.get(name);
@@ -6242,6 +6282,11 @@ export default defineComponent({
             let tmhmCheckTimer = null;
             const checkForNewTmhm = () => {
                 const current = readTmhmSet();
+                if (!itemSettle.settled || !leadLoaded()) {
+                    itemSettle.kick();
+                    lastTmhmSet = current;
+                    return;
+                }
                 for (const idx of current) {
                     if (lastTmhmSet.has(idx)) continue;
                     const entry = (Array.isArray(this.g3tmhmMapping))
@@ -6431,84 +6476,26 @@ export default defineComponent({
 
         this.newGame();
 
-        var trackingBattle = false;
-        this.game.properties.pointers.sStpCallback2.change((newProp, oldProp) => {
-            console.log("State:", newProp.value)
-            console.log(newProp.value)
+        // Trainer IN/OUT and IN - Wild: games/gen3/chapterMarkers.ts, which follows callback1 (BattleMainCB1 for
+        // exactly as long as the battle screen runs) instead of callback2, which changes on every warp and menu.
+        wireGen3ChapterMarkers({
+            props: this.game.properties,
+            selectedGame: this.gameSelection,
+            send: (marker) => this.sendObsChapterMarker(marker),
+        })
 
+        this.game.properties.pointers.sStpCallback2.change((newProp, oldProp) => {
             if (this.set_rom_starter_automatically && newProp.value == 'CB2_InitMainMenu' && this.timer.formatted_time[0] == "0h0m0s" && this.timer.formatted_time[1] == ".00") {
                 console.log('Setting ROM starter automatically')
                 this.update_rom_starter_and_intro_mon()
             }
-            if (newProp.value == 'CB2_Overworld' || newProp.value == 'BattleMainCB2' || newProp.value == null || newProp.value == "CB2_WhiteOut") {
-                console.log("Passed If:", newProp.value)
-
-                var stateName = ""
-                switch (newProp.value) {
-                    /*
-                    CB2_RunPokemonSummaryScreen
-                    CB2_ReturnToPartyMenuWhileLearningMove
-                    CB2_UseTMHMAfterForgettingMove 
-
-                    CB2_SetUpTMCaseUI_Blocking 
-
-                    CB2_PSA
-                    */
-                    case 'CB2_UseTMHMAfterForgettingMove':
-                        stateName = 'LABEL - MOVE';
-                        this.sendObsChapterMarker(stateName);
-                        return;
-                    // case '':
-                    //     stateName = 'LABEL - MOVE';
-                    //     this.sendObsChapterMarker(stateName);
-                    //     return;
-                        
-                    case null:
-                        if (this.game.properties.pointers.sStpCallback1.value == null) {
-                            stateName = 'RESET';
-                            trackingBattle = false;
-                            this.sendObsChapterMarker(stateName);
-                        }
-                        return;
-                    case 'CB2_WhiteOut':
-                        stateName = 'BLACKOUT';
-                        trackingBattle = false;
-                        this.sendObsChapterMarker(stateName);
-                        return;
-                    case 'CB2_Overworld':
-                        stateName = 'OUT';
-                        break;
-                    default: 
-                        if (oldProp.value == 'CB2_ReshowBattleScreenAfterMenu') {
-                            return;
-                        }
-                        trackingBattle = true;
-                        stateName = 'IN';
-                        break;
-                }
-                const trainerFlag = this.game.properties.battle.type.trainer.value
-                var trainerName = "";
-                if (this.gameSelection == 'FireRed and LeafGreen') {
-                    trainerName = trainerFlag ? this.game.properties.battle.trainer.opponent.value : "NOT_MAJOR_BATTLE";
-                }
-                else if (this.gameSelection == 'Emerald') {
-                    trainerName = trainerFlag ? this.game.properties.battle.trainer.opponentA.value : "NOT_MAJOR_BATTLE";
-                }
-                const chapterName = stateName + " - " + trainerName;
-                console.log("Chapter Detected: " + chapterName)
-                if (stateName == "OUT" && trackingBattle == false) {
-                    return;
-                }
-                // if (stateName == "IN" && trackingBattle == true) {
-                //     return;
-                // }
-                this.sendObsChapterMarker(chapterName);
-                // A battle with no trainer flag is a wild one (gen2's "IN - Wild"). Like gen2, no
-                // OUT is sent for it: the wild encounter is closed by "Enemy Fainted".
-                if (stateName == "IN" && trainerFlag === false) {
-                    console.log("Chapter Detected: IN - Wild");
-                    this.sendObsChapterMarker("IN - Wild");
-                }
+            // Every reset and boot passes the copyright screen once. Both callbacks also go null on Emerald's
+            // warps (its callback list lacks CB2_LoadMap2), which wrote RESET on warps made before the starter.
+            if (newProp.value == 'CB2_InitCopyrightScreenAfterBootup') {
+                this.reset_confirmed().then((real) => { if (real) this.sendObsChapterMarker('RESET') });
+            }
+            if (newProp.value == 'CB2_WhiteOut') {
+                this.sendObsChapterMarker('BLACKOUT');
             }
         });
 
@@ -6599,15 +6586,7 @@ export default defineComponent({
             if (this.legacy_state == true) {
                 this.game.properties.pointers.callback2.change((newProp, oldProp) => {
                     if(this.game_data.callback2.reset.includes(newProp.value) /*&& !this.game_data.callback2.reset.includes(newProp.value)*/) {
-                        if (this.hallOfFameReset == true) {
-                            this.hallOfFameReset = false;
-                        }
-                        else {
-                            if (this.no_counters == false) {
-                                this.playerResets++;
-                                if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
-                            }
-                        }
+                        this.reset_detected();
                     }
                     if(this.game_data.callback2.blackout.includes(newProp.value) /*&& !this.game_data.callback2.reset.includes(newProp.value)*/) {
                         if (this.no_counters == false) {
@@ -6620,15 +6599,7 @@ export default defineComponent({
             else {
                 this.game.properties.pointers.sStpCallback2.change((newProp, oldProp) => {
                     if(this.game_data.callback2.reset.includes(newProp.value) /*&& !this.game_data.callback2.reset.includes(newProp.value)*/) {
-                        if (this.hallOfFameReset == true) {
-                            this.hallOfFameReset = false;
-                        }
-                        else {
-                            if (this.no_counters == false) {
-                                this.playerResets++;
-                                if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
-                            }
-                        }
+                        this.reset_detected();
                     }
                     if(this.game_data.callback2.blackout.includes(newProp.value) /*&& !this.game_data.callback2.reset.includes(newProp.value)*/) {
                         if (this.no_counters == false) {
@@ -6722,15 +6693,7 @@ export default defineComponent({
             //callback2 seems more reliable to track than dma1 in firered no encryption
             this.game.properties.pointers.sStpCallback2.change((newProp, oldProp) => {
                 if(this.game_data.callback2.reset.includes(newProp.value) /*&& !this.game_data.callback2.reset.includes(newProp.value)*/) {
-                    if (this.hallOfFameReset == true) {
-                        this.hallOfFameReset = false;
-                    }
-                    else {
-                        if (this.no_counters == false) {
-                            this.playerResets++;
-                            if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
-                        }
-                    }
+                    this.reset_detected();
                 }
                 if(this.game_data.callback2.blackout.includes(newProp.value) /*&& !this.game_data.callback2.reset.includes(newProp.value)*/) {
                     if (this.no_counters == false) {
@@ -7070,7 +7033,11 @@ export default defineComponent({
             const map = newProp.value
             this.freezeEncounters();
 
-            this.sendObsChapterMarker(`Map Change - ${map}`)
+            // A reset or replay load zeroes the map bytes with the party (FireRed reads that as
+            // BATTLE_COLOSSEUM_2P, Emerald as PETALBURG_CITY): no marker until the lead is back.
+            if (this.game.properties.player.team[0].personalityValue?.value) {
+                this.sendObsChapterMarker(`Map Change - ${map}`)
+            }
 
             // Wally's Zigzagoon tutorial handling (Emerald only)
             if (this.gameSelection == 'Emerald' && newProp.value == 'PETALBURG_CITY - GYM') {
@@ -7202,7 +7169,7 @@ export default defineComponent({
                     this.log_split()
                     // The same split into the replay (2026-09-23): simple_data[2] is the trainer key, [3] real_time_hmmss.
                     addSplitBookmark(this.simple_data[2], this.simple_data[3])
-                    logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run)
+                    logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run, this.refilming_mode)
                     this.split_data.push(this.simple_data)
                     // split_data is no longer persisted (2026-09-17): it is only ever pushed to, the
                     // CSV split files are the record, and storing the whole history under the bare key
@@ -7253,7 +7220,7 @@ export default defineComponent({
                     if (this.shuckie_timer == true) { 
                         this.sendEmulatorEnd(); 
                     }
-                    if (!this.testRun && !this.no_counters) {
+                    if (!this.testRun && !this.no_counters && !this.refilming_mode) {
                         this.finished_run_count++
                     };
                     if (this.automatic_post_battle_splits == true) {
@@ -7274,10 +7241,10 @@ export default defineComponent({
                     }
                     else {
                         addSplitBookmark(this.simple_data[2], this.simple_data[3])
-                        logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run)
+                        logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run, this.refilming_mode)
                         .then(() => {
                                 console.log("Run complete - moving attempt files to finished folder.")
-                                logCopy(gameName, gameName_path, this.unique_run_identifier, splitFileName, this.evolution, this.evolution_splits_label, this.is_new_run, this.testRun, this.loggedRunsManager);
+                                logCopy(gameName, gameName_path, this.unique_run_identifier, splitFileName, this.evolution, this.evolution_splits_label, this.is_new_run, this.testRun, this.loggedRunsManager, this.getFinishFileName(), this.refilming_mode);
                             })
                             .catch(error => {
                                 console.error("Error:", error);
@@ -7296,7 +7263,16 @@ export default defineComponent({
         if (this.gameSelection == 'FireRed and LeafGreen') {
             this.game.properties.screen.hall_of_fame_4.change(async (newProp, oldProp) => {
                 if (newProp.value == 0 && oldProp.value == 255 && this.game.properties.overworld.mapName.value == "POKEMON_LEAGUE - HALL_OF_FAME") {
-                    this.autosplitter_process('HALL_OF_FAME')
+                    // The run-end "gametime" box must show the time the game prints on this screen. That watch is
+                    // gWindows[1] being added (Task_Hof_SpawnPlayerPic in pokefirered src/hall_of_fame.c); the game
+                    // prints the play time 192 frames later (120-frame wait, then the player picture slides 72 px)
+                    // and the clock keeps running meanwhile, so reading it now came out a minute short whenever the
+                    // minute turned in those 3.2 seconds.
+                    const gt = this.game.properties.gameTime
+                    const total = (((gt.hours.value * 60 + gt.minutes.value) * 60 + gt.seconds.value) * 60 + gt.frames.value) + 192
+                    const totalMinutes = Math.min(Math.floor(total / 3600), 999 * 60 + 59)
+                    const hofGameTime = Math.floor(totalMinutes / 60) + ":" + (totalMinutes % 60).toString().padStart(2, "0")
+                    this.autosplitter_process('HALL_OF_FAME', hofGameTime)
                     this.run_complete = true;
 
                     let trainer = this.opponent
@@ -7308,10 +7284,10 @@ export default defineComponent({
                     //write split data
                     //use then so that logCopy doesn't touch any files until logData finishes
                     addSplitBookmark(this.simple_data[2], this.simple_data[3])
-                    logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run)
+                    logData(gameName, gameName_path, this.simple_data_str, this.attempt_number, splitFileName, this.testRun, this.evolution, this.evolution_splits_label, this.unique_run_identifier, this.is_new_run, this.refilming_mode)
                     .then(() => {
                             console.log("Run complete - moving attempt files to finished folder.")
-                            logCopy(gameName, gameName_path, this.unique_run_identifier, splitFileName, this.evolution, this.evolution_splits_label, this.is_new_run, this.testRun, this.loggedRunsManager);
+                            logCopy(gameName, gameName_path, this.unique_run_identifier, splitFileName, this.evolution, this.evolution_splits_label, this.is_new_run, this.testRun, this.loggedRunsManager, this.getFinishFileName(), this.refilming_mode);
                         })
                         .catch(error => {
                             console.error("Error:", error);

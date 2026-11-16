@@ -20,3 +20,31 @@ export async function pickSplitComparison(): Promise<SplitComparison | null> {
 		return null;
 	}
 }
+
+/**
+ * Rows of a loaded comparison with one row per trainer: a trainer fought again after a reset is in the file twice, and
+ * the win is the last one, so the first row keeps its place and takes the last row's time. `keepEveryRow` names the
+ * trainers a file can legitimately hold more than once, such as gen4's Rival, which its panel numbers by counting
+ * rows. gen5 has its own version of this because of N.
+ */
+export function latestTimePerTrainer<Row extends { readonly trainer: string; readonly time: unknown }>(
+	rows: readonly Row[],
+	keepEveryRow: (trainer: string) => boolean = () => false,
+): Row[] {
+	const result: Row[] = [];
+	const indexByTrainer = new Map<string, number>();
+	for (const row of rows) {
+		if (keepEveryRow(row.trainer)) {
+			result.push(row);
+			continue;
+		}
+		const index = indexByTrainer.get(row.trainer);
+		if (index === undefined) {
+			indexByTrainer.set(row.trainer, result.length);
+			result.push(row);
+		} else {
+			result[index] = { ...result[index], time: row.time };
+		}
+	}
+	return result;
+}

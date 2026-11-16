@@ -32,9 +32,17 @@ kept verbatim in the unified `src/main` (it already exists in gen1's main).
 **Status (2026-09-11, plan 3.6):** the queuer-side change is `docs/queuer-unified.patch` -- the `unified` config
 entry, a `USE_UNIFIED_FRONTEND` switch that makes `detectGenContext` return `genKey: "unified"` while the
 `isGen1/2/4/5` flags keep steering the per-generation call shapes, and `detectRunningFrontendGen` recognising the
-unified overlay by `/status.app === "stp-overlay"`. It is **not applied**: the queuer's working tree carries
-uncommitted edits, so the patch is for Scott to apply (`git apply docs/queuer-unified.patch` in the queuer
-folder) and dry-run in Test Mode and Capture Fixtures mode before switching the default (decision 12). The
+unified overlay by `/status.app === "stp-overlay"`. **Applied 2026-11-11** to the queuer's working tree
+(uncommitted there, next to Scott's own edits; `USE_UNIFIED_FRONTEND = false` in its `main.js` goes back to the
+five legacy apps). Still owed (decision 12): Scott's dry-run of a mixed-generation queue in Test Mode and in
+Capture Fixtures mode, which needs Super Shuckie, PokeAByte and OBS together. Two things to know for it:
+- A mapper change still quits and relaunches the overlay (`shutdownOverlayFrontend`), although the unified app
+  could stay open across generations. That is the legacy behaviour kept on purpose until the dry-run passes.
+- `tools/parity/control-scripts/queuer-item.json` is the queuer's call order as of this date (it gained
+  `/set-nature` and `/set-ability`, and gen1's `$rightPanel` is "Automatic"). Re-read `configureOverlay` when
+  the queuer changes and keep the script in step.
+
+The
 unified app's `package.json` name is `stp-overlay` (3.4.0), so `%APPDATA%\stp-overlay` is where the queuer's
 window-state file goes; the app reads it in dev and, additively, when packaged.
 
@@ -47,6 +55,9 @@ to the main process (one implementation, `src/main/control-server.ts`) and must 
 with the same semantics. Port 30159 is single-tenant: only one overlay can run at a time.
 Since 2026-10-29 a request carrying `Sec-Fetch-Site: cross-site` (a browser's mark on a request a foreign
 web page makes to 127.0.0.1) is refused with a 403 `{ ok: false, error }`; the queuer sends no such header.
+Since 2026-11-11 the `Host` header must be `127.0.0.1:30159` or `localhost:30159` (else the same 403), and the
+reply no longer carries `Access-Control-Allow-Origin: *`. The queuer asks for `http://127.0.0.1:30159` from Node,
+so neither affects it; a browser page on another origin can no longer read a reply.
 
 The queuer's `overlayFetch` **throws** on a connection failure or a non-2xx reply, and
 `configureAndVerifyOverlay` gives up after three attempts. So against the legacy gen1 a queue item never got
@@ -55,9 +66,6 @@ other generation's. A route's error reply is `{ ok: false, error }` with the HTT
 (400, 404, 500), never in the body -- `tools/parity/diff.ts` oracle 6 compares the bodies.
 
 ### Routes the queuer calls (in call order for one item)
-Since 2026-11-11 the `Host` header must be `127.0.0.1:30159` or `localhost:30159` (else the same 403), and the
-reply no longer carries `Access-Control-Allow-Origin: *`. The queuer asks for `http://127.0.0.1:30159` from Node,
-so neither affects it; a browser page on another origin can no longer read a reply.
 
 | Route | Query | Gen guard in queuer | Effect |
 |---|---|---|---|
@@ -160,8 +168,19 @@ Failures are swallowed and throttled, so the app runs without Shuckie. The harne
 gen1 `logic/obs.ts` opens a throw-away socket per marker and sends `CreateRecordChapter`
 with `chapterName` = `IN - <battle.trainer.class>` / `OUT - <battle.trainer.class>` (URL and password
 overridable via localStorage keys `obs_websocket_url`, `obs_websocket_password`).
-Consumers: `fury_cutter.py` (cuts battles from markers; recognises `IN - X` / `OUT - X` after stripping
-leading `$%#`, and also plain `Battle` / `Overworld` names) and the StreamUP chapter-marker OBS plugin.
+Consumers (2026-11-07 survey; `fury_cutter.py` no longer reads markers, it uses OCR):
+- Cutter's Run Cutter, episode pipeline and auto-edits (`K:\Programs\air_cutter\extensions\`). They read every
+  chapter of a recording, and every bookmark of a `.replay` as a chapter. Names are matched after stripping leading
+  `$%#`. Battle pairing is `run-cutter/lib/pairing.js`. `Map Change - 0` is read as "back at the title screen"
+  (a lost battle), and `MENU - 12` / `MENU - 15` as footage walls (bag, save).
+- The `/review` skill (`K:\Programs\review-process`), which reads chapters with `ffprobe` as facts.
+- The StreamUP chapter-marker OBS plugin.
+
+Changes from the 2026-11-07 marker cleanup (ARCHITECTURE §9):
+- **Removed:** gen3's `IN/OUT - NOT_MAJOR_BATTLE` (wild fights have `IN - Wild`), and HG/SS `MENU - <id>` for ids
+  other than 12 and 15.
+- **New name:** gen5 writes `IN/OUT - Trainer <id>` for a trainer its mapper's table has no name for.
+- Nothing else was renamed.
 gen2 additionally documents "critical item" and "new move" chapter markers (`CRITICAL_ITEM_CHAPTER_MARKER.md`,
 `NEW_MOVE_CHAPTER_MARKER.md` in the gen2 repo) — port those names byte-for-byte.
 
@@ -179,7 +198,7 @@ gen1   splits/<GamePath>/<Species>/attempts/<L>-<test_run_>?<Species>-<N>.csv
 gen2   splits/Crystal/<Species>/attempts/<L>-<test_run_>?<Species>-<N>.csv   (finishes under <GamePath>, known-legacy-bugs #2)
 gen3   splits/<GamePath>/<Species>/attempts/<L>-<test_run_>?<Species>-<run id>.csv
 gen4/5 splits/<Game>/<Species>/<Species>-<N>.csv                            (a test run: same name, in test_runs/)
-all    …/finishes/…  (the copy on run completion)   …/refilmed/…  (refilming mode, gens 1, 2, 4, 5)
+all    …/finishes/…  (the copy on run completion)   …/refilmed/…  (refilming mode, gens 1-5)
 ```
 
 `<Species>` is `<Fully evolved>-line` when gen3-5's evolution option is on. gen4/5 never had an edition

@@ -28,6 +28,7 @@ export const auto_save_settings = [
     "route_102",
     "route_103",
     "testRun",
+    "refilming_mode",
     "simple_data_str",
     "simple_data",
     "timer_startTimeOffset",

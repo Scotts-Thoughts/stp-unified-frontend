@@ -126,6 +126,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                 flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", {
                     tier: "advanced", visible: () => !vm.second_screen_mode,
                 }),
+                flag(vm, "advanced.refilming_mode", "Re-filming Mode", "refilming_mode", { tier: "advanced" }),
                 flag(vm, "advanced.second_screen_mode", "Second Screen Mode", "second_screen_mode", { tier: "advanced" }),
                 flag(vm, "advanced.live_hp", "Live HP", "live_hp", { tier: "advanced" }),
                 flag(vm, "settings.editor", "Pokemon Editor", "editor", { tier: "advanced", noAction: true }),

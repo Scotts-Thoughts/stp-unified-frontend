@@ -6,6 +6,7 @@
 import PubSub from "~/logic/PubSub";
 import { sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
+import { OAKS_LAB } from "~/games/gen1/starterDvs";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore.js";
 import { defineComponent, markRaw } from "vue";
 import { FaultsBox } from "~/core/overlay/player/FaultsBox";
@@ -59,6 +60,9 @@ export default defineComponent({
         check_blackout([newProp, oldProp]) {
             if (newProp?.value == "Overworld" && oldProp?.value == "Battle" && this.metrics.blackout_pending == true) {
                 this.metrics.update("blackout_pending", false);
+                // Losing the first rival battle in Oak's Lab ends the battle without a blackout
+                // (pokered HandlePlayerBlackOut: `cp OAKS_LAB / ret z`), so it is no BLACKOUT.
+                if (this.game_properties.overworld?.map?.value == OAKS_LAB) return;
                 if (this.runConfig.advanced.count_blackouts) {
                     sendChapterMarker(gen1ChapterMarkers.blackout());
                     this.metrics.update("blackouts", this.metrics.blackouts + 1);

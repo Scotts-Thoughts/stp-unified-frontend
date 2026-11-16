@@ -36,14 +36,14 @@ export function logData(gameName, str, file_name, split_file_prefix, testStatus,
         return appendSplitCsv(filePath, header, str);
 }
 
-export function logCopy(gameName, file_name, splitFileName, finished_run_count, refilming_mode) {
+export function logCopy(gameName, file_name, splitFileName, finished_run_count, refilming_mode, finishFileName) {
     // Copy this run's attempt file into finishes/. logData writes attempts under
     // refilmed/ when refilming mode is on, so source and destination follow it there.
     var dirPathAttempts = refilming_mode == true ? splitPath(gameName, "refilmed", splitFileName) : splitPath(gameName, splitFileName);
     var dirPathFinishes = splitPath(dirPathAttempts, "finishes");
     return copySplitFile(
         splitPath(dirPathAttempts, `${splitFileName}-${file_name}.csv`),
-        splitPath(dirPathFinishes, `${splitFileName}-${finished_run_count}.csv`));
+        splitPath(dirPathFinishes, `${finishFileName || splitFileName}-${finished_run_count}.csv`));
 }
 
 export function transition(fn, ms) {

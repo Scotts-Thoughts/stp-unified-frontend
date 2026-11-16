@@ -309,7 +309,7 @@
                         <button class="popup-close" @click="closeRNGModal">×</button>
                     </div>
                     <div class="rng-modal-body">
-                        <div v-for="npc in rng_npcs" :key="npc.key" class="rng-npc-block">
+                        <div v-for="npc in rng_npcs_here" :key="npc.key" class="rng-npc-block">
                             <div class="rng-npc-header">
                                 <span class="rng-npc-title">{{ npc.label }}</span>
                                 <button class="smallButtonStyle increment" @click="addRNGTrip(npc.key)" title="Add trip">+</button>
@@ -394,6 +394,7 @@ import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
+import { confirmReset, emulatorClockBefore, noteEmulatorClock } from "~/core/logic/resetGuard";
 import ConfirmButton from "~/core/overlay/ConfirmButton.vue";
 import SettingsPanel from "~/core/settings/SettingsPanel.vue";
 import Movepool from "~/core/overlay/Movepool.vue";
@@ -415,7 +416,8 @@ import { gen45TurnOrder, gen45TurnOrderSpeed } from "~/core/logic/battleSpeed";
 import { moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
 import { bindShortcuts } from "~/core/shortcuts/engine";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
-import { pickSplitComparison } from "~/core/logic/splitComparison";
+import { wireGen4ChapterMarkers } from "./chapterMarkers";
+import { latestTimePerTrainer, pickSplitComparison } from "~/core/logic/splitComparison";
 import { checkMapperForChapterMarkerProperties } from "~/core/logic/chapterMarkerProperties";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { formatStage } from "~/core/logic/statFormat";
@@ -552,7 +554,7 @@ export default defineComponent({
             frame                        : false,
             selected_game                : MyStorage['selected_game'] ?? "Platinum",
             starter_choice               : "Turtwig",
-            refilming_mode               : false,
+            refilming_mode               : MyStorage['refilming_mode']      ?? false,
             show_advanced_settings       : MyStorage['show_advanced_settings']        ?? false,
             legacy_starter_assignment    : MyStorage['legacy_starter_assignment']     ?? false,
             catch_rate                   : MyStorage['catch_rate'] ?? false,
@@ -795,25 +797,55 @@ export default defineComponent({
                 "Chilan Berry": 17,
             },
 
+            // HG/SS S.S. Aqua Captain (stp-pokeheartgold v7+, scr_seq_0157_P01R0302.s):
+            // 0 = the game's own order (Flame, Splash, ... Iron), 1-16 = that plate, 17 = random.
+            ss_aqua_captain: {
+                "Random Plate": 17,
+                "Next Plate (Game Order)": 0,
+                "Flame Plate": 1,
+                "Splash Plate": 2,
+                "Zap Plate": 3,
+                "Meadow Plate": 4,
+                "Icicle Plate": 5,
+                "Fist Plate": 6,
+                "Toxic Plate": 7,
+                "Earth Plate": 8,
+                "Sky Plate": 9,
+                "Mind Plate": 10,
+                "Insect Plate": 11,
+                "Stone Plate": 12,
+                "Spooky Plate": 13,
+                "Draco Plate": 14,
+                "Dread Plate": 15,
+                "Iron Plate": 16,
+            },
+
             // RNG modal state
             showRNGModal: false,
+            // `game` is meta.game_name. `supportedProp` (optional) is a patch.* bool the mapper sets only
+            // on ROM builds that have the NPC's value; without it the value is never written.
             rng_npcs: [
-                { key: "shard_giver",          label: "Shard Giver",          map: "Great Marsh - Map 6",   bagCategory: "items",   patchProp: "stpGreatMarshShard", defaultItem: "Random Shard" },
-                { key: "floaroma_berry_girl",  label: "Floaroma Berry Girl",  map: "Flower Shop - Map 1",   bagCategory: "berries", patchProp: "stpFloaromaBerry",   defaultItem: "Random Berry" },
-                { key: "berry_master",         label: "Berry Master",         map: "Route 208 - Map 3",     bagCategory: "berries", patchProp: "stpBerryMaster",     defaultItem: "Random Berry" },
-                { key: "pastoria_berry_woman", label: "Pastoria Berry Woman", map: "Pastoria City - Map 8", bagCategory: "berries", patchProp: "stpPastoriaBerry",   defaultItem: "Random Berry" },
+                { key: "shard_giver",          label: "Shard Giver",          game: "Platinum", map: "Great Marsh - Map 6",   bagCategory: "items",   patchProp: "stpGreatMarshShard", defaultItem: "Random Shard" },
+                { key: "floaroma_berry_girl",  label: "Floaroma Berry Girl",  game: "Platinum", map: "Flower Shop - Map 1",   bagCategory: "berries", patchProp: "stpFloaromaBerry",   defaultItem: "Random Berry" },
+                { key: "berry_master",         label: "Berry Master",         game: "Platinum", map: "Route 208 - Map 3",     bagCategory: "berries", patchProp: "stpBerryMaster",     defaultItem: "Random Berry" },
+                { key: "pastoria_berry_woman", label: "Pastoria Berry Woman", game: "Platinum", map: "Pastoria City - Map 8", bagCategory: "berries", patchProp: "stpPastoriaBerry",   defaultItem: "Random Berry" },
+                { key: "ss_aqua_captain",      label: "S.S. Aqua Captain (Plates)", game: "HeartGold and SoulSilver", map: "S.S. Aqua - Map 2", bagCategory: "items", patchProp: "stpCaptainPlate", supportedProp: "stpCaptainPlateSupported", defaultItem: "Random Plate" },
             ],
-            rng_config: MyStorage['rng_config'] ?? {
+            // Saved configs from before an NPC was added lack its key, so the defaults are merged under them.
+            rng_config: {
                 shard_giver:          ["Random Shard"],
                 floaroma_berry_girl:  ["Random Berry"],
                 berry_master:         ["Random Berry"],
                 pastoria_berry_woman: ["Random Berry"],
+                ss_aqua_captain:      ["Random Plate"],
+                ...(MyStorage['rng_config'] ?? {}),
             },
             rng_trip_index: {
                 shard_giver:          0,
                 floaroma_berry_girl:  0,
                 berry_master:         0,
                 pastoria_berry_woman: 0,
+                ss_aqua_captain:      0,
             },
 
             // USER CONFIG (components) ------------------------------------------------------------------------//
@@ -1673,6 +1705,11 @@ export default defineComponent({
         // },
     },
     computed: {
+        // The RNG NPCs of the game being played (the picked box art before a game is read).
+        rng_npcs_here() {
+            const game = this.game?.properties?.meta?.game_name?.value || this.selected_game;
+            return this.rng_npcs.filter(npc => npc.game === game);
+        },
         // The settings panel's description (settingsPanel.ts). It reads nothing reactive itself, so it is
         // built once; the panel component reads the overlay through its closures as it renders.
         settingsPanel() {
@@ -2430,10 +2467,12 @@ export default defineComponent({
             const battleItem = this.game.properties.battle?.player?.active_pokemon?.held_item?.value
             const teamItem   = this.game.properties.player?.team[0]?.held_item?.value
             switch (state) {
+                // From Battle needs the battle Pokemon's id to match the party's, so the battle data is still live. The
+                // party's item stays stale until the game copies the party back after the battle, so falling back to it
+                // brought an eaten berry back (known-legacy-bugs.md #166).
                 case "Battle":
-                    return battleItem || null
                 case "From Battle":
-                    return battleItem || teamItem || null
+                    return battleItem || null
                 default:
                     return teamItem || null
             }
@@ -2832,6 +2871,7 @@ export default defineComponent({
                     this.emulatorStats = JSON.parse(text);
                 }
                 const stats = this.emulatorStats;
+                noteEmulatorClock(stats); // the reset check compares against it (core/logic/resetGuard.ts)
                 
                 // Update timer without pausing - sync the timer's startTime to match emulator
                 if (stats.time) {
@@ -3709,6 +3749,16 @@ export default defineComponent({
             this.showRNGModal = false;
             MyStorage['rng_config'] = this.rng_config;
         },
+        // Writes an RNG NPC's next value to its patch.* property. An NPC with a `supportedProp` is
+        // skipped unless the mapper says the running ROM has it: on older HG/SS builds
+        // patch.stpCaptainPlate falls back to the starter-species address.
+        async rng_write_patch_value(npc, value) {
+            if (npc.supportedProp && this.game.properties.patch?.[npc.supportedProp]?.value !== true) return;
+            const prop = this.game.properties.patch?.[npc.patchProp];
+            if (prop?.set) {
+                await prop.set(value, false);
+            }
+        },
         calculate_ev_benefit(stat_name) {
             const state = this.game.properties.meta.state.value
             if (state == 'No Pokemon') {
@@ -3979,6 +4029,7 @@ export default defineComponent({
             this.hm_104_marill =              MyStorage['hm_104_marill']              ?? true
             this.hm_104_taillow =             MyStorage['hm_104_taillow']             ?? true
             this.testRun =                    MyStorage['testRun']                    ?? false
+            this.refilming_mode =             MyStorage['refilming_mode']             ?? false
             this.simple_data_str =            MyStorage['simple_data_str']            ?? ""
             this.simple_data =                MyStorage['simple_data']                ?? ""
             this.time_split_start =           MyStorage['time_split_start']           ?? "00:00:00:00"
@@ -3995,7 +4046,7 @@ export default defineComponent({
             this.right_ui =                   readRightPanelMode(MyStorage['right_ui']).mode
             this.split_type =                 MyStorage['split_type']                 ?? "First"
             this.catch_rate =                 MyStorage['catch_rate']                 ?? false
-            this.rng_config =                 MyStorage['rng_config']                 ?? this.rng_config
+            this.rng_config =                 MyStorage['rng_config'] ? { ...this.rng_config, ...MyStorage['rng_config'] } : this.rng_config
 
             const evolution_family = (this.g4PokemonData && this.starter) ? (this.g4PokemonData[this.starter]?.evolution_family ?? [ {species: null, method: null,}, {species: null, method: null,}, {species: null, method: null,}, ]) : [ {species: null, method: null,}, {species: null, method: null,}, {species: null, method: null,}, ]
             // Evolution flags live in their own non-style key; fall back to the legacy base key.
@@ -4529,11 +4580,28 @@ export default defineComponent({
                 this.updateTime()
             }
         },
+        // What every reset detection does. A reset right after the champion is the credits ending, not a mistake.
+        async reset_detected(cameBack) {
+            this.blackout = false;
+            const allowed = this.disallow_faults == false && this.game_over == false
+            this.disallow_faults_function()
+            const before = emulatorClockBefore() // taken now: Super Shuckie's clock from before a replay could have loaded
+            if (!allowed || !(await confirmReset(cameBack, undefined, before))) return
+            if (this.hallOfFameReset == true) {
+                this.hallOfFameReset = false
+                return
+            }
+            this.playerResets++
+            this.sendObsChapterMarker("RESET")
+            if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
+        },
         newRun() {
             const timeRegex = /(\d+):(\d{2}):(\d{2})\.(\d{2})/;
             const timeOffsetArray = this.timer_startTimeOffset.match(timeRegex)?.slice(1,5).map(x => parseInt(x)) ?? [0,0,0,0];
             const timeOffset = timeOffsetArray[0] * 3600000 + timeOffsetArray[1] * 60000 + timeOffsetArray[2] * 1000 + timeOffsetArray[3] * 10;
             this.run_complete = false
+            this.game_over = false
+            this.hallOfFameReset = false
             this.starter_received = false,
 
             this.kanto_badges = false
@@ -7102,7 +7170,8 @@ export default defineComponent({
             // A replay's SPLIT bookmarks or a split CSV, picked and parsed in main (2026-09-23).
             const comparison = await pickSplitComparison();
             if (!comparison) return;
-            this.previous_splits = comparison.rows;
+            // The panel numbers these three by counting their rows; anything else twice is a refight after a reset.
+            this.previous_splits = latestTimePerTrainer(comparison.rows, (trainer) => /Rival|Cyrus|Lance/.test(trainer));
             this.previous_splits_source = comparison.name;
         },
 
@@ -7425,6 +7494,12 @@ export default defineComponent({
         // }
 
         // Resets
+        // The gen4 games read the whole save into memory at boot, before the intro (pokeplatinum and pokeheartgold
+        // main.c: SaveData_Init / SaveData_New), so after a real reset the save data is back within moments, just as
+        // it is after a replay resume's trip through frame 0. Memory can't tell the two apart here (checking it
+        // dropped every real reset), so reset_detected compares Super Shuckie's emulated clock instead: a resume
+        // makes it jump, a reset doesn't (confirmReset's `before`).
+        const saveDataNeverTells = () => false
         if (this.selected_game == "Platinum" || this.selected_game == "Diamond and Pearl") {
             this.game.properties?.flags?.new_game_1.change(async (newProp, oldProp) => {
                 if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
@@ -7434,15 +7509,11 @@ export default defineComponent({
                         this.sendEmulatorStart();
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
-                        this.attempt_number++
+                        if (this.refilming_mode == false) { this.attempt_number++ }
                         this.current_splits = [] // a new run starts with an empty splits panel
                     }
                     if (this.emulatorStats.time_current > 0 && newProp.value == false && oldProp.value == true) {
-                        this.blackout = false;
-                        if (this.disallow_faults == false) { this.playerResets++ }
-                        this.sendObsChapterMarker("RESET")
-                        if (this.shuckie_timer && this.disallow_faults == false) { this.incrementEmulatorCounter("playerResets") }
-                        this.disallow_faults_function()
+                        this.reset_detected(saveDataNeverTells)
                     }
                 }
                 else {
@@ -7452,20 +7523,25 @@ export default defineComponent({
                         // if (this.shuckie_timer == true) { this.sendEmulatorStart(); }
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
-                        this.attempt_number++
+                        if (this.refilming_mode == false) { this.attempt_number++ }
                         this.current_splits = [] // a new run starts with an empty splits panel
                     }
                     if (parseInt(this.timer_formatted_time[0]) > 0 && newProp.value == false && oldProp.value == true) {
-                        this.blackout = false;
-                        if (this.disallow_faults == false) { this.playerResets++ }
-                        this.sendObsChapterMarker("RESET")
-                        if (this.shuckie_timer && this.disallow_faults == false) { this.incrementEmulatorCounter("playerResets") }
-                        this.disallow_faults_function()
+                        this.reset_detected(saveDataNeverTells)
                     }
                 }
             })
         }
         if (this.selected_game == "HeartGold and SoulSilver") {
+            // HG/SS counts when the value returns, not when it goes. See saveDataNeverTells above: the value is back
+            // well inside a second of a real reset, so how long it was gone says nothing.
+            const hgss_reset = () => {
+                if (this.game.properties.overworld.map_name.value == 'Pokemon League - Map 7') {
+                    this.hallOfFameReset = false // the Hall of Fame room is the one reset this exception already covers
+                    return
+                }
+                this.reset_detected(saveDataNeverTells)
+            }
             this.game.properties?.variables?.game_started.change(async (newProp, oldProp) => {
                 if (this.timer_frame_live) this.updateTime() // the frame loop is off while the out-of-process clock shows
                 if (this.shuckie_timer == true) {
@@ -7474,15 +7550,11 @@ export default defineComponent({
                         this.sendEmulatorStart();
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
-                        this.attempt_number++
+                        if (this.refilming_mode == false) { this.attempt_number++ }
                         this.current_splits = [] // a new run starts with an empty splits panel
                     }
-                    if (this.emulatorStats.time_current > 0 && newProp.value != 0 && this.game.properties.overworld.map_name.value != 'Pokemon League - Map 7') {
-                        this.blackout = false;
-                        if (this.disallow_faults == false) { this.playerResets++ }
-                        this.sendObsChapterMarker("RESET")
-                        if (this.shuckie_timer && this.disallow_faults == false) { this.incrementEmulatorCounter("playerResets") }
-                        this.disallow_faults_function()
+                    if (this.emulatorStats.time_current > 0 && newProp.value != 0) {
+                        hgss_reset()
                     }
                 }
                 else {
@@ -7490,15 +7562,11 @@ export default defineComponent({
                         this.startTime()
                         this.update_rom_starter_and_intro_mon();
                         this.blackout = false;
-                        this.attempt_number++
+                        if (this.refilming_mode == false) { this.attempt_number++ }
                         this.current_splits = [] // a new run starts with an empty splits panel
                     }
-                    if (parseInt(this.timer_formatted_time[0]) > 0 && newProp.value != 0 && this.game.properties.overworld.map_name.value != 'Pokemon League - Map 7') { // TODO How do resets work in HGSS?
-                        this.blackout = false;
-                        if (this.disallow_faults == false) { this.playerResets++ }
-                        this.sendObsChapterMarker("RESET")
-                        if (this.shuckie_timer && this.disallow_faults == false) { this.incrementEmulatorCounter("playerResets") }
-                        this.disallow_faults_function()
+                    if (parseInt(this.timer_formatted_time[0]) > 0 && newProp.value != 0) { // TODO How do resets work in HGSS?
+                        hgss_reset()
                     }
                 }
             })
@@ -7514,56 +7582,13 @@ export default defineComponent({
             }
         })
 
-        // Battle-entry markers. A wild battle and a trainer battle can both fire near-simultaneously
-        // (battle.mode flips to 'Wild' while battle.opponent.trainer also briefly transitions). We
-        // debounce IN markers through a short queue so a 'Wild' entry pre-empts any trainer IN that
-        // would otherwise overwrite it. OUT markers fire immediately — they don't conflict.
-        const BATTLE_IN_DEBOUNCE_MS = 250;
-        let pendingBattleIn = null; // { name, isWild, timer }
-        const queueBattleInMarker = (name, isWild) => {
-            if (pendingBattleIn) {
-                if (isWild) {
-                    clearTimeout(pendingBattleIn.timer);
-                } else if (pendingBattleIn.isWild) {
-                    // Wild already queued — trainer write loses.
-                    return;
-                } else {
-                    clearTimeout(pendingBattleIn.timer);
-                }
-            }
-            const entry = { name, isWild, timer: null };
-            entry.timer = setTimeout(() => {
-                pendingBattleIn = null;
-                this.sendObsChapterMarker(entry.name);
-            }, BATTLE_IN_DEBOUNCE_MS);
-            pendingBattleIn = entry;
-        };
-
-        this.game.properties.battle.opponent.trainer.change(async (newProp, oldProp) => {
-            const trainer = newProp.value == null ? oldProp.value : newProp.value
-            if (newProp.value == null) {
-                // OUT — fire immediately, no conflict to resolve.
-                this.sendObsChapterMarker("OUT - " + trainer)
-            } 
-            else if (this.selected_game == "Platinum" || this.selected_game == "Diamond and Pearl") {
-                queueBattleInMarker("IN - " + trainer, false)
-            }
-            else if (this.selected_game == "HeartGold and SoulSilver" && this.game.properties.meta.menu.app_overlay_id.value === 12) {
-                queueBattleInMarker("IN - " + trainer, false)
-            }
+        // Trainer IN/OUT, IN - Wild, Next Pokemon, Enemy Fainted, Turn, MENU (HG/SS), New Move and Item markers:
+        // games/gen4/chapterMarkers.ts, which only believes the opponent slot while a battle is really on.
+        wireGen4ChapterMarkers({
+            props: this.game.properties,
+            selectedGame: this.selected_game,
+            send: (marker) => this.sendObsChapterMarker(marker),
         })
-
-        this.game.properties.battle.mode?.change?.((newProp, oldProp) => {
-            if (newProp?.value === 'Wild' && oldProp?.value !== 'Wild') {
-                queueBattleInMarker("IN - Wild", true)
-            }
-        })
-
-        if (this.selected_game == "HeartGold and SoulSilver") {
-            this.game.properties.meta.menu.app_overlay_id.change(async (newProp, oldProp) => {
-                this.sendObsChapterMarker("MENU - " + newProp.value)
-            })
-        }
 
         this.game.properties.meta.state.change((newProp, oldProp) => {
             // if (newProp.value == "Overworld" && oldProp.value == "From Battle") {
@@ -7590,7 +7615,7 @@ export default defineComponent({
                         if (this.disallow_faults == false) { 
                             this.blackout_counter++
                             this.sendObsChapterMarker("BLACKOUT")
-                            if (this.shuckie_timer) { this.incrementEmulatorCounter("blackout_counter") }
+                            if (this.shuckie_counters) { this.incrementEmulatorCounter("blackout_counter") }
                         }
                         this.blackout = false;
                         this.disallow_faults_function()
@@ -7601,7 +7626,7 @@ export default defineComponent({
                         if (this.disallow_faults == false) { 
                             this.blackout_counter++ 
                             this.sendObsChapterMarker("BLACKOUT")
-                            if (this.shuckie_timer) { this.incrementEmulatorCounter("blackout_counter") }
+                            if (this.shuckie_counters) { this.incrementEmulatorCounter("blackout_counter") }
                         }
                         this.blackout = false;
                         this.disallow_faults_function()
@@ -7633,7 +7658,7 @@ export default defineComponent({
                     if (this.disallow_faults == false) { 
                         this.blackout_counter++ 
                         this.sendObsChapterMarker("BLACKOUT")
-                        if (this.shuckie_timer) { this.incrementEmulatorCounter("blackout_counter") }
+                        if (this.shuckie_counters) { this.incrementEmulatorCounter("blackout_counter") }
                     }
                     this.blackout = false;
                     this.disallow_faults_function()
@@ -7643,178 +7668,13 @@ export default defineComponent({
                     if (this.disallow_faults == false) { 
                         this.blackout_counter++ 
                         this.sendObsChapterMarker("BLACKOUT")
-                        if (this.shuckie_timer) { this.incrementEmulatorCounter("blackout_counter") }
+                        if (this.shuckie_counters) { this.incrementEmulatorCounter("blackout_counter") }
                     }
                     this.blackout = false;
                     this.disallow_faults_function()
                 }
             }
         })
-
-        // NEW MOVE LEARNED CHAPTER MARKER (ported from gen2)
-        // In Battle state we read from battle.player.active_pokemon; otherwise from player.team[0].
-        // A new move is detected when the multiset diff has exactly one move added AND the previous
-        // set had at least one move — this filters out game resets, lead swaps, and the first starter.
-        const readMoveContext = () => {
-            const state = this.game?.properties?.meta?.state?.value;
-            const source = (state == 'Battle')
-                ? this.game?.properties?.battle?.player?.active_pokemon
-                : this.game?.properties?.player?.team?.[0];
-            if (!source) return { species: null, moves: [null, null, null, null] };
-            return {
-                species: source.species?.value ?? null,
-                moves: [
-                    source.moves?.[0]?.move?.value ?? null,
-                    source.moves?.[1]?.move?.value ?? null,
-                    source.moves?.[2]?.move?.value ?? null,
-                    source.moves?.[3]?.move?.value ?? null,
-                ],
-            };
-        };
-
-        let lastMoveContext = readMoveContext();
-        let moveCheckTimer = null;
-
-        const checkForNewMove = () => {
-            const previous = lastMoveContext;
-            const current = readMoveContext();
-            lastMoveContext = current;
-
-            // Species changed (lead swap, evolution, fresh game): refresh snapshot, don't fire.
-            if (previous.species !== current.species) return;
-
-            const oldMoves = previous.moves.filter(m => m != null && m !== '');
-            const newMoves = current.moves.filter(m => m != null && m !== '');
-
-            const oldCounts = {};
-            oldMoves.forEach(m => oldCounts[m] = (oldCounts[m] || 0) + 1);
-            const newCounts = {};
-            newMoves.forEach(m => newCounts[m] = (newCounts[m] || 0) + 1);
-            const added = [];
-            for (const m of Object.keys(newCounts)) {
-                const diff = newCounts[m] - (oldCounts[m] || 0);
-                for (let i = 0; i < diff; i++) added.push(m);
-            }
-
-            if (oldMoves.length >= 1 && added.length === 1) {
-                const newMove = added[0];
-                const chapterName = "New Move - " + newMove;
-                console.log("Chapter Detected: " + chapterName);
-                this.sendObsChapterMarker(chapterName);
-            }
-        };
-
-        // Debounce so 4 simultaneous slot changes (battle struct populating, lead swap)
-        // collapse into a single diff against the pre-burst snapshot.
-        const scheduleMoveCheck = () => {
-            if (moveCheckTimer) clearTimeout(moveCheckTimer);
-            moveCheckTimer = setTimeout(() => {
-                moveCheckTimer = null;
-                checkForNewMove();
-            }, 100);
-        };
-
-        for (let i = 0; i < 4; i++) {
-            this.game.properties.player.team[0]?.moves?.[i]?.move?.change(() => scheduleMoveCheck());
-            this.game.properties.battle.player.active_pokemon?.moves?.[i]?.move?.change(() => scheduleMoveCheck());
-        }
-
-        // ITEM ACQUISITION CHAPTER MARKERS
-        // Fires "Item - <name>" whenever the total owned quantity of an item name increases
-        // (across all six gen4 bag pockets and team-held slots). HMs other than HM03 Surf are
-        // suppressed. Bursts within ITEM_BURST_MS for the same name collapse to a single marker,
-        // so buying 5 Potions at once fires once; buying 1 then 5 more after the window fires twice.
-        // Slot reshuffles and held↔bag moves don't change totals, so they don't fire.
-        const allPockets = ['items', 'medicine', 'balls', 'tmhm', 'berries', 'battle_items'];
-        const ITEM_BURST_MS = 1500;
-
-        const hmBlocklist = new Set([
-            'HM01', 'HM02', 'HM04', 'HM05', 'HM06', 'HM07', 'HM08',
-            'Cut', 'Fly', 'Strength', 'Defog', 'Rock Smash', 'Waterfall', 'Rock Climb'
-        ]);
-        const isBlockedHm = (name) => {
-            if (hmBlocklist.has(name)) return true;
-            return /^HM(?!03)\d{2}\b/.test(String(name));
-        };
-
-        const readItemTotals = () => {
-            const totals = new Map();
-            const bag = this.game?.properties?.bag;
-            if (bag) {
-                for (const pocket of allPockets) {
-                    const slots = bag[pocket];
-                    if (!slots) continue;
-                    for (const k of Object.keys(slots)) {
-                        const slot = slots[k];
-                        const name = slot?.item?.value;
-                        if (name == null || name === '') continue;
-                        const qty = slot?.quantity?.value ?? 1;
-                        totals.set(name, (totals.get(name) || 0) + qty);
-                    }
-                }
-            }
-            const team = this.game?.properties?.player?.team;
-            if (team) {
-                for (let i = 0; i < 6; i++) {
-                    const name = team[i]?.held_item?.value;
-                    if (name == null || name === '') continue;
-                    totals.set(name, (totals.get(name) || 0) + 1);
-                }
-            }
-            return totals;
-        };
-
-        const lastItemTotals = readItemTotals();
-        // Per-item "last fired" timestamp. A new fire is gated on (now - lastFired) >= ITEM_BURST_MS,
-        // so a burst of quantity bumps for one name collapses to one marker.
-        const lastItemFiredAt = new Map();
-        let itemCheckTimer = null;
-
-        const checkItemDeltas = () => {
-            const current = readItemTotals();
-            const now = Date.now();
-            for (const [name, qty] of current) {
-                const prev = lastItemTotals.get(name) ?? 0;
-                if (qty > prev && !isBlockedHm(name)) {
-                    const last = lastItemFiredAt.get(name) ?? 0;
-                    if (now - last >= ITEM_BURST_MS) {
-                        const chapterName = "Item - " + name;
-                        console.log("Chapter Detected: " + chapterName);
-                        this.sendObsChapterMarker(chapterName);
-                    }
-                    lastItemFiredAt.set(name, now);
-                }
-            }
-            lastItemTotals.clear();
-            for (const [k, v] of current) lastItemTotals.set(k, v);
-        };
-
-        const scheduleItemCheck = () => {
-            if (itemCheckTimer) clearTimeout(itemCheckTimer);
-            itemCheckTimer = setTimeout(() => {
-                itemCheckTimer = null;
-                checkItemDeltas();
-            }, 100);
-        };
-
-        const bagRoot = this.game?.properties?.bag;
-        if (bagRoot) {
-            for (const pocket of allPockets) {
-                const slots = bagRoot[pocket];
-                if (!slots) continue;
-                for (const k of Object.keys(slots)) {
-                    const slot = slots[k];
-                    if (slot?.item?.change) slot.item.change(() => scheduleItemCheck());
-                    if (slot?.quantity?.change) slot.quantity.change(() => scheduleItemCheck());
-                }
-            }
-        }
-        for (let i = 0; i < 6; i++) {
-            const heldProp = this.game.properties.player.team[i]?.held_item;
-            if (heldProp && typeof heldProp.change === 'function') {
-                heldProp.change(() => scheduleItemCheck());
-            }
-        }
 
         // RARE CANDY USED CHAPTER MARKER
         // Fires "Rare Candy Used" when (in Overworld) the lead's level increments by 1 AND the
@@ -7916,17 +7776,14 @@ export default defineComponent({
             if (current <= previous) return;
             const currentMap = this.game?.properties?.overworld?.map_name?.value;
             if (!currentMap) return;
-            for (const npc of this.rng_npcs) {
+            for (const npc of this.rng_npcs_here) {
                 if (npc.bagCategory !== category) continue;
                 if (npc.map !== currentMap) continue;
                 this.rng_trip_index[npc.key] = (this.rng_trip_index[npc.key] ?? 0) + 1;
                 const nextValue = this.rng_trip_index[npc.key] < (this.rng_config[npc.key]?.length ?? 0)
                     ? this.rngPatchValueForTrip(npc.key, this.rng_trip_index[npc.key])
                     : 0;
-                const prop = this.game.properties.patch?.[npc.patchProp];
-                if (prop?.set) {
-                    await prop.set(nextValue, false);
-                }
+                await this.rng_write_patch_value(npc, nextValue);
             }
         };
 
@@ -7948,28 +7805,6 @@ export default defineComponent({
                 if (slot?.item?.change) slot.item.change(() => scheduleRNGBagCheck(category));
             }
         }
-
-        // NEXT POKEMON CHAPTER MARKER (Battle only)
-        // Fires "Next Pokemon" whenever battle.opponent.party_position changes during Battle.
-        if (!this.game.properties.battle.opponent.party_position) {
-            console.error('[OBS chapter marker] battle.opponent.party_position missing from mapper - "Next Pokemon" markers disabled for this session.');
-        }
-        this.game.properties.battle.opponent.party_position?.change((newProp, oldProp) => {
-            if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
-            if (newProp?.value === oldProp?.value) return;
-            console.log("Chapter Detected: Next Pokemon");
-            this.sendObsChapterMarker("Next Pokemon");
-        });
-
-        // ENEMY FAINTED CHAPTER MARKER (Battle only)
-        // Fires "Enemy Fainted" when battle.opponent.active_pokemon.stats.hp transitions to 0.
-        this.game.properties.battle.opponent.active_pokemon?.stats?.hp?.change((newProp, oldProp) => {
-            if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
-            if (newProp?.value !== 0) return;
-            if (oldProp?.value === 0) return;
-            console.log("Chapter Detected: Enemy Fainted");
-            this.sendObsChapterMarker("Enemy Fainted");
-        });
 
         // LEVEL UP CHAPTER MARKERS (gen2's logic, on the in-battle level)
         // "Battle Level Up" fires when the active battler's level rises by 1 during Battle;
@@ -8010,18 +7845,6 @@ export default defineComponent({
                 console.log("Chapter Detected: " + chapterName);
                 this.sendObsChapterMarker(chapterName);
             }, 200);
-        });
-
-        // TURN CHAPTER MARKER (Battle only; Platinum only)
-        // Fires "Turn" whenever battle.turn_counter increments during Battle. Only the Platinum
-        // mapper has battle.turn_counter (the battle context's turn total). Diamond/Pearl and
-        // HeartGold/SoulSilver have no battle-level turn property, so no "Turn" markers there.
-        // Counter resets between battles produce a decrement, not an increment, so they don't fire.
-        this.game.properties.battle.turn_counter?.change((newProp, oldProp) => {
-            if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
-            if ((newProp?.value ?? 0) <= (oldProp?.value ?? 0)) return;
-            console.log("Chapter Detected: Turn");
-            this.sendObsChapterMarker("Turn");
         });
 
         const setStartingStats = async () => {
@@ -8145,13 +7968,9 @@ export default defineComponent({
                 ])
             }
             // RNG: reset trip indices and write first-trip values to PokeAByte properties.
-            for (const npc of this.rng_npcs) {
+            for (const npc of this.rng_npcs_here) {
                 this.rng_trip_index[npc.key] = 0;
-                const value = this.rngPatchValueForTrip(npc.key, 0);
-                const prop = this.game.properties.patch?.[npc.patchProp];
-                if (prop?.set) {
-                    await prop.set(value, false);
-                }
+                await this.rng_write_patch_value(npc, this.rngPatchValueForTrip(npc.key, 0));
             }
 
             if (species == 'Regirock' || species == 'Regice' || species == 'Registeel') {
@@ -8424,6 +8243,7 @@ export default defineComponent({
 
                 //stop timer
                 if (this.game_data.finalBattle.includes(trainer)) {
+                    this.game_over = true // the resets after this aren't the run's, down to the credits' own
                     this.stopTime()
                     // HG/SS's Hall of Fame doesn't show the play time, so the run ends here: the type badges give way to
                     // the "gametime" box (decision 24 of docs/ui-uniformity-plan.md). Platinum and D/P keep theirs.
@@ -8433,7 +8253,7 @@ export default defineComponent({
                     if (this.shuckie_timer == true) { 
                         this.sendEmulatorEnd(); 
                     }
-                    if (this.testRun == false) {
+                    if (this.testRun == false && this.refilming_mode == false) {
                         this.finished_run_count++
                     };
                     log_split();
@@ -8445,7 +8265,7 @@ export default defineComponent({
                             // DPP defers the finishes/ copy until after the Hall of Fame split is recorded
                             // so the HoF entry is included. HGSS has no HoF flow, so copy now.
                             if (gameName !== 'Platinum') {
-                                logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.getFinishFileName());
+                                logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.getFinishFileName(), this.refilming_mode);
                             }
                         })
                         .catch(error => {
@@ -8541,7 +8361,7 @@ export default defineComponent({
                 if (gameName === 'Platinum') {
                     simpleP
                         .then(() => {
-                            logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.getFinishFileName());
+                            logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.getFinishFileName(), this.refilming_mode);
                         })
                         .catch(error => {
                             console.error("logCopy after Hall of Fame failed:", error);

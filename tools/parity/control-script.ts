@@ -15,7 +15,8 @@
  *
  *   $expectedGame   `expectedSelectedGameFromMapperId(item.mapperId)`, the string it
  *                   sends to /set-game (null for gen1 -- the call is skipped, as there)
- *   $rightPanel     "Automatic" for gen4/gen5, "Battle Graphic" otherwise
+ *   $rightPanel     "Automatic" for gen1/gen4/gen5, "Battle Graphic" otherwise (gen1 since
+ *                   docs/queuer-unified.patch was applied to the queuer, 2026-11-11)
  */
 import { readFileSync } from "node:fs";
 
@@ -103,7 +104,7 @@ function resolveQuery(call: ControlCall, opts: RunControlOptions): Record<string
   for (const [key, raw] of Object.entries(call.query ?? {})) {
     let value: string | null = raw;
     if (raw === "$expectedGame") value = expectedSelectedGame(opts.mapperId ?? "");
-    else if (raw === "$rightPanel") value = opts.generation === "gen4" || opts.generation === "gen5" ? "Automatic" : "Battle Graphic";
+    else if (raw === "$rightPanel") value = opts.generation === "gen1" || opts.generation === "gen4" || opts.generation === "gen5" ? "Automatic" : "Battle Graphic";
     if (value === null) return null;
     query[key] = value;
   }

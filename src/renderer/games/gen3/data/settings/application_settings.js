@@ -112,6 +112,7 @@ export const application_settings = [
     [ "simple_data_str",     "",       ],
     [ "simple_data",         "",       ],
     [ "testRun",             false,    ],
+    [ "refilming_mode",      false,    ],
 
     //movepool starting parameters. set to -1 if not initialized
     [ "movepoolDefaultFontSize",        -1, ],

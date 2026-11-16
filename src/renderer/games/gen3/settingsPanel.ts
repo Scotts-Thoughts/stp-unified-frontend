@@ -124,7 +124,7 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
             title: "Files",
             heading: "",
             controls: [
-                { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: () => vm.openFolder(`splits`, vm.gameSelection, vm.getSplitFileName(), `finishes`) },
+                { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: () => vm.openFolder(...[`splits`, vm.gameSelection, vm.getSplitFileName(), ...(vm.refilming_mode ? [`refilmed`] : []), `finishes`]) },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: () => vm.open_shortcuts_menu() },
             ],
         },
@@ -136,6 +136,7 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
                 flag(vm, "shuckie.counters", "Shuckie Counters", "shuckie_counters", { tier: "advanced" }),
                 flag(vm, "shuckie.bookmarks", "Shuckie Bookmarks", "shuckie_bookmarks", { tier: "advanced" }),
                 flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", { tier: "advanced" }),
+                flag(vm, "advanced.refilming_mode", "Re-filming Mode", "refilming_mode", { tier: "advanced" }),
                 // The old "Show optimization UI" / "Close optimization UI" buttons flipped this field.
                 flag(vm, "settings.editor", "Pokemon Editor", "battle_testing_ui", { tier: "advanced", noAction: true }),
                 flag(vm, "settings.debugging", "Debugging", "debugging", { tier: "advanced" }),

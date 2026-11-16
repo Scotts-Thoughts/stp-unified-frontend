@@ -1,1 +1,5 @@
-{}
+{
+  "pkmn_ability": "Adaptability",
+  "evolution": true,
+  "selected_evolution_species": "Eevee"
+}

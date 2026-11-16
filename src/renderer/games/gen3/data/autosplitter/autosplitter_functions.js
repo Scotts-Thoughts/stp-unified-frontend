@@ -8,7 +8,8 @@ export function log_split(x) {
     const time = this.timer.formatted_time;
     // console.log(`Autosplitter - Battle Ended: Split: ${this.opponent} at ${time[0]}${time[1]} (Gametime: ${this.gametimeSplit})`)
 } 
-export function autosplitter_process(split_name = null) {
+// `game_time_override`: the split's in-game time (h:mm) when it isn't the clock right now (FRLG's Hall of Fame split).
+export function autosplitter_process(split_name = null, game_time_override = null) {
     // console.log("Checking if autosplitter is on...")
     // console.log("autosplitter_process called:", {
     //     autosplitter_toggle: this.autosplitter_toggle,
@@ -40,7 +41,7 @@ export function autosplitter_process(split_name = null) {
         let resets = this.playerResets.toString()
         let blackouts = this.blackout_counter.toString()
         let level = this.game.properties.player.team[0].level.value.toString()
-        let game_time = this.gametimeSplit.toString()
+        let game_time = game_time_override ?? this.gametimeSplit.toString()
         let battle_duration = (battle_end - this.battle_start)/1000 
         let move1 = this.game.properties.player.team[0].move1.value
         let move2 = this.game.properties.player.team[0].move2.value

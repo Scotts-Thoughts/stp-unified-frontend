@@ -33,7 +33,12 @@ export function isGen4StyleKey(key: string): boolean {
     return GAME_PATTERN.test(key) || LINE_PATTERN.test(key);
 }
 
-/** gen4's `stylePropertyKeys`, verbatim and in order. */
+/**
+ * gen4's `stylePropertyKeys`, in order, plus `selected_evolution_species` (as gen5's list has).
+ * In a build run from source a species value keeps only these fields, so without it the
+ * Evolution Family Style choice was dropped and a reload went back to the starter's look
+ * (known-legacy-bugs #189).
+ */
 export const GEN4_STYLE_PROPERTIES: readonly string[] = [
     'overlay_color',
     'ui_saturation',
@@ -61,7 +66,8 @@ export const GEN4_STYLE_PROPERTIES: readonly string[] = [
     'pkmn_gender',
     'hidden_power_type',
     'hidden_power_index',
-    'frame'
+    'frame',
+    'selected_evolution_species'
 ];
 
 /** One JSON file per game+species; `index.json` lists the keys (tools/port/port-style-defaults.ts). */

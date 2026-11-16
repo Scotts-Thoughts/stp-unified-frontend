@@ -17,14 +17,14 @@ for (const folder of ['', 'Emerald', 'FireRed']) {
     void ensureSplitFolder(folder);
 }
 
-export function logData(gameName, gameName_path, str, file_name, starter, testStatus, evolution, evolution_label, unique_run_identifier, is_new_run) {
+export function logData(gameName, gameName_path, str, file_name, starter, testStatus, evolution, evolution_label, unique_run_identifier, is_new_run, refilming_mode) {
         const testStatusText = testStatus ? "test_run_" : "";
         // The starter parameter already contains the correct split file name (calculated by getSplitFileName())
         // Use unique_run_identifier instead of file_name (attempt_number) for attempts folder
         const run_identifier = unique_run_identifier || file_name;
         // The legacy read `gameName` off the mounted instance's `game` computed here, which
         // is what both call sites pass as `gameName_path` (tools/port/lift-gen3.py).
-        const dirPath = splitPath(gameName_path, starter, "attempts");
+        const dirPath = refilming_mode ? splitPath(gameName_path, starter, "refilmed", "attempts") : splitPath(gameName_path, starter, "attempts");
         const filePath = splitPath(dirPath, `${gameName}-${testStatusText}${starter}-${run_identifier}.csv`);
         const header = "player_name," +
                     "pokemon," +
@@ -42,13 +42,16 @@ export function logData(gameName, gameName_path, str, file_name, starter, testSt
         return appendSplitCsv(filePath, header, str);
 }
 
-export async function logCopy(gameName, gameName_path, unique_run_identifier, starter, evolution, evolution_label, is_new_run, testStatus, loggedRunsManager) {
+export async function logCopy(gameName, gameName_path, unique_run_identifier, starter, evolution, evolution_label, is_new_run, testStatus, loggedRunsManager, finishFileName, refilming_mode) {
     if (evolution == true) {
         starter = evolution_label;
     }
     const testStatusText = testStatus ? "test_run_" : "";
-    var dirPathAttempts = splitPath(gameName_path, starter, "attempts");
-    var dirPathFinishes = splitPath(gameName_path, starter, "finishes");
+    // starter names the attempts folder and its file. finishFileName names the copy in finishes/, after the species
+    // actually played to the end (getFinishFileName); logData puts a re-filmed run's attempts under refilmed/.
+    const finishName = finishFileName || starter;
+    var dirPathAttempts = refilming_mode ? splitPath(gameName_path, starter, "refilmed", "attempts") : splitPath(gameName_path, starter, "attempts");
+    var dirPathFinishes = refilming_mode ? splitPath(gameName_path, starter, "refilmed", "finishes") : splitPath(gameName_path, starter, "finishes");
     
     // Calculate the next finished_run_count by checking existing files in finishes folder
     let nextFinishedRunCount = 1;
@@ -60,7 +63,7 @@ export async function logCopy(gameName, gameName_path, unique_run_identifier, st
             // Look for files matching the pattern: ${gameName}-${starter}-${number}.csv, and the
             // `-simple.csv` names finished runs had before 2026-10-14, so the numbering carries on.
             // (test runs are not copied to finishes, so we don't need to check for test_run_ prefix)
-            const pattern = new RegExp(`^${gameName}-${starter}-(\\d+)(-simple)?\\.csv$`);
+            const pattern = new RegExp(`^${gameName}-${finishName}-(\\d+)(-simple)?\\.csv$`);
             const numbers = files
                 .map(file => {
                     const match = file.match(pattern);
@@ -82,7 +85,7 @@ export async function logCopy(gameName, gameName_path, unique_run_identifier, st
     if (!testStatus) {
         await copySplitFile(
             splitPath(dirPathAttempts, `${gameName}-${testStatusText}${starter}-${unique_run_identifier}.csv`),
-            splitPath(dirPathFinishes, `${gameName}-${starter}-${nextFinishedRunCount}.csv`));
+            splitPath(dirPathFinishes, `${gameName}-${finishName}-${nextFinishedRunCount}.csv`));
     }
 }
 

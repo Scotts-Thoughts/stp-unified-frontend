@@ -65,6 +65,16 @@ and the fixture headers are the ground truth for which mapper a recording used.
    queuer's `selected_game` strings (`Gold & Silver`, `HGSS`…) are the *edition/folder* vocabulary. Both vocabularies
    are declared per GameModule; nothing is renamed.
 
+## ST/gen3 Emerald: party_position (2026-11-13)
+
+`battle.trainer.party_position` / `party_position_2` (gBattlerPartyIndexes[1] and [3]: `0x2024070`, `0x2024074`;
+gBattlerPartyIndexes is `0x0202406E` in pokeemerald.map) were only in `pokemon_emerald_deprecated_ne.xml`. They were
+added by hand, after `partnerId`, to the local `pokemon_emerald_ne.xml` and `pokemon_emerald_deprecated_ne_new.xml`
+(not upstream). Without them gen3 writes no `Next Pokemon` marker (Overlay.vue logs a console error and goes on), which
+is why Emerald runs recorded on `pokemon_emerald_ne.xml` have none (e-treecko-2, e-torchic-2) and Cutter's Next Opponent
+cut finds nothing. Checked on e-treecko-2 with `tools/markers/memlog.cjs`: the value follows each switch-in. **After a
+mapper update, check the two lines are still there.** FireRed's `_ne` has them upstream.
+
 ## ST/gen5 (2026-11-04)
 
 `ST/gen5/pokemon_{black,white,black_2,white_2}_ne.{xml,js}` are generated from the upstream `STANDARD/gen5` files by

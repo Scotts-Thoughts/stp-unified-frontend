@@ -1,0 +1,20 @@
+{
+  "imageScale": 0.57,
+  "imageYOffset": -97,
+  "imageXOffset": 50,
+  "overlay_color": "#6c9cc0",
+  "ui_saturation": 1.4,
+  "backgroundTexture": "Dark Grass",
+  "backgroundBrightness": 61,
+  "backgroundContrast": 164,
+  "backgroundSaturation": 100,
+  "backgroundBlur": 1,
+  "backgroundScale": 117,
+  "backgroundHue": 0,
+  "backgroundUrl": "",
+  "backgroundFlip": false,
+  "backgroundXFlip": false,
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundYOffset": 0
+}

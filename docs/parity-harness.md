@@ -472,6 +472,15 @@ A smoke fixture's values are chosen. To check the overlay against what a game re
 7. Gen3 follows the battle through events, so a snapshot alone stays on "Base Stats". Step the callbacks as
    `scenarios/gen3-firered-smoke.json` does (`CB2_InitBattle`, then `BattleMainCB2` and `battleDialogue` 6).
 
+### Resets in the harness
+
+- The Super Shuckie stand-in always answers `is_playing_back: true`, so anything that treats "a replay is playing" as
+  special behaves differently in every run.
+- A capture settles the app's clock for 1.2 s before the next fixture batch is sent. A value that goes and comes back
+  around a checkpoint is therefore gone for 1.2 s from the app's point of view. The reset check (`resetGuard.ts`) counts
+  that, because the stand-in answered `/stats` at once; a real resume holds `/stats` up instead. A short dropout only
+  tests the check where the dropout isn't a checkpoint (in gens 1-2 every `playerId` change is one).
+
 ## Testing a mechanic no replay shows: inject it
 
 Don't ask Scott for a replay or save state because a game state is rare (weather, a status, a move, an item). Change the party and

@@ -36,6 +36,18 @@ To read one section, run `grep -n '^## ' ARCHITECTURE.md` for the starting lines
 - **Game quirks stay; code quirks get fixed.** If the real game does it, keep it. Check the decompilations below.
   If it's only an inconsistency between the old apps, fix it in its own change and log it in
   `docs/known-legacy-bugs.md`. Details: ARCHITECTURE §11.
+- **Every generation changes together.** A feature, file format or saved preference that applies to more than one
+  generation goes into all of them (gen1, gen2, gen3, gen4, gen5, and every game inside each) in the same piece of
+  work. If one can't be done yet, say so in your report and add it to the list below; don't leave it to be
+  noticed later. When you remove a setting or move logic into a shared mixin, grep every generation for the old name.
+  Decisions that hold everywhere:
+  - **Splits:** one CSV per run, the simple format, no `-simple` / `-full` names (`docs/external-contracts.md` §5).
+  - **Post-battle splits:** the switch is `show_post_battle_splits()` from `rightPanelModeMixin`. Nothing else
+    may use that name; a `data()` key with the same name replaces the method and crashes the battle-end handler.
+  - **Resets:** a detected reset goes through `confirmReset` (`core/logic/resetGuard.ts`) before it counts or sends a
+    marker, because resuming from a replay looks like a reset (ARCHITECTURE §9).
+  - **Finished runs:** the `finishes/` copy is named by `getFinishFileName()` where a generation has evolution lines
+    (gens 3-5), and re-filming mode covers gens 1-5. Gens 1 and 2 have no evolution lines.
 - **Don't rename these:** CSS classes, element ids, saved-setting keys, `/status` fields, split CSV columns,
   marker names. Other programs and the test harness depend on them.
 - **Verify only what you touched** (ARCHITECTURE §12):

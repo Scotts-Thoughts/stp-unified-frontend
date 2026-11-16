@@ -349,6 +349,7 @@ import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expCurve, expProgress } from "~/core/logic/expCurve";
+import { confirmReset } from "~/core/logic/resetGuard";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { gen2OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
 import { flailReversalPower } from "~/core/logic/movePower";
@@ -356,7 +357,7 @@ import { gen3IsPhysicalType } from "~/core/logic/moveAccuracy";
 import { formatStage } from "~/core/logic/statFormat";
 import { bindShortcuts } from "~/core/shortcuts/engine";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
-import { pickSplitComparison } from "~/core/logic/splitComparison";
+import { latestTimePerTrainer, pickSplitComparison } from "~/core/logic/splitComparison";
 import { markReminderMoves } from "~/core/logic/moveReminder";
 import { clampDvs, clampStat, DV_MAX, gen12Stat, gen2Gender, gen2HiddenPower, hpDv as hpDvOf, IV_MODE } from "~/core/logic/starterIvs";
 import { revealSplitFolder, splitPath } from "~/core/persistence/splitFiles";
@@ -2580,7 +2581,8 @@ export default defineComponent({
             // A replay's SPLIT bookmarks or a split CSV, picked and parsed in main (2026-09-23).
             const comparison = await pickSplitComparison();
             if (!comparison) return;
-            this.previous_splits = comparison.rows;
+            // RIVAL1 is every rival battle, in order; anything else twice is a refight after a reset.
+            this.previous_splits = latestTimePerTrainer(comparison.rows, (trainer) => trainer.startsWith("RIVAL"));
             this.previous_splits_source = comparison.name;
         },
         calculate_stat(species, level) {
@@ -5131,14 +5133,24 @@ export default defineComponent({
             }
         });
 
+        // A level up is the battler's level going up by one. "Battle Level Up" used to fire on any level change
+        // in battle (18 of 291 were switches to a Pokemon of another level); it now needs +1 and no species
+        // change within 150 ms either side, as gen5's. "Level Up - <n>" keeps its old rule and timing.
+        const LEVEL_SWITCH_WINDOW_MS = 150;
+        let lastBattlerSpeciesChangeAt = 0;
+        this.game.properties.battle.yourPokemon.species?.change?.(() => { lastBattlerSpeciesChangeAt = Date.now(); });
         this.game.properties.battle.yourPokemon.level?.change(async (newProp, oldProp) => {
             const state = this.game.properties.meta.state.value
-            if (newProp?.value != 0 && state == 'Battle') {
+            const oldLevel = oldProp?.value ?? 0
+            if (oldLevel <= 0 || (newProp?.value ?? 0) !== oldLevel + 1) return;
+            if (state != 'Battle' && state != 'From Battle') return;
+            this.sendObsChapterMarker(`Level Up - ${newProp.value}`);
+            if (state != 'Battle') return;
+            const changedAt = Date.now();
+            setTimeout(() => {
+                if (Math.abs(lastBattlerSpeciesChangeAt - changedAt) <= LEVEL_SWITCH_WINDOW_MS) return;
                 this.sendObsChapterMarker("Battle Level Up");
-            }
-            if ((newProp?.value ?? 0) === (oldProp?.value ?? 0) + 1 && (state == 'Battle' || state == 'From Battle')) {
-                this.sendObsChapterMarker(`Level Up - ${newProp.value}`);
-            }
+            }, LEVEL_SWITCH_WINDOW_MS);
         });
 
         this.game.properties.battle.battleStart.change((newProp, oldProp) => {
@@ -5194,9 +5206,12 @@ export default defineComponent({
             const map = newProp.value
             this.sendObsChapterMarker(`Map Change - ${map}`)
         });
-        this.game.properties.overworld.x.change((newProp) => {
+        // Route 30's pre-Violet training spot is marked once per run (Cutter reads the first); the y test was
+        // `>= 28 || <= 33`, true for every y, so each step onto x 8 wrote it again (~11 per run).
+        let preVioletTrainingMarked = false;
+        const checkSpecialSpots = () => {
             const map = this.game.properties.overworld.mapIndex.value
-            const x_coordinate = newProp.value
+            const x_coordinate = this.game.properties.overworld.x.value
             const y_coordinate = this.game.properties.overworld.y.value
             if (map == 820) {
                 if (x_coordinate == 21 && y_coordinate == 16) {
@@ -5204,12 +5219,15 @@ export default defineComponent({
                 }
             }
             else if (map == 6657) {
-                if (x_coordinate == 8 && (y_coordinate >= 28 || y_coordinate <= 33)) {
+                if (x_coordinate == 8 && y_coordinate >= 28 && y_coordinate <= 33 && !preVioletTrainingMarked) {
+                    preVioletTrainingMarked = true
                     this.sendObsChapterMarker("Special - G2_PreVioletTraining")
                 }
             }
-        });
+        };
+        this.game.properties.overworld.x.change(() => checkSpecialSpots());
         this.game.properties.overworld.y.change((newProp) => {
+            checkSpecialSpots();
             const map = this.game.properties.overworld.mapIndex.value
             const x_coordinate = this.game.properties.overworld.x.value
             const y_coordinate = newProp.value
@@ -5308,15 +5326,22 @@ export default defineComponent({
 
         // reset tracking
         this.game.properties.player.playerId.change(async (newProp,oldProp) => {
+            // Every player-id change is a reset or a load, including the one after the Champion that the branch
+            // below swallows: the bag reloading then wrote every TM and HM03 as a pickup (17-18 at once).
+            this.lastBattleResetTime = Date.now();
+            if (newProp.value > 0 && newProp.value != this.playerId) preVioletTrainingMarked = false;
             if (this.lance_defeated == true) {
                 this.lance_defeated = false
             }
             else if (newProp.value == 0 && oldProp.value > 0 && this.game_over == false) {
                 this.lastBattleResetTime = Date.now(); // reset/load boundary — suppress battle markers during reload
                 this.blackout = false;
-                if (this.no_increment == false) { this.playerResets++ };
-                this.sendObsChapterMarker("RESET")
-                if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
+                confirmReset(() => this.game.properties.player.playerId.value > 0).then((real) => {
+                    if (!real) return
+                    if (this.no_increment == false) { this.playerResets++ };
+                    this.sendObsChapterMarker("RESET")
+                    if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
+                })
             }
             if (newProp.value > 0 && oldProp.value == 0 && this.game_over == false) {
                 this.lastBattleResetTime = Date.now(); // save reloaded — battle struct repopulating, suppress markers
@@ -5953,6 +5978,7 @@ export default defineComponent({
         // Fires "Next Pokemon" whenever battle.enemyPokemon.partyPos updates while in Battle.
         this.game.properties.battle.enemyPokemon.partyPos.change((newProp, oldProp) => {
             if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
+            if (withinResetGrace()) return; // a reset clears the battle RAM while the state still reads Battle
             if (newProp?.value === oldProp?.value) return;
             console.log("Chapter Detected: Next Pokemon");
             this.sendObsChapterMarker("Next Pokemon");

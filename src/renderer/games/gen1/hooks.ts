@@ -1,5 +1,6 @@
 import PubSub from "~/logic/PubSub";
 import { logData, logCopy } from "~/autosplitter/autosplitter_functions.js";
+import { confirmReset } from "~/core/logic/resetGuard";
 import { addSplitBookmark, sendChapterMarker } from "~/core/logic/shuckieBookmarks";
 import { gen1ChapterMarkers } from "~/games/gen1/markers";
 import { installGen1MarkerHooks } from "~/games/gen1/markerHooks";
@@ -38,7 +39,9 @@ export function installGen1RunHooks(vm: any): void {
     // RESET - Identifies when a reset occurs and publishes an event
     vm.game.properties.player.playerId.change((newProp, oldProp) => {
         if (newProp.value == 0 && oldProp.value > 0 && vm.metrics.run_finished == false) {
-            PubSub.publish("@run/reset_occurred");
+            void confirmReset(() => vm.game.properties.player.playerId.value > 0).then((real) => {
+                if (real) PubSub.publish("@run/reset_occurred");
+            });
         }
     });
     // BLACKOUT - Identifies when a blackout might have occurred, and marks battles in the OBS recording.

@@ -364,6 +364,7 @@ import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
+import { confirmReset } from "~/core/logic/resetGuard";
 import ConfirmButton from "~/core/overlay/ConfirmButton.vue";
 import SettingsPanel from "~/core/settings/SettingsPanel.vue";
 import Movepool from "~/core/overlay/Movepool.vue";
@@ -441,6 +442,8 @@ import { textures } from "./data/textures.js";
 import { tmhm } from "./data/misc/tmhm.js";
 import { trainers_black } from "./data/trainers/black.js";
 import { typeBoostingItems } from "./data/typeBoostingItems.js";
+import { wireGen5ChapterMarkers } from "./chapterMarkers";
+import { realClock, SettleWindow } from "~/core/logic/battleMarkers";
 import { typeData } from "./data/type-effectiveness.js";
 import { typeEffectivenessArray } from "./data/type effectiveness array.js";
 import { unobtainable_moves_object } from "./data/moves/unobtainable_moves.js";
@@ -540,7 +543,7 @@ export default defineComponent({
             evolved_base_stats           : false, // Flag to show base stats of evolved species until next battle
             selected_game                : MyStorage['selected_game'] ?? "Black",
             starter_choice               : "Tepig",
-            refilming_mode               : false,
+            refilming_mode               : MyStorage['refilming_mode']      ?? false,
             show_advanced_settings       : MyStorage['show_advanced_settings'] ?? false,
 
             // RNG modal lookup tables (item name -> patch value)
@@ -3059,6 +3062,12 @@ export default defineComponent({
             const fullyEvolved = this.getFullyEvolvedSpecies(this.starter);
             return `${fullyEvolved}-line`;
         },
+        getFinishFileName() {
+            // Name used for the copy written into finishes/ at the end of a playthrough. getSplitFileName() names the
+            // shared attempts folder after the evolution family, and on a branching line that picks the same branch
+            // whatever is played. A finished run is no longer ambiguous, so it's named after the species in hand.
+            return this.evolution ? `${this.starter}-line` : this.starter;
+        },
         getStyleStorageKey() {
             // Where the visual style properties live: a battle-only form being displayed keeps its
             // own key (the same key Style Mode uses for that pokedex entry); everything else follows
@@ -4651,6 +4660,7 @@ export default defineComponent({
             this.tutor_moves =                MyStorage['tutor_moves']                ?? false
             this.showSpecialTrainerGraphics = MyStorage['showSpecialTrainerGraphics'] ?? true
             this.testRun =                    MyStorage['testRun']                    ?? false
+            this.refilming_mode =             MyStorage['refilming_mode']             ?? false
             this.simple_data_str =            MyStorage['simple_data_str']            ?? ""
             this.simple_data =                MyStorage['simple_data']                ?? ""
             this.time_split_start =           MyStorage['time_split_start']           ?? "00:00:00:00"
@@ -4751,13 +4761,19 @@ export default defineComponent({
             }
 
             //main pokemon settings
-            this.pkmnNature   = MyStorage[`${game_name}_${this.starter}`]?.pkmnNature            ?? "Hardy"
+            // With evolution on, the nature and ability were just loaded from the family key, which is
+            // where the save watcher writes them in that mode. Re-reading the species key here put
+            // back whatever it held from before evolution was turned on, so a /set-nature or
+            // /set-ability followed by /refresh reverted (gen4 already keeps the two paths apart).
+            if (!(this.evolution && this.evolution_family_list.length > 0)) {
+                this.pkmnNature   = MyStorage[`${game_name}_${this.starter}`]?.pkmnNature            ?? "Hardy"
 
-            if (this.g5PokemonData[this.starter].abilities.indexOf(this.pkmn_ability) == -1 && !MyStorage[`${game_name}_${this.starter}`]?.pkmn_ability) {
-                this.pkmn_ability = this.g5PokemonData[this.starter].abilities[0]
-            }
-            else {
-                this.pkmn_ability = MyStorage[`${game_name}_${this.starter}`]?.pkmn_ability          ?? this.g5PokemonData[this.starter]?.abilities[0] ?? null
+                if (this.g5PokemonData[this.starter].abilities.indexOf(this.pkmn_ability) == -1 && !MyStorage[`${game_name}_${this.starter}`]?.pkmn_ability) {
+                    this.pkmn_ability = this.g5PokemonData[this.starter].abilities[0]
+                }
+                else {
+                    this.pkmn_ability = MyStorage[`${game_name}_${this.starter}`]?.pkmn_ability          ?? this.g5PokemonData[this.starter]?.abilities[0] ?? null
+                }
             }
             this.set_starter_stats_object.gender = this.pkmn_gender;
             this.set_starter_stats_object.nature = this.pkmnNature;
@@ -7812,12 +7828,12 @@ export default defineComponent({
                 // console.log(this.timer.formatted_time[0])
                 // This should resolve the issue in Cynthia's chamber where the timer would restart when resetting against her
                 if (this.shuckie_timer == true) {
-                    if (this.emulatorStats.time_current == null) {
+                    if (newProp.value == true && this.emulatorStats.time_current == null) {
                         console.log("Sending emulator start")
                         this.sendEmulatorStart();
                         console.log("Setting options...")
                         this.set_options()
-                        this.attempt_number++
+                        if (this.refilming_mode == false) { this.attempt_number++ }
                         this.current_splits = [] // a new run starts with an empty splits panel
                     }
                 }
@@ -7827,7 +7843,7 @@ export default defineComponent({
                         this.timer.startTime(this.timer_startTimeOffset);
                         console.log("Setting options...")
                         this.set_options()
-                        this.attempt_number++
+                        if (this.refilming_mode == false) { this.attempt_number++ }
                         this.current_splits = [] // a new run starts with an empty splits panel
                     }
                 }
@@ -7842,12 +7858,13 @@ export default defineComponent({
 
             if (timer_check > 0 && newProp.value == "" && oldProp.value != "") {
                 this.blackout = false;
-                if (this.disallow_faults == false && this.run_complete == false) { 
-                    this.playerResets++ 
+                const allowed = this.disallow_faults == false && this.run_complete == false
+                this.disallow_faults_function()
+                if (allowed && await confirmReset(() => !!this.game.properties.player.name.value)) {
+                    this.playerResets++
                     this.sendObsChapterMarker("RESET")
                     if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
                 }
-                this.disallow_faults_function()
             }
         })
 
@@ -8037,88 +8054,12 @@ export default defineComponent({
         })
 
         
-        // IN / OUT BATTLE CHAPTER MARKERS
-        // Fire on any trainer-slot transition into or out of a real value, with no meta.state
-        // gating so plot battles (Bianca/Cheren/N) that skip "To Battle" or chain into a
-        // post-battle cutscene still mark cleanly. Dedupe on (direction, trainer) so multi-phase
-        // fights where the trainer property bounces don't spam duplicate markers, but a genuine
-        // hand-off to a different trainer still fires.
-        // IN markers go through a short queue (gen 4's), so a wild entry pre-empts the trainer IN that
-        // a phantom trainer ("Jaden", "Alf & Fred", which the frontend reads around battles) would
-        // otherwise write; the pre-empted trainer's OUT is dropped with it. An OUT that follows its
-        // IN within the queue's delay cancels that IN. Other OUTs fire at once.
-        const BATTLE_IN_DEBOUNCE_MS = 250
-        let pendingBattleIn = null // { name, trainer, timer }
-        const droppedBattleIns = new Set()
-        let wildInThisBattle = false
-        let lastBattleMarker = null
-        const isTrainerValue = (v) => v != null && v !== "" && v !== "--"
-        const queueTrainerIn = (trainer) => {
-            if (wildInThisBattle) { droppedBattleIns.add(trainer); return }
-            if (pendingBattleIn) {
-                clearTimeout(pendingBattleIn.timer)
-                this.sendObsChapterMarker(pendingBattleIn.name)
-            }
-            const entry = { name: "IN - " + trainer, trainer, timer: null }
-            entry.timer = setTimeout(() => {
-                pendingBattleIn = null
-                this.sendObsChapterMarker(entry.name)
-            }, BATTLE_IN_DEBOUNCE_MS)
-            pendingBattleIn = entry
-        }
-        // WILD BATTLE: the opponent trainer reads "--" while meta.state is Battle. Looked at once the
-        // state and trainer have settled (a trainer battle after a wild one still reads "--" for a moment).
-        let wildCheckTimer = null
-        const scheduleWildCheck = () => {
-            if (wildCheckTimer) clearTimeout(wildCheckTimer)
-            wildCheckTimer = setTimeout(() => {
-                wildCheckTimer = null
-                if (wildInThisBattle) return
-                if (this.game.properties.meta.state.value !== "Battle") return
-                if (this.game.properties.battle.opponent.trainer.value !== "--") return
-                wildInThisBattle = true
-                if (pendingBattleIn) {
-                    clearTimeout(pendingBattleIn.timer)
-                    droppedBattleIns.add(pendingBattleIn.trainer)
-                    pendingBattleIn = null
-                }
-                console.log("Chapter Detected: IN - Wild")
-                this.sendObsChapterMarker("IN - Wild")
-            }, BATTLE_IN_DEBOUNCE_MS)
-        }
-        this.game.properties.battle.opponent.trainer.change(async (newProp, oldProp) => {
-            if (newProp.value === "--") scheduleWildCheck()
-            const newIsTrainer = isTrainerValue(newProp.value)
-            const oldIsTrainer = isTrainerValue(oldProp.value)
-            let direction = null
-            let trainer = null
-            if (newIsTrainer) {
-                direction = "IN"
-                trainer = newProp.value
-            } else if (oldIsTrainer) {
-                direction = "OUT"
-                trainer = oldProp.value
-            }
-            if (direction == null) return
-            if (lastBattleMarker?.direction === direction && lastBattleMarker?.trainer === trainer) return
-            lastBattleMarker = { direction, trainer }
-            if (direction === "IN") { queueTrainerIn(trainer); return }
-            if (droppedBattleIns.delete(trainer)) { lastBattleMarker = null; return }
-            if (pendingBattleIn?.trainer === trainer) {
-                clearTimeout(pendingBattleIn.timer)
-                pendingBattleIn = null
-                lastBattleMarker = null
-                return
-            }
-            this.sendObsChapterMarker("OUT - " + trainer)
-        })
-        this.game.properties.meta.state.change(async (newProp) => {
-            if (newProp.value === "Battle") {
-                scheduleWildCheck()
-            } else {
-                wildInThisBattle = false
-                if (wildCheckTimer) { clearTimeout(wildCheckTimer); wildCheckTimer = null }
-            }
+        // Trainer IN/OUT, IN - Wild, Next Pokemon and Enemy Fainted: games/gen5/chapterMarkers.ts, which only
+        // believes the opponent slot while the battle flag is on (no more "Jude" / "Jaden" between battles).
+        wireGen5ChapterMarkers({
+            props: this.game.properties,
+            selectedGame: this.selected_game,
+            send: (marker) => this.sendObsChapterMarker(marker),
         })
 
         this.game.properties.meta.state.change(async (newProp, oldProp) => {
@@ -8203,7 +8144,7 @@ export default defineComponent({
                         this.timer.stopTime();
                         if (this.shuckie_timer == true) { this.sendEmulatorEnd(); }
                         this.run_complete = true
-                        if (this.testRun == false) {
+                        if (this.testRun == false && this.refilming_mode == false) {
                             this.finished_run_count++
                         };
                         //use then so that logCopy doesn't touch any files until logData finishes
@@ -8212,7 +8153,7 @@ export default defineComponent({
                                 // Test-run attempt files live in test_runs/, so there is nothing
                                 // valid to copy into finishes/ for a test run.
                                 if (this.testRun == false) {
-                                    logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.refilming_mode);
+                                    logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.refilming_mode, this.getFinishFileName());
                                 }
                             })
                             .catch(error => {
@@ -8247,7 +8188,7 @@ export default defineComponent({
                     //     // this.right_ui = "Splits"
                     // }
                     this.run_complete = true
-                    if (this.testRun == false) {
+                    if (this.testRun == false && this.refilming_mode == false) {
                         this.finished_run_count++
                     };
                     log_split();
@@ -8261,7 +8202,7 @@ export default defineComponent({
                             // Test-run attempt files live in test_runs/, so there is nothing
                             // valid to copy into finishes/ for a test run.
                             if (this.testRun == false) {
-                                logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.refilming_mode);
+                                logCopy(gameName, this.attempt_number, splitFileName, this.finished_run_count, this.refilming_mode, this.getFinishFileName());
                             }
                         })
                         .catch(error => {
@@ -8490,10 +8431,23 @@ export default defineComponent({
             }
         }, 500);
 
+        // After a reset or load the bag can reload more than OWNERSHIP_MEMORY_MS later, and every critical
+        // item then looked new (16-25 per burst, w-KyuremBlack1). While the window is open the items are
+        // only recorded; a reset (the name blanks and comes back), a party-size change (a Pokemon from the
+        // PC brings its held item) or an item change inside the window opens it again.
+        const itemSettle = new SettleWindow(realClock, 2000);
+        this.game.properties.player.name?.change?.(() => itemSettle.kick());
+        this.game.properties.player.team_count?.change?.(() => itemSettle.kick());
+
         let ownedCheckTimer = null;
         const checkForNewOwnedItems = () => {
             const now = Date.now();
             const current = readOwnedItems();
+            if (!itemSettle.settled) {
+                itemSettle.kick();
+                for (const name of current.keys()) lastSeenOwned.set(name, now);
+                return;
+            }
             for (const [name, pocket] of current) {
                 if (!isCriticalForPocket(name, pocket)) continue;
                 const lastSeen = lastSeenOwned.get(name);
@@ -8660,28 +8614,6 @@ export default defineComponent({
                 if (slot?.quantity?.change) slot.quantity.change(() => scheduleCandyCheck());
             }
         }
-
-        // NEXT POKEMON CHAPTER MARKER (Battle only)
-        // Fires "Next Pokemon" whenever battle.opponent.party_position changes during Battle.
-        if (!this.game.properties.battle.opponent.party_position) {
-            console.error('[OBS chapter marker] battle.opponent.party_position missing from mapper - "Next Pokemon" markers disabled for this session.');
-        }
-        this.game.properties.battle.opponent.party_position?.change((newProp, oldProp) => {
-            if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
-            if (newProp?.value === oldProp?.value) return;
-            console.log("Chapter Detected: Next Pokemon");
-            this.sendObsChapterMarker("Next Pokemon");
-        });
-
-        // ENEMY FAINTED CHAPTER MARKER (Battle only)
-        // Fires "Enemy Fainted" when battle.opponent.active_pokemon.stats.hp transitions to 0.
-        this.game.properties.battle.opponent.active_pokemon?.stats?.hp?.change((newProp, oldProp) => {
-            if (this.game?.properties?.meta?.state?.value !== 'Battle') return;
-            if (newProp?.value !== 0) return;
-            if (oldProp?.value === 0) return;
-            console.log("Chapter Detected: Enemy Fainted");
-            this.sendObsChapterMarker("Enemy Fainted");
-        });
 
         // LEVEL UP CHAPTER MARKERS (Battle only), as gen 2's
         // "Level Up - <n>" (Battle or From Battle) and "Battle Level Up" (Battle) fire when the

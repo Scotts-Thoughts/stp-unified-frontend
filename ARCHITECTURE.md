@@ -165,7 +165,7 @@ docs/             Reference docs. See §13.
 | `stores/` | `useEmulatorStatsStore` (Super Shuckie poll), `useReplaySplitsStore` |
 | `control/` | `registerControlServer`: turns forwarded requests into per-generation route calls and builds `/status` |
 | `shortcuts/` | The shortcut engine (`bindShortcuts`), the action builders, accelerator spelling, the shell's binder (`Shortcuts.vue`) and the Keyboard Shortcuts window (`ShortcutsMenu.vue`). §4 "Shortcuts" |
-| `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), `LiveText`, and `ClockFrame` (the clock in its own process, below). `overlay/player/`: on-stream player pieces used by all five generations (`FaultsBox`, `GameClock`, `StatTiles`, `ExpBar`, `BadgeRow`, `MoveList`, `PopupBox`, `SpeciesArt`, `TypeBadges`, `InfoRow`), each fed by `games/genN/playerPanel.ts`. `SpeciesArt` is the solo Pokémon's art `<img>` and its slider transform/outline filter (gens 2–5 hand it `overlayCommonMixin.species_art_look`); a new picture cross-fades in all five (the generation's `transition` name; the key is the picture's path unless `art-key` is given). At run end (`run_complete`) gens 2–5 hide the type badges and show the "gametime" box in their place: the last split's in-game time, `simple_data[7]` (`gametimeSplit`, h:mm from the mapper's `gameTime.*` in gens 2–3, `game_time.*` in gens 4–5). It is set at the final battle in Gen2, Emerald, HG/SS and gen5, at the Hall of Fame in FRLG; never in Platinum or D/P, whose Hall of Fame shows the time. `newRun` clears it. `TypeBadges` draws the type pictures from the generation's `typeBadgesLayout`; which types show stays the generation's rule (`typeBadges(vm)`, gen1's `get_type`). `InfoRow` is a caption and value pair (gens 4–5's Nature and Friendship/Total rows); gen2's Held Item and gen3's rows keep their markup, because gen3's captions sit apart from their values in the DOM. `MoveList` is the player's move list and its column headers: the generation's `moveListLayout` draws the plain rows its overlay's `player_move_list` computed once per change (`playerMoveList(vm)`; gen1 `move_set.vue`'s `move_list`). Headers are Title Case like the movepool's. A Struggle row replaces the moves when every move's PP is 0 (`core/logic/struggle.ts`; gen1 and gen3 keep their own copy of that rule): Normal type and the usual power maths in gen1, "???" icon and power 50 from gen2 on, because the engines skip STAB and the type chart for Struggle. `PopupBox` is one pop-up box (fade, frame, caption, value): accuracy, evasion, field/screens, repel, bonks, Vs. Seeker. Each generation's `popupBoxes` holds the captions (lowercase, no colon) and classes, and its `battle_popups` computed works out when each box shows and its value (stages signed with `formatStage`). A wrapper that hides several boxes stays in the overlay's markup. `StatTiles` draws an element tree that the generation's `statTiles(vm)` builds in one computed (`stat_tiles`), each value worked out once per change; a `key` on a node stands for a template `v-if` branch, so a mode switch makes new elements as before. `ExpBar` owns the fill element and the level-up animation (`animate`, timed per generation); the generation's watchers decide when it moves, through `this.$refs.expBar.setWidth / setTransition / animate`, never the fill's `style`. The exp curves are `core/logic/expCurve.ts` (one copy for gens 1-5, both growth-rate spellings). `BadgeRow`'s fade (`badge-fade`) is `core/styles/player.css`, one rule for all five; the stats header's shared mode names are `statsHeaderNames` in `core/logic/statFormat.ts` (each generation's `statHeaders`). `FaultsBox` draws an element tree the generation describes as data, because the five trees differ and the layout oracle compares every element. The faults rule (`core/logic/faultMode.ts`) and the count's shrink at 3/4 digits are the same in all five; nothing else may set the count's font size. `backgroundTexture.ts`: the background texture's filter and transform for all five generations (gen1's `graphics.vue`, gen2–5 via `overlayCommonMixin.background_texture_style`). It draws the scale no smaller than what covers 1920×1080 once the X/Y offset and 3× the blur (a CSS blur fades the image's own border) are taken off; saved values are untouched. `textureLooks.ts`: each texture's default brightness/contrast/saturation/blur, keyed by image file because the generations name one picture differently (gen5 "Water" = gen3 "Dark Water"). A background whose four filters are all plain (100/100/100/0) gets its texture's look on load and reset (`apply_texture_look` in gen2–5, `applyTextureLook` in gen1's `useGameSpeciesData`), and when the texture is changed if the filters are plain or still the old texture's look. A hand-styled background is never changed. Edit a row there to change a texture's default in every generation |
+| `overlay/` | Mixins shared by the lifted gen2–5 overlays (§5), `LiveText`, and `ClockFrame` (the clock in its own process, below). `overlay/player/`: on-stream player pieces used by all five generations (`FaultsBox`, `GameClock`, `StatTiles`, `ExpBar`, `BadgeRow`, `MoveList`, `PopupBox`, `SpeciesArt`, `TypeBadges`, `InfoRow`), each fed by `games/genN/playerPanel.ts`. `SpeciesArt` is the solo Pokémon's art `<img>` and its slider transform/outline filter (gens 2–5 hand it `overlayCommonMixin.species_art_look`); a new picture cross-fades in all five (the generation's `transition` name; the key is the picture's path unless `art-key` is given). At run end (`run_complete`) gens 2–5 hide the type badges and show the "gametime" box in their place: the last split's in-game time, `simple_data[7]` (`gametimeSplit`, h:mm from the mapper's `gameTime.*` in gens 2–3, `game_time.*` in gens 4–5). It is set at the final battle in Gen2, Emerald, HG/SS and gen5, at the Hall of Fame in FRLG (there it is the time the game prints: the `hall_of_fame_4` watch fires when the player picture appears, 192 frames before the print, and the clock keeps running, so the handler adds those frames); never in Platinum or D/P, whose Hall of Fame shows the time. `newRun` clears it. `TypeBadges` draws the type pictures from the generation's `typeBadgesLayout`; which types show stays the generation's rule (`typeBadges(vm)`, gen1's `get_type`). `InfoRow` is a caption and value pair (gens 4–5's Nature and Friendship/Total rows); gen2's Held Item and gen3's rows keep their markup, because gen3's captions sit apart from their values in the DOM. `MoveList` is the player's move list and its column headers: the generation's `moveListLayout` draws the plain rows its overlay's `player_move_list` computed once per change (`playerMoveList(vm)`; gen1 `move_set.vue`'s `move_list`). Headers are Title Case like the movepool's. A Struggle row replaces the moves when every move's PP is 0 (`core/logic/struggle.ts`; gen1 and gen3 keep their own copy of that rule): Normal type and the usual power maths in gen1, "???" icon and power 50 from gen2 on, because the engines skip STAB and the type chart for Struggle. `PopupBox` is one pop-up box (fade, frame, caption, value): accuracy, evasion, field/screens, repel, bonks, Vs. Seeker. Each generation's `popupBoxes` holds the captions (lowercase, no colon) and classes, and its `battle_popups` computed works out when each box shows and its value (stages signed with `formatStage`). A wrapper that hides several boxes stays in the overlay's markup. `StatTiles` draws an element tree that the generation's `statTiles(vm)` builds in one computed (`stat_tiles`), each value worked out once per change; a `key` on a node stands for a template `v-if` branch, so a mode switch makes new elements as before. `ExpBar` owns the fill element and the level-up animation (`animate`, timed per generation); the generation's watchers decide when it moves, through `this.$refs.expBar.setWidth / setTransition / animate`, never the fill's `style`. The exp curves are `core/logic/expCurve.ts` (one copy for gens 1-5, both growth-rate spellings). `BadgeRow`'s fade (`badge-fade`) is `core/styles/player.css`, one rule for all five; the stats header's shared mode names are `statsHeaderNames` in `core/logic/statFormat.ts` (each generation's `statHeaders`). `FaultsBox` draws an element tree the generation describes as data, because the five trees differ and the layout oracle compares every element. The faults rule (`core/logic/faultMode.ts`) and the count's shrink at 3/4 digits are the same in all five; nothing else may set the count's font size. `backgroundTexture.ts`: the background texture's filter and transform for all five generations (gen1's `graphics.vue`, gen2–5 via `overlayCommonMixin.background_texture_style`). It draws the scale no smaller than what covers 1920×1080 once the X/Y offset and 3× the blur (a CSS blur fades the image's own border) are taken off; saved values are untouched. `textureLooks.ts`: each texture's default brightness/contrast/saturation/blur, keyed by image file because the generations name one picture differently (gen5 "Water" = gen3 "Dark Water"). A background whose four filters are all plain (100/100/100/0) gets its texture's look on load and reset (`apply_texture_look` in gen2–5, `applyTextureLook` in gen1's `useGameSpeciesData`), and when the texture is changed if the filters are plain or still the old texture's look. A hand-styled background is never changed. Edit a row there to change a texture's default in every generation |
 | `logic/` | Cross-generation helpers: OBS (`obs.ts`), Shuckie bookmarks, split comparison, enemy sprite scales, starter IVs, move reminder, battle mechanics (speed, accuracy, move power, OHKO; §4) |
 | `window/` | `scaleToFit`, virtual keys |
 | `report/` | The Report button and its drawing/details screens (teleported to `<body>`); the back end is `src/main/report.ts` (§2) |
@@ -544,6 +544,17 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   `enemyPanel.ts`: the battle's copy in gen2, the opponent party in memory in gens 4-5, header "Wild <species>"), so
   it has no stat stages and the preview's speed label.
 
+**RNG Trips (gen4 Platinum and HG/SS, gen5 White 2).** The patched ROMs read a gift NPC's next item from a
+`patch.*` value. gen4's `rng_npcs` lists each NPC with its `game` (meta.game_name), map, bag pocket and property.
+`rng_npcs_here` is the current game's NPCs. A new run writes trip 1. When that pocket's total grows on the NPC's map,
+the overlay writes the next trip, then 0 once the trips run out. 0 is the game's own behaviour: random for the
+Platinum NPCs, the plates in order for the HG/SS S.S. Aqua Captain. The Captain (stp-pokeheartgold v7,
+`scr_seq_0157_P01R0302.s`, script command 854) takes 1-16 = Flame…Iron and 17 = random. It gives one plate per visit
+to his cabin (a map-temporary flag), not one a day as in the real game, and still needs the Earth Badge.
+- Trap: on HG/SS builds before v7 the mapper points `patch.stpCaptainPlate` at the starter-species value, so writes go
+  through `rng_write_patch_value`, which skips an NPC whose `supportedProp` (`patch.stpCaptainPlateSupported`) isn't true.
+- Saved `rng_config` is merged over the defaults, so an NPC added later gets its default trip.
+
 **Adding a mapper or edition.**
 - A new `games/genN/mappers/<x>.ts` profile, listed in that generation's `manifest.ts`.
 - An `editions` entry (box art, split folder, icon).
@@ -687,7 +698,7 @@ keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. 
 - Loading runs the controls' own `set`, in panel order, so a dependent control must come after the one it depends on (Hidden Power type before spread, texture before its sliders). The species' save watchers do the rest: a load replaces what the species has stored.
 - `settle()` after each change is load-bearing. Those watchers skip while `is_loading_evolution_style` is true, so a value set during a species load shows but is never saved. Likewise a texture change resets plain filters set in the same tick. `npm run parity:presets` tests this against a fake overlay.
 - With Evolution on, each family member has its own stored look, so the host carries them all (`family_looks`). Otherwise a refilm would change look at the first evolution.
-- Trap: in a build run from source, the style store keeps only `GEN4_STYLE_PROPERTIES`, which lacks `iv_mode` and `manual_ivs`, so those two are not remembered across species changes there (they are in an installed build). A preset still restores them when loaded.
+- Trap: in a build run from source, the style store keeps only `GEN4_STYLE_PROPERTIES` of a species value (any other field written there is silently dropped; `selected_evolution_species` was, until #189). It lacks `iv_mode` and `manual_ivs`, so those two are not remembered across species changes there (they are in an installed build). A preset still restores them when loaded.
 
 **Persisted key names are a contract.** Renaming one silently loses a user's settings, and harness oracle 4
 flags it.
@@ -784,12 +795,35 @@ machine that built it.
   - Name formats are in `src/shared/splitBookmarks.ts`.
 - **Marker names.**
   - gen1 keeps them in `games/gen1/markers.ts`.
-  - gen2–5 hard-code them inline in `Overlay.vue` (grep `sendChapterMarker`).
-  - gen5 (2026-10-29, mirrored in legacy `app/frontend.js`) writes `IN - Wild` (state Battle and opponent
-    trainer `--`, checked after a 250 ms settle, via the same IN queue as gen4 so phantom trainers like
-    "Jaden" lose to it), `Level Up - <n>` / `Battle Level Up` (battle only, as gen2) and `Held Item - <name>`.
-    It has no `Text Box` or `Turn`: the gen5 mappers expose no property for either. No `OUT - Wild` is written,
-    as in gen2/gen4: Cutter closes a wild fight on `Enemy Fainted`, and an `OUT - Wild` would pair as a trainer OUT.
+  - gen2 hard-codes them inline in `Overlay.vue` (grep `sendChapterMarker`). gens 3–5 keep the battle markers in
+    `games/genN/chapterMarkers.ts` (below) and the rest inline.
+  - gen5 also writes `Level Up - <n>` / `Battle Level Up` (battle only, as gen2) and `Held Item - <name>`.
+    It has no `Text Box` or `Turn`: the gen5 mappers expose no property for either. No `OUT - Wild` is written
+    in any generation: Cutter closes a wild fight on `Enemy Fainted`, and an `OUT - Wild` would pair as a trainer OUT.
+- **Battle markers are written only for a battle the game confirms** (2026-11-07 audit of 113 recordings: phantom
+  trainer pairs outnumbered real battles 2.4 to 1 in Platinum and White 2, and Cutter cut fake battles up to 98
+  minutes long). The opponent slot each generation reads is memory the game reuses between battles, so a value
+  there is only a candidate:
+  - **gen4** (`games/gen4/chapterMarkers.ts`): `battle.opponent.trainer` is BattleSystem.trainerIDs[1]. Its
+    leftovers ("Dragon Tamer Geoffrey" 557, "Ninja Boy Joel" 70, HG/SS "Ace Trainer Gaven") come with a garbage
+    `battle.opponent.team_count`; a real battle's is 1–6 within 4 frames. `meta.state` is no gate: it compares the
+    battle's active Pokémon with party slot 0, so a switch reads Overworld. In-battle markers need the IN written and
+    `battle.other.outcome_flags` ≠ 1.
+  - **gen5** (`games/gen5/chapterMarkers.ts`): `battle.other.battle` is 21828 from battle setup to teardown; the
+    leftover "Jude" / "Jaden" comes back in the frame it drops to 0. A trainer id the mapper's table lacks (White 2
+    2103–2105) reads null and is written `IN - Trainer <id>`. Wild = no trainer written since the flag came on.
+    `Enemy Fainted` watches all six `opponent.pkmn_ram` records (`active_pokemon` is slot 0 only).
+  - **gen3** (`games/gen3/chapterMarkers.ts`): `pointers.sStpCallback1` is `BattleMainCB1` exactly while the battle
+    screen runs (callback2, which the old markers followed, changes on every warp and menu). No more
+    `IN/OUT - NOT_MAJOR_BATTLE`; RESET is written on `CB2_InitCopyrightScreenAfterBootup`.
+  - gens 1–2 read battle state the game only sets in battle and had no phantoms.
+  - `core/logic/battleMarkers.ts` `BattleMarkerTracker`: one battle open at a time; IN held 250 ms (gens 4–5, the
+    delay Cutter's offsets are tuned to) and written only if the generation's check passes then; OUT once, under
+    the IN's name, only for a written IN; an end inside the hold drops both. `SettleWindow` is the "memory is
+    reloading" guard the Item markers use after resets, loads and party-size changes.
+  - Timing of every marker that was right before is unchanged (same frame within PokeAByte's polling).
+  - **Checking a change:** `tools/markers/` runs a generation's real wiring over a Super Shuckie replay's memory
+    and compares it with the markers the overlay wrote into that replay (README there).
   - The specs for the "Item" and "New Move" markers are `docs/CRITICAL_ITEM_CHAPTER_MARKER.md` and
     `docs/NEW_MOVE_CHAPTER_MARKER.md`. They cite legacy `app/frontend.js`, which is now gen2's `Overlay.vue`.
 - **Autosplitting.**
@@ -797,11 +831,29 @@ machine that built it.
   - gen2–5: `games/genN/splits.js` plus `data/autosplitter*.js`.
   - Only the simple CSV is written (2026-10-14). Its name has no `-simple`, which makes it the name the old
     deprecated CSV had in gens 1–3. File names per generation: `docs/external-contracts.md` §5.
+  - The `-simple` and `-full` files still in a `splits/` folder are from before that date. Nothing deletes them,
+    so an old run in `finishes/` shows three files. That is not the app writing three today.
+- **The battle-won handlers do several jobs in a row, with no error catching between them.** The split row, the
+  post-battle panel, the Hall of Fame flag, the run end and the `finishes/` copy all run in order, so one thrown
+  error silently skips everything after it (known-legacy-bugs.md #165).
 - **gen1 repeated rival splits.** A rival fight can be seen where there is none (a replay had a phantom
   `RIVAL1` battle overlapping the Mt Moon Rocket after a reset, which logged a second "Rival1-Lab"). Comparisons
   keep the last split per trainer, so that overwrote the real Lab time. `games/gen1/hooks.ts` now skips a rival
   split already logged this run unless it is the latest split. The phantom battle's IN/OUT chapter markers
   still appear.
+- **Replays and resets.** Super Shuckie attaches a replay and seeks to frame 0 before it goes to the resume point, so for a
+  moment the game memory is the replay's start. That looks like a reset to every generation's detection. `/stats` is
+  answered on Super Shuckie's frontend thread, so it can't report that window while a resume is running, but a request
+  sent during it only returns when the resume is over. `confirmReset` (`core/logic/resetGuard.ts`) uses that: it waits,
+  reads `/stats`, and drops the reset if the save data came back or Super Shuckie stayed busy. Each generation supplies
+  what a reset empties: `playerId` (gens 1-2), the lead's `personalityValue` (gen3), `player.name` (gen5). Gen4 supplies
+  nothing (`saveDataNeverTells`): Platinum, D/P and HG/SS read the whole save into memory at boot (decomps' `main.c`),
+  so the save data is back within moments of a real reset too, and checking it dropped every real reset (HG/SS, found
+  2026-11-08). Gen4 instead passes `before`, a reading of Super Shuckie's emulated clock (`total_elapsed_time`) at
+  least 1.5 s old, from the readings its `/stats` poll records (`noteEmulatorClock`). The clock runs on through a
+  reset the game does itself, and loading a replay moves it to the replay's position, so a jump (backwards, or more
+  than 8x fast-forward explains) drops the reset. Needs the poll, so Shuckie Timer or Shuckie Counters on. A real reset counts about half a second late. Don't drop resets because a replay is *playing*
+  (`is_playing_back`): the overlay is run against played-back replays, and the harness's Shuckie stand-in always says one is.
 - **Comparing against a previous run.** `core/logic/splitComparison.ts` and `core/stores/useReplaySplitsStore.ts`.
 
 ## 10. Invariants
@@ -857,7 +909,7 @@ From cheapest to most expensive:
 |---|---|---|---|
 | Typecheck | `npm run typecheck` | ~15 s | Always. Covers renderer, shared and preload, but **not** `src/main` |
 | Drift | `npm run parity:drift` | ~3 s | Any gen2–5 overlay or mixin edit |
-| Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:debounce`, `parity:shortcuts`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits, shortcuts or import code |
+| Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:reset-guard`, `parity:debounce`, `parity:shortcuts`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits, resets, shortcuts or import code |
 | Presets | `npm run parity:presets` | seconds | `core/presets/`; the fake overlay does not cover a real `PresetHost` (§7) |
 | Voice | `npm run parity:voice` (needs a build); `npx tsx --tsconfig tsconfig.web.json tools/parity/voice-app.ts --gen=N` | ~1 min; ~2 min | Voice control, its phrases, or the shortcut action ids it uses (§2 `voice/`) |
 | Action ids | `npm run parity:action-ids -- --out=<file>` before, `-- --compare=<file>` after | seconds, no build | When a change rebuilds a generation's shortcut actions (settings panel descriptors): no persisted id may go missing |

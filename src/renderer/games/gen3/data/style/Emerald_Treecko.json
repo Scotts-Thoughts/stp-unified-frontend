@@ -3,7 +3,7 @@
   "pkmn_ability": "Overgrow",
   "pkmnNature": "Quiet",
   "backgroundTexture": "Dark Grass",
-  "overlay_color": "#cae184",
+  "overlay_color": "#78c850",
   "imageFlip": true,
   "imageScale": "0.53",
   "imageYOffset": "-37",
@@ -16,8 +16,9 @@
   "backgroundSaturation": "120",
   "backgroundBlur": "2",
   "backgroundHue": "16",
-  "finished_run_count": 2,
-  "attempt_number": 2,
+  "finished_run_count": 4,
+  "attempt_number": 4,
   "hidden_power_type": "Fire",
-  "hidden_power_index": "3"
+  "hidden_power_index": "3",
+  "splits_display": "Followup"
 }

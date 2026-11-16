@@ -38,7 +38,7 @@
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 53L, gen3 85L, gen4 406L, gen5 243L)",
       "bodies": {
         "gen2": "4830d11aab78",
-        "gen3": "913b4b35e5c9",
+        "gen3": "790f782315dd",
         "gen4": "940e46a8771d",
         "gen5": "e45a4056384c"
       }
@@ -176,7 +176,7 @@
       "name": "heldItem",
       "reason": "UNREVIEWED: gen4 | gen5 (gen4 14L, gen5 13L)",
       "bodies": {
-        "gen4": "2a422cbb5336",
+        "gen4": "7ca708b39d2f",
         "gen5": "9e5c22c34b26"
       }
     },
@@ -750,11 +750,11 @@
     {
       "section": "methods",
       "name": "fetchEmulatorStats",
-      "reason": "UNREVIEWED (omission?): gen5 counts failed /stats fetches and clears the poll interval after ten; gens 2-4 keep polling a dead Super Shuckie (once a second since 2026-11-02, all four log a failure at most once per 5 s).",
+      "reason": "UNREVIEWED (omission?): gen5 counts failed /stats fetches and clears the poll interval after ten; gens 2-4 keep polling a dead Super Shuckie (once a second since 2026-11-02, all four log a failure at most once per 5 s). gen4 also records each reading for its reset check (noteEmulatorClock).",
       "bodies": {
         "gen2": "faea79db467b",
         "gen3": "faea79db467b",
-        "gen4": "faea79db467b",
+        "gen4": "58b1dc7984c4",
         "gen5": "fa9672cc561a"
       }
     },
@@ -823,6 +823,16 @@
         "gen3": "e39260df268e",
         "gen4": "6a67624ee002",
         "gen5": "6a67624ee002"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "getFinishFileName",
+      "reason": "quirk: gen3 reads this.starter because its starterString stays the picked species, and takes its non-evolution name from getSplitFileName; gen4 and gen5 differ only in comments.",
+      "bodies": {
+        "gen3": "02cc2cd7a110",
+        "gen4": "5564ef5072c1",
+        "gen5": "05f1e41e325a"
       }
     },
     {
@@ -1102,9 +1112,9 @@
       "reason": "UNREVIEWED: gen2 | gen3 | gen4 | gen5 (gen2 91L, gen3 198L, gen4 169L, gen5 155L)",
       "bodies": {
         "gen2": "5dcb5ccb3d3e",
-        "gen3": "78e9bc1b5068",
-        "gen4": "72132efa7e2b",
-        "gen5": "22979fde8386"
+        "gen3": "640fd601b7c6",
+        "gen4": "8e216a6a9b77",
+        "gen5": "4dc178cd0e32"
       }
     },
     {
@@ -1119,11 +1129,11 @@
     {
       "section": "methods",
       "name": "load_splits",
-      "reason": "UNREVIEWED (omission?): gen5 dedupes repeated trainer rows (first occurrence keeps the position, last time wins) and keeps only N's final battle; gens 2-4 push every CSV row.",
+      "reason": "quirk: which trainers keep every row depends on how each panel numbers them (known-legacy-bugs.md #172), and gen5 also keeps only N's final battle.",
       "bodies": {
-        "gen2": "51a84afc6ccf",
-        "gen3": "51a84afc6ccf",
-        "gen4": "51a84afc6ccf",
+        "gen2": "b1a99f8444a5",
+        "gen3": "c65db17c83bb",
+        "gen4": "0c2a1c115dbd",
         "gen5": "e87ae95749fc"
       }
     },
@@ -1227,7 +1237,7 @@
       "bodies": {
         "gen2": "302cc90d4514",
         "gen3": "5e94a809b23e",
-        "gen4": "8f1f70539568",
+        "gen4": "e9106638e80b",
         "gen5": "01fecc821851"
       }
     },
@@ -1315,6 +1325,15 @@
         "gen3": "4a6ac0256c4d",
         "gen4": "7037e5227090",
         "gen5": "53b0fd8655a5"
+      }
+    },
+    {
+      "section": "methods",
+      "name": "reset_detected",
+      "reason": "quirk: only gens 3 and 4 have several detection sites to share. gen3 has no disallow_faults window and checks run_complete; gen4 has the window and game_over, because D/P and Platinum never set run_complete; gen4 also passes Super Shuckie's emulated clock (emulatorClockBefore) because its games reload the save at boot, so memory can't tell a resume from a reset.",
+      "bodies": {
+        "gen3": "bd924e94335d",
+        "gen4": "7711ed0b76cf"
       }
     },
     {

@@ -30,14 +30,15 @@ export function logData(gameName, str, file_name, split_file_prefix, testStatus,
         return appendSplitCsv(filePath, header, str);
 }
 
-export function logCopy(gameName, file_name, splitFileName, finished_run_count, finishFileName) {
+export function logCopy(gameName, file_name, splitFileName, finished_run_count, finishFileName, refilming_mode) {
     // splitFileName names the attempts folder and its source file. finishFileName names the
     // copy placed in finishes/ and is based on the species actually played to the end of the
     // run, which can differ from splitFileName on a branching evolution line (see
     // getFinishFileName). Fall back to splitFileName when no finish name was supplied.
     const finishName = finishFileName || splitFileName;
-    var dirPathAttempts = splitPath(gameName, splitFileName);
-    var dirPathFinishes = splitPath(gameName, splitFileName, "finishes");
+    // logData writes attempts under refilmed/ when refilming mode is on, so source and destination follow it there.
+    var dirPathAttempts = refilming_mode == true ? splitPath(gameName, "refilmed", splitFileName) : splitPath(gameName, splitFileName);
+    var dirPathFinishes = splitPath(dirPathAttempts, "finishes");
     return copySplitFile(
         splitPath(dirPathAttempts, `${splitFileName}-${file_name}.csv`),
         splitPath(dirPathFinishes, `${finishName}-${finished_run_count}.csv`));

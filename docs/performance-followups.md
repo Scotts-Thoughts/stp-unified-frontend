@@ -661,3 +661,24 @@ process's vsync wait left out; method in ARCHITECTURE §12).
   totals moved with machine load between runs (the clock frame's renderer measured 98-120 ms/s), so the same-run
   stub comparison above (14-22% of all work while the timer runs) is the better figure.
 - Not checked in the real app: the gen1 store loading a *running* timer from disk while the frame is down.
+
+## Seventh pass (2026-11-09): measured, nothing changed
+
+A check after v3.3-v3.4.0 (enemy team panel, presets, the redone settings panel, two-trainer battles, voice). No code
+was changed; the numbers are here so the next pass does not repeat them.
+
+- **Renders per component, whole replay** (harness, frame off, so `LiveText` is the in-page clock; fourth-pass method,
+  with every component under `#app` wrapped rather than only the overlay). Overlay root: gen5 21, gen4 15, gen3 19,
+  the Crystal recording 231 (226 on 2026-10-13). The busiest children in the Crystal recording: `MoveList` 368,
+  `PopupBox` 150, `StatTiles` 117; in the smoke fixtures nothing above 65 (`SplitsPanel`, gen3). gen1: 282 across its
+  small unnamed components. Largest burst in one task: 16 (`SettingsControl` at mount, `MoveList` in gen2). So the new
+  features added no render load, and nothing here is worth a change.
+- **Background textures are much larger than the screen**: up to 9760x5040 and 31 MB (`Ghost.jpg`), ~120 files over
+  3 MB, 1.4 GB. The `<img>` is stretched to 1920x1080 and the Scale slider goes to 300%, so 5760x3240 is the most a
+  texture can show. Decoding one (traced, warm disk, offscreen window at 1920x1080): `Ghost.jpg` 287 ms, `SteelLab.jpg`
+  228 ms, `Fairy.jpg` 184 ms, all on a worker thread, once per texture change. Resizing would save about 0.1-0.2 s
+  per background change and would not be pixel-identical, so it was left; it is an install-size question (the
+  package already ships identical files once), not a speed one.
+- **Voice**: `parity:voice` measured 6.0% of one core. Skipping the recognizer in silence was considered and left: the
+  self-test has only 1.5 s of quiet between clips, so it cannot show such a gate is safe, and a streamer talks for
+  most of a run.
