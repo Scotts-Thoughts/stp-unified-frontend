@@ -78,7 +78,7 @@ let styleSettingsManager: StyleSettingsStore | null = null;
 /** Reads every species file and builds the store. Idempotent. */
 export async function loadGen4StyleDefaults(): Promise<StyleSettingsStore> {
     if (styleSettingsManager) return styleSettingsManager;
-    const defaults = await loadStyleFiles(styleFiles);
+    const defaults = await loadStyleFiles(styleFiles, "games/gen4/data/style");
     styleSettingsManager = createStyleSettingsStore({
         defaults,
         isStyleKey: isGen4StyleKey,

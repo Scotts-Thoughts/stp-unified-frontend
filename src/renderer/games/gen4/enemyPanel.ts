@@ -11,6 +11,7 @@ import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel
 import { twoTrainerHeader, twoTrainerHeaderStyle } from "~/core/logic/twoTrainerBattle";
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen4, SendOutOrderCache, type SendOutMon, type SendOutPlayer } from "~/core/logic/sendOutOrder";
+import { fitTrainerHeader } from "~/core/logic/trainerHeader";
 
 /** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
 const liveOrder = new SendOutOrderCache();
@@ -402,7 +403,7 @@ function slotNodes(view: Gen4EnemyTeam, slot: Gen4EnemySlot): EnemyNode {
 /** The panel inside the overlay's enemy team branch. */
 export function enemyTeamLayout(view: Gen4EnemyTeam): EnemyChild[] {
     return [
-        { key: view.double ? 1 : 0, class: "trainerLabel", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 26, 24) : undefined, text: view.trainer },
+        { key: view.double ? 1 : 0, class: "trainerLabel", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 26, 24) : undefined, text: view.double ? view.trainer : fitTrainerHeader(view.trainer, 24) },
         { class: "colored-image ds", style: [view.crop, { "--url": "url(images/gen4/new_ui/enemy.svg)" }] },
         ...[...view.slots, ...view.second.filter((slot) => slot.present)].map((slot): EnemyNode => ({
             children: [!slot.present ? null : {

@@ -13,5 +13,10 @@
   "imageScale": "0.69",
   "imageYOffset": 0,
   "imageXOffset": 0,
-  "backgroundTexture": "water"
+  "backgroundTexture": "water",
+  "backgroundBlur": 0,
+  "backgroundFlip": false,
+  "backgroundXFlip": false,
+  "backgroundXOffset": 0,
+  "backgroundSaturation": 100
 }

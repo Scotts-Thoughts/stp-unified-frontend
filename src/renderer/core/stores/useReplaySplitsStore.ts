@@ -26,9 +26,19 @@ import { isSplitBookmark, splitsFromBookmarks, type FrameStampedBookmark, type S
  * state in which the game runs live from the replay's point (`is_playback_stopped`);
  * splits the player earns live from there are pushed by the autosplitter as always and
  * shown once the replay is unloaded.
+ *
+ * **The Cutter editor's rows (2026-11-17).** The editor's stand-in for Super Shuckie
+ * (air_cutter `extensions/stp-overlay/lib/chain.js`) adds `splits` to its `/bookmarks`
+ * reply: the rows of the splits CSV the user chose for the recording, in the CSV's order,
+ * each with the frame it shows from, worked out from the recording (`lib/splits.js` there).
+ * With them, the current column is exactly those rows up to the frame: no deduplication,
+ * no reordering, so a trainer fought four times is four rows, as in the CSV. The store
+ * then also asks four times as often, so a row lands within a few frames of its win.
  */
 
 const POLL_INTERVAL_MS = 250;
+/** With the editor's rows: its stand-in is local and cheap, and an export is paced to the wall clock. */
+const ROWS_POLL_INTERVAL_MS = 50;
 const RETRY_AFTER_FAILURE_MS = 5000;
 
 interface StatsSample {
@@ -37,11 +47,27 @@ interface StatsSample {
 	bookmark_generation?: number;
 }
 
+/** One of the editor's rows: a `current_splits` row and the frame it shows from (null: never). */
+export interface FramedSplitRow extends SplitRow {
+	frame: number | null;
+}
+
 interface BookmarksReply {
 	replay: string | null;
 	state: "none" | "recording" | "playback";
 	generation: number;
 	bookmarks: FrameStampedBookmark[];
+	/** The Cutter editor's stand-in only. */
+	splits?: FramedSplitRow[];
+}
+
+/** The editor's rows reached at `frame`, in their order, without the frame. */
+export function rowsUpTo(rows: readonly FramedSplitRow[], frame: number): SplitRow[] {
+	const out: SplitRow[] = [];
+	for (const { frame: from, ...row } of rows) {
+		if (from !== null && from !== undefined && from <= frame) out.push(row);
+	}
+	return out;
 }
 
 export const useReplaySplitsStore = defineStore("replay_splits", {
@@ -56,6 +82,9 @@ export const useReplaySplitsStore = defineStore("replay_splits", {
 		generation: null as number | null,
 		/** The replay's SPLIT bookmarks (only those), every frame. */
 		bookmarks: [] as FrameStampedBookmark[],
+		/** The editor's rows, when its stand-in sent them: shown in place of the bookmarks. */
+		rows: null as FramedSplitRow[] | null,
+		_intervalMs: POLL_INTERVAL_MS as number,
 		_interval: null as ReturnType<typeof setInterval> | null,
 		_nextAttemptAt: 0 as number,
 		_fetching: false as boolean,
@@ -63,17 +92,28 @@ export const useReplaySplitsStore = defineStore("replay_splits", {
 	getters: {
 		/** `current_splits` rows for the frame being shown: the last split per trainer at or before it. */
 		currentSplits(state): SplitRow[] {
-			return state.playingBack ? splitsFromBookmarks(state.bookmarks, state.frame) : [];
+			if (!state.playingBack) return [];
+			if (state.rows) return rowsUpTo(state.rows, state.frame);
+			return splitsFromBookmarks(state.bookmarks, state.frame);
 		},
 	},
 	actions: {
 		startPolling(): void {
 			if (this._interval != null) return;
-			this._interval = setInterval(() => void this.tick(), POLL_INTERVAL_MS);
+			this._interval = setInterval(() => void this.tick(), this._intervalMs);
+		},
+		/** Poll every `ms` from now on. */
+		setPollInterval(ms: number): void {
+			if (ms === this._intervalMs) return;
+			this._intervalMs = ms;
+			if (this._interval == null) return;
+			clearInterval(this._interval);
+			this._interval = setInterval(() => void this.tick(), ms);
 		},
 		stopPolling(): void {
 			if (this._interval != null) clearInterval(this._interval);
 			this._interval = null;
+			this._intervalMs = POLL_INTERVAL_MS;
 			this.clear();
 		},
 		clear(): void {
@@ -81,6 +121,7 @@ export const useReplaySplitsStore = defineStore("replay_splits", {
 			this.replay = null;
 			this.generation = null;
 			this.bookmarks = [];
+			this.rows = null;
 		},
 		async tick(): Promise<void> {
 			if (!shuckieBookmarksEnabled()) {
@@ -128,6 +169,14 @@ export const useReplaySplitsStore = defineStore("replay_splits", {
 				this.replay = reply.replay;
 				this.generation = reply.generation;
 				this.bookmarks = reply.bookmarks.filter(isSplitBookmark).map(({ id, name, in_frame, type }) => ({ id, name, in_frame, type }));
+				this.rows = Array.isArray(reply.splits)
+					? reply.splits.filter((r) => r && typeof r.trainer === "string").map((r) => {
+						const row: FramedSplitRow = { trainer: r.trainer, time: String(r.time ?? ""), frame: typeof r.frame === "number" ? r.frame : null };
+						if (typeof r.id === "number") row.id = r.id;
+						return row;
+					})
+					: null;
+				this.setPollInterval(this.rows ? ROWS_POLL_INTERVAL_MS : POLL_INTERVAL_MS);
 			} catch (_err) {
 				// Left as it was; the next generation change (or the next tick with no
 				// generation yet) tries again.

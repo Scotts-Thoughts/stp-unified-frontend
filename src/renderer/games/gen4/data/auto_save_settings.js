@@ -79,6 +79,7 @@ export const auto_save_settings = [
     "right_ui",
     "show_wild_battles",
     "send_out_order",
+    "webcam_mode",
     "examined_trainer",
     "split_type",
     "catch_rate",

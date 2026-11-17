@@ -422,6 +422,11 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
             controls: [
                 flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles"),
                 flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order"),
+                flag(vm, "display.webcam_mode", "Webcam Mode", "webcam_mode", {
+                    title: "Keeps the right panel above the bottom right corner and hides the tutor moves, to leave room for a webcam.",
+                    // A streaming setup, not part of a Pokémon's look: not saved in presets.
+                    preset: false,
+                }),
                 flag(vm, "display.tutor_moves", "Show Tutor Moves", "tutor_moves"),
                 flag(vm, "display.automatic_evs", "Automatic EVs", "automatic_evs", { tier: "advanced" }),
                 flag(vm, "display.battle_graphics", "Show Battle Graphics", "battleGraphic", { tier: "advanced" }),

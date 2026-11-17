@@ -207,7 +207,7 @@
                      setting, not a post-battle Splits, so a gym leader's team stays up until enemy_graphic ends, as before. -->
                 <div v-else-if="enemy_graphic == true && (right_ui == 'Automatic' || right_ui == 'Trainers')" style="position: absolute;" key="1">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, during the battle. -->
                 <div v-else-if="(right_ui == 'Automatic' || right_ui == 'Trainers') && wild_pokemon_view" style="position: absolute;" key="9">
@@ -215,7 +215,7 @@
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Splits -->
                 <div v-else-if="right_panel_mode == 'Splits'" key="3" class="posAbs">
@@ -606,6 +606,8 @@ export default defineComponent({
             show_wild_battles      : MyStorage['show_wild_battles']    ?? false,
             // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
             send_out_order         : MyStorage['send_out_order']       ?? true,
+            // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
+            webcam_mode            : MyStorage['webcam_mode']          ?? false,
             stats_setting          : MyStorage['stats_setting']        ?? "Automatic",
             expBarToggle           : MyStorage['expBarToggle']         ?? true,
             show_nature_changes    : MyStorage['show_nature_changes']  ?? true,
@@ -1819,7 +1821,8 @@ export default defineComponent({
                     power: this.movepoolPower(x), accuracy: x.Accuracy, pp: x.PP,
                 })) },
             ]
-            if (this.show_tutor_moves == true) {
+            // Webcam Mode leaves the tutor rows out, so the shorter panel keeps the rest readable.
+            if (this.show_tutor_moves == true && !this.webcam_mode) {
                 groups.push({ struck: struck.machines, rows: rows.tutor.map(x => ({
                     way: "Tutor", move: x.Move, name: this.move_name(x.Move), type: x.Type, typeColor: `var(--${x.Type?.toLowerCase()})`,
                     dc: x.Category, dcColor: dcColor(x),
@@ -1835,6 +1838,8 @@ export default defineComponent({
                 // 995px of the 1000px table less the 17px header and the first row's 2px; rows at 21px/14px,
                 // and a long list's font shrinks a little slower than its rows.
                 fit: { containerHeight: 976, lineHeight: 21, fontSize: 14, shrinkFactor: 0.77 },
+                // Webcam Mode: images/gen4/ui/movepool.svg's bottom border at 1055, the 1000px table of style.css.
+                webcam: this.webcam_mode ? { frameBottom: 1055, tableHeight: 1000 } : undefined,
                 groups,
             }
         },
@@ -1854,6 +1859,7 @@ export default defineComponent({
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
                 art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen4/new_ui/splits.svg)"], frameBottom: 780 },
+                webcam: this.webcam_mode,
             }
         },
         /**

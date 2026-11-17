@@ -234,7 +234,7 @@
                      setting, not a post-battle Splits, which waits for enemy_graphic to end, as before. -->
                 <div v-else-if="enemy_graphic == true && battlePokemonCrop != false && !second_screen_mode && (right_ui == 'Automatic' || right_ui == 'Trainers')" style="position: absolute;" key="1">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, during the battle. -->
                 <div v-else-if="!second_screen_mode && (right_ui == 'Automatic' || right_ui == 'Trainers') && wild_pokemon_view" style="position: absolute;" key="9">
@@ -250,7 +250,7 @@
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Splits -->
                 <div v-else-if="right_panel_mode == 'Splits'" key="7" :style="`filter: drop-shadow(0px 1px 1px)`" class="posAbs">
@@ -591,6 +591,8 @@ export default defineComponent({
             show_wild_battles            : MyStorage['show_wild_battles']      ?? false,
             // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
             send_out_order               : MyStorage['send_out_order']         ?? true,
+            // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
+            webcam_mode                  : MyStorage['webcam_mode']            ?? false,
             previous_label               : MyStorage['previous_label']         ?? "Previous",
             current_label                : MyStorage['current_label']          ?? "Current",
             collect_split_data           : MyStorage['collect_split_data']     ?? true,
@@ -1710,10 +1712,11 @@ export default defineComponent({
             const struck = this.movepoolStruck
             const groups = [
                 { struck: struck.everywhere, rows: rows.level.map((x, index) => row(x, x.Level, index === 0)) },
-                { struck: struck.everywhere, rows: rows.form.map(x => row(x, "Form")) },
+                // Webcam Mode leaves the Form and tutor rows out, so the shorter panel keeps the rest readable.
+                { struck: struck.everywhere, rows: this.webcam_mode ? [] : rows.form.map(x => row(x, "Form")) },
                 { struck: struck.machines, rows: rows.tmhm.map(x => row(x, x.Move == 'Whirlpool' ? "HM05" : x.tmhm)) },
             ]
-            if (this.show_tutor_moves && (this.selected_game == 'Black 2' || this.selected_game == 'White 2')) {
+            if (this.show_tutor_moves && !this.webcam_mode && (this.selected_game == 'Black 2' || this.selected_game == 'White 2')) {
                 groups.push({ struck: struck.machines, rows: rows.tutor.map(x => row(x, "Tutor")) })
             }
             return {
@@ -1725,6 +1728,8 @@ export default defineComponent({
                 // 993px of the 1000px table less the 17px header; rows at 19px/14px, and a long list's font
                 // shrinks once its rows are under 17px, a little slower than the rows.
                 fit: { containerHeight: 976, lineHeight: 19, fontSize: 14, shrinkFactor: 0.77, fontFrom: 17 },
+                // Webcam Mode: images/gen5/ui/movepool.svg's bottom border at 1055, the 1000px table of style.css.
+                webcam: this.webcam_mode ? { frameBottom: 1055, tableHeight: 1000 } : undefined,
                 groups,
             }
         },
@@ -1743,6 +1748,7 @@ export default defineComponent({
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
                 art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/splits.svg)"], frameBottom: 780 },
+                webcam: this.webcam_mode,
             }
         },
         /** The second-screen layout's copy of the Splits panel: its own table and icon classes and art. */
@@ -1752,6 +1758,8 @@ export default defineComponent({
                 ...view,
                 table: { class: "second_screen_splits_table", icon: { imgClass: "icons splitIcon_2" } },
                 art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/second_screen_splits.svg)"], frameBottom: 729 },
+                // The second screen's own layout has no webcam corner.
+                webcam: false,
             }
         },
         /**

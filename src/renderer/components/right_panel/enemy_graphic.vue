@@ -4,7 +4,7 @@
 <div>
     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in games/gen1/enemyPanel.ts. A slot whose data
          hasn't arrived yet would show "null" and "Lv:0"; it is hidden like gen2's (v-show keeps it in the DOM). -->
-    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" />
+    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="overlay.right_panel.webcam_mode" :webcam-header="81" />
 </div>
 </template>
 

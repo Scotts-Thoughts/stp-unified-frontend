@@ -194,13 +194,15 @@ const S = {
   replay: "run-1",
   bookmarks: [] as { id: number; name: string; in_frame: number; type: { name: string } | null }[],
   fetches: 0,
+  /** The Cutter editor's stand-in's rows; undefined: a real Super Shuckie. */
+  splits: undefined as { trainer: string; time: string; frame: number | null }[] | undefined,
 };
 function start(): Promise<Server> {
   const server = createServer((req, res) => {
     const url = new URL(req.url!, `http://127.0.0.1:${PORT}`);
     const reply = (body: unknown) => { res.writeHead(200, { "Content-Type": "application/json" }); res.end(JSON.stringify(body)); };
     if (url.pathname === "/stats") return reply({ total_elapsed_frames: S.frame, is_playing_back: S.playingBack, bookmark_generation: S.generation, counters: {} });
-    if (url.pathname === "/bookmarks") { S.fetches++; return reply({ replay: S.replay, state: S.playingBack ? "playback" : "recording", generation: S.generation, editable: true, bookmarks: S.bookmarks, types: [] }); }
+    if (url.pathname === "/bookmarks") { S.fetches++; return reply({ replay: S.replay, state: S.playingBack ? "playback" : "recording", generation: S.generation, editable: true, bookmarks: S.bookmarks, types: [], ...(S.splits ? { splits: S.splits } : {}) }); }
     res.writeHead(404).end();
   });
   return new Promise((resolve) => server.listen(PORT, "127.0.0.1", () => resolve(server)));
@@ -245,6 +247,30 @@ check("store: still inside the retry wait: not asked yet", !store.playingBack);
 store._nextAttemptAt = 0;
 await store.tick();
 check("store: after the wait: back", store.playingBack && rows(store.currentSplits) === "Rival1-Lab@0:45,Brock@10:00");
+
+// --- G. The Cutter editor's rows (2026-11-17): the CSV's rows, in its order, up to the frame
+S.splits = [
+  { trainer: "Leader Falkner", time: "10:15.48", frame: 1000 },
+  { trainer: "Rival Silver", time: "16:53.04", frame: 2000 },
+  { trainer: "Rival Silver", time: "39:02.21", frame: 3000 },
+  { trainer: "Leader Morty", time: "41:41.73", frame: null },
+];
+S.generation = 7;
+S.frame = 2500;
+await store.tick();
+check("rows: shown up to the frame, CSV times as they are", rows(store.currentSplits) === "Leader Falkner@10:15.48,Rival Silver@16:53.04", rows(store.currentSplits));
+check("rows: the store asks more often for them", store._intervalMs === 50, String(store._intervalMs));
+S.frame = 999999;
+await store.tick();
+check("rows: a trainer fought twice is two rows; a row with no frame never shows", rows(store.currentSplits) === "Leader Falkner@10:15.48,Rival Silver@16:53.04,Rival Silver@39:02.21", rows(store.currentSplits));
+S.frame = 10;
+await store.tick();
+check("rows: a scrub back to before the first win shows none", store.playingBack && store.currentSplits.length === 0, rows(store.currentSplits));
+S.splits = undefined;
+S.generation = 8;
+S.frame = 2000;
+await store.tick();
+check("rows: a reply without them goes back to the bookmarks", rows(store.currentSplits) === "Rival1-Lab@0:45,Brock@10:00,Misty@20:00" && store.rows === null && store._intervalMs === 250, rows(store.currentSplits));
 store.stopPolling();
 await new Promise((resolve) => server.close(resolve));
 

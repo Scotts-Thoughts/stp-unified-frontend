@@ -63,6 +63,11 @@ export interface SplitsView {
      * under the last row, and the header keeps its height.
      */
     art: { class: string; style: StyleValue; frameBottom?: number };
+    /**
+     * Webcam Mode (`core/logic/webcamMode.ts`): the frame's bottom border never sits below `WEBCAM_FRAME_BOTTOM`, and a
+     * list too long for that shrinks its icons. Needs `art.frameBottom`.
+     */
+    webcam?: boolean;
 }
 
 /** The difference cell's colour: black for none, red behind, green ahead. */

@@ -40,6 +40,7 @@
 <script lang="ts">
 import { defineComponent, markRaw, type PropType, type StyleValue } from "vue";
 import type { SplitsSummary, SplitsTable, SplitsView } from "./splitsView";
+import { WEBCAM_FRAME_BOTTOM } from "../logic/webcamMode";
 
 // The one look (docs/ui-uniformity-plan.md decision 29): rows at their natural height (the table is a block as tall as
 // its rows, so they never stretch, and its background ends with them, where the frame now ends), an underlined header
@@ -198,9 +199,11 @@ export default defineComponent({
             // In the art's own px: the picture is 1080 high, whatever scale the overlay is drawn at.
             const box = art.getBoundingClientRect();
             if (box.height === 0) return;
-            this.fitIcons(box, bottom);
+            // Webcam Mode: the rows fit above the webcam line, and the border never sits below it.
+            const limit = this.view.webcam ? Math.min(bottom, WEBCAM_FRAME_BOTTOM) : bottom;
+            this.fitIcons(box, limit);
             const rowsBottom = Math.max(...bodies.map((body) => body.getBoundingClientRect().bottom));
-            const shift = Math.max(0, bottom - Math.ceil(((rowsBottom - box.top) * 1080) / box.height));
+            const shift = Math.max(0, bottom - limit, bottom - Math.ceil(((rowsBottom - box.top) * 1080) / box.height));
             if (shift !== this.frameShift) this.frameShift = shift;
         },
     },

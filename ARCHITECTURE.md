@@ -446,6 +446,57 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
   strikes nothing. gen1's list (Double Team) is `games/gen1/data/unobtainable_moves.ts`.
 - The cross-out is an inline style, not a class, on purpose: the harness keys elements by their class list.
 
+**Webcam Mode (all five generations, 2026-11-17; `core/logic/webcamMode.ts`).** A "Webcam Mode" toggle (Toggles group,
+action `display.webcam_mode`, not in presets) keeps the right panel above the bottom right corner for the streamer's
+webcam. Saved as `webcam_mode` (gens 2-5, via each `auto_save_settings`; gen3's own key list) and
+`right_panel.webcam_mode` (gen1). Off, every element tree is what it was.
+- Movepool: the view's `webcam` (`frameBottom` of the art, the table's `style.css` height) shortens the table and fits
+  the rows into what is left, with the font held to the row (gen3's never shrinks otherwise); the art is drawn twice and
+  cut like the Splits frame (`core/overlay/ArtPiece.ts`). The movepool SVGs' `frameBottom`: gens 1-2 1037, gen3 1058,
+  gens 4-5 1055. Tutor rows (gens 2-5) and gen5's Form rows are left out; each tutor switch keeps its own value.
+- Splits: the view's `webcam` caps the frame's bottom border at `WEBCAM_FRAME_BOTTOM` (730) and shrinks the icons to fit.
+  Not applied to gen5's Second Screen Mode, which has its own right side (the toggle is hidden there).
+- Enemy team / Trainers: `EnemyTeamPanel`'s `webcam` prop squeezes a team whose art (`view.crop`'s height) runs past
+  740: the full width stays, the rows are `scaleY`'d to fit, and each text node and type/move icon gets a CSS `scale`
+  (its own property) that keeps it upright: text and move icons at a little under their size. Text is scaled from the
+  side it is aligned to (`alignUpright`). A sprite instead gets its own transform rewritten (`spriteTransform`): its
+  size shrunk across to match the rows, its per-species `translate` X kept whole. A `scale` property shrank that offset
+  too and pulled every sprite right of where it was placed (Scott, 2026-11-17). Type icons keep their regular size and spacing (Scott, 2026-11-17), anchored at their bottom
+  left: gens 4-5's group of icons as one (`isIconGroup`), gens 1-3's `ePkmnTypeIcons` one by one. Which images are art
+  (squeezed), sprites (`sprite` in the class) or icons (`icon`/`type`) is read from their classes, so a new picture
+  in a layout needs a class that says which it is. Up to four Pokémon keep their size; wild panels always fit.
+- Only the rows are squeezed (Scott, 2026-11-17): the trainer's header, with its angled cutout, and the panel's top
+  edge (level with the top of the game area) stay at their regular size. The panel is drawn twice: once as it is, cut
+  off below `webcamHeader` (the y where the header ends: gens 1-2 81, gens 3-5 66, between the header's bottom border
+  and the first row in each enemy-panel SVG), and once squeezed from that line down, cut off above it. A squeeze of the
+  whole panel from the canvas top shrank the top margin and changed the cutout's angle.
+- A layout can make a crowded text smaller in the squeeze with `squeezeText` on its node (its size as a share of the
+  rows' scale; default 1.2). gen1's stat numbers and stage badges use 1.02, as they collided in the shorter stat tiles
+  (Scott, 2026-11-17).
+- Move-row type icons are drawn at about the rows' scale (a little over), not the text's: at the text's size they
+  were too tall for the shorter move rows (Scott, 2026-11-17).
+- Trainer pictures (the full-canvas art of a gym leader or rival: `view.art` in gens 1, 4, 5, drawn by the panel;
+  `specialTrainerGraphics()` in gens 2-3, drawn by the overlay with `webcam_trainer_art_style`) keep their shape and
+  never cover the team (Scott, 2026-11-17): `webcamArtStyle` scales the picture evenly into the space between the
+  team's last row and 740, its bottom right corner kept across, and hides it when there is under 120px of room (teams
+  of four or more). It needs the picture's visible box from `core/logic/trainerArtBoxes.json`; **run
+  `npx tsx tools/assets/trainer-art-boxes.ts` after adding a trainer picture**, or it is hidden in Webcam Mode. In the
+  squeezed panel the picture is drawn outside both boxes, so the squeeze never stretches it.
+- Checked with staged fixtures (Webcam Mode on before the replay, harness checkpoint captures): enemy stat stages in a
+  squeezed six-Pokémon battle (gens 1, 4, 5) sit where they do in the regular panel. The smoke fixtures have no stage
+  changes; the staging copied a fixture, set the stage values at the battle's start, pointed gen4/5's opponent id at a
+  six-Pokémon trainer (their teams come from the trainer table) and added a level change to force a capture.
+- Trap: each squeeze box must be the full 1920×1080 canvas, not zero-size. It becomes the containing block of the
+  `position: fixed` art, and gen4's speed bar is sized in % of it (it drew 0 px tall in a zero-size box). The box takes
+  no clicks itself (`core/styles/enemyPanel.css`).
+- Trap: a slot passed on to a child (`<art-piece><slot></slot></art-piece>`) arrives as a Fragment, which takes no style.
+
+**Trainer header too long (all five generations, 2026-11-17; `core/logic/trainerHeader.ts`).** In every mode, a
+one-trainer header longer than its generation's header holds (by character count: gen1 20, gen2 23, gen3 20, gens 4-5
+24) drops the trainer class and keeps the name: "Pokemon Trainer Bianca's Team" reads "Bianca's Team". It is applied
+in each `enemyTeamLayout`, so `view.trainer` (and anything else reading it) keeps the full name. Two-trainer headers
+are shrunk instead (`twoTrainerHeaderStyle`).
+
 **The Splits panel (all five generations, 2026-10-15; `docs/ui-uniformity-plan.md` step 5.3).**
 - One component, `core/overlay/SplitsPanel.vue`, fed a plain `view` (`core/overlay/splitsView.ts`) by one computed
   per generation: gen1's `splitsView` in `components/right_panel.vue`, gens 2-5's `splitsView` in the overlay (gen5
@@ -473,6 +524,11 @@ from the state the overlay posts (start, pause, Super Shuckie's time, the clock'
 - Followup + Summary exists only in gens 1-2: only their patches record the battle statistics it shows
   (`patch.battle_info.*`); gens 3-5's mappers have none.
 - The difference colour is `splitDiffColor` in `splitsView.ts` (the mixin's `split_diff_color` is gone).
+- **In the Cutter editor** (2026-11-17) the stand-in for Super Shuckie adds `splits` to its `/bookmarks` reply: the
+  rows of the splits CSV chosen for the recording, each with the frame it shows from (air_cutter
+  `extensions/stp-overlay/lib/splits.js`). `useReplaySplitsStore` then shows exactly those rows up to the frame, in
+  their order, with no per-trainer dedupe, and polls every 50 ms. Without the field it reads the SPLIT bookmarks as
+  before.
 
 **The enemy team panel (all five generations, 2026-10-15; `docs/ui-uniformity-plan.md` step 5.4).**
 - One render-function component, `core/overlay/EnemyTeamPanel.ts`, fed a plain `view` (`core/overlay/enemyTeamView.ts`)

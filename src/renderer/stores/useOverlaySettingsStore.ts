@@ -170,6 +170,11 @@ function defaultOverlaySettings() {
 				post_battle_splits: true as boolean,
 				/** Whether or not to show battle details in the right panel (on mode == Automatic) on wild pokemon encounters */
 				wild_battles: false as boolean,
+				/**
+				 * Webcam Mode (core/logic/webcamMode.ts): the right panel stops above the bottom right corner,
+				 * leaving it free for a webcam.
+				 */
+				webcam_mode: false as boolean,
 				/** Movepool settings */
 				movepool: {
 					/**

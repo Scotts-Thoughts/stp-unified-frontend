@@ -372,6 +372,11 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
             title: "Toggles",
             controls: [
                 flag("display.wild_battles", "Show Wild Battles", () => settings().right_panel, "wild_battles"),
+                flag("display.webcam_mode", "Webcam Mode", () => settings().right_panel, "webcam_mode", {
+                    title: "Keeps the right panel above the bottom right corner, to leave room for a webcam.",
+                    // A streaming setup, not part of a Pokémon's look: not saved in presets.
+                    preset: false,
+                }),
                 flag("display.count_blackouts", "Count Blackouts", advanced, "count_blackouts", { title: "A blackout counts as a fault" }),
                 // The store field is `right_panel.hotkeys`, and ticked (the default) F17-F19 all pick
                 // Automatic; unticked F18 picks Movepool and F19 Splits (actions.ts legacyFKeys).

@@ -21,3 +21,13 @@ img[data-stp-fade][data-stp-state="loaded"] {
         opacity: 0;
     }
 }
+
+/* Webcam Mode's squeezed panel (EnemyTeamPanel.ts): its full-canvas box takes no clicks itself; what it holds keeps the
+   pointer events it had. */
+.stp-webcam-fit {
+    pointer-events: none;
+}
+
+.stp-webcam-fit > * {
+    pointer-events: auto;
+}

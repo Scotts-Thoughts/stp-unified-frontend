@@ -229,7 +229,7 @@
                 </div> 
                 <div v-else-if="(right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && (battle_fade == true && battleGraphic == true && batt.mode.value == `Trainer`)" style="position: absolute;" key="4">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="81"></enemy-team-panel>
                 </div>
                 <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, at the trainer panel's times. -->
                 <div v-else-if="(right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && wild_pokemon_view && battle_fade == true && battleGraphic == true" style="position: absolute;" key="9">
@@ -237,7 +237,7 @@
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="81"></enemy-team-panel>
                 </div>
                 <div v-else="" key="6">
                     <movepool :view="movepoolView">
@@ -247,7 +247,7 @@
             </transition>
             <transition name="fadeDelayed">
                 <div v-if="((right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && battle_fade == true && g2trainerEnemySelector(batt.trainer.class.value) == 1) && battleGraphic == true && showSpecialTrainerGraphics == true" style="position: absolute;">
-                    <img class="canvas" :src="specialTrainerGraphics()">
+                    <img class="canvas" :src="specialTrainerGraphics()" :style="webcam_trainer_art_style">
                 </div>
             </transition>
 
@@ -350,6 +350,7 @@ import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expCurve, expProgress } from "~/core/logic/expCurve";
 import { confirmReset } from "~/core/logic/resetGuard";
+import { cropHeight, webcamArtStyleOrHidden } from "~/core/logic/webcamMode";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { gen2OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
 import { flailReversalPower } from "~/core/logic/movePower";
@@ -516,6 +517,8 @@ export default defineComponent({
             show_wild_battles      : MyStorage['this.show_wild_battles']    ?? false,
             // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
             send_out_order         : MyStorage['this.send_out_order']       ?? true,
+            // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
+            webcam_mode            : MyStorage['this.webcam_mode']          ?? false,
             display_badge_boosts   : MyStorage['this.display_badge_boosts'] ?? true,
             display_run_summary    : MyStorage['this.display_run_summary']  ?? true,
             show_badge_boosts      : MyStorage['this.show_badge_boosts']    ?? true,
@@ -1302,6 +1305,14 @@ export default defineComponent({
 
     //FUNCTIONS ----------------------------------------------------------------//
     computed: {
+        /**
+         * Webcam Mode's place for the special trainer picture (core/logic/webcamMode.ts): its own shape, under the
+         * enemy team, or hidden when there is no room; nothing with Webcam Mode off.
+         */
+        webcam_trainer_art_style() {
+            if (!this.webcam_mode) return undefined
+            return webcamArtStyleOrHidden(this.specialTrainerGraphics(), cropHeight(this.battlePokemonCrop()))
+        },
         // The settings panel's description (settingsPanel.ts). It reads nothing reactive itself, so it is
         // built once; the panel component reads the overlay through its closures as it renders.
         settingsPanel() {
@@ -1395,6 +1406,8 @@ export default defineComponent({
                 headerColor: `var(--${prefix}${this.dexDataCrystal[this.s1dynamicReset.species.value].type_2.toLowerCase()})`,
                 // The table's 941.5px for the rows at the stylesheet's 16px/21px; a long list shrinks its font in step.
                 fit: { containerHeight: 941.5, lineHeight: 21, fontSize: 16, shrinkFactor: 1, normalFromCss: true },
+                // Webcam Mode: images/gen2/ui/movepool.svg's bottom border at 1037, the 966px table of style.css.
+                webcam: this.webcam_mode ? { frameBottom: 1037, tableHeight: 966 } : undefined,
                 groups: [
                     { struck: struck.everywhere, rows: rows.level.map(x => ({
                         way: x.Level, move: x.Move, type: this.movepoolType(x), typeColor: typeColor(x),
@@ -1404,7 +1417,8 @@ export default defineComponent({
                         way: x.tmhm, move: x.Move, type: this.movepoolType(x), typeColor: typeColor(x),
                         power: this.movepoolPower(x), accuracy: x.Accuracy, pp: x.PP,
                     })) },
-                    { struck: struck.machines, rows: rows.tutor.map(x => ({
+                    // Webcam Mode leaves the tutor rows out, so the shorter panel keeps the rest readable.
+                    { struck: struck.machines, rows: this.webcam_mode ? [] : rows.tutor.map(x => ({
                         way: "Tutor", move: x.Move, type: x.Type, typeColor: `var(--${prefix}${x.Type?.toLowerCase()})`,
                         power: x.Power, accuracy: x.Accuracy, pp: x.PP,
                     })) },
@@ -1431,6 +1445,7 @@ export default defineComponent({
                         diffStyle: splitDiffColor(split.difference),
                     })),
                 art: { class: "colored-image", style: [`filter: saturate(${this.ui_saturation}) drop-shadow(0px 0px 1px #000000)`, "--url: url(images/gen2/ui/movepool.svg)"], frameBottom: 1037 },
+                webcam: this.webcam_mode,
             }
             if (mode === "Followup + Summary") {
                 const metric = (stat) => ({ label: [stat.name], value: this[stat.data_name] != 0 ? this[stat.data_name] : "-" })

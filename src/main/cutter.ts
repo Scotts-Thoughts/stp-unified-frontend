@@ -1,4 +1,5 @@
-import { app, BrowserWindow, session, type NativeImage } from "electron";
+import { app, BrowserWindow, ipcMain, session, type NativeImage } from "electron";
+import { readdirSync, readFileSync } from "fs";
 import { connect, type Socket } from "net";
 import path from "path";
 import { registerIpc } from "./ipc";
@@ -125,6 +126,10 @@ class Painted {
  *   {"id":1,"op":"frame"}        -> {"id":1,"width":1920,"height":1080,"generation":7,"bytes":8294400} + pixels
  *   {"id":2,"op":"generation"}   -> {"id":2,"generation":7}
  *   {"id":3,"op":"invalidate"}   -> {"id":3}     (paint even if nothing was damaged)
+ *   {"id":5,"op":"rate","fps":60}
+ *                                -> {"id":5,"fps":60}  paint this many times a second from
+ *                                   now on (1..240): the launcher's own pace, high while
+ *                                   the editor is being used, low while it is left alone
  *   {"id":4,"op":"probe","paths":["a.b"]}
  *                                -> {"id":4,"batches":12,"bytes":[[1,2],null]}
  *                                   what the overlay's client has received of those
@@ -166,6 +171,12 @@ function serve(socket: Socket, painted: Painted, window: BrowserWindow): void {
           if (!window.isDestroyed()) window.webContents.invalidate();
           reply({ id: request.id });
           break;
+        case "rate": {
+          const fps = Math.max(1, Math.min(240, Math.round(Number((request as { fps?: number }).fps) || 60)));
+          if (!window.isDestroyed()) window.webContents.setFrameRate(fps);
+          reply({ id: request.id, fps });
+          break;
+        }
         case "probe": {
           const paths = JSON.stringify((request as { paths?: string[] }).paths ?? []);
           window.webContents
@@ -197,9 +208,65 @@ function loadRenderer(window: BrowserWindow): void {
   }
 }
 
-/** The renderer is told the tool's address the only way it can be before it runs: its argv. */
+/**
+ * The renderer is told the tool's address the only way it can be before it
+ * runs: its argv. `--cutter-mode` tells the preload to offer the live style
+ * files (below).
+ */
 function rendererArgs(args: CutterArgs): string[] {
-  return args.tool ? [`--cutter-tool=${args.tool}`] : [];
+  return ["--cutter-mode=1", ...(args.tool ? [`--cutter-tool=${args.tool}`] : [])];
+}
+
+/**
+ * How the style settings persist in the Cutter modes.
+ *
+ * Run from a checkout, the overlay is in "dev mode" (core/env.ts): a style edit
+ * is written back into `src/renderer/games/genN/data/style/*.json`, and those
+ * files reach a build only when it is built again. Two things went wrong in
+ * the editor because of that (2026-11-17):
+ *
+ * * Its overlay drew the styles the last build was made from, not the ones the
+ *   user had since set on their computer (HG/SS Typhlosion line, styled
+ *   2026-11-16 into the source; the renderer bundle was from 2026-11-11).
+ * * An edit made in the editor went into the chain's sandbox copy of the
+ *   source tree, which nothing keeps; gens 2 and 4 read only the shipped
+ *   defaults and the `user_` overrides back, so after a restart it was gone.
+ *
+ * So here the renderer reads the style files live from this checkout's source
+ * (`cutter:style_files`, merged over the bundled ones in
+ * `core/persistence/styleFiles.ts`), and persists as a packaged build does:
+ * an edit is a `user_` override in `data/user_state.json`, which the editor
+ * keeps for the pairing. The source tree is never written from a chain.
+ */
+function persistLikeAPackage(): void {
+  ipcMain.removeHandler("is_packaged");
+  ipcMain.handle("is_packaged", () => true);
+  ipcMain.handle("cutter:style_files", (_e, sourceDir: string) => liveStyleFiles(sourceDir));
+}
+
+/**
+ * `<checkout>/src/renderer/<sourceDir>/*.json` by file name, each parsed —
+ * `null` for a file that says `null` (a style removed) — or null when there is
+ * no such folder (a packaged overlay). `sourceDir` is `games/genN/data/style`.
+ */
+export function liveStyleFiles(sourceDir: string, appPath = app.getAppPath()): Record<string, unknown> | null {
+  if (!/^games\/gen\d\/data\/style$/.test(sourceDir)) return null;
+  const dir = path.join(appPath, "src", "renderer", ...sourceDir.split("/"));
+  let names: string[];
+  try {
+    names = readdirSync(dir).filter((n) => n.endsWith(".json") && n !== "index.json");
+  } catch {
+    return null;
+  }
+  const out: Record<string, unknown> = {};
+  for (const name of names) {
+    try {
+      out[name.slice(0, -".json".length)] = JSON.parse(readFileSync(path.join(dir, name), "utf8"));
+    } catch {
+      // A file being written as it is read: the bundled one stands in.
+    }
+  }
+  return out;
 }
 
 /**
@@ -216,6 +283,7 @@ export function runCutter(args: CutterArgs): void {
     // sandbox the launcher made (`STP_APP_ROOT`, `--user-data-dir`).
     let window: BrowserWindow | null = null;
     registerIpc(() => window);
+    persistLikeAPackage();
 
     if (args.mode === "configure") {
       window = new BrowserWindow({

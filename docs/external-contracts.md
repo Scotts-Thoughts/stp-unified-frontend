@@ -43,7 +43,7 @@ Capture Fixtures mode, which needs Super Shuckie, PokeAByte and OBS together. Tw
   the queuer changes and keep the script in step.
 
 The
-unified app's `package.json` name is `stp-overlay` (3.4.0), so `%APPDATA%\stp-overlay` is where the queuer's
+unified app's `package.json` name is `stp-overlay` (3.4.1), so `%APPDATA%\stp-overlay` is where the queuer's
 window-state file goes; the app reads it in dev and, additively, when packaged.
 
 ## 2. Overlay control server — `http://127.0.0.1:30159`

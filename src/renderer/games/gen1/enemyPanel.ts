@@ -13,6 +13,7 @@ import { ref } from "vue";
 import { get_enemy_pkmn_styles } from "~/methods/enemy";
 import PokeData from "~/logic/PokeData";
 import { status_penalty } from "~/logic/statusPenalty";
+import { fitTrainerHeader } from "~/core/logic/trainerHeader";
 
 export interface Gen1EnemySlot extends EnemySlotView {
     /** The slot's species has arrived (it stays in the DOM, hidden, until then). */
@@ -183,6 +184,9 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer, key: string
     };
 }
 
+/** Webcam Mode's size for the stat numbers and stage badges, as a share of the squeezed rows' scale (others: 1.2). */
+const SQUEEZED_STAT_TEXT = 1.02;
+
 const fading = (cls: string, style: StyleValue, text: unknown): EnemyNode => ({ class: cls + " opacityTransition", style, text });
 
 function slotNodes(view: Gen1EnemyTeam, slot: Gen1EnemySlot): EnemyNode {
@@ -215,10 +219,11 @@ function slotNodes(view: Gen1EnemyTeam, slot: Gen1EnemySlot): EnemyNode {
             })),
             // Stats
             ...LABELS.map(([cls, label], i) => fading("ePkmnStatLabelStyle ePkmnLabel" + cls, slot.stats[i].labelStyle!, label)),
-            ...VALUES.map((cls, i) => fading("ePkmnStatsStyle ePkmn" + cls, slot.styles.text, slot.stats[i].value)),
+            // Webcam Mode: the numbers and stage badges a little smaller than other text, so they fit the shorter tiles together.
+            ...VALUES.map((cls, i): EnemyNode => ({ ...fading("ePkmnStatsStyle ePkmn" + cls, slot.styles.text, slot.stats[i].value), squeezeText: SQUEEZED_STAT_TEXT })),
             // Modifiers
             ...slot.mods.map((mod, i): EnemyNode => ({
-                children: [{ class: "ePkmnModsStyle ePkmnMod" + MODS[i][1], show: mod.shown, text: mod.text }],
+                children: [{ class: "ePkmnModsStyle ePkmnMod" + MODS[i][1], show: mod.shown, text: mod.text, squeezeText: SQUEEZED_STAT_TEXT }],
             })),
             {
                 children: [{ transition: "fade", show: view.speedShown, style: slot.styles.text, class: "speed_comparison", text: slot.speed.label }],
@@ -230,7 +235,7 @@ function slotNodes(view: Gen1EnemyTeam, slot: Gen1EnemySlot): EnemyNode {
 /** `enemy_graphic.vue`'s elements inside its root `<div>`. */
 export function enemyTeamLayout(view: Gen1EnemyTeam): EnemyChild[] {
     return [
-        { class: "trainerLabel", text: view.trainer },
+        { class: "trainerLabel", text: fitTrainerHeader(view.trainer, 20) },
         { class: "tinted-box", style: [view.crop, { "--url": "url(images/ui/opponent.svg)" }] },
         { class: "enemyGraphic", children: view.slots.map((slot) => slotNodes(view, slot)) },
         view.art === null ? null : { key: "1", style: "position: absolute;", children: [{ tag: "img", class: "canvas", src: view.art }] },

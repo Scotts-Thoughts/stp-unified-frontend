@@ -69,6 +69,8 @@ export default defineComponent({
                 // 966px table, less the 19px header and the first row's 1px. Only Mew (60 rows) overflows;
                 // its font stays about 15px, as gen1's own Mew rule had it.
                 fit: { containerHeight: 946, lineHeight: 20, fontSize: 16, shrinkFactor: 0.25, normalFromCss: true },
+                // Webcam Mode: images/ui/movepool.svg's bottom border at 1037, the 966px table of style.css.
+                webcam: this.settings.right_panel.webcam_mode ? { frameBottom: 1037, tableHeight: 966 } : undefined,
                 groups: [
                     { rows: this.moves.level.map((x, index) => row(x, x.Level, index === 0)), struck: this.struck.everywhere },
                     { rows: this.moves.tmhm.map((x) => row(x, x.tmhm)), struck: this.struck.machines },

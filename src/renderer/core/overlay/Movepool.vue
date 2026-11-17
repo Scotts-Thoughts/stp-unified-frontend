@@ -24,13 +24,19 @@
             </template>
         </tbody>
     </table>
-    <slot></slot>
+    <slot v-if="!artCut"></slot>
+    <template v-else>
+        <art-piece :extra="artCut.top"><slot></slot></art-piece>
+        <art-piece :extra="artCut.bottom"><slot></slot></art-piece>
+    </template>
     <div v-if="!view.titleFirst" :class="view.titleClass">{{ view.title }}</div>
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from "vue";
+import { defineComponent, type PropType, type StyleValue } from "vue";
 import { movepoolFitStyle } from "../logic/movepoolFit";
+import { webcamFrameShift } from "../logic/webcamMode";
+import { ArtPiece } from "./ArtPiece";
 import type { MovepoolView } from "./movepoolView";
 
 /**
@@ -43,9 +49,14 @@ import type { MovepoolView } from "./movepoolView";
  * each `style.css` and the parity harness key on them. The cross-out stays an inline style for
  * the same reason: the harness keys elements by their classes. Every row can be crossed out, and
  * fades over 1.5 s either way.
+ *
+ * In Webcam Mode (`view.webcam`, `core/logic/webcamMode.ts`) the table is shortened and the art is drawn twice, as the
+ * Splits panel draws its own: cut just above its bottom border, and that border moved up to meet the cut. With Webcam
+ * Mode off the element tree is what it was.
  */
 export default defineComponent({
     name: "Movepool",
+    components: { ArtPiece },
     props: {
         view: { type: Object as PropType<MovepoolView>, required: true },
     },
@@ -61,9 +72,28 @@ export default defineComponent({
                 ? { outline: "2px solid #000" }
                 : { "background-color": this.view.headerColor, outline: "2px solid #000" };
         },
+        /** How far up the table's bottom and the art's bottom border move in Webcam Mode (0: off). */
+        webcamShift(): number {
+            const webcam = this.view.webcam;
+            return webcam ? webcamFrameShift(webcam.frameBottom) : 0;
+        },
         tableStyle(): string | undefined {
             const rows = this.view.groups.reduce((sum, group) => sum + group.rows.length, 0);
-            return movepoolFitStyle(rows, this.view.fit);
+            const shift = this.webcamShift;
+            if (shift === 0 || !this.view.webcam) return movepoolFitStyle(rows, this.view.fit);
+            const fit = { ...this.view.fit, containerHeight: this.view.fit.containerHeight - shift };
+            const rowStyle = movepoolFitStyle(rows, fit, true) ?? "";
+            return `${rowStyle} height: ${this.view.webcam.tableHeight - shift}px;`.trim();
+        },
+        /** The art's two pieces in Webcam Mode, else `null` (the slot as the generation wrote it). */
+        artCut(): { top: StyleValue; bottom: StyleValue } | null {
+            const webcam = this.view.webcam;
+            const shift = this.webcamShift;
+            if (!webcam || shift === 0) return null;
+            return {
+                top: { "clip-path": `inset(0 0 ${1080 - (webcam.frameBottom - shift)}px 0)` },
+                bottom: { "clip-path": `inset(${webcam.frameBottom}px 0 0 0)`, transform: `translateY(-${shift}px)` },
+            };
         },
     },
 });

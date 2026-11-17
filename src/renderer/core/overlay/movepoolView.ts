@@ -54,6 +54,12 @@ export interface MovepoolView {
     headerColor?: string;
     /** The generation's normal row size and panel height. */
     fit: MovepoolFit;
+    /**
+     * Set only while Webcam Mode is on (`core/logic/webcamMode.ts`): the y of the inner edge of the art's bottom
+     * border in its 1920×1080 picture, and the table's height in its `style.css`. The table, its rows and the art's
+     * bottom border all move up to leave the bottom right corner free.
+     */
+    webcam?: { frameBottom: number; tableHeight: number };
     /** Row groups in display order (level, form, TM/HM, tutor). */
     groups: MovepoolGroup[];
 }

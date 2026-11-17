@@ -9,6 +9,7 @@ import { ENEMY_STAT_LABELS, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotV
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { movePowerOf, orderSlots, predictGen2, SendOutOrderCache, type SendOutMon } from "~/core/logic/sendOutOrder";
+import { fitTrainerHeader } from "~/core/logic/trainerHeader";
 
 /** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
 const liveOrder = new SendOutOrderCache();
@@ -307,7 +308,7 @@ function slotNodes(view: EnemyTeamView<Gen2EnemySlot>, slot: Gen2EnemySlot): Ene
 /** The panel inside the overlay's "Battle Graphic" branch. */
 export function enemyTeamLayout(view: EnemyTeamView<Gen2EnemySlot>): EnemyChild[] {
     return [
-        { class: "trainerLabel", text: view.trainer },
+        { class: "trainerLabel", text: fitTrainerHeader(view.trainer, 23) },
         { class: "colored-image", style: [view.crop, { "--url": "url(images/gen2/ui/opponent.svg)" }] },
         ...view.slots.map((slot): EnemyNode => ({
             children: [{ tag: "img", show: slot.speedPictureShown, class: ["canvas", slot.speed.svgClass], src: `images/gen2/ui/speed_comp/${rowOf(slot)}.svg` }],

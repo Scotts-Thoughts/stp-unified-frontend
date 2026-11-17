@@ -41,7 +41,7 @@ const TAG = "[StyleSettingsManager]";
 /** Reads every species file. Idempotent; the module's `prepare()`. */
 export async function loadGen3StyleDefaults(): Promise<void> {
     if (defaults) return;
-    const loaded = await loadStyleFiles(styleFiles);
+    const loaded = await loadStyleFiles(styleFiles, SOURCE_DIR);
     defaults = loaded;
 }
 

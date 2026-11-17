@@ -69,8 +69,13 @@ const api = {
   settings_dir: () => invoke('settings_dir'),
   /** The folder `./splits` and `./storage` are resolved against (plan 1.7). */
   app_root: () => invoke('app_root'),
-  /** `app.isPackaged`; the legacy style managers' dev/prod switch (core/env.ts). */
+  /** `app.isPackaged`; the legacy style managers' dev/prod switch (core/env.ts). True in Cutter mode. */
   is_packaged: () => invoke('is_packaged'),
+  /**
+   * Cutter mode only (src/main/cutter.ts `liveStyleFiles`): a generation's style
+   * files as they are in this checkout's source now, or null. Null outside Cutter mode.
+   */
+  cutter_style_files: cutterArg('cutter-mode') ? (sourceDir) => invoke('cutter:style_files', sourceDir) : null,
   /** Resolves once the overlay window is on screen (src/main/index.ts); rejects in Cutter mode, which has no handler. */
   window_shown: () => invoke('window:shown'),
   /** Taskbar icon: a file under resources/icons/, or "" for the portrait. Fire and forget. */

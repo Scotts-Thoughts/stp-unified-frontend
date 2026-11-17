@@ -29,12 +29,18 @@ export interface MovepoolFit {
     normalFromCss?: boolean;
 }
 
-/** The table's inline style for `rows` move rows, or `undefined` for none. */
-export function movepoolFitStyle(rows: number, fit: MovepoolFit): string | undefined {
+/**
+ * The table's inline style for `rows` move rows, or `undefined` for none.
+ *
+ * `fontToRow` (Webcam Mode, where the panel is about a third shorter) also keeps the font no larger than the row at
+ * the generation's normal font-to-row ratio, so a generation whose font never shrinks (gen3) can't overlap its rows.
+ */
+export function movepoolFitStyle(rows: number, fit: MovepoolFit, fontToRow = false): string | undefined {
     if (rows * fit.lineHeight <= fit.containerHeight) {
         return fit.normalFromCss ? undefined : `line-height: ${fit.lineHeight}px; font-size: ${fit.fontSize}px;`;
     }
     const lineHeight = fit.containerHeight / rows;
-    const fontSize = Math.min(fit.fontSize, fit.fontSize * Math.pow(lineHeight / (fit.fontFrom ?? fit.lineHeight), fit.shrinkFactor));
+    let fontSize = Math.min(fit.fontSize, fit.fontSize * Math.pow(lineHeight / (fit.fontFrom ?? fit.lineHeight), fit.shrinkFactor));
+    if (fontToRow) fontSize = Math.min(fontSize, lineHeight * (fit.fontSize / fit.lineHeight));
     return `line-height: ${lineHeight}px; font-size: ${fontSize}px;`;
 }

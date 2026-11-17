@@ -11,6 +11,7 @@ import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel
 import { twoTrainerHeader, twoTrainerHeaderStyle } from "~/core/logic/twoTrainerBattle";
 import { gen3PreviewOf, trainerOptions, type PreviewPokemon, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen3, SendOutOrderCache, strongestMove, type SendOutMon, type SendOutMove, type SendOutPlayer } from "~/core/logic/sendOutOrder";
+import { fitTrainerHeader } from "~/core/logic/trainerHeader";
 
 /** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
 const liveOrder = new SendOutOrderCache();
@@ -335,7 +336,7 @@ function slotNodes(view: Gen3EnemyTeam, slot: Gen3EnemySlot): EnemyChild[] {
 /** The panel inside the overlay's "Battle Graphic" branch. */
 export function enemyTeamLayout(view: Gen3EnemyTeam): EnemyChild[] {
     return [
-        { class: "enemy_trainer_name", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 24, 20) : undefined, text: view.trainer },
+        { class: "enemy_trainer_name", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 24, 20) : undefined, text: view.double ? view.trainer : fitTrainerHeader(view.trainer, 20) },
         { class: "colored-image ds", style: [view.crop, { "--url": "url(images/gen3/ui/enemy.svg)" }] },
         ...view.slots.map((slot): EnemyNode => ({ class: "enemyGraphic", children: slotNodes(view, slot) })),
     ];

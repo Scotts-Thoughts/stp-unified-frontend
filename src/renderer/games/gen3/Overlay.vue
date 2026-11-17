@@ -327,11 +327,11 @@
                 </div>
                 <div v-else-if="(right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && ((g3stateVariable == `Battle` || g3stateVariable == `To Battle`) && game.properties.battle.type.trainer.value == true)" key="4">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <div v-else-if="right_panel_mode == 'Splits'" key="5">
                     <div v-if="splitsView">
@@ -346,7 +346,7 @@
             </transition>
             <transition name="fadeDelayed">
                 <div v-if="((g3stateVariable == `Battle` || g3stateVariable == `To Battle`) && g3trainerEnemySelector(this.opponent) == 1) && showSpecialTrainerGraphics == true && batt.type.trainer.value == true && !second_trainer && (right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers')" style="position: absolute;" key="1">
-                    <img class="canvas" :src="specialTrainerGraphics()">
+                    <img class="canvas" :src="specialTrainerGraphics()" :style="webcam_trainer_art_style">
                 </div>
             </transition>
 
@@ -436,6 +436,7 @@ import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
 import { confirmReset, isHallOfFameReset } from "~/core/logic/resetGuard";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
+import { cropHeight, webcamArtStyleOrHidden } from "~/core/logic/webcamMode";
 import { formatStage } from "~/core/logic/statFormat";
 import { gen3OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
 import { gen3IsPhysicalType, moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
@@ -1012,6 +1013,8 @@ export default defineComponent({
             show_wild_battles:   MyStorage['show_wild_battles']   ?? readRightPanelMode(MyStorage['right_panel']).wild,
             // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
             send_out_order:      MyStorage['send_out_order']      ?? true,
+            // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
+            webcam_mode:         MyStorage['webcam_mode']         ?? false,
             // The trainer the "Trainers" right panel previews (a trainer-table id), and the picker's search text.
             examined_trainer:    MyStorage['examined_trainer']    ?? "",
             search_trainers:     "",
@@ -1134,6 +1137,7 @@ export default defineComponent({
                 "automatic_post_battle_splits",
                 "show_wild_battles",
                 "send_out_order",
+                "webcam_mode",
                 "examined_trainer",
                 "no_counters",
                 "legacy_state",
@@ -1963,6 +1967,14 @@ export default defineComponent({
     },
 
     computed: {
+        /**
+         * Webcam Mode's place for the special trainer picture (core/logic/webcamMode.ts): its own shape, under the
+         * enemy team, or hidden when there is no room; nothing with Webcam Mode off.
+         */
+        webcam_trainer_art_style() {
+            if (!this.webcam_mode) return undefined
+            return webcamArtStyleOrHidden(this.specialTrainerGraphics(), cropHeight(this.battlePokemonCrop()))
+        },
         // The settings panel's description (settingsPanel.ts). It reads nothing reactive itself, so it is
         // built once; the panel component reads the overlay through its closures as it renders.
         settingsPanel() {
@@ -2083,7 +2095,8 @@ export default defineComponent({
                     power: this.movepoolPower(x), accuracy: x.Accuracy, pp: x.PP,
                 })) },
             ]
-            if (this.tutor_moves) {
+            // Webcam Mode leaves the tutor rows out, so the shorter panel keeps the rest readable.
+            if (this.tutor_moves && !this.webcam_mode) {
                 groups.push({ struck: struck.machines, rows: rows.tutor.map(x => ({
                     way: "Tutor", move: this.move_name(x.Move), type: x.Type, typeColor: `var(--${prefix}${x.Type?.toLowerCase()})`,
                     power: x.Power, accuracy: x.Accuracy, pp: x.PP,
@@ -2098,6 +2111,8 @@ export default defineComponent({
                 // The 1001px table less the 17px header and the first row's 1.5px; rows at 19px, and a long
                 // list keeps its 13px font.
                 fit: { containerHeight: 982, lineHeight: 19, fontSize: 13, shrinkFactor: 0 },
+                // Webcam Mode: images/gen3/ui/movepool.svg's bottom border at 1058, the 1001px table of style.css.
+                webcam: this.webcam_mode ? { frameBottom: 1058, tableHeight: 1001 } : undefined,
                 groups,
             }
         },
@@ -2118,6 +2133,7 @@ export default defineComponent({
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
                 art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen3/ui/splits.svg)"], frameBottom: 811 },
+                webcam: this.webcam_mode,
             }
         },
         /**
