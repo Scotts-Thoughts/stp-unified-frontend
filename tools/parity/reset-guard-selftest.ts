@@ -5,7 +5,7 @@
  *
  *   npm run parity:reset-guard
  */
-import { clockJumped, confirmReset, emulatorClockBefore, noteEmulatorClock, type ResetGuardDeps } from "../../src/renderer/core/logic/resetGuard.ts";
+import { clockJumped, confirmReset, emulatorClockBefore, HALL_OF_FAME_RESET_WINDOW_MS, isHallOfFameReset, noteEmulatorClock, startHallOfFameReset, type ResetGuardDeps } from "../../src/renderer/core/logic/resetGuard.ts";
 import { latestTimePerTrainer } from "../../src/renderer/core/logic/splitComparison.ts";
 
 let failures = 0;
@@ -77,6 +77,24 @@ check("the check is free again afterwards", await run(null, null), true);
     ];
     const out = latestTimePerTrainer(rows, (t) => t === "Rival");
     check("comparison keeps every Rival and merges refights", out.map((r) => `${r.trainer}=${r.time}`).join(), "Rival=1,Leader Roark=6,Elite Four Aaron=4,Rival=5");
+}
+
+{
+    // The champion's reset (gen4 HG/SS: both Champion Lance wins). One reset trips detection more than once.
+    const hof = { hallOfFameReset: true, hall_of_fame_reset_until: 0 };
+    check("hall of fame: the first reset after the champion is not counted", isHallOfFameReset(hof, 1000), true);
+    check("hall of fame: the same reset tripping again 600 ms later is not counted", isHallOfFameReset(hof, 1600), true);
+    check("hall of fame: nor 3 s later (after the 2 s fault block)", isHallOfFameReset(hof, 4000), true);
+    check("hall of fame: a real reset after the window counts", isHallOfFameReset(hof, 1000 + HALL_OF_FAME_RESET_WINDOW_MS + 1), false);
+
+    // The Hall of Fame room's trip used to clear the exemption, so the next trip, read off that map, counted.
+    const room = { hallOfFameReset: true, hall_of_fame_reset_until: 0 };
+    startHallOfFameReset(room, 5000);
+    check("hall of fame: a trip off the room after one in it is not counted", isHallOfFameReset(room, 5400), true);
+    check("hall of fame: the room's trip disarms, so a later real reset counts", isHallOfFameReset(room, 5000 + HALL_OF_FAME_RESET_WINDOW_MS + 1), false);
+
+    const none = { hallOfFameReset: false, hall_of_fame_reset_until: 0 };
+    check("hall of fame: without a champion win a reset counts", isHallOfFameReset(none, 1000), false);
 }
 
 console.log(failures === 0 ? "\nreset guard ok" : `\n${failures} failure(s)`);

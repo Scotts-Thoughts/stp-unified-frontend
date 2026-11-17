@@ -1237,7 +1237,7 @@
       "bodies": {
         "gen2": "302cc90d4514",
         "gen3": "5e94a809b23e",
-        "gen4": "e9106638e80b",
+        "gen4": "1e97b0d8e6e4",
         "gen5": "01fecc821851"
       }
     },
@@ -1330,10 +1330,10 @@
     {
       "section": "methods",
       "name": "reset_detected",
-      "reason": "quirk: only gens 3 and 4 have several detection sites to share. gen3 has no disallow_faults window and checks run_complete; gen4 has the window and game_over, because D/P and Platinum never set run_complete; gen4 also passes Super Shuckie's emulated clock (emulatorClockBefore) because its games reload the save at boot, so memory can't tell a resume from a reset.",
+      "reason": "quirk: only gens 3 and 4 have several detection sites to share. gen3 has no disallow_faults window and checks run_complete; gen4 has the window and game_over, because D/P and Platinum never set run_complete; gen4 also passes Super Shuckie's emulated clock (emulatorClockBefore) because its games reload the save at boot, so memory can't tell a resume from a reset. Both use isHallOfFameReset for the champion's reset (a window, since one reset trips detection more than once).",
       "bodies": {
-        "gen3": "bd924e94335d",
-        "gen4": "7711ed0b76cf"
+        "gen3": "81f57b56885d",
+        "gen4": "0743cb079261"
       }
     },
     {

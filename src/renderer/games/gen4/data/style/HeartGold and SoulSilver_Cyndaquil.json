@@ -1,1 +1,10 @@
-{}
+{
+  "imageScale": 0.68,
+  "imageYOffset": -61,
+  "imageXOffset": 43,
+  "overlay_color": "#f6cd48",
+  "ui_saturation": 1.1,
+  "backgroundScale": 154,
+  "backgroundYOffset": -55,
+  "selected_evolution_species": "Cyndaquil"
+}

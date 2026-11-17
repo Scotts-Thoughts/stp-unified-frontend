@@ -434,7 +434,7 @@ import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
-import { confirmReset } from "~/core/logic/resetGuard";
+import { confirmReset, isHallOfFameReset } from "~/core/logic/resetGuard";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { formatStage } from "~/core/logic/statFormat";
 import { gen3OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
@@ -995,6 +995,7 @@ export default defineComponent({
             resetCounter:        true,
             game_over:           false,
             hallOfFameReset:     false,
+            hall_of_fame_reset_until: 0, // see isHallOfFameReset (core/logic/resetGuard.ts)
             finished_logs:       false,
             pb_time:             "None",
             split_logStr:        "",
@@ -5621,13 +5622,14 @@ export default defineComponent({
                 this.attempt_number++
             }
             this.hallOfFameReset = false;
+            this.hall_of_fame_reset_until = 0;
             this.newRun();
             // this.timer.startTime(this.timer_startTimeOffset);
             if (this.set_rom_starter_automatically) { this.update_rom_starter_and_intro_mon(); }
         },
         // What every reset detection below does. A soft reset clears the party (RegisterRamReset in the decompilations'
-        // main.c), which is why the state code watches the same property. The credits end in a soft reset, so the first
-        // one after the champion isn't counted, and neither is one after a finished run, as in the other generations.
+        // main.c), which is why the state code watches the same property. The credits end in a soft reset, so that reset
+        // (every trip of it, isHallOfFameReset) isn't counted, and neither is one after a finished run, as in the other generations.
         // The RESET marker is the state handler's (both callbacks null), through the same check.
         async reset_detected() {
             if (this._reset_checking) return; // the legacy mapper's reset list can match twice on the way down
@@ -5639,10 +5641,7 @@ export default defineComponent({
                 this._reset_checking = false;
             }
             if (!real) return;
-            if (this.hallOfFameReset == true) {
-                this.hallOfFameReset = false;
-                return;
-            }
+            if (isHallOfFameReset(this)) return; // the credits' reset, however many times it trips detection
             if (this.run_complete == true && this.league_rematches == false) return;
             if (this.no_counters == false) {
                 this.playerResets++;
@@ -7159,6 +7158,10 @@ export default defineComponent({
                 // console.log('Starting log process')
                 let trainer = this.opponent
                 let id = this.opponentId
+                // Armed before the split code below, which has no error catching (known-legacy-bugs.md #165).
+                if (this.game_data.champion.includes(trainer)) {
+                    this.hallOfFameReset = true;
+                }
                 let gameName = this.game_data.gameName == 'Emerald' ? 'E' : this.game_data.gameName == 'Ruby & Sapphire' ? 'RS' : this.game_data.gameName == 'FireRed and LeafGreen' ? 'FRLG' : this.game_data.gameName;
                 let gameName_path = this.game_data.gameName;
                 const splitFileName = this.getSplitFileName();
@@ -7206,10 +7209,6 @@ export default defineComponent({
                     }
                 }
            
-                if (this.game_data.champion.includes(trainer)) {
-                    this.hallOfFameReset = true;
-                }
-
                 //stop timer
                 if (this.game_data.finalBattle.includes(trainer)) {
                     if ((this.game.properties.battle.trainer.opponent?.value == "CHAMPION_FIRST_CHARMANDER" || this.game.properties.battle.trainer.opponent?.value == "CHAMPION_FIRST_SQUIRTLE" || this.game.properties.battle.trainer.opponent?.value == "CHAMPION_FIRST_BULBASAUR") 

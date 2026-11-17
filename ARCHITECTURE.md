@@ -854,6 +854,14 @@ machine that built it.
   reset the game does itself, and loading a replay moves it to the replay's position, so a jump (backwards, or more
   than 8x fast-forward explains) drops the reset. Needs the poll, so Shuckie Timer or Shuckie Counters on. A real reset counts about half a second late. Don't drop resets because a replay is *playing*
   (`is_playing_back`): the overlay is run against played-back replays, and the harness's Shuckie stand-in always says one is.
+- **The champion's reset.** Beating the champion ends in a reset (the game's own after the credits, pokeheartgold
+  `game_clear.c` `OS_ResetSystem`, or the runner's to skip them), which isn't counted. Where the champion isn't the
+  last battle (HG/SS's two Champion Lance wins, Emerald's Wallace) the run goes on, so only that reset may be let
+  through. One reset can trip detection more than once, so the exemption is a window (`isHallOfFameReset` in
+  `core/logic/resetGuard.ts`, gens 3-4): the first reset after the champion opens it, and every reset in the next
+  15 s is the same one. It used to be one-shot, and HG/SS's Hall of Fame room check cleared it without blocking, so
+  a second trip counted (both Lance wins of h-pidgeot-line-2, 2026-11-15). The champion check is armed before the
+  battle-won handler's split code, which can throw (known-legacy-bugs.md #165).
 - **Comparing against a previous run.** `core/logic/splitComparison.ts` and `core/stores/useReplaySplitsStore.ts`.
 
 ## 10. Invariants

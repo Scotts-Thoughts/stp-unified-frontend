@@ -132,3 +132,35 @@ function ignored(reason: string): false {
     console.log(`[reset] not counted: ${reason}.`);
     return false;
 }
+
+/**
+ * How long the champion's reset stays exempt once it is first seen. Beating the champion ends in a reset: the game's
+ * own when the credits are over (pokeheartgold `game_clear.c`, `Task_GameClear`: `OS_ResetSystem`), or the runner's to
+ * skip them after the Hall of Fame save. One reset can trip detection more than once on its way through boot (HG/SS's
+ * save variables are read through a pointer that is rebuilt at boot, so they read zero and junk before the save is
+ * back), and the trips are up to about a second apart. The exemption used to be used up by the first trip, so a later
+ * one counted (h-pidgeot-line-2, both Champion Lance wins, 2026-11-15). No real reset can follow a reset this soon:
+ * the title screen alone takes longer.
+ */
+export const HALL_OF_FAME_RESET_WINDOW_MS = 15_000;
+
+/** What a generation keeps for the champion's reset: armed when the champion is beaten, then the window's end. */
+export type HallOfFameResetState = { hallOfFameReset: boolean; hall_of_fame_reset_until: number };
+
+/** The game is in the Hall of Fame or its credits, so the reset coming is the champion's: open the window now. */
+export function startHallOfFameReset(state: HallOfFameResetState, now = Date.now()): void {
+    state.hallOfFameReset = false;
+    state.hall_of_fame_reset_until = now + HALL_OF_FAME_RESET_WINDOW_MS;
+}
+
+/**
+ * Whether a confirmed reset is the champion's, so it isn't counted. The first one after the champion's win uses up
+ * the arming and opens the window; every reset detected until the window closes is the same reset.
+ */
+export function isHallOfFameReset(state: HallOfFameResetState, now = Date.now()): boolean {
+    if (state.hallOfFameReset) {
+        startHallOfFameReset(state, now);
+        return true;
+    }
+    return now < state.hall_of_fame_reset_until;
+}

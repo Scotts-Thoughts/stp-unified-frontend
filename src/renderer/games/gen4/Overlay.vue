@@ -394,7 +394,7 @@ import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
-import { confirmReset, emulatorClockBefore, noteEmulatorClock } from "~/core/logic/resetGuard";
+import { confirmReset, emulatorClockBefore, isHallOfFameReset, noteEmulatorClock, startHallOfFameReset } from "~/core/logic/resetGuard";
 import ConfirmButton from "~/core/overlay/ConfirmButton.vue";
 import SettingsPanel from "~/core/settings/SettingsPanel.vue";
 import Movepool from "~/core/overlay/Movepool.vue";
@@ -1071,6 +1071,7 @@ export default defineComponent({
             resetCounter             : true,
             game_over                : false,
             hallOfFameReset          : false,
+            hall_of_fame_reset_until : 0, // see isHallOfFameReset (core/logic/resetGuard.ts)
             finished_logs            : false,
             pb_time                  : "None",
             split_logStr             : "",
@@ -4587,10 +4588,7 @@ export default defineComponent({
             this.disallow_faults_function()
             const before = emulatorClockBefore() // taken now: Super Shuckie's clock from before a replay could have loaded
             if (!allowed || !(await confirmReset(cameBack, undefined, before))) return
-            if (this.hallOfFameReset == true) {
-                this.hallOfFameReset = false
-                return
-            }
+            if (isHallOfFameReset(this)) return
             this.playerResets++
             this.sendObsChapterMarker("RESET")
             if (this.shuckie_counters) { this.incrementEmulatorCounter("playerResets") }
@@ -4602,6 +4600,7 @@ export default defineComponent({
             this.run_complete = false
             this.game_over = false
             this.hallOfFameReset = false
+            this.hall_of_fame_reset_until = 0
             this.starter_received = false,
 
             this.kanto_badges = false
@@ -7537,7 +7536,10 @@ export default defineComponent({
             // well inside a second of a real reset, so how long it was gone says nothing.
             const hgss_reset = () => {
                 if (this.game.properties.overworld.map_name.value == 'Pokemon League - Map 7') {
-                    this.hallOfFameReset = false // the Hall of Fame room is the one reset this exception already covers
+                    // The Hall of Fame room: the champion's reset. It used to clear the exemption and return, so when
+                    // this reset tripped detection again a moment later, off this map, that trip counted. Now the
+                    // window covers those trips too (isHallOfFameReset).
+                    startHallOfFameReset(this)
                     return
                 }
                 this.reset_detected(saveDataNeverTells)
@@ -8121,6 +8123,14 @@ export default defineComponent({
                 let gameName = 'Platinum'
                 let game_name = 'Platinum'
                 if (trainer == 'Pokemon Trainer -' || trainer == null || trainer == undefined) { return }
+                // Armed before the split code below, which has no error catching (known-legacy-bugs.md #165): a throw
+                // there would skip this and let the champion's reset count.
+                if (this.game_data.champion.includes(trainer)) {
+                    this.hallOfFameReset = true;
+                    if (this.selected_game == "HeartGold and SoulSilver") {
+                        this.kanto_badges = true;
+                    }
+                }
                 if (this.game.properties.meta.game_name.value == 'HeartGold and SoulSilver') {
                     gameName = 'HGSS'
                     game_name = 'HeartGold and SoulSilver'
@@ -8231,13 +8241,6 @@ export default defineComponent({
                     if (this.automatic_post_battle_splits == true && !skipForHGSSKantoLeader &&
                         !trainer_name.startsWith("Rival") && !trainer_name.startsWith("Mars") && !trainer_name.startsWith("Jupiter") && !trainer_name.startsWith("Saturn") && !trainer_name.startsWith("Cyrus") && (trainer_name != "Passerby Boy")) {
                         this.show_post_battle_splits()
-                    }
-                }
-        
-                if (this.game_data.champion.includes(trainer)) {
-                    this.hallOfFameReset = true;
-                    if (this.selected_game == "HeartGold and SoulSilver") {
-                        this.kanto_badges = true;
                     }
                 }
 
