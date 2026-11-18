@@ -803,6 +803,8 @@ it out of the package.
 
 **Building the Windows package.** `npm run build:win`, or `npm run build:unpack` and then
 `npx electron-builder --win --prepackaged dist/win-unpacked` to zip a tree you already have.
+**Scott runs the overlay from `dist\win-unpacked\stp-overlay.exe`** (2026-11-17): a build made for him to use must
+leave the exe there (both commands above do). Close that exe before building, since the pack replaces the folder.
 The zip is compressed (`build.compression: "normal"`, since 2026-10-14; it was `store`). The images are
 already compressed and stay their size, but Electron and the code drop from about 308 MB to about 121 MB.
 

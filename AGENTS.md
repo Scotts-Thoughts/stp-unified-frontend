@@ -23,9 +23,27 @@ To read one section, run `grep -n '^## ' ARCHITECTURE.md` for the starting lines
 
 ## Rules
 
-- **Don't commit or push.** Leave changes uncommitted for Scott to review, unless Scott asks for a commit.
-  Where the docs say two things need separate commits, do one, stop, and tell Scott so it can be committed
-  before you start the other.
+- **One working copy, no worktrees.** Always work in this folder, on the branch it is on, even when other agents
+  are editing files here at the same time. Never make a git worktree, a copy of the repo or a new branch to work
+  in. Other agents' half-finished edits are normal: leave them alone and don't revert files you didn't change.
+  (The HEAD build that ARCHITECTURE §12 uses for before/after captures is a read-only baseline, not a place to
+  work; delete it when the capture is done.)
+- **Write commit notes when you finish.** When your task is done, append your notes to `commitnotes.md` (next to
+  this file): a short heading for the task, then a few plain bullets saying what changed and why, what you
+  verified and what you didn't. Add to the file; never rewrite or delete other agents' notes.
+- **Don't commit or push unless Scott says to, and don't ask.** Leave changes uncommitted. Never ask Scott whether
+  to commit; he will tell you when. Where the docs say two things need separate commits, do one, stop, and tell
+  Scott so it can be committed before you start the other.
+- **When Scott says to commit:**
+  1. Ask Scott which version this commit is, offering the three next versions worked out from the one in
+     `package.json`. For `3.4.1` that is `4.0.0`, `3.5.0` or `3.4.2`. Then bump once to the one he picks:
+     `npm version major|minor|patch --no-git-tag-version` updates `package.json` and `package-lock.json`
+     together.
+  2. Commit everything Scott asked for. The commit message is the new version as the title (`v3.4.2`), then
+     everything in `commitnotes.md` as the description.
+  3. Empty `commitnotes.md` (leave the file in place) and include that in the same commit, so the next agent
+     starts fresh.
+  Push only if Scott asks for that too.
 - **Big jobs start with a short plan.** For a refactor, a change across several generations, or anything over an
   hour of work: say what you will change and how you'll verify it, then wait for approval.
 - **Never read a giant file whole.** The four `games/gen{2,3,4,5}/Overlay.vue` files (7k–10k lines) and the
