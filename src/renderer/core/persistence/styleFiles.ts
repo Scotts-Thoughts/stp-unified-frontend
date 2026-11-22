@@ -26,12 +26,19 @@ export async function loadStyleFiles(
 }
 
 /**
- * In the Cutter editor (src/main/cutter.ts), the style files as they are in the checkout's
- * source now: what the user last styled on their computer, which the build in use may
- * predate. Null anywhere else, or when the main process cannot say.
+ * The style files as they are in the checkout's source now: what the user last styled on
+ * their computer, which the build in use may predate. Gens 2-5 write a style edit back into
+ * those files in any unpackaged run (dev mode, core/env.ts), but a built bundle holds them as
+ * they were at build time, so without this a refresh of a built-from-source app lost every edit
+ * since the build (gens 2 and 4 read only the bundled defaults and the `user_` overrides back),
+ * and a species styled for the first time, with no file in the bundle at all, came back unstyled.
+ * The Cutter editor asks its own handler (src/main/cutter.ts). Null in a packaged build, or
+ * when the main process cannot say.
  */
 async function liveStyleFiles(sourceDir: string): Promise<Record<string, unknown> | null> {
-    const ask = (window as unknown as { api?: { cutter_style_files?: ((dir: string) => Promise<unknown>) | null } }).api?.cutter_style_files;
+    type Ask = ((dir: string) => Promise<unknown>) | null | undefined;
+    const api = (window as unknown as { api?: { cutter_style_files?: Ask; source_style_files?: Ask } }).api;
+    const ask = api?.cutter_style_files ?? api?.source_style_files;
     if (!ask) return null;
     try {
         const live = await ask(sourceDir);

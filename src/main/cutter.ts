@@ -1,8 +1,8 @@
 import { app, BrowserWindow, ipcMain, session, type NativeImage } from "electron";
-import { readdirSync, readFileSync } from "fs";
 import { connect, type Socket } from "net";
 import path from "path";
 import { registerIpc } from "./ipc";
+import { liveStyleFiles } from "./styleFiles";
 
 /**
  * The overlay as a picture source for the Cutter video editor
@@ -241,32 +241,7 @@ function rendererArgs(args: CutterArgs): string[] {
 function persistLikeAPackage(): void {
   ipcMain.removeHandler("is_packaged");
   ipcMain.handle("is_packaged", () => true);
-  ipcMain.handle("cutter:style_files", (_e, sourceDir: string) => liveStyleFiles(sourceDir));
-}
-
-/**
- * `<checkout>/src/renderer/<sourceDir>/*.json` by file name, each parsed —
- * `null` for a file that says `null` (a style removed) — or null when there is
- * no such folder (a packaged overlay). `sourceDir` is `games/genN/data/style`.
- */
-export function liveStyleFiles(sourceDir: string, appPath = app.getAppPath()): Record<string, unknown> | null {
-  if (!/^games\/gen\d\/data\/style$/.test(sourceDir)) return null;
-  const dir = path.join(appPath, "src", "renderer", ...sourceDir.split("/"));
-  let names: string[];
-  try {
-    names = readdirSync(dir).filter((n) => n.endsWith(".json") && n !== "index.json");
-  } catch {
-    return null;
-  }
-  const out: Record<string, unknown> = {};
-  for (const name of names) {
-    try {
-      out[name.slice(0, -".json".length)] = JSON.parse(readFileSync(path.join(dir, name), "utf8"));
-    } catch {
-      // A file being written as it is read: the bundled one stands in.
-    }
-  }
-  return out;
+  ipcMain.handle("cutter:style_files", (_e, sourceDir: string) => liveStyleFiles(sourceDir, path.join(app.getAppPath(), "src", "renderer")));
 }
 
 /**

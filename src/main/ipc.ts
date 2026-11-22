@@ -5,6 +5,7 @@ import { basename, dirname, join } from "path";
 import { app, dialog, ipcMain, nativeImage, shell, type BrowserWindow } from "electron";
 import { appRoot, rendererSourceRoot, resolveInside, splitsRoot, storageRoot, userDataRoot } from "./paths";
 import { loadSplitComparison } from "./splitComparison";
+import { liveStyleFiles } from "./styleFiles";
 
 /**
  * Everything the renderer used to do with `require("fs")`, `require("path")`,
@@ -198,6 +199,17 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
    * `process.cwd()` (plan 1.6). A packaged build has no source tree to write to and the
    * caller falls back to a user-data override instead.
    */
+  /**
+   * Unpackaged runs only: a generation's style files as they are in the source tree now
+   * (src/main/styleFiles.ts). Style edits are written there (`source:write` above), but a
+   * built renderer bundle holds the files as they were at build time, so the renderer
+   * merges these over its bundled copy; otherwise a refresh lost every edit made since the
+   * last build, and a species' first edit (a new file) was never seen at all. Null in a
+   * packaged build, which keeps its edits as `user_` overrides instead.
+   */
+  ipcMain.handle("source:style_files", (_e, sourceDir: string) =>
+    app.isPackaged ? null : liveStyleFiles(sourceDir, rendererSourceRoot()),
+  );
   ipcMain.handle("source:write", (_e, relative: string, contents: string) => {
     if (app.isPackaged) throw new Error("the renderer source tree is not writable in a packaged build");
     const target = resolveInside(rendererSourceRoot(), relative);
