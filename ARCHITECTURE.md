@@ -756,6 +756,12 @@ keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. 
 - With Evolution on, each family member has its own stored look, so the host carries them all (`family_looks`). Otherwise a refilm would change look at the first evolution.
 - Trap: in a build run from source, the style store keeps only `GEN4_STYLE_PROPERTIES` of a species value (any other field written there is silently dropped; `selected_evolution_species` was, until #189). It lacks `iv_mode` and `manual_ivs`, so those two are not remembered across species changes there (they are in an installed build). A preset still restores them when loaded.
 
+**Style files in an unpackaged run** (2026-11-21). Run from the checkout, gens 2-5 write a style edit into
+`games/genN/data/style/*.json`, which a built bundle holds only as they were at build time. So at load the renderer
+merges the live files over the bundled ones (`core/persistence/styleFiles.ts`, via `source:style_files` in
+`src/main/ipc.ts`, or `cutter:style_files` in the Cutter editor). Without that, gens 2 and 4 lost every style edit
+on a refresh until the next build, and a species' first edit (a file the bundle lacks) came back unstyled.
+
 **Persisted key names are a contract.** Renaming one silently loses a user's settings, and harness oracle 4
 flags it.
 

@@ -76,6 +76,12 @@ const api = {
    * files as they are in this checkout's source now, or null. Null outside Cutter mode.
    */
   cutter_style_files: cutterArg('cutter-mode') ? (sourceDir) => invoke('cutter:style_files', sourceDir) : null,
+  /**
+   * Any unpackaged run (src/main/ipc.ts `source:style_files`): the same live style files, so a
+   * style edit written back into the source survives a refresh of a built app. Null in a
+   * packaged build.
+   */
+  source_style_files: (sourceDir) => invoke('source:style_files', sourceDir),
   /** Resolves once the overlay window is on screen (src/main/index.ts); rejects in Cutter mode, which has no handler. */
   window_shown: () => invoke('window:shown'),
   /** Taskbar icon: a file under resources/icons/, or "" for the portrait. Fire and forget. */
