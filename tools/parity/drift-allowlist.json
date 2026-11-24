@@ -183,11 +183,12 @@
     {
       "section": "computed",
       "name": "hp_tracker_style",
-      "reason": "UNREVIEWED: gen4=gen5 | gen2 (gen2 16L, gen4 16L, gen5 16L)",
+      "reason": "Reviewed 2026-11-24: one rule, core/logic/healthTracker.ts (Pokerus, damaged, status, healthy). The bodies differ only in mapper paths (gen2 hp/maxHp/statusCondition, gens 4-5 stats.hp/stats.hp_max/status_condition) and gen2's lighter damaged colour, kept from its legacy app. gen3 has the same computed (g3stateVariable for the state).",
       "bodies": {
-        "gen2": "b63f8733d974",
-        "gen4": "28931e4fe360",
-        "gen5": "28931e4fe360"
+        "gen2": "7acb3da81f76",
+        "gen3": "250af5bd3b98",
+        "gen4": "18cc673e8dcf",
+        "gen5": "18cc673e8dcf"
       }
     },
     {

@@ -10,7 +10,7 @@
                  mid-run evolutions cross-fade old/new art. No inline opacity here: it would
                  override the styleFade classes, so the fade is left entirely to the transition -->
             <species-art ref="pokemon_art" img-class="pokemon_art" v-bind="species_art_look" transition="styleFade" :art-key="displayedPokemonSpecies" :src="`images/gen4/pokemon/${displayedPokemonSpecies}.webp`"></species-art>
-            <img class="canvas colored-image ds" src="images/gen4/ui/game_area.svg">
+            <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen4/ui/game_area.svg)"></div>
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen4/ui/timer.svg)"></div>
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen4/ui/moveset.svg)"></div>
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen4/ui/moveset.svg)"></div>
@@ -393,6 +393,7 @@ import { faultsLayout, faultsFontSizes, statTiles, expBarLayouts, expBarTiming, 
 import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
+import { healthTrackerStyle } from "~/core/logic/healthTracker";
 import { expProgress } from "~/core/logic/expCurve";
 import { confirmReset, emulatorClockBefore, isHallOfFameReset, noteEmulatorClock, startHallOfFameReset } from "~/core/logic/resetGuard";
 import ConfirmButton from "~/core/overlay/ConfirmButton.vue";
@@ -1872,21 +1873,15 @@ export default defineComponent({
             const evolutionFamily = this.getEvolutionFamily(this.starter);
             return evolutionFamily && evolutionFamily.length > 1;
         },
+        /** The game-area box's colour: Pokerus, damaged, status or healthy (core/logic/healthTracker.ts). */
         hp_tracker_style() {
-            const state = this.game.properties.meta.state.value
-            const hp = this.game.properties.player.team[0].stats.hp.value
-            const hp_max = this.game.properties.player.team[0].stats.hp_max.value
-            const hp_percentage = hp / hp_max
-            const status_condition = this.game.properties.player.team[0].status_condition.value
-            if (state == "Overworld" && hp_percentage != 1) {
-                return "--overlay-color: rgb(255, 98, 98);"
-            }
-            else if (status_condition != null) {
-                return "--overlay-color: rgb(98, 192, 255);"
-            }
-            else {
-                return "--overlay-color: #39b54a;"
-            }
+            const lead = this.game.properties.player.team[0]
+            return healthTrackerStyle({
+                state: this.game.properties.meta.state.value,
+                hp: lead.stats.hp.value, maxHp: lead.stats.hp_max.value,
+                status: lead.status_condition.value,
+                pokerus: lead.pokerus?.value,
+            })
         },
         compare_splits() {
             debugging_mode = false

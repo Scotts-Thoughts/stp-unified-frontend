@@ -11,7 +11,7 @@
                 <div>
                     <species-art ref="pokemon_art" img-class="pokemon_art" v-bind="species_art_look" transition="castformFade" :src="species_art_src"></species-art>
                 </div>
-                <img class="canvas colored-image ds" src="images/gen3/ui/game_area.svg">
+                <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen3/ui/game_area.svg)"></div>
 
                 <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 0px 1px #000000)`" style="--url: url(images/gen3/ui/moveset.svg)"></div>
                 <img class="canvas" src="images/gen3/elements/moveset.webp">
@@ -433,6 +433,7 @@ import { faultsLayout, faultsFontSizes, statTiles, statMods, expBarLayouts, expB
 import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
+import { healthTrackerStyle } from "~/core/logic/healthTracker";
 import { expProgress } from "~/core/logic/expCurve";
 import { confirmReset, isHallOfFameReset } from "~/core/logic/resetGuard";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
@@ -1967,6 +1968,16 @@ export default defineComponent({
     },
 
     computed: {
+        /** The game-area box's colour: Pokerus, damaged, status or healthy (core/logic/healthTracker.ts). */
+        hp_tracker_style() {
+            const lead = this.game.properties.player.team[0]
+            return healthTrackerStyle({
+                state: this.g3stateVariable,
+                hp: lead.hp.value, maxHp: lead.maxHp.value,
+                status: lead.statusCondition.value,
+                pokerus: lead.pokerus?.value,
+            })
+        },
         /**
          * Webcam Mode's place for the special trainer picture (core/logic/webcamMode.ts): its own shape, under the
          * enemy team, or hidden when there is no room; nothing with Webcam Mode off.

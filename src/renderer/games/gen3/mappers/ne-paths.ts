@@ -200,6 +200,8 @@ export const GEN3_NE_READS: readonly string[] = [
     "player.team.0.move4ppUp",
     "player.team.0.nature",
     "player.team.0.personalityValue",
+    // The game-area box turns purple-pink on an infection (core/logic/healthTracker.ts).
+    "player.team.0.pokerus",
     "player.team.0.specialAttack",
     "player.team.0.specialDefense",
     "player.team.0.species",

@@ -348,6 +348,7 @@ import { faultsLayout, faultsFontSizes, statTiles, expBarLayouts, expBarTiming, 
 import { StatTiles } from "~/core/overlay/player/StatTiles";
 import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
+import { healthTrackerStyle } from "~/core/logic/healthTracker";
 import { expCurve, expProgress } from "~/core/logic/expCurve";
 import { confirmReset } from "~/core/logic/resetGuard";
 import { cropHeight, webcamArtStyleOrHidden } from "~/core/logic/webcamMode";
@@ -1655,21 +1656,16 @@ export default defineComponent({
         manualGender() {
             return gen2Gender(clampDvs(this.manual_dvs).atk, this.dexDataCrystal[this.starter]?.gender_ratio)
         },
+        /** The game-area box's colour: Pokerus, damaged, status or healthy (core/logic/healthTracker.ts). */
         hp_tracker_style() {
-            const state = this.game.properties.meta.state.value
-            const hp = this.game.properties.player.team[0].hp.value
-            const hp_max = this.game.properties.player.team[0].maxHp.value
-            const hp_percentage = hp / hp_max
-            const status_condition = this.game.properties.player.team[0].statusCondition.value
-            if (state == "Overworld" && hp_percentage != 1) {
-                return "--overlay-color: rgb(255, 167, 167);"
-            }
-            else if (status_condition != null) {
-                return "--overlay-color: rgb(98, 192, 255);"
-            }
-            else {
-                return "--overlay-color: #39b54a;"
-            }
+            const lead = this.game.properties.player.team[0]
+            return healthTrackerStyle({
+                state: this.game.properties.meta.state.value,
+                hp: lead.hp.value, maxHp: lead.maxHp.value,
+                status: lead.statusCondition.value,
+                pokerus: lead.pokerus?.value,
+                damagedColor: "rgb(255, 167, 167)",
+            })
         },
         examined_trainer_data() {
             var trainer = this.examined_trainer

@@ -237,6 +237,8 @@ export const GEN2_DEPRECATED_READS: readonly string[] = [
     "player.team.0.move4",
     "player.team.0.move4pp",
     "player.team.0.move4ppUp",
+    // The game-area box turns purple-pink on an infection (core/logic/healthTracker.ts).
+    "player.team.0.pokerus",
     "player.team.0.specialAttack",
     "player.team.0.specialDefense",
     "player.team.0.species",

@@ -216,6 +216,8 @@ export const GEN4_STANDARD_READS: readonly string[] = [
     "player.team.0.moves.3.pp",
     "player.team.0.moves.3.pp_up",
     "player.team.0.nature",
+    // The game-area box turns purple-pink on an infection (core/logic/healthTracker.ts).
+    "player.team.0.pokerus",
     "player.team.0.species",
     "player.team.0.statExpAttack",
     "player.team.0.stats",
