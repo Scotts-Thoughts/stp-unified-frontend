@@ -374,6 +374,9 @@ export function gen4SettingsPanel(vm: any, presets?: PresetHost): SettingsPanelS
             title: "Toggles",
             controls: [
                 flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles"),
+                flag(vm, "display.show_ev_gauge", "Show EV Gauge", "show_ev_gauge", {
+                    title: "A gauge under each stat in the regular stats view: one pill per vitamin, then a bar up to the most EVs a stat can hold.",
+                }),
                 flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order"),
                 flag(vm, "display.show_tutor_moves", "Show Tutor Moves", "show_tutor_moves"),
                 // Historical, Webcam or Secondary Screen (core/logic/secondScreen.ts); the old Webcam Mode action kept.

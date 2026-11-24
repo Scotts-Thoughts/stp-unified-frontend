@@ -12,6 +12,8 @@ import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
 import type { StatChild, StatNode } from "~/core/overlay/player/StatTiles";
+import { statEvGauge, type EvGaugeLayout } from "~/core/overlay/player/evGauge";
+import { evGaugeState, evTotal } from "~/core/logic/evGauge";
 
 const frame = (picture: string): FaultsNode => ({
     class: "colored-image ds",
@@ -68,6 +70,9 @@ export function statMods(vm: any): StatChild[] {
     ];
 }
 
+/** Where the coloured stat tiles are, for the EV gauge (core/overlay/player/evGauge.ts). */
+export const evGaugeLayout: EvGaugeLayout = { left: [12, 180], top: [57, 119, 181], width: 163, height: 59, side: 6 };
+
 /**
  * The stat tiles (core/overlay/player/StatTiles.ts): the six labels (the vitamins' names in Vitamins and Comparison
  * modes), then the six stats' value cells for the current mode. `vm` is the overlay; every value is read the way
@@ -86,6 +91,9 @@ export function statTiles(vm: any): StatChild[] {
             ? { key: "label", style, class: cls, text: stat.label }
             : { key: "vitamin", style, class: cls, text: stat.vitamin }] };
     });
+    // The EV gauge under each tile in the regular stats view (core/logic/evGauge.ts).
+    const gauge = mode == "Automatic" && vm.show_ev_gauge != false;
+    const total = gauge ? evTotal(vm.stat_object.map((s: any) => team0[`ev${s.name_ev}`]?.value)) : 0;
     const values = vm.stat_object.map((stat: any): StatNode => {
         const row = stat[`${arrangement}value_row`];
         const value = (key: string, extra: string, text: unknown, id?: string): StatNode =>
@@ -102,7 +110,10 @@ export function statTiles(vm: any): StatChild[] {
             case "IVs":       cells.push(value("iv", " dv", show(vm.get_iv(`${stat.name}`)) + "/31")); break;
             case "EVs":       cells.push(value("ev", " evs", ev())); break;
             case "Vitamins":  cells.push(value("vitamins", " evs", vm.vitamins_remaining(ev()))); break;
-            case "Automatic": cells.push(value("auto", "", vm.get_stat(`${stat.name}`), `${stat.abrv}`)); break;
+            case "Automatic":
+                cells.push(value("auto", gauge ? " ev_gauge_value" : "", vm.get_stat(`${stat.name}`), `${stat.abrv}`));
+                if (gauge) cells.push(statEvGauge(evGaugeState(ev(), "ev", total), evGaugeLayout, stat.value_column, row));
+                break;
             case "Detailed EVs":
                 cells.push(
                     detailed("dev1", "devs", show(ev()) + "/255"),

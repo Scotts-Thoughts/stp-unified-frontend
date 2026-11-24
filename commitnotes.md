@@ -165,3 +165,29 @@
   harness against a baseline. The new button changes the settings panel's top row, so the layout and pixels
   oracles will show it in every generation. `parity:drift` fails on gen5 `load_all_settings`, which this change
   doesn't touch (no Overlay.vue edits).
+
+## EV gauge under the stat tiles (all five generations)
+
+- New: in the regular stats view (Automatic) every stat tile shows a thin EV gauge along its bottom: ten pills
+  (one per vitamin: 10 EVs, or 2,560 stat experience in gens 1-2) then a bar to 255 EVs / 65,535 stat exp, in a
+  1 px see-through case. Blue (the Exp bar's gradient); green once a stat is maxed (252 EVs; 63,002 stat exp in
+  gens 1-2, the first value that gives the last stat point per pokered `CalcStat` / pokecrystal `GetSquareRoot`);
+  gens 3-5 only: yellow from 400 total EVs, red from 490, every gauge grey at 510 (a maxed stat stays green until
+  510). The stat number is 90% size and centred in its tile while the gauge shows. Spec:
+  https://claude.ai/artifact/EqXvguxJi7XBrK1aHyz1Bn
+- Code: `core/logic/evGauge.ts` (fills, colours, limits), `core/overlay/player/evGauge.ts` (the node tree),
+  `core/styles/player.css` (looks); each generation's `statTiles` (gen1 `components/left_panel/stats.vue`) adds it,
+  with the tiles' measured positions in `evGaugeLayout` (`games/genN/playerPanel.ts`); `ev_gauge_value` in each
+  `style.css`. Other stats modes are untouched.
+- New setting "Show EV Gauge" (Toggles, on by default) in all five: saved key `show_ev_gauge` (gen2
+  `this.show_ev_gauge`, as all its keys; gen1 `visualization.left_panel.stats.show_ev_gauge`). Off gives today's tiles.
+- Vitamin limits checked against pokered/pokecrystal item_effects.asm (refused at 25,600, +2,560) and pokeemerald
+  (EV_ITEM_RAISE_LIMIT 100, 510 total); gens 4-5 assumed the same (pokeplatinum's EV constants match).
+- Verified: `npm run typecheck` passes; new `npm run parity:ev-gauge` (26 checks) passes; `parity:presets` and
+  `parity:shortcuts` pass; harness captures with staged EV values for Yellow, Crystal (a synthetic fixture built in
+  scratch from the PokeAByte Crystal mapper, not committed), FireRed, Platinum and Black show each gauge inside its
+  tile, 3 px from the bottom, whole-pixel pills, the digits centred, and the blue, green, yellow and red states. Grey only by self-test.
+- `npm run parity:drift` fails on `load_all_settings` (gen5) on HEAD too, before this change; not touched here.
+- Not verified: other games inside each generation (Red/Blue, Gold/Silver, Ruby/Sapphire/Emerald, D/P, HG/SS,
+  B2/W2) by eye; battle stage markers checked next to the gauge in Platinum only (staged +6/-6, clear of it); no
+  before/after harness diff against baselines (none on this machine).

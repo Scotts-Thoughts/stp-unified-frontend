@@ -79,6 +79,7 @@ export const auto_save_settings = [
     "right_ui",
     "show_wild_battles",
     "send_out_order",
+    "show_ev_gauge",
     "webcam_mode",
     "second_screen_mode",
     "examined_trainer",

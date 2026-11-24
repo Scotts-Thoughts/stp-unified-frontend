@@ -13,6 +13,8 @@ import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
 import type { StatChild, StatNode } from "~/core/overlay/player/StatTiles";
+import { statEvGauge, type EvGaugeLayout } from "~/core/overlay/player/evGauge";
+import { evGaugeState } from "~/core/logic/evGauge";
 
 const frame = (picture: string): FaultsNode => ({
     class: "colored-image ds",
@@ -60,6 +62,9 @@ export const faultsLayout = { frames, labels, counts };
 /** The faults count's font size by digit count (core/logic/faultMode.ts faultFontSize): gen1's, the box being gen1's. */
 export const faultsFontSizes = [75, 65, 44] as const;
 
+/** Where the coloured stat tiles are, for the EV gauge (core/overlay/player/evGauge.ts). */
+export const evGaugeLayout: EvGaugeLayout = { left: [15, 198], top: [72, 134, 196], width: 177, height: 59, side: 6 };
+
 /**
  * The stat tiles (core/overlay/player/StatTiles.ts), one `<div>` per stat: the stage modifier in battle, the label
  * (the vitamin's name in Vitamins mode) and the mode's value cells. `vm` is the overlay; every value is read the
@@ -94,12 +99,17 @@ export function statTiles(vm: any): StatChild[] {
             ({ key, class: `stat_value_style detailed_ev_stat_row_${row} stat_column_${stat.value_column} ${extra}`, text });
         const statExp = () => team0[`statExp${stat.name_stat_exp}`].value;
         const show = toDisplayString;
+        // The stat experience gauge under each tile in the regular stats view (core/logic/evGauge.ts).
+        const gauge = mode == "Automatic" && vm.show_ev_gauge != false;
         switch (mode) {
             case "Base Stats": cells.push(value("base", "", vm.dexDataCrystal[vm.starter][stat.base_stat_path])); break;
             case "DVs":        cells.push(value("dv", " dv", show(vm.get_dv(`${stat.name}`)) + "/15")); break;
             case "EVs":        cells.push(value("ev", " evs", statExp())); break;
             case "Vitamins":   cells.push(value("vitamins", " evs", vm.statExp(statExp()))); break;
-            case "Automatic":  cells.push(value("auto", "", vm.get_stat(`${stat.name}`))); break;
+            case "Automatic":
+                cells.push(value("auto", gauge ? " ev_gauge_value" : "", vm.get_stat(`${stat.name}`)));
+                if (gauge) cells.push(statEvGauge(evGaugeState(statExp(), "statExp"), evGaugeLayout, stat.value_column, row));
+                break;
             case "Hidden Power":
                 cells.push(
                     detailed("hp60", "devs", "Lv60: " + show(hiddenPower[0][stat.abrv])),

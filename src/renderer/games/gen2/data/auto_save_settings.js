@@ -16,6 +16,7 @@ export const auto_save_settings = [
     "showCritMultiplierInEP",
     "show_wild_battles",
     "send_out_order",
+    "show_ev_gauge",
     "webcam_mode",
     "automaticallySavePBSplits",
     "help_menus",

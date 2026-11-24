@@ -8,6 +8,10 @@ import type { PopupBoxLayout } from "~/core/overlay/player/PopupBox";
 import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
+import type { EvGaugeLayout } from "~/core/overlay/player/evGauge";
+
+/** Where the coloured stat tiles are, for the stat experience gauge (core/overlay/player/evGauge.ts). */
+export const evGaugeLayout: EvGaugeLayout = { left: [8, 191], top: [57, 119, 181], width: 177, height: 59, side: 6 };
 
 const frame = (picture: string): FaultsNode => ({
     class: "tinted-box",
