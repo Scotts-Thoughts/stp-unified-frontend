@@ -372,6 +372,7 @@ import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, t
 import { isTwoTrainerBattle, secondTeamRows } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { soloStyleCopyMixin } from "~/core/overlay/soloStyleCopyMixin";
+import { leadEvolutionMixin } from "~/core/overlay/leadEvolutionMixin";
 import { searchTrainers } from "~/core/logic/trainerPreview";
 import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
 import { crossOutActive, struckMoves } from "~/core/logic/unobtainableMoves";
@@ -457,7 +458,7 @@ const rowMove = (row) => row.move ?? row.Move;
 const rowType = (row) => row.type ?? row.Type;
 
 export default defineComponent({
-    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin, rightPanelModeMixin("right_ui"), soloStyleCopyMixin(MyStorage)],
+    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin, rightPanelModeMixin("right_ui"), soloStyleCopyMixin(MyStorage), leadEvolutionMixin(MyStorage, { dex: (vm) => vm.g5PokemonData, flagsInEvoStateKey: false })],
     components: {
         ClockFrame,
         FaultsBox,
@@ -532,6 +533,7 @@ export default defineComponent({
             evolution_family_list        : [],    // List of species in the current evolution family
             last_known_species           : null,  // Track last known species for evolution detection
             last_known_personality_value : null,  // Track last known personality value for evolution detection
+            evolution_lead_pv            : null,  // Personality value of the party lead while it is the Solo Pokemon (trackEvolutionLead)
             evolution_transitioning      : false, // Flag to track if evolution transition is in progress
             evolution_old_species        : null,  // Species before evolution (for transition)
             evolution_new_species        : null,  // Species after evolution (for transition)
@@ -1431,6 +1433,7 @@ export default defineComponent({
                 return
             }
             const starter = newValue
+            this.trackEvolutionLead();
             const game = this.game?.properties.meta.game_name.value
             const state = this.game?.properties.meta.state.value
             MyStorage['starter'] = newValue
@@ -7641,10 +7644,14 @@ export default defineComponent({
         this.last_known_personality_value = this.game.properties.player.team[0].internals.personality_value.value;
         this.last_known_species = this.game.properties.player.team[0].species.value;
         
+        this.trackEvolutionLead();
+
         // Track personality value changes
         this.game.properties.player.team[0].internals.personality_value.change(async (newProp, oldProp) => {
             // Update tracked personality value
             this.last_known_personality_value = newProp.value;
+            this.trackEvolutionLead();
+            this.checkLeadEvolution();
         });
 
         // Species change handler - handles both normal species changes and evolution
@@ -7652,96 +7659,15 @@ export default defineComponent({
             const currentPersonalityValue = this.game.properties.player.team[0].internals.personality_value.value;
             const state = this.game.properties.meta.state.value
             
-            // Check if this is an evolution (same personality value, different species, evolution enabled)
-            if (this.evolution == true && newProp.value != oldProp.value && 
-                currentPersonalityValue === this.last_known_personality_value &&
-                this.last_known_personality_value != null) {
-                
-                const evolution_family_raw = this.g5PokemonData[this.starter]?.evolution_family;
-                if (evolution_family_raw && evolution_family_raw.length > 0) {
-                    const evolution_family = evolution_family_raw.map(obj => obj.species).filter(s => s != null);
-                    const evolved = evolution_family.includes(newProp.value);
-                    
-                    if (evolved == true) {
-                        // Store old species for transition. The evolved species goes through the
-                        // form byte so a Burmy that evolved in a cloak lands on the matching Wormadam.
-                        const oldSpecies = this.starter;
-                        const newSpecies = this.resolveIncomingSpecies(newProp.value);
-
-                        // Only proceed if both oldProp and newSpecies are valid
-                        // Check that oldProp has a valid species (not 0x00 0x00 bytes)
-                        let oldPropValid = false;
-                        if (oldProp && oldProp.value != null && oldProp.value !== undefined) {
-                            // Check if bytes is valid (not 0x00 0x00)
-                            if (oldProp.bytes != null) {
-                                if (Array.isArray(oldProp.bytes)) {
-                                    // Array format: [0x00, 0x00] is invalid
-                                    oldPropValid = !(oldProp.bytes.length === 2 && oldProp.bytes[0] === 0x00 && oldProp.bytes[1] === 0x00);
-                                } else {
-                                    // Number format: 0x00 or 0x0000 is invalid
-                                    oldPropValid = oldProp.bytes !== 0x00 && oldProp.bytes !== 0;
-                                }
-                            } else {
-                                // If bytes is null/undefined but value exists, consider it valid
-                                oldPropValid = true;
-                            }
-                        }
-                        
-                        // Only proceed if newSpecies is valid and within the evolution family
-                        if (oldPropValid && newSpecies && newSpecies !== undefined && newSpecies !== null && newSpecies != oldSpecies &&
-                            evolution_family && evolution_family.includes(newProp.value)) {
-                            console.log("Evolving to:", newSpecies)
-                            console.log("Showing base stats.")
-                            this.stats_setting = "Base Stats";
-                            
-                            // Preserve attempt_number, finished_run_count, resets, and blackouts when evolving
-                            const preservedAttemptNumber = this.attempt_number;
-                            const preservedFinishedRunCount = this.finished_run_count;
-                            const preservedResets = this.playerResets;
-                            const preservedBlackouts = this.blackout_counter;
-                            
-                            // Update starter
-                            this.starter = newSpecies;
-                            this.last_known_species = newSpecies;
-                            
-                            // Restore preserved values after starter update (before watcher loads from storage)
-                            this.attempt_number = preservedAttemptNumber;
-                            this.finished_run_count = preservedFinishedRunCount;
-                            this.playerResets = preservedResets;
-                            this.blackout_counter = preservedBlackouts;
-                            
-                            // Save preserved values to storage for the new species
-                            const game = this.game?.properties.meta.game_name.value;
-                            if (!MyStorage[`${game}_${newSpecies}`]) {
-                                MyStorage[`${game}_${newSpecies}`] = {};
-                            }
-                            MyStorage[`${game}_${newSpecies}`] = {
-                                ...MyStorage[`${game}_${newSpecies}`],
-                                attempt_number: preservedAttemptNumber,
-                                finished_run_count: preservedFinishedRunCount,
-                                playerResets: preservedResets,
-                                blackout_counter: preservedBlackouts
-                            };
-                            
-                            // Update the dropdown to the new evolved species
-                            // This will trigger the watcher to load the new species' styles
-                            this.selected_evolution_species = newSpecies;
-                            
-                            // Show base stats of new evolved species until next battle
-                            this.show_evolved_base_stats = true;
-                            this.evolved_species_for_stats = newSpecies;
-                            
-                            // Perform fade transition
-                            await this.performEvolutionTransition(oldSpecies, newSpecies);
-                            
-                            // Update personality value tracking
-                            this.last_known_personality_value = currentPersonalityValue;
-                            return; // Don't process as normal species change
-                        }
-                    }
-                }
+            // An evolution: the run's own Pokemon (same personality value) is now another member of the
+            // Solo Pokemon's family. checkLeadEvolution reads the party as it is now rather than this
+            // event's old value, so a Rare Candy evolution outside battle counts whatever the old value
+            // or the game state was at the time (see trackEvolutionLead).
+            this.trackEvolutionLead();
+            if (await this.checkLeadEvolution(oldProp)) {
+                return; // Don't process as normal species change
             }
-            
+
             // Normal species change handling (not an evolution)
             this.last_known_species = newProp.value;
             this.last_known_personality_value = currentPersonalityValue;
@@ -8041,6 +7967,8 @@ export default defineComponent({
         // Player profiles (move-stats spec §4.4): re-filming and test runs aren't added.
         setProfileSkip(() => this.testRun == true || this.refilming_mode == true)
         this.game.properties.meta.state.change(async (newProp, oldProp) => {
+            // A Rare Candy evolution happens outside battle; any state change re-checks the lead.
+            this.checkLeadEvolution();
             if (newProp.value == 'From Battle') onBattleEnded()
             if (newProp.value == "From Battle" && oldProp.value == "Battle") {
                 this.update_buffer_moves()
