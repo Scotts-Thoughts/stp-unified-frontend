@@ -406,6 +406,7 @@ import { speedColorClass, speedLabel, speedLabelOrder } from "~/core/logic/speed
 import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
 import { isTwoTrainerBattle, secondTeamRows } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
+import { soloStyleCopyMixin } from "~/core/overlay/soloStyleCopyMixin";
 import { searchTrainers } from "~/core/logic/trainerPreview";
 import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
 import { crossOutActive, struckMoves } from "~/core/logic/unobtainableMoves";
@@ -480,7 +481,7 @@ import { unobtainable_moves } from "./data/moves/unobtainable_moves.js";
 let attack, basePower, battle_end, calculated_stats, damageMax, damageMin, debugging_mode, defense, encounters_off, encounters_on, fling_power, gen3abilities, h, level, m, maxPercentage, minPercentage, modifier_table, nature, newColor, part1, part2, part3, part4, pid, power, shuckie_blackouts, shuckie_resets, specialA, specialD, stab, stageModification, starterType, timecode, turn_count, type, type1, type2, typeString, usableVitamins, vitaminsUsed;
 
 export default defineComponent({
-    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin, rightPanelModeMixin("right_ui")],
+    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin, rightPanelModeMixin("right_ui"), soloStyleCopyMixin(MyStorage)],
     components: { ClockFrame, FaultsBox, MoveList, PopupBox, GameClock, ConfirmButton, SettingsPanel, Movepool, SplitsPanel, EnemyTeamPanel, StatTiles, ExpBar, BadgeRow, SpeciesArt, TypeBadges, InfoRow },
     props: ["game"],
     provide() {

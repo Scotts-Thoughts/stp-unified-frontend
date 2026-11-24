@@ -59,3 +59,19 @@
   which was already failing before this change), `parity:adapter`, and a Platinum smoke replay with Pokérus
   injected (green → purple-pink → red once cured and damaged). Not run: gen2/gen3/gen5 on screen, and no
   before/after harness diff. The purple-pink is approximate, not read from a game palette.
+
+## Copy Solo Style button (Evolution group, gens 3-5)
+
+- New "Copy Solo Style" button in the settings panel's Evolution group, next to Unify Styles. It shows only while
+  Evolution is on and the species picked in "Evolution Family Style" has a stored solo look (its style from when
+  Evolution is off). Pressing it copies that look (colour, UI saturation, image position/scale/flip, background
+  texture and its sliders, gen3's frame) into the species' evolution-line style and reloads it on screen.
+- Shared code in `core/overlay/soloStyleCopyMixin.ts`, added to the gen3, gen4 and gen5 overlays. Gens 1 and 2
+  have no evolution lines, so nothing to add there. New shortcut action id `evolution.copy_solo_style`.
+- The copy goes through each generation's own `loadEvolutionStyle`, so defaults the solo entry doesn't store are
+  filled the same way the solo overlay fills them. No style data files were changed.
+- ARCHITECTURE §7: note on the solo vs evolution-line style keys and the button.
+- Verified: `npm run typecheck` passes; a small script against a fake overlay confirmed the copy, the merge
+  (other line fields kept) and that the button hides with no solo look or with Evolution off.
+  `npm run parity:drift` fails on `load_all_settings` (gen5), but it fails the same way on the untouched main
+  branch, so it is not from this change. Not run in the real app or the harness.

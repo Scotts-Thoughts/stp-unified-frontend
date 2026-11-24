@@ -756,6 +756,13 @@ keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. 
 
 `<userData>` is `%APPDATA%` on Windows and `~/Library/Application Support` on a Mac.
 
+**Species looks, solo and evolution line** (gens 3-5). A species' look is stored twice: `<Game>_<Species>` (its solo look,
+used while Evolution is off) and `<Game>_<FullyEvolved>-line-<Species>` (its look inside its evolution line, used while
+Evolution is on); `<Game>_<FullyEvolved>-line` holds what the family shares (ability, nature, gender, Hidden Power).
+"Copy Solo Style" (`core/overlay/soloStyleCopyMixin.ts`) copies the first into the second for the picked family member,
+going through `loadEvolutionStyle` so the generation's defaults fill whatever the solo entry doesn't store. A solo
+entry with no look fields (only `selected_evolution_species`, say) counts as no style, and the button stays hidden.
+
 **Presets** (2026-11-05). A preset belongs to one game + species, like the style storage, and a file for another game is refused.
 - What it holds is the panel: every toggle, choice and slider by control id, unless the control says `preset: false`. A new control is saved without further work; mark it `preset: false` if it isn't about the run or the look (counters aren't saved because they aren't those kinds). `preset: "always"` keeps a value while `available` is false. What has no plain control is the generation's `PresetHost` (`games/genN/presets.ts`).
 - Loading runs the controls' own `set`, in panel order, so a dependent control must come after the one it depends on (Hidden Power type before spread, texture before its sliders). The species' save watchers do the rest: a load replaces what the species has stored.
