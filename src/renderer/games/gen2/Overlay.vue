@@ -274,6 +274,7 @@
                 <popup-box v-bind="battle_popups.accuracy"></popup-box>
                 <popup-box v-bind="battle_popups.evasion"></popup-box>
                 <popup-box v-bind="battle_popups.field"></popup-box>
+                <popup-box v-bind="battle_popups.weather"></popup-box>
 
                 <!-- Resets -->
                 <faults-box :layout="faults_layout.counts" :mode="blackouts_resets" :resets="fault_resets" :blackouts="fault_blackouts" :font-sizes="faults_font_sizes"></faults-box>
@@ -1978,13 +1979,10 @@ export default defineComponent({
                 var lightscreenCount = this.batt.field.player.lightScreenCount?.value
                 var safeguard = this.batt.field.player.statusSafeguard?.value
                 var safeguardCount = this.batt.field.player.safeguardCount?.value
-                var weather = this.batt.field.weather?.value
-                var weatherCount = this.batt.field.weatherCount?.value
                 return [
                     ["Reflect", reflect, reflectCount,],
                     ["Light Screen", lightscreen, lightscreenCount,],
                     ["Safeguard", safeguard, safeguardCount,],
-                    [weather, weather, weatherCount,],
                 ]
             }
             else {
@@ -1992,7 +1990,6 @@ export default defineComponent({
                     ["Reflect", false, 0,],
                     ["Light Screen", false, 0,],
                     ["Safeguard", false, 0,],
-                    [weather, false, 0,],
                 ]
             }
         },
@@ -5328,11 +5325,6 @@ export default defineComponent({
         this.game.properties.battle.field?.player?.statusSafeguard.change(async (prop) => { 9
             if (prop.value == true) {
                 this.last_initiated_field_effect = "Safeguard"
-            }
-        });
-        this.game.properties.battle.field?.weather.change(async (prop) => { 
-            if (prop.value != null) {
-                this.last_initiated_field_effect = prop.value
             }
         });
 

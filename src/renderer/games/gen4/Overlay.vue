@@ -235,6 +235,7 @@
             <div v-if="!not_valid_battle_state" style="position: absolute;">
                 <popup-box v-bind="battle_popups.accuracy"></popup-box>
                 <popup-box v-bind="battle_popups.evasion"></popup-box>
+                <popup-box v-bind="battle_popups.weather"></popup-box>
             </div>
 
             <!-- Exp bar -->
@@ -2696,7 +2697,6 @@ export default defineComponent({
                 ["Reflect", false, 0,],
                 ["Light Screen", false, 0,],
                 ["Safeguard", false, 0,],
-                [this.battleWeather(), false, 0,],
             ]
             if (this.game.properties.meta.state.value == `Battle`) {
                 effect_array[0][1] = this.batt.field.player.reflect?.value
@@ -2705,8 +2705,6 @@ export default defineComponent({
                 effect_array[1][2] = this.batt.field.player.lightscreen_count?.value
                 effect_array[2][1] = this.batt.field.player.safeguard?.value
                 effect_array[2][2] = this.batt.field.player.safeguard_count?.value
-                effect_array[3][1] = this.battleWeather()
-                effect_array[3][2] = this.batt.field.weather_count?.value
             }
             return effect_array
         },

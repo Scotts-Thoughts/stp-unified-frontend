@@ -1227,6 +1227,11 @@
     left: 292px;
 }
 
+/* The weather box (images/gen4/new_ui/weather.svg), between accuracy and evasion under the faults box. */
+.gen-4 .weatherLabel {
+    left: 161px;
+}
+
 .gen-4 .popUpsStyle {
     position: absolute;
     font-family: play;
@@ -1943,6 +1948,10 @@
 
 .gen-4 .evasionMod {
     left: 292px;
+}
+
+.gen-4 .weatherTurns {
+    left: 161px;
 }
 
 .gen-4 .enemyMod {

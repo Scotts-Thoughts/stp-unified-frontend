@@ -354,6 +354,7 @@
             <popup-box v-bind="battle_popups.accuracy"></popup-box>
             <popup-box v-bind="battle_popups.evasion"></popup-box>
             <popup-box v-bind="battle_popups.field"></popup-box>
+            <popup-box v-bind="battle_popups.weather"></popup-box>
             <!-- REPEL COUNTER -->
             <div v-if="repel_counter == true">
                 <popup-box v-bind="battle_popups.repel"></popup-box>
@@ -2651,7 +2652,6 @@ export default defineComponent({
                 ["Reflect", false, 0,],
                 ["Light Screen", false, 0,],
                 ["Safeguard", false, 0,],
-                [this.game.properties.battle.field.weather.value, false, 0,],
             ]
             if (this.g3stateVariable == `Battle`) {
                 effect_array[0][1] = this.batt.field.player.statusReflect?.value
@@ -2660,8 +2660,6 @@ export default defineComponent({
                 effect_array[1][2] = this.batt.field.player.lightScreenCount?.value
                 effect_array[2][1] = this.batt.field.player.statusSafeguard?.value
                 effect_array[2][2] = this.batt.field.player.safeguardCount?.value
-                effect_array[3][1] = this.batt.field.weather?.value
-                effect_array[3][2] = this.batt.field.weatherCount?.value
             }
             return effect_array
         },
@@ -6793,11 +6791,6 @@ export default defineComponent({
         this.game.properties.battle.field?.player?.statusSafeguard.change(async (prop) => { 
             if (prop.value == true) {
                 this.last_initiated_field_effect = "Safeguard"
-            }
-        });
-        this.game.properties.battle.field?.weather.change(async (prop) => { 
-            if (prop.value != null) {
-                this.last_initiated_field_effect = prop.value
             }
         });
 

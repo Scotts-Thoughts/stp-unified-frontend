@@ -1159,16 +1159,27 @@
     border: 1px solid #ff000000;
 }
 
+/* Accuracy and evasion sit one row down, so the weather box can go under the faults box (2026-11-24). */
 .gen-5 .accuracyModLabel {
     position: absolute;
-    top: 318px;
+    top: 390px;
     left: 72px;
 }
 
 .gen-5 .evasionModLabel {
     position: absolute;
-    top: 318px;
+    top: 390px;
     left: 306px;
+}
+
+/* The weather box (images/gen5/ui/weather.svg), under the faults box as in every generation. Centred: the weather
+   names differ in width. */
+.gen-5 .weatherLabel {
+    position: absolute;
+    top: 318px;
+    left: 147px;
+    width: 151px;
+    text-align: center;
 }
 
 .gen-5 .popUpsStyle {
@@ -1994,11 +2005,16 @@
 
 .gen-5 .accuracyMod {
     left: 54px;
-    top: 332px;
+    top: 404px;
 }
 
 .gen-5 .evasionMod {
     left: 284px;
+    top: 404px;
+}
+
+.gen-5 .weatherTurns {
+    left: 169px;
     top: 332px;
 }
 

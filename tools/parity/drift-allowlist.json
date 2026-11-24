@@ -113,10 +113,10 @@
       "name": "field_effect_array",
       "reason": "UNREVIEWED: gen4=gen5 | gen2 | gen3 (gen2 26L, gen3 19L, gen4 19L, gen5 19L)",
       "bodies": {
-        "gen2": "9e9b901e8902",
-        "gen3": "9725af1949d8",
-        "gen4": "c4fe3604fd2c",
-        "gen5": "db67c157026d"
+        "gen2": "02e6e0271b4d",
+        "gen3": "d06520e5c869",
+        "gen4": "881f63f718cd",
+        "gen5": "881f63f718cd"
       }
     },
     {

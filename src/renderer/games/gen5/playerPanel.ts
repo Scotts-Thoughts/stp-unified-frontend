@@ -8,6 +8,7 @@ import type { MoveChild, MoveNode, MoveRow } from "~/core/overlay/player/MoveLis
 import type { PopupBoxLayout, PopupBoxProps } from "~/core/overlay/player/PopupBox";
 import { allMovesOutOfPp } from "~/core/logic/struggle";
 import { formatStage } from "~/core/logic/statFormat";
+import { weatherTurns } from "~/core/overlay/player/weatherBox";
 import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
@@ -217,12 +218,15 @@ export function moveListLayout(list: MoveListData): MoveChild[] {
     });
 }
 
-/** The accuracy and evasion boxes (`battle_popups`): captions lowercase with no colon, stages signed (decision 20). */
+/** The accuracy, evasion and weather boxes (`battle_popups`): captions lowercase with no colon, stages signed (decision 20). */
 export const popupBoxes = {
     accuracy: { transition: "fade1", frameClass: "colored-image ds", frame: "images/gen5/ui/accuracy.svg",
         labelClass: "genericLabels accuracyModLabel", label: "accuracy", valueClass: "popUpsStyle accuracyMod" },
     evasion: { transition: "fade1", frameClass: "colored-image ds", frame: "images/gen5/ui/evasion.svg",
         labelClass: "genericLabels evasionModLabel", label: "evasion", valueClass: "popUpsStyle evasionMod" },
+    /** The weather's name over its turns left (core/overlay/player/weatherBox.ts). */
+    weather: { transition: "fade1", id: "weather", frameClass: "colored-image ds", frame: "images/gen5/ui/weather.svg",
+        labelClass: "genericLabels weatherLabel", label: "weather", valueClass: "popUpsStyle weatherTurns" },
 } satisfies Record<string, PopupBoxLayout>;
 
 /** Each pop-up box's props (the overlay's `battle_popups`): when it shows and its value, worked out once per change. */
@@ -233,7 +237,11 @@ export function battlePopups(vm: any): Record<keyof typeof popupBoxes, PopupBoxP
         return { ...popupBoxes[stat], frameStyle: tint, value: stage,
             shown: stage != 0 && vm.game.properties.meta.state == `Battle` };
     };
-    return { accuracy: box("accuracy"), evasion: box("evasion") };
+    // The mapper has no permanent-weather bit; its counter reads 0 or 255 for weather that doesn't run out.
+    const field = vm.game.properties.battle?.field;
+    const weather = weatherTurns(field?.weather?.value, field?.weather_count?.value);
+    return { accuracy: box("accuracy"), evasion: box("evasion"),
+        weather: { ...popupBoxes.weather, frameStyle: tint, ...weather, shown: vm.game.properties.meta.state.value == `Battle` && weather.shown } };
 }
 
 /** The type badges: the second type only when it differs. */

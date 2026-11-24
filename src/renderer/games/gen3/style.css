@@ -1962,6 +1962,17 @@ body:has(.gen-3) {
     top: 274px;
 }
 
+/* The weather box (images/gen3/new_ui/weather.svg), between accuracy and evasion under the faults box. */
+.gen-3 .weatherLabel {
+    left: 123px;
+    top: 259px;
+}
+
+.gen-3 .weatherTurns {
+    left: 123px;
+    top: 274px;
+}
+
 .gen-3 .playerFieldEffectsLarge {
     position: absolute;
     border: 1px solid #ff000000;
