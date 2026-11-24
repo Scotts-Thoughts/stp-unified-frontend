@@ -413,7 +413,7 @@ import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { gen45OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
 import { flailReversalPower, gyroBallPower, punishmentPower, trumpCardPower, wringOutPower } from "~/core/logic/movePower";
 import { gen45TurnOrder, gen45TurnOrderSpeed } from "~/core/logic/battleSpeed";
-import { moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
+import { moveAccuracy as calcMoveAccuracy, moveAccuracyPreview as calcMoveAccuracyPreview } from "~/core/logic/moveAccuracy";
 import { bindShortcuts } from "~/core/shortcuts/engine";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { wireGen4ChapterMarkers } from "./chapterMarkers";
@@ -5294,26 +5294,15 @@ export default defineComponent({
             if (this.game.properties.player?.team[0]?.ability?.value == 'No Guard') {
                 return `—`
             }
-            if (this.game.properties.player?.team[0]?.ability?.value == 'Compound Eyes') {
-                accuracy = accuracy * 1.3
-            }
             if (weather == 'Hail' && move == 'Blizzard' && state == 'Battle') {
                 return `—`
             }
-            if (state == `Overworld`) {
-                let item_modifier = 1
-                let ability_modifier = 1
-                if (move_category == "Physical" && ability == 'Hustle') {
-                    ability_modifier = 3277/4096
-                }
-                switch (held_item) {
-                    case "Wide Lens": item_modifier = 4505/4096; break;
-                    case "Zoom Lens": item_modifier = 4915/4096; break;
-                    default: item_modifier = 1; break;
-                }
-                let calculated_accuracy = Math.floor(accuracy * item_modifier * ability_modifier) <= 100 ? Math.floor(accuracy * item_modifier * ability_modifier) : 100
-                return calculated_accuracy
-            }
+            const preview = () => calcMoveAccuracyPreview(4, {
+                accuracy: listed_accuracy,
+                physical: move_category == "Physical",
+                userAbility: ability,
+                userItem: held_item,
+            }) ?? `—`
             if (state == `Battle`) {
                 if (
                     this.game.properties.battle.opponent.active_pokemon.modifiers.attack.value == "-6" &&
@@ -5324,18 +5313,8 @@ export default defineComponent({
                     this.game.properties.battle.opponent.active_pokemon.modifiers.accuracy.value == "-6" &&
                     this.game.properties.battle.opponent.active_pokemon.modifiers.evasion.value == "-6"
                 ) {
-                    let item_modifier = 1
-                    let ability_modifier = 1
-                    switch (held_item) {
-                        case "Wide Lens": item_modifier = 4505/4096; break;
-                        case "Zoom Lens": item_modifier = 4915/4096; break;
-                        default: item_modifier = 1; break;
-                    }
-                    if (move_category == "Physical" && ability == "Hustle") {
-                        ability_modifier = 3277/4096
-                    }
-                    let calculated_accuracy = Math.floor(accuracy * item_modifier * ability_modifier) <= 100 ? Math.floor(accuracy * item_modifier * ability_modifier) : 100
-                    return calculated_accuracy
+                    // Every enemy stage at -6: the battle data isn't real yet, so show the preview.
+                    return preview()
                 }
                 const player = this.game.properties.battle.player.active_pokemon
                 const opponent = this.game.properties.battle.opponent.active_pokemon
@@ -5372,9 +5351,9 @@ export default defineComponent({
                     fog: field?.fog?.value == true || weather == 'Fog',
                 }) ?? `—`
             }
-            // Any other state (e.g. 'From Battle'): no battle modifiers apply, but still floor so
-            // an upstream decimal (e.g. Compound Eyes' 1.3x) never shows decimal places.
-            else return Math.floor(accuracy)
+            // Overworld and every other state (e.g. 'From Battle' at the end of a battle): the
+            // player's own ability and item only, capped at 100.
+            return preview()
         },
         
         speed_comparison(slotIndex, enemySpeedValue) {

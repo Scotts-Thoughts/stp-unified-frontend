@@ -5,7 +5,7 @@
  *
  *   npm run parity:accuracy
  */
-import { accuracyStageIndex, gen3IsPhysicalType, moveAccuracy } from "../../src/renderer/core/logic/moveAccuracy.ts";
+import { accuracyStageIndex, gen3IsPhysicalType, moveAccuracy, moveAccuracyPreview } from "../../src/renderer/core/logic/moveAccuracy.ts";
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown): void {
@@ -52,7 +52,18 @@ check("gen4 Gravity", moveAccuracy(4, { accuracy: 50, gravity: true }), 83);
 check("gen4 fog", moveAccuracy(4, { accuracy: 100, fog: true }), 60);
 check("gen4 Tangled Feet confused", moveAccuracy(4, { accuracy: 100, targetAbility: "Tangled Feet", targetConfused: true }), 50);
 check("gen5 Compound Eyes", moveAccuracy(5, { accuracy: 70, userAbility: "Compound Eyes" }), 91);
-check("gen5 Wide Lens", moveAccuracy(5, { accuracy: 90, userItem: "Wide Lens" }), 98);
+check("gen5 Wide Lens 90 rounds to 99", moveAccuracy(5, { accuracy: 90, userItem: "Wide Lens" }), 99);
+check("gen5 Wide Lens 80 rounds to 88", moveAccuracy(5, { accuracy: 80, userItem: "Wide Lens" }), 88);
+check("gen4 Wide Lens 90 (x110/100)", moveAccuracy(4, { accuracy: 90, userItem: "Wide Lens" }), 99);
+check("gen4 Compound Eyes capped", moveAccuracy(4, { accuracy: 90, userAbility: "Compound Eyes" }), 100);
+
+// Outside battle: own ability and item only, still capped.
+check("gen4 preview Compound Eyes 90", moveAccuracyPreview(4, { accuracy: 90, userAbility: "Compound Eyes" }), 100);
+check("gen4 preview Compound Eyes 70", moveAccuracyPreview(4, { accuracy: 70, userAbility: "Compound Eyes" }), 91);
+check("gen4 preview Wide Lens 80", moveAccuracyPreview(4, { accuracy: 80, userItem: "Wide Lens" }), 88);
+check("gen5 preview Compound Eyes 95", moveAccuracyPreview(5, { accuracy: 95, userAbility: "Compound Eyes" }), 100);
+check("gen3 preview Compound Eyes 80", moveAccuracyPreview(3, { accuracy: 80, userAbility: "COMPOUND EYES" }), 100);
+check("preview dash", moveAccuracyPreview(4, { accuracy: "-" }), null);
 check("gen5 Victory Star", moveAccuracy(5, { accuracy: 90, userAbility: "Victory Star" }), 99);
 check("gen5 cap", moveAccuracy(5, { accuracy: 100, userItem: "Wide Lens" }), 100);
 
