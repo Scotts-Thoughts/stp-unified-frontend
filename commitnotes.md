@@ -191,3 +191,24 @@
 - Not verified: other games inside each generation (Red/Blue, Gold/Silver, Ruby/Sapphire/Emerald, D/P, HG/SS,
   B2/W2) by eye; battle stage markers checked next to the gauge in Platinum only (staged +6/-6, clear of it); no
   before/after harness diff against baselines (none on this machine).
+
+## Fix missed mid-run evolutions (gens 4-5)
+- Scott's Yanma evolved into Yanmega by Rare Candy in HeartGold and the overlay didn't follow. The gen4/gen5 check
+  only ran inside the lead's species event, and gave up if that event's old value read blank (0x0000) or, with
+  that, fell through to the normal path that only moves the starter in Overworld/Battle. It now reads the party as
+  it is now and also runs from the personality-value handler and on every game-state change. "The same Pokemon" is
+  the personality value recorded while the lead was the Solo Pokemon, which also stops a different Pokemon of the
+  same family (new save) from counting as an evolution.
+- Second bug, reproduced: the Evolution flags are stored per Solo Pokemon and nothing wrote them for the evolved
+  species, so the queuer's /refresh or a restart after any evolution switched Evolution off. The evolution now
+  writes them for the evolved species (gen4 `evoState_` key, gen5 the species key).
+- The two generations shared the same copied code; it now lives once in `core/overlay/leadEvolutionMixin.ts`.
+  Gen3 checked and left alone (its own handler, no blank-old-value check, starter stays the base species).
+  Yanmega's `knows_move` condition is the game's business; the overlay only watches the species, so move-known,
+  item, friendship and trade evolutions all go through the same path.
+- Verified: typecheck; drift (watch.starter re-reviewed; `load_all_settings` gen5 already fails on main, not from
+  this change); synthetic HeartGold replays through the real app: plain Rare Candy evolution, one with a blank
+  species read and a non-Overworld state in between, one where a different Pokemon arrives, each followed by a
+  /refresh (Evolution now stays on, it went off before); gen4 and gen5 smoke fixtures run with no page errors.
+- Not verified: the real game (I couldn't reproduce Scott's exact miss from a recording, so the cause above is the
+  likeliest one, not a proven one); a gen5 evolution replay.
