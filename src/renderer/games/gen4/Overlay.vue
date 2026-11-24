@@ -395,6 +395,7 @@ import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
 import { confirmReset, emulatorClockBefore, isHallOfFameReset, noteEmulatorClock, startHallOfFameReset } from "~/core/logic/resetGuard";
+import { onBattleEnded, setProfileSkip } from "~/core/profile/tracker";
 import ConfirmButton from "~/core/overlay/ConfirmButton.vue";
 import SettingsPanel from "~/core/settings/SettingsPanel.vue";
 import Movepool from "~/core/overlay/Movepool.vue";
@@ -8111,9 +8112,12 @@ export default defineComponent({
             }
         }
 
+        // Player profiles (move-stats spec §4.4): re-filming and test runs aren't added.
+        setProfileSkip(() => this.testRun == true || this.refilming_mode == true)
         //write to file at the end of a key battle
         this.game.properties.meta.state.change(async (newProp, oldProp) => {
             // console.log(`State Changed to "${newProp.value}"`)
+            if (newProp.value == 'From Battle') onBattleEnded()
             // The post-battle Splits ends when the next battle starts (decision 27: only the override; this used to
             // reset the setting itself to Automatic).
             if (newProp.value == "Battle") {

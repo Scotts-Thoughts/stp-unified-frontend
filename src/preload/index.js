@@ -103,6 +103,20 @@ const api = {
     list: (relative) => invoke('data:list', relative),
   },
 
+  /**
+   * The router's move-stats server (src/main/routerClient.ts). Not counted in
+   * `pendingInvokes`: a poll that waits for a router that isn't running must not hold
+   * the parity harness's IPC barrier.
+   */
+  router: {
+    get: (path, port) => ipcRenderer.invoke('router:get', path, port),
+  },
+
+  /** Player profiles' own files (core/profile/); reads and writes go through `data`. */
+  profiles: {
+    remove: (id) => invoke('profiles:remove', id),
+  },
+
   presets: {
     /** A file the user picks, as `{ name, contents }`, or null; opens at `relative` under the presets folder. */
     pick: (relative) => invoke('presets:pick', relative),

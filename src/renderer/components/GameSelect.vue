@@ -5,6 +5,7 @@
             <voice-button></voice-button>
             <report-button></report-button>
         </div>
+        <profile-bar :bucket="selectedBucket" @open-stats="statsOpen = true"></profile-bar>
         <header class="gs-header">
             <h1 class="gs-title">Scott's Thoughts Overlay</h1>
             <div class="gs-status">
@@ -47,6 +48,7 @@
                 </div>
             </section>
         </div>
+        <move-stats-screen v-if="statsOpen" :initial-bucket="selectedBucket" @close="statsOpen = false"></move-stats-screen>
     </div>
 </template>
 
@@ -76,6 +78,10 @@
  * LeafGreen, Diamond and Pearl, HeartGold and SoulSilver), so a pair's tile is twice
  * as wide and still one `.gameToggleImg` -- `tools/parity/packaged-probe.ts` counts
  * those, and `screenshot-idle.ts` clicks by the `title`.
+ *
+ * The player-profile bar sits above the title, and its "Move stats" button opens the
+ * stats screen over this one (core/profile/, move-stats spec §4). Both use their own
+ * classes; nothing on this screen was renamed for them.
  */
 import { defineComponent } from "vue";
 import type { Edition } from "~/core/game/GameModule";
@@ -86,12 +92,15 @@ import { MANIFESTS } from "~/games/registry";
 import ReportButton from "~/core/report/ReportButton.vue";
 import UpdatesButton from "~/core/updates/UpdatesButton.vue";
 import VoiceButton from "~/core/voice/VoiceButton.vue";
+import ProfileBar from "~/core/profile/ProfileBar.vue";
+import MoveStatsScreen from "~/core/profile/MoveStatsScreen.vue";
+import { bucketForEdition } from "~/core/profile/buckets";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 
 const SELECTED_GENERATION_KEY = "selected_generation";
 
 export default defineComponent({
-    components: { ReportButton, UpdatesButton, VoiceButton },
+    components: { ReportButton, UpdatesButton, VoiceButton, ProfileBar, MoveStatsScreen },
     props: {
         /** The `/mapper` path of a mapper no module claims (main.ts), shown as a warning. */
         unsupportedMapper: { type: String as () => string | null, default: null },
@@ -102,6 +111,7 @@ export default defineComponent({
             manifests: MANIFESTS,
             // A read of the user state is not reactive; bumping this after a click is.
             revision: 0,
+            statsOpen: false,
         };
     },
     computed: {
@@ -118,6 +128,11 @@ export default defineComponent({
             const name = this.currentEdition(manifest);
             const edition = this.visibleEditions(manifest).find((e) => e.name === name);
             return edition ? { manifest, edition } : null;
+        },
+        /** The selected edition's player-profile bucket (core/profile/buckets.ts). */
+        selectedBucket(): string | null {
+            const s = this.selected;
+            return s ? bucketForEdition(s.manifest, s.edition.name) : null;
         },
     },
     methods: {

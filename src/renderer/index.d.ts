@@ -50,6 +50,13 @@ declare global {
         write: (relative: string, contents: string) => Promise<string>,
         list: (relative: string) => Promise<DirectoryEntry[]>,
       },
+      router: {
+        /** `GET <path>` on the router's move-stats server (127.0.0.1:30161 unless `port`). */
+        get: (path: "/status" | "/move-stats", port?: number) => Promise<{ ok: boolean, status: number, body: unknown, error?: string }>,
+      },
+      profiles: {
+        remove: (id: string) => Promise<void>,
+      },
       presets: {
         pick: (relative: string) => Promise<{ name: string, contents: string } | null>,
         remove: (relative: string) => Promise<void>,

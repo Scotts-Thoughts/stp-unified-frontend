@@ -24,9 +24,11 @@ export type UserStateSections = Record<string, Record<string, unknown>>;
  * `settings_panel_theme` was the settings panel's look: nothing reads it now, and it stays
  * listed so an old saved value keeps being filed where it always was.
  * `voice_control` is the microphone button's on/off (core/voice/voice.ts).
+ * `active_profile` is the player profile the router's move stats are added to
+ * (core/profile/profiles.ts).
  */
 export function isGlobalKey(key: string): boolean {
-    return key === "obs_websocket_url" || key === "obs_websocket_password" || key === "selected_generation" || key === "shuckie_bookmarks" || key === "settings_panel_theme" || key === "voice_control" || key.startsWith("enemyScale_");
+    return key === "obs_websocket_url" || key === "obs_websocket_password" || key === "selected_generation" || key === "shuckie_bookmarks" || key === "settings_panel_theme" || key === "voice_control" || key === "active_profile" || key.startsWith("enemyScale_");
 }
 
 /**

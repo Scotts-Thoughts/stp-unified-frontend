@@ -20,6 +20,9 @@ import { initEnv } from "~/core/env";
 import { installScaleToFit, removeScaleToFit } from "~/core/window/scaleToFit";
 import { setReportContext } from "~/core/report/context";
 import { startVoiceIfEnabled } from "~/core/voice/voice";
+import { getUserState } from "~/core/persistence/userState";
+import { startProfileTracking, stopProfileTracking } from "~/core/profile/tracker";
+import { bucketForEdition } from "~/core/profile/buckets";
 
 /**
  * Applies a module's presentation to the document (plan 3.1, brought forward for
@@ -274,6 +277,12 @@ const main = defineComponent({
                 // Every generation: the run's splits from the replay Super Shuckie is
                 // playing back (core/stores/useReplaySplitsStore.ts, 2026-09-23).
                 useReplaySplitsStore().startPolling();
+                // Player profiles (move-stats spec §4.4): the router is asked for its move
+                // stats while this game is loaded. The bucket is the picked edition's.
+                const editionName = detection.manifest.id === "gen1"
+                    ? this.settings.overlay.edition
+                    : detection.manifest.editionKey ? getUserState<string | null>(detection.manifest.editionKey, null, detection.manifest.id) : null;
+                startProfileTracking(bucketForEdition(detection.manifest, editionName, detection.game));
                 this.ready = true;
                 // What the Cutter editor's export waits for before it takes a
                 // picture (src/main/cutter.ts): an overlay, not a loading screen.
@@ -299,6 +308,7 @@ const main = defineComponent({
             this.mapper!.clearSubscriptions();
             this.session?.module.deactivate?.();
             useReplaySplitsStore().stopPolling();
+            stopProfileTracking();
             this.session = null;
             this.applyWindowIcon(null);
             setActiveModule(null);

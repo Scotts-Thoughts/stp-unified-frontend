@@ -350,6 +350,7 @@ import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expCurve, expProgress } from "~/core/logic/expCurve";
 import { confirmReset } from "~/core/logic/resetGuard";
+import { onBattleEnded, setProfileSkip } from "~/core/profile/tracker";
 import { cropHeight, webcamArtStyleOrHidden } from "~/core/logic/webcamMode";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { gen2OhkoAccuracy, isOhkoMove, ohkoPowerText } from "~/core/logic/ohkoAccuracy";
@@ -5551,9 +5552,12 @@ export default defineComponent({
             }
         }
 
+        // Player profiles (move-stats spec §4.4): re-filming and test runs aren't added.
+        setProfileSkip(() => this.testRun == true || this.refilming_mode == true)
         //write to file at the end of a key battle
         this.game.properties.battle.lowHealthAlarm.change(async (prop) => {
             autosplitter_process()
+            if (prop.value == "Disabled") onBattleEnded()
             if (prop.value == "Disabled" && this.game.properties.battle.mode.value == "Trainer") {
                 let trainer = this.game.properties.battle.trainer.class.value
                 let gameName = this.game_selection == 'Crystal' ? 'C' : 'GS' // Used for split data

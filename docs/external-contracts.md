@@ -313,3 +313,36 @@ remotes — never use them as inputs), plus `poketcg-frontend`, `tcg_frontend` a
 overlays, not Electron) and an unrelated January 2025 React/Vite project that is also called
 `stp-unified-frontend`. None of these are inputs to this plan. The TCG mapper (`STANDARD/gen1/pokemon_tcg.xml`)
 is therefore not a supported game.
+
+## 10. pkmn_yellow_xp_router move stats — `http://127.0.0.1:30161`
+
+The router (Rust app, `xpr-app/src/move_stats_server.rs`) counts every move used in battle while it records a
+route, and serves the numbers so the overlay can add them to the active player profile (`core/profile/`). The
+port can be changed in the router's settings (`move_stats_port`); the overlay asks 30161.
+
+- It answers **only while recording**, only on 127.0.0.1. It refuses a `Host` that isn't `127.0.0.1`/`localhost`
+  and `Sec-Fetch-Site: cross-site`, and sends **no CORS headers**, so the overlay asks from its main process
+  (`src/main/routerFetch.ts`). Nothing but `/status` and `/move-stats` is asked.
+- `GET /status` → `{ recording, game, run_id, solo_species }`. `game` is the router's version name: `Red`, `Blue`,
+  `Yellow`, `Gold`, `Silver`, `Crystal`, `Emerald`, `FireRed`, `LeafGreen`, `Diamond`, `Pearl`, `Platinum`,
+  `HeartGold`, `SoulSilver`, `Black`, `White`, `Black 2`, `White 2` (`core/profile/buckets.ts` maps them).
+- `GET /move-stats` → 503 `{ "recording": false }` when not recording, else the run object
+  `{ format: 1, run_id, game, solo_species, recorded_with, total, wild, reset_attempts }` plus:
+  - `battles`: every battle finished this recording session (trainer, wild, reset and lost), in order, each
+    `{ battle_id, kind, trainer, started_at, finished_at, outcome, player, enemy, other }`;
+  - `in_battle`: whether a battle is in progress (it is not listed until it ends).
+- `player` / `enemy` map a move name to its counts: `interest` (1 luck move, 2 only crits are random, 3 nothing
+  is), `uses`, `acc_rolls`, `hits`, `misses`, `expected_hits`, `hit_variance`, `listed_accuracy`, `type`,
+  `crit_rolls`, `crits`, `expected_crits`, `crit_variance`, `effect_rolls`, `effects`, `expected_effects`,
+  `effect_variance`, `effect_blocked`, `effect_kind`, `listed_effect_chance` (percent), `failed`, `no_effect`, `protected`,
+  `super_effective`, `not_very_effective`, `ohko`, `kos`, `multi_hit` `{hits: count}`, `called_by` `{move: count}`.
+  `other` holds `player_crits`, `enemy_crits`, `player_misses`, `enemy_misses`.
+
+What the overlay does with it:
+- **De-duplicates by `battle_id` per `run_id`**, so asking again, a restart or a reload never counts a battle twice.
+- **Game check:** a reply whose `game` isn't in the bucket of the edition being played is ignored (amber dot).
+- **Re-filming mode and test runs:** a battle handled while either is on is marked handled but never added, even
+  after the switch is turned off.
+- Reset and lost battles are added like any other (every roll was real). The overlay's own `confirmReset` is not
+  involved.
+- No router: nothing is added and the dot is grey. There is no import fallback.

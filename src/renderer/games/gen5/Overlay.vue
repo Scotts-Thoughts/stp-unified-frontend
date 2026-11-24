@@ -365,6 +365,7 @@ import { ExpBar } from "~/core/overlay/player/ExpBar";
 import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { expProgress } from "~/core/logic/expCurve";
 import { confirmReset } from "~/core/logic/resetGuard";
+import { onBattleEnded, setProfileSkip } from "~/core/profile/tracker";
 import ConfirmButton from "~/core/overlay/ConfirmButton.vue";
 import SettingsPanel from "~/core/settings/SettingsPanel.vue";
 import Movepool from "~/core/overlay/Movepool.vue";
@@ -8070,7 +8071,10 @@ export default defineComponent({
             send: (marker) => this.sendObsChapterMarker(marker),
         })
 
+        // Player profiles (move-stats spec §4.4): re-filming and test runs aren't added.
+        setProfileSkip(() => this.testRun == true || this.refilming_mode == true)
         this.game.properties.meta.state.change(async (newProp, oldProp) => {
+            if (newProp.value == 'From Battle') onBattleEnded()
             if (newProp.value == "From Battle" && oldProp.value == "Battle") {
                 this.update_buffer_moves()
             }
