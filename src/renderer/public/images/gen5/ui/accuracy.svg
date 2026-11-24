@@ -20,6 +20,7 @@
       <feComposite in="SourceGraphic"/>
     </filter>
   </defs>
+  <g transform="translate(0 72)">
   <g id="Badge">
     <g id="Layer_26_copy_2" data-name="Layer 26 copy 2">
       <g id="Accuracy_copy_2" data-name="Accuracy copy 2">
@@ -32,5 +33,6 @@
         <rect x="72.77" y="334.04" width="70.45" height=".96" style="fill: #231f20; filter: url(#drop-shadow-1); stroke-width: 0px;"/>
       </g>
     </g>
+  </g>
   </g>
 </svg>

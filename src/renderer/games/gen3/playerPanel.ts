@@ -7,6 +7,7 @@ import { toDisplayString as moveText } from "vue";
 import type { MoveChild, MoveNode, MoveRow } from "~/core/overlay/player/MoveList";
 import type { PopupBoxLayout, PopupBoxProps } from "~/core/overlay/player/PopupBox";
 import { formatStage } from "~/core/logic/statFormat";
+import { weatherTurns } from "~/core/overlay/player/weatherBox";
 import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
@@ -279,6 +280,9 @@ export const popupBoxes = {
         labelClass: "accEvaStyle accEvaLabel evasionLabel", label: "evasion", valueClass: "accEvaStyle accEvaMod evasionMod" },
     field: { transition: "fadeBattle", frameClass: "colored-image ds", frame: "images/gen3/ui/field.svg",
         bodyClass: "playerFieldEffectsLarge", labelClass: "field_header", label: "field", valueClass: "field_effect" },
+    /** The weather's name over its turns left (core/overlay/player/weatherBox.ts). */
+    weather: { transition: "fadeBattle", id: "weather", frameClass: "colored-image ds", frame: "images/gen3/new_ui/weather.svg",
+        labelClass: "accEvaStyle accEvaLabel weatherLabel", label: "weather", valueClass: "accEvaStyle accEvaMod weatherTurns" },
     repel: { transition: "fadeBattle", frameClass: "colored-image", frame: "images/gen3/new_ui/accuracy.svg",
         labelClass: "accEvaStyle accEvaLabel accuracyLabel", labelStyle: "font-size: 14px;", label: "repel steps",
         valueClass: "accEvaStyle accEvaMod accuracyMod" },
@@ -291,13 +295,18 @@ export const popupBoxes = {
  * Each pop-up box's props (the overlay's `battle_popups`): when it shows and its value, worked out once per change.
  * The repel and Vs. Seeker boxes are `null` while their toggle is off (the template does not draw them then).
  */
-export function battlePopups(vm: any): Record<"accuracy" | "evasion" | "field", PopupBoxProps> & Record<"repel" | "vsSeeker", PopupBoxProps | null> {
+export function battlePopups(vm: any): Record<"accuracy" | "evasion" | "field" | "weather", PopupBoxProps> & Record<"repel" | "vsSeeker", PopupBoxProps | null> {
     const props = vm.game.properties;
     const state = vm.g3stateVariable;
     const inBattle = state == "Battle" || state == "From Battle";
     const mon = vm.batt.yourPokemon;
     const tint = `filter: saturate(${vm.ui_saturation})`;
     const expiring = vm.field_effect_first_expiring;
+    // Permanent weather (Drizzle, Drought, Sand Stream, overworld weather) never counts down (pokeemerald
+    // `DoFieldEndTurnEffects`), so its counter is stale.
+    const field = props.battle.flags?.field;
+    const permanent = [field?.rain_permanent, field?.sun_permanent, field?.sandstorm_permanent].some((f) => f?.value == true);
+    const weather = weatherTurns(vm.batt.field?.weather?.value, field?.weather_turns?.value ?? vm.batt.field?.weatherCount?.value, !permanent);
     return {
         accuracy: { ...popupBoxes.accuracy, frameStyle: tint, value: formatStage(mon?.modStageAccuracy?.value),
             shown: inBattle && mon?.modStageAccuracy?.value != `0` },
@@ -305,6 +314,7 @@ export function battlePopups(vm: any): Record<"accuracy" | "evasion" | "field", 
             shown: inBattle && mon?.modStageEvasion?.value != `0` },
         field: { ...popupBoxes.field, frameStyle: tint, shown: inBattle && expiring[2] != 0,
             value: `${moveText(expiring[0])}: ${moveText(expiring[2])}` },
+        weather: { ...popupBoxes.weather, frameStyle: tint, ...weather, shown: inBattle && weather.shown },
         repel: vm.repel_counter != true ? null : { ...popupBoxes.repel, frameStyle: tint,
             shown: state == "Overworld" && props.overworld.repelCount?.value > 0, value: props.overworld.repelCount?.value },
         vsSeeker: vm.vs_seeker != true ? null : { ...popupBoxes.vsSeeker, frameStyle: tint,

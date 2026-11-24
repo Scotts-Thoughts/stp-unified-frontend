@@ -1507,20 +1507,21 @@ body:has(.gen-2) {
     top: 282px;
 }
 
+/* Evasion sits right and the field box one row down, so the weather box can go under the faults box (2026-11-24). */
 .gen-2 .evasionLabel {
-    left: 139px;
+    left: 267px;
     top: 270px;
 }
 
 .gen-2 .screenLabel {
     outline: 1px solid #ff000000;
     left: 267px;
-    top: 270px;
+    top: 340px;
 }
 
 .gen-2 .evasionMod {
     font-size: 40px;
-    left: 139px;
+    left: 267px;
     width: 122px;
     top: 282px;
 }
@@ -1529,7 +1530,20 @@ body:has(.gen-2) {
     font-size: 17px;
     left: 267px;
     width: 122px;
-    top: 294px;
+    top: 364px;
+}
+
+/* The weather box (images/gen2/ui/weather.svg), under the faults box as in every generation. */
+.gen-2 .weatherLabel {
+    left: 139px;
+    top: 270px;
+}
+
+.gen-2 .weatherTurns {
+    font-size: 40px;
+    left: 139px;
+    width: 122px;
+    top: 282px;
 }
 
 /* ANIMATIONS */

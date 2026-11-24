@@ -8,6 +8,7 @@ import type { MoveChild, MoveNode, MoveRow } from "~/core/overlay/player/MoveLis
 import type { PopupBoxLayout, PopupBoxProps } from "~/core/overlay/player/PopupBox";
 import { allMovesOutOfPp } from "~/core/logic/struggle";
 import { formatStage } from "~/core/logic/statFormat";
+import { weatherTurns } from "~/core/overlay/player/weatherBox";
 import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
@@ -219,12 +220,15 @@ export function moveListLayout(list: MoveListData): MoveChild[] {
     });
 }
 
-/** The accuracy and evasion boxes (`battle_popups`): captions lowercase with no colon, stages signed (decision 20). */
+/** The accuracy, evasion and weather boxes (`battle_popups`): captions lowercase with no colon, stages signed (decision 20). */
 export const popupBoxes = {
     accuracy: { transition: "fade1", frameClass: "colored-image ds", frame: "images/gen4/new_ui/accuracy.svg",
         labelClass: "genericLabels mod_label accuracyModLabel", label: "accuracy", valueClass: "popUpsStyle accuracyMod" },
     evasion: { transition: "fade1", frameClass: "colored-image ds", frame: "images/gen4/new_ui/evasion.svg",
         labelClass: "genericLabels mod_label evasionModLabel", label: "evasion", valueClass: "popUpsStyle evasionMod" },
+    /** The weather's name over its turns left (core/overlay/player/weatherBox.ts). */
+    weather: { transition: "fade1", id: "weather", frameClass: "colored-image ds", frame: "images/gen4/new_ui/weather.svg",
+        labelClass: "genericLabels mod_label weatherLabel", label: "weather", valueClass: "popUpsStyle weatherTurns" },
 } satisfies Record<string, PopupBoxLayout>;
 
 /** Each pop-up box's props (the overlay's `battle_popups`): when it shows and its value, worked out once per change. */
@@ -236,7 +240,13 @@ export function battlePopups(vm: any): Record<keyof typeof popupBoxes, PopupBoxP
         ...popupBoxes[stat], frameStyle: tint, value: formatStage(modifiers[stat].value),
         shown: modifiers[stat].value != null && modifiers[stat].value != 0 && props.meta.state.value == `Battle`,
     });
-    return { accuracy: box("accuracy"), evasion: box("evasion") };
+    // Permanent weather (Drizzle, Drought, Sand Stream, Snow Warning, overworld weather) never counts down
+    // (pokeplatinum `BattleController_CheckFieldConditions`), so its counter is stale. D/P has no weather bits.
+    const field = vm.battleFlags("field");
+    const permanent = ["rain_permanent", "sun_permanent", "sandstorm_permanent", "hail_permanent"].some((f) => field?.[f]?.value == true);
+    const weather = weatherTurns(vm.battleWeather(), props.battle.field?.weather_count?.value, !permanent);
+    return { accuracy: box("accuracy"), evasion: box("evasion"),
+        weather: { ...popupBoxes.weather, frameStyle: tint, ...weather, shown: props.meta.state.value == `Battle` && weather.shown } };
 }
 
 /** The type badges: the second type only when it differs. */

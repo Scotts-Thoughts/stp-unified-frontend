@@ -8,6 +8,7 @@ import type { MoveChild, MoveNode } from "~/core/overlay/player/MoveList";
 import type { PopupBoxLayout, PopupBoxProps } from "~/core/overlay/player/PopupBox";
 import { allMovesOutOfPp } from "~/core/logic/struggle";
 import { formatStage } from "~/core/logic/statFormat";
+import { weatherTurns } from "~/core/overlay/player/weatherBox";
 import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
@@ -311,8 +312,8 @@ export const moveListLayout = {
 const popupFrame = (picture: string) => `images/gen2/ui/${picture}`;
 
 /**
- * The pop-up boxes (`battle_popups`). Accuracy, evasion and field are inside the Battle Pop Ups toggle; bonks and repel
- * follow only their own toggles. Captions lowercase with no colon, stages signed (decision 20).
+ * The pop-up boxes (`battle_popups`). Accuracy, evasion, field (Reflect, Light Screen, Safeguard) and weather are inside
+ * the Battle Pop Ups toggle; bonks and repel follow only their own toggles. Captions lowercase with no colon, stages signed (decision 20).
  */
 export const popupBoxes = {
     accuracy: { transition: "fade2", id: "accuracy", frameClass: "colored-image ds", frame: popupFrame("accuracy.svg"),
@@ -329,6 +330,9 @@ export const popupBoxes = {
         labelClass: "accEvaStyle accEvaLabel evasionLabel", label: "evasion", valueClass: "accEvaStyle accEvaMod evasionMod" },
     field: { transition: "fade2", frameClass: "colored-image ds", frame: popupFrame("screens.svg"),
         labelClass: "accEvaStyle accEvaLabel screenLabel", label: "field", valueClass: "accEvaStyle accEvaMod screenTurns" },
+    /** The weather's name over its turns left (core/overlay/player/weatherBox.ts). */
+    weather: { transition: "fade2", id: "weather", frameClass: "colored-image ds", frame: popupFrame("weather.svg"),
+        labelClass: "accEvaStyle accEvaLabel weatherLabel", label: "weather", valueClass: "accEvaStyle accEvaMod weatherTurns" },
 } satisfies Record<string, PopupBoxLayout>;
 
 /** Each pop-up box's props (the overlay's `battle_popups`): when it shows and its value, worked out once per change. */
@@ -345,6 +349,7 @@ export function battlePopups(vm: any): Record<keyof typeof popupBoxes, PopupBoxP
     const repel = vm.repel_counter == true && state == "Overworld" && vm.game.properties.squidgyExtras.repelStepsRemaining?.value > 0;
     const repelSteps = () => vm.game.properties.squidgyExtras.repelStepsRemaining.value;
     const expiring = vm.field_effect_first_expiring;
+    const weather = weatherTurns(vm.batt.field?.weather?.value, vm.batt.field?.weatherCount?.value);
     return {
         accuracy: { ...popupBoxes.accuracy, frameStyle: shadowTint, value: formatStage(mon?.modStageAccuracy?.value),
             shown: Boolean(vm.battle_fade == true && mon?.modStageAccuracy?.value != 0 && inBattle && stagesRead) },
@@ -356,6 +361,7 @@ export function battlePopups(vm: any): Record<keyof typeof popupBoxes, PopupBoxP
             shown: Boolean(vm.battle_fade == true && mon?.modStageEvasion?.value != 0 && inBattle && stagesRead) },
         field: { ...popupBoxes.field, frameStyle: shadowTint, shown: Boolean(inBattle && expiring[2] != 0 && stagesRead),
             value: `${moveText(expiring[0])}: ${moveText(expiring[2])}` },
+        weather: { ...popupBoxes.weather, frameStyle: shadowTint, ...weather, shown: inBattle && stagesRead && weather.shown },
     };
 }
 

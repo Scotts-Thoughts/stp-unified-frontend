@@ -339,6 +339,11 @@ Every `games/genN/` has:
   combination. In gen4 the same bytes also hold Uproar and Gravity, so gen4 reads the bits instead:
   `battleWeather()` (what is on the field, for display) and `effectiveWeather()` (empty under Cloud Nine or Air
   Lock, for every damage, speed and accuracy rule). Don't read `battle.field.weather` directly in gen4.
+- **The weather turn box** (gens 2-5) is `core/overlay/player/weatherBox.ts` plus a `weather` entry in each
+  `playerPanel.ts`'s `battlePopups`. It shows only while a move's weather counts down (1-8 turns): permanent weather
+  never ticks and leaves a stale counter, so gens 3 and 4 hide it on the `battle.flags.field.*_permanent` bits
+  (D/P has none); gen5's counter reads 255 at battle start. Weather is not part of the field box
+  (`field_effect_array`) any more, so the field box only picks among Reflect, Light Screen and Safeguard.
 - Simple differs by generation: gen4 doubles the stored stage when it is used, gen5 doubles each change as it
   is applied (the stored stage already counts it), so only gen4 code may double a stage for Simple.
 - A move's in-battle power that depends on the target or on earlier turns (Brine, Rollout, Trump Card...) is

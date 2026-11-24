@@ -80,7 +80,7 @@ export const overlayCommonMixin = {
                     field_effect_most_recent_array = this.field_effect_array[i]
                 }
             }
-            if (this.field_effect_array[0][2] == 0 && this.field_effect_array[1][2] == 0 && this.field_effect_array[2][2] == 0 && this.field_effect_array[3][2] == 0) {
+            if (this.field_effect_array.every((effect) => effect[2] == 0)) {
                 field_effect_most_recent_array = [this.last_initiated_field_effect, false, 0]
             }
             return field_effect_most_recent_array

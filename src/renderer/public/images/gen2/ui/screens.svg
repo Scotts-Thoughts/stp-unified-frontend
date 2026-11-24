@@ -13,6 +13,7 @@
       <stop offset="1" stop-color="#999"/>
     </linearGradient>
   </defs>
+  <g transform="translate(0 70)">
   <g id="Solo_Challenge" data-name="Solo Challenge">
     <g id="Bonks_copy_2" data-name="Bonks copy 2">
       <g id="screens">
@@ -22,5 +23,6 @@
         <path d="m381,268c4.42,0,8,3.58,8,8v48c0,4.42-3.58,8-8,8h-105.82c-4.42,0-8-3.58-8-8v-48c0-4.42,3.58-8,8-8h105.82m0-1h-105.82c-4.96,0-9,4.04-9,9v48c0,4.96,4.04,9,9,9h105.82c4.96,0,9-4.04,9-9v-48c0-4.96-4.04-9-9-9h0Z" style="stroke-width: 0px;"/>
       </g>
     </g>
+  </g>
   </g>
 </svg>
