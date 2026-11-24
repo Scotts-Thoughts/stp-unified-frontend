@@ -64,7 +64,7 @@ const LAST = TIME + " padding-right: 7px;";
  * wrappers where they were.
  *
  * Every class is the one the generations' own tables had (`splits_table`, `splits_table_old`,
- * `second_screen_splits_table`, `battle_summary_table`, `battle_summary_label`, `scaled_icon`,
+ * `battle_summary_table`, `battle_summary_label`, `scaled_icon`,
  * `splitIcon`, `movepool_header`…), since each `style.css` and the parity harness key on them.
  *
  * The art's frame is drawn to the rows' height (`art.frameBottom`): the picture is cut just above its bottom

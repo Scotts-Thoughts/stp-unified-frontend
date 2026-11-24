@@ -225,12 +225,12 @@
     {
       "section": "computed",
       "name": "movepoolView",
-      "reason": "Reviewed 2026-10-14 (by design): each generation builds the shared Movepool's view from its own rows, title class and fit rule (core/overlay/Movepool.vue). Re-reviewed 2026-11-17: Webcam Mode added to all four the same way (each with its own art's frameBottom and table height; the rows it leaves out are each generation's extra groups).",
+      "reason": "Reviewed 2026-10-14 (by design): each generation builds the shared Movepool's view from its own rows, title class and fit rule (core/overlay/Movepool.vue). Re-reviewed 2026-11-17: Webcam Mode added to all four the same way (each with its own art's frameBottom and table height; the rows it leaves out are each generation's extra groups). Re-reviewed 2026-11-24: gens 4-5 also shorten for Secondary Screen (core/logic/secondScreen.ts), which keeps tutor rows on short lists and shows only level-up or TM/HM rows on lists over 75; gens 2-3 have no DS screen.",
       "bodies": {
         "gen2": "4025103843ce",
         "gen3": "16435dee281c",
-        "gen4": "931965f18c98",
-        "gen5": "2dccc48536f4"
+        "gen4": "dc137d000dac",
+        "gen5": "04c79a19bb0b"
       }
     },
     {
@@ -315,12 +315,12 @@
     {
       "section": "computed",
       "name": "splitsView",
-      "reason": "Reviewed 2026-10-15 (by design): each generation builds the shared SplitsPanel view (core/overlay/SplitsPanel.vue, one look since decision 29) from its own split rows: its mode setting (toggle_compare_splits / splits_display / split_type), name lookup, icon path and art; only gens 1-2 have the battle-summary data for Followup + Summary; gen5 shows a previous 0:00 as -.",
+      "reason": "Reviewed 2026-10-15 (by design): each generation builds the shared SplitsPanel view (core/overlay/SplitsPanel.vue, one look since decision 29) from its own split rows: its mode setting (toggle_compare_splits / splits_display / split_type), name lookup, icon path and art; only gens 1-2 have the battle-summary data for Followup + Summary; gen5 shows a previous 0:00 as -. Re-reviewed 2026-11-24: gens 4-5 shorten for Webcam Mode or Secondary Screen (`right_panel_shortened`); gens 2-3 for Webcam Mode only.",
       "bodies": {
         "gen2": "79cc7c0ac775",
         "gen3": "50c10381919e",
-        "gen4": "5724dd6bf232",
-        "gen5": "a4990ba5289d"
+        "gen4": "93bd0e7b0ee8",
+        "gen5": "5d71353fbdf0"
       }
     },
     {

@@ -838,12 +838,6 @@
     /* 3px above and below comes from the icon cell (core/overlay/SplitsPanel.vue) */
 }
 
-.gen-5 .splitIcon_2 {
-    width: 40.15px;
-    height: 40.15px;
-    /* 3px above and below comes from the icon cell (core/overlay/SplitsPanel.vue) */
-}
-
 .gen-5 .specialMod {
     top: 92px;
 }
@@ -2177,26 +2171,6 @@
     top: 58px;
     opacity: .9;
     border: none;
-}
-
-.gen-5 .second_screen_splits_table {
-    display: block;
-    position: absolute;
-    /* border: 1px solid #00ff0d00; */
-    background-color: #ffffff;
-    font-size: 12px;
-    line-height: 24px;
-    width: 404px;
-    height: 670px;
-    font-family: play;
-    left: 1494px;
-    top: 58px;
-    opacity: .9;
-    border: none;
-}
-
-.gen-5 .second_screen_splits_table tr:nth-child(odd) {
-    background-color: #cfcfcf;
 }
 
 /* The settings panel (core/settings, docs/ui-uniformity-plan.md stages 3-4): inside the game-capture area, so it

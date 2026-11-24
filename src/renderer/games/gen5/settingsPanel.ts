@@ -1,6 +1,7 @@
 import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import { abilityLabel } from "~/core/settings/abilityLabel";
+import { rightPanelLayoutControls } from "~/core/settings/rightPanelLayout";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
 import { slug } from "~/core/shortcuts/build";
 import { gen5Manifest } from "./manifest";
@@ -123,11 +124,8 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                 flag(vm, "shuckie.timer", "Shuckie Timer", "shuckie_timer", { tier: "advanced" }),
                 flag(vm, "shuckie.counters", "Shuckie Counters", "shuckie_counters", { tier: "advanced" }),
                 flag(vm, "shuckie.bookmarks", "Shuckie Bookmarks", "shuckie_bookmarks", { tier: "advanced" }),
-                flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", {
-                    tier: "advanced", visible: () => !vm.second_screen_mode,
-                }),
+                flag(vm, "display.post_battle_splits", "Automatic Post-Battle Splits", "automatic_post_battle_splits", { tier: "advanced" }),
                 flag(vm, "advanced.refilming_mode", "Re-filming Mode", "refilming_mode", { tier: "advanced" }),
-                flag(vm, "advanced.second_screen_mode", "Second Screen Mode", "second_screen_mode", { tier: "advanced" }),
                 flag(vm, "advanced.live_hp", "Live HP", "live_hp", { tier: "advanced" }),
                 flag(vm, "settings.editor", "Pokemon Editor", "editor", { tier: "advanced", noAction: true }),
                 flag(vm, "advanced.debugging", "Debugging", "debugging_mode", { tier: "advanced" }),
@@ -368,9 +366,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                     get: () => vm.stats_setting, set: (v) => { vm.stats_setting = v; },
                 },
                 {
-                    // Hidden in Second Screen Mode, as before (that mode draws its own right panel).
                     kind: "choice", id: "right_panel", label: "Right Panel", options: ["Automatic", "Movepool", "Splits", "Trainers"],
-                    visible: () => !vm.second_screen_mode,
                     // Decision 27: a pick also ends a post-battle Splits (core/overlay/rightPanelMode.ts).
                     get: () => vm.right_ui, set: (v) => { vm.set_right_panel(v); },
                 },
@@ -386,7 +382,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
         {
             // Decision 14: the trainer the "Trainers" right panel previews (Black and White: B2/W2 have no trainer table).
             title: "Trainers",
-            available: () => vm.right_ui == "Trainers" && !vm.second_screen_mode,
+            available: () => vm.right_ui == "Trainers",
             controls: [
                 { kind: "text", id: "trainers.search", label: "Search Trainers", placeholder: "Search for a trainer", noAction: true, get: () => vm.search_trainers, set: (v) => { vm.search_trainers = v; } },
                 {
@@ -398,15 +394,11 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
         {
             title: "Toggles",
             controls: [
-                flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles", { visible: () => !vm.second_screen_mode }),
-                flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order", { visible: () => !vm.second_screen_mode }),
-                // Second Screen Mode has its own right side, with no webcam corner.
-                flag(vm, "display.webcam_mode", "Webcam Mode", "webcam_mode", {
-                    title: "Keeps the right panel above the bottom right corner and hides the tutor and form moves, to leave room for a webcam.",
-                    visible: () => !vm.second_screen_mode,
-                    // A streaming setup, not part of a Pokémon's look: not saved in presets.
-                    preset: false,
-                }),
+                flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles"),
+                flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order"),
+                // Historical, Webcam or Secondary Screen (core/logic/secondScreen.ts); the old Webcam Mode and Second
+                // Screen Mode actions kept.
+                ...rightPanelLayoutControls(vm, true),
                 // Black 2 / White 2 only (the tutors); any species (it used to sit in the evolution table, known-legacy-bugs #85).
                 flag(vm, "moves.show_tutor_moves", "Show Tutor Moves", "show_tutor_moves", { actionLabel: "Show Tutor Moves (B2/W2)", available: blackWhite2 }),
             ],

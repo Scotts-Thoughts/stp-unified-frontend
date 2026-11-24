@@ -11,6 +11,8 @@
                  override the styleFade classes, so the fade is left entirely to the transition -->
             <species-art ref="pokemon_art" img-class="pokemon_art" v-bind="species_art_look" transition="styleFade" :art-key="displayedPokemonSpecies" :src="`images/gen4/pokemon/${displayedPokemonSpecies}.webp`"></species-art>
             <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen4/ui/game_area.svg)"></div>
+            <!-- Secondary Screen (core/logic/secondScreen.ts): the DS's second screen under the shortened right panel, in the game area's look -->
+            <div v-if="second_screen_mode == true" class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen4/ui/second_screen_game_area.svg)"></div>
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen4/ui/timer.svg)"></div>
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen4/ui/moveset.svg)"></div>
             <div class="colored-image ds" :style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`" style="--url: url(images/gen4/ui/moveset.svg)"></div>
@@ -207,7 +209,7 @@
                      setting, not a post-battle Splits, so a gym leader's team stays up until enemy_graphic ends, as before. -->
                 <div v-else-if="enemy_graphic == true && (right_ui == 'Automatic' || right_ui == 'Trainers')" style="position: absolute;" key="1">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, during the battle. -->
                 <div v-else-if="(right_ui == 'Automatic' || right_ui == 'Trainers') && wild_pokemon_view" style="position: absolute;" key="9">
@@ -215,7 +217,7 @@
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Splits -->
                 <div v-else-if="right_panel_mode == 'Splits'" key="3" class="posAbs">
@@ -477,6 +479,7 @@ import { typeBoostingItems } from "./data/typeBoostingItems.js";
 import { typeData } from "./data/type-effectiveness.js";
 import { typeEffectivenessArray } from "./data/type effectiveness array.js";
 import { unobtainable_moves } from "./data/moves/unobtainable_moves.js";
+import { movepoolTitle, secondScreenPart, SECOND_SCREEN_TUTOR_LIMIT } from "~/core/logic/secondScreen";
 
 // Implicit globals of the legacy classic script, see tools/port/lift-gen4.py.
 let attack, basePower, battle_end, calculated_stats, damageMax, damageMin, debugging_mode, defense, encounters_off, encounters_on, fling_power, gen3abilities, h, level, m, maxPercentage, minPercentage, modifier_table, nature, newColor, part1, part2, part3, part4, pid, power, shuckie_blackouts, shuckie_resets, specialA, specialD, stab, stageModification, starterType, timecode, turn_count, type, type1, type2, typeString, usableVitamins, vitaminsUsed;
@@ -612,6 +615,8 @@ export default defineComponent({
             send_out_order         : MyStorage['send_out_order']       ?? true,
             // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
             webcam_mode            : MyStorage['webcam_mode']          ?? false,
+            // Secondary Screen (core/logic/secondScreen.ts): the panel shortened as in Webcam Mode, the DS's second screen under it.
+            second_screen_mode     : MyStorage['second_screen_mode']   ?? false,
             stats_setting          : MyStorage['stats_setting']        ?? "Automatic",
             expBarToggle           : MyStorage['expBarToggle']         ?? true,
             show_nature_changes    : MyStorage['show_nature_changes']  ?? true,
@@ -1780,6 +1785,10 @@ export default defineComponent({
         info_rows() {
             return infoRows(this)
         },
+        /** Webcam Mode or Secondary Screen: every right panel stops above the bottom right corner (core/logic/secondScreen.ts). */
+        right_panel_shortened() {
+            return this.webcam_mode == true || this.second_screen_mode == true
+        },
         /**
          * The movepool table's rows, computed once per displayed species. The template
          * called getMovepool() once per row group on every render, and each call resolved
@@ -1813,20 +1822,28 @@ export default defineComponent({
             const dcColor = (x) => `var(--${this.getMoveCategory(x.Category, x)[1].toLowerCase()})`
             const rows = this.movepoolRows
             const struck = this.movepoolStruck
+            // Secondary Screen: a long list shows only its level-up or its TM/HM rows (core/logic/secondScreen.ts).
+            const part = this.second_screen_mode
+                ? secondScreenPart(rows.level.length, rows.tmhm.length, rows.level.map(x => x.Level), this.game.properties.player.team[0].level.value)
+                : "all"
             const groups = [
-                { struck: struck.everywhere, rows: rows.level.map((x, index) => ({
+                { struck: struck.everywhere, rows: part === "machines" ? [] : rows.level.map((x, index) => ({
                     way: x.Level, move: x.Move, name: this.move_name(x.Move), type: this.movepoolType(x), typeColor: typeColor(x),
                     dc: this.getMoveCategory(x.Category)[0], dcColor: dcColor(x),
                     power: this.movepoolPower(x), accuracy: x.Accuracy, pp: x.PP, first: index === 0,
                 })) },
-                { struck: struck.machines, rows: rows.tmhm.map(x => ({
+                { struck: struck.machines, rows: part === "level" ? [] : rows.tmhm.map(x => ({
                     way: x.Move == 'Whirlpool' ? "HM05" : x.tmhm, move: x.Move, name: this.move_name(x.Move), type: this.movepoolType(x), typeColor: typeColor(x),
                     dc: this.getMoveCategory(x.Category)[0], dcColor: dcColor(x),
                     power: this.movepoolPower(x), accuracy: x.Accuracy, pp: x.PP,
                 })) },
             ]
-            // Webcam Mode leaves the tutor rows out, so the shorter panel keeps the rest readable.
-            if (this.show_tutor_moves == true && !this.webcam_mode) {
+            // Webcam Mode leaves the tutor rows out, so the shorter panel keeps the rest readable. Secondary Screen keeps
+            // them while the whole list is short (SECOND_SCREEN_TUTOR_LIMIT).
+            const tutorsFit = this.second_screen_mode
+                ? rows.level.length + rows.tmhm.length + rows.tutor.length <= SECOND_SCREEN_TUTOR_LIMIT
+                : !this.webcam_mode
+            if (this.show_tutor_moves == true && tutorsFit) {
                 groups.push({ struck: struck.machines, rows: rows.tutor.map(x => ({
                     way: "Tutor", move: x.Move, name: this.move_name(x.Move), type: x.Type, typeColor: `var(--${x.Type?.toLowerCase()})`,
                     dc: x.Category, dcColor: dcColor(x),
@@ -1834,7 +1851,7 @@ export default defineComponent({
                 })) })
             }
             return {
-                title: "Movepool",
+                title: movepoolTitle(part),
                 titleClass: "posAbs movepoolLabel",
                 titleFirst: true,
                 dc: true,
@@ -1843,7 +1860,7 @@ export default defineComponent({
                 // and a long list's font shrinks a little slower than its rows.
                 fit: { containerHeight: 976, lineHeight: 21, fontSize: 14, shrinkFactor: 0.77 },
                 // Webcam Mode: images/gen4/ui/movepool.svg's bottom border at 1055, the 1000px table of style.css.
-                webcam: this.webcam_mode ? { frameBottom: 1055, tableHeight: 1000 } : undefined,
+                webcam: this.right_panel_shortened ? { frameBottom: 1055, tableHeight: 1000 } : undefined,
                 groups,
             }
         },
@@ -1863,7 +1880,7 @@ export default defineComponent({
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
                 art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen4/new_ui/splits.svg)"], frameBottom: 780 },
-                webcam: this.webcam_mode,
+                webcam: this.right_panel_shortened,
             }
         },
         /**

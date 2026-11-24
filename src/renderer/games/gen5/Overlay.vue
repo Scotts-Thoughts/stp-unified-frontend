@@ -11,6 +11,8 @@
                  override the styleFade classes, so the fade is left entirely to the transition -->
             <species-art ref="pokemon_art" img-class="pokemon_art" v-bind="species_art_look" transition="styleFade" :art-key="displayedPokemonSpecies" :src="`images/gen5/pokemon/${displayedPokemonSpecies}.webp`"></species-art>
             <div class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen5/ui/game_area.svg)"></div>
+            <!-- Secondary Screen (core/logic/secondScreen.ts): the DS's second screen under the shortened right panel, in the game area's look -->
+            <div v-if="second_screen_mode == true" class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen5/ui/second_screen_game_area.svg)"></div>
             <!-- The faults box (core/overlay/player/FaultsBox.ts, laid out in playerPanel.ts): its frame here, its labels and counts after the Ability and Held Item boxes. -->
             <faults-box :layout="faults_layout.frames" :mode="blackouts_resets" :frame-style="`filter: saturate(${ui_saturation}) drop-shadow(0px 1px 1px)`"></faults-box>
             
@@ -232,25 +234,17 @@
                 <!-- Enemy Team Display -->
                 <!-- Decision 27: only Automatic and Trainers show it (Movepool and Splits keep their panel). It follows the
                      setting, not a post-battle Splits, which waits for enemy_graphic to end, as before. -->
-                <div v-else-if="enemy_graphic == true && battlePokemonCrop != false && !second_screen_mode && (right_ui == 'Automatic' || right_ui == 'Trainers')" style="position: absolute;" key="1">
+                <div v-else-if="enemy_graphic == true && battlePokemonCrop != false && (right_ui == 'Automatic' || right_ui == 'Trainers')" style="position: absolute;" key="1">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, during the battle. -->
-                <div v-else-if="!second_screen_mode && (right_ui == 'Automatic' || right_ui == 'Trainers') && wild_pokemon_view" style="position: absolute;" key="9">
+                <div v-else-if="(right_ui == 'Automatic' || right_ui == 'Trainers') && wild_pokemon_view" style="position: absolute;" key="9">
                     <enemy-team-panel :view="wild_pokemon_view" :layout="enemy_team_layout"></enemy-team-panel>
-                </div>
-                <!-- Second Screen Mode -->
-                <div v-else-if="second_screen_mode" key="2">
-                    <div class="posAbs movepoolLabel">Splits</div>
-                    <div v-if="secondScreenSplitsView">
-                        <splits-panel :view="secondScreenSplitsView" />
-                    </div>
-                    <div v-if="second_screen_mode == true" class="colored-image ds" :style="hp_tracker_style" style="--url: url(images/gen5/ui/second_screen_game_area.svg)"></div>
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Splits -->
                 <div v-else-if="right_panel_mode == 'Splits'" key="7" :style="`filter: drop-shadow(0px 1px 1px)`" class="posAbs">
@@ -451,6 +445,7 @@ import { realClock, SettleWindow } from "~/core/logic/battleMarkers";
 import { typeData } from "./data/type-effectiveness.js";
 import { typeEffectivenessArray } from "./data/type effectiveness array.js";
 import { unobtainable_moves_object } from "./data/moves/unobtainable_moves.js";
+import { movepoolTitle, secondScreenPart, SECOND_SCREEN_TUTOR_LIMIT } from "~/core/logic/secondScreen";
 
 // Implicit globals of the legacy classic script, see tools/port/lift-gen5.py.
 let attack, basePower, battle_end, damageMax, damageMin, debugging_mode, defense, fling_power, gen3abilities, h, level, m, maxPercentage, minPercentage, nature, newColor, part1, part2, part3, part4, pid, power, shuckie_blackouts, shuckie_resets, specialA, specialD, stab, starterType, timecode, type, type1, type2, typeString, usableVitamins, vitaminsUsed;
@@ -584,7 +579,6 @@ export default defineComponent({
             },
 
             // Shadow Stitch Settings
-            second_screen_mode: MyStorage['second_screen_mode'] ?? false,
             live_hp: MyStorage['live_hp'] ?? false,
             stop_timer_after_n_dialogue: MyStorage['stop_timer_after_n_dialogue'] ?? false,
 
@@ -597,6 +591,9 @@ export default defineComponent({
             send_out_order               : MyStorage['send_out_order']         ?? true,
             // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
             webcam_mode                  : MyStorage['webcam_mode']            ?? false,
+            // Secondary Screen (core/logic/secondScreen.ts): the panel shortened as in Webcam Mode, the DS's second screen
+            // under it. The key of the old Second Screen Mode (Splits over a game area), which this replaced.
+            second_screen_mode           : MyStorage['second_screen_mode']     ?? false,
             previous_label               : MyStorage['previous_label']         ?? "Previous",
             current_label                : MyStorage['current_label']          ?? "Current",
             collect_split_data           : MyStorage['collect_split_data']     ?? true,
@@ -1675,6 +1672,10 @@ export default defineComponent({
         info_rows() {
             return infoRows(this)
         },
+        /** Webcam Mode or Secondary Screen: every right panel stops above the bottom right corner (core/logic/secondScreen.ts). */
+        right_panel_shortened() {
+            return this.webcam_mode == true || this.second_screen_mode == true
+        },
         /**
          * The movepool table's rows, computed once per displayed species. The template
          * called getMovepool() once per row group on every render, and each call resolved
@@ -1714,17 +1715,26 @@ export default defineComponent({
             })
             const rows = this.movepoolRows
             const struck = this.movepoolStruck
+            // Secondary Screen: a long list shows only its level-up (and Form) or its TM/HM rows (core/logic/secondScreen.ts).
+            const part = this.second_screen_mode
+                ? secondScreenPart(rows.level.length + rows.form.length, rows.tmhm.length, rows.level.map(x => x.Level), this.game.properties.player.team[0].level.value)
+                : "all"
             const groups = [
-                { struck: struck.everywhere, rows: rows.level.map((x, index) => row(x, x.Level, index === 0)) },
-                // Webcam Mode leaves the Form and tutor rows out, so the shorter panel keeps the rest readable.
-                { struck: struck.everywhere, rows: this.webcam_mode ? [] : rows.form.map(x => row(x, "Form")) },
-                { struck: struck.machines, rows: rows.tmhm.map(x => row(x, x.Move == 'Whirlpool' ? "HM05" : x.tmhm)) },
+                { struck: struck.everywhere, rows: part === "machines" ? [] : rows.level.map((x, index) => row(x, x.Level, index === 0)) },
+                // Webcam Mode leaves the Form and tutor rows out, so the shorter panel keeps the rest readable. Secondary
+                // Screen keeps the Form rows with the level-up ones, and the tutor rows while the whole list is short
+                // (SECOND_SCREEN_TUTOR_LIMIT).
+                { struck: struck.everywhere, rows: (this.webcam_mode && !this.second_screen_mode) || part === "machines" ? [] : rows.form.map(x => row(x, "Form")) },
+                { struck: struck.machines, rows: part === "level" ? [] : rows.tmhm.map(x => row(x, x.Move == 'Whirlpool' ? "HM05" : x.tmhm)) },
             ]
-            if (this.show_tutor_moves && !this.webcam_mode && (this.selected_game == 'Black 2' || this.selected_game == 'White 2')) {
+            const tutorsFit = this.second_screen_mode
+                ? rows.level.length + rows.form.length + rows.tmhm.length + rows.tutor.length <= SECOND_SCREEN_TUTOR_LIMIT
+                : !this.webcam_mode
+            if (this.show_tutor_moves && tutorsFit && (this.selected_game == 'Black 2' || this.selected_game == 'White 2')) {
                 groups.push({ struck: struck.machines, rows: rows.tutor.map(x => row(x, "Tutor")) })
             }
             return {
-                title: "Movepool",
+                title: movepoolTitle(part),
                 titleClass: "posAbs movepoolLabel",
                 titleFirst: true,
                 dc: true,
@@ -1733,7 +1743,7 @@ export default defineComponent({
                 // shrinks once its rows are under 17px, a little slower than the rows.
                 fit: { containerHeight: 976, lineHeight: 19, fontSize: 14, shrinkFactor: 0.77, fontFrom: 17 },
                 // Webcam Mode: images/gen5/ui/movepool.svg's bottom border at 1055, the 1000px table of style.css.
-                webcam: this.webcam_mode ? { frameBottom: 1055, tableHeight: 1000 } : undefined,
+                webcam: this.right_panel_shortened ? { frameBottom: 1055, tableHeight: 1000 } : undefined,
                 groups,
             }
         },
@@ -1752,18 +1762,7 @@ export default defineComponent({
                     diffStyle: mode === "First" ? undefined : splitDiffColor(split.difference),
                 })),
                 art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/splits.svg)"], frameBottom: 780 },
-                webcam: this.webcam_mode,
-            }
-        },
-        /** The second-screen layout's copy of the Splits panel: its own table and icon classes and art. */
-        secondScreenSplitsView() {
-            const view = this.splitsView
-            return view && {
-                ...view,
-                table: { class: "second_screen_splits_table", icon: { imgClass: "icons splitIcon_2" } },
-                art: { class: "colored-image ds", style: [`filter: saturate(${this.ui_saturation})`, "--url: url(images/gen5/ui/second_screen_splits.svg)"], frameBottom: 729 },
-                // The second screen's own layout has no webcam corner.
-                webcam: false,
+                webcam: this.right_panel_shortened,
             }
         },
         /**

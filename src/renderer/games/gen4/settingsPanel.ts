@@ -1,6 +1,7 @@
 import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import { abilityLabel } from "~/core/settings/abilityLabel";
+import { rightPanelLayoutControls } from "~/core/settings/rightPanelLayout";
 import type { PresetHost } from "~/core/presets/presets";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
 import { slug } from "~/core/shortcuts/build";
@@ -375,11 +376,8 @@ export function gen4SettingsPanel(vm: any, presets?: PresetHost): SettingsPanelS
                 flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles"),
                 flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order"),
                 flag(vm, "display.show_tutor_moves", "Show Tutor Moves", "show_tutor_moves"),
-                flag(vm, "display.webcam_mode", "Webcam Mode", "webcam_mode", {
-                    title: "Keeps the right panel above the bottom right corner and hides the tutor moves, to leave room for a webcam.",
-                    // A streaming setup, not part of a Pokémon's look: not saved in presets.
-                    preset: false,
-                }),
+                // Historical, Webcam or Secondary Screen (core/logic/secondScreen.ts); the old Webcam Mode action kept.
+                ...rightPanelLayoutControls(vm, false),
             ],
         },
         {

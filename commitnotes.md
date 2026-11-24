@@ -119,3 +119,26 @@
   species and a mismatched species give "") and the wild preview's suffix. `parity:drift` fails on
   `load_all_settings` in gen5, which this change doesn't touch (fails the same at HEAD). Not checked: the harness
   (no Platinum fixture with Shellos) or a real battle against an East Sea Shellos.
+
+## Right Panel Layout with a DS Secondary Screen (gens 4-5)
+
+- Gens 4 and 5: the Webcam Mode switch became a "Right Panel Layout" dropdown: Historical, Webcam or Secondary
+  Screen (`core/logic/secondScreen.ts`, `core/settings/rightPanelLayout.ts`). Gens 1-3 keep the Webcam Mode switch.
+- Secondary Screen shortens the right panel like Webcam Mode and draws a green area for the DS's second screen
+  under it (419×314, the game area's look, `images/genN/ui/second_screen_game_area.svg`; gen4 got a copy of gen5's).
+- Movepool in Secondary Screen: tutor moves only while the whole list is 45 or fewer; over 75 level-up + TM/HM
+  moves (Mew, Mewtwo, Arceus, Gallade) it shows the level-up list when the lead is at a learning level or one below,
+  else the TM/HM list, and the title says which.
+- Removed gen5's old Second Screen Mode (splits over a game area) at Scott's request, with its CSS
+  (`second_screen_splits_table`, `splitIcon_2`) and `second_screen_splits.svg`. Its `second_screen_mode` key now
+  means Secondary Screen. The screen-swap key feature (`second_screen_toggle`) is untouched.
+- Saved keys unchanged (`webcam_mode`, plus `second_screen_mode` now saved in gen4 too); the old shortcut action ids
+  `display.webcam_mode` and gen5 `advanced.second_screen_mode` still work (0 missing, 10 added).
+- Verified: typecheck, `parity:drift` (movepoolView/splitsView re-reviewed; `methods.load_all_settings` in gen5
+  already failed before this change), `parity:action-ids`, `parity:presets`; harness before/after on the gen4 and
+  gen5 smoke fixtures: overlay pixels unchanged outside the settings panel (which is taller by the dropdown) apart
+  from clock/fade timing noise; gen4 showed one transient `playerResets` key in the baseline at one checkpoint only
+  (same at the next), not traced. Screenshots of Secondary Screen with Mew at learning and non-learning levels,
+  Ponyta, Infernape, Oshawott and Splits in both generations.
+- Not verified: on Scott's machines, voice phrases (`parity:voice`), and with real DS screen capture in OBS.
+- The game-screenshot thread's change reads `second_screen_mode` for the DS bottom box in gens 4 and 5.

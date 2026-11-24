@@ -466,7 +466,6 @@ webcam. Saved as `webcam_mode` (gens 2-5, via each `auto_save_settings`; gen3's 
   cut like the Splits frame (`core/overlay/ArtPiece.ts`). The movepool SVGs' `frameBottom`: gens 1-2 1037, gen3 1058,
   gens 4-5 1055. Tutor rows (gens 2-5) and gen5's Form rows are left out; each tutor switch keeps its own value.
 - Splits: the view's `webcam` caps the frame's bottom border at `WEBCAM_FRAME_BOTTOM` (730) and shrinks the icons to fit.
-  Not applied to gen5's Second Screen Mode, which has its own right side (the toggle is hidden there).
 - Enemy team / Trainers: `EnemyTeamPanel`'s `webcam` prop squeezes a team whose art (`view.crop`'s height) runs past
   740: the full width stays, the rows are `scaleY`'d to fit, and each text node and type/move icon gets a CSS `scale`
   (its own property) that keeps it upright: text and move icons at a little under their size. Text is scaled from the
@@ -501,6 +500,26 @@ webcam. Saved as `webcam_mode` (gens 2-5, via each `auto_save_settings`; gen3's 
   `position: fixed` art, and gen4's speed bar is sized in % of it (it drew 0 px tall in a zero-size box). The box takes
   no clicks itself (`core/styles/enemyPanel.css`).
 - Trap: a slot passed on to a child (`<art-piece><slot></slot></art-piece>`) arrives as a Fragment, which takes no style.
+
+**Right Panel Layout: Secondary Screen (gens 4-5 only, 2026-11-24; `core/logic/secondScreen.ts`).** In the DS
+generations the Webcam Mode switch is a "Right Panel Layout" dropdown (`core/settings/rightPanelLayout.ts`, action
+`display.right_panel_layout`): Historical, Webcam or Secondary Screen. Gens 1-3 keep the plain Webcam Mode switch.
+- Saved as two switches, so no key was renamed: `webcam_mode` and `second_screen_mode` (gen5's old Second Screen Mode
+  key, reused; added to gen4's `auto_save_settings`). The dropdown never sets both; both on reads as Secondary Screen.
+  The old switches' shortcut actions keep their persisted ids (`display.webcam_mode`, gen5 `advanced.second_screen_mode`)
+  as an `actions` control.
+- Secondary Screen shortens every right panel exactly as Webcam Mode does (each overlay's `right_panel_shortened`
+  feeds the views' and `EnemyTeamPanel`'s `webcam`) and draws `images/genN/ui/second_screen_game_area.svg` under it:
+  the game area's green, inner edge x 1487, y 747.75, 419×314.25 (4:3). both draw it as a `colored-image` with
+  `hp_tracker_style`, like their game areas, so it takes the same HP/status/Pokérus tint. Other code that needs the box (the game
+  screenshot) checks `second_screen_mode`.
+- Movepool in Secondary Screen (Scott, 2026-11-24), unlike Webcam Mode: tutor rows show while the whole list is 45
+  rows or fewer; gen5's Form rows stay, with the level-up rows. Over 75 level-up (+Form) and TM/HM rows, only one list
+  shows: level-up while the lead (`player.team.0.level`) is at a level it learns a move at or one below one, else TM/HM;
+  the title says which ("Level-Up Moves" / "TM/HM Moves"). Only Mew, Mewtwo, Arceus and Gallade pass 75; Mew's
+  TM/HM list alone is ~100 rows, so it is still very small.
+- gen5's old Second Screen Mode (Splits over a game area, enemy panels hidden; advanced tier) was removed (Scott,
+  2026-11-24). The separate `second_screen_toggle` (feature `secondScreen`, the DS screen-swap key, decision 9) stays.
 
 **Trainer header too long (all five generations, 2026-11-17; `core/logic/trainerHeader.ts`).** In every mode, a
 one-trainer header longer than its generation's header holds (by character count: gen1 20, gen2 23, gen3 20, gens 4-5

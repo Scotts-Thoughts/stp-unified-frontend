@@ -13,7 +13,7 @@ import type { StyleValue } from "vue";
 
 /** A generation's classes on a splits table (each `style.css` places and sizes the table and its icons). */
 export interface SplitsTable {
-    /** `splits_table`, `splits_table_old` or `second_screen_splits_table`. */
+    /** `splits_table` or `splits_table_old`. */
     class: string;
     /** The table has a trainer-icon column first: the class on its cell (gens 1-2: `scaled_icon`) and on its image. */
     icon?: { cellClass?: string; imgClass?: string };
