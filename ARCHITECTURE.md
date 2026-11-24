@@ -320,7 +320,7 @@ Every `games/genN/` has:
 **Battle mechanics shared across generations (2026-10-13 audit).**
 - The rules live in `core/logic/`, each read from the decompilations and covered by a `tsx` self-test:
   `battleSpeed.ts` (gens 4-5 turn-order Speed and who moves first, `parity:speed`), `moveAccuracy.ts`
-  (gens 3-5 accuracy, `parity:accuracy`), `movePower.ts` (Flail/Reversal, Gyro Ball, Wring Out, Trump Card,
+  (gens 3-5 accuracy, `parity:accuracy`; out of battle every overlay uses its `moveAccuracyPreview`, never its own maths), `movePower.ts` (Flail/Reversal, Gyro Ball, Wring Out, Trump Card,
   Punishment, and gen5's Stored Power, Electro Ball and Heavy Slam, `parity:move-power`),
   `ohkoAccuracy.ts` (`parity:ohko`), `sendOutOrder.ts` (trainer AI send-out order, with gen 3/4 AI damage
   formulas; `parity:send-order`). `typeMatchups.ts` is the ROM's own type chart in ROM order, for code that must

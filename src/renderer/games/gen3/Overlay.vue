@@ -440,7 +440,7 @@ import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { cropHeight, webcamArtStyleOrHidden } from "~/core/logic/webcamMode";
 import { formatStage } from "~/core/logic/statFormat";
 import { gen3OhkoAccuracy, isOhkoMove } from "~/core/logic/ohkoAccuracy";
-import { gen3IsPhysicalType, moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
+import { gen3IsPhysicalType, moveAccuracy as calcMoveAccuracy, moveAccuracyPreview as calcMoveAccuracyPreview } from "~/core/logic/moveAccuracy";
 import { bindShortcuts } from "~/core/shortcuts/engine";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { wireGen3ChapterMarkers } from "./chapterMarkers";
@@ -4872,18 +4872,6 @@ export default defineComponent({
             var stageModsEva       = this.stageModifiersData.find(x => x.modType === "evasion")
             var currentModStageAcc = this.batt.yourPokemon.modStageAccuracy.value
             var currentModStageEva = this.batt.enemyPokemon.modStageEvasion.value
-            var abilityMod         = 1
-            // debugger
-            if (this.pkmn_ability == "Compound Eyes") {
-                abilityMod *= 1.3
-            }
-            // gen3 moves have no category: physical or special follows the type (IS_TYPE_PHYSICAL)
-            if (this.pkmn_ability == "Hustle" && gen3IsPhysicalType(this.moveType(move))) {
-                abilityMod *= 0.8;
-            }
-            if (this.game.properties.battle.enemyPokemon.ability.value == "SAND VEIL" && this.game.properties.battle.field.weather.value == "Sandstorm" && !this.weatherDenial && this.g3stateVariable == "Battle") {
-                abilityMod *= 0.8;
-            }
             if (moveAccuracy == `-`) {
                 return `-`
             }
@@ -4911,11 +4899,12 @@ export default defineComponent({
                 }) ?? `-`
             }
             else {
-                var accuracy = Math.floor(moveAccuracy * abilityMod)
-                if (accuracy > 100) {
-                    return 100
-                }
-                return accuracy
+                // Outside battle: the player's own ability only, capped at 100.
+                return calcMoveAccuracyPreview(3, {
+                    accuracy: moveAccuracy,
+                    physical: gen3IsPhysicalType(this.moveType(move)),
+                    userAbility: this.pkmn_ability,
+                }) ?? `-`
             }
         },
 

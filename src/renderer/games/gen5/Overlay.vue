@@ -392,7 +392,7 @@ import {
     wringOutPower,
 } from "~/core/logic/movePower";
 import { gen45TurnOrder, gen45TurnOrderSpeed } from "~/core/logic/battleSpeed";
-import { moveAccuracy as calcMoveAccuracy } from "~/core/logic/moveAccuracy";
+import { moveAccuracy as calcMoveAccuracy, moveAccuracyPreview as calcMoveAccuracyPreview } from "~/core/logic/moveAccuracy";
 import { bindShortcuts } from "~/core/shortcuts/engine";
 import { addSplitBookmark, sendChapterMarker, shuckieBookmarksEnabled } from "~/core/logic/shuckieBookmarks";
 import { pickSplitComparison } from "~/core/logic/splitComparison";
@@ -5788,40 +5788,10 @@ export default defineComponent({
             if (ability == 'No Guard') {
                 return '—'
             }
-            if (ability == 'Victory Star') {
-                accuracy = accuracy * (4506/4096)
-            }
-            if (ability == 'Compound Eyes') {
-                accuracy = accuracy * 1.3
-            }
-
             // if (weather == 'Hail' && move == 'Blizzard' && state == 'Battle') {
             //     return `—`
             // }
-            let calculated_accuracy
-            if (state == `Overworld` || state == `To Battle`) {
-                let item_modifier = 1
-                let ability_modifier = 1
-                switch (held_item) {
-                    case "Wide Lens": item_modifier = 4505/4096; break;
-                    case "Zoom Lens": item_modifier = 4915/4096; break;
-                    default: item_modifier = 1; break;
-                }
-                if (move_category == "Physical" && ability == "Hustle") {
-                    ability_modifier = 3277/4096
-                }
-                if (item_modifier == 1 && ability_modifier == 1) {
-                    calculated_accuracy = accuracy 
-                }
-                else {
-                    calculated_accuracy = Math.floor(accuracy * item_modifier * ability_modifier) <= 100 ? Math.floor(accuracy * item_modifier * ability_modifier) : 100
-                }
-                if (calculated_accuracy >= 100) { 
-                    calculated_accuracy = 100 
-                }
-                return Math.floor(calculated_accuracy)
-            }
-            else if (state == `Battle`) {
+            if (state == `Battle`) {
                 const opponent = this.activeOpponent()
                 // The target's No Guard: the move cannot miss
                 if (opponent.ability?.value == 'No Guard') {
@@ -5847,11 +5817,14 @@ export default defineComponent({
                     targetMovedFirst: enemy_moves_first,
                 }) ?? '—'
             }
-
-            if (accuracy > 100) {
-                accuracy = 100
-            }
-            else return Math.floor(accuracy)
+            // Overworld and every other state (e.g. 'From Battle' at the end of a battle): the
+            // player's own ability and item only, capped at 100.
+            return calcMoveAccuracyPreview(5, {
+                accuracy: listed_accuracy,
+                physical: move_category == "Physical",
+                userAbility: ability,
+                userItem: held_item,
+            }) ?? '—'
         },
         
         

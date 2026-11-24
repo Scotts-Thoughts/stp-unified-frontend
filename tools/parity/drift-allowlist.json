@@ -780,10 +780,10 @@
     {
       "section": "methods",
       "name": "getAccuracy",
-      "reason": "UNREVIEWED: gen4 | gen5 (gen4 101L, gen5 105L)",
+      "reason": "UNREVIEWED: gen4 | gen5 (gen4 80L, gen5 75L)",
       "bodies": {
-        "gen4": "bff8a5a383ee",
-        "gen5": "ed68de6f5326"
+        "gen4": "eafde493bc70",
+        "gen5": "d582c6e39b3c"
       }
     },
     {

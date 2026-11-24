@@ -26,7 +26,11 @@
  *   BrightPowder/Lax Incense 3686, Wide Lens 4505, Zoom Lens 4915, Victory Star 4506), the
  *   values the gen5 overlay already used. Fog does not exist in gen 5.
  *
- * Every step floors, as the games' integer arithmetic does; the result is capped at 100.
+ * Every gen3/gen4 step floors, as the games' integer arithmetic does; gen5 rounds the chained
+ * modifier once (halves down). The result is capped at 100.
+ *
+ * Outside battle the overlays show a preview from the user's own ability and item only:
+ * `moveAccuracyPreview`.
  */
 
 /** Gens 1-3 decide physical or special by the move's type (pokeemerald `IS_TYPE_PHYSICAL`: below Mystery). */
@@ -146,7 +150,24 @@ export function moveAccuracy(gen: 3 | 4 | 5, input: AccuracyInput): number | nul
     if (userItem === "widelens") mul(4505);
     if (userItem === "zoomlens" && input.targetMovedFirst) mul(4915);
     if (input.micleBerry) mul(4915);
-    hit = Math.floor((hit * chain) / 4096);
+    // Gen5 applies the chained modifier with rounding, halves rounding down (Showdown `modify`):
+    // a 90 move with Wide Lens is 99, not the 98 a floor gives.
+    hit = Math.floor((hit * chain + 2047) / 4096);
     if (input.gravity) hit = Math.floor((hit * 5) / 3);
     return Math.min(100, hit);
+}
+
+/**
+ * The hit chance shown outside battle (overworld, and the moments around a battle such as
+ * "From Battle"): the user's own ability and held item, no stages and nothing about a target.
+ * Zoom Lens counts as if the target moved first, as the overlays have always previewed it.
+ */
+export function moveAccuracyPreview(gen: 3 | 4 | 5, input: Pick<AccuracyInput, "accuracy" | "physical" | "userAbility" | "userItem">): number | null {
+    return moveAccuracy(gen, {
+        accuracy: input.accuracy,
+        physical: input.physical,
+        userAbility: input.userAbility,
+        userItem: gen === 3 ? null : input.userItem,
+        targetMovedFirst: true,
+    });
 }
