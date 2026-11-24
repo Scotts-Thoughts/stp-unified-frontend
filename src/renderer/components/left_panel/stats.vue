@@ -14,6 +14,9 @@
 import { defineComponent, inject, toDisplayString } from "vue";
 import PokeData from "~/logic/PokeData";
 import { StatTiles, type StatChild, type StatNode } from "~/core/overlay/player/StatTiles";
+import { evGaugeNode } from "~/core/overlay/player/evGauge";
+import { evGaugeState } from "~/core/logic/evGauge";
+import { evGaugeLayout } from "~/games/gen1/playerPanel";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { StatsPanelMode } from "~/stores/types/StatsPanelMode";
 import { useMetaStore } from "~/stores/metaStore";
@@ -147,7 +150,9 @@ export default defineComponent({
             const mode = this.display_mode;
             const battle = this.meta.gameState == GameState.in_battle;
             const opacity = this.statLabelOpacity();
-            return this.stat_object.map((stat): StatNode => {
+            // The stat experience gauge under each tile in the regular stats view (core/logic/evGauge.ts).
+            const gauge = mode == "Automatic" && this.settings.left_panel.stats.show_ev_gauge != false;
+            return this.stat_object.map((stat, index): StatNode => {
                 const cells: StatChild[] = [];
                 if (stat.name != 'Hp' && battle) {
                     const stage = this.game_properties.battle.yourPokemon['modStage' + stat.mod_path];
@@ -163,7 +168,12 @@ export default defineComponent({
                     case 'Medians':    cells.push(value("median", "", this.stat_averages[stat.base_stat_key].median)); break;
                     case 'DVs':        cells.push(value("dv", " dv", toDisplayString(this.get_dv(stat.name)) + "/15")); break;
                     case 'EVs':        cells.push(value("ev", " stat_exp", statExp())); break;
-                    case 'Automatic':  cells.push(value("auto", "", this.get_stat(stat.name))); break;
+                    case 'Automatic':
+                        cells.push(value("auto", gauge ? " ev_gauge_value" : "", this.get_stat(stat.name)));
+                        // Tiles go left, right, left...: .stat's nth-child rules in games/gen1/style.css.
+                        if (gauge) cells.push(evGaugeNode(evGaugeState(statExp(), "statExp"), evGaugeLayout,
+                            index % 2 == 0 ? 1 : 2, (Math.floor(index / 2) + 1) as 1 | 2 | 3));
+                        break;
                     case 'Vitamins':
                         cells.push(
                             { key: "vit1", class: "stat_value stat_multi_line devs2", children: [

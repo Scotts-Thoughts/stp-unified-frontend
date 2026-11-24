@@ -14,6 +14,8 @@ import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
 import type { TypeBadgesLayout } from "~/core/overlay/player/TypeBadges";
 import type { InfoRowProps } from "~/core/overlay/player/InfoRow";
 import type { StatChild, StatNode } from "~/core/overlay/player/StatTiles";
+import { statEvGauge, type EvGaugeLayout } from "~/core/overlay/player/evGauge";
+import { evGaugeState, evTotal } from "~/core/logic/evGauge";
 
 const frame = (picture: string): FaultsNode => ({
     class: "colored-image ds",
@@ -51,6 +53,10 @@ export const faultsLayout = {
  * this box's 68 px. */
 export const faultsFontSizes = [68, 59, 40] as const;
 
+/** Where the coloured stat tiles are, for the EV gauge (core/overlay/player/evGauge.ts). The tiles' cut corners take
+ * 15 px off each end of the bottom edge, so the gauge keeps 16 px from the sides to sit on the flat part. */
+export const evGaugeLayout: EvGaugeLayout = { left: [22, 225], top: [71, 134, 197], width: 197, height: 59, side: 16 };
+
 /**
  * The stat tiles (core/overlay/player/StatTiles.ts), one `<div>` per stat: the stage modifier in battle, the label
  * (the vitamin's name in Vitamins mode) and the mode's value cells. `vm` is the overlay; every value is read the way
@@ -62,6 +68,9 @@ export function statTiles(vm: any): StatChild[] {
     const team0 = vm.game.properties.player.team[0];
     const stats = mode == "Automatic" ? vm.get_stat() : null;
     const show = toDisplayString;
+    // The EV gauge under each tile in the regular stats view (core/logic/evGauge.ts).
+    const gauge = mode == "Automatic" && vm.show_ev_gauge != false;
+    const total = gauge ? evTotal(vm.stat_object.map((s: any) => team0.evs[s.path]?.value)) : 0;
     return vm.stat_object.map((stat: any): StatNode => {
         const cells: StatChild[] = [];
         if (stat.name != "Hp" && vm.game.properties.meta.state.value == "Battle" && !vm.not_valid_battle_state) {
@@ -95,7 +104,10 @@ export function statTiles(vm: any): StatChild[] {
                 break;
             case "Base Stats Median":  cells.push(value("median", `average_value_style ${place}`, vm.average_median_stats(stat.object_identifier).median)); break;
             case "Base Stats Average": cells.push(value("average", `average_value_style ${place}`, vm.average_median_stats(stat.object_identifier).average)); break;
-            case "Automatic":          cells.push(value("auto", `stat_value_style ${place}`, stats[stat.abrv])); break;
+            case "Automatic":
+                cells.push(value("auto", `stat_value_style ${place}${gauge ? " ev_gauge_value" : ""}`, stats[stat.abrv]));
+                if (gauge) cells.push(statEvGauge(evGaugeState(ev(), "ev", total), evGaugeLayout, stat.value_column, stat.stat_row));
+                break;
         }
         return { children: cells };
     });

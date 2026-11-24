@@ -1017,6 +1017,7 @@ export default defineComponent({
             show_wild_battles:   MyStorage['show_wild_battles']   ?? readRightPanelMode(MyStorage['right_panel']).wild,
             // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
             send_out_order:      MyStorage['send_out_order']      ?? true,
+            show_ev_gauge:       MyStorage['show_ev_gauge']       ?? true,
             // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
             webcam_mode:         MyStorage['webcam_mode']         ?? false,
             // The trainer the "Trainers" right panel previews (a trainer-table id), and the picker's search text.
@@ -1141,6 +1142,7 @@ export default defineComponent({
                 "automatic_post_battle_splits",
                 "show_wild_battles",
                 "send_out_order",
+                "show_ev_gauge",
                 "webcam_mode",
                 "examined_trainer",
                 "no_counters",

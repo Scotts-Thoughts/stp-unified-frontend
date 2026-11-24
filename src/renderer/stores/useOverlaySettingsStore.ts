@@ -144,6 +144,8 @@ function defaultOverlaySettings() {
 			left_panel: {
 				stats: {
 					mode: StatsPanelMode.automatic,
+					/** "Show EV Gauge": the stat experience gauge under each tile in the Automatic view (core/overlay/player/evGauge.ts). */
+					show_ev_gauge: true as boolean,
 				}
 			},
 			pop_ups: {

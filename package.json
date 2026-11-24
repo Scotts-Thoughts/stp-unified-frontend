@@ -59,6 +59,7 @@
     "parity:ohko": "tsx tools/parity/ohko-selftest.ts",
     "parity:reset-guard": "tsx tools/parity/reset-guard-selftest.ts",
     "parity:profiles": "tsx tools/parity/profile-router-selftest.ts",
+    "parity:ev-gauge": "tsx tools/parity/ev-gauge-selftest.ts",
     "parity:speed": "tsx tools/parity/battle-speed-selftest.ts",
     "parity:accuracy": "tsx tools/parity/accuracy-selftest.ts",
     "parity:move-power": "tsx tools/parity/move-power-selftest.ts",

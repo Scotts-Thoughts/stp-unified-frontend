@@ -372,6 +372,9 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
             title: "Toggles",
             controls: [
                 flag("display.wild_battles", "Show Wild Battles", () => settings().right_panel, "wild_battles"),
+                flag("display.show_ev_gauge", "Show EV Gauge", () => settings().left_panel.stats, "show_ev_gauge", {
+                    title: "A gauge under each stat in the regular stats view: one pill per vitamin, then a bar up to the most stat experience a stat can hold.",
+                }),
                 flag("display.webcam_mode", "Webcam Mode", () => settings().right_panel, "webcam_mode", {
                     title: "Keeps the right panel above the bottom right corner, to leave room for a webcam.",
                     // A streaming setup, not part of a Pokémon's look: not saved in presets.

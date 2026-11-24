@@ -29,3 +29,34 @@
 .species-art-fade-leave-active {
     transition: opacity 750ms ease-in-out;
 }
+
+/* The EV gauge along the bottom of each stat tile in the regular stats view (core/overlay/player/evGauge.ts, which
+   sets every position and width in whole pixels): a thin see-through case, ten pills and a bar. */
+.ev_gauge {
+    position: absolute;
+    box-sizing: border-box;
+    border-radius: 3px;
+    background: rgba(20, 20, 20, 0.6);
+    pointer-events: none;
+    z-index: 60;
+}
+
+.ev_gauge_pill {
+    position: absolute;
+    top: 1px;
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.ev_gauge_fill {
+    height: 100%;
+    background-repeat: no-repeat;
+}
+
+.ev_gauge_blue .ev_gauge_fill { background-image: var(--expBarExperience, linear-gradient(90deg, hsl(189, 92%, 45%), hsl(187, 100%, 69%))); }
+.ev_gauge_green .ev_gauge_fill { background-image: linear-gradient(90deg, hsl(128, 70%, 40%), hsl(105, 85%, 62%)); }
+.ev_gauge_yellow .ev_gauge_fill { background-image: linear-gradient(90deg, hsl(43, 100%, 47%), hsl(52, 100%, 65%)); }
+.ev_gauge_red .ev_gauge_fill { background-image: linear-gradient(90deg, hsl(2, 85%, 48%), hsl(8, 100%, 66%)); }
+.ev_gauge_grey .ev_gauge_fill { background-image: linear-gradient(90deg, hsl(0, 0%, 58%), hsl(0, 0%, 84%)); }

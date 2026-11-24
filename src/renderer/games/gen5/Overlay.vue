@@ -589,6 +589,7 @@ export default defineComponent({
             show_wild_battles            : MyStorage['show_wild_battles']      ?? false,
             // The enemy team in the order the trainer's AI sends it out (core/logic/sendOutOrder.ts), on by default.
             send_out_order               : MyStorage['send_out_order']         ?? true,
+            show_ev_gauge                : MyStorage['show_ev_gauge']          ?? true,
             // Webcam Mode (core/logic/webcamMode.ts): the right panel leaves the bottom right corner free.
             webcam_mode                  : MyStorage['webcam_mode']            ?? false,
             // Secondary Screen (core/logic/secondScreen.ts): the panel shortened as in Webcam Mode, the DS's second screen

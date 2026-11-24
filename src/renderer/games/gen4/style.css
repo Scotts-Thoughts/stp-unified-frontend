@@ -2123,3 +2123,10 @@
     width: 1012px;
     height: 756px;
 }
+
+/* The stat number while the EV gauge shows (core/overlay/player/evGauge.ts): 90% of its size, centred in the tile. */
+.gen-4 .stat_value_style.ev_gauge_value {
+    font-size: 50px;
+    /* The digits sit 1 px low at line-height 58px: this centres them in the 59 px tile. */
+    margin-top: -1px;
+}

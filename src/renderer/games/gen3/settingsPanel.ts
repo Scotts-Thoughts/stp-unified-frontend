@@ -426,6 +426,9 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
             title: "Toggles",
             controls: [
                 flag(vm, "display.wild_battles", "Show Wild Battles", "show_wild_battles"),
+                flag(vm, "display.show_ev_gauge", "Show EV Gauge", "show_ev_gauge", {
+                    title: "A gauge under each stat in the regular stats view: one pill per vitamin, then a bar up to the most EVs a stat can hold.",
+                }),
                 flag(vm, "display.send_out_order", "Predicted Send-Out Order", "send_out_order"),
                 flag(vm, "display.webcam_mode", "Webcam Mode", "webcam_mode", {
                     title: "Keeps the right panel above the bottom right corner and hides the tutor moves, to leave room for a webcam.",
