@@ -6,6 +6,7 @@ import fs from "fs";
 import { ControlServer } from "./control-server";
 import { TimerFrameServer } from "./timer-frame-server";
 import { registerIpc } from "./ipc";
+import { registerRouterIpc } from "./routerClient";
 import { appRoot } from "./paths";
 import { clearHotkeysForReload, startHotkeys, stopHotkeys } from "./hotkeys";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
@@ -255,6 +256,7 @@ if (!cutter) app.whenReady().then(() => {
     importLegacyLocalStorage();
     ensureImagePool();
     registerIpc(() => mainWindow);
+    registerRouterIpc();
     registerReportIpc(() => mainWindow);
     // Voice control (src/main/voice/): nothing loads until the overlay switches it on.
     registerVoiceIpc(() => mainWindow);

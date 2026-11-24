@@ -436,6 +436,7 @@ import { BadgeRow } from "~/core/overlay/player/BadgeRow";
 import { healthTrackerStyle } from "~/core/logic/healthTracker";
 import { expProgress } from "~/core/logic/expCurve";
 import { confirmReset, isHallOfFameReset } from "~/core/logic/resetGuard";
+import { onBattleEnded, setProfileSkip } from "~/core/profile/tracker";
 import { findKeyIgnoringCase } from "~/core/logic/caseInsensitiveLookup";
 import { cropHeight, webcamArtStyleOrHidden } from "~/core/logic/webcamMode";
 import { formatStage } from "~/core/logic/statFormat";
@@ -7165,9 +7166,12 @@ export default defineComponent({
 
         //*Autosplitter
         //write to file at the end of a key battle
+        // Player profiles (move-stats spec §4.4): re-filming and test runs aren't added.
+        setProfileSkip(() => this.testRun == true || this.refilming_mode == true)
         this.game.properties.battle.turnInfo.battleOutcome.change(async (prop) => {
             // console.log('Battle Outcome Changed')
             this.autosplitter_process()
+            if (prop.value) onBattleEnded()
             // console.log('Autosplitter Attempted to Run by Battle Outcome Change')
             // console.log("Battle outcome: " + prop.value)
             if ((prop.value == "WON" || prop.value == 1) && this.game.properties.battle.type.trainer.value) {

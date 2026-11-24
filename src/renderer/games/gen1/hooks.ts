@@ -6,6 +6,7 @@ import { gen1ChapterMarkers } from "~/games/gen1/markers";
 import { installGen1MarkerHooks } from "~/games/gen1/markerHooks";
 import { applyManualStarterDvs, OAKS_LAB } from "~/games/gen1/starterDvs";
 import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
+import { onBattleEnded, setProfileSkip } from "~/core/profile/tracker";
 
 /**
  * gen1's run hooks: everything the overlay subscribes to on the mapper once it is
@@ -28,6 +29,9 @@ import { RightPanelMode } from "~/stores/types/RightPanelMode.js";
  */
 export function installGen1RunHooks(vm: any): void {
 
+    // Player profiles (move-stats spec §4.4): re-filming and test runs aren't added.
+    setProfileSkip(() => vm.runConfig.advanced.test_run == true || vm.runConfig.advanced.refilming_mode == true);
+
     // The split names logged this run, in order (2026-10-15). A rival split already in the
     // list is skipped unless it is the latest split: a phantom rival battle after a reset
     // once logged a second "Rival1-Lab" at Mt Moon (ARCHITECTURE §9). Re-beating the rival
@@ -47,6 +51,7 @@ export function installGen1RunHooks(vm: any): void {
     // BLACKOUT - Identifies when a blackout might have occurred, and marks battles in the OBS recording.
     vm.game.properties.meta.state.change((newProp, oldProp) => {
         PubSub.publish("@run/check_blackout", [newProp, oldProp]);
+        if (newProp.value == "From Battle") onBattleEnded();
         if (newProp.value == "To Battle" && vm.game.properties.battle.type.value == "Trainer") {
             vm.settings.clearRightPanelOverride();
             if (oldProp.value == "Overworld") {

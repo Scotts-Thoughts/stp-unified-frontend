@@ -105,6 +105,11 @@ docs/             Reference docs. See §13.
 - `importLegacy.ts`, `leveldb.ts`, `localStorageImport.ts`: the one-time seeding from the legacy apps' profiles.
 - `splitComparison.ts`, `replayFile.ts`: read split comparisons from `.replay` bookmarks or legacy CSVs.
 - `cutter.ts`: the air_cutter editor modes (`--cutter-*` flags), which replace the normal boot.
+- `routerFetch.ts`, `routerClient.ts`: `router:get` asks the router's move-stats server (`127.0.0.1:30161`, §8)
+  for `/status` or `/move-stats`. It runs here because the router sends no CORS headers on purpose. The preload
+  calls it with a plain `ipcRenderer.invoke`, not the counted `invoke`, so a poll waiting on a router that isn't
+  running never holds the harness's IPC barrier. `profiles:remove` deletes one profile file (only under
+  `data/profiles/`).
 - `updater/`: the self-updater, on only in a packaged Windows build. It checks GitHub releases at start-up, downloads
   only the files that changed, and swaps them in with `apply.ps1` while the app is closed. The replaced files stay
   in `<install>/updates/previous/` for one local rollback. Its window is `updates.html` (`core/updates/`), opened by
@@ -170,6 +175,7 @@ docs/             Reference docs. See §13.
 | `window/` | `scaleToFit`, virtual keys |
 | `report/` | The Report button and its drawing/details screens (teleported to `<body>`); the back end is `src/main/report.ts` (§2) |
 | `voice/` | Voice control: the microphone button, mic capture and the wake/command logic, and which shortcut action each command runs; the back end is `src/main/voice/` (§2) |
+| `profile/` | Player profiles and move stats (spec `move-stats/spec.md` §4). `ProfileBar.vue` is the bar at the top of the start screen (`components/GameSelect.vue`): picture, switch/new/rename/delete, the router dot (green: recording the picked game; amber: another game; grey: not recording) and the "Move stats" button, which opens `MoveStatsScreen.vue` over the start screen. `tracker.ts` asks the router while a game is loaded: `main.ts` calls `startProfileTracking(bucket)` on mapper load and `stopProfileTracking()` on unload; each generation calls `setProfileSkip(() => test run or re-filming on)` in its mounted code and `onBattleEnded()` where it sees a battle end (gen1 `hooks.ts` and gens 4–5 on `meta.state` "From Battle", gen2 on `lowHealthAlarm` "Disabled", gen3 on `battleOutcome`); a 30 s poll is the backstop. `merge.ts` folds a reply into a profile (pure, tested by `npm run parity:profiles`). `buckets.ts` is the only file that knows games: a bucket is the edition's `game` ("Red and Blue"), and the router's single-version names map onto it. `counts.ts` adds counts and gives the luck labels |
 | `styles/base.css` | The document reset only. Each generation's look is in `games/genN/style.css` |
 
 ### Dependencies
@@ -746,6 +752,7 @@ keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. 
 | Split CSVs | `<appRoot>/splits/` (folder names kept from the five legacy apps) | `core/persistence/splitFiles.ts` + `games/genN/splits.js` |
 | Per-Pokémon presets (gen4 so far) | `<userData>/stp-overlay/data/presets/<game>/<species>/<name>.json`, one file each | `core/presets/presets.ts`, `core/settings/SoloPicker.vue`, `games/genN/presets.ts` |
 | Legacy gen1 presets (read-only) | `<appRoot>/storage/Storage.json` | `logic/Storage.ts` |
+| Player profiles (move stats from the router) | `<userData>/stp-overlay/data/profiles/<id>.json`, one file each; the active one is `active_profile` in the `global` section of `user_state.json` | `core/profile/profiles.ts`, `core/profile/merge.ts` |
 
 `<userData>` is `%APPDATA%` on Windows and `~/Library/Application Support` on a Mac.
 
@@ -755,6 +762,14 @@ keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. 
 - `settle()` after each change is load-bearing. Those watchers skip while `is_loading_evolution_style` is true, so a value set during a species load shows but is never saved. Likewise a texture change resets plain filters set in the same tick. `npm run parity:presets` tests this against a fake overlay.
 - With Evolution on, each family member has its own stored look, so the host carries them all (`family_looks`). Otherwise a refilm would change look at the first evolution.
 - Trap: in a build run from source, the style store keeps only `GEN4_STYLE_PROPERTIES` of a species value (any other field written there is silently dropped; `selected_evolution_species` was, until #189). It lacks `iv_mode` and `manual_ivs`, so those two are not remembered across species changes there (they are in an installed build). A preset still restores them when loaded.
+
+**Player profiles** (2026-11-24). A profile file is `{ format: 1, id, name, picture, created, buckets }`. Each
+bucket (one per game pair, `core/profile/buckets.ts`) holds the summed `player`/`enemy`/`other` counts and its
+`runs`. A run keeps the battle ids it added (`battle_ids`) and the ones it only marked as handled
+(`skipped_battle_ids`: seen while re-filming or on a test run, or after "Remove from profile"), plus the sum of what
+it added (`counts`), so removing it subtracts exactly that. A removed run stays in the file with `removed: true`,
+or the next reply would add its battles again. Nothing is written until a profile is made or the router reports a
+battle; the first reported battle makes "Player 1" if there is no profile.
 
 **Persisted key names are a contract.** Renaming one silently loses a user's settings, and harness oracle 4
 flags it.
@@ -772,6 +787,7 @@ flags it.
 | Microphone (voice control) | `getUserMedia`, only while the mic button is on | `core/voice/voice.ts`, then `src/main/voice/` (§2) |
 | air_cutter (video tool) | launches the app with `--cutter-*` | `src/main/cutter.ts`, `tools/cutter/` |
 | The clock page (our own) | `http://127.0.0.1:30160/timer` | `src/main/timer-frame-server.ts`, `core/overlay/ClockFrame.ts` |
+| pkmn_yellow_xp_router (move stats) | `http://127.0.0.1:30161`, only while it records | `src/main/routerFetch.ts` (asked from main: no CORS), `core/profile/tracker.ts`, `core/profile/ProfileBar.vue` |
 
 `docs/external-contracts.md` specifies exactly what each of these sends and expects:
 - control routes and `/status` fields;
@@ -975,7 +991,7 @@ From cheapest to most expensive:
 |---|---|---|---|
 | Typecheck | `npm run typecheck` | ~15 s | Always. Covers renderer, shared and preload, but **not** `src/main` |
 | Drift | `npm run parity:drift` | ~3 s | Any gen2–5 overlay or mixin edit |
-| Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:reset-guard`, `parity:debounce`, `parity:shortcuts`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits, resets, shortcuts or import code |
+| Self-tests | `parity:selftest`, `parity:gamehook`, `parity:adapter`, `parity:bookmarks`, `parity:replay-splits`, `parity:reset-guard`, `parity:profiles`, `parity:debounce`, `parity:shortcuts`, `import:selftest` | seconds each, no build | When touching the client, bookmarks, splits, resets, shortcuts, import or player-profile code |
 | Presets | `npm run parity:presets` | seconds | `core/presets/`; the fake overlay does not cover a real `PresetHost` (§7) |
 | Voice | `npm run parity:voice` (needs a build); `npx tsx --tsconfig tsconfig.web.json tools/parity/voice-app.ts --gen=N` | ~1 min; ~2 min | Voice control, its phrases, or the shortcut action ids it uses (§2 `voice/`) |
 | Action ids | `npm run parity:action-ids -- --out=<file>` before, `-- --compare=<file>` after | seconds, no build | When a change rebuilds a generation's shortcut actions (settings panel descriptors): no persisted id may go missing |
