@@ -142,3 +142,26 @@
   Ponyta, Infernape, Oshawott and Splits in both generations.
 - Not verified: on Scott's machines, voice phrases (`parity:voice`), and with real DS screen capture in OBS.
 - The game-screenshot thread's change reads `second_screen_mode` for the DS bottom box in gens 4 and 5.
+
+## Game screenshot
+
+- New camera button (settings panel, left of the microphone) and a bindable "Save Game Screenshot" shortcut
+  (`screenshot.game`, group Run) in all five generations. It takes the game picture from Super Shuckie's
+  `GET /screenshot`, takes the overlay window's own picture, draws each game screen into the gameplay box with
+  sharp pixels (as OBS layers it), saves `screenshots/<date> <time> <game>.png` next to `reports/` and copies it
+  to the clipboard. Boxes: gens 1-2 the Game Boy box, gen3 the GBA box, gens 4-5 the DS top screen; gen5 also
+  draw the touch screen into its box (`SCREEN_BOXES.dsSecondScreen`) when `second_screen_mode` is on. gen4 gets
+  that field from the Right Panel Layout change (another thread); until then gen4 draws only the top screen.
+- Needs the matching Super Shuckie change (its `/screenshot` used to need Settings > Allow bot control too).
+  With an older Super Shuckie the button's tooltip says to update it or turn bot control on.
+- New files: `src/main/screenshot.ts`, `src/renderer/core/screenshot/`. `screenshots/` is gitignored.
+  ARCHITECTURE §2 and docs/external-contracts.md §3 describe it.
+- Verified: `npm run typecheck`; `npm run build`; main's tsc output has no new errors (15 before and after);
+  `parity:shortcuts` passes; drove the built app (Linux, xvfb) on the gen1, gen3, gen4 and gen5 smoke fixtures
+  against a stand-in Super Shuckie serving a test card, and checked the saved PNG's pixels land exactly in each
+  box (gen5 with Second Screen Mode on too), the clipboard holds the PNG, and with no Super Shuckie the tooltip
+  says it didn't answer.
+- Not verified: gen2 (no fixture; it uses the same box as gen1), a real Super Shuckie, Windows, and the parity
+  harness against a baseline. The new button changes the settings panel's top row, so the layout and pixels
+  oracles will show it in every generation. `parity:drift` fails on gen5 `load_all_settings`, which this change
+  doesn't touch (no Overlay.vue edits).

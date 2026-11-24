@@ -1,6 +1,7 @@
 import { manualNewRun } from "~/core/logic/newRunGuard";
 import { panelActions } from "~/core/settings/toActions";
 import { press } from "~/core/shortcuts/build";
+import { SCREEN_BOXES, screenshotAction } from "~/core/screenshot/screenshot";
 import type { ShortcutAction } from "~/core/shortcuts/types";
 import { gen2SettingsPanel } from "./settingsPanel";
 
@@ -102,5 +103,5 @@ function legacyFKeys(vm: any): ShortcutAction[] {
 export function gen2Actions(vm: any): ShortcutAction[] {
   // One action per settings control, from the same description that renders the panel
   // (settingsPanel.ts), so the two can't drift apart.
-  return [...legacyFKeys(vm), ...panelActions(gen2SettingsPanel(vm))];
+  return [...legacyFKeys(vm), ...panelActions(gen2SettingsPanel(vm)), screenshotAction(() => ({ top: SCREEN_BOXES.gameBoy }))];
 }

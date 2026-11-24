@@ -1,0 +1,48 @@
+/*
+ * The camera button (ScreenshotButton.vue), in the `.stp-top-buttons` row (core/report/report.css),
+ * shaped like the microphone button. Every rule sets what it needs, because the generations'
+ * style.css files style bare `button` elements.
+ */
+
+.stp-screenshot-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(190, 190, 200, 0.45);
+    border-radius: 6px;
+    background: rgba(30, 32, 40, 0.85);
+    color: #b9bdc8;
+    text-shadow: none;
+    box-shadow: none;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.stp-screenshot-btn:hover {
+    background: rgba(50, 54, 66, 0.95);
+    color: #ffffff;
+}
+
+.stp-screenshot-btn svg {
+    flex: none;
+}
+
+.stp-screenshot-btn.stp-screenshot-btn-busy {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.stp-screenshot-btn.stp-screenshot-btn-done {
+    border-color: rgba(120, 230, 140, 0.6);
+    color: #d6ffdd;
+}
+
+.stp-screenshot-btn.stp-screenshot-btn-error {
+    border-color: rgba(255, 190, 90, 0.7);
+    background: rgba(80, 50, 10, 0.9);
+    color: #ffe2b5;
+}

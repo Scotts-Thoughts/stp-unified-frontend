@@ -125,6 +125,7 @@ Used by gen1 (`useEmulatorStatsStore`, poll every **10 ms**) and by gen5's `Shuc
 | `POST /mark-end` | end it |
 | `POST /increment-counter?name=X[&by=Y]` | bump a counter |
 | `GET /bookmarks` | `{ replay, state: "none"\|"recording"\|"playback", generation, editable, bookmarks: [{ id, name, in_frame, … }], … }` |
+| `GET /screenshot` | `image/png`: the current screens at the console's own size (160x144, 240x160, 256x384 for a DS with the top screen above the bottom, no gap). The overlay's game screenshot (`core/screenshot/`). Scott's fork answers it with only **Enable external commands** on; upstream it also needs **Allow bot control** (403 otherwise). 409 when no game is loaded |
 | `POST /add-bookmark?name=X&type=T&frame=F` | a replay bookmark; `T` is created on first use. Needs Super Shuckie's `replay-bookmarks` branch (format v5); older builds 404 |
 
 **Bookmarks at every chapter marker** (all generations, `core/logic/shuckieBookmarks.ts`): each OBS chapter

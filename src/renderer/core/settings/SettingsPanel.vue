@@ -48,6 +48,7 @@
         </div>
         <div class="stp-top-buttons">
             <updates-button></updates-button>
+            <screenshot-button></screenshot-button>
             <voice-button></voice-button>
             <report-button></report-button>
         </div>
@@ -61,6 +62,7 @@ import SettingsControl from "./SettingsControl.vue";
 import ReportButton from "../report/ReportButton.vue";
 import UpdatesButton from "../updates/UpdatesButton.vue";
 import VoiceButton from "../voice/VoiceButton.vue";
+import ScreenshotButton from "../screenshot/ScreenshotButton.vue";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec, Tier } from "./types";
 import "../styles/settings.css";
 
@@ -78,7 +80,7 @@ const COLLAPSED_KEY = "settings_collapsed_groups";
  */
 export default defineComponent({
     name: "SettingsPanel",
-    components: { SettingsControl, ReportButton, UpdatesButton, VoiceButton },
+    components: { SettingsControl, ReportButton, UpdatesButton, VoiceButton, ScreenshotButton },
     provide() {
         return { settingsPanel: this.panel };
     },

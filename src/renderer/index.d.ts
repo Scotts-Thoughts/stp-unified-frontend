@@ -73,6 +73,10 @@ declare global {
         save: (payload: ReportPayload) => Promise<string>,
         cancel: () => Promise<void>,
       },
+      screenshot: {
+        capture: () => Promise<string>,
+        save: (png: Uint8Array, game: string) => Promise<string>,
+      },
       voice: {
         start: () => Promise<void>,
         stop: () => Promise<void>,

@@ -1,6 +1,7 @@
 import { manualNewRun } from "~/core/logic/newRunGuard";
 import { panelActions } from "~/core/settings/toActions";
 import { press } from "~/core/shortcuts/build";
+import { SCREEN_BOXES, screenshotAction } from "~/core/screenshot/screenshot";
 import type { ShortcutAction } from "~/core/shortcuts/types";
 import { gen3SettingsPanel } from "./settingsPanel";
 
@@ -94,5 +95,6 @@ export function gen3Actions(vm: any): ShortcutAction[] {
         ...panelActions(gen3SettingsPanel(vm)),
         // The right panel's old "Wild" option (decision 27/30: Automatic with Show Wild Battles on). Its saved id stays.
         press("right_panel.set.wild", "Right Panel: Automatic + Show Wild Battles (was \"Wild\")", "Display", () => { vm.set_right_panel("Wild"); }),
+        screenshotAction(() => ({ top: SCREEN_BOXES.gameBoyAdvance })),
     ];
 }

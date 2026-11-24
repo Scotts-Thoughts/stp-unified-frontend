@@ -5,6 +5,7 @@ import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
 import { panelActions } from "~/core/settings/toActions";
 import { press } from "~/core/shortcuts/build";
+import { SCREEN_BOXES, screenshotAction } from "~/core/screenshot/screenshot";
 import type { ShortcutAction } from "~/core/shortcuts/types";
 import { gen1SettingsPanel } from "./settingsPanel";
 
@@ -109,5 +110,5 @@ function legacyFKeys(): ShortcutAction[] {
 export function gen1Actions(): ShortcutAction[] {
   // One action per settings control, from the same description that renders the panel
   // (settingsPanel.ts), so the two can't drift apart.
-  return [...legacyFKeys(), ...panelActions(gen1SettingsPanel())];
+  return [...legacyFKeys(), ...panelActions(gen1SettingsPanel()), screenshotAction(() => ({ top: SCREEN_BOXES.gameBoy }))];
 }

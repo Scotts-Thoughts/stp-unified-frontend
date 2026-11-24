@@ -142,6 +142,14 @@ const api = {
     cancel: () => invoke('report:cancel'),
   },
 
+  /** The game screenshot (src/main/screenshot.ts, core/screenshot/). */
+  screenshot: {
+    /** The window's picture now, as a PNG data URL. */
+    capture: () => invoke('screenshot:capture'),
+    /** Writes `screenshots/<date> <time> <game>.png`, copies it to the clipboard and returns its path. */
+    save: (png, game) => invoke('screenshot:save', png, game),
+  },
+
   /**
    * Voice control (src/main/voice/). `start` loads the speech model (rejects if the Mac
    * refuses the microphone); `audio` is a fire-and-forget send, ~10 a second while on.

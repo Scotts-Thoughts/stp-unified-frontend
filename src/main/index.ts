@@ -12,6 +12,7 @@ import { clearHotkeysForReload, startHotkeys, stopHotkeys } from "./hotkeys";
 import { ensureImagePool, importLegacyLocalStorage, importLegacyUserData } from "./importLegacy";
 import { cutterArgs, runCutter } from "./cutter";
 import { registerReportIpc, startReportLog } from "./report";
+import { registerScreenshotIpc } from "./screenshot";
 import { startUpdater } from "./updater";
 import { registerVoiceIpc, stopVoice } from "./voice";
 
@@ -258,6 +259,7 @@ if (!cutter) app.whenReady().then(() => {
     registerIpc(() => mainWindow);
     registerRouterIpc();
     registerReportIpc(() => mainWindow);
+    registerScreenshotIpc(() => mainWindow);
     // Voice control (src/main/voice/): nothing loads until the overlay switches it on.
     registerVoiceIpc(() => mainWindow);
     ipcMain.handle('window:shown', () => windowShown ? undefined : new Promise<void>((resolve) => {
