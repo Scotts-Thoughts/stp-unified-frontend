@@ -16,6 +16,22 @@ import { fitTrainerHeader } from "~/core/logic/trainerHeader";
 /** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
 const liveOrder = new SendOutOrderCache();
 
+/**
+ * The art file suffix for a form the enemy panel draws apart from the species' plain art: East Sea Shellos and
+ * Gastrodon (form 1; the plain `Shellos.webp` is the West Sea art). The form is the party member's form byte
+ * (`flags.alternate_forms`), which the ST Platinum mapper reads; the D/P and HG/SS mappers read it from 1.7.0.
+ * Only when `member` holds `species`, so a stale party in memory never colours another Pokémon.
+ */
+const FORM_ART: Record<string, Record<number, string>> = {
+    Shellos: { 1: "-East" },
+    Gastrodon: { 1: "-East" },
+};
+export function enemyFormArt(member: any, species: unknown): string {
+    const forms = FORM_ART[String(species)];
+    if (!forms || member?.species?.value != species) return "";
+    return forms[member?.flags?.alternate_forms?.value] ?? "";
+}
+
 function speciesTypes(vm: any, species: unknown): [string, string] {
     const entry = vm.g4PokemonData[species as string];
     const type1 = entry?.type_1 ?? "Normal";
@@ -144,7 +160,7 @@ export function enemyTeamView(vm: any): Gen4EnemyTeam {
             ui: vm.enemyPkmnUI(battle.opponent.team[x]),
             speed: { label: speed, svgClass: vm.svgColorClass(speed, battle.opponent.team[x]) },
             sprite: {
-                src: `images/gen4/pokemon/${vm.speciesSpecialCharacters(mon?.species)}.webp`,
+                src: `images/gen4/pokemon/${vm.speciesSpecialCharacters(mon?.species)}${enemyFormArt(battle.opponent.team[x], species)}.webp`,
                 style: { transform: vm.enemyTransformFor(species), filter: `drop-shadow(${vm.getEnemySpriteFlipped(species) ? -2 : 2}px 2px 2px #000) saturate(1.1)` },
                 species,
                 resizing: vm.enemyResize.slot === x,
@@ -185,7 +201,7 @@ export function enemyTeamView(vm: any): Gen4EnemyTeam {
             ui: vm.enemyPkmnUI(member),
             speed: { label: speed, svgClass: vm.svgColorClass(speed, member) },
             sprite: {
-                src: `images/gen4/pokemon/${vm.speciesSpecialCharacters(species)}.webp`,
+                src: `images/gen4/pokemon/${vm.speciesSpecialCharacters(species)}${enemyFormArt(member, species)}.webp`,
                 style: { transform: vm.enemyTransformFor(species), filter: `drop-shadow(${vm.getEnemySpriteFlipped(species) ? -2 : 2}px 2px 2px #000) saturate(1.1)` },
                 species,
                 resizing: false,
@@ -259,7 +275,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen4EnemyT
             ui: "opacity: 1",
             speed: { label: speedLabel(order, "enemy"), svgClass: speedColorClass(order, false) },
             sprite: {
-                src: `images/gen4/pokemon/${vm.speciesSpecialCharacters(mon.species)}.webp`,
+                src: `images/gen4/pokemon/${vm.speciesSpecialCharacters(mon.species)}${mon.artSuffix ?? ""}.webp`,
                 style: { transform: vm.enemyTransformFor(mon.species), filter: `drop-shadow(${vm.getEnemySpriteFlipped(mon.species) ? -2 : 2}px 2px 2px #000) saturate(1.1)` },
                 species: mon.species,
                 resizing: false,
@@ -312,6 +328,7 @@ export function wildPreview(vm: any): PreviewTrainer | null {
             species,
             level: mon.level?.value,
             ability: mon.ability?.value,
+            artSuffix: enemyFormArt(mon, species),
             moves: [0, 1, 2, 3].map((i) => mon.moves?.[i]?.move?.value).filter(Boolean),
             stats: {
                 hp: mon.stats?.hp_max?.value, attack: mon.stats?.attack?.value, defense: mon.stats?.defense?.value,

@@ -25,6 +25,8 @@ export interface PreviewPokemon {
     ability?: unknown;
     /** The held item, where the table has one (the send-out order's damage step reads it). */
     item?: unknown;
+    /** Appended to the species' art file name for a form drawn apart from the plain art (the wild panel's "-East" Shellos). */
+    artSuffix?: string;
     moves: string[];
     stats: PreviewStats;
 }

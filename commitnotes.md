@@ -103,3 +103,19 @@
   Gold/Silver, White, Black 2 and White 2 (same code paths as the games checked); Damp Rock's 8 turns; gen5's moved accuracy/evasion boxes on screen (they never show today, see below).
 - Found, not fixed: gen5's accuracy and evasion boxes compare `meta.state` (the property) with "Battle" instead of
   `meta.state.value`, so they look like they can never show (`games/gen5/playerPanel.ts` `battlePopups`).
+
+## East Sea Shellos and Gastrodon on the gen4 enemy panel
+
+- Platinum (and D/P, HG/SS) always drew the pink West Sea art for an enemy Shellos/Gastrodon. The enemy panel now reads
+  the form byte from the opponent's party in memory (`flags.alternate_forms`) and draws `Shellos-East` /
+  `Gastrodon-East` for form 1: trainer battles, the second trainer of a two-trainer battle, and the wild panel
+  (`enemyFormArt` in `games/gen4/enemyPanel.ts`). Styles stay keyed by the species name, so style data is untouched.
+- The wild panel in gen5 now uses `enemy_form` too (it already did for trainers), through a new optional
+  `PreviewPokemon.artSuffix` in `core/logic/trainerPreview.ts`. Gens 1-3 have no forms with their own art here.
+- Mappers (PokeAByte `ST/gen4`, separate repo): added `alternate_forms` to the party flags of the D/P and HG/SS mappers,
+  the property Platinum already has. No extra version bump: those files were already at 1.7.0 (uncommitted) from the
+  move-stats work.
+- Verified: `npm run typecheck` passes; a small script checked `enemyFormArt` (form 1 gives "-East", form 0, other
+  species and a mismatched species give "") and the wild preview's suffix. `parity:drift` fails on
+  `load_all_settings` in gen5, which this change doesn't touch (fails the same at HEAD). Not checked: the harness
+  (no Platinum fixture with Shellos) or a real battle against an East Sea Shellos.

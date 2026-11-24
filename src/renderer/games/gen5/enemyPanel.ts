@@ -245,7 +245,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen5EnemyT
             styles: { stats: undefined, comparison: undefined, mon: undefined, text: undefined, faint: undefined },
             speed: { label: speedLabel(order, "enemy"), svgClass: speedColorClass(order, false) },
             sprite: {
-                src: `images/gen5/pokemon/${vm.speciesSpecialCharacters(mon.species)}.webp`,
+                src: `images/gen5/pokemon/${vm.speciesSpecialCharacters(mon.species)}${mon.artSuffix ?? ""}.webp`,
                 style: { transform: vm.enemyTransformFor(mon.species), filter: `drop-shadow(${vm.getEnemySpriteFlipped(mon.species) ? -1 : 1}px 1px 2px)` },
                 species: mon.species,
                 resizing: false,
@@ -302,6 +302,7 @@ export function wildPreview(vm: any): PreviewTrainer | null {
             species,
             level: mon.level?.value,
             ability: mon.ability?.value,
+            artSuffix: vm.enemy_form(x, species),
             moves: [0, 1, 2, 3].map((i) => mon.moves?.[i]?.move?.value).filter(Boolean),
             stats: {
                 hp: mon.stats?.hp_max?.value, attack: mon.stats?.attack?.value, defense: mon.stats?.defense?.value,

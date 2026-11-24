@@ -610,6 +610,11 @@ are shrunk instead (`twoTrainerHeaderStyle`).
   its own wild block; gens 2, 4, 5 draw the wild Pokémon with the trainer preview (`wildPreview` in each
   `enemyPanel.ts`: the battle's copy in gen2, the opponent party in memory in gens 4-5, header "Wild <species>"), so
   it has no stat stages and the preview's speed label.
+- Form art on the enemy panel: the trainer tables have no forms, so the art's form comes from the party in memory
+  (`flags.alternate_forms`). gen5: `enemy_form` (trainer and wild rows); gen4: `enemyFormArt` in `enemyPanel.ts`
+  (East Sea Shellos/Gastrodon only; plain `Shellos.webp` is West). The wild preview carries it as `PreviewPokemon.artSuffix`.
+  The ST D/P and HG/SS mappers read `alternate_forms` from 1.7.0; Platinum always did. Trap: D/P trainer data has no
+  form, so a D/P trainer's Shellos is always West; Platinum's trainer data can set one.
 
 **RNG Trips (gen4 Platinum and HG/SS, gen5 White 2).** The patched ROMs read a gift NPC's next item from a
 `patch.*` value. gen4's `rng_npcs` lists each NPC with its `game` (meta.game_name), map, bag pocket and property.
