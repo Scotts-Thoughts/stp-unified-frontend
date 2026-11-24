@@ -249,6 +249,11 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
                     get: () => `${vm.selected_evolution_species}`, set: (v) => { vm.selected_evolution_species = v; },
                 },
                 { kind: "button", id: "evolution.unify_styles", label: "Unify Styles", available: familyStyle, run: () => vm.copyCurrentStylesToAllFamilyMembers() },
+                {
+                    kind: "button", id: "evolution.copy_solo_style", label: "Copy Solo Style",
+                    title: "Copy this Pokémon's style from when Evolution is off into its evolution style",
+                    available: () => familyStyle() && vm.hasSoloStyleToCopy(), run: () => vm.copySoloStyleToEvolutionLine(),
+                },
                 flag(vm, "evolution.post_kanto", "Allow Post-Kanto Evolutions", "post_kanto_evolutions", { available: familyStyle }),
             ],
         },

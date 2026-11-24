@@ -376,6 +376,7 @@ import { speedColorClass, speedLabel, speedLabelOrder } from "~/core/logic/speed
 import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
 import { isTwoTrainerBattle, secondTeamRows } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
+import { soloStyleCopyMixin } from "~/core/overlay/soloStyleCopyMixin";
 import { searchTrainers } from "~/core/logic/trainerPreview";
 import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
 import { crossOutActive, struckMoves } from "~/core/logic/unobtainableMoves";
@@ -460,7 +461,7 @@ const rowMove = (row) => row.move ?? row.Move;
 const rowType = (row) => row.type ?? row.Type;
 
 export default defineComponent({
-    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin, rightPanelModeMixin("right_ui")],
+    mixins: [enemySpriteStyleMixin({ enemySpriteScaleManager }), formattersMixin, naturesMixin, manualIvsMixin, speciesArtMixin, overlayCommonMixin, battleMathMixin, dsPairMixin, rightPanelModeMixin("right_ui"), soloStyleCopyMixin(MyStorage)],
     components: {
         ClockFrame,
         FaultsBox,
