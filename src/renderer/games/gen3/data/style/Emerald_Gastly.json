@@ -1,3 +1,9 @@
 {
-  "evolution": false
+  "evolution": false,
+  "imageScale": 0.52,
+  "imageXOffset": 52,
+  "imageYOffset": 183,
+  "imageFlip": true,
+  "overlay_color": "#92769d",
+  "ui_saturation": 1.6
 }

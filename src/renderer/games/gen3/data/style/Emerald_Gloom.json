@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Gloom"
+  "selected_evolution_species": "Gloom",
+  "imageScale": 0.65,
+  "imageXOffset": 24,
+  "imageYOffset": -32,
+  "imageFlip": true,
+  "overlay_color": "#9e5d49",
+  "ui_saturation": 1.6
 }

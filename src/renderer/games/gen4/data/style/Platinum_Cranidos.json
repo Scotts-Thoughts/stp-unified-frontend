@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Cranidos"
+  "selected_evolution_species": "Cranidos",
+  "imageScale": 0.59,
+  "imageXOffset": 34,
+  "imageYOffset": -51,
+  "imageFlip": false,
+  "overlay_color": "#6995b8",
+  "ui_saturation": 1.5
 }

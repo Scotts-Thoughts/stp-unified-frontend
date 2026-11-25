@@ -5,7 +5,7 @@
  * moves and stat stages from the mapper.
  */
 import { toDisplayString, type StyleValue } from "vue";
-import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
+import { SQUEEZED_TYPE_ICON, type EnemyChild, type EnemyNode } from "~/core/overlay/EnemyTeamPanel";
 import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
 import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel";
 import { twoTrainerHeader, twoTrainerHeaderStyle } from "~/core/logic/twoTrainerBattle";
@@ -13,6 +13,13 @@ import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/tra
 import { trainers_black } from "./data/trainers_black.js";
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen5, SendOutOrderCache, type SendOutMon } from "~/core/logic/sendOutOrder";
 import { fitTrainerHeader } from "~/core/logic/trainerHeader";
+import type { EnemyRowArt } from "~/core/logic/webcamMode";
+
+/**
+ * Where `images/gen5/ui/opponent.svg` draws the rows (outer edges, black outline included) and how far the angled corners reach into a
+ * row: Webcam Mode's fitted rows (`core/logic/webcamMode.ts` `webcamRowLayout`) keep those parts at their regular size.
+ */
+export const ENEMY_ROW_ART: EnemyRowArt = { tops: [68, 234, 401, 567, 734, 901], height: 162, cornerTop: 24, cornerBottom: 24 };
 
 /** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
 const liveOrder = new SendOutOrderCache();
@@ -81,8 +88,8 @@ export interface Gen5EnemyTeam extends EnemyTeamView<Gen5EnemySlot> {
 
 /**
  * A Pokémon of a two-trainer battle. `slot` is the party slot, plus 6 for the second trainer (`getEnemyStat`,
- * `speed_comparison`, `enemy_held_item`, `enemy_form`). `ram` is its battle record: the ST/gen5 mappers have one for both
- * trainers. The upstream mappers read the wrong records in these battles and have none for the second trainer, so without
+ * `speed_comparison`, `enemy_held_item`, `enemy_form`). `ram` is its battle record: the patched STANDARD/gen5 mappers have one
+ * for both trainers. The unpatched stock mappers read the wrong records in these battles and have none for the second trainer, so without
  * one this falls back on the party copy, whose HP only changes when the battle ends: no faints or stage badges during it.
  */
 function partySlot(vm: any, team: any, slot: number, row: number, ram: any): Gen5EnemySlot {
@@ -337,6 +344,10 @@ function slotNodes(slot: Gen5EnemySlot): EnemyNode {
                         },
                         {
                             class: "border ePkmnTyping",
+                            // Smaller next to the shorter rows; the group is placed by its right edge (style.css), so
+                            // it shrinks towards it.
+                            squeezeSize: SQUEEZED_TYPE_ICON,
+                            squeezeOrigin: "right bottom",
                             children: [
                                 { tag: "img", class: "icons moveIcon", src: slot.types[0].src },
                                 { tag: "img", show: slot.types[1].shown, class: "icons moveIcon", src: slot.types[1].src },
@@ -391,7 +402,7 @@ function slotNodes(slot: Gen5EnemySlot): EnemyNode {
 export function enemyTeamLayout(view: Gen5EnemyTeam): EnemyChild[] {
     return [
         { key: view.double ? 1 : 0, class: "trainerLabel", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 26, 24) : undefined, text: view.double ? view.trainer : fitTrainerHeader(view.trainer, 24) },
-        { class: "colored-image ds", style: [view.crop, { "--url": "url(images/gen5/ui/opponent.svg)" }] },
+        { frame: true, class: "colored-image ds", style: [view.crop, { "--url": "url(images/gen5/ui/opponent.svg)" }] },
         ...[...view.slots, ...view.second].map((slot): EnemyNode => ({
             style: slot.styles.stats,
             children: [!slot.present ? null : {

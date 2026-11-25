@@ -1,0 +1,20 @@
+{
+  "imageScale": 0.5,
+  "imageYOffset": 149,
+  "imageXOffset": 38,
+  "backgroundScale": 129,
+  "backgroundHue": 91,
+  "backgroundYOffset": -36,
+  "overlay_color": "#2c5f79",
+  "ui_saturation": 2,
+  "backgroundTexture": "Ghost",
+  "backgroundBlur": 0,
+  "backgroundUrl": "",
+  "backgroundFlip": false,
+  "backgroundXFlip": false,
+  "use_custom_background": false,
+  "backgroundXOffset": 0,
+  "backgroundBrightness": 100,
+  "backgroundContrast": 117,
+  "backgroundSaturation": 100
+}

@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Weezing"
+  "selected_evolution_species": "Weezing",
+  "imageScale": 0.83,
+  "imageXOffset": 28,
+  "imageYOffset": 116,
+  "imageFlip": true,
+  "overlay_color": "#8f7f8d",
+  "ui_saturation": 1.6
 }

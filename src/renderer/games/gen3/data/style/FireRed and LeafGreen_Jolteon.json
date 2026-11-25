@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Jolteon"
+  "selected_evolution_species": "Jolteon",
+  "imageScale": 0.86,
+  "imageXOffset": 41,
+  "imageYOffset": 52,
+  "imageFlip": true,
+  "overlay_color": "#f9d573",
+  "ui_saturation": 1.6
 }

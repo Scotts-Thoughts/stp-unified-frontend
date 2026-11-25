@@ -1,0 +1,10 @@
+{
+  "imageXOffset": -5,
+  "imageYOffset": 32,
+  "backgroundTexture": "Fighting",
+  "backgroundBrightness": 62,
+  "backgroundContrast": 130,
+  "backgroundBlur": 2,
+  "overlay_color": "#ed8965",
+  "ui_saturation": 1
+}

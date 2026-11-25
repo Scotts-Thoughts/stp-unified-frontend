@@ -4,7 +4,7 @@
 <div>
     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in games/gen1/enemyPanel.ts. A slot whose data
          hasn't arrived yet would show "null" and "Lv:0"; it is hidden like gen2's (v-show keeps it in the DOM). -->
-    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="overlay.right_panel.webcam_mode" :webcam-header="81" />
+    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="overlay.right_panel.webcam_mode" :webcam-header="81" :webcam-rows="enemy_row_art" />
 </div>
 </template>
 
@@ -21,7 +21,7 @@ import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder, speedOrder } from "~/core/logic/speedLabel";
-import { enemyTeamLayout, enemyTeamView, trainerPreviewView, type Gen1EnemyTeam } from "~/games/gen1/enemyPanel";
+import { ENEMY_ROW_ART, enemyTeamLayout, enemyTeamView, trainerPreviewView, type Gen1EnemyTeam } from "~/games/gen1/enemyPanel";
 export default defineComponent({
     name: "EnemyGraphics",
     components: { EnemyTeamPanel },
@@ -45,6 +45,10 @@ export default defineComponent({
         },
         enemy_team_layout() {
             return enemyTeamLayout;
+        },
+        /** Where the enemy panel art draws its rows (Webcam Mode's fitted rows, games/gen1/enemyPanel.ts). */
+        enemy_row_art() {
+            return ENEMY_ROW_ART;
         },
         showtrainerArtwork() {
             // TODO: I think this logic can be drastically simplified, but i'm not sure. - Ion.

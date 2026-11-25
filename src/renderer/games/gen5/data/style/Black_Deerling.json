@@ -1,4 +1,10 @@
 {
   "selected_evolution_species": "Deerling",
-  "evolution": true
+  "evolution": true,
+  "imageScale": 0.59,
+  "imageXOffset": 5,
+  "imageYOffset": -88,
+  "imageFlip": true,
+  "overlay_color": "#f2d748",
+  "ui_saturation": 1.5
 }

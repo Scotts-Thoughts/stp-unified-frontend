@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Ivysaur"
+  "selected_evolution_species": "Ivysaur",
+  "imageScale": 0.84,
+  "imageXOffset": -11,
+  "imageYOffset": -20,
+  "imageFlip": false,
+  "overlay_color": "#4194ac",
+  "ui_saturation": 1.5
 }

@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Lickitung"
+  "selected_evolution_species": "Lickitung",
+  "imageScale": 0.62,
+  "imageXOffset": -37,
+  "imageYOffset": -53,
+  "imageFlip": true,
+  "overlay_color": "#c7979d",
+  "ui_saturation": 1.5
 }

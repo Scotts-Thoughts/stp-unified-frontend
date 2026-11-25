@@ -1,1 +1,8 @@
-{}
+{
+  "imageScale": 0.69,
+  "imageXOffset": 33,
+  "imageYOffset": -14,
+  "imageFlip": false,
+  "overlay_color": "#99bbc6",
+  "ui_saturation": 1.5
+}

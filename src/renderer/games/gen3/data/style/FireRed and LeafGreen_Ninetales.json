@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Ninetales"
+  "selected_evolution_species": "Ninetales",
+  "imageScale": 0.83,
+  "imageXOffset": 3,
+  "imageYOffset": 37,
+  "imageFlip": false,
+  "overlay_color": "#f4e9a8",
+  "ui_saturation": 1.6
 }

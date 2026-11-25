@@ -3193,7 +3193,1258 @@
                 "data": {}
             },
             "Charmander": {
-                "style": {}
+                "style": {
+                    "imageScale": 0.35,
+                    "imageXOffset": -373,
+                    "imageYOffset": 62,
+                    "imageFlip": false,
+                    "overlay_color": "#dd5f55",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Abra": {
+                "style": {
+                    "imageScale": 0.33,
+                    "imageXOffset": -490,
+                    "imageYOffset": 79,
+                    "imageFlip": false,
+                    "overlay_color": "#f5dc12",
+                    "backgroundTexture": "Psychic (crisp)",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Aerodactyl": {
+                "style": {
+                    "imageScale": 0.56,
+                    "imageXOffset": -236,
+                    "imageYOffset": 170,
+                    "imageFlip": false,
+                    "overlay_color": "#82d1e2",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Arbok": {
+                "style": {
+                    "imageScale": 0.56,
+                    "imageXOffset": 175,
+                    "imageYOffset": -187,
+                    "imageFlip": true,
+                    "overlay_color": "#93769f",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Arcanine": {
+                "style": {
+                    "imageScale": 0.58,
+                    "imageXOffset": 227,
+                    "imageYOffset": 173,
+                    "imageFlip": true,
+                    "overlay_color": "#d3261c",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Articuno": {
+                "style": {
+                    "imageScale": 0.54,
+                    "imageXOffset": 246,
+                    "imageYOffset": 257,
+                    "imageFlip": true,
+                    "overlay_color": "#1ab2e1",
+                    "backgroundTexture": "Ice 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Bellsprout": {
+                "style": {
+                    "imageScale": 0.31,
+                    "imageXOffset": 552,
+                    "imageYOffset": -267,
+                    "imageFlip": true,
+                    "overlay_color": "#e1e851",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Bulbasaur": {
+                "style": {
+                    "imageScale": 0.42,
+                    "imageXOffset": 99,
+                    "imageYOffset": 53,
+                    "imageFlip": true,
+                    "overlay_color": "#22a6d0",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Caterpie": {
+                "style": {
+                    "imageScale": 0.42,
+                    "imageXOffset": 22,
+                    "imageYOffset": 1,
+                    "imageFlip": true,
+                    "overlay_color": "#dad047",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Charmeleon": {
+                "style": {
+                    "imageScale": 0.47,
+                    "imageXOffset": 99,
+                    "imageYOffset": 143,
+                    "imageFlip": true,
+                    "overlay_color": "#eb945a",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Clefairy": {
+                "style": {
+                    "imageScale": 0.41,
+                    "imageXOffset": 166,
+                    "imageYOffset": 46,
+                    "imageFlip": true,
+                    "overlay_color": "#f4a4b4",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Cubone": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": -144,
+                    "imageYOffset": 26,
+                    "imageFlip": false,
+                    "overlay_color": "#e4c16e",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Diglett": {
+                "style": {
+                    "imageScale": 0.39,
+                    "imageXOffset": 203,
+                    "imageYOffset": -151,
+                    "imageFlip": true,
+                    "overlay_color": "#e47135",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Ditto": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": 172,
+                    "imageYOffset": -241,
+                    "imageFlip": true,
+                    "overlay_color": "#b49cc2",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Dodrio": {
+                "style": {
+                    "imageScale": 0.5,
+                    "imageXOffset": 214,
+                    "imageYOffset": 124,
+                    "imageFlip": true,
+                    "overlay_color": "#e47631",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Doduo": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": -40,
+                    "imageYOffset": 132,
+                    "imageFlip": true,
+                    "overlay_color": "#ebca45",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Dragonite": {
+                "style": {
+                    "imageScale": 0.61,
+                    "imageXOffset": -53,
+                    "imageYOffset": 179,
+                    "imageFlip": false,
+                    "overlay_color": "#f2df93",
+                    "backgroundTexture": "Dragon 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Dratini": {
+                "style": {
+                    "imageScale": 0.45,
+                    "imageXOffset": -170,
+                    "imageYOffset": 4,
+                    "imageFlip": false,
+                    "overlay_color": "#30bce2",
+                    "backgroundTexture": "Dragon 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Eevee": {
+                "style": {
+                    "imageScale": 0.37,
+                    "imageXOffset": 254,
+                    "imageYOffset": 53,
+                    "imageFlip": true,
+                    "overlay_color": "#d8ac8c",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Electrode": {
+                "style": {
+                    "imageScale": 0.68,
+                    "imageXOffset": -28,
+                    "imageYOffset": 4,
+                    "imageFlip": false,
+                    "overlay_color": "#da4337",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Exeggcute": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": 169,
+                    "imageYOffset": 36,
+                    "imageFlip": true,
+                    "overlay_color": "#e58d8d",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Exeggutor": {
+                "style": {
+                    "imageScale": 0.62,
+                    "imageXOffset": 109,
+                    "imageYOffset": 182,
+                    "imageFlip": true,
+                    "overlay_color": "#dbe769",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Farfetch'd": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": -136,
+                    "imageYOffset": 129,
+                    "imageFlip": false,
+                    "overlay_color": "#e19f55",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Fearow": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": 135,
+                    "imageYOffset": 338,
+                    "imageFlip": true,
+                    "overlay_color": "#e4b332",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Flareon": {
+                "style": {
+                    "imageScale": 0.54,
+                    "imageXOffset": -174,
+                    "imageYOffset": 167,
+                    "imageFlip": false,
+                    "overlay_color": "#fbe669",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Gengar": {
+                "style": {
+                    "imageScale": 0.61,
+                    "imageXOffset": 71,
+                    "imageYOffset": 70,
+                    "imageFlip": true,
+                    "overlay_color": "#3d4175",
+                    "backgroundTexture": "Ghost 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Geodude": {
+                "style": {
+                    "imageScale": 0.36,
+                    "imageXOffset": 297,
+                    "imageYOffset": -158,
+                    "imageFlip": true,
+                    "overlay_color": "#c9dddc",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Gloom": {
+                "style": {
+                    "imageScale": 0.42,
+                    "imageXOffset": 245,
+                    "imageYOffset": 14,
+                    "imageFlip": true,
+                    "overlay_color": "#eec27c",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Golbat": {
+                "style": {
+                    "imageScale": 0.47,
+                    "imageXOffset": 220,
+                    "imageYOffset": 335,
+                    "imageFlip": true,
+                    "overlay_color": "#6ac5e2",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Golduck": {
+                "style": {
+                    "imageScale": 0.53,
+                    "imageXOffset": 138,
+                    "imageYOffset": 162,
+                    "imageFlip": true,
+                    "overlay_color": "#0a9cd6",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Golem": {
+                "style": {
+                    "imageScale": 0.56,
+                    "imageXOffset": 140,
+                    "imageYOffset": 74,
+                    "imageFlip": true,
+                    "overlay_color": "#79cbd9",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Graveler": {
+                "style": {
+                    "imageScale": 0.36,
+                    "imageXOffset": 538,
+                    "imageYOffset": -445,
+                    "imageFlip": true,
+                    "overlay_color": "#6b7e93",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Growlithe": {
+                "style": {
+                    "imageScale": 0.45,
+                    "imageXOffset": 166,
+                    "imageYOffset": 53,
+                    "imageFlip": true,
+                    "overlay_color": "#f1d59c",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Haunter": {
+                "style": {
+                    "imageScale": 0.5,
+                    "imageXOffset": 152,
+                    "imageYOffset": 332,
+                    "imageFlip": true,
+                    "overlay_color": "#b67795",
+                    "backgroundTexture": "Ghost 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Hitmonchan": {
+                "style": {
+                    "imageScale": 0.55,
+                    "imageXOffset": 16,
+                    "imageYOffset": 166,
+                    "imageFlip": true,
+                    "overlay_color": "#d85d50",
+                    "backgroundTexture": "Fighting 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Hitmonlee": {
+                "style": {
+                    "imageScale": 0.57,
+                    "imageXOffset": 141,
+                    "imageYOffset": 80,
+                    "imageFlip": true,
+                    "overlay_color": "#e8df94",
+                    "backgroundTexture": "Fighting 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Horsea": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": 117,
+                    "imageYOffset": 44,
+                    "imageFlip": true,
+                    "overlay_color": "#2dbce5",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Hypno": {
+                "style": {
+                    "imageScale": 0.57,
+                    "imageXOffset": -62,
+                    "imageYOffset": 109,
+                    "imageFlip": false,
+                    "overlay_color": "#e9ee3f",
+                    "backgroundTexture": "Psychic (crisp)",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Ivysaur": {
+                "style": {
+                    "imageScale": 0.49,
+                    "imageXOffset": 167,
+                    "imageYOffset": 31,
+                    "imageFlip": true,
+                    "overlay_color": "#1fa1cc",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Jigglypuff": {
+                "style": {
+                    "imageScale": 0.43,
+                    "imageXOffset": 77,
+                    "imageYOffset": -31,
+                    "imageFlip": true,
+                    "overlay_color": "#dea6a9",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Jolteon": {
+                "style": {
+                    "imageScale": 0.53,
+                    "imageXOffset": 177,
+                    "imageYOffset": 164,
+                    "imageFlip": true,
+                    "overlay_color": "#fde862",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kabuto": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": 157,
+                    "imageYOffset": -228,
+                    "imageFlip": true,
+                    "overlay_color": "#df7549",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kabutops": {
+                "style": {
+                    "imageScale": 0.66,
+                    "imageXOffset": 47,
+                    "imageYOffset": -72,
+                    "imageFlip": true,
+                    "overlay_color": "#cabe7c",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kadabra": {
+                "style": {
+                    "imageScale": 0.5,
+                    "imageXOffset": 168,
+                    "imageYOffset": 152,
+                    "imageFlip": true,
+                    "overlay_color": "#e4ed59",
+                    "backgroundTexture": "Psychic (crisp)",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kakuna": {
+                "style": {
+                    "imageScale": 0.38,
+                    "imageXOffset": 12,
+                    "imageYOffset": 15,
+                    "imageFlip": false,
+                    "overlay_color": "#f2ec5c",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kangaskhan": {
+                "style": {
+                    "imageScale": 0.62,
+                    "imageXOffset": 126,
+                    "imageYOffset": 128,
+                    "imageFlip": true,
+                    "overlay_color": "#d79160",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kingler": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": 331,
+                    "imageYOffset": -77,
+                    "imageFlip": true,
+                    "overlay_color": "#ec4531",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Krabby": {
+                "style": {
+                    "imageScale": 0.36,
+                    "imageXOffset": 321,
+                    "imageYOffset": -88,
+                    "imageFlip": true,
+                    "overlay_color": "#de532a",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Machoke": {
+                "style": {
+                    "imageScale": 0.52,
+                    "imageXOffset": 53,
+                    "imageYOffset": 159,
+                    "imageFlip": true,
+                    "overlay_color": "#6fb1c3",
+                    "backgroundTexture": "Fighting 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Machop": {
+                "style": {
+                    "imageScale": 0.41,
+                    "imageXOffset": 23,
+                    "imageYOffset": 120,
+                    "imageFlip": true,
+                    "overlay_color": "#c8ebe3",
+                    "backgroundTexture": "Fighting 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Magikarp": {
+                "style": {
+                    "imageScale": 0.3,
+                    "imageXOffset": 637,
+                    "imageYOffset": 33,
+                    "imageFlip": true,
+                    "overlay_color": "#e74a31",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Magnemite": {
+                "style": {
+                    "imageScale": 0.31,
+                    "imageXOffset": 430,
+                    "imageYOffset": 297,
+                    "imageFlip": true,
+                    "overlay_color": "#4190b2",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Magneton": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": 307,
+                    "imageYOffset": 173,
+                    "imageFlip": true,
+                    "overlay_color": "#6fbed4",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Marowak": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": 242,
+                    "imageYOffset": -85,
+                    "imageFlip": true,
+                    "overlay_color": "#d6b69d",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Metapod": {
+                "style": {
+                    "imageScale": 0.37,
+                    "imageXOffset": 283,
+                    "imageYOffset": -436,
+                    "imageFlip": true,
+                    "overlay_color": "#bcd251",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Moltres": {
+                "style": {
+                    "imageScale": 0.57,
+                    "imageXOffset": 200,
+                    "imageYOffset": 283,
+                    "imageFlip": true,
+                    "overlay_color": "#f1db42",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Muk": {
+                "style": {
+                    "imageScale": 0.43,
+                    "imageXOffset": -366,
+                    "imageYOffset": 67,
+                    "imageFlip": false,
+                    "overlay_color": "#d77d9b",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Nidoqueen": {
+                "style": {
+                    "imageScale": 0.54,
+                    "imageXOffset": -123,
+                    "imageYOffset": 163,
+                    "imageFlip": false,
+                    "overlay_color": "#5cbee3",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "NidoranF": {
+                "style": {
+                    "imageScale": 0.33,
+                    "imageXOffset": 204,
+                    "imageYOffset": 220,
+                    "imageFlip": true,
+                    "overlay_color": "#6dc3e3",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Nidorina": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": -129,
+                    "imageYOffset": 132,
+                    "imageFlip": false,
+                    "overlay_color": "#7bcae7",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Nidorino": {
+                "style": {
+                    "imageScale": 0.41,
+                    "imageXOffset": 202,
+                    "imageYOffset": 115,
+                    "imageFlip": true,
+                    "overlay_color": "#5b5b99",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Ninetales": {
+                "style": {
+                    "imageScale": 0.51,
+                    "imageXOffset": 196,
+                    "imageYOffset": 71,
+                    "imageFlip": true,
+                    "overlay_color": "#feeb76",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Omanyte": {
+                "style": {
+                    "imageScale": 0.42,
+                    "imageXOffset": -115,
+                    "imageYOffset": 51,
+                    "imageFlip": false,
+                    "overlay_color": "#dadea9",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Omastar": {
+                "style": {
+                    "imageScale": 0.51,
+                    "imageXOffset": 184,
+                    "imageYOffset": 113,
+                    "imageFlip": true,
+                    "overlay_color": "#37b6de",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Parasect": {
+                "style": {
+                    "imageScale": 0.32,
+                    "imageXOffset": 509,
+                    "imageYOffset": 73,
+                    "imageFlip": true,
+                    "overlay_color": "#e55539",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Persian": {
+                "style": {
+                    "imageScale": 0.46,
+                    "imageXOffset": -65,
+                    "imageYOffset": 75,
+                    "imageFlip": false,
+                    "overlay_color": "#ece73c",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Pidgeot": {
+                "style": {
+                    "imageScale": 0.55,
+                    "imageXOffset": -52,
+                    "imageYOffset": 166,
+                    "imageFlip": true,
+                    "overlay_color": "#ebeba2",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Pidgeotto": {
+                "style": {
+                    "imageScale": 0.45,
+                    "imageXOffset": 35,
+                    "imageYOffset": 336,
+                    "imageFlip": true,
+                    "overlay_color": "#e5ecac",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Pikachu": {
+                "style": {
+                    "imageScale": 0.45,
+                    "imageXOffset": 82,
+                    "imageYOffset": -32,
+                    "imageFlip": true,
+                    "overlay_color": "#fdef49",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Pinsir": {
+                "style": {
+                    "imageScale": 0.49,
+                    "imageXOffset": 348,
+                    "imageYOffset": 151,
+                    "imageFlip": true,
+                    "overlay_color": "#eec383",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Poliwhirl": {
+                "style": {
+                    "imageScale": 0.48,
+                    "imageXOffset": -140,
+                    "imageYOffset": -72,
+                    "imageFlip": false,
+                    "overlay_color": "#30657b",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Poliwrath": {
+                "style": {
+                    "imageScale": 0.54,
+                    "imageXOffset": 205,
+                    "imageYOffset": -100,
+                    "imageFlip": true,
+                    "overlay_color": "#4b9bb9",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Ponyta": {
+                "style": {
+                    "imageScale": 0.54,
+                    "imageXOffset": 98,
+                    "imageYOffset": -62,
+                    "imageFlip": true,
+                    "overlay_color": "#f6ef81",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Primeape": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": 340,
+                    "imageYOffset": -54,
+                    "imageFlip": true,
+                    "overlay_color": "#f5e3a6",
+                    "backgroundTexture": "Fighting 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Psyduck": {
+                "style": {
+                    "imageScale": 0.42,
+                    "imageXOffset": 128,
+                    "imageYOffset": 67,
+                    "imageFlip": true,
+                    "overlay_color": "#ede241",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Raichu": {
+                "style": {
+                    "imageScale": 0.53,
+                    "imageXOffset": 97,
+                    "imageYOffset": 63,
+                    "imageFlip": true,
+                    "overlay_color": "#efb845",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Rapidash": {
+                "style": {
+                    "imageScale": 0.5,
+                    "imageXOffset": -240,
+                    "imageYOffset": 61,
+                    "imageFlip": false,
+                    "overlay_color": "#e3e995",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Raticate": {
+                "style": {
+                    "imageScale": 0.32,
+                    "imageXOffset": 484,
+                    "imageYOffset": -102,
+                    "imageFlip": true,
+                    "overlay_color": "#eade77",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Rhydon": {
+                "style": {
+                    "imageScale": 0.49,
+                    "imageXOffset": 279,
+                    "imageYOffset": 17,
+                    "imageFlip": true,
+                    "overlay_color": "#4291ae",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Rhyhorn": {
+                "style": {
+                    "imageScale": 0.33,
+                    "imageXOffset": 589,
+                    "imageYOffset": -55,
+                    "imageFlip": true,
+                    "overlay_color": "#78b9c4",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Sandshrew": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": -130,
+                    "imageYOffset": 30,
+                    "imageFlip": false,
+                    "overlay_color": "#e7ea47",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Sandslash": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": -105,
+                    "imageYOffset": 134,
+                    "imageFlip": false,
+                    "overlay_color": "#ebe73d",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Scyther": {
+                "style": {
+                    "imageScale": 0.6,
+                    "imageXOffset": -158,
+                    "imageYOffset": 177,
+                    "imageFlip": false,
+                    "overlay_color": "#e5d938",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Seadra": {
+                "style": {
+                    "imageScale": 0.45,
+                    "imageXOffset": 206,
+                    "imageYOffset": 10,
+                    "imageFlip": true,
+                    "overlay_color": "#1fb5e1",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Seel": {
+                "style": {
+                    "imageScale": 0.43,
+                    "imageXOffset": 215,
+                    "imageYOffset": -163,
+                    "imageFlip": true,
+                    "overlay_color": "#71cbe7",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Shellder": {
+                "style": {
+                    "imageScale": 0.42,
+                    "imageXOffset": 105,
+                    "imageYOffset": 1,
+                    "imageFlip": true,
+                    "overlay_color": "#ca788b",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Slowbro": {
+                "style": {
+                    "imageScale": 0.55,
+                    "imageXOffset": 168,
+                    "imageYOffset": -72,
+                    "imageFlip": true,
+                    "overlay_color": "#dd4847",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Slowpoke": {
+                "style": {
+                    "imageScale": 0.33,
+                    "imageXOffset": -588,
+                    "imageYOffset": -390,
+                    "imageFlip": false,
+                    "overlay_color": "#f46354",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Snorlax": {
+                "style": {
+                    "imageScale": 0.63,
+                    "imageXOffset": -153,
+                    "imageYOffset": -20,
+                    "imageFlip": false,
+                    "overlay_color": "#e2ee7f",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Spearow": {
+                "style": {
+                    "imageScale": 0.4,
+                    "imageXOffset": -151,
+                    "imageYOffset": 30,
+                    "imageFlip": false,
+                    "overlay_color": "#d15032",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Squirtle": {
+                "style": {
+                    "imageScale": 0.38,
+                    "imageXOffset": -238,
+                    "imageYOffset": 48,
+                    "imageFlip": false,
+                    "overlay_color": "#0faedf",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Starmie": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": 423,
+                    "imageYOffset": -7,
+                    "imageFlip": true,
+                    "overlay_color": "#e892b0",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Staryu": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": 165,
+                    "imageYOffset": -25,
+                    "imageFlip": true,
+                    "overlay_color": "#eadb58",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Tangela": {
+                "style": {
+                    "imageScale": 0.46,
+                    "imageXOffset": 260,
+                    "imageYOffset": 97,
+                    "imageFlip": true,
+                    "overlay_color": "#49c1e2",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Tauros": {
+                "style": {
+                    "imageScale": 0.58,
+                    "imageXOffset": 163,
+                    "imageYOffset": 125,
+                    "imageFlip": true,
+                    "overlay_color": "#e3864d",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Tentacool": {
+                "style": {
+                    "imageScale": 0.46,
+                    "imageXOffset": 72,
+                    "imageYOffset": 83,
+                    "imageFlip": true,
+                    "overlay_color": "#30b0dc",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Tentacruel": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": 428,
+                    "imageYOffset": 132,
+                    "imageFlip": true,
+                    "overlay_color": "#29a6d2",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Vaporeon": {
+                "style": {
+                    "imageScale": 0.55,
+                    "imageXOffset": 171,
+                    "imageYOffset": 169,
+                    "imageFlip": true,
+                    "overlay_color": "#7dc8de",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Venomoth": {
+                "style": {
+                    "imageScale": 0.46,
+                    "imageXOffset": -88,
+                    "imageYOffset": 336,
+                    "imageFlip": false,
+                    "overlay_color": "#d4bd79",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Venonat": {
+                "style": {
+                    "imageScale": 0.44,
+                    "imageXOffset": -122,
+                    "imageYOffset": -2,
+                    "imageFlip": false,
+                    "overlay_color": "#735f86",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Victreebel": {
+                "style": {
+                    "imageScale": 0.56,
+                    "imageXOffset": -120,
+                    "imageYOffset": 167,
+                    "imageFlip": false,
+                    "overlay_color": "#f4e226",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Vileplume": {
+                "style": {
+                    "imageScale": 0.53,
+                    "imageXOffset": 149,
+                    "imageYOffset": 161,
+                    "imageFlip": true,
+                    "overlay_color": "#eea84f",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Voltorb": {
+                "style": {
+                    "imageScale": 0.57,
+                    "imageXOffset": -12,
+                    "imageYOffset": -108,
+                    "imageFlip": true,
+                    "overlay_color": "#e0443b",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Wartortle": {
+                "style": {
+                    "imageScale": 0.46,
+                    "imageXOffset": 104,
+                    "imageYOffset": 139,
+                    "imageFlip": true,
+                    "overlay_color": "#25bce5",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Weedle": {
+                "style": {
+                    "imageScale": 0.45,
+                    "imageXOffset": 32,
+                    "imageYOffset": -43,
+                    "imageFlip": false,
+                    "overlay_color": "#f6d473",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Weepinbell": {
+                "style": {
+                    "imageScale": 0.5,
+                    "imageXOffset": 128,
+                    "imageYOffset": 68,
+                    "imageFlip": true,
+                    "overlay_color": "#e9e632",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Weezing": {
+                "style": {
+                    "imageScale": 0.52,
+                    "imageXOffset": 142,
+                    "imageYOffset": 197,
+                    "imageFlip": true,
+                    "overlay_color": "#eaf29a",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Wigglytuff": {
+                "style": {
+                    "imageScale": 0.46,
+                    "imageXOffset": 118,
+                    "imageYOffset": 30,
+                    "imageFlip": true,
+                    "overlay_color": "#faf4f2",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Roselia": {
+                "style": {
+                    "imageScale": 0.26,
+                    "imageXOffset": 840,
+                    "imageYOffset": 588,
+                    "imageFlip": true,
+                    "overlay_color": "#78bb74",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Toxicroak": {
+                "style": {
+                    "imageScale": 0.23,
+                    "imageXOffset": 1887,
+                    "imageYOffset": 1739,
+                    "imageFlip": true,
+                    "overlay_color": "#6894bf",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Rayquaza": {
+                "style": {
+                    "imageScale": 0.3,
+                    "imageXOffset": 1446,
+                    "imageYOffset": 1769,
+                    "imageFlip": true,
+                    "overlay_color": "#428763",
+                    "backgroundTexture": "Dragon 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Groudon": {
+                "style": {
+                    "imageScale": 0.3,
+                    "imageXOffset": -1447,
+                    "imageYOffset": 1324,
+                    "imageFlip": false,
+                    "overlay_color": "#bf3224",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kyogre": {
+                "style": {
+                    "imageScale": 0.3,
+                    "imageXOffset": 1447,
+                    "imageYOffset": 1482,
+                    "imageFlip": true,
+                    "overlay_color": "#1a63a9",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Hoothoot": {
+                "style": {
+                    "imageScale": 0.33,
+                    "imageXOffset": 406,
+                    "imageYOffset": 242,
+                    "imageFlip": true,
+                    "overlay_color": "#f3e8a0",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
             }
         },
         "Blue": {
@@ -11193,7 +12444,15 @@
                 "data": {}
             },
             "Tangela": {
-                "style": {},
+                "style": {
+                    "imageScale": 0.76,
+                    "imageXOffset": 0,
+                    "imageYOffset": 7,
+                    "imageFlip": true,
+                    "overlay_color": "#70a2c3",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                },
                 "settings": {},
                 "splits": {},
                 "data": {}
@@ -11205,13 +12464,29 @@
                 "data": {}
             },
             "Seel": {
-                "style": {},
+                "style": {
+                    "imageScale": 0.62,
+                    "imageXOffset": -34,
+                    "imageYOffset": -30,
+                    "imageFlip": true,
+                    "overlay_color": "#d7dde9",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                },
                 "settings": {},
                 "splits": {},
                 "data": {}
             },
             "Scyther": {
-                "style": {},
+                "style": {
+                    "imageScale": 0.93,
+                    "imageXOffset": -45,
+                    "imageYOffset": 57,
+                    "imageFlip": true,
+                    "overlay_color": "#9bc581",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                },
                 "settings": {},
                 "splits": {},
                 "data": {}
@@ -11243,10 +12518,392 @@
                 "data": {}
             },
             "Raticate": {
-                "style": {},
+                "style": {
+                    "imageScale": 0.56,
+                    "imageXOffset": 18,
+                    "imageYOffset": -39,
+                    "imageFlip": true,
+                    "overlay_color": "#a1743c",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                },
                 "settings": {},
                 "splits": {},
                 "data": {}
+            },
+            "Kabutops": {
+                "style": {
+                    "imageScale": 0.8,
+                    "imageXOffset": -7,
+                    "imageYOffset": 34,
+                    "imageFlip": true,
+                    "overlay_color": "#b78e5a",
+                    "backgroundTexture": "Rock 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kadabra": {
+                "style": {
+                    "imageScale": 0.75,
+                    "imageXOffset": 22,
+                    "imageYOffset": 23,
+                    "imageFlip": true,
+                    "overlay_color": "#f2da4c",
+                    "backgroundTexture": "Psychic (crisp)",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kakuna": {
+                "style": {
+                    "imageScale": 0.55,
+                    "imageXOffset": 7,
+                    "imageYOffset": -38,
+                    "imageFlip": true,
+                    "overlay_color": "#c9af51",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kangaskhan": {
+                "style": {
+                    "imageScale": 0.91,
+                    "imageXOffset": -13,
+                    "imageYOffset": 55,
+                    "imageFlip": true,
+                    "overlay_color": "#f4edc5",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Krabby": {
+                "style": {
+                    "imageScale": 0.61,
+                    "imageXOffset": 3,
+                    "imageYOffset": -93,
+                    "imageFlip": true,
+                    "overlay_color": "#db8f58",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Machoke": {
+                "style": {
+                    "imageScale": 0.76,
+                    "imageXOffset": 6,
+                    "imageYOffset": 27,
+                    "imageFlip": true,
+                    "overlay_color": "#b5b8d3",
+                    "backgroundTexture": "Fighting 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Porygon": {
+                "style": {
+                    "imageScale": 0.68,
+                    "imageXOffset": -1,
+                    "imageYOffset": 124,
+                    "imageFlip": true,
+                    "overlay_color": "#bc4f58",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Primeape": {
+                "style": {
+                    "imageScale": 0.67,
+                    "imageXOffset": -7,
+                    "imageYOffset": 4,
+                    "imageFlip": true,
+                    "overlay_color": "#c3a180",
+                    "backgroundTexture": "Fighting 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Psyduck": {
+                "style": {
+                    "imageScale": 0.59,
+                    "imageXOffset": -9,
+                    "imageYOffset": -22,
+                    "imageFlip": true,
+                    "overlay_color": "#e2bc7b",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Raichu": {
+                "style": {
+                    "imageScale": 0.71,
+                    "imageXOffset": 64,
+                    "imageYOffset": -8,
+                    "imageFlip": true,
+                    "overlay_color": "#cfa761",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Rapidash": {
+                "style": {
+                    "imageScale": 0.83,
+                    "imageXOffset": -26,
+                    "imageYOffset": 41,
+                    "imageFlip": false,
+                    "overlay_color": "#ec7a4b",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Rhydon": {
+                "style": {
+                    "imageScale": 0.81,
+                    "imageXOffset": 31,
+                    "imageYOffset": 2,
+                    "imageFlip": true,
+                    "overlay_color": "#a4a9b6",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Slowbro": {
+                "style": {
+                    "imageScale": 0.8,
+                    "imageXOffset": 8,
+                    "imageYOffset": 35,
+                    "imageFlip": true,
+                    "overlay_color": "#e8b3c0",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Slowpoke": {
+                "style": {
+                    "imageScale": 0.64,
+                    "imageXOffset": -4,
+                    "imageYOffset": -45,
+                    "imageFlip": true,
+                    "overlay_color": "#e4acba",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Spearow": {
+                "style": {
+                    "imageScale": 0.53,
+                    "imageXOffset": 0,
+                    "imageYOffset": -49,
+                    "imageFlip": false,
+                    "overlay_color": "#d06869",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Squirtle": {
+                "style": {
+                    "imageScale": 0.57,
+                    "imageXOffset": 5,
+                    "imageYOffset": -31,
+                    "imageFlip": true,
+                    "overlay_color": "#68a0b1",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Tentacruel": {
+                "style": {
+                    "imageScale": 0.87,
+                    "imageXOffset": -15,
+                    "imageYOffset": 2,
+                    "imageFlip": true,
+                    "overlay_color": "#82c7e8",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Vaporeon": {
+                "style": {
+                    "imageScale": 0.83,
+                    "imageXOffset": 27,
+                    "imageYOffset": 41,
+                    "imageFlip": true,
+                    "overlay_color": "#7ecde0",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Venonat": {
+                "style": {
+                    "imageScale": 0.61,
+                    "imageXOffset": -28,
+                    "imageYOffset": -15,
+                    "imageFlip": true,
+                    "overlay_color": "#655b98",
+                    "backgroundTexture": "Bug 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Venusaur": {
+                "style": {
+                    "imageScale": 0.94,
+                    "imageXOffset": -4,
+                    "imageYOffset": 14,
+                    "imageFlip": true,
+                    "overlay_color": "#579a8d",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Victreebel": {
+                "style": {
+                    "imageScale": 0.81,
+                    "imageXOffset": 7,
+                    "imageYOffset": 7,
+                    "imageFlip": true,
+                    "overlay_color": "#e3e269",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Vileplume": {
+                "style": {
+                    "imageScale": 0.77,
+                    "imageXOffset": -7,
+                    "imageYOffset": 11,
+                    "imageFlip": true,
+                    "overlay_color": "#cf6c79",
+                    "backgroundTexture": "Grass 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Voltorb": {
+                "style": {
+                    "imageScale": 0.6,
+                    "imageXOffset": 8,
+                    "imageYOffset": -24,
+                    "imageFlip": false,
+                    "overlay_color": "#e29287",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Weezing": {
+                "style": {
+                    "imageScale": 0.77,
+                    "imageXOffset": 1,
+                    "imageYOffset": 102,
+                    "imageFlip": true,
+                    "overlay_color": "#8f7f8d",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Wigglytuff": {
+                "style": {
+                    "imageScale": 0.64,
+                    "imageXOffset": -14,
+                    "imageYOffset": -6,
+                    "imageFlip": true,
+                    "overlay_color": "#f7dce0",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Zapdos": {
+                "style": {
+                    "imageScale": 0.91,
+                    "imageXOffset": 2,
+                    "imageYOffset": 78,
+                    "imageFlip": true,
+                    "overlay_color": "#cbad71",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Zubat": {
+                "style": {
+                    "imageScale": 0.53,
+                    "imageXOffset": -21,
+                    "imageYOffset": 100,
+                    "imageFlip": true,
+                    "overlay_color": "#a3689d",
+                    "backgroundTexture": "Poison 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Flutter Mane": {
+                "style": {
+                    "imageScale": 1.0,
+                    "imageXOffset": 34,
+                    "imageYOffset": 103,
+                    "imageFlip": true,
+                    "overlay_color": "#4b858f",
+                    "backgroundTexture": "Ghost 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Raging Bolt": {
+                "style": {
+                    "imageScale": 0.95,
+                    "imageXOffset": 21,
+                    "imageYOffset": 61,
+                    "imageFlip": true,
+                    "overlay_color": "#706e9a",
+                    "backgroundTexture": "Electric 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Gouging Fire": {
+                "style": {
+                    "imageScale": 0.92,
+                    "imageXOffset": 6,
+                    "imageYOffset": 40,
+                    "imageFlip": true,
+                    "overlay_color": "#9b6e35",
+                    "backgroundTexture": "Fire 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Rayquaza": {
+                "style": {
+                    "imageScale": 1.0,
+                    "imageXOffset": 38,
+                    "imageYOffset": 128,
+                    "imageFlip": true,
+                    "overlay_color": "#428763",
+                    "backgroundTexture": "Dragon 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Groudon": {
+                "style": {
+                    "imageScale": 0.98,
+                    "imageXOffset": -1,
+                    "imageYOffset": 1,
+                    "imageFlip": false,
+                    "overlay_color": "#bf3224",
+                    "backgroundTexture": "Ground 1",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Kyogre": {
+                "style": {
+                    "imageScale": 1.0,
+                    "imageXOffset": 16,
+                    "imageYOffset": 57,
+                    "imageFlip": true,
+                    "overlay_color": "#1a63a9",
+                    "backgroundTexture": "Water 2",
+                    "ui_saturation": 0.9
+                }
+            },
+            "Hoothoot": {
+                "style": {
+                    "imageScale": 0.54,
+                    "imageXOffset": 1,
+                    "imageYOffset": -43,
+                    "imageFlip": true,
+                    "overlay_color": "#bb9f78",
+                    "backgroundTexture": "Normal 1",
+                    "ui_saturation": 0.9
+                }
             }
         }
     }

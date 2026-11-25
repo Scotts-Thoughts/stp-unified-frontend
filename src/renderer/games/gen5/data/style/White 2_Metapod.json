@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Metapod"
+  "selected_evolution_species": "Metapod",
+  "imageScale": 0.59,
+  "imageXOffset": 29,
+  "imageYOffset": -88,
+  "imageFlip": false,
+  "overlay_color": "#89b64a",
+  "ui_saturation": 1.5
 }

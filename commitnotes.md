@@ -249,3 +249,84 @@
   bindable shortcut (`screenshots.open_folder`).
 - Verified: typecheck, build, and the built app on gens 1 and 4 (button shows, click creates the folder).
   Not seen opening Explorer on Windows.
+
+## AGENTS.md: reproduce reported run problems from the replay
+- Added a routing row and a short rule: when Scott reports something the overlay got wrong in a run, find the
+  run's Super Shuckie replay, log memory headlessly with `tools/markers/memlog.cjs`, and find the cause before
+  asking him for anything. Full recipe in `project_context/docs/workflows/debugging-from-replays.md`.
+- Docs only; no checks needed.
+
+## Mid-run evolution: the art stayed on the old species (Yanmega, HeartGold)
+- Tested from both of Scott's Yanmega replays (h-yanmega-line-2-dnf, evolution 14:51; h-yanmega-line-2-21334,
+  20:01) by logging their memory headlessly. The game data is clean in both: one species event, same personality
+  value. Over that data the evolution check follows the evolution, before and after yesterday's fix, in a new
+  harness (`tools/markers/lead-evolution-wiring.ts`) and in the real app (a fixture built from the log,
+  `tools/markers/mem-to-scenario.ts`, run through `tools/parity/run.ts`).
+- Cause found in the real app: after "Evolving to: Yanmega" the starter watcher draws the family member stored
+  under the new starter's key. With `selected_evolution_species: "Yanma"` stored under Yanmega (a choice saved
+  while Yanmega was the Solo Pokemon in an earlier session), the starter became Yanmega and the art stayed Yanma.
+  It fits the 21334 evidence: the evolved species' Evolution flags were written (only the evolution writes both
+  at once), and ten seconds later the Yanmega family-style choice and the family's ability were saved, as when the
+  family style dropdown is changed by hand. The evolution now stores the evolved species as that choice first.
+- Also: the run's Pokemon is now a short list of personality values (`evolution_lead_pvs`), and every check
+  refreshes it. gen4 debounces the species and not the personality value, so a reset's garbage value could
+  replace the real one while the species still read the Solo Pokemon (seen in the dnf log at 9223 s), and a later
+  evolution would have been missed.
+- Verified: real app on the dnf evolution fixture: the art shows Yanmega with and without a stale stored choice
+  (it showed Yanma with one before); harness on both logs, mounted mid-run (during a blank read, right after the
+  evolution), with a stale stored choice, and a different Yanmega after a blank (not followed); typecheck.
+  `parity:drift` fails only on the known gen5 `load_all_settings` entry.
+- Not verified: what was stored on Scott's machine at 14:51 (storage keeps only the latest value, now Yanmega),
+  so the stale choice is the cause that reproduces the symptom, not one read from that moment; gen5 (same mixin
+  and the same starter-watcher code) not run in the app.
+
+## Enemy team in Webcam / Secondary Screen: even gaps, corners kept, smaller gen5 type icons
+
+- A team of five or six no longer gets squeezed as one block. Each row is fitted on its own (`webcamRowLayout` in
+  `core/logic/webcamMode.ts`, `drawFitted` in `core/overlay/EnemyTeamPanel.ts`): the rows get shorter, and the gap
+  between rows equals the gap between the last row and the DS second screen (or the Webcam line), the art's own
+  smallest row gap. Before, the rows sat ~3px apart and the last one ~8px above the second screen.
+- The frame art is drawn in slices per row, so the corners keep their shape and only the straight sides shrink
+  (Scott: gen5's 45° corners were getting flattened, the same problem the header had).
+- gen5's type icons are 25% smaller in a squeezed team (Scott: they looked about a third too big). Other generations'
+  icons unchanged.
+- Two to four Pokémon: no change (they already fit). Every generation passes its row geometry (`ENEMY_ROW_ART`), so
+  gens 1-3's Webcam Mode gets the same even gaps.
+- Verified: typecheck; `parity:drift` (only the gen5 `load_all_settings` failure that was already there); screenshots
+  of the built app with Black (4, 5 and 6 Pokémon, Secondary Screen, and 5 in Webcam), Platinum (5 and 6, Secondary
+  Screen) and FireRed (5 and 6, Webcam) trainer previews. Not seen on screen: gens 1-2 (same code path), a live battle,
+  OBS on Scott's machine.
+
+## Gen 6 (3DS) overlay plan
+
+- Added `docs/gen6-3ds-overlay-plan.md`: the plan for a gen 6 / 3DS overlay (X/Y, then OR/AS) on the Gen 4/5 Secondary Screen layout. Proposed only; nothing built.
+- Added `docs/gen6/mockup-a.png` (the layout Scott picked) and `docs/gen6/build_mockup_a.py`, the script that drew it. The script is a reference: it expects the staged assets next to it, so it won't run from the repo as-is.
+- ARCHITECTURE §13: new row for the plan.
+- No code changed; no checks run (docs only).
+
+## Gen 5 runs on the standard mappers (Burgh's team not fading in Black)
+
+- Cause: Black was running on the stock STANDARD/gen5 mapper (the ST/gen5 copies had vanished after a Poke-A-Byte
+  mapper update). Its ally team count reads junk that depends on the location; at Burgh it threw off the battle-ready
+  address, so the state stayed "To Battle" all battle and fainted Pokémon never greyed out. No overlay code change.
+- Scott's rule: Gen 5+ uses the standard mappers, Gen 3-4 the ST ones; never push to or PR the mappers repo.
+- tools/mappers/make-gen5-st.py now patches STANDARD/gen5 in place (keeps names and ids, skips patched files);
+  check-black-2-offset.py reads STANDARD/gen5. Docs and the gen5 profile comments updated (docs/mapper-matrix.md).
+- On Scott's PC: STANDARD/gen5 patched (originals in the project's mapper-backup folder), ST/gen5 deleted. Not pushed.
+- Verified: the script on the stock files gives exactly the installed files, a second run skips all four, and the
+  Black 2 offset check passes. Not verified: a real battle on the patched mapper; typecheck not run (comment-only .ts edits).
+
+## Generated style defaults for every unstyled species; evolution mode falls back to the solo look
+- New `core/overlay/evolutionStyleFallback.ts`, used by gens 3-5 `Overlay.vue` (`loadEvolutionStyle`, the style watcher,
+  `set_pokemon_prop`, Copy to Family, the evolution fade): a `-line-` entry with no look reads the species' solo look;
+  the first evolution-mode style edit copies the solo look into the line entry first. gen1 and gen2 have no evolution lines.
+- Generated looks for every species Scott hadn't styled: 4,892 entries (gen5 2,543, gen4 1,429, gen3 692, gen2 228,
+  gen1 152 Storage.json presets). Files that already had a look were skipped; non-style files were merged into, not
+  replaced. Rules are in ARCHITECTURE §6 "Generated defaults". Generator scripts are not in the repo.
+- Steel texture look (gens 3-5) is now Scott's Bronzong-line look (38/169/100, blur 0.8); generated Steel-type
+  entries also get backgroundScale 151.
+- drift-allowlist: re-fingerprinted loadEvolutionStyle, set_pokemon_prop, copyCurrentStylesToAllFamilyMembers and
+  performEvolutionTransition (the same edit in gens 3-5). load_all_settings (gen5) still fails drift from another change.
+- Verified: typecheck, build, parity:drift (apart from load_all_settings), on Scott's working tree. Sample renders of
+  ~40 species in Platinum and Black reviewed by Scott over five rounds. Not verified: the evolution fallback on screen,
+  gens 1-3 renders after the last round, and most of the ~4,900 entries were not looked at one by one.

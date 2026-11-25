@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Accelgor"
+  "selected_evolution_species": "Accelgor",
+  "imageScale": 0.5,
+  "imageXOffset": -24,
+  "imageYOffset": -152,
+  "imageFlip": true,
+  "overlay_color": "#db6c7d",
+  "ui_saturation": 1.5
 }

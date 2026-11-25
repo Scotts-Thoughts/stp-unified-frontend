@@ -75,12 +75,22 @@ is why Emerald runs recorded on `pokemon_emerald_ne.xml` have none (e-treecko-2,
 cut finds nothing. Checked on e-treecko-2 with `tools/markers/memlog.cjs`: the value follows each switch-in. **After a
 mapper update, check the two lines are still there.** FireRed's `_ne` has them upstream.
 
-## ST/gen5 (2026-11-04)
+## Gen 5 fixes in the STANDARD mappers (2026-11-04, moved 2026-11-25)
 
-`ST/gen5/pokemon_{black,white,black_2,white_2}_ne.{xml,js}` are generated from the upstream `STANDARD/gen5` files by
-`tools/mappers/make-gen5-st.py`, so an upstream update can't undo them: after one, re-run the script (it stops if an edit no
-longer applies). Property paths are the same plus `battle.opponent_2.pkmn_ram`, `.active_pokemon`, `.party_position` and
-`battle.TESTING.opponent_2_indirect_1`. Gen5's profiles accept both families; pick `ST/gen5` in the queuer.
+**Rule (Scott, 2026-11-25): Gen 5 and later run on the standard `STANDARD/genN` mappers, and mapper fixes for them go
+into those files. Gens 3-4 keep the `ST` mappers (ROMs with encryption disabled). Never push to the mappers repo or open
+a pull request on it; only Scott pushes there.** There are no `ST/gen5` copies any more (they were deleted 2026-11-25).
+
+`tools/mappers/make-gen5-st.py` patches the fixes below into `STANDARD/gen5/pokemon_{black,white,black_2,white_2}.{xml,js}`
+in place, keeping the mappers' names and ids, and skips a file it already patched. Until Scott pushes the fixes to the
+mappers repo, a Poke-A-Byte mapper update puts the stock files back: re-run the script afterwards (it stops if an edit no
+longer applies). Property paths are the stock ones plus `battle.opponent_2.pkmn_ram`, `.active_pokemon`, `.party_position`
+and `battle.TESTING.opponent_2_indirect_1`. Gen5's profiles still match the old `ST/gen5` paths so older fixtures load.
+
+**Symptom of unpatched stock files** (Black, 2026-11-24 run): in some battles only, Burgh's among them, the enemy panel
+never greyed out fainted Pokémon. The stock `ally.team_count` reads a junk value that depends on where you are; when it
+is 1-6 the `battle_state_ready` address is wrong, `meta.state` stays "To Battle" for the whole battle, and the fades and
+stage badges wait for a "Battle" that never comes.
 
 What was wrong upstream, each read from real battles in Super Shuckie replays:
 
@@ -98,7 +108,7 @@ What was wrong upstream, each read from real battles in Super Shuckie replays:
 every shared property equal, except `ally.team_count` and clock seconds.
 
 **Black 2 is White 2 at a fixed offset:** every game address is 0x40 lower. `tools/mappers/check-black-2-offset.py` compares all
-489 XML addresses and the script, so run it after `make-gen5-st.py`. Black 2 has no replays, so its battles were never watched;
+489 XML addresses and the script, so run it after `make-gen5-st.py` (it reads `STANDARD/gen5`). Black 2 has no replays, so its battles were never watched;
 they rest on that offset. Its overworld was read on the real game (name, map, clock, position). Triple and rotation battles were
 not seen. White 2's `options.difficulty_keys` and `patch.*` are absent from Black 2 on purpose: `difficulty_keys` is a code patch,
 so the offset can't be assumed, and the overlay writes to both.

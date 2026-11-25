@@ -14,6 +14,13 @@ import { get_enemy_pkmn_styles } from "~/methods/enemy";
 import PokeData from "~/logic/PokeData";
 import { status_penalty } from "~/logic/statusPenalty";
 import { fitTrainerHeader } from "~/core/logic/trainerHeader";
+import type { EnemyRowArt } from "~/core/logic/webcamMode";
+
+/**
+ * Where `images/ui/opponent.svg` draws the rows (outer edges, black outline included) and how far the rounded corners (and the highlight in the
+ * bottom left) reach into a row: Webcam Mode's fitted rows (`core/logic/webcamMode.ts` `webcamRowLayout`) keep those parts at their regular size.
+ */
+export const ENEMY_ROW_ART: EnemyRowArt = { tops: [82, 243, 404, 565, 726, 887], height: 158, cornerTop: 10, cornerBottom: 32 };
 
 export interface Gen1EnemySlot extends EnemySlotView {
     /** The slot's species has arrived (it stays in the DOM, hidden, until then). */
@@ -236,7 +243,7 @@ function slotNodes(view: Gen1EnemyTeam, slot: Gen1EnemySlot): EnemyNode {
 export function enemyTeamLayout(view: Gen1EnemyTeam): EnemyChild[] {
     return [
         { class: "trainerLabel", text: fitTrainerHeader(view.trainer, 20) },
-        { class: "tinted-box", style: [view.crop, { "--url": "url(images/ui/opponent.svg)" }] },
+        { frame: true, class: "tinted-box", style: [view.crop, { "--url": "url(images/ui/opponent.svg)" }] },
         { class: "enemyGraphic", children: view.slots.map((slot) => slotNodes(view, slot)) },
         view.art === null ? null : { key: "1", style: "position: absolute;", children: [{ tag: "img", class: "canvas", src: view.art }] },
     ];

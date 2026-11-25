@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Ducklett"
+  "selected_evolution_species": "Ducklett",
+  "imageScale": 0.55,
+  "imageXOffset": -5,
+  "imageYOffset": -108,
+  "imageFlip": false,
+  "overlay_color": "#badfdd",
+  "ui_saturation": 1.5
 }

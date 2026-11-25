@@ -1,4 +1,4 @@
-"""Check that ST/gen5 Black 2 is White 2 with every game address 0x40 lower. Run after make-gen5-st.py.
+"""Check that the patched STANDARD/gen5 Black 2 is White 2 with every game address 0x40 lower. Run after make-gen5-st.py.
 
 Windows, Git Bash python: python tools/mappers/check-black-2-offset.py
 Exits 1 and lists anything else. White 2's extra patch and difficulty_keys properties are deliberate: see docs/mapper-matrix.md.
@@ -6,7 +6,7 @@ Exits 1 and lists anything else. White 2's extra patch and difficulty_keys prope
 import re, sys
 import xml.etree.ElementTree as ET
 
-D = "/c/Users/scott/AppData/Roaming/PokeAByte/Mappers/ST/gen5/"
+D = "/c/Users/scott/AppData/Roaming/PokeAByte/Mappers/STANDARD/gen5/"
 OFFSET = -0x40
 RAM = 0x2000000
 ONLY_WHITE_2 = re.compile(r"mapper/(properties/options/difficulty_keys|properties/patch/|references/difficulty_keys_list)")
@@ -25,7 +25,7 @@ def walk(el, path, out):
 
 
 def load(game):
-    root = ET.parse(f"{D}pokemon_{game}_ne.xml").getroot()
+    root = ET.parse(f"{D}pokemon_{game}.xml").getroot()
     root.attrib.pop("name")
     out = {}
     walk(root, [], out)
@@ -59,7 +59,7 @@ for k in w:
         elif x != y and k != "mapper/properties/meta/game_name" and "party_position" not in k:
             bad.append(f"{k} {attr}: {x} / {y}")
 
-js = [open(f"{D}pokemon_{g}_ne.js", encoding="utf8").read().splitlines() for g in ("white_2", "black_2")]
+js = [open(f"{D}pokemon_{g}.js", encoding="utf8").read().splitlines() for g in ("white_2", "black_2")]
 if len(js[0]) != len(js[1]):
     bad.append("scripts differ in length")
 for i, (x, y) in enumerate(zip(*js), 1):

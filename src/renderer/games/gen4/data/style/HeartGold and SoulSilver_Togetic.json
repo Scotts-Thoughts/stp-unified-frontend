@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Togetic"
+  "selected_evolution_species": "Togetic",
+  "imageScale": 0.72,
+  "imageXOffset": -9,
+  "imageYOffset": -5,
+  "imageFlip": true,
+  "overlay_color": "#b55955",
+  "ui_saturation": 1.5
 }

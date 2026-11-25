@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Mareep"
+  "selected_evolution_species": "Mareep",
+  "imageScale": 0.5,
+  "imageXOffset": 38,
+  "imageYOffset": -94,
+  "imageFlip": false,
+  "overlay_color": "#f7e9c3",
+  "ui_saturation": 1.5
 }

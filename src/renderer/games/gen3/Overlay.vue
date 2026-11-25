@@ -327,11 +327,11 @@
                 </div>
                 <div v-else-if="(right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && ((g3stateVariable == `Battle` || g3stateVariable == `To Battle`) && game.properties.battle.type.trainer.value == true)" key="4">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-rows="enemy_row_art" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-rows="enemy_row_art" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <div v-else-if="right_panel_mode == 'Splits'" key="5">
                     <div v-if="splitsView">
@@ -425,6 +425,7 @@
  */
 import { computed, defineComponent, markRaw, shallowRef } from "vue";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
+import { styleSourceKey, seedLineStyle, isStyleField } from "~/core/overlay/evolutionStyleFallback";
 import { FaultsBox } from "~/core/overlay/player/FaultsBox";
 import { MoveList } from "~/core/overlay/player/MoveList";
 import { PopupBox } from "~/core/overlay/player/PopupBox";
@@ -473,7 +474,7 @@ import Movepool from "~/core/overlay/Movepool.vue";
 import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder, speedOrder } from "~/core/logic/speedLabel";
-import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView } from "./enemyPanel";
+import { ENEMY_ROW_ART, enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView } from "./enemyPanel";
 import { isTwoTrainerBattle } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { soloStyleCopyMixin } from "~/core/overlay/soloStyleCopyMixin";
@@ -1238,6 +1239,9 @@ export default defineComponent({
                         // Otherwise, use individual species storage
                         // This ensures styles are saved to the correct location (e.g., "FireRed_Unfezant-line-Pidove" vs "FireRed_Pidove")
                         storageKey = this.getCurrentStorageKey();
+                        if (isStyleField(propName) && this.evolution && this.selected_evolution_species && storageKey === this.getStorageKey(this.selected_evolution_species, true)) {
+                            seedLineStyle(MyStorage, storageKey, this.getStorageKey(this.selected_evolution_species, false));
+                        }
                         // Castform's visual styles are stored per form
                         if (this.starterString == "Castform" && this.castform_style_settings.includes(propName)) {
                             storageKey = this.getCastformStyleStorageKey();
@@ -2430,6 +2434,10 @@ export default defineComponent({
         },
         enemy_team_layout() {
             return enemyTeamLayout
+        },
+        /** Where the enemy panel art draws its rows (Webcam Mode's fitted rows, enemyPanel.ts). */
+        enemy_row_art() {
+            return ENEMY_ROW_ART
         },
         /** The trainer preview (decision 14): the picker's options, the picked trainer and its panel (enemyPanel.ts). */
         trainer_options() {
@@ -4123,6 +4131,7 @@ export default defineComponent({
             const game_name = this.game?.properties?.meta?.game_name?.value || this.gameSelection;
             const sourceSpecies = this.selected_evolution_species;
             const sourceStorageKey = this.getStorageKey(sourceSpecies, true); // Evolution line storage
+            seedLineStyle(MyStorage, sourceStorageKey, this.getStorageKey(sourceSpecies, false));
             
             // Initialize source storage if it doesn't exist
             if (!MyStorage[sourceStorageKey]) {
@@ -4452,6 +4461,9 @@ export default defineComponent({
             const storageKey = this.starterString == "Castform"
                 ? this.getCastformStyleStorageKey()
                 : this.getCurrentStorageKey();
+            if (this.evolution && this.selected_evolution_species && storageKey === this.getStorageKey(this.selected_evolution_species, true)) {
+                seedLineStyle(MyStorage, storageKey, this.getStorageKey(this.selected_evolution_species, false));
+            }
             MyStorage[storageKey] = {
                 ...MyStorage[storageKey],
                 [property_name]: value,
@@ -4567,6 +4579,8 @@ export default defineComponent({
             // Load styles for a species, either from evolution line storage or individual storage
             const game_name = this.game?.properties?.meta?.game_name?.value || this.gameSelection;
             let storageKey = useEvolutionLine ? this.getStorageKey(species, true) : this.getStorageKey(species, false);
+            // Evolution mode falls back to the species' own look until its line entry is styled.
+            if (useEvolutionLine) storageKey = styleSourceKey(MyStorage, storageKey, this.getStorageKey(species, false));
             // Castform's styles are stored per form
             if (species == "Castform") {
                 storageKey = this.getCastformStyleStorageKey();
@@ -4681,8 +4695,8 @@ export default defineComponent({
             this.evolution_new_species = newSpecies;
             
             // Get old and new styles
-            const oldStorageKey = this.getStorageKey(oldSpecies, true);
-            const newStorageKey = this.getStorageKey(newSpecies, true);
+            const oldStorageKey = styleSourceKey(MyStorage, this.getStorageKey(oldSpecies, true), this.getStorageKey(oldSpecies, false));
+            const newStorageKey = styleSourceKey(MyStorage, this.getStorageKey(newSpecies, true), this.getStorageKey(newSpecies, false));
             const game_name = this.game?.properties?.meta?.game_name?.value || this.gameSelection;
             
             const oldType1 = this.game_data?.dexData?.[oldSpecies]?.type_1 ?? 'Normal';

@@ -3,7 +3,7 @@
  * Mid-run evolution of the Solo Pokemon, gens 4 and 5 (2026-11-24).
  *
  * The run's Pokemon is the party lead whose personality value was seen while its species was the
- * Solo Pokemon (`evolution_lead_pv`). With Evolution on, when that same Pokemon is now another member
+ * Solo Pokemon (`evolution_lead_pvs`). With Evolution on, when that same Pokemon is now another member
  * of the Solo Pokemon's family, it evolved: the starter follows, the counts carry over, the evolved
  * species gets the Evolution flags, and the art cross-fades.
  *
@@ -30,9 +30,14 @@ export function leadEvolutionMixin(storage, { dex, flagsInEvoStateKey }) {
                 const lead = this.game?.properties?.player?.team?.[0];
                 const pv = lead?.internals?.personality_value?.value;
                 if (!pv || !this.starter) return;
-                if (this.resolveIncomingSpecies(lead?.species?.value) === this.starter) {
-                    this.evolution_lead_pv = pv;
-                }
+                if (this.resolveIncomingSpecies(lead?.species?.value) !== this.starter) return;
+                // A short list, not one value: gen4 debounces the species but not the personality value,
+                // so a new value can land while the species still reads the Solo Pokemon from before (a
+                // reset's garbage read, h-yanmega-line-2-dnf at 9223 s). With one value that read replaced
+                // the real one and a later evolution was missed; here it is only one more entry.
+                const pvs = (this.evolution_lead_pvs ?? []).filter(v => v !== pv);
+                pvs.push(pv);
+                this.evolution_lead_pvs = pvs.slice(-8);
             },
             leadEvolvedSpecies(oldProp = null) {
                 // The species the run's Pokemon has evolved into, or null. Reads the party lead as it is
@@ -45,8 +50,8 @@ export function leadEvolutionMixin(storage, { dex, flagsInEvoStateKey }) {
                 const species = this.resolveIncomingSpecies(lead?.species?.value);
                 const pv = lead?.internals?.personality_value?.value;
                 if (!species || species === this.starter || !pv) return null;
-                if (this.evolution_lead_pv != null) {
-                    if (pv !== this.evolution_lead_pv) return null;
+                if (this.evolution_lead_pvs?.length) {
+                    if (!this.evolution_lead_pvs.includes(pv)) return null;
                 } else {
                     if (pv !== this.last_known_personality_value) return null;
                     if (oldProp && (oldProp.value == null || (Array.isArray(oldProp.bytes) && oldProp.bytes.every(b => b === 0)))) return null;
@@ -59,6 +64,9 @@ export function leadEvolutionMixin(storage, { dex, flagsInEvoStateKey }) {
                 // Runs from the species and personality-value handlers and on every game-state change, so
                 // an evolution is caught even when the species event itself didn't qualify (for example a
                 // Rare Candy evolution out of battle whose species change arrived next to a blank read).
+                // Every check also refreshes the run's Pokemon, so it never depends on which handler saw the
+                // Solo Pokemon last.
+                this.trackEvolutionLead();
                 const newSpecies = this.leadEvolvedSpecies(oldProp);
                 if (!newSpecies) return false;
                 const oldSpecies = this.starter;
@@ -105,6 +113,11 @@ export function leadEvolutionMixin(storage, { dex, flagsInEvoStateKey }) {
                     ...storage[`${game}_${newSpecies}`],
                     // gen5 keeps the flags in the species key itself
                     ...(flagsInEvoStateKey ? {} : { evolution: true, evolution_splits_label: this.evolution_splits_label }),
+                    // The starter watcher shows the family member stored under the new starter's key when
+                    // there is one. A stale choice there (Yanma, saved while Yanmega was the Solo Pokemon in
+                    // an earlier session) kept the old art after the evolution: "Evolving to: Yanmega", the
+                    // starter changed, and the overlay still drew Yanma. The evolved species is the choice now.
+                    selected_evolution_species: newSpecies,
                     attempt_number: preservedAttemptNumber,
                     finished_run_count: preservedFinishedRunCount,
                     playerResets: preservedResets,

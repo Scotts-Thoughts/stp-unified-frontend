@@ -8,7 +8,7 @@
   "imageYOffset": 0,
   "imageXOffset": 0,
   "overlay_color": "#705898",
-  "evolution": false,
+  "evolution": true,
   "pkmn_ability": "Mummy",
   "pkmnNature": "Hardy",
   "backgroundTexture": "Ghost"

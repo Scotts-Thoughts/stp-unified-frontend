@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Magneton"
+  "selected_evolution_species": "Magneton",
+  "imageScale": 0.73,
+  "imageXOffset": 28,
+  "imageYOffset": 130,
+  "imageFlip": true,
+  "overlay_color": "#d5e0e5",
+  "ui_saturation": 1.6
 }

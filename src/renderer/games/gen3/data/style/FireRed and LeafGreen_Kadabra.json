@@ -1,4 +1,10 @@
 {
   "selected_evolution_species": "Kadabra",
-  "evolution": false
+  "evolution": false,
+  "imageScale": 0.72,
+  "imageXOffset": 52,
+  "imageYOffset": 23,
+  "imageFlip": true,
+  "overlay_color": "#f2da4c",
+  "ui_saturation": 1.6
 }

@@ -31,3 +31,8 @@ img[data-stp-fade][data-stp-state="loaded"] {
 .stp-webcam-fit > * {
     pointer-events: auto;
 }
+
+/* The fitted rows (EnemyTeamPanel.ts `band`) nest two such boxes, the cut outside the transform: neither takes clicks. */
+.stp-webcam-fit > .stp-webcam-band {
+    pointer-events: none;
+}

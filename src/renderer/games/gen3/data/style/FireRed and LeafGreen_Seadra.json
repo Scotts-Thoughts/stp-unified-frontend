@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Seadra"
+  "selected_evolution_species": "Seadra",
+  "imageScale": 0.73,
+  "imageXOffset": 35,
+  "imageYOffset": -1,
+  "imageFlip": true,
+  "overlay_color": "#8ed0ec",
+  "ui_saturation": 1.6
 }

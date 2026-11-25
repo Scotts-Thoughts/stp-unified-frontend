@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Eelektross"
+  "selected_evolution_species": "Eelektross",
+  "imageScale": 0.52,
+  "imageXOffset": 7,
+  "imageYOffset": 96,
+  "imageFlip": true,
+  "overlay_color": "#b5c4db",
+  "ui_saturation": 1.5
 }

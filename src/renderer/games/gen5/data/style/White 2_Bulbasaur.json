@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Bulbasaur"
+  "selected_evolution_species": "Bulbasaur",
+  "imageScale": 0.67,
+  "imageXOffset": -7,
+  "imageYOffset": -103,
+  "imageFlip": true,
+  "overlay_color": "#9accb3",
+  "ui_saturation": 1.5
 }

@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Yanma"
+  "selected_evolution_species": "Yanma",
+  "imageScale": 0.66,
+  "imageXOffset": 24,
+  "imageYOffset": 81,
+  "imageFlip": true,
+  "overlay_color": "#d5694a",
+  "ui_saturation": 1.5
 }

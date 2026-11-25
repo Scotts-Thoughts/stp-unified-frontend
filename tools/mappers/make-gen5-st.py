@@ -1,4 +1,7 @@
-"""Generate ST/gen5/pokemon_<game>_ne.{xml,js} from STANDARD/gen5, so a mapper update can't undo the fixes.
+"""Patch the fixes into the standard STANDARD/gen5/pokemon_<game>.{xml,js} mappers, in place.
+
+Gen 5+ runs on the standard mappers (Scott, 2026-11-25); no separate ST/gen5 copies. Run it on fresh stock files, e.g.
+after a Poke-A-Byte mapper update undid the fixes. Already-patched files are skipped. Never push to the mappers repo.
 
 Windows, Git Bash python: python tools/mappers/make-gen5-st.py
 Facts behind each edit are in docs/mapper-matrix.md ("ST/gen5"); they were read from real battles in Super Shuckie replays.
@@ -13,9 +16,6 @@ GAMES = {
     "black_2": ("STP Pokemon Black 2", "0x22573AC - 0x40", False),
     "white_2": ("STP Pokemon White 2", "0x22573AC", False),
 }
-UUIDS = {"black": "5c7a2e10-4f0b-4b6e-9c11-0b5e1a7d5001", "white": "5c7a2e10-4f0b-4b6e-9c11-0b5e1a7d5002",
-         "black_2": "5c7a2e10-4f0b-4b6e-9c11-0b5e1a7d5003", "white_2": "5c7a2e10-4f0b-4b6e-9c11-0b5e1a7d5004"}
-os.makedirs(M + "ST/gen5", exist_ok=True)
 
 
 def once(t, a, b, what):
@@ -31,8 +31,9 @@ for g, (name, table, bw) in GAMES.items():
     jnl = "\r\n" if "\r\n" in j else "\n"
 
     # ---- XML
-    x, c = re.subn(r'<mapper id="[^"]+" name="[^"]+"', f'<mapper id="{UUIDS[g]}" name="{name}"', x, count=1)
-    assert c == 1
+    if "opponent_2_indirect_1" in x:
+        print("already patched, skipped", g)
+        continue
     if bw:
         # Black/White had White 2's address for the ally's team count, so it read 0 and every battle-RAM sum that
         # includes the ally was wrong (the outcome flags, and with them meta.state).
@@ -117,6 +118,6 @@ for g, (name, table, bw) in GAMES.items():
              "    // The table only points at records during the battle." + jnl +
              "    const opponent_2_party_position = (getValue('battle.TESTING.opponent_2_indirect_1') - (opponent_2_battle_ram_start + indirect_offset)) / 548;" + jnl +
              "    setValue('battle.opponent_2.party_position', Number.isInteger(opponent_2_party_position) && opponent_2_party_position >= 0 && opponent_2_party_position < 6 ? opponent_2_party_position : 0);", "position")
-    open(f"{M}ST/gen5/pokemon_{g}_ne.xml", "w", encoding="utf8", newline="").write(x)
-    open(f"{M}ST/gen5/pokemon_{g}_ne.js", "w", encoding="utf8", newline="").write(j)
+    open(f"{M}STANDARD/gen5/pokemon_{g}.xml", "w", encoding="utf8", newline="").write(x)
+    open(f"{M}STANDARD/gen5/pokemon_{g}.js", "w", encoding="utf8", newline="").write(j)
     print("wrote", g)

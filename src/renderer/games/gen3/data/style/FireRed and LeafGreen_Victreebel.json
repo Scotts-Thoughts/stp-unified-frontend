@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Victreebel"
+  "selected_evolution_species": "Victreebel",
+  "imageScale": 0.86,
+  "imageXOffset": 33,
+  "imageYOffset": 22,
+  "imageFlip": true,
+  "overlay_color": "#e3e269",
+  "ui_saturation": 1.6
 }

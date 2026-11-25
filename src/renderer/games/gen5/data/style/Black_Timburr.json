@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Conkeldurr"
+  "selected_evolution_species": "Conkeldurr",
+  "imageScale": 0.53,
+  "imageXOffset": 2,
+  "imageYOffset": -156,
+  "imageFlip": false,
+  "overlay_color": "#aa9578",
+  "ui_saturation": 1.5
 }

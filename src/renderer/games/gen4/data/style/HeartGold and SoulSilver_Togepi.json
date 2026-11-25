@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Togepi"
+  "selected_evolution_species": "Togepi",
+  "imageScale": 0.5,
+  "imageXOffset": -38,
+  "imageYOffset": -94,
+  "imageFlip": true,
+  "overlay_color": "#f7ecc2",
+  "ui_saturation": 1.5
 }

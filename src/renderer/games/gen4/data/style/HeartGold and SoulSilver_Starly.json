@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Starly"
+  "selected_evolution_species": "Starly",
+  "imageScale": 0.5,
+  "imageXOffset": -34,
+  "imageYOffset": -94,
+  "imageFlip": true,
+  "overlay_color": "#494542",
+  "ui_saturation": 1.5
 }

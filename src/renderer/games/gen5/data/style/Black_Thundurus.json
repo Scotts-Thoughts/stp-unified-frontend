@@ -12,5 +12,6 @@
   "backgroundBrightness": "66",
   "pkmn_ability": "Prankster",
   "pkmnNature": "Hardy",
-  "backgroundTexture": "Electric"
+  "backgroundTexture": "Electric",
+  "evolution": false
 }

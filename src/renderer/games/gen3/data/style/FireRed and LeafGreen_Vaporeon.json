@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Vaporeon"
+  "selected_evolution_species": "Vaporeon",
+  "imageScale": 0.94,
+  "imageXOffset": 49,
+  "imageYOffset": 50,
+  "imageFlip": true,
+  "overlay_color": "#7ecde0",
+  "ui_saturation": 1.6
 }

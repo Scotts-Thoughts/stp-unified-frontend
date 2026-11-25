@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Venomoth"
+  "selected_evolution_species": "Venomoth",
+  "imageScale": 0.77,
+  "imageXOffset": -15,
+  "imageYOffset": 123,
+  "imageFlip": true,
+  "overlay_color": "#ece2ef",
+  "ui_saturation": 1.6
 }

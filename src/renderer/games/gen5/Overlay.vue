@@ -236,7 +236,7 @@
                      setting, not a post-battle Splits, which waits for enemy_graphic to end, as before. -->
                 <div v-else-if="enemy_graphic == true && battlePokemonCrop != false && (right_ui == 'Automatic' || right_ui == 'Trainers')" style="position: absolute;" key="1">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-rows="enemy_row_art" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, during the battle. -->
                 <div v-else-if="(right_ui == 'Automatic' || right_ui == 'Trainers') && wild_pokemon_view" style="position: absolute;" key="9">
@@ -244,7 +244,7 @@
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="right_panel_shortened" :webcam-rows="enemy_row_art" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Splits -->
                 <div v-else-if="right_panel_mode == 'Splits'" key="7" :style="`filter: drop-shadow(0px 1px 1px)`" class="posAbs">
@@ -349,6 +349,7 @@
  */
 import { computed, defineComponent, markRaw, shallowRef } from "vue";
 import { ClockFrame } from "~/core/overlay/ClockFrame";
+import { styleSourceKey, seedLineStyle, isStyleField } from "~/core/overlay/evolutionStyleFallback";
 import { FaultsBox } from "~/core/overlay/player/FaultsBox";
 import { MoveList } from "~/core/overlay/player/MoveList";
 import { PopupBox } from "~/core/overlay/player/PopupBox";
@@ -368,7 +369,7 @@ import Movepool from "~/core/overlay/Movepool.vue";
 import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder } from "~/core/logic/speedLabel";
-import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
+import { ENEMY_ROW_ART, enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
 import { isTwoTrainerBattle, secondTeamRows } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { soloStyleCopyMixin } from "~/core/overlay/soloStyleCopyMixin";
@@ -533,7 +534,7 @@ export default defineComponent({
             evolution_family_list        : [],    // List of species in the current evolution family
             last_known_species           : null,  // Track last known species for evolution detection
             last_known_personality_value : null,  // Track last known personality value for evolution detection
-            evolution_lead_pv            : null,  // Personality value of the party lead while it is the Solo Pokemon (trackEvolutionLead)
+            evolution_lead_pvs           : [],    // Personality values the party lead had while it was the Solo Pokemon (trackEvolutionLead)
             evolution_transitioning      : false, // Flag to track if evolution transition is in progress
             evolution_old_species        : null,  // Species before evolution (for transition)
             evolution_new_species        : null,  // Species after evolution (for transition)
@@ -1103,6 +1104,9 @@ export default defineComponent({
                         // Otherwise, use individual species storage
                         // This ensures styles are saved to the correct location (e.g., "Black_Unfezant-line-Pidove" vs "Black_Pidove")
                         storageKey = this.getCurrentStorageKey();
+                        if (isStyleField(propName) && this.evolution && this.selected_evolution_species && storageKey === this.getStorageKey(this.selected_evolution_species, true)) {
+                            seedLineStyle(MyStorage, storageKey, this.getStorageKey(this.selected_evolution_species, false));
+                        }
                         // A battle-only form being displayed keeps its visual styles on its own key
                         if (this.visual_style_settings.includes(propName)) {
                             storageKey = this.getStyleStorageKey();
@@ -2378,6 +2382,10 @@ export default defineComponent({
         },
         enemy_team_layout() {
             return enemyTeamLayout
+        },
+        /** Where the enemy panel art draws its rows (Webcam Mode's fitted rows, enemyPanel.ts). */
+        enemy_row_art() {
+            return ENEMY_ROW_ART
         },
         /** The trainer preview (decision 14): the picker's options, the picked trainer and its panel (enemyPanel.ts). */
         trainer_options() {
@@ -4536,6 +4544,7 @@ export default defineComponent({
             const game_name = this.game?.properties?.meta?.game_name?.value || this.selected_game;
             const sourceSpecies = this.selected_evolution_species;
             const sourceStorageKey = this.getStorageKey(sourceSpecies, true); // Evolution line storage
+            seedLineStyle(MyStorage, sourceStorageKey, this.getStorageKey(sourceSpecies, false));
             
             // Initialize source storage if it doesn't exist
             if (!MyStorage[sourceStorageKey]) {
@@ -4827,6 +4836,9 @@ export default defineComponent({
         set_pokemon_prop(property_name, value) {
             // Only ever called for style properties, so a displayed battle-only form routes to its own key
             const storageKey = this.getStyleStorageKey();
+            if (this.evolution && this.selected_evolution_species && storageKey === this.getStorageKey(this.selected_evolution_species, true)) {
+                seedLineStyle(MyStorage, storageKey, this.getStorageKey(this.selected_evolution_species, false));
+            }
             MyStorage[storageKey] = {
                 ...MyStorage[storageKey],
                 [property_name]: value,
@@ -4875,7 +4887,9 @@ export default defineComponent({
             
             // Load styles for a species, either from evolution line storage or individual storage
             const game_name = this.game?.properties?.meta?.game_name?.value || this.selected_game;
-            const storageKey = useEvolutionLine ? this.getStorageKey(species, true) : this.getStorageKey(species, false);
+            let storageKey = useEvolutionLine ? this.getStorageKey(species, true) : this.getStorageKey(species, false);
+            // Evolution mode falls back to the species' own look until its line entry is styled.
+            if (useEvolutionLine) storageKey = styleSourceKey(MyStorage, storageKey, this.getStorageKey(species, false));
             
             // Debug: Log what we're trying to load
             console.log(`Loading styles for ${species} (useEvolutionLine: ${useEvolutionLine}, key: ${storageKey})`);
@@ -4969,8 +4983,8 @@ export default defineComponent({
             this.evolution_new_species = newSpecies;
             
             // Get old and new styles
-            const oldStorageKey = this.getStorageKey(oldSpecies, true);
-            const newStorageKey = this.getStorageKey(newSpecies, true);
+            const oldStorageKey = styleSourceKey(MyStorage, this.getStorageKey(oldSpecies, true), this.getStorageKey(oldSpecies, false));
+            const newStorageKey = styleSourceKey(MyStorage, this.getStorageKey(newSpecies, true), this.getStorageKey(newSpecies, false));
             const game_name = this.game?.properties?.meta?.game_name?.value || this.selected_game;
             
             const oldOverlayColor = MyStorage[oldStorageKey]?.overlay_color ?? this.default_colors[this.g5PokemonData[oldSpecies]?.type_1] ?? this.default_colors.Normal;

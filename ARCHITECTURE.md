@@ -486,6 +486,20 @@ webcam. Saved as `webcam_mode` (gens 2-5, via each `auto_save_settings`; gen3's 
   off below `webcamHeader` (the y where the header ends: gens 1-2 81, gens 3-5 66, between the header's bottom border
   and the first row in each enemy-panel SVG), and once squeezed from that line down, cut off above it. A squeeze of the
   whole panel from the canvas top shrank the top margin and changed the cutout's angle.
+- Fitted rows (Scott, 2026-11-25; all five generations pass `webcamRows`, so the block squeeze above is now only the
+  fallback for a layout without them): each generation's `ENEMY_ROW_ART` (`games/genN/enemyPanel.ts`: every row's
+  outer top, the row height, how far the corners reach in) feeds `webcamRowLayout`, which gives a team too tall for the
+  line (five or six Pokémon; four never change) whole-pixel rows with one gap everywhere: between rows and between the
+  last row and `WEBCAM_ROWS_LINE` (746, the outer edge of the DS second-screen area). The gap is the art's smallest gap
+  between two rows. `drawFitted` draws the header box, then per row: the `frame: true` node (the panel art) in three
+  slices, top and bottom corners at their regular size and only the straight middle scaled, so gen5's 45° corners
+  keep their angle; and the rest of the panel in its own box, cut to the row and half a gap each side, scaled with it.
+  Each cut is made outside the transform (`band`), on canvas pixels.
+- gen5's type icon group shrinks to `SQUEEZED_TYPE_ICON` (0.75) in a squeezed/fitted team (`squeezeSize`, from its
+  right edge via `squeezeOrigin`); other generations keep their type icons at regular size.
+- Trap (verifying): at a zoom factor that isn't exactly 1 (the window's content a pixel short of 1920×1080, as under
+  xvfb), the slice cuts land between pixels and show faint lines in the frames. Set the window's content size to
+  1920×1080 before a capture.
 - A layout can make a crowded text smaller in the squeeze with `squeezeText` on its node (its size as a share of the
   rows' scale; default 1.2). gen1's stat numbers and stage badges use 1.02, as they collided in the shorter stat tiles
   (Scott, 2026-11-17).
@@ -602,9 +616,9 @@ are shrunk instead (`twoTrainerHeaderStyle`).
   - **Gen3 (Emerald):** the game caps each trainer at 3 and puts the second at party slot 3 even when the first has fewer,
     so `slot` and `row` can differ. The Pokémon that is out for the second trainer is `battle.enemySecondPokemon`.
   - **Gen5:** there are no Black 2 / White 2 tables, so the team is `battle.opponent_2.team` from memory, and
-    `opponent_2.team_count` is junk outside these battles. Use the `ST/gen5` mappers (`docs/mapper-matrix.md`): only they
-    have correct battle records in these battles. `partySlot` takes a second-trainer slot as 6+ (`getEnemyStat`,
-    `speed_comparison`, `enemy_held_item`, `enemy_form`). On an upstream `STANDARD/gen5` mapper it falls back on the party
+    `opponent_2.team_count` is junk outside these battles. Use the patched `STANDARD/gen5` mappers (`docs/mapper-matrix.md`):
+    only they have correct battle records in these battles. `partySlot` takes a second-trainer slot as 6+ (`getEnemyStat`,
+    `speed_comparison`, `enemy_held_item`, `enemy_form`). On an unpatched stock `STANDARD/gen5` mapper it falls back on the party
     copy, whose HP only changes when the battle ends. `single_battle` lists Black's four two-trainer ids, for the move-power
     calculation; `enemy_graphic` lets them through.
   - **Gens 4-5 set no limit on the two teams together.** Only the first six rows are drawn (`secondTeamRows`).
@@ -772,6 +786,13 @@ keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. 
 - **Don't use `server.watch.ignored` for this.** An unwatched file is never invalidated in Vite's cache, so
   every window reload until the dev server restarts gets the table as it was at startup (edits look "lost"),
   and the next sprite commit writes that stale table back over the file, wiping the session's edits.
+- **Generated defaults** (2026-11-25). Every species Scott had not styled got a generated look (about 4,900 entries
+  across gens 1-5; gen1's are `style` presets in `storage/Storage.json`). Rules: art centred on its body's weight
+  (thin tails, wings and arms count less; eyes centred instead only for tall narrow art), feet on the Poké Ball
+  line just behind the type icons, size by evolution stage then nudged by real height and base stat total, never
+  drawn above the art's own resolution (upscaling blurs), floating species lifted, art mirrored where needed so it
+  looks toward the game area (judged by eye, per family), overlay colour = the art's dominant colour unless it
+  blends into the type background, then its next colour. They are ordinary defaults: editing one overwrites it.
 
 **File names with spaces.** gen4 and gen5 have `data/type effectiveness array.js`, which needs quoting in shell commands.
 
@@ -797,6 +818,9 @@ Evolution is on); `<Game>_<FullyEvolved>-line` holds what the family shares (abi
 "Copy Solo Style" (`core/overlay/soloStyleCopyMixin.ts`) copies the first into the second for the picked family member,
 going through `loadEvolutionStyle` so the generation's defaults fill whatever the solo entry doesn't store. A solo
 entry with no look fields (only `selected_evolution_species`, say) counts as no style, and the button stays hidden.
+Since 2026-11-25 a line entry with no look fields falls back to the solo look when loaded
+(`core/overlay/evolutionStyleFallback.ts`), and the first style edit in evolution mode copies the solo look into the
+line entry before the edit lands, so the rest of the look survives.
 
 **Presets** (2026-11-05). A preset belongs to one game + species, like the style storage, and a file for another game is refused.
 - What it holds is the panel: every toggle, choice and slider by control id, unless the control says `preset: false`. A new control is saved without further work; mark it `preset: false` if it isn't about the run or the look (counters aren't saved because they aren't those kinds). `preset: "always"` keeps a value while `available` is false. What has no plain control is the generation's `PresetHost` (`games/genN/presets.ts`).
@@ -806,14 +830,20 @@ entry with no look fields (only `selected_evolution_species`, say) counts as no 
 - Trap: in a build run from source, the style store keeps only `GEN4_STYLE_PROPERTIES` of a species value (any other field written there is silently dropped; `selected_evolution_species` was, until #189). It lacks `iv_mode` and `manual_ivs`, so those two are not remembered across species changes there (they are in an installed build). A preset still restores them when loaded.
 
 **Mid-run evolution** (gens 4-5, `core/overlay/leadEvolutionMixin.ts`, 2026-11-24). With Evolution on, the Solo
-Pokemon follows the party lead when the lead is the run's own Pokemon (its personality value, `evolution_lead_pv`,
-recorded while the lead was the Solo Pokemon) and is now another member of the family. The check reads the party as
+Pokemon follows the party lead when the lead is the run's own Pokemon (one of its personality values, `evolution_lead_pvs`,
+recorded while the lead was the Solo Pokemon; a list because gen4 debounces the species and not the value, so a reset's
+garbage value can be recorded next to the real one) and is now another member of the family. The check reads the party as
 it is now and runs from the lead's species and personality-value handlers and on every `meta.state` change; don't
 move it back to depending on the species event's old value or on the game state, which is how a HeartGold Rare
 Candy evolution (Yanma to Yanmega) was missed. The Evolution flags are stored per Solo Pokemon (gen4
 `evoState_<Game>_<Species>`, gen5 `<Game>_<Species>`), so the evolution writes them for the evolved species too;
 before that, a `/refresh` or restart after any evolution turned Evolution off. Gen3 has its own handler (its
 starter stays the base species).
+Trap: the starter watcher draws the family member stored under the new starter's key (`<Game>_<Species>`
+`selected_evolution_species`) when there is one, so the evolution writes the evolved species there first. A stale
+choice (Yanma stored under Yanmega) left the old art on screen after "Evolving to: Yanmega" (2026-11-25). Check a
+change here with `tools/markers/lead-evolution-wiring.ts` over a real memory log, and in the real app with
+`tools/markers/mem-to-scenario.ts` -> `make-fixture.ts` -> `run.ts` (`tools/markers/README.md`).
 
 **Player profiles** (2026-11-24). A profile file is `{ format: 1, id, name, picture, created, buckets }`. Each
 bucket (one per game pair, `core/profile/buckets.ts`) holds the summed `player`/`enemy`/`other` counts and its
@@ -1131,6 +1161,7 @@ Re-running them would overwrite months of hand edits.
 | `docs/game-support-gaps.md` | Adding or fixing support for a game or edition |
 | `docs/performance-followups.md` | Performance work. It records what four passes did and what is still open |
 | `docs/themes-plan.md` | Themes (per-generation looks). A proposed plan, not built yet |
+| `docs/gen6-3ds-overlay-plan.md` | Gen 6 / 3DS (X/Y, OR/AS) support. A proposed plan, not built yet; the chosen layout is `docs/gen6/mockup-a.png` |
 | `docs/ui-uniformity-plan.md` | Making the generations look and behave alike, cutting CSS and template lines (decision 26 as a guideline). The order of work and Scott's open questions; `docs/ui-audit/A-E` hold the 2026-10-14 audit with file:line detail |
 | `docs/ui-uniformity-log.md` | The uniformity work step by step (2026-10-14/15): a git tree snapshot per step and what the harness showed against the step before; for reviewing or committing the steps one at a time |
 | `docs/shortcuts-menu-plan.md` | Shortcuts or the settings controls. The plan behind the Keyboard Shortcuts window and the per-generation action lists (built 2026-10-14), with an inventory of each generation's controls and the old F-key quirks |

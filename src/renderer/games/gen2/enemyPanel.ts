@@ -10,6 +10,13 @@ import { speedColorClass, speedLabel, speedOrder } from "~/core/logic/speedLabel
 import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/trainerPreview";
 import { movePowerOf, orderSlots, predictGen2, SendOutOrderCache, type SendOutMon } from "~/core/logic/sendOutOrder";
 import { fitTrainerHeader } from "~/core/logic/trainerHeader";
+import type { EnemyRowArt } from "~/core/logic/webcamMode";
+
+/**
+ * Where `images/gen2/ui/opponent.svg` draws the rows (outer edges, black outline included) and how far the rounded corners (and the highlight in the
+ * bottom left) reach into a row: Webcam Mode's fitted rows (`core/logic/webcamMode.ts` `webcamRowLayout`) keep those parts at their regular size.
+ */
+export const ENEMY_ROW_ART: EnemyRowArt = { tops: [82, 243, 404, 565, 726, 887], height: 158, cornerTop: 10, cornerBottom: 32 };
 
 /** The live battle's send-out order, frozen for the battle (the rows never move once the panel is up). */
 const liveOrder = new SendOutOrderCache();
@@ -309,7 +316,7 @@ function slotNodes(view: EnemyTeamView<Gen2EnemySlot>, slot: Gen2EnemySlot): Ene
 export function enemyTeamLayout(view: EnemyTeamView<Gen2EnemySlot>): EnemyChild[] {
     return [
         { class: "trainerLabel", text: fitTrainerHeader(view.trainer, 23) },
-        { class: "colored-image", style: [view.crop, { "--url": "url(images/gen2/ui/opponent.svg)" }] },
+        { frame: true, class: "colored-image", style: [view.crop, { "--url": "url(images/gen2/ui/opponent.svg)" }] },
         ...view.slots.map((slot): EnemyNode => ({
             children: [{ tag: "img", show: slot.speedPictureShown, class: ["canvas", slot.speed.svgClass], src: `images/gen2/ui/speed_comp/${rowOf(slot)}.svg` }],
         })),

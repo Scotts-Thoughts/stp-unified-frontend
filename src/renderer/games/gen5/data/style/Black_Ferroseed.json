@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Ferrothorn"
+  "selected_evolution_species": "Ferrothorn",
+  "imageScale": 0.53,
+  "imageXOffset": -2,
+  "imageYOffset": -120,
+  "imageFlip": true,
+  "overlay_color": "#6cb27e",
+  "ui_saturation": 1.5
 }

@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Pineco"
+  "selected_evolution_species": "Pineco",
+  "imageScale": 0.5,
+  "imageXOffset": -38,
+  "imageYOffset": -94,
+  "imageFlip": true,
+  "overlay_color": "#364a5a",
+  "ui_saturation": 1.5
 }

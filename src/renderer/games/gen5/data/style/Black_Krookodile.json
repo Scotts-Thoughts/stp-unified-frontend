@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Krookodile"
+  "selected_evolution_species": "Krookodile",
+  "imageScale": 1.15,
+  "imageXOffset": 9,
+  "imageYOffset": 46,
+  "imageFlip": true,
+  "overlay_color": "#ae6672",
+  "ui_saturation": 1.5
 }

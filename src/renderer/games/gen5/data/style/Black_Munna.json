@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Musharna"
+  "selected_evolution_species": "Musharna",
+  "imageScale": 0.54,
+  "imageXOffset": -3,
+  "imageYOffset": 99,
+  "imageFlip": true,
+  "overlay_color": "#f7d4db",
+  "ui_saturation": 1.5
 }

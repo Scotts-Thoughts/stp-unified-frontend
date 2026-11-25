@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Archeops"
+  "selected_evolution_species": "Archeops",
+  "imageScale": 0.63,
+  "imageXOffset": 5,
+  "imageYOffset": -134,
+  "imageFlip": true,
+  "overlay_color": "#f8d288",
+  "ui_saturation": 1.5
 }

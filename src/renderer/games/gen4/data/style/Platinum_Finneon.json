@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Finneon"
+  "selected_evolution_species": "Finneon",
+  "imageScale": 0.52,
+  "imageXOffset": -40,
+  "imageYOffset": -107,
+  "imageFlip": true,
+  "overlay_color": "#cc7399",
+  "ui_saturation": 1.5
 }

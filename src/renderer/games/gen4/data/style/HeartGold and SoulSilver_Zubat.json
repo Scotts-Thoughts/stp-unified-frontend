@@ -1,4 +1,10 @@
 {
   "evolution": true,
-  "selected_evolution_species": "Zubat"
+  "selected_evolution_species": "Zubat",
+  "imageScale": 0.48,
+  "imageXOffset": -58,
+  "imageYOffset": 110,
+  "imageFlip": true,
+  "overlay_color": "#a3689d",
+  "ui_saturation": 1.5
 }

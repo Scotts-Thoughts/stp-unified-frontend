@@ -1,3 +1,9 @@
 {
-  "pkmn_ability": "Rock Head"
+  "pkmn_ability": "Rock Head",
+  "imageScale": 0.72,
+  "imageXOffset": -16,
+  "imageYOffset": -5,
+  "imageFlip": true,
+  "overlay_color": "#ac8371",
+  "ui_saturation": 1.5
 }

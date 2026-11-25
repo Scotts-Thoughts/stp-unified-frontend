@@ -1,5 +1,11 @@
 {
   "pkmn_ability": "Run Away",
   "evolution": true,
-  "selected_evolution_species": "Aipom"
+  "selected_evolution_species": "Aipom",
+  "imageScale": 0.56,
+  "imageXOffset": 7,
+  "imageYOffset": -93,
+  "imageFlip": false,
+  "overlay_color": "#9d74ad",
+  "ui_saturation": 1.5
 }

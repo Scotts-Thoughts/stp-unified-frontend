@@ -18,8 +18,25 @@ components being broken up. Read `ARCHITECTURE.md` **only in the sections your t
 | Control server, OBS, Super Shuckie, PokeAByte, chapter markers | §8, §9, then `docs/external-contracts.md` |
 | Performance | §3, §5, `docs/performance-followups.md` |
 | Checking your work | §12 |
+| Scott reports something the overlay got wrong in a run | `A:\Dropbox\stp-projects\project_context\docs\workflows\debugging-from-replays.md`, then `tools/markers/README.md` |
+
+**When Scott reports a problem from a run, reproduce it yourself:** find the run's Super Shuckie replay, log the
+game's memory through it headlessly (`tools/markers/memlog.cjs`), find the cause in the log, then fix it. Don't
+ask him for files or a plan first.
 
 To read one section, run `grep -n '^## ' ARCHITECTURE.md` for the starting lines, then read only that range.
+
+## Git: no pull requests, work on main
+
+- **Never open a pull request and never push a branch.** Scott commits and pushes
+  himself.
+- **Work in Scott's local checkout** of this repo on his PC, on the branch it is
+  already on (normally `main`). Don't create or switch branches for your work.
+- **Leave every change uncommitted**, so Scott can test it locally on main and
+  commit it himself.
+- If you are running in a cloud session with only a clone of this repo, do the
+  work on Scott's PC instead (folder access or Remote Control). If you can't,
+  stop and ask Scott; don't fall back to a branch or a PR.
 
 ## Rules
 

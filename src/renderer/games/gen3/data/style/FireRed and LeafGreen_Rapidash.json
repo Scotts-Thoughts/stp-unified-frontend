@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Rapidash"
+  "selected_evolution_species": "Rapidash",
+  "imageScale": 0.86,
+  "imageXOffset": -51,
+  "imageYOffset": 52,
+  "imageFlip": false,
+  "overlay_color": "#ec7a4b",
+  "ui_saturation": 1.6
 }

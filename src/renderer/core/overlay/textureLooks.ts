@@ -156,8 +156,9 @@ const LOOKS: LookRow[] = [
     [85, 115, 100, 0, ["gen3/textures/SciFi.jpg"]],
     // gen3 Spiral (picked by eye)
     [70, 115, 100, 1, ["gen3/textures/Spiral.jpg"]],
-    // gen3 Steel, gen4 Steel, gen5 Steel (median of 3 styled species)
-    [45, 115, 100, 0, ["gen3/textures/Steel.jpg","gen4/textures/Steel.jpg","gen5/textures/Steel.jpg"]],
+    // gen3 Steel, gen4 Steel, gen5 Steel (Scott's Platinum Bronzong line, 2026-11-23; was 45/115/100/0,
+    // the median of 3 styled species). Generated style defaults pair it with backgroundScale 151.
+    [38, 169, 100, 0.8, ["gen3/textures/Steel.jpg","gen4/textures/Steel.jpg","gen5/textures/Steel.jpg"]],
     // gen3 SteelLab (picked by eye)
     [85, 115, 100, 0, ["gen3/textures/SteelLab.jpg"]],
     // gen3 Swamp Water, gen4 Swamp Water, gen5 Swamp Water (median of 2 styled species)

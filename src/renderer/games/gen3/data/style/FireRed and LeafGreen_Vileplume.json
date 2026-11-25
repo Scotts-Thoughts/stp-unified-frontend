@@ -1,3 +1,9 @@
 {
-  "selected_evolution_species": "Vileplume"
+  "selected_evolution_species": "Vileplume",
+  "imageScale": 0.79,
+  "imageXOffset": 21,
+  "imageYOffset": 21,
+  "imageFlip": true,
+  "overlay_color": "#cf6c79",
+  "ui_saturation": 1.6
 }

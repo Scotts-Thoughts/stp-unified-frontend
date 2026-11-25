@@ -32,3 +32,18 @@ frame by frame, and (format 5 and later) every marker the overlay wrote while it
 
 The 2026-11-07 runs (ARCHITECTURE §9) used Platinum p-glaceon-line-1 / p-porygonz-line-1, HeartGold
 h-porygonz-line-2, White 2 w-kyurem-1, Black b-victini-1, Emerald e-mudkip-2 and FireRed f-cloyster-line-1.
+
+## Overlay logic over a real run
+
+- **Mid-run evolution** (`lead-evolution-wiring.ts`): runs `core/overlay/leadEvolutionMixin.ts` with gen4's species,
+  personality-value and `meta.state` handlers and the starter watcher (on Vue's reactivity, with the client's
+  10-frame species debounce on the replay clock) over a memory log, and prints what the overlay follows.
+  `npx tsx --tsconfig tsconfig.web.json tools/markers/lead-evolution-wiring.ts --mem h.mem.csv --starter Yanma
+  --expect Yanmega@2878762`. `--start-ms` mounts mid-run, `--seed '<json>'` puts stored values in place first,
+  `--code old` runs the handler from before 2026-11-24.
+- **The real app over a real run** (`mem-to-scenario.ts`): turns windows of a memory log into a
+  `tools/parity/make-fixture.ts` scenario (`--windows 30000-60000,2690000-2712000` keeps the run's start and the
+  moment in question, with one step for everything that changed in between). Build the fixture with
+  `make-fixture.ts` against the same mapper XML (`%APPDATA%\PokeAByte\Mappers\...`) and run it with
+  `tools/parity/run.ts` (`--redirect-ports` while Scott's PokeAByte is up); set the overlay up the way the queuer
+  does in `beforeReplay` (`/set-game`, `/set-starter`, `/refresh`, `/set-evolution`).
