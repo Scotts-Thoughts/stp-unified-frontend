@@ -8,7 +8,7 @@
  *
  * Secondary Screen shortens the right panel exactly as Webcam Mode does (every panel stops at `WEBCAM_FRAME_BOTTOM`)
  * and draws a green area for the DS's second screen under it, in the game area's look
- * (`images/genN/ui/second_screen_game_area.svg`: inner edge x 1487, y 747.75, 419×314.25, 4:3). The movepool then
+ * (`images/genN/ui/second_screen_game_area.svg`: inner edge x 1486, y 747, 420×315 on whole pixels, exactly 4:3). The movepool then
  * follows the rules below instead of Webcam Mode's "never any tutor rows".
  */
 

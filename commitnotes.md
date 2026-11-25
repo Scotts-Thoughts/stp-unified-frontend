@@ -221,3 +221,12 @@
 - The big stat numbers are one size everywhere: Automatic, Base Stats and the full-size averages/medians (gen1,
   gen3) all use the new `stat_value_large` (50 px, gen3 45 px, centred), so switching to Base Stats no longer makes
   the numbers grow. `ev_gauge_value` (added earlier today) is replaced by it.
+
+## DS second screen area on whole pixels (gens 4-5)
+
+- The Secondary Screen green area was 419×314.25 from y 747.75, so it drew about 314 green rows: a pixel short
+  of 4:3 (Scott). It is now 420×315 at (1486,747), the DS's 256×192 at exactly 1.640625x, with a 1px black edge
+  outside it (1px further left than before). Both `second_screen_game_area.svg` files and the game screenshot's
+  `SCREEN_BOXES.dsSecondScreen` changed together.
+- Verified: typecheck; built and screenshotted gens 4 and 5 in Secondary Screen and counted the green pixels:
+  420×315 from (1486,747) in both. Not checked in OBS with a real capture.

@@ -44,8 +44,8 @@ export const SCREEN_BOXES = {
     gameBoyAdvance: { x: 360, y: 19, width: 1200, height: 800 },
     /** DS top screen, 256x192 at 4x: `images/gen4/ui/game_area.svg`, `images/gen5/ui/game_area.svg`. */
     dsTop: { x: 448, y: 19, width: 1024, height: 768 },
-    /** The DS touch screen's box under the move pool (about 1.64x), gens 4 and 5 with Secondary Screen on: `images/gen5/ui/second_screen_game_area.svg`. */
-    dsSecondScreen: { x: 1487, y: 748, width: 419, height: 314 },
+    /** The DS touch screen under the move pool, 256x192 at 1.640625x, gens 4 and 5 with Secondary Screen on: `images/gen{4,5}/ui/second_screen_game_area.svg`. */
+    dsSecondScreen: { x: 1486, y: 747, width: 420, height: 315 },
 } as const satisfies Record<string, ScreenBox>;
 
 export type ScreenshotStatus = "idle" | "busy" | "done" | "error";
