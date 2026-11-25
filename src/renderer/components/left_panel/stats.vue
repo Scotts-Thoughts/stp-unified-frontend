@@ -151,7 +151,7 @@ export default defineComponent({
             const battle = this.meta.gameState == GameState.in_battle;
             const opacity = this.statLabelOpacity();
             // The stat experience gauge under each tile in the regular stats view (core/logic/evGauge.ts).
-            const gauge = mode == "Automatic" && this.settings.left_panel.stats.show_ev_gauge != false;
+            const gauge = mode == "Automatic" && this.settings.left_panel.stats.show_ev_gauge != false && String(this.stats_header).startsWith("Level");
             return this.stat_object.map((stat, index): StatNode => {
                 const cells: StatChild[] = [];
                 if (stat.name != 'Hp' && battle) {
@@ -163,13 +163,13 @@ export default defineComponent({
                 const party = () => this.game_properties.player.team[0];
                 const statExp = () => party()['statExp' + stat.name].value;
                 switch (mode as string) {
-                    case 'Base Stats': cells.push(value("base", "", this.base_stats(stat.base_stat_key))); break;
-                    case 'Averages':   cells.push(value("mean", "", this.stat_averages[stat.base_stat_key].mean)); break;
-                    case 'Medians':    cells.push(value("median", "", this.stat_averages[stat.base_stat_key].median)); break;
+                    case 'Base Stats': cells.push(value("base", " stat_value_large", this.base_stats(stat.base_stat_key))); break;
+                    case 'Averages':   cells.push(value("mean", " stat_value_large", this.stat_averages[stat.base_stat_key].mean)); break;
+                    case 'Medians':    cells.push(value("median", " stat_value_large", this.stat_averages[stat.base_stat_key].median)); break;
                     case 'DVs':        cells.push(value("dv", " dv", toDisplayString(this.get_dv(stat.name)) + "/15")); break;
                     case 'EVs':        cells.push(value("ev", " stat_exp", statExp())); break;
                     case 'Automatic':
-                        cells.push(value("auto", gauge ? " ev_gauge_value" : "", this.get_stat(stat.name)));
+                        cells.push(value("auto", " stat_value_large", this.get_stat(stat.name)));
                         // Tiles go left, right, left...: .stat's nth-child rules in games/gen1/style.css.
                         if (gauge) cells.push(evGaugeNode(evGaugeState(statExp(), "statExp"), evGaugeLayout,
                             index % 2 == 0 ? 1 : 2, (Math.floor(index / 2) + 1) as 1 | 2 | 3));

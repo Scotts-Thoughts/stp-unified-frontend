@@ -69,7 +69,7 @@ export function statTiles(vm: any): StatChild[] {
     const stats = mode == "Automatic" ? vm.get_stat() : null;
     const show = toDisplayString;
     // The EV gauge under each tile in the regular stats view (core/logic/evGauge.ts).
-    const gauge = mode == "Automatic" && vm.show_ev_gauge != false;
+    const gauge = mode == "Automatic" && vm.show_ev_gauge != false && String(vm.stats_header).startsWith("Level");
     const total = gauge ? evTotal(vm.stat_object.map((s: any) => team0.evs[s.path]?.value)) : 0;
     return vm.stat_object.map((stat: any): StatNode => {
         const cells: StatChild[] = [];
@@ -91,7 +91,7 @@ export function statTiles(vm: any): StatChild[] {
             value(key, `stat_value_style detailed_ev_stat_row_${stat[`stat_row`]} stat_column_${stat.value_column} ${extra}`, text);
         const ev = () => team0.evs[stat.path].value;
         switch (mode) {
-            case "Base Stats": cells.push(value("base", `stat_value_style ${place}`, vm.g5PokemonData[vm.statsDisplaySpecies]?.base_stats[stat.path])); break;
+            case "Base Stats": cells.push(value("base", `stat_value_style ${place} stat_value_large`, vm.g5PokemonData[vm.statsDisplaySpecies]?.base_stats[stat.path])); break;
             case "IVs":        cells.push(value("iv", `stat_value_style ${place} dv`, show(vm.get_iv(`${stat.name}`)) + "/31")); break;
             case "EVs":        cells.push(value("ev", `stat_value_style ${place} evs`, show(ev()) + "/255")); break;
             case "Vitamins":   cells.push(value("vitamins", `stat_value_style ${place} evs`, vm.vitamins_remaining(ev()))); break;
@@ -105,7 +105,7 @@ export function statTiles(vm: any): StatChild[] {
             case "Base Stats Median":  cells.push(value("median", `average_value_style ${place}`, vm.average_median_stats(stat.object_identifier).median)); break;
             case "Base Stats Average": cells.push(value("average", `average_value_style ${place}`, vm.average_median_stats(stat.object_identifier).average)); break;
             case "Automatic":
-                cells.push(value("auto", `stat_value_style ${place}${gauge ? " ev_gauge_value" : ""}`, stats[stat.abrv]));
+                cells.push(value("auto", `stat_value_style ${place} stat_value_large`, stats[stat.abrv]));
                 if (gauge) cells.push(statEvGauge(evGaugeState(ev(), "ev", total), evGaugeLayout, stat.value_column, stat.stat_row));
                 break;
         }

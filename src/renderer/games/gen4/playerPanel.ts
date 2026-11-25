@@ -69,7 +69,7 @@ export function statTiles(vm: any): StatChild[] {
     const stats = mode == "Automatic" ? vm.get_stat() : null;
     const show = toDisplayString;
     // The EV gauge under each tile in the regular stats view (core/logic/evGauge.ts).
-    const gauge = mode == "Automatic" && vm.show_ev_gauge != false;
+    const gauge = mode == "Automatic" && vm.show_ev_gauge != false && String(vm.stats_header).startsWith("Level");
     const total = gauge ? evTotal(vm.stat_object.map((s: any) => team0.evs[s.path]?.value)) : 0;
     return vm.stat_object.map((stat: any): StatNode => {
         const cells: StatChild[] = [];
@@ -90,13 +90,13 @@ export function statTiles(vm: any): StatChild[] {
             ({ key, class: `stat_value_style ${place}${extra}`, id, text });
         const ev = () => team0.evs[stat.path].value;
         switch (mode) {
-            case "Base Stats":   cells.push(value("base", "", vm.get_base_stat(stat.path))); break;
+            case "Base Stats":   cells.push(value("base", " stat_value_large", vm.get_base_stat(stat.path))); break;
             case "IVs":          cells.push(value("iv", " dv", show(vm.get_iv(`${stat.name}`)) + "/31")); break;
             case "EVs":          cells.push(value("ev", " evs", show(ev()) + "/255")); break;
             case "Vitamins":     cells.push(value("vitamins", " evs", vm.vitamins_remaining(ev()))); break;
             case "Detailed EVs": cells.push(value("detailed", " evs", show(ev()) + "/255")); break;
             case "Automatic":
-                cells.push(value("auto", gauge ? " ev_gauge_value" : "", stats[stat.abrv], stat.abrv));
+                cells.push(value("auto", " stat_value_large", stats[stat.abrv], stat.abrv));
                 if (gauge) cells.push(statEvGauge(evGaugeState(ev(), "ev", total), evGaugeLayout, stat.value_column, stat[`${arrangement}value_row`]));
                 break;
             case "Base Stats Median":

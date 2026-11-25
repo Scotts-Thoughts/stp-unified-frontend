@@ -92,7 +92,7 @@ export function statTiles(vm: any): StatChild[] {
             : { key: "vitamin", style, class: cls, text: stat.vitamin }] };
     });
     // The EV gauge under each tile in the regular stats view (core/logic/evGauge.ts).
-    const gauge = mode == "Automatic" && vm.show_ev_gauge != false;
+    const gauge = mode == "Automatic" && vm.show_ev_gauge != false && String(vm.stats_header).startsWith("Level");
     const total = gauge ? evTotal(vm.stat_object.map((s: any) => team0[`ev${s.name_ev}`]?.value)) : 0;
     const values = vm.stat_object.map((stat: any): StatNode => {
         const row = stat[`${arrangement}value_row`];
@@ -104,14 +104,14 @@ export function statTiles(vm: any): StatChild[] {
         const cells: StatChild[] = [];
         switch (mode) {
             case "Base Stats":
-                cells.push(value("base", "", vm.statsDisplaySpecies == "Deoxys" ? vm.deoxys_form_base_stats[stat.name] :
+                cells.push(value("base", " stat_value_large", vm.statsDisplaySpecies == "Deoxys" ? vm.deoxys_form_base_stats[stat.name] :
                     vm.game_data.dexData[vm.statsDisplaySpecies][stat.base_stat_path]));
                 break;
             case "IVs":       cells.push(value("iv", " dv", show(vm.get_iv(`${stat.name}`)) + "/31")); break;
             case "EVs":       cells.push(value("ev", " evs", ev())); break;
             case "Vitamins":  cells.push(value("vitamins", " evs", vm.vitamins_remaining(ev()))); break;
             case "Automatic":
-                cells.push(value("auto", gauge ? " ev_gauge_value" : "", vm.get_stat(`${stat.name}`), `${stat.abrv}`));
+                cells.push(value("auto", " stat_value_large", vm.get_stat(`${stat.name}`), `${stat.abrv}`));
                 if (gauge) cells.push(statEvGauge(evGaugeState(ev(), "ev", total), evGaugeLayout, stat.value_column, row));
                 break;
             case "Detailed EVs":
@@ -128,8 +128,8 @@ export function statTiles(vm: any): StatChild[] {
                     detailed("bb3", "ev_stats_gained", " Result: " + show(vm.get_stat(`${stat.name}`))),
                 );
                 break;
-            case "Base Stats Average": cells.push(value("average", "", vm.average_median_stats(stat.object_identifier).average)); break;
-            case "Base Stats Median":  cells.push(value("median", "", vm.average_median_stats(stat.object_identifier).median)); break;
+            case "Base Stats Average": cells.push(value("average", " stat_value_large", vm.average_median_stats(stat.object_identifier).average)); break;
+            case "Base Stats Median":  cells.push(value("median", " stat_value_large", vm.average_median_stats(stat.object_identifier).median)); break;
             case "Comparison": {
                 const td = (style: string, text: unknown): StatNode => ({ tag: "td", style, text });
                 cells.push(

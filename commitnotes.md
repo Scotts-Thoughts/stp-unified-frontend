@@ -177,7 +177,7 @@
   https://claude.ai/artifact/EqXvguxJi7XBrK1aHyz1Bn
 - Code: `core/logic/evGauge.ts` (fills, colours, limits), `core/overlay/player/evGauge.ts` (the node tree),
   `core/styles/player.css` (looks); each generation's `statTiles` (gen1 `components/left_panel/stats.vue`) adds it,
-  with the tiles' measured positions in `evGaugeLayout` (`games/genN/playerPanel.ts`); `ev_gauge_value` in each
+  with the tiles' measured positions in `evGaugeLayout` (`games/genN/playerPanel.ts`); `stat_value_large` in each
   `style.css`. Other stats modes are untouched.
 - New setting "Show EV Gauge" (Toggles, on by default) in all five: saved key `show_ev_gauge` (gen2
   `this.show_ev_gauge`, as all its keys; gen1 `visualization.left_panel.stats.show_ev_gauge`). Off gives today's tiles.
@@ -212,3 +212,12 @@
   /refresh (Evolution now stays on, it went off before); gen4 and gen5 smoke fixtures run with no page errors.
 - Not verified: the real game (I couldn't reproduce Scott's exact miss from a recording, so the cause above is the
   likeliest one, not a proven one); a gen5 evolution replay.
+
+## EV gauge follow-up: hidden while base stats show, one number size
+
+- The gauge now shows only while the Automatic view shows the Pokémon's own stats (stats header "Level N"); while
+  it shows Base Stats (no Pokémon yet, Base Stats state, an invalid battle state) or IVs (gens 4-5 2023 style before
+  TM27) there is no gauge.
+- The big stat numbers are one size everywhere: Automatic, Base Stats and the full-size averages/medians (gen1,
+  gen3) all use the new `stat_value_large` (50 px, gen3 45 px, centred), so switching to Base Stats no longer makes
+  the numbers grow. `ev_gauge_value` (added earlier today) is replaced by it.
