@@ -76,6 +76,7 @@ declare global {
       screenshot: {
         capture: () => Promise<string>,
         save: (png: Uint8Array, name: string) => Promise<string>,
+        reveal: () => Promise<string>,
       },
       voice: {
         start: () => Promise<void>,

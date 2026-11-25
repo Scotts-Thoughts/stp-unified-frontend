@@ -241,3 +241,11 @@
   used to mean only "failed", with the reason in the tooltip).
 - Verified: typecheck, build, and the built app on the gen1 and gen5 smoke fixtures against a stand-in Super
   Shuckie (file name and note checked). Gens 2-4 not run in the app.
+
+## Open Screenshots Folder button
+
+- "Open Screenshots Folder" next to "Open Splits Folder" in every generation's settings panel. It opens
+  `<appRoot>/screenshots`, creating it first (`screenshot:reveal` in src/main/screenshot.ts). It is also a
+  bindable shortcut (`screenshots.open_folder`).
+- Verified: typecheck, build, and the built app on gens 1 and 4 (button shows, click creates the folder).
+  Not seen opening Explorer on Windows.

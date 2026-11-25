@@ -5,6 +5,7 @@ import { rightPanelLayoutControls } from "~/core/settings/rightPanelLayout";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
 import { slug } from "~/core/shortcuts/build";
 import { gen5Manifest } from "./manifest";
+import { openScreenshotsFolder } from "~/core/screenshot/screenshot";
 
 /**
  * gen5's settings panel as data (docs/ui-uniformity-plan.md stages 3-4): the four shared columns,
@@ -114,6 +115,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
             heading: "",
             controls: [
                 { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: () => vm.openSplitsFolder() },
+                { kind: "button", id: "screenshots.open_folder", label: "Open Screenshots Folder", run: openScreenshotsFolder },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: () => vm.open_shortcuts_menu() },
             ],
         },

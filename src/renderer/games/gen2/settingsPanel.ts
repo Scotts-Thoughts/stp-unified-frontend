@@ -2,6 +2,7 @@ import { manualNewRun } from "~/core/logic/newRunGuard";
 import { IV_MODE } from "~/core/logic/starterIvs";
 import type { SettingControl, SettingsGroup, SettingsPanelSpec } from "~/core/settings/types";
 import { gen2Manifest } from "./manifest";
+import { openScreenshotsFolder } from "~/core/screenshot/screenshot";
 
 /**
  * gen2's settings panel as data (docs/ui-uniformity-plan.md stages 3-4): the four shared columns,
@@ -82,6 +83,7 @@ export function gen2SettingsPanel(vm: any): SettingsPanelSpec {
             controls: [
                 // gen2's only caller has always passed `Crystal` as the game folder, whatever the edition.
                 { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: () => vm.openFolder(`splits`, `Crystal`, vm.starter, "finishes") },
+                { kind: "button", id: "screenshots.open_folder", label: "Open Screenshots Folder", run: openScreenshotsFolder },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: () => vm.open_shortcuts_menu() },
             ],
         },

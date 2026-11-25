@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
-import { ClipboardItem, clipboard, ipcMain, type BrowserWindow } from "electron";
+import { ClipboardItem, clipboard, ipcMain, shell, type BrowserWindow } from "electron";
 import { appRoot } from "./paths";
 
 /**
@@ -9,6 +9,7 @@ import { appRoot } from "./paths";
  *   screenshot:capture   the window's picture now, as a PNG data URL
  *   screenshot:save      PNG bytes + a name -> `<appRoot>/screenshots/<name>.png` (a " (2)" etc. if taken),
  *                        also put on the clipboard; returns the path
+ *   screenshot:reveal    opens `<appRoot>/screenshots` in Explorer/Finder, creating it first
  */
 
 /** The renderer's name (core/screenshot `screenshotName`) made safe for a file name on Windows and macOS. */
@@ -26,6 +27,14 @@ function freeName(folder: string, base: string): string {
 }
 
 export function registerScreenshotIpc(getWindow: () => BrowserWindow | null): void {
+    ipcMain.handle("screenshot:reveal", async () => {
+        const folder = join(appRoot(), "screenshots");
+        mkdirSync(folder, { recursive: true });
+        const error = await shell.openPath(folder);
+        if (error) console.warn(`[screenshot] could not open ${folder}: ${error}`);
+        return folder;
+    });
+
     ipcMain.handle("screenshot:capture", async () => {
         const window = getWindow();
         if (!window || window.isDestroyed()) throw new Error("No overlay window to capture");

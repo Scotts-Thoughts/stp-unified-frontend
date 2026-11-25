@@ -129,8 +129,8 @@ docs/             Reference docs. See §13.
   password, token or secret (today the OBS WebSocket password, `obs_websocket_password`) is `<redacted>`,
   because a report is something the user sends to someone else.
 - `screenshot.ts`: the **game screenshot**'s back end (2026-11-24). `screenshot:capture` is the window's picture
-  (`capturePage`); `screenshot:save` writes `<appRoot>/screenshots/<name>.png` and puts it on the clipboard. The name
-  is the renderer's `screenshotName`: `YYYYMMDD-HHMMSS-<species>-<Finished Runs>-<H><MM><SS of the run clock>`
+  (`capturePage`); `screenshot:save` writes `<appRoot>/screenshots/<name>.png` and puts it on the clipboard; `screenshot:reveal` opens that folder (creating it), for the settings panel's "Open Screenshots
+  Folder" button. The name is the renderer's `screenshotName`: `YYYYMMDD-HHMMSS-<species>-<Finished Runs>-<H><MM><SS of the run clock>`
   (Scott's format, e.g. `20261124-213659-Yanmega-1-21334`). Trap: Electron 45's `clipboard` is the async W3C-style one (`write([new ClipboardItem(...)])`);
   `writeImage`/`readImage` are gone.
 - `voice/`: **voice control** (2026-10-31). Say "Hey Rotom", then within 5 s a command ("show IVs" or "show DVs",

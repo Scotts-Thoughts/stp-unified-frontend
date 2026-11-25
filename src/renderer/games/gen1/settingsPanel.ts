@@ -33,6 +33,7 @@ import type { SpeciesMetrics } from "~/stores/useSpeciesMetricsStore";
 import { gen1Manifest } from "./manifest";
 import { gen1TrainerOptions, trainerSearch } from "./enemyPanel";
 import { searchTrainers } from "~/core/logic/trainerPreview";
+import { openScreenshotsFolder } from "~/core/screenshot/screenshot";
 
 /**
  * gen1's settings panel as data (docs/ui-uniformity-plan.md stages 3-4): the four shared columns,
@@ -159,6 +160,7 @@ export function gen1SettingsPanel(properties: () => any = () => undefined): Sett
             heading: "",
             controls: [
                 { kind: "button", id: "splits.open_folder", label: "Open Splits Folder", run: openSplitsFolder },
+                { kind: "button", id: "screenshots.open_folder", label: "Open Screenshots Folder", run: openScreenshotsFolder },
                 { kind: "button", id: "shortcuts.open", label: "Keyboard Shortcuts", noAction: true, run: openShortcutsMenu },
             ],
         },

@@ -148,6 +148,8 @@ const api = {
     capture: () => invoke('screenshot:capture'),
     /** Writes `screenshots/<name>.png`, copies it to the clipboard and returns its path. */
     save: (png, name) => invoke('screenshot:save', png, name),
+    /** Opens the screenshots folder (creating it first) and returns its path. */
+    reveal: () => invoke('screenshot:reveal'),
   },
 
   /**

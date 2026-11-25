@@ -197,6 +197,11 @@ export async function takeGameScreenshot(screens: GameScreens, facts: Screenshot
 
 export const SCREENSHOT_ACTION_ID = "screenshot.game";
 
+/** The settings panel's "Open Screenshots Folder" button (next to Open Splits Folder in every generation). */
+export function openScreenshotsFolder(): Promise<string> {
+    return window.api.screenshot.reveal();
+}
+
 /**
  * The shortcut every generation lists; the camera button runs it too. `screens` and `facts` are
  * read at the press. A `facts` that throws (a game half loaded) still saves, named "Unknown-0-000".
