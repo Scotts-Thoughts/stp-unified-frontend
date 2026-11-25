@@ -241,3 +241,27 @@
   used to mean only "failed", with the reason in the tooltip).
 - Verified: typecheck, build, and the built app on the gen1 and gen5 smoke fixtures against a stand-in Super
   Shuckie (file name and note checked). Gens 2-4 not run in the app.
+
+## Mid-run evolution: the art stayed on the old species (Yanmega, HeartGold)
+- Tested from both of Scott's Yanmega replays (h-yanmega-line-2-dnf, evolution 14:51; h-yanmega-line-2-21334,
+  20:01) by logging their memory headlessly. The game data is clean in both: one species event, same personality
+  value. Over that data the evolution check follows the evolution, before and after yesterday's fix, in a new
+  harness (`tools/markers/lead-evolution-wiring.ts`) and in the real app (a fixture built from the log,
+  `tools/markers/mem-to-scenario.ts`, run through `tools/parity/run.ts`).
+- Cause found in the real app: after "Evolving to: Yanmega" the starter watcher draws the family member stored
+  under the new starter's key. With `selected_evolution_species: "Yanma"` stored under Yanmega (a choice saved
+  while Yanmega was the Solo Pokemon in an earlier session), the starter became Yanmega and the art stayed Yanma.
+  It fits the 21334 evidence: the evolved species' Evolution flags were written (only the evolution writes both
+  at once), and ten seconds later the Yanmega family-style choice and the family's ability were saved, as when the
+  family style dropdown is changed by hand. The evolution now stores the evolved species as that choice first.
+- Also: the run's Pokemon is now a short list of personality values (`evolution_lead_pvs`), and every check
+  refreshes it. gen4 debounces the species and not the personality value, so a reset's garbage value could
+  replace the real one while the species still read the Solo Pokemon (seen in the dnf log at 9223 s), and a later
+  evolution would have been missed.
+- Verified: real app on the dnf evolution fixture: the art shows Yanmega with and without a stale stored choice
+  (it showed Yanma with one before); harness on both logs, mounted mid-run (during a blank read, right after the
+  evolution), with a stale stored choice, and a different Yanmega after a blank (not followed); typecheck.
+  `parity:drift` fails only on the known gen5 `load_all_settings` entry.
+- Not verified: what was stored on Scott's machine at 14:51 (storage keeps only the latest value, now Yanmega),
+  so the stale choice is the cause that reproduces the symptom, not one read from that moment; gen5 (same mixin
+  and the same starter-watcher code) not run in the app.

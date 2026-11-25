@@ -550,7 +550,7 @@ export default defineComponent({
             evolution_family_list        : [],    // List of species in the current evolution family
             last_known_species           : null,  // Track last known species for evolution detection
             last_known_personality_value : null,  // Track last known personality value for evolution detection
-            evolution_lead_pv            : null,  // Personality value of the party lead while it is the Solo Pokemon (trackEvolutionLead)
+            evolution_lead_pvs           : [],    // Personality values the party lead had while it was the Solo Pokemon (trackEvolutionLead)
             evolution_transitioning      : false, // Flag to track if evolution transition is in progress
             evolution_old_species        : null,  // Species before evolution (for transition)
             evolution_new_species        : null,  // Species after evolution (for transition)

@@ -806,14 +806,20 @@ entry with no look fields (only `selected_evolution_species`, say) counts as no 
 - Trap: in a build run from source, the style store keeps only `GEN4_STYLE_PROPERTIES` of a species value (any other field written there is silently dropped; `selected_evolution_species` was, until #189). It lacks `iv_mode` and `manual_ivs`, so those two are not remembered across species changes there (they are in an installed build). A preset still restores them when loaded.
 
 **Mid-run evolution** (gens 4-5, `core/overlay/leadEvolutionMixin.ts`, 2026-11-24). With Evolution on, the Solo
-Pokemon follows the party lead when the lead is the run's own Pokemon (its personality value, `evolution_lead_pv`,
-recorded while the lead was the Solo Pokemon) and is now another member of the family. The check reads the party as
+Pokemon follows the party lead when the lead is the run's own Pokemon (one of its personality values, `evolution_lead_pvs`,
+recorded while the lead was the Solo Pokemon; a list because gen4 debounces the species and not the value, so a reset's
+garbage value can be recorded next to the real one) and is now another member of the family. The check reads the party as
 it is now and runs from the lead's species and personality-value handlers and on every `meta.state` change; don't
 move it back to depending on the species event's old value or on the game state, which is how a HeartGold Rare
 Candy evolution (Yanma to Yanmega) was missed. The Evolution flags are stored per Solo Pokemon (gen4
 `evoState_<Game>_<Species>`, gen5 `<Game>_<Species>`), so the evolution writes them for the evolved species too;
 before that, a `/refresh` or restart after any evolution turned Evolution off. Gen3 has its own handler (its
 starter stays the base species).
+Trap: the starter watcher draws the family member stored under the new starter's key (`<Game>_<Species>`
+`selected_evolution_species`) when there is one, so the evolution writes the evolved species there first. A stale
+choice (Yanma stored under Yanmega) left the old art on screen after "Evolving to: Yanmega" (2026-11-25). Check a
+change here with `tools/markers/lead-evolution-wiring.ts` over a real memory log, and in the real app with
+`tools/markers/mem-to-scenario.ts` -> `make-fixture.ts` -> `run.ts` (`tools/markers/README.md`).
 
 **Player profiles** (2026-11-24). A profile file is `{ format: 1, id, name, picture, created, buckets }`. Each
 bucket (one per game pair, `core/profile/buckets.ts`) holds the summed `player`/`enemy`/`other` counts and its
