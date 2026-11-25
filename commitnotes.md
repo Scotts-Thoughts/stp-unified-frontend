@@ -249,3 +249,21 @@
   bindable shortcut (`screenshots.open_folder`).
 - Verified: typecheck, build, and the built app on gens 1 and 4 (button shows, click creates the folder).
   Not seen opening Explorer on Windows.
+
+## Enemy team in Webcam / Secondary Screen: even gaps, corners kept, smaller gen5 type icons
+
+- A team of five or six no longer gets squeezed as one block. Each row is fitted on its own (`webcamRowLayout` in
+  `core/logic/webcamMode.ts`, `drawFitted` in `core/overlay/EnemyTeamPanel.ts`): the rows get shorter, and the gap
+  between rows equals the gap between the last row and the DS second screen (or the Webcam line), the art's own
+  smallest row gap. Before, the rows sat ~3px apart and the last one ~8px above the second screen.
+- The frame art is drawn in slices per row, so the corners keep their shape and only the straight sides shrink
+  (Scott: gen5's 45° corners were getting flattened, the same problem the header had).
+- gen5's type icons are 25% smaller in a squeezed team (Scott: they looked about a third too big). Other generations'
+  icons unchanged.
+- Two to four Pokémon: no change (they already fit). Every generation passes its row geometry (`ENEMY_ROW_ART`), so
+  gens 1-3's Webcam Mode gets the same even gaps.
+- Verified: typecheck; `parity:drift` (only the gen5 `load_all_settings` failure that was already there); screenshots
+  of the built app with Black (4, 5 and 6 Pokémon, Secondary Screen, and 5 in Webcam), Platinum (5 and 6, Secondary
+  Screen) and FireRed (5 and 6, Webcam) trainer previews. Not seen on screen: gens 1-2 (same code path), a live battle,
+  OBS on Scott's machine.
+

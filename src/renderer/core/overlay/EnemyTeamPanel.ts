@@ -1,6 +1,6 @@
 import { createCommentVNode, defineComponent, h, toDisplayString, Transition, vShow, withDirectives, type PropType, type StyleValue, type VNode } from "vue";
 import "../styles/enemyPanel.css";
-import { cropHeight, WEBCAM_PANEL_BOTTOM, webcamArtStyleOrHidden, webcamPanelScale } from "../logic/webcamMode";
+import { cropHeight, rowCount, WEBCAM_PANEL_BOTTOM, webcamArtStyleOrHidden, webcamPanelScale, webcamRowLayout, type EnemyRowArt, type FittedRows } from "../logic/webcamMode";
 
 /**
  * One element of a generation's enemy team panel (`games/genN/enemyPanel.ts`). Strings in `children` are text;
@@ -31,6 +31,19 @@ export interface EnemyNode {
      * for text that is crowded in the shorter rows (gen1's stat numbers and stage badges).
      */
     squeezeText?: number;
+    /**
+     * The panel art that holds the rows' frames (gens 1-5: the element with the team's `crop`). When the rows are fitted
+     * above the webcam (`EnemyTeamPanel`'s `webcamRows`) it is drawn in slices, so each frame's corners keep their shape
+     * and only its straight sides get shorter.
+     */
+    frame?: boolean;
+    /** Webcam Mode only: the point a group of type icons is scaled from (default `left bottom`, its corner of the row). */
+    squeezeOrigin?: string;
+    /**
+     * Webcam Mode only: a group of type icons' size in a squeezed or fitted team, as a share of its regular size
+     * (default 1). gen5's are `SQUEEZED_TYPE_ICON`.
+     */
+    squeezeSize?: number;
 }
 export type EnemyChild = EnemyNode | string | null;
 
@@ -78,6 +91,12 @@ interface Squeeze {
     text: number;
 }
 
+/**
+ * gen5's type icons in a squeezed or fitted team, as a share of their regular size (Scott, 2026-11-25: at their regular
+ * size they looked about a third too big next to the shorter rows). A layout opts in with `squeezeSize`.
+ */
+export const SQUEEZED_TYPE_ICON = 0.75;
+
 /** A node's classes as one string (a template class may be a string, an array or an object). */
 function classText(value: unknown): string {
     if (typeof value === "string") return value;
@@ -90,9 +109,8 @@ const isIcon = (child: EnemyChild): boolean =>
     child !== null && typeof child === "object" && child.tag === "img" && /icon|type/i.test(classText(child.class));
 
 /**
- * A row of icons on their own (the Pokémon's type icons): drawn as one group at its regular size, so the icons keep
- * their size and the distance between them, from the group's bottom left so they keep their distance from the bottom
- * and left of their area's border.
+ * A row of icons on their own (the Pokémon's type icons): drawn as one group, upright at its regular size (or its
+ * `squeezeSize`), from the group's bottom left (or its `squeezeOrigin`) so they keep their place in their area.
  */
 const isIconGroup = (child: EnemyNode): boolean =>
     child.tag !== "th" && child.tag !== "td" && !!child.children?.length
@@ -130,7 +148,10 @@ function unsqueeze(child: EnemyNode, squeeze: Squeeze | null): Record<string, st
         const size = child.squeezeText === undefined ? text : Math.min(1, rows * child.squeezeText);
         return { scale: `${size} ${size / rows}` };
     }
-    if (isIconGroup(child)) return { scale: `1 ${1 / rows}`, "transform-origin": "left bottom" };
+    if (isIconGroup(child)) {
+        const size = child.squeezeSize ?? 1;
+        return { scale: `${size} ${size / rows}`, "transform-origin": child.squeezeOrigin ?? "left bottom" };
+    }
     if (child.tag !== "img") return null;
     const cls = classText(child.class);
     if (/sprite/i.test(cls)) return { transform: spriteTransform(styleTransform(child.style), rows) };
@@ -184,6 +205,59 @@ function draw(child: EnemyChild, squeeze: Squeeze | null = null, art: ArtPlace |
     return child.transition === undefined ? vnode : h(Transition, { name: child.transition }, () => vnode);
 }
 
+/** A full-canvas box (see `render`): the containing block of everything it holds. */
+const CANVAS_BOX = { position: "absolute", left: "0", top: "0", width: "1920px", height: "1080px" };
+
+/**
+ * A box holding `children` drawn with `transform` (from canvas y `origin`), showing only canvas y `from` to `to` of the
+ * result. The cut is made outside the transform, on whole pixels of the canvas, so a scaled slice has hard edges where
+ * it meets the next one (cut inside the transform, its edge rows came out half see-through: a faint line).
+ */
+function band(children: (VNode | string)[], from: number, to: number, transform: string, origin: number): VNode {
+    return h("div", {
+        class: "stp-webcam-fit stp-webcam-band",
+        style: { ...CANVAS_BOX, "clip-path": `inset(${from}px 0 ${1080 - to}px 0)` },
+    }, [h("div", { class: "stp-webcam-fit stp-webcam-band", style: { ...CANVAS_BOX, transform, "transform-origin": `0 ${origin}px` } }, children)]);
+}
+
+/**
+ * The fitted team (`webcamRowLayout`): the header as it is, then each row moved to its new place and scaled to its new
+ * height. The frame art is drawn in three slices per row: the top corners and the bottom corners at their regular
+ * size, only the straight part between them scaled, so the corners keep their angle (as the header keeps its shape).
+ * Each row's box holds the whole panel, cut to that row and half the gap on each side of it, so every piece keeps its
+ * place; text and icons are kept upright as in the squeeze.
+ */
+function drawFitted(layout: readonly EnemyChild[], fit: FittedRows, art: EnemyRowArt, cut: number, picture: ArtPlace | null): (VNode | string)[] {
+    const rows = layout.filter((child) => !holdsArt(child, picture));
+    const pictures = layout.filter((child) => holdsArt(child, picture));
+    const isFrame = (child: EnemyChild) => child !== null && typeof child === "object" && child.frame === true;
+    const frames = () => rows.filter(isFrame).map((child) => draw(child, null));
+    const content = rows.filter((child) => !isFrame(child));
+    const out: (VNode | string)[] = [band(rows.map((child) => draw(child, null)), 0, cut, "scaleY(1)", 0)];
+    // The frames' shadows reach a little past their edges: each slice keeps up to half the gap beyond them.
+    const reach = Math.floor(fit.gap / 2);
+    const last = fit.rows.length - 1;
+    fit.rows.forEach((row, k) => {
+        const top = row.from;
+        const bottom = top + art.height;
+        const shift = row.to - top;
+        const end = row.to + row.height;
+        const middle = (row.height - art.cornerTop - art.cornerBottom) / (art.height - art.cornerTop - art.cornerBottom);
+        out.push(
+            band(frames(), k === 0 ? Math.min(cut, row.to) : row.to - reach, row.to + art.cornerTop, `translateY(${shift}px)`, 0),
+            band(frames(), row.to + art.cornerTop, end - art.cornerBottom, `translateY(${shift}px) scaleY(${middle})`, top + art.cornerTop),
+            band(frames(), end - art.cornerBottom, end + reach, `translateY(${end - bottom}px)`, 0),
+        );
+        // The row's box reaches halfway to the next row (and from the header, and to the bottom of the canvas for the last).
+        const from = k === 0 ? cut : row.to - fit.gap / 2;
+        const to = k === last ? 1080 : end + fit.gap / 2;
+        const squeeze = { rows: row.scale, text: Math.min(1, row.scale * 1.2) };
+        out.push(band(content.map((child) => draw(child, squeeze)), from, to, `translateY(${shift}px) scaleY(${row.scale})`, top));
+    });
+    out.push(...pictures.map((child) => draw(child, null, picture)));
+    return out;
+}
+
 /**
  * The enemy team panel on the right side in trainer battles, in all five generations (D9 of
  * docs/ui-audit/D-onstream-right-battle.md, docs/ui-uniformity-plan.md step 5.4): the trainer's name, the panel art,
@@ -213,6 +287,13 @@ export const EnemyTeamPanel = defineComponent({
          * game area, is drawn at its regular size; only the rows below it are squeezed.
          */
         webcamHeader: { type: Number, default: 0 },
+        /**
+         * Where the generation's art draws its rows (`EnemyRowArt`). With it, a team too tall for Webcam Mode or
+         * Secondary Screen is fitted row by row instead of squeezed as one block (`webcamRowLayout`): one gap between
+         * every row and under the last, and each frame's corners at their regular shape (`frame` nodes are drawn in
+         * slices). Without it, the old squeeze.
+         */
+        webcamRows: { type: Object as PropType<EnemyRowArt | null>, default: null },
     },
     computed: {
         /**
@@ -223,9 +304,16 @@ export const EnemyTeamPanel = defineComponent({
             const src = (this.view as { art?: unknown }).art;
             if (!this.webcam || typeof src !== "string") return null;
             const crop = cropHeight((this.view as { crop?: unknown }).crop);
-            return { src, style: webcamArtStyleOrHidden(src, this.squeeze ? WEBCAM_PANEL_BOTTOM : crop) };
+            return { src, style: webcamArtStyleOrHidden(src, this.squeeze || this.fitted ? WEBCAM_PANEL_BOTTOM : crop) };
+        },
+        /** The fitted rows (`webcamRows`), or null when the team fits as it is or the generation gives no rows. */
+        fitted(): FittedRows | null {
+            const art = this.webcamRows;
+            if (!this.webcam || !art) return null;
+            return webcamRowLayout(art, rowCount(art, cropHeight((this.view as { crop?: unknown }).crop)));
         },
         squeeze(): Squeeze | null {
+            if (this.webcamRows) return null;
             const rows = this.webcam ? webcamPanelScale(cropHeight((this.view as { crop?: unknown }).crop), this.webcamHeader) : 1;
             return rows === 1 ? null : { rows, text: Math.min(1, rows * 1.2) };
         },
@@ -242,9 +330,9 @@ export const EnemyTeamPanel = defineComponent({
          * of its box and a centred stat stays centred.
          */
         alignUpright(): void {
-            const box = this.$refs.squeezeBox;
-            if (!(box instanceof HTMLElement)) return;
-            for (const el of box.querySelectorAll<HTMLElement>("[data-stp-upright]")) {
+            const parent = (this.$el as Node | null)?.parentElement;
+            if (!parent) return;
+            for (const el of parent.querySelectorAll<HTMLElement>(".stp-webcam-fit [data-stp-upright]")) {
                 const align = getComputedStyle(el).textAlign;
                 const side = align === "left" || align === "start" ? "left" : align === "right" || align === "end" ? "right" : "center";
                 if (el.style.transformOrigin !== `${side} center`) el.style.transformOrigin = `${side} center`;
@@ -255,6 +343,8 @@ export const EnemyTeamPanel = defineComponent({
         const squeeze = this.squeeze;
         const art = this.artPlace;
         const layout = this.layout(this.view);
+        const fitted = this.fitted;
+        if (fitted) return drawFitted(layout, fitted, this.webcamRows!, this.webcamHeader, art);
         if (!squeeze) return layout.map((child) => draw(child, null, art));
         const cut = this.webcamHeader;
         // The trainer picture is drawn once, outside both boxes, so it keeps its shape (`artPlace` puts it under the team).
@@ -272,7 +362,6 @@ export const EnemyTeamPanel = defineComponent({
                 style: { ...box, transform: "scaleY(1)", "clip-path": `inset(0 0 ${1080 - cut}px 0)` },
             }, rows.map((child) => draw(child, null))),
             h("div", {
-                ref: "squeezeBox",
                 class: "stp-webcam-fit",
                 style: { ...box, transform: `scaleY(${squeeze.rows})`, "transform-origin": `0 ${cut}px`, "clip-path": `inset(${cut}px 0 0 0)` },
             }, rows.map((child) => draw(child, squeeze))),

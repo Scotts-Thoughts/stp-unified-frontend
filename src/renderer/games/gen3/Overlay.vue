@@ -327,11 +327,11 @@
                 </div>
                 <div v-else-if="(right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && ((g3stateVariable == `Battle` || g3stateVariable == `To Battle`) && game.properties.battle.type.trainer.value == true)" key="4">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-rows="enemy_row_art" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="66"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-rows="enemy_row_art" :webcam-header="66"></enemy-team-panel>
                 </div>
                 <div v-else-if="right_panel_mode == 'Splits'" key="5">
                     <div v-if="splitsView">
@@ -473,7 +473,7 @@ import Movepool from "~/core/overlay/Movepool.vue";
 import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder, speedOrder } from "~/core/logic/speedLabel";
-import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView } from "./enemyPanel";
+import { ENEMY_ROW_ART, enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView } from "./enemyPanel";
 import { isTwoTrainerBattle } from "../../core/logic/twoTrainerBattle";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { soloStyleCopyMixin } from "~/core/overlay/soloStyleCopyMixin";
@@ -2430,6 +2430,10 @@ export default defineComponent({
         },
         enemy_team_layout() {
             return enemyTeamLayout
+        },
+        /** Where the enemy panel art draws its rows (Webcam Mode's fitted rows, enemyPanel.ts). */
+        enemy_row_art() {
+            return ENEMY_ROW_ART
         },
         /** The trainer preview (decision 14): the picker's options, the picked trainer and its panel (enemyPanel.ts). */
         trainer_options() {

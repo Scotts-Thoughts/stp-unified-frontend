@@ -11,8 +11,8 @@
  *   level-up and TM/HM rows keep a readable size.
  * - Splits (`core/overlay/SplitsPanel.vue`): the frame's bottom border never sits below the line, and a list too long
  *   for that shrinks its icons, as it already did for its own frame.
- * - Enemy team and Trainers (`core/overlay/EnemyTeamPanel.ts`): a team whose panel runs past the line is drawn smaller,
- *   anchored at the top right, so up to four Pokémon keep their size.
+ * - Enemy team and Trainers (`core/overlay/EnemyTeamPanel.ts`): a team whose panel runs past the line is drawn with
+ *   shorter rows (`webcamRowLayout`), so up to four Pokémon keep their size.
  */
 
 import trainerArtBoxes from "./trainerArtBoxes.json";
@@ -35,6 +35,74 @@ export function webcamFrameShift(frameBottom: number): number {
 export function webcamPanelScale(bottom: number | undefined, top = 0): number {
     if (bottom === undefined || !(bottom > WEBCAM_PANEL_BOTTOM)) return 1;
     return (WEBCAM_PANEL_BOTTOM - top) / (bottom - top);
+}
+
+/**
+ * The line the enemy team's rows end at when they are fitted above the webcam (`webcamRowLayout`): the outer edge of
+ * the DS second-screen area's black frame in Secondary Screen (`images/genN/ui/second_screen_game_area.svg`, gens 4-5),
+ * and the same line in Webcam Mode, so the team's last row sits as far above it as the rows sit apart.
+ */
+export const WEBCAM_ROWS_LINE = 746;
+
+/**
+ * Where a generation's enemy team art draws its Pokémon rows (canvas px, outer edges of each row's frame, its black
+ * outline included). `cornerTop` / `cornerBottom`: how far the frame's corners (rounded or angled, and gens 1-4's
+ * highlight in the bottom left) reach into the row from its top and bottom edge; only the straight part between
+ * them is stretched or squeezed, so the corners keep their shape.
+ */
+export interface EnemyRowArt {
+    tops: readonly number[];
+    height: number;
+    cornerTop: number;
+    cornerBottom: number;
+}
+
+/** One row of a fitted team: drawn from canvas y `from` (its regular top) at `to`, `height` tall. */
+export interface FittedRow {
+    from: number;
+    to: number;
+    height: number;
+    /** `height` over the regular height. */
+    scale: number;
+}
+
+export interface FittedRows {
+    rows: FittedRow[];
+    /** The space between rows, and between the last row and `WEBCAM_ROWS_LINE`. */
+    gap: number;
+}
+
+/** How many rows of `art` a panel art cut to `crop` px tall shows. */
+export function rowCount(art: EnemyRowArt, crop: number | undefined): number {
+    if (crop === undefined) return 0;
+    return art.tops.filter((top) => top < crop).length;
+}
+
+/**
+ * Webcam Mode and Secondary Screen (Scott, 2026-11-25): a team whose `count` rows don't fit above `WEBCAM_ROWS_LINE`
+ * (five or six Pokémon) is drawn with shorter rows, the first one's top where it was and one gap everywhere: between
+ * the rows and between the last row and the line. The gap is the art's smallest gap between two rows. Heights are
+ * whole pixels (a leftover pixel goes to the first rows), so the frames' edges stay sharp. `null`: the team fits as
+ * it is (four or fewer Pokémon), and nothing changes.
+ */
+export function webcamRowLayout(art: EnemyRowArt, count: number): FittedRows | null {
+    const n = Math.min(count, art.tops.length);
+    if (n === 0) return null;
+    let gap = Infinity;
+    for (let k = 1; k < art.tops.length; k++) gap = Math.min(gap, art.tops[k] - (art.tops[k - 1] + art.height));
+    if (!Number.isFinite(gap)) gap = 0;
+    if (art.tops[n - 1] + art.height + gap <= WEBCAM_ROWS_LINE) return null;
+    const room = WEBCAM_ROWS_LINE - art.tops[0] - n * gap;
+    const base = Math.floor(room / n);
+    const extra = room - base * n;
+    let y = art.tops[0];
+    const rows = art.tops.slice(0, n).map((from, k): FittedRow => {
+        const height = base + (k < extra ? 1 : 0);
+        const row = { from, to: y, height, scale: height / art.height };
+        y += height + gap;
+        return row;
+    });
+    return { rows, gap };
 }
 
 /** Space kept between the enemy team's last row and a trainer picture under it. */

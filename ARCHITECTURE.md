@@ -486,6 +486,20 @@ webcam. Saved as `webcam_mode` (gens 2-5, via each `auto_save_settings`; gen3's 
   off below `webcamHeader` (the y where the header ends: gens 1-2 81, gens 3-5 66, between the header's bottom border
   and the first row in each enemy-panel SVG), and once squeezed from that line down, cut off above it. A squeeze of the
   whole panel from the canvas top shrank the top margin and changed the cutout's angle.
+- Fitted rows (Scott, 2026-11-25; all five generations pass `webcamRows`, so the block squeeze above is now only the
+  fallback for a layout without them): each generation's `ENEMY_ROW_ART` (`games/genN/enemyPanel.ts`: every row's
+  outer top, the row height, how far the corners reach in) feeds `webcamRowLayout`, which gives a team too tall for the
+  line (five or six Pokémon; four never change) whole-pixel rows with one gap everywhere: between rows and between the
+  last row and `WEBCAM_ROWS_LINE` (746, the outer edge of the DS second-screen area). The gap is the art's smallest gap
+  between two rows. `drawFitted` draws the header box, then per row: the `frame: true` node (the panel art) in three
+  slices, top and bottom corners at their regular size and only the straight middle scaled, so gen5's 45° corners
+  keep their angle; and the rest of the panel in its own box, cut to the row and half a gap each side, scaled with it.
+  Each cut is made outside the transform (`band`), on canvas pixels.
+- gen5's type icon group shrinks to `SQUEEZED_TYPE_ICON` (0.75) in a squeezed/fitted team (`squeezeSize`, from its
+  right edge via `squeezeOrigin`); other generations keep their type icons at regular size.
+- Trap (verifying): at a zoom factor that isn't exactly 1 (the window's content a pixel short of 1920×1080, as under
+  xvfb), the slice cuts land between pixels and show faint lines in the frames. Set the window's content size to
+  1920×1080 before a capture.
 - A layout can make a crowded text smaller in the squeeze with `squeezeText` on its node (its size as a share of the
   rows' scale; default 1.2). gen1's stat numbers and stage badges use 1.02, as they collided in the shorter stat tiles
   (Scott, 2026-11-17).

@@ -229,7 +229,7 @@
                 </div> 
                 <div v-else-if="(right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && (battle_fade == true && battleGraphic == true && batt.mode.value == `Trainer`)" style="position: absolute;" key="4">
                     <!-- The enemy team panel (core/overlay/EnemyTeamPanel.ts), laid out in enemyPanel.ts. -->
-                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="81"></enemy-team-panel>
+                    <enemy-team-panel :view="enemy_team_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-rows="enemy_row_art" :webcam-header="81"></enemy-team-panel>
                 </div>
                 <!-- Show Wild Battles (decision 30): the wild Pokémon in the same panel, at the trainer panel's times. -->
                 <div v-else-if="(right_panel_mode == 'Automatic' || right_panel_mode == 'Trainers') && wild_pokemon_view && battle_fade == true && battleGraphic == true" style="position: absolute;" key="9">
@@ -237,7 +237,7 @@
                 </div>
                 <!-- Trainers (decision 14): the picked trainer's team in the same panel, outside a trainer battle. -->
                 <div v-else-if="right_panel_mode == 'Trainers' && trainer_preview_view" style="position: absolute;" key="8">
-                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-header="81"></enemy-team-panel>
+                    <enemy-team-panel :view="trainer_preview_view" :layout="enemy_team_layout" :webcam="webcam_mode" :webcam-rows="enemy_row_art" :webcam-header="81"></enemy-team-panel>
                 </div>
                 <div v-else="" key="6">
                     <movepool :view="movepoolView">
@@ -380,7 +380,7 @@ import Movepool from "~/core/overlay/Movepool.vue";
 import SplitsPanel from "~/core/overlay/SplitsPanel.vue";
 import { EnemyTeamPanel } from "~/core/overlay/EnemyTeamPanel";
 import { speedColorClass, speedLabel, speedLabelOrder, speedOrder } from "~/core/logic/speedLabel";
-import { enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
+import { ENEMY_ROW_ART, enemyTeamLayout, enemyTeamView, previewTrainer, trainerPickerOptions, trainerPreviewView, wildPreview } from "./enemyPanel";
 import { readRightPanelMode, rightPanelModeMixin } from "~/core/overlay/rightPanelMode";
 import { searchTrainers } from "~/core/logic/trainerPreview";
 import { splitDiffColor, splitsHead } from "~/core/overlay/splitsView";
@@ -1794,6 +1794,10 @@ export default defineComponent({
         },
         enemy_team_layout() {
             return enemyTeamLayout
+        },
+        /** Where the enemy panel art draws its rows (Webcam Mode's fitted rows, enemyPanel.ts). */
+        enemy_row_art() {
+            return ENEMY_ROW_ART
         },
         enemy_trainer() {
             const trainer = this.capitalization_format(this.game.properties.battle.trainer.class.value)
