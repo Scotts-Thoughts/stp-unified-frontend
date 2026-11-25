@@ -1863,8 +1863,9 @@
     height: 996px;
 }
 
-/* The stat number while the EV gauge shows (core/overlay/player/evGauge.ts): 90% of its size, centred in the tile. */
-.gen-1 .stat_value.ev_gauge_value {
+/* The big stat numbers (Automatic, Base Stats and the average/median values drawn at full size): one size whether or not
+   the EV gauge (core/overlay/player/evGauge.ts) shows, 90% of the old 56 px (gen3: 50 px), centred in the tile. */
+.gen-1 .stat_value.stat_value_large {
     font-size: 50px;
     /* The digits sit 1 px low at line-height 58px: this centres them in the 59 px tile. */
     margin-top: -1px;

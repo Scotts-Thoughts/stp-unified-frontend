@@ -100,14 +100,14 @@ export function statTiles(vm: any): StatChild[] {
         const statExp = () => team0[`statExp${stat.name_stat_exp}`].value;
         const show = toDisplayString;
         // The stat experience gauge under each tile in the regular stats view (core/logic/evGauge.ts).
-        const gauge = mode == "Automatic" && vm.show_ev_gauge != false;
+        const gauge = mode == "Automatic" && vm.show_ev_gauge != false && String(vm.stats_header).startsWith("Level");
         switch (mode) {
-            case "Base Stats": cells.push(value("base", "", vm.dexDataCrystal[vm.starter][stat.base_stat_path])); break;
+            case "Base Stats": cells.push(value("base", " stat_value_large", vm.dexDataCrystal[vm.starter][stat.base_stat_path])); break;
             case "DVs":        cells.push(value("dv", " dv", show(vm.get_dv(`${stat.name}`)) + "/15")); break;
             case "EVs":        cells.push(value("ev", " evs", statExp())); break;
             case "Vitamins":   cells.push(value("vitamins", " evs", vm.statExp(statExp()))); break;
             case "Automatic":
-                cells.push(value("auto", gauge ? " ev_gauge_value" : "", vm.get_stat(`${stat.name}`)));
+                cells.push(value("auto", " stat_value_large", vm.get_stat(`${stat.name}`)));
                 if (gauge) cells.push(statEvGauge(evGaugeState(statExp(), "statExp"), evGaugeLayout, stat.value_column, row));
                 break;
             case "Hidden Power":
