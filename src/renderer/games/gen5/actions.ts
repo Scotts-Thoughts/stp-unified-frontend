@@ -1,7 +1,7 @@
 import { manualNewRun } from "~/core/logic/newRunGuard";
 import { panelActions } from "~/core/settings/toActions";
 import { press } from "~/core/shortcuts/build";
-import { SCREEN_BOXES, screenshotAction } from "~/core/screenshot/screenshot";
+import { SCREEN_BOXES, runSeconds, screenshotAction } from "~/core/screenshot/screenshot";
 import type { ShortcutAction } from "~/core/shortcuts/types";
 import { gen5SettingsPanel } from "./settingsPanel";
 
@@ -95,6 +95,7 @@ export function gen5Actions(vm: any): ShortcutAction[] {
     ...legacyFKeys(vm),
     ...panelActions(gen5SettingsPanel(vm)),
     // The touch screen goes in its box when Secondary Screen (`second_screen_mode`) shows it.
-    screenshotAction(() => ({ top: SCREEN_BOXES.dsTop, bottom: vm.second_screen_mode ? SCREEN_BOXES.dsSecondScreen : null })),
+    screenshotAction(() => ({ top: SCREEN_BOXES.dsTop, bottom: vm.second_screen_mode ? SCREEN_BOXES.dsSecondScreen : null }),
+      () => ({ species: vm.starter, finishes: vm.finished_run_count, seconds: runSeconds(vm.shuckie_timer, vm.emulatorStats?.time_current, vm.timer.getTime()) })),
   ];
 }

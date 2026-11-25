@@ -146,8 +146,8 @@ const api = {
   screenshot: {
     /** The window's picture now, as a PNG data URL. */
     capture: () => invoke('screenshot:capture'),
-    /** Writes `screenshots/<date> <time> <game>.png`, copies it to the clipboard and returns its path. */
-    save: (png, game) => invoke('screenshot:save', png, game),
+    /** Writes `screenshots/<name>.png`, copies it to the clipboard and returns its path. */
+    save: (png, name) => invoke('screenshot:save', png, name),
   },
 
   /**

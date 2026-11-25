@@ -1,4 +1,5 @@
 <template>
+    <span class="stp-screenshot-wrap">
     <button
         type="button"
         class="stp-screenshot-btn"
@@ -12,6 +13,8 @@
             <circle cx="8" cy="8.4" r="2.4" fill="none" stroke="currentColor" stroke-width="1.3" />
         </svg>
     </button>
+    <span v-if="note" class="stp-screenshot-note" :class="`stp-screenshot-note-${status}`">{{ note }}</span>
+    </span>
 </template>
 
 <script lang="ts">
@@ -27,7 +30,13 @@ import "./screenshot.css";
  */
 export default defineComponent({
     name: "ScreenshotButton",
+    data() {
+        return { note: "", noteTimer: 0 as ReturnType<typeof setTimeout> | 0 };
+    },
     computed: {
+        finished() {
+            return screenshotState.finished;
+        },
         status() {
             return screenshotState.status;
         },
@@ -43,6 +52,20 @@ export default defineComponent({
             }
             return base;
         },
+    },
+    watch: {
+        // Each outcome shows above the button for a few seconds: where the file went, or why
+        // nothing was saved (the tooltip keeps the last one).
+        finished() {
+            this.note = screenshotState.status === "done"
+                ? `Saved to ${screenshotState.message} (and copied)`
+                : `No screenshot: ${screenshotState.message}`;
+            if (this.noteTimer) clearTimeout(this.noteTimer);
+            this.noteTimer = setTimeout(() => { this.note = ""; this.noteTimer = 0; }, screenshotState.status === "done" ? 5000 : 10000);
+        },
+    },
+    beforeUnmount() {
+        if (this.noteTimer) clearTimeout(this.noteTimer);
     },
     methods: {
         take() {

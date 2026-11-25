@@ -3,9 +3,11 @@ import { RightPanelMode } from "~/stores/types/RightPanelMode";
 import { StatsPanelMode } from "~/stores/types/StatsPanelMode";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useSpeciesMetricsStore } from "~/stores/useSpeciesMetricsStore";
+import { useMetaStore } from "~/stores/metaStore";
+import { useEmulatorStatsStore } from "~/core/stores/useEmulatorStatsStore";
 import { panelActions } from "~/core/settings/toActions";
 import { press } from "~/core/shortcuts/build";
-import { SCREEN_BOXES, screenshotAction } from "~/core/screenshot/screenshot";
+import { SCREEN_BOXES, runSeconds, screenshotAction } from "~/core/screenshot/screenshot";
 import type { ShortcutAction } from "~/core/shortcuts/types";
 import { gen1SettingsPanel } from "./settingsPanel";
 
@@ -107,8 +109,20 @@ function legacyFKeys(): ShortcutAction[] {
   ];
 }
 
+/** The screenshot's file name facts: the species on screen, Finished Runs, and the run clock. */
+function screenshotFacts() {
+  const meta = useMetaStore();
+  const metrics = useSpeciesMetricsStore();
+  const species = meta.currentSpecies && meta.currentSpecies !== "Backport" ? meta.currentSpecies : meta.starter;
+  return {
+    species,
+    finishes: metrics.finishes,
+    seconds: runSeconds(useOverlaySettingsStore().shuckie.timer, useEmulatorStatsStore().stats?.time_current, metrics.getTime().raw),
+  };
+}
+
 export function gen1Actions(): ShortcutAction[] {
   // One action per settings control, from the same description that renders the panel
   // (settingsPanel.ts), so the two can't drift apart.
-  return [...legacyFKeys(), ...panelActions(gen1SettingsPanel()), screenshotAction(() => ({ top: SCREEN_BOXES.gameBoy }))];
+  return [...legacyFKeys(), ...panelActions(gen1SettingsPanel()), screenshotAction(() => ({ top: SCREEN_BOXES.gameBoy }), screenshotFacts)];
 }

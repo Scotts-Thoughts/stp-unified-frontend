@@ -46,3 +46,35 @@
     background: rgba(80, 50, 10, 0.9);
     color: #ffe2b5;
 }
+
+/* The button and the outcome note over it (shown for a few seconds after each screenshot). */
+.stp-screenshot-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.stp-screenshot-note {
+    /* Above the button: in the settings panel the button row sits at the bottom left. */
+    position: absolute;
+    bottom: 26px;
+    left: 0;
+    z-index: 10;
+    width: max-content;
+    max-width: 420px;
+    padding: 5px 8px;
+    border: 1px solid rgba(120, 230, 140, 0.6);
+    border-radius: 6px;
+    background: rgba(16, 40, 22, 0.95);
+    color: #d6ffdd;
+    font: 500 12px/1.35 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    text-shadow: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
+
+.stp-screenshot-note.stp-screenshot-note-error {
+    border-color: rgba(255, 190, 90, 0.7);
+    background: rgba(60, 38, 8, 0.95);
+    color: #ffe2b5;
+}

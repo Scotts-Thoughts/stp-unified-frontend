@@ -230,3 +230,14 @@
   `SCREEN_BOXES.dsSecondScreen` changed together.
 - Verified: typecheck; built and screenshotted gens 4 and 5 in Secondary Screen and counted the green pixels:
   420×315 from (1486,747) in both. Not checked in OBS with a real capture.
+
+## Game screenshot: file name and a visible result
+
+- Screenshots are named `YYYYMMDD-HHMMSS-<species>-<Finished Runs>-<run clock H MM SS>.png`, Scott's format
+  (`20261124-213659-Yanmega-1-21334.png`): when it was taken, the solo Pokémon as it is now, the Finished Runs
+  counter, and the run clock with no padding on the hours. Before any finish the counter is 0 and the clock is
+  the run's current time; a missing species is `Unknown`. Two in the same second get " (2)".
+- After each click a note above the camera button says where the file went, or why nothing was saved (yellow
+  used to mean only "failed", with the reason in the tooltip).
+- Verified: typecheck, build, and the built app on the gen1 and gen5 smoke fixtures against a stand-in Super
+  Shuckie (file name and note checked). Gens 2-4 not run in the app.

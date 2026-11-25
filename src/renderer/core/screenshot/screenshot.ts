@@ -1,5 +1,4 @@
 import { reactive } from "vue";
-import { describeForReport } from "../report/context";
 import { press } from "../shortcuts/build";
 import { EMULATOR_BASE_URL } from "../stores/useEmulatorStatsStore";
 import type { ShortcutAction } from "../shortcuts/types";
@@ -16,7 +15,7 @@ import type { ShortcutAction } from "../shortcuts/types";
  *   stretched to 1920x1080 if the window is another size.
  * - Each screen is scaled into its box with sharp pixels, and covers whatever the overlay draws
  *   there (the green box, gen1's settings panel), as in OBS.
- * - Saved to `<appRoot>/screenshots/<date> <time> <game>.png` and copied to the clipboard.
+ * - Saved to `<appRoot>/screenshots/<name>.png` (`screenshotName`) and copied to the clipboard.
  */
 
 /** A box on the 1920x1080 overlay, in CSS px. */
@@ -48,12 +47,47 @@ export const SCREEN_BOXES = {
     dsSecondScreen: { x: 1486, y: 747, width: 420, height: 315 },
 } as const satisfies Record<string, ScreenBox>;
 
+/** What the file name says about the run, from the generation (its `screenshotAction`). */
+export interface ScreenshotFacts {
+    /** The solo Pokémon as it is now (after evolving), as the overlay spells it. */
+    species: string;
+    /** The Finished Runs counter. */
+    finishes: number;
+    /** The run's real time in whole seconds: the clock the overlay shows (Super Shuckie's when its timer is on). */
+    seconds: number;
+}
+
+/** Whole seconds from a clock reading, or from Super Shuckie's milliseconds when its timer is on. */
+export function runSeconds(shuckieTimer: boolean, shuckieMs: number | null | undefined, clock: { hours?: number; minutes?: number; seconds?: number }): number {
+    if (shuckieTimer && typeof shuckieMs === "number" && Number.isFinite(shuckieMs)) return Math.max(0, Math.floor(shuckieMs / 1000));
+    const n = (value: unknown) => (Number.isFinite(Number(value)) ? Number(value) : 0);
+    return Math.max(0, n(clock.hours) * 3600 + n(clock.minutes) * 60 + Math.floor(n(clock.seconds)));
+}
+
+/**
+ * The file name, without `.png`: `YYYYMMDD-HHMMSS-<species>-<finishes>-<H><MM><SS>`, the date and
+ * time the picture was taken, then the run clock with no padding on the hours (2:13:34 is 21334,
+ * 0:05:07 is 0507). Scott's example: `20261124-213659-Yanmega-1-21334`.
+ */
+export function screenshotName(when: Date, facts: ScreenshotFacts): string {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const date = `${when.getFullYear()}${pad(when.getMonth() + 1)}${pad(when.getDate())}`;
+    const time = `${pad(when.getHours())}${pad(when.getMinutes())}${pad(when.getSeconds())}`;
+    const species = String(facts.species ?? "").replace(/[<>:"/\\|?*\u0000-\u001f\s]/g, "") || "Unknown";
+    const finishes = Number.isFinite(facts.finishes) ? Math.max(0, Math.floor(facts.finishes)) : 0;
+    const total = Number.isFinite(facts.seconds) ? Math.max(0, Math.floor(facts.seconds)) : 0;
+    const clock = `${Math.floor(total / 3600)}${pad(Math.floor(total / 60) % 60)}${pad(total % 60)}`;
+    return `${date}-${time}-${species}-${finishes}-${clock}`;
+}
+
 export type ScreenshotStatus = "idle" | "busy" | "done" | "error";
 
 /** What the camera button shows: the last screenshot's outcome. */
 export const screenshotState = reactive({
     status: "idle" as ScreenshotStatus,
     message: "",
+    /** Counts finished screenshots, so the button can show each outcome for a few seconds. */
+    finished: 0,
 });
 
 const SCREENSHOT_URL = `${EMULATOR_BASE_URL}/screenshot`;
@@ -139,21 +173,23 @@ export async function composeGameScreenshot(screens: GameScreens): Promise<Uint8
 }
 
 /** Takes, saves and copies one screenshot; the outcome goes to `screenshotState`. */
-export async function takeGameScreenshot(screens: GameScreens): Promise<string | null> {
+export async function takeGameScreenshot(screens: GameScreens, facts: ScreenshotFacts): Promise<string | null> {
     if (screenshotState.status === "busy") return null;
     screenshotState.status = "busy";
     screenshotState.message = "";
     try {
+        const name = screenshotName(new Date(), facts);
         const png = await composeGameScreenshot(screens);
-        const game = describeForReport().game;
-        const file = await window.api.screenshot.save(png, typeof game === "string" ? game : "");
+        const file = await window.api.screenshot.save(png, name);
         screenshotState.status = "done";
         screenshotState.message = file;
+        screenshotState.finished++;
         console.log(`[screenshot] saved ${file}`);
         return file;
     } catch (error) {
         screenshotState.status = "error";
         screenshotState.message = error instanceof Error ? error.message : String(error);
+        screenshotState.finished++;
         console.warn(`[screenshot] ${screenshotState.message}`);
         return null;
     }
@@ -161,7 +197,18 @@ export async function takeGameScreenshot(screens: GameScreens): Promise<string |
 
 export const SCREENSHOT_ACTION_ID = "screenshot.game";
 
-/** The shortcut every generation lists; the camera button runs it too. `screens` is read at the press. */
-export function screenshotAction(screens: () => GameScreens): ShortcutAction {
-    return press(SCREENSHOT_ACTION_ID, "Save Game Screenshot", "Run", () => takeGameScreenshot(screens()));
+/**
+ * The shortcut every generation lists; the camera button runs it too. `screens` and `facts` are
+ * read at the press. A `facts` that throws (a game half loaded) still saves, named "Unknown-0-000".
+ */
+export function screenshotAction(screens: () => GameScreens, facts: () => ScreenshotFacts): ShortcutAction {
+    return press(SCREENSHOT_ACTION_ID, "Save Game Screenshot", "Run", () => {
+        let known: ScreenshotFacts;
+        try {
+            known = facts();
+        } catch {
+            known = { species: "", finishes: 0, seconds: 0 };
+        }
+        return takeGameScreenshot(screens(), known);
+    });
 }

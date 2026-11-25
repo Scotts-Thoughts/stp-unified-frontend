@@ -7,26 +7,16 @@ import { appRoot } from "./paths";
  * The game screenshot's back end (core/screenshot/screenshot.ts does the drawing).
  *
  *   screenshot:capture   the window's picture now, as a PNG data URL
- *   screenshot:save      PNG bytes + the game's name -> `<appRoot>/screenshots/<YYYY-MM-DD HH.MM.SS> <game>.png`,
+ *   screenshot:save      PNG bytes + a name -> `<appRoot>/screenshots/<name>.png` (a " (2)" etc. if taken),
  *                        also put on the clipboard; returns the path
  */
 
-function stamp(when: Date): string {
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())} ${pad(when.getHours())}.${pad(when.getMinutes())}.${pad(when.getSeconds())}`;
-}
-
-/** A game name made safe for a file name on Windows and macOS ("Gold & Silver" stays). */
-function fileGame(game: unknown): string {
-    if (typeof game !== "string") return "";
-    return game
-        .replace(/^Pok[eé]mon\s+/i, "") // the shell calls FireRed "Pokemon FireRed and LeafGreen"
-        .replace(/[<>:"/\\|?*\u0000-\u001f]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .replace(/[. ]+$/, "")
-        .slice(0, 60)
-        .trim();
+/** The renderer's name (core/screenshot `screenshotName`) made safe for a file name on Windows and macOS. */
+function fileName(name: unknown): string {
+    const cleaned = typeof name === "string"
+        ? name.replace(/[<>:"/\\|?*\u0000-\u001f]/g, "").trim().replace(/[. ]+$/, "").slice(0, 120)
+        : "";
+    return cleaned || "screenshot";
 }
 
 function freeName(folder: string, base: string): string {
@@ -43,13 +33,12 @@ export function registerScreenshotIpc(getWindow: () => BrowserWindow | null): vo
         return `data:image/png;base64,${image.toPNG().toString("base64")}`;
     });
 
-    ipcMain.handle("screenshot:save", async (_e, png: Uint8Array, game: unknown) => {
+    ipcMain.handle("screenshot:save", async (_e, png: Uint8Array, name: unknown) => {
         const data = Buffer.from(png);
         if (data.length < 8 || data.readUInt32BE(0) !== 0x89504e47) throw new Error("Not a PNG");
         const folder = join(appRoot(), "screenshots");
         mkdirSync(folder, { recursive: true });
-        const name = fileGame(game);
-        const file = freeName(folder, name ? `${stamp(new Date())} ${name}` : stamp(new Date()));
+        const file = freeName(folder, fileName(name));
         writeFileSync(file, data);
         try {
             // Electron 45's clipboard is the async W3C-style one (no writeImage).
