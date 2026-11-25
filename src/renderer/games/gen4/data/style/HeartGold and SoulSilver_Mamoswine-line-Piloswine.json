@@ -14,5 +14,8 @@
   "backgroundBrightness": 41,
   "backgroundContrast": 127,
   "backgroundSaturation": 100,
-  "imageFlip": true
+  "imageFlip": true,
+  "imageScale": 0.71,
+  "imageYOffset": -18,
+  "imageXOffset": -18
 }

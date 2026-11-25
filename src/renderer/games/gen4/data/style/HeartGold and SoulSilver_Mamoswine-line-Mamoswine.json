@@ -1,6 +1,6 @@
 {
-  "overlay_color": "#b28c79",
-  "ui_saturation": 1.4,
+  "overlay_color": "#9b7446",
+  "ui_saturation": 1.6,
   "backgroundTexture": "Dark Ice",
   "backgroundBlur": 3,
   "backgroundHue": 0,
@@ -13,5 +13,8 @@
   "backgroundYOffset": 0,
   "backgroundBrightness": 41,
   "backgroundContrast": 127,
-  "backgroundSaturation": 100
+  "backgroundSaturation": 100,
+  "imageFlip": true,
+  "imageYOffset": 1,
+  "imageXOffset": -54
 }

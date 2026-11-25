@@ -330,3 +330,16 @@
 - Verified: typecheck, build, parity:drift (apart from load_all_settings), on Scott's working tree. Sample renders of
   ~40 species in Platinum and Black reviewed by Scott over five rounds. Not verified: the evolution fallback on screen,
   gens 1-3 renders after the last round, and most of the ~4,900 entries were not looked at one by one.
+
+## /pokemon-style skill: learn from Scott's styling and regenerate untouched looks
+- New `tools/pokemon-style/` (Python: `style.py` diff / preview / show / generate / accept, `rules.py`, `art.py`,
+  `data/`, `LESSONS.md`, `README.md`, `dump-dex.ts`) and `.claude/skills/pokemon-style/SKILL.md`. It is the
+  one-off generator from the "Generated style defaults" task, moved into the repo with a record of what it wrote
+  (`data/known.json`) so it can tell Scott's edits from its own and never overwrite his.
+- Fixed in the move: Steel's texture look (blur 0.8) wasn't read, so Steel-type colours were picked against the
+  unfiltered texture. Regenerated those 41 looks (Aggron, Lairon, Metagross, Registeel, Klink, Klinklang).
+- Trial run on the HGSS Mamoswine-line edits: logged in `LESSONS.md`, no rule change (one family only).
+- Verified: the tool reproduces every previously generated look except those 41 colours; diff, preview, accept and
+  generate ran on this copy. Not verified: reading an installed build's `user_state.json` overrides and gen1
+  per-species settings (written to the documented paths, no real files to test against). No TypeScript changed.
+- ARCHITECTURE.md §6: note on the tool after "Generated defaults".

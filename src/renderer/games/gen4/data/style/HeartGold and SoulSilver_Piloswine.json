@@ -4,5 +4,6 @@
   "imageYOffset": 11,
   "imageFlip": true,
   "overlay_color": "#ad7f6d",
-  "ui_saturation": 1.5
+  "ui_saturation": 1.5,
+  "selected_evolution_species": "Piloswine"
 }

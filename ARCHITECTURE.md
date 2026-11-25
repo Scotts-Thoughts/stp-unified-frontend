@@ -793,6 +793,10 @@ keep this in mind when editing `data/trainers/heartgold_soulsilver.js` by hand. 
   drawn above the art's own resolution (upscaling blurs), floating species lifted, art mirrored where needed so it
   looks toward the game area (judged by eye, per family), overlay colour = the art's dominant colour unless it
   blends into the type background, then its next colour. They are ordinary defaults: editing one overwrites it.
+- **`/pokemon-style`** (`tools/pokemon-style/`, skill in `.claude/skills/pokemon-style/`) holds the generator.
+  `data/known.json` records every look it wrote and every look of Scott's it has learned from; `style.py diff`
+  lists looks that match neither (his new edits), `generate --write` only rewrites looks still exactly as
+  generated, and `LESSONS.md` keeps what each edit taught. Change the rules there, not by hand-editing style files.
 
 **File names with spaces.** gen4 and gen5 have `data/type effectiveness array.js`, which needs quoting in shell commands.
 
