@@ -3,6 +3,8 @@
  * `components/right_panel/enemy_graphic.vue` computes (`enemyTeamView`, read exactly as its old template read it)
  * and the elements it draws (`enemyTeamLayout`).
  */
+import { enemyDamageOf, enemyMoveCell } from "~/core/overlay/enemyMoveCell";
+import { enemyMoveDamage } from "./damage";
 import { toDisplayString, type StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
 import { enemyLevelText, FAINTED_PICTURE, FAINTED_TEXT, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
@@ -64,6 +66,8 @@ export function enemyTeamView(vm: any): Gen1EnemyTeam {
         const stage = (value: unknown) => vm.stat_mod(value, x);
         // Decision 26: a fainted Pokémon's text, labels and stats art at half opacity (the sprite and icons already were).
         const fainted = team?.hp?.value == 0;
+        const damage = speciesValue == null ? null
+            : enemyMoveDamage(props, vm.meta, x, [1, 2, 3, 4].map((n) => team["move" + n]?.value != null ? vm.move_name(team["move" + n].value) : null));
         const labelStages = [0, enemy.modEnemyStageAttack.value, enemy.modEnemyStageDefense.value, enemy.modEnemyStageSpecial.value, enemy.modEnemyStageSpeed.value, 0];
         const values = [
             team?.maxHp,
@@ -95,7 +99,7 @@ export function enemyTeamView(vm: any): Gen1EnemyTeam {
             ],
             moves: [1, 2, 3, 4].map((n) => {
                 const move = team["move" + n]?.value;
-                return { known: move != null, icon: move != null ? vm.move_icon(move) : undefined, name: vm.move_name(move) };
+                return { known: move != null, icon: move != null ? vm.move_icon(move) : undefined, name: vm.move_name(move), damage: enemyDamageOf(damage, n - 1) };
             }),
             stats: values.map((value, i) => ({
                 value: toDisplayString(value),
@@ -221,7 +225,7 @@ function slotNodes(view: Gen1EnemyTeam, slot: Gen1EnemySlot): EnemyNode {
             ...slot.moves.map((move, i): EnemyNode => ({
                 children: [
                     move.known ? { tag: "img", class: "ds eMoveIconStyle moveIcon" + (i + 1) + " opacityTransition", style: slot.styles.icons, src: move.icon } : null,
-                    { class: "ePkmnMoveStyle ePkmnMove" + (i + 1) + " opacityTransition", style: slot.styles.text, text: move.name },
+                    enemyMoveCell("ePkmnMoveStyle ePkmnMove" + (i + 1) + " opacityTransition", move, slot.styles.text),
                 ],
             })),
             // Stats

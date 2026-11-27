@@ -38,3 +38,11 @@ an old lesson isn't undone.
   Piloswine the same overlay colour (#b28c79), a lighter tan than generated. Lesson: a family shares one
   background and often one colour; big gen4 middle/final stages may run a little large. One family only, so no
   rule change yet: if more big gen4 Pokemon come back smaller, lower `T["gen4"].size` middle/final by ~8%.
+- 2026-11-26, gens 6-7 (3DS overlay) added, no looks of Scott's yet: `T["gen6"]` is gen 5's feet and body centre
+  carried into the 3DS art box, sizes gen 5's x1.1 (mockup A draws the art bigger), and a new `xlim` keeps the
+  outline between the canvas's left edge and the top screen's border (shifted in, shrunk only if wider than the
+  room). 231 new pictures got `faces_right` / `floats` labels by eye from contact sheets. First lessons from his
+  3DS looks should check these numbers.
+- 2026-11-26, noticed while adding gens 6-7: a dry run for gens 2-5 wants to replace ~3,180 generated looks
+  (overlay colours a few shades off, e.g. White 2 Meloetta #d57d5d -> #df8261), so something the colours depend on
+  (likely a texture look) changed since the 11-25 run. Not regenerated; worth a look on the next `/pokemon-style`.

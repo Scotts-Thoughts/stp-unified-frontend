@@ -22,6 +22,9 @@ DEX = json.load(open(os.path.join(HERE, "data", "dex.json"), encoding="utf-8"))
 STORAGE = os.path.join(REPO, "storage", "Storage.json")
 IMG = {"gen1|Yellow": "pokemon", "gen1|Red and Blue": "pokemon/Red_and_Blue", "gen2": "gen2/pokemon",
        "gen3": "gen3/pokemon", "gen4": "gen4/pokemon", "gen5": "gen5/pokemon"}
+# Gens 6-7 (one 3DS overlay, games/gen6/) take each species' picture from its art table (dex.json `img`), and keep
+# their looks in one folder: gen7's files are gen6's.
+GENS = ("gen2", "gen3", "gen4", "gen5", "gen6", "gen7")
 # Fields that count as "this entry has a look" (an entry with none of them falls back to defaults).
 HAS_LOOK = {"imageScale", "overlay_color", "imageXOffset", "imageYOffset"}
 LOOK_FIELDS = rules.STYLE_KEYS + ["imageSat", "imageRotation", "backgroundBlur", "backgroundBrightness",
@@ -42,13 +45,13 @@ def known():
 
 
 def save_known(k):
-    with open(KNOWN, "w", encoding="utf-8") as f:
+    with open(KNOWN, "w", encoding="utf-8", newline="\n") as f:  # LF on Windows too, as the file is committed
         json.dump(k, f, indent=1, sort_keys=True)
         f.write("\n")
 
 
 def style_dir(gen):
-    return os.path.join(R, "games", gen, "data", "style")
+    return os.path.join(R, "games", "gen6" if gen == "gen7" else gen, "data", "style")
 
 
 def file_key(gen, game, species):
@@ -88,7 +91,7 @@ def user_overrides(ud):
     """Looks saved by an installed build (gens 2-5 `user_<key>` in user_state.json; gen3 also plain keys)."""
     st = load_json(os.path.join(ud, "data", "user_state.json"), {}) or {}
     out = {}
-    for gen in ("gen2", "gen3", "gen4", "gen5"):
+    for gen in GENS:
         sec = st.get(gen) or {}
         for k, v in sec.items():
             if k.startswith("user_") and isinstance(v, dict):
@@ -121,7 +124,7 @@ def inventory():
     """Every species in every game: {id, gen, game, species, img, t1, fam, current}."""
     storage = load_json(STORAGE, {}).get("games", {})
     files = {}
-    for gen in ("gen2", "gen3", "gen4", "gen5"):
+    for gen in GENS:
         for p in glob.glob(os.path.join(style_dir(gen), "*.json")):
             k = os.path.basename(p)[:-5]
             if k != "index":
@@ -129,9 +132,9 @@ def inventory():
     inv = []
     for key, d in DEX.items():
         gen, game = key.split("|")
-        rel = IMG.get(key) or IMG[gen]
+        rel = IMG.get(key) or IMG.get(gen)
         for s, info in d.items():
-            img = os.path.join(IMAGES, rel, s + ".webp")
+            img = os.path.join(IMAGES, info["img"]) if info.get("img") else os.path.join(IMAGES, rel, s + ".webp")
             e = dict(gen=gen, game=game, species=s, img=img if os.path.exists(img) else None,
                      t1=info.get("t1"), fam=info.get("fam") or [])
             if gen == "gen1":

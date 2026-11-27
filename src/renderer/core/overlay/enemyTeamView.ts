@@ -25,6 +25,8 @@ export interface EnemyMoveView {
     icon?: string;
     /** The move is known (its icon, or its row, is drawn). */
     known: boolean;
+    /** In a battle: its damage to the player's Pokémon out (core/damage), drawn under the name (`enemyMoveCell`). */
+    damage?: { pct: string; ko: string } | null;
 }
 
 export interface EnemyStatView {

@@ -8933,5 +8933,929 @@
 "pokemon/Zubat.webp": {
 "faces_right": false,
 "floats": true
+},
+"gen5/pokemon/489.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen5/pokemon/490.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen5/pokemon/Farfetch'd.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen5/pokemon/Ho-oh.webp": {
+"faces_right": true,
+"floats": true
+},
+"gen5/pokemon/Nidoran F.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen5/pokemon/Nidoran M.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Aegislash (Blade).webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Aegislash.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Alolan Diglett.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Dugtrio.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Exeggutor.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Geodude.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Alolan Golem.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Graveler.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Grimer.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Meowth.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Muk.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Ninetales.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Persian.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Raichu.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Raticate.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Rattata.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Alolan Sandshrew.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Alolan Sandslash.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Alolan Vulpix.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Amaura.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Araquanid.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Aromatisse.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Aurorus.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Avalugg.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Barbaracle.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Bergmite.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Bewear.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Binacle.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Blacephalon.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Bounsweet.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Braixen.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Brionne.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Bruxish.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Bunnelby.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Buzzwole.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Carbink.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Celesteela.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Charjabug.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Chesnaught.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Chespin.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Clauncher.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Clawitzer.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Comfey.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Cosmoem.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Cosmog.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Crabominable.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Crabrawler.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Cutiefly.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Dartrix.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Decidueye.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Dedenne.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Delphox.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Dewpider.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Dhelmise.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Diancie.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Diggersby.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Doublade.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Dragalge.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Drampa.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Espurr.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Fennekin.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Flabebe.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Fletchinder.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Fletchling.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Floette.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Florges.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Fomantis.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Froakie.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Frogadier.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Furfrou.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Gogoat.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Golisopod.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Goodra.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Goomy.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Gourgeist.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Greninja.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Grubbin.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Gumshoos.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Guzzlord.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Hakamo-o.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Hawlucha.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Heliolisk.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Helioptile.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Honedge.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Hoopa (Unbound).webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Hoopa.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Incineroar.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Inkay.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Jangmo-o.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Kartana.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Klefki.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Komala.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Kommo-o.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Litleo.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Litten.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Lunala.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Lurantis.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Lycanroc.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Magearna.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Malamar.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mareanie.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Marshadow.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Abomasnow.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Absol.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Aerodactyl.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Aggron.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Alakazam.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Altaria.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Ampharos.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Audino.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Banette.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Beedrill.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Blastoise.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Blaziken.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Camerupt.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Charizard X.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Mega Charizard Y.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Diancie.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Gallade.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Garchomp.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Gardevoir.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Gengar.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Mega Glalie.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Gyarados.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Heracross.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Houndoom.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Kangaskhan.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Latias.webp": {
+"faces_right": true,
+"floats": true
+},
+"gen6/pokemon/Mega Latios.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Lopunny.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Lucario.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Manectric.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Mawile.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Mega Medicham.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Metagross.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Mewtwo X.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Mewtwo Y.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Pidgeot.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Pinsir.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Rayquaza.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Sableye.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Salamence.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Sceptile.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Scizor.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Sharpedo.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Mega Slowbro.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Steelix.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Swampert.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Tyranitar.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mega Venusaur.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Meowstic.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mimikyu.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Minior.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Morelull.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mudbray.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Mudsdale.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Naganadel.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Necrozma.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Nihilego.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Noibat.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Noivern.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Oranguru.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Oricorio.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Palossand.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Pancham.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Pangoro.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Passimian.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Phantump.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Pheromosa.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Pikipek.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Poipole.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Popplio.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Primarina.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Pumpkaboo.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Pyroar.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Pyukumuku.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Quilladin.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Ribombee.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Rockruff.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Rowlet.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Salandit.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Salazzle.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Sandygast.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Scatterbug.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Shiinotic.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Silvally.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Skiddo.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Skrelp.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Sliggoo.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Slurpuff.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Solgaleo.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Spewpa.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Spritzee.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Stakataka.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Steenee.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Stufful.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Swirlix.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Sylveon.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Talonflame.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Tapu Bulu.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Tapu Fini.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Tapu Koko.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Tapu Lele.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Togedemaru.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Torracat.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Toucannon.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Toxapex.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Trevenant.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Trumbeak.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Tsareena.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Turtonator.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Type Null.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Tyrantrum.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Tyrunt.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Vikavolt.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Vivillon.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Volcanion.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Wimpod.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Wishiwashi.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Xerneas.webp": {
+"faces_right": true,
+"floats": false
+},
+"gen6/pokemon/Xurkitree.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Yungoos.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Yveltal.webp": {
+"faces_right": false,
+"floats": true
+},
+"gen6/pokemon/Zeraora.webp": {
+"faces_right": false,
+"floats": false
+},
+"gen6/pokemon/Zygarde.webp": {
+"faces_right": false,
+"floats": false
 }
 }

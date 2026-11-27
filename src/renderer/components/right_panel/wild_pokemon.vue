@@ -40,7 +40,13 @@
                     :style="enemy_fainted_styles" 
                     :src="move_icon(wild_mon['move' + (move_index + 1)]?.value)"
                 />
-                <div :class="'ePkmnMoveStyle ePkmnMove' + (move_index + 1) + ' opacityTransition'" 
+                <div v-if="wild_damage[move_index]" :class="'ePkmnMoveStyle ePkmnMove' + (move_index + 1) + ' opacityTransition withDamage'"
+                    :style="enemy_styles.text">
+                    <!-- The move's damage to the player's Pokémon (core/damage), as core/overlay/enemyMoveCell.ts draws it. -->
+                    <div class="ePkmnMoveName">{{move_name(wild_mon['move' + (move_index + 1)]?.value)}}</div>
+                    <div class="ePkmnMoveDamage">{{wild_damage[move_index].line}}<span v-if="wild_damage[move_index].chance" class="koChance"> {{wild_damage[move_index].chance}}</span></div>
+                </div>
+                <div v-else :class="'ePkmnMoveStyle ePkmnMove' + (move_index + 1) + ' opacityTransition'" 
                     :style="enemy_styles.text">
                     {{move_name(wild_mon['move' + (move_index + 1)]?.value)}}
                 </div>
@@ -95,6 +101,8 @@ import { defineComponent, inject } from "vue";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { useOverlaySettingsStore } from "~/stores/useOverlaySettingsStore";
 import { useEnemySpriteResizeStore } from "~/stores/useEnemySpriteResizeStore";
+import { enemyMoveDamage } from "~/games/gen1/damage";
+import { koParts } from "~/core/overlay/player/MoveList";
 
 type SpeedComparison = "Outspeeds" | "Outsped" | "Speed-tie";
 export default defineComponent({
@@ -251,7 +259,20 @@ export default defineComponent({
         },
         wild_mon() {
             return this.game_properties.battle.enemyPokemon
-        }
+        },
+        /** Each move's damage to the player's Pokémon (core/damage): "41–49% · 3HKO" and the KO chance, or null. */
+        wild_damage(): ({ line: string; chance: string | null } | null)[] {
+            const mon = this.game_properties.battle.enemyPokemon;
+            const names = [1, 2, 3, 4].map((n) => mon?.["move" + n]?.value != null ? this.move_name(mon["move" + n].value) : null);
+            const x = Number(mon?.partyPos?.value) || 0;
+            const damage = enemyMoveDamage(this.game_properties, this.meta, x, names);
+            return [0, 1, 2, 3].map((i) => {
+                const d = damage?.[i];
+                if (!d || (!d.short && !d.ko)) return null;
+                const [count, chance] = koParts(d.ko);
+                return { line: count ? (d.short ? `${d.short} · ${count}` : count) : d.short, chance };
+            });
+        },
     }
 });
 </script>

@@ -4,6 +4,9 @@
  * it draws (`enemyTeamLayout`). Species, level and ability come from the trainer data (`enemy_mon_static`); stats,
  * moves and stat stages from the mapper.
  */
+import { enemyDamageOf, enemyMoveCell } from "~/core/overlay/enemyMoveCell";
+import type { EnemyMoveView } from "~/core/overlay/enemyTeamView";
+import { enemyMoveDamage } from "./damage";
 import { toDisplayString, type StyleValue } from "vue";
 import { SQUEEZED_TYPE_ICON, type EnemyChild, type EnemyNode } from "~/core/overlay/EnemyTeamPanel";
 import { ENEMY_STAT_LABELS as L, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
@@ -157,6 +160,7 @@ export function enemyTeamView(vm: any): Gen5EnemyTeam {
         const speed = vm.speed_comparison(x, opponent.team[x]?.stats.speed.value).comparison;
         const species = mon?.species?.value;
         const entry = vm.g5PokemonData[mon?.species];
+        const damage = enemyMoveDamage(vm, x, [0, 1, 2, 3].map((i) => team.moves[i].move.value));
         return {
             slot: x,
             present: true,
@@ -181,7 +185,7 @@ export function enemyTeamView(vm: any): Gen5EnemyTeam {
             })),
             moves: [0, 1, 2, 3].map((i) => {
                 const move = team.moves[i].move.value;
-                return { known: move != null, icon: `images/gen5/type-icons-circular/${vm.black_moves[move]?.type?.toLowerCase()}.webp`, name: move };
+                return { known: move != null, icon: `images/gen5/type-icons-circular/${vm.black_moves[move]?.type?.toLowerCase()}.webp`, name: move, damage: enemyDamageOf(damage, i) };
             }),
             mods: props.meta.state.value == "Battle" ? vm.modifier_values.map((name: string) => ({
                 name,
@@ -246,6 +250,8 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen5EnemyT
         const order = speedOrder(player_speed, mon.stats.speed);
         const entry = vm.g5PokemonData[mon.species];
         const stats = mon.stats as unknown as Record<string, unknown>;
+        // Only during a battle (a wild one: the party slot is the opponent's); a preview has no battle to read.
+        const damage = enemyMoveDamage(vm, x, [0, 1, 2, 3].map((i) => mon.moves[i]));
         return {
             slot: x,
             present: true,
@@ -270,6 +276,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen5EnemyT
                 known: mon.moves[i] != null,
                 icon: `images/gen5/type-icons-circular/${vm.black_moves[mon.moves[i]]?.type?.toLowerCase()}.webp`,
                 name: mon.moves[i],
+                damage: enemyDamageOf(damage, i),
             })),
             mods: null,
         };
@@ -378,7 +385,7 @@ function slotNodes(slot: Gen5EnemySlot): EnemyNode {
                                         show: move.known,
                                         children: [
                                             { tag: "th", children: [{ tag: "img", class: "icons moveIcon", src: move.icon }] },
-                                            { tag: "th", class: "align_left", style: "font-size: 14px;", text: move.name },
+                                            enemyMoveNameCell(move),
                                         ],
                                     })),
                                 }],
@@ -399,6 +406,12 @@ function slotNodes(slot: Gen5EnemySlot): EnemyNode {
 }
 
 /** The panel inside the overlay's enemy team branch. */
+/** A move's name cell; in a battle the name over its damage (core/overlay/enemyMoveCell.ts), a table cell here. */
+function enemyMoveNameCell(move: EnemyMoveView): EnemyNode {
+    const cell = enemyMoveCell("align_left", move, "font-size: 14px;");
+    return { ...cell, tag: "th", class: "align_left" };
+}
+
 export function enemyTeamLayout(view: Gen5EnemyTeam): EnemyChild[] {
     return [
         { key: view.double ? 1 : 0, class: "trainerLabel", style: view.double ? twoTrainerHeaderStyle(String(view.trainer), 26, 24) : undefined, text: view.double ? view.trainer : fitTrainerHeader(view.trainer, 24) },

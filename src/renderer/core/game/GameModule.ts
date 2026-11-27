@@ -77,8 +77,9 @@ export interface ControlContext {
 }
 
 export interface GameModule {
-    id: "gen1" | "gen2" | "gen3" | "gen4" | "gen5";
-    generation: 1 | 2 | 3 | 4 | 5;
+    /** gen6 and gen7 are the 3DS games: one overlay (games/gen6/), two manifests. */
+    id: "gen1" | "gen2" | "gen3" | "gen4" | "gen5" | "gen6" | "gen7";
+    generation: 1 | 2 | 3 | 4 | 5 | 6 | 7;
     /** The mapper profiles this module ships; today exactly the mappers in `docs/mapper-matrix.md`. */
     mappers: MapperProfile[];
     /** The mapper game-name strings this module accepts: the data keys. */
@@ -125,8 +126,11 @@ export interface GameModule {
      * which also says why a plain relative path and not a URL scheme).
      */
     assetPrefix?: string;
-    /** Anything that must be in memory before the overlay mounts (gen2: the per-species style defaults). */
-    prepare?(): Promise<void>;
+    /**
+     * Anything that must be in memory before the overlay mounts (gen2: the per-species style defaults).
+     * `game` is the detected mapper game: the 3DS module loads only that game's tables.
+     */
+    prepare?(game?: string): Promise<void>;
     /**
      * Mapper paths (prefixes) whose updates the client debounces by ten animation
      * frames -- gen4's `this.mapper.deboucePath(...)` calls, which it made before
@@ -159,5 +163,5 @@ export interface GameModule {
         legacyAppName: string;
     };
     /** Which `logCopy` the autosplitter uses (known-legacy-bugs.md #21). */
-    logCopyVariant: "gen1" | "gen2" | "gen3" | "gen4" | "gen5";
+    logCopyVariant: "gen1" | "gen2" | "gen3" | "gen4" | "gen5" | "gen6";
 }

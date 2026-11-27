@@ -1,3 +1,4 @@
+import "../../styles/player.css";
 import { createCommentVNode, defineComponent, h, toDisplayString, vShow, withDirectives, type PropType, type VNode } from "vue";
 
 /**
@@ -17,6 +18,33 @@ export interface MoveRow {
     pp?: unknown;
     /** The damage-class icon's picture (gens 4-5). */
     category?: string | null;
+    /**
+     * In a battle: the damage against the enemy out (core/damage/calc.ts), shown in place of power, accuracy and PP.
+     * Null for a move the calculator doesn't know.
+     */
+    damage?: MoveDamageText | null;
+}
+
+/** A move's damage as the move list draws it (core/damage/calc.ts `MoveDamage`). */
+export interface MoveDamageText {
+    /** HP: "23–28". */
+    hp: string;
+    /** Percent of the target's max HP: "41–49%" ("0%" when immune). */
+    pct: string;
+    /** "2HKO" or "2HKO 56%": `koParts` splits off the chance, which is drawn smaller. */
+    ko: string;
+}
+
+/** "2HKO 56%" → ["2HKO", "56%"]; "2HKO" → ["2HKO", null]. */
+export function koParts(ko: string | null | undefined): [string, string | null] {
+    const [count, chance] = String(ko ?? "").split(" ");
+    return [count ?? "", chance ?? null];
+}
+
+/** The KO cell's children: the count, then the chance in a smaller `koChance` span. */
+export function koChildren(ko: string | null | undefined): MoveChild[] {
+    const [count, chance] = koParts(ko);
+    return chance ? [count, { tag: "span", class: "koChance", text: ` ${chance}` }] : [count];
 }
 
 /**

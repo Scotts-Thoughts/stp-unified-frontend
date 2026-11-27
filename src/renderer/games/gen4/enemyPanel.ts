@@ -13,6 +13,8 @@ import { previewOf, trainerOptions, type PreviewTrainer } from "~/core/logic/tra
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen4, SendOutOrderCache, type SendOutMon, type SendOutPlayer } from "~/core/logic/sendOutOrder";
 import { fitTrainerHeader } from "~/core/logic/trainerHeader";
 import type { EnemyRowArt } from "~/core/logic/webcamMode";
+import { enemyDamageOf, enemyMoveCell } from "~/core/overlay/enemyMoveCell";
+import { enemyMoveDamage } from "./damage";
 
 /**
  * Where `images/gen4/new_ui/enemy.svg` draws the rows (outer edges, black outline included) and how far the rounded corners (and the highlight in the
@@ -160,6 +162,7 @@ export function enemyTeamView(vm: any): Gen4EnemyTeam {
         const speed = vm.speed_comparison(x, vm.getEnemyStat("speed", mon?.stats.speed, x)).comparison;
         const active = battle.opponent.active_pokemon;
         const statsShown = state == "Battle" || state == "From Battle";
+        const damage = vm.enemyFaint(x) ? null : enemyMoveDamage(vm, x, mon, [0, 1, 2, 3].map((i) => mon?.moves?.[i]));
         return {
             slot: x,
             present: true,
@@ -184,7 +187,7 @@ export function enemyTeamView(vm: any): Gen4EnemyTeam {
             stages: state == "Battle" && battle.opponent.party_position.value == x
                 ? stageCells(vm, active, (value) => vm.enemy_status(value), active) : null,
             moves: [0, 1, 2, 3].map((i) => mon?.moves[i] != undefined
-                ? { known: true, icon: moveIcon(x, i), name: mon?.moves[i] }
+                ? { known: true, icon: moveIcon(x, i), name: mon?.moves[i], damage: enemyDamageOf(damage, i) }
                 : { known: false, name: undefined }),
         };
     });
@@ -275,6 +278,8 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen4EnemyT
     const slots = trainer.party.map((mon, x): Gen4EnemySlot => {
         const order = speedOrder(player_speed, mon.stats.speed);
         const entry = vm.g4PokemonData[mon.species];
+        // Only during a battle (a wild one: the party slot is the opponent's); a preview has no battle to read.
+        const damage = enemyMoveDamage(vm, x, mon, [0, 1, 2, 3].map((i) => mon.moves[i]));
         return {
             slot: x,
             present: true,
@@ -298,7 +303,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen4EnemyT
             stats: STATS.map(([, , , stat]) => ({ value: (mon.stats as unknown as Record<string, unknown>)[stat], labelStyle: undefined })),
             stages: null,
             moves: [0, 1, 2, 3].map((i) => mon.moves[i] != null
-                ? { known: true, icon: `images/gen4/type-icons-circular/${vm.platinum_moves[mon.moves[i]]?.Type?.toLowerCase()}.webp`, name: mon.moves[i] }
+                ? { known: true, icon: `images/gen4/type-icons-circular/${vm.platinum_moves[mon.moves[i]]?.Type?.toLowerCase()}.webp`, name: mon.moves[i], damage: enemyDamageOf(damage, i) }
                 : { known: false, name: undefined }),
         };
     });
@@ -415,7 +420,7 @@ function slotNodes(view: Gen4EnemyTeam, slot: Gen4EnemySlot): EnemyNode {
                                 })),
                             }],
                         },
-                        ...slot.moves.map((move, i): EnemyChild => move.known ? { class: `ePkmnMoveStyle ePkmnMove${i + 1}`, text: move.name } : null),
+                        ...slot.moves.map((move, i): EnemyChild => move.known ? enemyMoveCell(`ePkmnMoveStyle ePkmnMove${i + 1}`, move) : null),
                     ],
                 },
                 { transition: "fade", class: "ePkmnSpeedComparison", text: slot.speed.label },

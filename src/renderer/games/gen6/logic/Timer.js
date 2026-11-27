@@ -1,0 +1,198 @@
+// gen5's `logic/Timer.js`, verbatim as an ES module (tools/port/lift-gen5.py).
+import PubSub from "./PubSub.js";
+const f = (x) => x.toString().padStart(2, "0");
+
+/**
+ * Real-world timer.
+ */
+class Timer {
+	constructor(storage) {
+		// We use the storage for keeping track of timer_pause, timer_startTime and timer_pause_time:
+		// formatted_time is initalized here only as good practise. update() will always set it to the correct value.
+		// We do not keep formatted_time in storage, because we can always reconstruct it from the 3 variables we do
+		// store.
+		this.storage = storage;
+		this.update();     // update once to set everything correctly.
+		this.updateLoop(); // then start the timer loop.
+		// We may be paused, so the update() is necessary, since the loop does no updates when paused.
+	}
+
+	updateLoop = () => {
+		if (this.stopped) return;
+		if (!this.storage.timer_pause) {
+			this.update();
+		}
+		// Not in the legacy file (2026-11-02): a paused timer has nothing to draw, so the loop ends,
+		// and `startTime` and `pauseUnpauseTime` start it again through `wakeLoop` when they unpause.
+		// It used to run every frame for the life of the overlay, waking the page at the display's
+		// refresh rate while idle.
+		// Not in the legacy file either (2026-11-03): nor while the out-of-process clock shows
+		// (`setFrameLive`). Then only the hidden, frozen in-page clock would read the published
+		// text, and the loop alone kept the overlay drawing a frame per display refresh.
+		if (this.storage.timer_pause || this.frameLive) {
+			this.looping = false;
+			return;
+		}
+		this.looping = true;
+		window.requestAnimationFrame(this.updateLoop);
+	}
+
+	looping = false;
+
+	/** The out-of-process clock (core/overlay/ClockFrame.ts) is showing; set by the overlay. */
+	frameLive = false;
+
+	/**
+	 * Called by the overlay when the out-of-process clock appears or goes away. When it goes
+	 * away the in-page clock shows again, so it gets the current time and the loop restarts.
+	 */
+	setFrameLive = (live) => {
+		this.frameLive = live;
+		if (!live) {
+			this.update();
+			this.wakeLoop();
+		}
+	}
+
+	/** Restarts an ended `updateLoop` on the next frame; a no-op while it runs. */
+	wakeLoop = () => {
+		if (this.stopped || this.looping) return;
+		this.looping = true;
+		window.requestAnimationFrame(this.updateLoop);
+	}
+
+	/**
+	 * Ends the loop. Not in the legacy file: its one Timer lived as long as the page,
+	 * where the unified overlay component -- and the Timer its `data()` creates --
+	 * is unmounted when the mapper unloads and made again on the next load. A loop
+	 * left running would keep publishing `time_update` from the discarded instance.
+	 */
+	stop = () => {
+		this.stopped = true;
+	}
+
+	/**
+	 * Called after every change to the storage fields (set, start, pause, unpause, stop). Not
+	 * in the legacy file: the overlay's out-of-process clock (core/overlay/ClockFrame.ts)
+	 * mirrors those fields, and the storage is not reactive, so it has to be told.
+	 */
+	onChange = null;
+
+	/**
+ 	 * Pause and set the timer back to default
+	 * @param {string} startTimeOffset The default value to set the timer to, as a string in the format `hh:mm:ss.ms`
+	 */
+	setTimer = (startTimeOffset) => {
+		const timeOffset = this.parseOffsetString(startTimeOffset);
+		this.storage.timer_pause = true;
+		this.storage.timer_startTime = Date.now() - timeOffset;
+		this.storage.timer_pause_time = Date.now();
+		this.update();
+		this.onChange?.();
+	}
+
+	/**
+	 * Sets the timer (see {@link setTimer}) and unpauses it.
+	 * @param {*} startTimeOffset An offset to add to the timer value, a string in the format hh:mm:ss.ms.
+	 */
+	startTime = (startTimeOffset) => {
+		if (this.storage.timer_pause == false) {
+			return
+		}
+		this.setTimer(startTimeOffset);
+		this.storage.timer_pause = false;
+		this.update();
+		this.wakeLoop();
+		this.onChange?.();
+	}
+
+	/**
+	 * Pauses the timer if it's currently running and vice versa.
+	 */
+	pauseUnpauseTime = () => {
+		if (this.storage.timer_pause == true) {
+			this.storage.timer_pause = false;
+			this.storage.timer_startTime += Date.now() - this.storage.timer_pause_time;
+			this.update();
+			this.wakeLoop();
+		}
+		else {
+			this.storage.timer_pause = true;
+			this.storage.timer_pause_time = Date.now();
+		}
+		this.onChange?.();
+	}
+
+	/** Pause the timer. */
+	stopTime = () => {
+		this.storage.timer_pause_time = Date.now();
+		this.storage.timer_pause = true;
+		this.onChange?.();
+	}
+
+	/**
+	 * Get the current timer value as an object.
+	 * @returns {{ms: number, seconds:number,minutes: number ,hours: number}} 
+	 * An object containing the hours, minutes, seconds and milliseconds that have elapsed on the timer.
+	 */
+	getTime = () => {
+		var time = Date.now() - this.storage.timer_startTime
+		if (this.storage.timer_pause == true) {
+			time = this.storage.timer_pause_time - this.storage.timer_startTime
+		}
+		return {
+			ms: (Math.floor(time / 10) % 100),
+			seconds: (Math.floor(time / 1000) % 60),
+			minutes: (Math.floor(time / 60000) % 60),
+			hours: (Math.floor(time / 3600000))
+		};
+	}
+
+	/**
+	 * An array with formatted time information. First item is the general time as `hh:mm:ss`.
+	 * Second is the number of milliseconds elapsed as `.ms`
+	 *
+	 * As of the last `update()`, as in the legacy file -- except while the out-of-process clock
+	 * shows (2026-11-03): the frame loop is off then, so the time is worked out when read, for
+	 * the split and autosplitter code that needs the time at that moment.
+	 */
+	get formatted_time() {
+		return this.frameLive ? this.format() : this._formatted;
+	}
+
+	/** The last `update()`'s {@link formatted_time}. */
+	_formatted = ["0", ".00"];
+
+	/** The current time, formatted as {@link formatted_time}. */
+	format = () => {
+		const {ms: ms, seconds: s, minutes: m, hours: h} = this.getTime();
+		if (h != 0) {
+			return [ h + ":" + f(m) + ":" + f(s), "." + f(ms), h + "h" + m + "m" + s + "s", ]
+		} else if (m != 0) {
+			return [ m + ":" + f(s), "." + f(ms), h + "h" + m + "m" + s + "s", ]
+		} else {
+			return [ s, "." + f(ms), h + "h" + m + "m" + s + "s", ]
+		}
+	}
+
+	/**
+	 * Publishes the {@link formatted_time} as a `time_update` event, which the in-page clock listens for.
+	 */
+	update = () => {
+		this._formatted = this.format();
+		PubSub.publish("time_update", this._formatted);
+	}
+
+	/**
+	 * Parses a time value string with format `hh:mm:ss.ms` and returns the number of milliseconds that value describes.
+	 * @param {string} offset The offset string to parse.
+	 * @returns {number} Milliseconds
+	 */
+	parseOffsetString = (offset) => {
+		const timeRegex = /(\d+):(\d{2}):(\d{2})\.(\d{2})/;
+		const timeOffsetArray = offset.match(timeRegex)?.slice(1,5).map(x => parseInt(x)) ?? [0,0,0,0];
+		return timeOffsetArray[0] * 3600000 + timeOffsetArray[1] * 60000 + timeOffsetArray[2] * 1000 + timeOffsetArray[3] * 10;
+	}
+}
+
+export { Timer };

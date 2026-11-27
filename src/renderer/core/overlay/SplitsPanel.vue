@@ -6,7 +6,7 @@
             <tr :style="headRowStyle">
                 <td v-for="(text, i) in view.head" :class="table.headClass" :style="headStyles[i]">{{ text }}</td>
             </tr>
-            <tr v-for="row in view.rows">
+            <tr v-for="row in view.rows" :style="rowFill">
                 <td v-if="table.icon" :class="table.icon.cellClass" :style="ICON_CELL"><img :class="table.icon.imgClass" :style="iconFit" :src="row.icon"></td>
                 <td v-for="(value, i) in row.cells" :style="i === row.cells.length - 1 ? [bodyStyles[i], row.diffStyle] : bodyStyles[i]">{{ value }}</td>
             </tr>
@@ -82,6 +82,8 @@ export default defineComponent({
             FONT, HEAD, NAME, LAST, TABLE: "display: block; height: auto;", ICON_CELL: FONT + ICON,
             /** How far, in the art's px, the frame's bottom border moves up (0: drawn as the picture has it). */
             frameShift: 0,
+            /** With `fill`: each split row's height, in the art's px, that spreads the rows down to the frame's border. */
+            rowHeight: null as number | null,
             /** The icons' height cap, in the art's px, when the rows at their own size would run past the frame. */
             iconCap: null as number | null,
             /** The icons' height, in the art's px, when last seen uncapped. */
@@ -118,6 +120,9 @@ export default defineComponent({
             return this.iconCap === null
                 ? ICON_IMG
                 : { ...ICON_IMG, "max-height": `${this.iconCap}px`, "object-fit": "contain", "object-position": "left center" };
+        },
+        rowFill(): StyleValue {
+            return this.rowHeight === null ? undefined : { height: `${this.rowHeight}px` };
         },
         table(): SplitsTable {
             return this.view.table;
@@ -183,8 +188,26 @@ export default defineComponent({
             const rest = rows[1].getBoundingClientRect().height * scale - imgHeight;
             const room = bottom - (rows[0].getBoundingClientRect().bottom - box.top) * scale;
             const fit = Math.floor((room / (rows.length - 1) - rest) * 10) / 10;
-            const cap = fit >= this.naturalIcon ? null : fit / scale;
+            // With `fill` the rows are stretched to the room, so `fit` comes out at the icon's own size give or take the
+            // rounding: half a pixel of slack keeps that from capping it.
+            const cap = fit >= this.naturalIcon - (this.view.fill ? 0.5 : 0) ? null : fit / scale;
             if (cap !== this.iconCap) this.iconCap = cap;
+        },
+        /**
+         * `fill`: gives the split rows equal heights that take them down to the frame's border (`limit`), so the table
+         * fills the frame. A row's content taller than that (a long list) still sets its height; `fitIcons` shrinks it.
+         */
+        fillRows(box: DOMRect, limit: number): void {
+            const body = this.$refs.rowsBody;
+            const rows = body instanceof HTMLTableSectionElement ? body.rows : null;
+            if (!this.view.fill || !rows || rows.length < 2) {
+                this.rowHeight = null;
+                return;
+            }
+            const scale = 1080 / box.height;
+            const top = (rows[0].getBoundingClientRect().bottom - box.top) * scale;
+            const height = Math.floor(((limit - top) / (rows.length - 1)) * 10) / 10;
+            if (height !== this.rowHeight) this.rowHeight = height;
         },
         /** Moves the frame's bottom border up to the lowest row, never below where the picture has it. */
         fitFrame(): void {
@@ -200,10 +223,14 @@ export default defineComponent({
             const box = art.getBoundingClientRect();
             if (box.height === 0) return;
             // Webcam Mode: the rows fit above the webcam line, and the border never sits below it.
-            const limit = this.view.webcam ? Math.min(bottom, WEBCAM_FRAME_BOTTOM) : bottom;
+            const limit = this.view.webcam ? Math.min(bottom, this.view.webcamLimit ?? WEBCAM_FRAME_BOTTOM) : bottom;
             this.fitIcons(box, limit);
+            this.fillRows(box, limit);
             const rowsBottom = Math.max(...bodies.map((body) => body.getBoundingClientRect().bottom));
-            const shift = Math.max(0, bottom - limit, bottom - Math.ceil(((rowsBottom - box.top) * 1080) / box.height));
+            // `fill`: the border stays on the limit line, wherever the rows end.
+            const shift = this.view.fill
+                ? Math.max(0, bottom - limit)
+                : Math.max(0, bottom - limit, bottom - Math.ceil(((rowsBottom - box.top) * 1080) / box.height));
             if (shift !== this.frameShift) this.frameShift = shift;
         },
     },

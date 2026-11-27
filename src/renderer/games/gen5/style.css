@@ -272,6 +272,17 @@
     width: 42px;
 }
 
+/* In a battle the power, accuracy and PP cells hold the damage, its percent and the hits to KO (core/damage). */
+.gen-5 .g4movepool.damage_mode .g4mp_move { width: 136px; }
+.gen-5 .g4movepool.damage_mode .g4mp_category { width: 58px; }
+.gen-5 .g4movepool.damage_mode .g4mp_power { width: 70px; }
+.gen-5 .g4movepool.damage_mode .g4mp_accuracy { width: 86px; }
+.gen-5 .g4movepool.damage_mode .g4mp_pp { width: 66px; }
+.gen-5 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_move { font-size: 21px; white-space: nowrap; }
+.gen-5 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_power,
+.gen-5 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_accuracy,
+.gen-5 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_pp { font-size: 18px; white-space: nowrap; }
+
 .gen-5 .gametimeClock {
     font-size: 68px;
     display: block;
@@ -787,6 +798,10 @@
 .gen-5 .ePkmnMoveType {
     width: 26px;
 }
+/* An enemy move with its damage under the name (core/overlay/enemyMoveCell.ts): two lines in the row's 30px. */
+.gen-5 .enemyMovesetTable .ePkmnMoveName { line-height: 17px; }
+.gen-5 .enemyMovesetTable .ePkmnMoveDamage { line-height: 13px; }
+
 .gen-5 .enemyMovesetTable th:nth-child(1) {
     width: 13px;
     /* border: 1px solid #ff0000; */

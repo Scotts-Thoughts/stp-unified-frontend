@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="262.83" y1="348" x2="413.17" y2="348" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g transform="translate(0 72)">
+  <g id="Badge">
+    <g id="Layer_26_copy_2" data-name="Layer 26 copy 2">
+      <g id="Screens_copy_2" data-name="Screens copy 2">
+        <g id="Evasion">
+          <path d="M292.58,317L383.41,317A31,31 0 0 1 414.41,348A31,31 0 0 1 383.41,379L292.58,379A31,31 0 0 1 261.58,348A31,31 0 0 1 292.58,317Z" style="fill: url(#linear-gradient); stroke-width: 0px;"/>
+          <path d="M383.41,377L292.58,377A29,29 0 0 1 263.58,348A29,29 0 0 1 292.58,319L383.41,319A29,29 0 0 1 412.41,348A29,29 0 0 1 383.41,377ZM383.41,315L292.58,315A33,33 0 0 0 259.58,348A33,33 0 0 0 292.58,381L383.41,381A33,33 0 0 0 416.41,348A33,33 0 0 0 383.41,315Z" style="fill: gray; stroke-width: 0px;"/>
+          <path d="M383.41,379L292.58,379A31,31 0 0 1 261.58,348A31,31 0 0 1 292.58,317L383.41,317A31,31 0 0 1 414.41,348A31,31 0 0 1 383.41,379ZM383.41,315L292.58,315A33,33 0 0 0 259.58,348A33,33 0 0 0 292.58,381L383.41,381A33,33 0 0 0 416.41,348A33,33 0 0 0 383.41,315Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+          <path d="M383.41,381L292.58,381A33,33 0 0 1 259.58,348A33,33 0 0 1 292.58,315L383.41,315A33,33 0 0 1 416.41,348A33,33 0 0 1 383.41,381ZM383.41,314L292.58,314A34,34 0 0 0 258.58,348A34,34 0 0 0 292.58,382L383.41,382A34,34 0 0 0 417.41,348A34,34 0 0 0 383.41,314Z" style="stroke-width: 0px;"/>
+        </g>
+        <rect x="302.77" y="334.18" width="70.45" height=".82" style="fill: #231f20; filter: url(#drop-shadow-1); stroke-width: 0px;"/>
+      </g>
+    </g>
+  </g>
+  </g>
+</svg>

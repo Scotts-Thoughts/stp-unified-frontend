@@ -68,6 +68,13 @@ export interface SplitsView {
      * list too long for that shrinks its icons. Needs `art.frameBottom`.
      */
     webcam?: boolean;
+    /** The line the frame stops at with `webcam`, where it isn't `WEBCAM_FRAME_BOTTOM` (the 3DS overlay). */
+    webcamLimit?: number;
+    /**
+     * The frame always reaches its limit (`webcamLimit` with `webcam`, else the picture's own border), however few
+     * rows there are, so it is as tall as the movepool's (the 3DS overlay). A list too long still shrinks its icons.
+     */
+    fill?: boolean;
 }
 
 /** The difference cell's colour: black for none, red behind, green ahead. */

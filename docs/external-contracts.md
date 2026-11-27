@@ -347,3 +347,17 @@ What the overlay does with it:
 - Reset and lost battles are added like any other (every roll was real). The overlay's own `confirmReset` is not
   involved.
 - No router: nothing is added and the dot is grey. There is no import fallback.
+
+## 11. Gen 6 and gen 7 (3DS), first pass 2026-11-26
+
+- **Control server:** the 3DS overlay answers gen 5's routes with gen 5's `/status` field names
+  (`games/gen6/control.ts`). `set-nature`, `set-ability` and `set-hidden-power` answer
+  `ok: false, unsupported: true`: the ROMs are unpatched and the overlay writes nothing to the game.
+  `selected_game` is one of `X and Y`, `Omega Ruby and Alpha Sapphire`, `Sun and Moon`,
+  `Ultra Sun and Ultra Moon`. **The queuer does not know these games yet** (no launch entry, no expected
+  `selected_game`); nothing was tested against it.
+- **Splits:** gen 5's simple CSV and header, one file per run, in `splits/<game pair>/<species>/`.
+- **Markers and bookmarks:** gen 5's names (`IN - <trainer>`, `OUT - <trainer>`, `IN - Wild`, `Enemy Fainted`,
+  `Next Pokemon`, `Level Up - N`, `Battle Level Up`, `New Move - <move>`, `Held Item - <item>`,
+  `Map Change - <id>`, `BLACKOUT`, `RESET`). A trainer the mapper has no name for is `Trainer <id>`.
+- **Mappers:** the four STANDARD 3DS mappers at version 0.1.0 (`docs/gen6-inventory.md`).

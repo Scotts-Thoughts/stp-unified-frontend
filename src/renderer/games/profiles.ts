@@ -4,6 +4,8 @@ import { gen2Manifest } from "./gen2/manifest";
 import { gen3Manifest } from "./gen3/manifest";
 import { gen4Manifest } from "./gen4/manifest";
 import { gen5Manifest } from "./gen5/manifest";
+import { gen6Manifest } from "./gen6/manifest";
+import { gen7Manifest } from "./gen7/manifest";
 
 /**
  * Every mapper profile the app ships, by generation, with no app or Vue imports so the
@@ -16,7 +18,7 @@ import { gen5Manifest } from "./gen5/manifest";
  * screen says so instead of the overlay hanging (known-legacy-bugs.md #22).
  */
 export const PROFILES: Readonly<Record<string, readonly MapperProfile[]>> = Object.fromEntries(
-    [gen1Manifest, gen2Manifest, gen3Manifest, gen4Manifest, gen5Manifest].map((m) => [m.id, m.mappers]),
+    [gen1Manifest, gen2Manifest, gen3Manifest, gen4Manifest, gen5Manifest, gen6Manifest, gen7Manifest].map((m) => [m.id, m.mappers]),
 );
 
 export function allProfiles(): MapperProfile[] {

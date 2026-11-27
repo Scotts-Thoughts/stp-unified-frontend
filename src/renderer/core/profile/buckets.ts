@@ -31,6 +31,10 @@ export const BUCKETS: readonly BucketInfo[] = [
     { key: "White", label: "White", generation: 5 },
     { key: "Black 2", label: "Black 2", generation: 5 },
     { key: "White 2", label: "White 2", generation: 5 },
+    { key: "X and Y", label: "X / Y", generation: 6 },
+    { key: "Omega Ruby and Alpha Sapphire", label: "Omega Ruby / Alpha Sapphire", generation: 6 },
+    { key: "Sun and Moon", label: "Sun / Moon", generation: 7 },
+    { key: "Ultra Sun and Ultra Moon", label: "Ultra Sun / Ultra Moon", generation: 7 },
 ];
 
 const BY_KEY = new Map(BUCKETS.map((b) => [b.key, b]));
@@ -55,6 +59,14 @@ const ROUTER_VERSIONS: Record<string, string> = {
     White: "White",
     "Black 2": "Black 2",
     "White 2": "White 2",
+    X: "X and Y",
+    Y: "X and Y",
+    "Omega Ruby": "Omega Ruby and Alpha Sapphire",
+    "Alpha Sapphire": "Omega Ruby and Alpha Sapphire",
+    Sun: "Sun and Moon",
+    Moon: "Sun and Moon",
+    "Ultra Sun": "Ultra Sun and Ultra Moon",
+    "Ultra Moon": "Ultra Sun and Ultra Moon",
 };
 
 export function bucketInfo(key: string | null | undefined): BucketInfo | null {

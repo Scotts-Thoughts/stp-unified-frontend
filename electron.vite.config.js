@@ -78,9 +78,13 @@ export default defineConfig({
       },
     },
     resolve: {
-      alias: {
-        '~': resolve('src/renderer'),
-      }
+      // @stp/damage-calc is the shared damage engine, the git submodule in damage-calc/ (ARCHITECTURE §4,
+      // "Damage calculator"). Subpath first: the bare name would otherwise swallow '@stp/damage-calc/stats'.
+      alias: [
+        { find: '~', replacement: resolve('src/renderer') },
+        { find: /^@stp\/damage-calc\/(.*)$/, replacement: resolve('damage-calc/src') + '/$1' },
+        { find: '@stp/damage-calc', replacement: resolve('damage-calc/src/index.ts') },
+      ]
     },
     plugins: [
       vue({

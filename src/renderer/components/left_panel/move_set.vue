@@ -16,6 +16,7 @@ import { defineComponent, inject } from "vue";
 import { GameHookProperty } from "~/packages/gameHookMapperClient";
 import { MoveList, type MoveRow } from "~/core/overlay/player/MoveList";
 import { moveListLayout, type MoveListData } from "~/games/gen1/playerPanel";
+import { playerMoveDamage } from "~/games/gen1/damage";
 
 /** Moves whose damage is fixed or stored rather than worked out from power (gen1 data spellings). */
 const FIXED_DAMAGE_MOVES = new Set(["Seismic Toss", "Night Shade", "SonicBoom", "Dragon Rage", "Super Fang", "Psywave", "Counter", "Bide"]);
@@ -112,13 +113,17 @@ export default defineComponent({
             }
             const enemy = this.game_properties.battle.enemyPokemon;
             if (this.struggle_check) {
-                return { shown, rows: [], struggle: {
+                const struggle = playerMoveDamage(this.game_properties, this.meta, ["Struggle"]);
+                return { shown, rows: [], damage: !!struggle, struggleDamage: struggle?.[0], struggle: {
                     power: this.type_effectiveness(this.dynamic_mon, 'move1', enemy, true) || "-",
                     accuracy: this.accuracy_text(this.moveAccuracyEvasionDynamic('Struggle')),
                 } };
             }
             const team0 = this.game_properties.player.team[0];
-            const rows = this.pkmnMoves.map((move: string): MoveRow | null => {
+            // The damage (core/damage, in a battle) of the moves as named here (backported moves mapped).
+            const damage = playerMoveDamage(this.game_properties, this.meta, this.pkmnMoves.map((move: string) =>
+                team0.level.value > 0 && team0[move].value != null ? this.display_name(this.get_backport_move(move)) : null));
+            const rows = this.pkmnMoves.map((move: string, i: number): MoveRow | null => {
                 if (!(team0.level.value > 0 && team0[move].value != null)) {
                     return null;
                 }
@@ -131,9 +136,10 @@ export default defineComponent({
                     power: power || "-",
                     accuracy: this.accuracy_text(this.moveAccuracyEvasionDynamic(backport)),
                     pp: this.move_pp(move),
+                    damage: damage?.[i],
                 };
             });
-            return { shown, struggle: null, rows };
+            return { shown, struggle: null, rows, damage: !!damage };
         },
     },
     methods: {

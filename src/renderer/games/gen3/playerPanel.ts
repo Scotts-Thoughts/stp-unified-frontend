@@ -4,7 +4,8 @@
 import { toDisplayString } from "vue";
 import type { FaultsNode } from "~/core/overlay/player/FaultsBox";
 import { toDisplayString as moveText } from "vue";
-import type { MoveChild, MoveNode, MoveRow } from "~/core/overlay/player/MoveList";
+import { koChildren, type MoveChild, type MoveNode, type MoveRow } from "~/core/overlay/player/MoveList";
+import { playerMoveDamage } from "./damage";
 import type { PopupBoxLayout, PopupBoxProps } from "~/core/overlay/player/PopupBox";
 import { formatStage } from "~/core/logic/statFormat";
 import { weatherTurns } from "~/core/overlay/player/weatherBox";
@@ -203,6 +204,10 @@ export interface MoveListData {
     /** Struggle's accuracy (branches 1 and 2). */
     struggleAccuracy?: unknown;
     items: readonly MoveItem[];
+    /** Damage cells (core/damage) instead of power, accuracy and PP: in a battle, once the calculator has an answer. */
+    damage?: boolean;
+    /** Struggle's damage (branches 1 and 2, in a battle). */
+    struggleDamage?: MoveRow["damage"];
 }
 
 /** The move list (the overlay's `player_move_list`): each value worked out once per change. */
@@ -220,13 +225,16 @@ export function playerMoveList(vm: any): MoveListData {
         })) };
     }
     if (state != "Base Stats" && hasTeam() && outOfPp(team0)) {
-        return { shown, branch: 1, struggleAccuracy: vm.moveAccuracyDynamic("Struggle"), items: [] };
+        const struggle = playerMoveDamage(vm, ["Struggle"]);
+        return { shown, branch: 1, struggleAccuracy: vm.moveAccuracyDynamic("Struggle"), items: [], damage: !!struggle, struggleDamage: struggle?.[0] };
     }
     if (state == "Battle" && hasTeam() && outOfPp(battleMon)) {
-        return { shown, branch: 2, struggleAccuracy: vm.moveAccuracyDynamic("Struggle"), items: [] };
+        const struggle = playerMoveDamage(vm, ["Struggle"]);
+        return { shown, branch: 2, struggleAccuracy: vm.moveAccuracyDynamic("Struggle"), items: [], damage: !!struggle, struggleDamage: struggle?.[0] };
     }
     if (vm.starterString == "Ditto" && state == "Battle") {
-        return { shown, branch: 3, items: vm.pkmnMoves.map((x: string): MoveItem => {
+        const damage = playerMoveDamage(vm, vm.pkmnMoves.map((x: string) => battleMon[x].value));
+        return { shown, branch: 3, damage: !!damage, items: vm.pkmnMoves.map((x: string, i: number): MoveItem => {
             if (!(team0.level.value > 0 && battleMon[x].value != null)) return { slot: x, row: null };
             const move = battleMon[x].value;
             return { slot: x, row: {
@@ -235,10 +243,13 @@ export function playerMoveList(vm: any): MoveListData {
                 accuracy: vm.moveAccuracyDynamic(move),
                 pp: moveText(battleMon[x + "pp"]),
                 icon: vm.moveTypeIcon(move),
+                damage: damage?.[i],
             } };
         }) };
     }
-    return { shown, branch: 4, items: vm.pkmnMoves.map((x: string): MoveItem => {
+    // In a battle the moves are the battler's (they are the party leader's, read the same way as the names).
+    const damage = playerMoveDamage(vm, vm.pkmnMoves.map((x: string) => team0.level.value > 0 && team0[x].value != null ? vm.get_player_move(x) : null));
+    return { shown, branch: 4, damage: !!damage, items: vm.pkmnMoves.map((x: string, i: number): MoveItem => {
         if (!(team0.level.value > 0 && team0[x].value != null)) return { slot: x, row: null };
         const move = vm.get_player_move(x);
         return { slot: x, row: {
@@ -247,12 +258,21 @@ export function playerMoveList(vm: any): MoveListData {
             accuracy: vm.moveAccuracyDynamic(move),
             pp: vm.get_player_move_pp(x),
             icon: vm.moveTypeIcon(move),
+            damage: damage?.[i],
         } };
     }) };
 }
 
 const percentSign: MoveNode = { tag: "span", class: "movesetPercentage", text: "%" };
-const moveCells = (slot: string, row: MoveRow): MoveChild[] => [
+const moveCells = (slot: string, row: MoveRow, damage = false): MoveChild[] => damage ? [
+    // In a battle (core/damage): damage in HP, percent of the enemy's HP, hits to KO, in the power, accuracy and PP
+    // cells (`damageCell` moves and narrows them, style.css).
+    { class: `movesetFontSize moveStyle ${slot}`, text: row.name },
+    { key: "dmg", class: `movesetSmallFontSize movePowerStyle movesetFontSize ${slot}power damageCell`, text: row.damage?.hp ?? "—" },
+    { key: "pct", class: `movesetSmallFontSize moveAccuracyStyle movesetFontSize ${slot}acc damageCell`, text: row.damage?.pct ?? "—" },
+    { key: "ko", class: `movesetSmallFontSize movePPStyle movesetFontSize ${slot}pp damageCell`, children: koChildren(row.damage?.ko || "—") },
+    { tag: "img", class: `movesetFontSize ${slot}icon`, src: row.icon },
+] : [
     { class: `movesetFontSize moveStyle ${slot}`, text: row.name },
     { class: `movesetSmallFontSize movePowerStyle movesetFontSize ${slot}power`, text: row.power },
     { class: `movesetSmallFontSize moveAccuracyStyle movesetFontSize ${slot}acc`, children: [moveText(row.accuracy), percentSign] },
@@ -266,15 +286,18 @@ const moveCells = (slot: string, row: MoveRow): MoveChild[] => [
  * `Cmd_typecalc` skips Struggle (no STAB, no type chart) although its table type is Normal.
  */
 export function moveListLayout(list: MoveListData): MoveChild[] {
-    const headers = ["Type", "Move", "Pwr.", "Acc.", "PP", "Type", "Move", "Pwr.", "Acc.", "PP"];
+    const dmg = list.damage == true;
+    const headers = dmg
+        ? ["Type", "Move", "Dmg.", "%", "KO", "Type", "Move", "Dmg.", "%", "KO"]
+        : ["Type", "Move", "Pwr.", "Acc.", "PP", "Type", "Move", "Pwr.", "Acc.", "PP"];
     const struggle = list.branch == 1 || list.branch == 2;
     return [
-        ...headers.map((text, i): MoveNode => ({ class: `movesetLabel movesetLabelColumn${i + 1}`, text })),
+        ...headers.map((text, i): MoveNode => ({ class: dmg ? `movesetLabel movesetLabelColumn${i + 1} damageLabel` : `movesetLabel movesetLabelColumn${i + 1}`, text })),
         { show: list.shown, id: "moveset", children: [{ key: list.branch, children: struggle
-            ? moveCells("move1", { name: "Struggle", power: "50", accuracy: list.struggleAccuracy, pp: "-", icon: "images/gen3/elements/type-icons/curse.webp" })
+            ? moveCells("move1", { name: "Struggle", power: "50", accuracy: list.struggleAccuracy, pp: "-", icon: "images/gen3/elements/type-icons/curse.webp", damage: list.struggleDamage }, dmg)
             : list.items.map((item): MoveNode => ({
                 key: list.branch == 0 ? item.key as MoveNode["key"] : undefined,
-                children: [item.row && { children: moveCells(item.slot, item.row) }],
+                children: [item.row && { children: moveCells(item.slot, item.row, dmg) }],
             })),
         }] },
     ];

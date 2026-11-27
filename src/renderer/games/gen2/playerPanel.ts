@@ -4,7 +4,8 @@
 import { toDisplayString } from "vue";
 import type { FaultsNode } from "~/core/overlay/player/FaultsBox";
 import { toDisplayString as moveText } from "vue";
-import type { MoveChild, MoveNode } from "~/core/overlay/player/MoveList";
+import { koChildren, type MoveDamageText, type MoveChild, type MoveNode } from "~/core/overlay/player/MoveList";
+import { playerMoveDamage } from "./damage";
 import type { PopupBoxLayout, PopupBoxProps } from "~/core/overlay/player/PopupBox";
 import { allMovesOutOfPp } from "~/core/logic/struggle";
 import { formatStage } from "~/core/logic/statFormat";
@@ -182,11 +183,18 @@ interface MoveSlot {
     percent: unknown;
     accuracy: unknown;
     pp: unknown;
+    /** In a battle: the damage against the enemy out (core/damage). */
+    damage?: MoveDamageText | null;
 }
 
 export interface MoveListData {
     /** The damage-range toggle as stored (the template compared it `== true` / `== false`). */
     damageRanges: unknown;
+    /**
+     * In a battle, once the calculator (core/damage) has an answer: damage, percent and hits to KO, whatever the old
+     * damage-range toggle says (its own formula, `damage_calculation`, is not used then).
+     */
+    damage?: boolean;
     /** move1..move4; `null`: no move in the slot (`s1[move].value` is empty). Out of PP: Struggle, then three `null`s. */
     rows: readonly (MoveSlot | null)[];
 }
@@ -239,8 +247,10 @@ export function playerMoveList(vm: any): MoveListData {
         ? (battleMon[move].value != null ? battleMon[move + "pp"].value : null)
         : s1[move + "pp"].value);
     if (allMovesOutOfPp(pps)) {
-        return { damageRanges: ranges, rows: [struggleSlot(vm, battle, ranges), null, null, null] };
+        const struggle = playerMoveDamage(vm, ["Struggle"]);
+        return { damageRanges: ranges, damage: !!struggle, rows: [{ ...struggleSlot(vm, battle, ranges), damage: struggle?.[0] }, null, null, null] };
     }
+    const engine = playerMoveDamage(vm, vm.pkmnMoves.map((move: string) => battleMon[move].value != null ? vm.move_name(vm.camelCase(battleMon[move].value)) : null));
     const rows = vm.pkmnMoves.map((move: string): MoveSlot | null => {
         if (!s1[move].value) return null;
         const overworldIcon = vm.moveTypeIcon(s1[move].value);
@@ -275,9 +285,10 @@ export function playerMoveList(vm: any): MoveListData {
                 slot.pp = battleMon[move.toString() + "pp"].value;
             }
         }
+        slot.damage = engine?.[vm.pkmnMoves.indexOf(move)];
         return slot;
     });
-    return { damageRanges: ranges, rows };
+    return { damageRanges: ranges, damage: !!engine, rows };
 }
 
 /** The cell on screen: the overworld copy is the `v-if` branch (key 0), the battle copy the `v-else(-if)` (key 1). */
@@ -286,7 +297,14 @@ const shownCopy = (row: MoveSlot, text: unknown): MoveChild =>
 
 export const moveListLayout = {
     /** The column headers (Title Case like the movepool's), in `.resetsContainer` beside the faults labels. */
-    headers: (list: MoveListData): MoveChild[] => [
+    headers: (list: MoveListData): MoveChild[] => list.damage ? [
+        { class: "timerTitle moves_header", text: "Move" },
+        { key: "damage", children: [
+            { class: "timerTitle moves_header", style: "left: 200px;", text: "Dmg." },
+            { class: "timerTitle moves_header", style: "left: 278px;", text: "%" },
+            { class: "timerTitle moves_header", style: "left: 314px;", text: "KO" },
+        ] },
+    ] : [
         { class: "timerTitle moves_header", text: "Move" },
         { show: list.damageRanges == true, children: [
             { class: "timerTitle moves_header", style: "left: 225px;", text: "Dmg." },
@@ -301,6 +319,16 @@ export const moveListLayout = {
     /** The moves: one `<tr>` per slot in `.movesetContainer`. */
     moves: (list: MoveListData): MoveChild[] => [{ tag: "table", children: [{ tag: "tbody", children: list.rows.map((row): MoveNode => {
         if (!row) return { tag: "tr", children: [] };
+        if (list.damage) return { tag: "tr", children: [
+            { tag: "th", children: [
+                { tag: "img", show: row.overworldIconShown, class: "movesetIcon", src: row.overworldIcon },
+                { tag: "img", show: row.battle, class: "movesetIcon", src: row.battleIcon },
+            ] },
+            { tag: "th", class: "movesetName damageName", children: [shownCopy(row, row.name)] },
+            { tag: "th", key: "dmg", class: "movesetDamage", text: row.damage?.hp ?? "—" },
+            { tag: "th", key: "pct", class: "movesetDamagePercent", text: row.damage?.pct ?? "—" },
+            { tag: "th", key: "ko", class: "movesetKo", children: koChildren(row.damage?.ko || "—") },
+        ] };
         const ranges = list.damageRanges == true;
         const powers = list.damageRanges == false;
         const power = (cls: string): MoveNode => ({ key: row.powerKey as MoveNode["key"], class: cls, text: row.power });

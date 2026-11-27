@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="230" y1="253" x2="376" y2="253" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-2" x1="71" x2="217" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-2" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur-2" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient-3" x1="51" y1="148" x2="396" y2="148" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-4" x1="15" y1="67" x2="431" y2="67" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-3" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur-3" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur-3" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-4" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="-1"/>
+      <feGaussianBlur result="blur-4" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".5"/>
+      <feComposite in2="blur-4" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Badge">
+    <g id="Layer_26_copy_2" data-name="Layer 26 copy 2">
+      <g transform="translate(0 40)" id="Layer_29_copy_2" data-name="Layer 29 copy 2">
+        <g>
+          <path d="M230,281.5L230,224.5A23.5,23.5 0 0 1 253.5,201L352.5,201A23.5,23.5 0 0 1 376,224.5L376,281.5A23.5,23.5 0 0 1 352.5,305L253.5,305A23.5,23.5 0 0 1 230,281.5Z" style="fill: url(#linear-gradient); stroke-width: 0px;"/>
+          <path d="M374,224.5L374,281.5A21.51,21.51 0 0 1 352.5,303.01L253.5,303.01A21.51,21.51 0 0 1 231.99,281.5L231.99,224.51A21.5,21.5 0 0 1 253.49,203L352.5,203A21.5,21.5 0 0 1 374,224.5ZM352.51,199L253.49,199A25.49,25.49 0 0 0 228,224.49L228,281.51A25.49,25.49 0 0 0 253.49,307L352.5,307A25.5,25.5 0 0 0 378,281.5L378,224.49A25.49,25.49 0 0 0 352.51,199Z" style="fill: gray; stroke-width: 0px;"/>
+          <path d="M376,224.5L376,281.5A23.5,23.5 0 0 1 352.5,305L253.5,305A23.5,23.5 0 0 1 230,281.5L230,224.5A23.5,23.5 0 0 1 253.5,201L352.5,201A23.5,23.5 0 0 1 376,224.5ZM352.51,199L253.49,199A25.49,25.49 0 0 0 228,224.49L228,281.51A25.49,25.49 0 0 0 253.49,307L352.5,307A25.5,25.5 0 0 0 378,281.5L378,224.49A25.49,25.49 0 0 0 352.51,199Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+          <path d="M378,224.5L378,281.5A25.5,25.5 0 0 1 352.5,307L253.5,307A25.5,25.5 0 0 1 228,281.5L228,224.5A25.5,25.5 0 0 1 253.5,199L352.5,199A25.5,25.5 0 0 1 378,224.5ZM352.5,198L253.49,198A26.49,26.49 0 0 0 227,224.49L227,281.5A26.49,26.49 0 0 0 253.49,307.99L352.5,307.99A26.49,26.49 0 0 0 378.99,281.5L378.99,224.49A26.49,26.49 0 0 0 352.5,198Z" style="stroke-width: 0px;"/>
+        </g>
+        <rect x="244" y="237" width="118" height=".59" style="fill: #231f20; filter: url(#drop-shadow-1); stroke-width: 0px;"/>
+      </g>
+      <g transform="translate(0 40)" id="Layer_28_copy_2" data-name="Layer 28 copy 2">
+        <g>
+          <path d="M71,281.5L71,224.5A23.5,23.5 0 0 1 94.5,201L193.5,201A23.5,23.5 0 0 1 217,224.5L217,281.5A23.5,23.5 0 0 1 193.5,305L94.5,305A23.5,23.5 0 0 1 71,281.5Z" style="fill: url(#linear-gradient-2); stroke-width: 0px;"/>
+          <path d="M215,224.5L215,281.5A21.51,21.51 0 0 1 193.49,303.01L94.5,303.01A21.51,21.51 0 0 1 72.99,281.5L72.99,224.5A21.5,21.5 0 0 1 94.49,203L193.5,203A21.5,21.5 0 0 1 215,224.5ZM193.51,199L94.49,199A25.49,25.49 0 0 0 69,224.49L69,281.51A25.49,25.49 0 0 0 94.49,307L193.5,307A25.5,25.5 0 0 0 219,281.5L219,224.49A25.49,25.49 0 0 0 193.51,199Z" style="fill: gray; stroke-width: 0px;"/>
+          <path d="M217,224.5L217,281.5A23.5,23.5 0 0 1 193.5,305L94.5,305A23.5,23.5 0 0 1 71,281.5L71,224.5A23.5,23.5 0 0 1 94.5,201L193.5,201A23.5,23.5 0 0 1 217,224.5ZM193.51,199L94.49,199A25.49,25.49 0 0 0 69,224.49L69,281.51A25.49,25.49 0 0 0 94.49,307L193.5,307A25.5,25.5 0 0 0 219,281.5L219,224.49A25.49,25.49 0 0 0 193.51,199Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+          <path d="M219,224.5L219,281.5A25.5,25.5 0 0 1 193.5,307L94.5,307A25.5,25.5 0 0 1 69,281.5L69,224.5A25.5,25.5 0 0 1 94.5,199L193.5,199A25.5,25.5 0 0 1 219,224.5ZM193.5,198L94.49,198A26.49,26.49 0 0 0 68,224.49L68,281.5A26.49,26.49 0 0 0 94.49,307.99L193.5,307.99A26.49,26.49 0 0 0 219.99,281.5L219.99,224.49A26.49,26.49 0 0 0 193.5,198Z" style="stroke-width: 0px;"/>
+        </g>
+        <rect x="85" y="237" width="118" height=".59" style="fill: #231f20; filter: url(#drop-shadow-2); stroke-width: 0px;"/>
+      </g>
+      <g>
+        <path d="M51,225L51,111A32,32 0 0 1 83,79L364,79A32,32 0 0 1 396,111L396,225A32,32 0 0 1 364,257L83,257A32,32 0 0 1 51,225Z" style="fill: url(#linear-gradient-3); stroke-width: 0px;"/>
+        <path d="M394,111L394,225A30,30 0 0 1 364,255.01L83,255.01A30,30 0 0 1 53,225L53,111A30,30 0 0 1 83,81L364,81A30,30 0 0 1 394,111ZM364.01,77L82.99,77A33.99,33.99 0 0 0 49,110.99L49,225A34,34 0 0 0 83,259L364.01,259A33.99,33.99 0 0 0 398,225.01L398,110.99A33.99,33.99 0 0 0 364.01,77Z" style="fill: gray; stroke-width: 0px;"/>
+        <path d="M396,111L396,225A32,32 0 0 1 364,257L83,257A32,32 0 0 1 51,225L51,111A32,32 0 0 1 83,79L364,79A32,32 0 0 1 396,111ZM364.01,77L82.99,77A33.99,33.99 0 0 0 49,110.99L49,225A34,34 0 0 0 83,259L364.01,259A33.99,33.99 0 0 0 398,225.01L398,110.99A33.99,33.99 0 0 0 364.01,77Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+        <path d="M398,111L398,225A34,34 0 0 1 364,259L83,259A34,34 0 0 1 49,225L49,111A34,34 0 0 1 83,77L364,77A34,34 0 0 1 398,111ZM364.01,76L83,76A34.99,34.99 0 0 0 48.01,110.99L48.01,225A34.99,34.99 0 0 0 83,259.99L364.01,259.99A34.99,34.99 0 0 0 399,225L399,110.99A34.99,34.99 0 0 0 364.01,76Z" style="stroke-width: 0px;"/>
+      </g>
+    </g>
+  </g>
+  <g id="Timer">
+    <g>
+      <path d="M15,82L15,52A32,32 0 0 1 47,20L399,20A32,32 0 0 1 431,52L431,82A32,32 0 0 1 399,114L47,114A32,32 0 0 1 15,82Z" style="fill: url(#linear-gradient-4); stroke-width: 0px;"/>
+      <path d="M429,52L429,82A30,30 0 0 1 399,112.01L47,112.01A30,30 0 0 1 17,82L17,52A30,30 0 0 1 47,22L399,22A30,30 0 0 1 429,52ZM399.01,18L46.99,18A33.99,33.99 0 0 0 13,51.99L13,82A34,34 0 0 0 47,116L399.01,116A33.99,33.99 0 0 0 433,82.01L433,51.99A33.99,33.99 0 0 0 399.01,18Z" style="fill: gray; stroke-width: 0px;"/>
+      <path d="M431,52L431,82A32,32 0 0 1 399,114L47,114A32,32 0 0 1 15,82L15,52A32,32 0 0 1 47,20L399,20A32,32 0 0 1 431,52ZM399.01,18L46.99,18A33.99,33.99 0 0 0 13,51.99L13,82A34,34 0 0 0 47,116L399.01,116A33.99,33.99 0 0 0 433,82.01L433,51.99A33.99,33.99 0 0 0 399.01,18Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+      <path d="M433,52L433,82A34,34 0 0 1 399,116L47,116A34,34 0 0 1 13,82L13,52A34,34 0 0 1 47,18L399,18A34,34 0 0 1 433,52ZM399.01,17L47,17A34.99,34.99 0 0 0 12.01,51.99L12.01,82A34.99,34.99 0 0 0 47,116.99L399.01,116.99A34.99,34.99 0 0 0 434,82L434,51.99A34.99,34.99 0 0 0 399.01,17Z" style="stroke-width: 0px;"/>
+    </g>
+    <rect x="33" y="40.33" width="379" height=".67" style="fill: #231f20; filter: url(#drop-shadow-3); stroke-width: 0px;"/>
+    <path id="_highlight_" data-name="&amp;lt;highlight&amp;gt;" d="M17,81.7L17,81.7A30.3,30.3 0 0 0 47.3,112L412,112L419,105L47.3,105A23.3,23.3 0 0 1 24,81.7Z" style="fill: gray; filter: url(#drop-shadow-4); opacity: .2; stroke: #6e5597; stroke-miterlimit: 10;"/>
+  </g>
+</svg>

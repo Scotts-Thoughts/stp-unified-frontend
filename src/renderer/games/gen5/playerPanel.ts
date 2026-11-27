@@ -4,7 +4,8 @@
 import { toDisplayString } from "vue";
 import type { FaultsNode } from "~/core/overlay/player/FaultsBox";
 import { toDisplayString as moveText } from "vue";
-import type { MoveChild, MoveNode, MoveRow } from "~/core/overlay/player/MoveList";
+import { koChildren, type MoveChild, type MoveNode, type MoveRow } from "~/core/overlay/player/MoveList";
+import { playerMoveDamage } from "./damage";
 import type { PopupBoxLayout, PopupBoxProps } from "~/core/overlay/player/PopupBox";
 import { allMovesOutOfPp } from "~/core/logic/struggle";
 import { formatStage } from "~/core/logic/statFormat";
@@ -151,6 +152,8 @@ export interface MoveListData {
      * To Battle, key 1), or none in any other state.
      */
     powerCell: 0 | 1 | null;
+    /** Damage columns (core/damage) instead of power, accuracy and PP: in a battle, once the calculator has an answer. */
+    damage: boolean;
     /** Slots 1-4; `null`: no move in the slot. Every move out of PP: Struggle in slot 1, then three `null`s. */
     rows: readonly (MoveRow | null)[];
 }
@@ -179,8 +182,10 @@ export function playerMoveList(vm: any): MoveListData {
     const powerCell = state == "Battle" || state == "From Battle" ? 0 : state == "Overworld" || state == "To Battle" ? 1 : null;
     const known = [1, 2, 3, 4].filter((slot) => vm.getMove(`${slot}`));
     if (allMovesOutOfPp(known.map((slot) => vm.getPP(`${slot}`)))) {
-        return { powerCell, rows: [struggleRow(vm), null, null, null] };
+        const struggle = playerMoveDamage(vm, ["Struggle"]);
+        return { powerCell, damage: !!struggle, rows: [{ ...struggleRow(vm), damage: struggle?.[0] }, null, null, null] };
     }
+    const damage = playerMoveDamage(vm, [1, 2, 3, 4].map((slot) => vm.getMove(`${slot}`)));
     const rows = [1, 2, 3, 4].map((slot): MoveRow | null => {
         if (!vm.getMove(`${slot}`)) return null;
         const icon = `images/gen5/type-icons-circular/${vm.getMoveType(`${slot}`)}.webp`;
@@ -191,9 +196,9 @@ export function playerMoveList(vm: any): MoveListData {
             : undefined;
         const category = vm.moveCategoryIcon(move);
         const accuracy = `${moveText(vm.getAccuracy(vm.black_moves[move]?.accuracy, move))}%`;
-        return { icon, name: move, power, category, accuracy, pp: vm.getPP(`${slot}`) };
+        return { icon, name: move, power, category, accuracy, pp: vm.getPP(`${slot}`), damage: damage?.[slot - 1] };
     });
-    return { powerCell, rows };
+    return { powerCell, damage: !!damage, rows };
 }
 
 /** The column headers, on the top row's two tables. */
@@ -206,24 +211,38 @@ const moveHeaders: MoveNode = { tag: "tr", class: "g4movepool_header", children:
     { tag: "th", class: "align_right g4mp_pp", text: "PP" },
 ] };
 
+/** In a battle (`list.damage`): damage in HP, damage class, percent of the enemy's HP, hits to KO (core/damage). */
+const damageHeaders: MoveNode = { tag: "tr", class: "g4movepool_header", children: [
+    { tag: "th", class: "align_center g4mp_type", text: "Type" },
+    { tag: "th", class: "align_left g4mp_move", text: "Move" },
+    { tag: "th", class: "align_right g4mp_power", text: "Dmg." },
+    { tag: "th", class: "align_center g4mp_category", text: "DC" },
+    { tag: "th", class: "align_right g4mp_accuracy", text: "%" },
+    { tag: "th", class: "align_right g4mp_pp", text: "KO" },
+] };
+
 /** One table per move slot, laid out 1 2 / 3 4; slot 1's type cell says g4mp_types (sic), the others g4mp_type. */
 export function moveListLayout(list: MoveListData): MoveChild[] {
     return list.rows.map((row, i): MoveNode => {
         const slot = i + 1;
-        return { tag: "table", key: slot, class: "posAbs g4movepool", style: `top: ${slot <= 2 ? 900 : 986}px; left: ${slot % 2 == 1 ? 457 : 966}px;`,
+        const dmg = list.damage ? row?.damage : undefined;
+        return { tag: "table", key: slot, class: list.damage ? "posAbs g4movepool damage_mode" : "posAbs g4movepool", style: `top: ${slot <= 2 ? 900 : 986}px; left: ${slot % 2 == 1 ? 457 : 966}px;`,
             children: [{ tag: "tbody", children: [
-                slot <= 2 ? moveHeaders : null,
+                slot <= 2 ? (list.damage ? damageHeaders : moveHeaders) : null,
                 row && { tag: "tr", children: [
                     { tag: "th", class: `align_left ${slot == 1 ? "g4mp_types" : "g4mp_type"}`, children: [
                         { tag: "img", class: "moveset_typeIcons centered-content dropshadow", src: row.icon },
                     ] },
                     { tag: "th", class: "align_left g4mp_move", text: row.name },
-                    list.powerCell === null ? null : { tag: "th", key: list.powerCell, class: "align_right g4mp_power", text: row.power },
+                    list.damage ? { tag: "th", key: 2, class: "align_right g4mp_power", text: dmg?.hp ?? "—" }
+                        : list.powerCell === null ? null : { tag: "th", key: list.powerCell, class: "align_right g4mp_power", text: row.power },
                     { tag: "th", class: "align_right g4mp_category", children: [
                         { tag: "img", class: "centered-content dropshadow", src: row.category },
                     ] },
-                    { tag: "th", class: "align_right g4mp_accuracy", text: row.accuracy },
-                    { tag: "th", class: "align_right g4mp_pp", text: row.pp },
+                    list.damage ? { tag: "th", key: 3, class: "align_right g4mp_accuracy", text: dmg?.pct ?? "—" }
+                        : { tag: "th", class: "align_right g4mp_accuracy", text: row.accuracy },
+                    list.damage ? { tag: "th", key: 4, class: "align_right g4mp_pp", children: koChildren(dmg?.ko || "—") }
+                        : { tag: "th", class: "align_right g4mp_pp", text: row.pp },
                 ] },
             ] }],
         };

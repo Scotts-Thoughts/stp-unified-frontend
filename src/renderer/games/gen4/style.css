@@ -272,6 +272,17 @@
     width: 42px;
 }
 
+/* In a battle the power, accuracy and PP cells hold the damage, its percent and the hits to KO (core/damage). */
+.gen-4 .g4movepool.damage_mode .g4mp_move { width: 136px; }
+.gen-4 .g4movepool.damage_mode .g4mp_category { width: 58px; }
+.gen-4 .g4movepool.damage_mode .g4mp_power { width: 70px; }
+.gen-4 .g4movepool.damage_mode .g4mp_accuracy { width: 86px; }
+.gen-4 .g4movepool.damage_mode .g4mp_pp { width: 66px; }
+.gen-4 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_move { font-size: 21px; white-space: nowrap; }
+.gen-4 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_power,
+.gen-4 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_accuracy,
+.gen-4 .g4movepool.damage_mode tr:not(.g4movepool_header) .g4mp_pp { font-size: 18px; white-space: nowrap; }
+
 .gen-4 .gametimeClock {
     font-size: 68px;
     display: block;
@@ -1718,6 +1729,11 @@
     line-height: 31px;
     text-align: left;
     left: 94px;
+}
+
+/* With its damage under the name (core/overlay/enemyMoveCell.ts): the two lines share the row's 31px. */
+.gen-4 .ePkmnMoveStyle.withDamage {
+    height: 31px;
 }
 
 .gen-4 .ePkmnMove1 {

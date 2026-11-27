@@ -3,6 +3,8 @@
  * `core/overlay/EnemyTeamPanel.ts`: what the overlay computes (`enemyTeamView`, read exactly as the old template read
  * it, each value once per change) and the elements it draws (`enemyTeamLayout`).
  */
+import { enemyDamageOf, enemyMoveCell } from "~/core/overlay/enemyMoveCell";
+import { enemyMoveDamage } from "./damage";
 import type { StyleValue } from "vue";
 import type { EnemyChild, EnemyNode } from "~/core/overlay/EnemyTeamPanel";
 import { ENEMY_STAT_LABELS, enemyLevelText, FAINTED_TEXT, rowOf, type EnemySlotView, type EnemyTeamView } from "~/core/overlay/enemyTeamView";
@@ -101,6 +103,7 @@ export function enemyTeamView(vm: any): EnemyTeamView<Gen2EnemySlot> {
         // Decision 26: a fainted Pokémon's text and labels at half opacity (its sprite, icons and art already were).
         const fainted = mon.hp.value == 0;
         const text = fainted ? FAINTED_TEXT : vm.enemyPkmnText(mon);
+        const damage = species == null ? null : enemyMoveDamage(vm, x, [1, 2, 3, 4].map((n) => vm.move_name(mon[`move${n}`]?.value) || null));
         let values: unknown[];
         if (statMode === 0) {
             values = vm.stat_object.map((stat: any) => vm.dexDataCrystal[species]?.[stat.base_stat_path]);
@@ -135,6 +138,7 @@ export function enemyTeamView(vm: any): EnemyTeamView<Gen2EnemySlot> {
                     known,
                     icon: known ? `images/gen2/type-icons-circular/${vm.g2MoveData[vm.move_name(props.battle.trainer.team[x][`move${i + 1}`]?.value)]?.Type?.toLowerCase()}.webp` : undefined,
                     name: vm.move_name(mon[`move${i + 1}`]?.value),
+                    damage: enemyDamageOf(damage, i),
                 };
             }),
             stats: vm.stat_object.map((stat: any, i: number) => {
@@ -193,6 +197,8 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamV
         const type1 = dex?.type_1 ?? "Normal";
         const type2 = dex?.type_2 ?? type1;
         const order = speedOrder(player_speed, mon.stats.speed);
+        // Only during a battle (a wild one: the Pokémon out); a preview has no battle to read.
+        const damage = enemyMoveDamage(vm, x, [0, 1, 2, 3].map((i) => mon.moves[i] != null ? vm.move_name(mon.moves[i]) : null));
         return {
             slot: x,
             shown: true,
@@ -213,7 +219,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): EnemyTeamV
             ],
             moves: [0, 1, 2, 3].map((i) => {
                 const name = vm.move_name(mon.moves[i]);
-                return { known: mon.moves[i] != null, icon: `images/gen2/type-icons-circular/${vm.g2MoveData[name]?.Type?.toLowerCase()}.webp`, name };
+                return { known: mon.moves[i] != null, icon: `images/gen2/type-icons-circular/${vm.g2MoveData[name]?.Type?.toLowerCase()}.webp`, name, damage: enemyDamageOf(damage, i) };
             }),
             stats: vm.stat_object.map((stat: any, i: number) => ({
                 value: statMode === 0 ? dex?.[stat.base_stat_path] : mon.stats[STAT_FIELDS[i]],
@@ -289,7 +295,7 @@ function slotNodes(view: EnemyTeamView<Gen2EnemySlot>, slot: Gen2EnemySlot): Ene
             ...slot.moves.map((move, i): EnemyNode => ({
                 children: [
                     move.known ? { tag: "img", class: `ds eMoveIconStyle moveIcon${i + 1} opacityTransition`, style: slot.styles.icons, src: move.icon } : null,
-                    { class: `ePkmnMoveStyle ePkmnMove${i + 1} opacityTransition`, style: text, text: move.name },
+                    enemyMoveCell(`ePkmnMoveStyle ePkmnMove${i + 1} opacityTransition`, move, text),
                 ],
             })),
             // Level

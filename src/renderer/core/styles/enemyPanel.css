@@ -36,3 +36,19 @@ img[data-stp-fade][data-stp-state="loaded"] {
 .stp-webcam-fit > .stp-webcam-band {
     pointer-events: none;
 }
+
+/* An enemy move with its damage under the name (core/overlay/enemyMoveCell.ts): two lines in the row's height, which
+   each generation's style.css sets on `.withDamage`. */
+.ePkmnMoveStyle.withDamage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.05;
+}
+.ePkmnMoveStyle.withDamage .ePkmnMoveName { line-height: 1.05; }
+.ePkmnMoveDamage {
+    font-size: 0.74em;
+    line-height: 1.1;
+    opacity: 0.9;
+    white-space: nowrap;
+}

@@ -215,7 +215,7 @@ export function gen4SettingsPanel(vm: any, presets?: PresetHost): SettingsPanelS
                 { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
                 { kind: "readout", id: "readout.status", label: "Status", value: () => team0().status_condition.value ?? "None" },
                 {
-                    kind: "statGrid", id: "readout.evs", label: "EVs",
+                    kind: "statGrid", id: "readout.evs", label: "EVs", class: "stp-statgrid-numbers",
                     items: () => [
                         { label: "HP", value: evs().hp, extra: evBenefit("hp") },
                         { label: "Spe", value: evs().speed, extra: evBenefit("speed") },

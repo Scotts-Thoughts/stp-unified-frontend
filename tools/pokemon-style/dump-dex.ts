@@ -34,5 +34,17 @@ for (const [games, f] of [[["Black", "White"], "black_white"], [["Black 2", "Whi
     const dex = pick(first(await load(`games/gen5/data/pokedex/${f}.js`)));
     for (const g of games) out[`gen5|${g}`] = dex;
 }
+// Gens 6-7: the 3DS overlay's tables (games/gen6/data), each species with its picture from the art table.
+const { speciesArt } = await load("games/gen6/data/species_art.js");
+for (const [gen, game, f] of [["gen6", "X and Y", "x_y"], ["gen6", "Omega Ruby and Alpha Sapphire", "omega_ruby_alpha_sapphire"],
+    ["gen7", "Sun and Moon", "sun_moon"], ["gen7", "Ultra Sun and Ultra Moon", "ultra_sun_ultra_moon"]]) {
+    const dex: Record<string, any> = pick((await load(`games/gen6/data/pokedex/${f}.js`)).pokedex);
+    for (const s of Object.keys(dex)) {
+        const art = speciesArt[s];
+        if (art) dex[s].img = String(art).replace(/^images\//, "");
+        else delete dex[s];
+    }
+    out[`${gen}|${game}`] = dex;
+}
 writeFileSync(join(HERE, "data", "dex.json"), JSON.stringify(out));
 for (const k in out) console.log(k, Object.keys(out[k] as object).length);

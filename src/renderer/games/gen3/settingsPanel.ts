@@ -222,7 +222,7 @@ export function gen3SettingsPanel(vm: any): SettingsPanelSpec {
                 { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().hp.value} / ${team0().maxHp.value}` },
                 { kind: "readout", id: "readout.status", label: "Status", value: () => team0().statusCondition.value ?? "None" },
                 {
-                    kind: "statGrid", id: "readout.evs", label: "EVs",
+                    kind: "statGrid", id: "readout.evs", label: "EVs", class: "stp-statgrid-numbers",
                     items: () => [
                         { label: "HP", value: team0().evHp.value },
                         { label: "Spe", value: team0().evSpeed.value },

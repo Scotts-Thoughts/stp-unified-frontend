@@ -6,6 +6,8 @@
  *
  *   npx tsx tools/markers/mem-to-scenario.ts --mem <log.csv> --mapper <mapper.xml> --mapper-id ST/gen4/x.xml
  *       --windows 30000-60000,2690000-2710000 --name h-yanmega-dnf [--paths <regex>] --out <scenario.json>
+ *       [--initial <snapshot.json>]   memlog.cjs --snapshot: every property's value where the log begins, for a
+ *                                     replay that starts mid-game (most values never change, so no log line has them)
  */
 import fs from "node:fs";
 import { parseMapperXml } from "../parity/lib/mapper-xml.ts";
@@ -18,6 +20,10 @@ const want = new RegExp(args.paths ?? ".");
 const windows = args.windows.split(",").map((w) => w.split("-").map(Number) as [number, number]);
 
 const state = new Map<string, unknown>();
+if (args.initial) {
+	const snapshot = JSON.parse(fs.readFileSync(args.initial, "utf8")) as { values: Record<string, unknown> };
+	for (const [path, value] of Object.entries(snapshot.values)) if (known.has(path) && want.test(path)) state.set(path, value);
+}
 const initial: Record<string, unknown> = {};
 const steps: { tMs: number; frame: number; comment?: string; set: Record<string, unknown> }[] = [];
 let w = 0, offset = 0, entered = -1, gap: Record<string, unknown> = {};

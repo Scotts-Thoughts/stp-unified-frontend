@@ -13,6 +13,8 @@ import { gen3PreviewOf, trainerOptions, type PreviewPokemon, type PreviewTrainer
 import { moveCategoryOf, movePowerOf, orderSlots, predictGen3, SendOutOrderCache, strongestMove, type SendOutMon, type SendOutMove, type SendOutPlayer } from "~/core/logic/sendOutOrder";
 import { fitTrainerHeader } from "~/core/logic/trainerHeader";
 import type { EnemyRowArt } from "~/core/logic/webcamMode";
+import { enemyDamageOf, enemyMoveCell } from "~/core/overlay/enemyMoveCell";
+import { enemyMoveDamage } from "./damage";
 
 /**
  * Where `images/gen3/ui/enemy.svg` draws the rows (outer edges, black outline included) and how far the rounded corners (and the highlight in the
@@ -161,6 +163,7 @@ export function enemyTeamView(vm: any): Gen3EnemyTeam {
         const type1 = x >= 3 && second ? dex?.type_1 : vm.enemyType1(x);
         const type2 = x >= 3 && second ? dex?.type_2 : vm.enemyType2(x);
         const moves = pokemon?.moves;
+        const damage = enemyMoveDamage(vm, x, pokemon, [0, 1, 2, 3].map((i) => moves?.[i]));
         const labelStyles = labelFaded ? LABELS.map(() => FAINTED_TEXT) : [
             vm.enemyHpOpacity(mon, x),
             ...MODIFIED.map(([, , stage]) => vm.enemyStatLabelOpacity(enemy[stage].value, x)),
@@ -189,7 +192,7 @@ export function enemyTeamView(vm: any): Gen3EnemyTeam {
             level: pokemon?.level,
             ability: pokemon?.ability,
             moves: [0, 1, 2, 3].map((i) => moves[i]
-                ? { known: true, icon: `images/gen3/elements/type-icons/${vm.generation_3_moves[moves[i]]?.type?.toLowerCase()}.webp`, name: moves[i] }
+                ? { known: true, icon: `images/gen3/elements/type-icons/${vm.generation_3_moves[moves[i]]?.type?.toLowerCase()}.webp`, name: moves[i], damage: enemyDamageOf(damage, i) }
                 : { known: false, name: moves[i] }),
             mods: MODS.map(([property]) => ({
                 text: vm.stat_mod(enemy[property].value),
@@ -239,6 +242,8 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen3EnemyT
         const dex = vm.game_data?.dexData?.[mon.species];
         const order = speedOrder(player_speed, mon.stats.speed);
         const s = mon.stats;
+        // Only during a battle (a wild one: the party slot is the opponent's); a preview has no battle to read.
+        const damage = enemyMoveDamage(vm, x, mon, [0, 1, 2, 3].map((i) => mon.moves[i]));
         return {
             slot: x,
             present: true,
@@ -259,7 +264,7 @@ export function trainerPreviewView(vm: any, trainer: PreviewTrainer): Gen3EnemyT
             level: mon.level,
             ability: mon.ability,
             moves: [0, 1, 2, 3].map((i) => mon.moves[i]
-                ? { known: true, icon: `images/gen3/elements/type-icons/${vm.generation_3_moves[mon.moves[i]]?.type?.toLowerCase()}.webp`, name: mon.moves[i] }
+                ? { known: true, icon: `images/gen3/elements/type-icons/${vm.generation_3_moves[mon.moves[i]]?.type?.toLowerCase()}.webp`, name: mon.moves[i], damage: enemyDamageOf(damage, i) }
                 : { known: false, name: undefined }),
             mods: MODS.map(() => ({ text: "", shown: false })),
             evs,
@@ -310,7 +315,7 @@ function slotNodes(view: Gen3EnemyTeam, slot: Gen3EnemySlot): EnemyChild[] {
                     : null),
                 // Each name when its move is known (the legacy template tested the first move for all four).
                 ...slot.moves.map((move, i): EnemyChild => move.known
-                    ? { class: `ePkmnMoveStyle ePkmnMove${i + 1} opacityTransition`, style: text, text: move.name }
+                    ? enemyMoveCell(`ePkmnMoveStyle ePkmnMove${i + 1} opacityTransition`, move, text)
                     : null),
                 ...slot.mods.map((mod, i): EnemyNode => ({
                     show: mod.shown,

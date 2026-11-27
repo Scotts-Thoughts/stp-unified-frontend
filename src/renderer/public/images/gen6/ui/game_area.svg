@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <g id="Game_Areas" data-name="Game Areas">
+    <g id="Game_Area_1" data-name="Game Area 1">
+      <!-- The 3DS top screen, 400x240 at 3x: 1200x720 at (360, 19), inside a 2px black edge (358..1562 x 17..741). -->
+      <rect x="359" y="18" width="1202" height="722" style="fill: #39b54a; stroke-width: 0px;"/>
+      <path d="m1560,19v720H360V19h1200m2-2H358v724h1204V17h0Z" style="stroke-width: 0px;"/>
+    </g>
+  </g>
+</svg>

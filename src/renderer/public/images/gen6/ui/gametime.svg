@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Export_Layer" data-name="Export Layer" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="87" y1="662.5" x2="361" y2="662.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="-1"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".5"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-2" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur-2" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Gametime_copy" data-name="Gametime copy">
+    <g>
+      <path d="M87,662.5L87,662.5A29.5,29.5 0 0 1 116.5,633L331.5,633A29.5,29.5 0 0 1 361,662.5L361,662.5A29.5,29.5 0 0 1 331.5,692L116.5,692A29.5,29.5 0 0 1 87,662.5Z" style="fill: url(#linear-gradient); stroke-width: 0px;"/>
+      <path d="M359,662.5L359,662.5A27.5,27.5 0 0 1 331.5,690.01L116.5,690.01A27.5,27.5 0 0 1 89,662.5L89,662.5A27.5,27.5 0 0 1 116.5,635L331.5,635A27.5,27.5 0 0 1 359,662.5ZM331.5,631L116.5,631A31.5,31.5 0 0 0 85,662.5L85,662.5A31.51,31.51 0 0 0 116.51,694L331.5,694A31.5,31.5 0 0 0 363,662.5L363,662.5A31.5,31.5 0 0 0 331.5,631Z" style="fill: gray; stroke-width: 0px;"/>
+      <path d="M361,662.5L361,662.5A29.5,29.5 0 0 1 331.5,692L116.5,692A29.5,29.5 0 0 1 87,662.5L87,662.5A29.5,29.5 0 0 1 116.5,633L331.5,633A29.5,29.5 0 0 1 361,662.5ZM331.5,631L116.5,631A31.5,31.5 0 0 0 85,662.5L85,662.5A31.51,31.51 0 0 0 116.51,694L331.5,694A31.5,31.5 0 0 0 363,662.5L363,662.5A31.5,31.5 0 0 0 331.5,631Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+      <path d="M363,662.5L363,662.5A31.5,31.5 0 0 1 331.5,694L116.5,694A31.5,31.5 0 0 1 85,662.5L85,662.5A31.5,31.5 0 0 1 116.5,631L331.5,631A31.5,31.5 0 0 1 363,662.5ZM331.5,630L116.5,630A32.49,32.49 0 0 0 84.01,662.5L84.01,662.49A32.49,32.49 0 0 0 116.5,694.99L331.5,694.99A32.5,32.5 0 0 0 364,662.49L364,662.5A32.5,32.5 0 0 0 331.5,630Z" style="stroke-width: 0px;"/>
+    </g>
+    <path id="_highlight_" data-name="&amp;lt;highlight&amp;gt;" d="M89,659.7L89,659.7A30.3,30.3 0 0 0 119.3,690L341,690L348,683L119.3,683A23.3,23.3 0 0 1 96,659.7Z" style="fill: gray; filter: url(#drop-shadow-1); opacity: .2; stroke: #6e5597; stroke-miterlimit: 10;"/>
+    <rect x="107" y="651" width="234" height=".59" style="fill: #231f20; filter: url(#drop-shadow-2); stroke-width: 0px;"/>
+  </g>
+</svg>

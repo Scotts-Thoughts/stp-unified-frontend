@@ -3,7 +3,7 @@
  */
 import type { FaultsNode } from "~/core/overlay/player/FaultsBox";
 import { toDisplayString as moveText } from "vue";
-import type { MoveChild, MoveNode, MoveRow } from "~/core/overlay/player/MoveList";
+import { koChildren, type MoveChild, type MoveNode, type MoveRow } from "~/core/overlay/player/MoveList";
 import type { PopupBoxLayout } from "~/core/overlay/player/PopupBox";
 import { statsHeaderNames } from "~/core/logic/statFormat";
 import type { ExpBarLayout, ExpBarTiming } from "~/core/overlay/player/ExpBar";
@@ -74,34 +74,50 @@ export interface MoveListData {
     struggle: { power: unknown; accuracy: unknown } | null;
     /** move1..move4; `null`: no move in that slot. */
     rows: readonly (MoveRow | null)[];
+    /** In a battle, once the calculator (core/damage) has an answer: damage, percent and hits to KO. */
+    damage?: boolean;
+    /** Struggle's damage (the Struggle row, in a battle). */
+    struggleDamage?: MoveRow["damage"];
 }
 
 const moveCell = (kind: string, slot: string) => `movesetStyling ${kind} ${slot}`;
 const percentSign: MoveNode = { tag: "span", style: "font-size: 20px;", text: "%" };
 
 /** The column headers (Title Case like the movepool's), then the moves in `.movesetContainer`. */
+/** In a battle (core/damage): damage in HP, percent of the enemy's HP and hits to KO in the power, accuracy and PP cells. */
+const damageCells = (slot: string, damage: MoveRow["damage"]): MoveChild[] => [
+    { key: "dmg", class: moveCell("powerStyling damageCell", slot), text: damage?.hp ?? "—" },
+    { key: "pct", class: moveCell("accuracyStyling damageCell", slot), text: damage?.pct ?? "—" },
+    { key: "ko", class: moveCell("ppStyling damageCell", slot), children: koChildren(damage?.ko || "—") },
+];
+
 export function moveListLayout(list: MoveListData): MoveChild[] {
     const struggle = list.struggle;
+    const dmg = list.damage == true;
     return [
         { class: "movesetLabel labelMoves", text: "Move" },
-        { class: "movesetLabel labelPwr", text: "Pwr." },
-        { class: "movesetLabel labelAcc", text: "Acc." },
-        { class: "movesetLabel labelPP", text: "PP" },
+        { class: dmg ? "movesetLabel labelPwr damageLabel" : "movesetLabel labelPwr", text: dmg ? "Dmg." : "Pwr." },
+        { class: dmg ? "movesetLabel labelAcc damageLabel" : "movesetLabel labelAcc", text: dmg ? "%" : "Acc." },
+        { class: dmg ? "movesetLabel labelPP damageLabel" : "movesetLabel labelPP", text: dmg ? "KO" : "PP" },
         !list.shown ? null : { class: "movesetContainer", children: struggle ? [{ key: 0, children: [
             { tag: "img", class: moveCell("iconStyling", "move1icon"), src: "images/elements/type-icons/normal.webp" },
             { class: moveCell("moveStyling", "move1"), text: "Struggle" },
-            { class: moveCell("powerStyling", "move1"), text: struggle.power },
-            { class: moveCell("accuracyStyling", "move1"), children: [moveText(struggle.accuracy), percentSign] },
-            { class: moveCell("ppStyling", "move1"), text: "-" },
+            ...(dmg ? damageCells("move1", list.struggleDamage) : [
+                { class: moveCell("powerStyling", "move1"), text: struggle.power },
+                { class: moveCell("accuracyStyling", "move1"), children: [moveText(struggle.accuracy), percentSign] },
+                { class: moveCell("ppStyling", "move1"), text: "-" },
+            ]),
         ] }] : list.rows.map((row, i): MoveNode => {
             const slot = `move${i + 1}`;
             return { children: [row && { children: [
                 { tag: "img", class: moveCell("iconStyling", `${slot}icon`), src: row.icon },
                 { class: moveCell("moveStyling", slot), text: row.name },
-                { key: row.powerKey as MoveNode["key"], class: moveCell("powerStyling", slot), text: row.power },
-                // "100%" with no space, like gens 2-5 and the Struggle row (the old template's line break gave "100 %")
-                { class: moveCell("accuracyStyling", slot), children: [moveText(row.accuracy), percentSign] },
-                { class: moveCell("ppStyling", slot), text: row.pp },
+                ...(dmg ? damageCells(slot, row.damage) : [
+                    { key: row.powerKey as MoveNode["key"], class: moveCell("powerStyling", slot), text: row.power },
+                    // "100%" with no space, like gens 2-5 and the Struggle row (the old template's line break gave "100 %")
+                    { class: moveCell("accuracyStyling", slot), children: [moveText(row.accuracy), percentSign] },
+                    { class: moveCell("ppStyling", slot), text: row.pp },
+                ]),
             ] }] };
         }) },
     ];

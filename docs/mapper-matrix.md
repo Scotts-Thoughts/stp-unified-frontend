@@ -42,6 +42,19 @@ PokeAByte's own `docs/HowTo.md` states that the Generation 1 overlay only works 
 Rows marked "?" are confirmed by the gen2/gen3 inventories in Phase 2.1; the queuer's `expectedSelectedGameFromMapperId`
 and the fixture headers are the ground truth for which mapper a recording used.
 
+## Gen 6 and gen 7 (3DS), 2026-11-26
+
+| Path | Game key (`meta.game_name`) | Consumer |
+|---|---|---|
+| `STANDARD/gen6/pokemon_x_y.xml` | `X and Y` | gen6 |
+| `STANDARD/gen6/pokemon_omega_ruby_alpha_sapphire.xml` | `Omega Ruby and Alpha Sapphire` | gen6 |
+| `STANDARD/gen7/pokemon_sun_moon.xml` | `Sun and Moon` | gen7 |
+| `STANDARD/gen7/pokemon_ultra_sun_moon.xml` | `Ultra Sun and Ultra Moon` | gen7 |
+
+All four are the stock STANDARD files patched in place to version 0.2.0 by `tools/mappers/make-3ds-mappers.py`
+(name tables, gen 6 battle teams, trainer names). There is no ST flavour and no ROM patch. Details and the
+re-run rule after a PokeAByte mapper update: `docs/gen6-inventory.md`.
+
 ## Consequences for the unified app (decisions of 2026-09-10 applied)
 
 1. **Today's mappers stay.** Each regular game ships exactly one `MapperProfile` (plan §2) for the mapper file the

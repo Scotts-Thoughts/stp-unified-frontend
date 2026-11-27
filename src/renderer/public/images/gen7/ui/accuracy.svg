@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="32.83" y1="348" x2="183.17" y2="348" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g transform="translate(0 72)">
+  <g id="Badge">
+    <g id="Layer_26_copy_2" data-name="Layer 26 copy 2">
+      <g id="Accuracy_copy_2" data-name="Accuracy copy 2">
+        <g id="Accuracy">
+          <path d="M42.3,323.53A10.22,10.22 0 0 1 51.83,317L164.17,317A10.22,10.22 0 0 1 173.7,323.53L180.87,342.06A16.46,16.46 0 0 1 180.87,353.94L173.7,372.47A10.22,10.22 0 0 1 164.17,379L51.83,379A10.22,10.22 0 0 1 42.3,372.47L35.13,353.94A16.46,16.46 0 0 1 35.13,342.06Z" style="fill: url(#linear-gradient); stroke-width: 0px;"/>
+          <path d="M45.01,325.38A10.33,10.33 0 0 1 54.55,319L161.44,319A10.33,10.33 0 0 1 170.98,325.38L177.7,341.62A16.69,16.69 0 0 1 177.7,354.38L170.98,370.62A10.33,10.33 0 0 1 161.44,377L54.55,377A10.33,10.33 0 0 1 45.01,370.62L38.29,354.38A16.69,16.69 0 0 1 38.29,341.62ZM32.29,341.7A18.44,18.44 0 0 0 32.29,354.3L39.61,374.42A9.99,9.99 0 0 0 49,381L167,381A9.99,9.99 0 0 0 176.39,374.42L183.71,354.3A18.43,18.43 0 0 0 183.71,341.7L176.39,321.58A9.99,9.99 0 0 0 167,315L49,315A9.99,9.99 0 0 0 39.61,321.58Z" style="fill: gray; stroke-width: 0px;"/>
+          <path d="M42.3,323.53A10.22,10.22 0 0 1 51.83,317L164.17,317A10.22,10.22 0 0 1 173.7,323.53L180.87,342.06A16.46,16.46 0 0 1 180.87,353.94L173.7,372.47A10.22,10.22 0 0 1 164.17,379L51.83,379A10.22,10.22 0 0 1 42.3,372.47L35.13,353.94A16.46,16.46 0 0 1 35.13,342.06ZM32.29,341.7A18.44,18.44 0 0 0 32.29,354.3L39.61,374.42A9.99,9.99 0 0 0 49,381L167,381A9.99,9.99 0 0 0 176.39,374.42L183.71,354.3A18.43,18.43 0 0 0 183.71,341.7L176.39,321.58A9.99,9.99 0 0 0 167,315L49,315A9.99,9.99 0 0 0 39.61,321.58Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+          <path d="M38.79,323.83A13.41,13.41 0 0 1 51.39,315L165.44,315A12.22,12.22 0 0 1 176.92,323.04L183.61,341.42A19.25,19.25 0 0 1 183.61,354.58L177.21,372.17A13.41,13.41 0 0 1 164.61,381L50.56,381A12.22,12.22 0 0 1 39.08,372.96L32.39,354.58A19.25,19.25 0 0 1 32.39,341.42ZM30.92,341.4A19.83,19.83 0 0 0 30.92,354.6L37.86,374.27A11.59,11.59 0 0 0 48.79,382L167.64,382A10.99,10.99 0 0 0 178.01,374.67L185.09,354.6A19.83,19.83 0 0 0 185.09,341.4L178.15,321.74A11.6,11.6 0 0 0 167.21,314L48.37,314A10.99,10.99 0 0 0 38,321.33Z" style="stroke: #000; stroke-width: 0.8px; stroke-linejoin: round;"/>
+        </g>
+        <rect x="72.77" y="334.04" width="70.45" height=".96" style="fill: #231f20; filter: url(#drop-shadow-1); stroke-width: 0px;"/>
+      </g>
+    </g>
+  </g>
+  </g>
+</svg>

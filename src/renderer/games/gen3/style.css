@@ -1541,6 +1541,11 @@ body:has(.gen-3) {
     left: 249px;
 }
 
+/* With its damage under the name (core/overlay/enemyMoveCell.ts): the two lines share the row's 27px. */
+.gen-3 .ePkmnMoveStyle.withDamage {
+    height: 27px;
+}
+
 .gen-3 .ePkmnMove1 {
     top: 23px;
 }
@@ -1775,6 +1780,16 @@ body:has(.gen-3) {
 .gen-3 .movesetSmallFontSize {
     font-size: 25px;
 }
+
+/* In a battle the power, accuracy and PP cells hold the damage, its percent and the hits to KO (core/damage,
+   playerPanel.ts `moveCells`): each moved left so the KO cell has room for "2HKO 56%". */
+.gen-3 .movesetSmallFontSize.damageCell { font-size: 22px; white-space: nowrap; }
+.gen-3 .movePowerStyle.damageCell { margin-left: -40px; }
+.gen-3 .moveAccuracyStyle.damageCell { margin-left: -50px; }
+.gen-3 .movePPStyle.damageCell { margin-left: -52px; width: 104px; }
+.gen-3 .movesetLabelColumn3.damageLabel, .gen-3 .movesetLabelColumn8.damageLabel { margin-left: -38px; }
+.gen-3 .movesetLabelColumn4.damageLabel, .gen-3 .movesetLabelColumn9.damageLabel { margin-left: -34px; }
+.gen-3 .movesetLabelColumn5.damageLabel, .gen-3 .movesetLabelColumn10.damageLabel { margin-left: -12px; }
 
 .gen-3 .movesetPercentage {
     font-size: 24px;

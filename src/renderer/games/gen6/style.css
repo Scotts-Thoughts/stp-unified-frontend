@@ -1,0 +1,125 @@
+/**
+ * The 3DS overlay's own rules (gens 6 and 7). `games/gen6/index.ts` loads the shared gens 3-5 and 4-5 sheets and all
+ * of gen 5's `style.css` first, under this module's class, so every panel has gen 5's look; this sheet only adds the
+ * zones those panels are drawn in (games/gen6/layout.ts) and changes the few rules the 3DS layout moves.
+ * `.gen-N` becomes the module's class (`.gen-6` or `.gen-7`).
+ */
+
+/* A zone: a full-canvas box holding gen 5's markup at gen 5's coordinates, scaled and moved as a whole by the inline
+   transform (`zoneStyle`). It is the containing block of what is inside it, `position: fixed` pieces included, and
+   never takes a click: the settings panel sits over the top screen, beside the zones. */
+.gen-N .tds-zone {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: 0 0;
+    pointer-events: none;
+}
+
+/* The fault counts, moved with the faults box when the badge box above it is sized for its badges
+   (playerPanel.ts BADGE_BOX_DY): a full-canvas box like a zone, so what is inside keeps its gen 5 coordinates. */
+.gen-N .tds-shift {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    pointer-events: none;
+}
+
+/* The species art stands in the Poke Ball, centred on it, in the left column (layout.ts `ART_BOX`). */
+.gen-N .pokemon_art {
+    top: var(--tds-art-top, 328px);
+    left: var(--tds-art-left, -23px);
+    width: var(--tds-art-size, 440px);
+    height: var(--tds-art-size, 440px);
+    border: 0;
+    padding: 0;
+    pointer-events: none;
+}
+
+/* The badges owned, two rows of four inside gen 5's badge box like the 3DS badge case; each cell's place and size is
+   inline (playerPanel.ts `badgeCellStyle`) and the badge is fitted into it. */
+.gen-N .tds-badge {
+    position: absolute;
+    object-fit: contain;
+    filter: drop-shadow(0px 1px 1px #000000a0);
+}
+
+/* A badge not won yet: its shape in flat grey at a fifth opacity, as gen 5's progress picture draws them. */
+.gen-N .tds-badge-slot {
+    filter: brightness(0) invert(0.33);
+    opacity: 0.2;
+}
+
+/* The splits table has no trainer icons here: rows at the height of their text. */
+.gen-N .splits_table.tds-splits {
+    font-size: 15px;
+    line-height: 30px;
+}
+
+/* The settings panel fills the top screen's area and never reaches the filmed part of the overlay. */
+.gen-N .stp-settings {
+    left: 366px;
+    top: 25px;
+    width: 1188px;
+    height: 708px;
+}
+
+/* Gen 6's own frames (images/gen6/ui, made by tools/gen6/make-rounded-ui.py) are gen 5's with round corners and
+   pill ends; the exp bar, drawn in CSS, gets pill ends to match instead of gen 5's pointed ones. */
+.gen-N .expMeterOuter,
+.gen-N .expMeterInner {
+    clip-path: inset(0 round 9px);
+}
+
+/* The stats panel's rows (layout.ts STATS_*): the frame's top is 17.5px higher than gen 5's and the room goes to the
+   rows. The stat tiles are 63px tall instead of 59 (tops 853/920/987, bottom 1050 as before), and the header, exp bar
+   and nature row move up. The frame pictures move the same way (tools/gen6/make-rounded-ui.py MAPS); the EV gauges
+   follow `evGaugeLayout` (playerPanel.ts). Gen 5 px, inside the stats zone. */
+.gen-N .stats_header { top: 753px; }
+.gen-N .expBar { top: 797.5px; }
+.gen-N .growth_rate { top: 799px; }
+.gen-N .nature_label,
+.gen-N .friendship_label,
+.gen-N .nature_value,
+.gen-N .friendship_value { top: 820px; }
+/* Tile tops in the stats container (top 794): 59, 126, 193; text keeps gen 5's offset from its tile. */
+.gen-N .stat_row_1 { top: 57px; }
+.gen-N .stat_row_2 { top: 123.5px; }
+.gen-N .stat_row_3 { top: 191px; }
+.gen-N .stat_value_style,
+.gen-N .average_value_style,
+.gen-N .stat_label_style { line-height: 62px; }
+.gen-N .hp_spd_atkMod, .gen-N .hp_spd_spAMod { top: 125px; }
+.gen-N .hp_spd_defMod, .gen-N .hp_spd_spDMod { top: 192px; }
+.gen-N .hp_spd_speMod { top: 58px; }
+
+/* Gen 7's split icons fill the row: its 11 rows stretch to ~75.6px (in the zone's own px; ~59.6px on screen at the
+   right zone's scale) in the movepool's frame (`SplitsView.fill`), so the icon is that less the cell's 3px above and
+   below (core/overlay/SplitsPanel.vue ICON), rounded down. Sized by height with the
+   width following, so a capped icon (`fitIcons`' max-height) stays square and leaves no gap before the name. Written
+   as `.gen-7`, not `.gen-N`, so gen 6 keeps gen 5's 43.8px. */
+.gen-7 .splitIcon {
+    width: auto;
+    height: 69px;
+}
+
+/* The colour tint (`.colored-image::after`, a `color`-blended layer masked by the frame picture) used to reach the
+   frame's outermost half-covered pixels, where the frame below is almost transparent, so the tint colour itself
+   showed as a faint light line just outside the dark edge. The mask is eroded by ~0.8px (the picture intersected
+   with itself shifted four ways), so the tint stops inside the edge. */
+.gen-N .colored-image::after {
+    -webkit-mask-image: var(--url), var(--url), var(--url), var(--url);
+    mask-image: var(--url), var(--url), var(--url), var(--url);
+    -webkit-mask-size: 1920px 1080px;
+    mask-size: 1920px 1080px;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: 0.8px 0, -0.8px 0, 0 0.8px, 0 -0.8px;
+    mask-position: 0.8px 0, -0.8px 0, 0 0.8px, 0 -0.8px;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+}

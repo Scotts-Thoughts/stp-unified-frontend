@@ -19,7 +19,9 @@ add it to the matching section, keeping it short.
 
 The STP overlay is one Electron app that draws a stream overlay for Scott's Thoughts Pokémon runs. It covers
 five generations: gen1 (Yellow, Red & Blue), gen2 (Crystal, Gold & Silver), gen3 (Emerald, FireRed & LeafGreen),
-gen4 (Platinum, Diamond & Pearl, HeartGold & SoulSilver) and gen5 (Black, White, Black 2, White 2).
+gen4 (Platinum, Diamond & Pearl, HeartGold & SoulSilver) and gen5 (Black, White, Black 2, White 2). A first pass of
+the 3DS games was added 2026-11-26: gen6 (X/Y, Omega Ruby/Alpha Sapphire) and gen7 (Sun/Moon, Ultra Sun/Ultra
+Moon), two modules that share one new overlay (§4, "The 3DS overlay").
 
 It reads live game memory from a memory tool: PokeAByte by default, or GameHook. The memory tool exposes a
 *mapper*, a tree of named game properties such as party, enemy and bag. The overlay:
@@ -362,6 +364,47 @@ Every `games/genN/` has:
   gen4's `battleMovePower`; gen4 works out a battler's gender from its personality value
   (`battlerGender`), because the battle structure's gender is not mapped.
 
+**Damage calculator (all five generations, 2026-11-26).** In a battle the player's move list shows each move's damage
+to the enemy out (HP range, percent of its max HP, hits to KO) instead of power, accuracy and PP, and each enemy move
+in the enemy panel (trainer, wild, gen1's wild panel) shows its percent range and hits to KO against the player's
+Pokémon on a small line under its name. Out of a battle both look as before.
+- **The numbers come from `stp-damage-calc`**, Scott's shared engine (also Solodex and Matchup Planner), the git
+  submodule in `damage-calc/`, imported as `@stp/damage-calc` (aliases in `electron.vite.config.js` and
+  `tsconfig.web.json`). Never copy a formula into the overlay: fix it in `A:\Programs\stp-damage-calc`, push, then
+  `git -C damage-calc pull` here and commit the new submodule commit. A fresh clone needs `git submodule update --init`
+  (the Mac too); the release workflow checks it out with the `DAMAGE_CALC_TOKEN` secret, because the repo is private.
+- **Data**: `core/damage/data/<game>.json` (moves without descriptions, species types/base stats/weight/can-evolve),
+  built from data_objects by `node tools/damage/build-data.mjs [path]` (default Solodex's `data_objects-main`). The
+  frontend's own move tables can't feed the engine (gens 2 and 4 have no move effects). Names are matched loosely
+  (`calc.ts` `looseKey`, plus the old spellings in `MOVE_ALIASES`), so "ThunderPunch" and "Faint Attack" still find
+  their move. A species missing from data_objects (the challenge replacements) shows no damage.
+- **`core/damage/calc.ts`** is pure (no Vue, no mapper): `MonInput` / `FieldInput` in, `MoveDamage` texts out, with a
+  256-entry cache because the overlays recompute their panels on any mapper change. `data.ts` loads a game's file on
+  first use (a reactive map, so a computed re-runs when it arrives). `mapperMon.ts` reads gen 3-5 mapper Pokémon and
+  trainer table entries. Each generation's inputs are `games/genN/damage.ts`; `parity:damage` tests the glue.
+- **Hits to KO** count hits that land, without critical hits, from the target's current HP, and include a healing berry
+  it holds (Oran, Sitrus, Berry, Gold Berry, Berry Juice, Figy family, counted by the engine when eaten). The count shown
+  is the first with at least a 10% chance (`KO_SHOWN_FROM`), with its chance when under 99.5% ("2HKO 56%"; the chance
+  is the smaller `koChance` span): "3HKO 1%" read as three hits when four were what it took. Nothing within 9 hits: "—".
+  An immune move is "0%" in the move lists ("Immune" doesn't fit), "Immune" in the enemy panel.
+- **Trap, gens 1-2: never feed the battle struct's stats.** pokered/pokecrystal keep wBattleMon / wEnemyMon stats with
+  the stat stages, badge boosts and burn/paralysis already applied (pokecrystal `CalcPlayerStats`), and the engine
+  applies all of those again. The party structs (`player.team.0`, `battle.trainer.team.N`) are raw; only the stages,
+  types and HP come from the battle struct. A gen 1 wild Pokémon is worked out from base stats + DVs + level; a gen 2
+  wild one (no DVs in the mapper) uses its battle stats with no stages, which is exact unless it is burned/paralysed.
+  Gens 3-5 battle structs are raw (stages apart), so they go in as they are.
+- **Per-generation sources**: gen3 the live battler for the enemy out, else the trainer table (`enemyTrainer`) at its
+  HP now; gen4 the live battler, else `battle.opponent.team.N`, else the trainer table; gen5 `pkmn_ram.pokemon_N_ram`
+  (ability in force is `ability_temp`) with the party member's status and IVs. Screens: gens 1-4 read them (gen4 from
+  `battle.flags.player_side` / `enemy_side`); **the gen 5 mapper has no screen flags**, so gen 5 never counts them.
+  gen3's `weatherDenial` is a computed, not a method: calling it crashes the overlay in a battle.
+- Layout: gens 4-5 keep the six cells (`damage_mode` class narrows them); gens 1 and 3 reuse the power/accuracy/PP
+  cells with `damageCell`; gen2 swaps in `movesetDamage` / `movesetDamagePercent` / `movesetKo` and ignores its old
+  "damage ranges" setting in battle (that setting's own formula, `damage_calculation`, still drives it elsewhere). The
+  enemy line is `core/overlay/enemyMoveCell.ts`; each `style.css` sets `.ePkmnMoveStyle.withDamage`'s height to its row.
+- Not done: the second trainer's team in a two-trainer battle (gens 3-5) shows no enemy damage; double battles count as
+  singles (no spread reduction).
+
 **The clock in its own process (all five generations, 2026-10-01).** After the gen2 legacy app's "timer fix"
 (its commit `1ab51d8`). The overlay's own clock is a `requestAnimationFrame` loop on the page, so a long script or
 a heavy repaint stalls it. Now `core/overlay/ClockFrame.ts` draws an `<iframe>` over the clock, showing
@@ -665,6 +708,62 @@ to his cabin (a map-temporary flag), not one a day as in the real game, and stil
 - Trap: on HG/SS builds before v7 the mapper points `patch.stpCaptainPlate` at the starter-species value, so writes go
   through `rng_write_patch_value`, which skips an NPC whose `supportedProp` (`patch.stpCaptainPlateSupported`) isn't true.
 - Saved `rng_config` is merged over the defaults, so an NPC added later gets its default trip.
+
+**The 3DS overlay (gen6 and gen7, first pass 2026-11-26).**
+
+- `games/gen6/` is **not a lifted legacy component**: it is a new, small Options-API `Overlay.vue` built from the
+  `core/overlay/` pieces, with the per-topic code beside it (`playerPanel.ts`, `enemyPanel.ts`, `splits.ts`,
+  `chapterMarkers.ts`, `control.ts`, `settingsPanel.ts`, `actions.ts`, `storage.ts`). It is not in the drift check.
+- `gen6` and `gen7` are two manifests and two user-state sections with one overlay: `games/gen7/manifest.ts` loads
+  `games/gen6/index.ts`'s `gen7` export. The four game pairs' facts (badges, split lists, final battle) are
+  `games/gen6/games.ts`; the detected pair's tables load in `prepare(game)` (`data/index.ts`), a new optional
+  `GameModule` hook that `main.ts` awaits before mounting.
+- It wears gen 5's art and CSS: the module's style is the shared sheets plus gen 5's `style.css` with `.gen-5` swapped
+  for `.gen-6`/`.gen-7`, then its own `style.css`. Gen 5's panels are drawn at their own sizes inside full-canvas
+  "zones" that are moved and scaled as one (`layout.ts`: `ZONES`, `zoneStyle`), because the 3DS top screen
+  (1200x720 at 360,19) leaves 332 px side columns, not gen 5's 420. A CSS change to a gen 5 panel therefore shows
+  in the 3DS overlay too. The movepool, splits and enemy panels take the zone's line limits through optional
+  parameters (`webcamMode.ts` `PanelLines`); the defaults are gens 1-5's.
+- Its frame pictures are its own, not gen 5's: `images/gen6/ui/` (and `images/gen6/enemy-area/stats/current_/`) are
+  gen 5's frames with every cut corner made round and every pointed end made a pill, generated by
+  `tools/gen6/make-rounded-ui.py`. Edit a gen 5 frame, then run the script to carry the change over; never hand-edit
+  the gen 6 copies. The exp bar's pill ends are CSS (`games/gen6/style.css`). Move backgrounds, the Poke Ball and
+  type icons are still gen 5's files.
+- Gen 7 (Sun/Moon, Ultra Sun/Ultra Moon) has its own set in `images/gen7/`, from the same script ("soft" style):
+  gen 5's angled cuts kept, every join between edges a short curve, like Alola's menus. The overlay picks the set
+  from the game (`games.ts` `frames`; `frame()` / `frame_url()` in Overlay.vue, `view.frames` in enemyPanel.ts), so
+  a new frame picture must go through those, never a hard-coded `images/gen6/...` path. The badge-box variants
+  (`make-badge-boxes.py`) are gen 6 only; gen 7 uses the plain timer box.
+- The stats panel mirrors the bottom screen's slot (408x307, `layout.ts` `STATS_*`), so it is taller than gen 5's:
+  the script's `MAPS` raise the frame's top and move the exp, nature and stat-tile pictures (and the nature arrows,
+  copied unrounded) to new rows; `games/gen6/style.css` ("The stats panel's rows") and `playerPanel.ts`
+  `evGaugeLayout` move the text and EV bars to the same rows. A change to one must change the other two.
+- Its Splits panel uses the movepool's frame (`movepool.svg`; `splits.svg` is the same frame cut short) with
+  `SplitsView.fill`, so it always ends on the movepool's bottom line, however few rows, and its rows stretch evenly
+  to fill it. The split icons are face
+  crops of the official artwork (`images/gen6|gen7/split_images/<name>.webp`, made by `tools/gen6/make-split-icons.py`
+  from `libraries/trainer art/gen6|gen7/`), framed by hand on the eyes and face width and flipped to look right; a new
+  split trainer in `games.ts` needs its art there and a `FACES` entry in the script. Gen 7's are framed to gens 3-5's
+  measured proportions (face centred, cheeks 0.52 of the square, eyes-to-chin midpoint 0.54 down; the script's
+  `face7`) and shown at 69px, filling its 11 stretched rows (`.gen-7 .splitIcon` in `games/gen6/style.css`; gen 6
+  keeps gen 5's 43.8px). The right zone is drawn at ~0.79 scale, so on-screen px are smaller than CSS px.
+- **A split is a name in `games.ts` `splits`, matched to a won battle by `splitFor`.** Usually the name is the
+  trainer's own, but gen 7 fights some trainers more than once: `splitRules` gives such a split the trainer it stands
+  for (`"Hala (E4)"` is `Hala`) and `afterAny`, the splits one of which must already be in the run. The latest
+  matching split not yet done wins, so Hala before Lusamine is the kahuna and after it the Elite Four. USUM's Hau is
+  the rival all game: only a Hau win after an Elite Four split is the champion split. The split's name is what the
+  panel, the CSV's `trainer_name` and the bookmark carry; the face icon is the split's name less a `" (E4)"`-style
+  tag (`splitIcon`). Names are compared without case or spaces and with a pair's two names in either order. OR/AS's
+  Mossdeep pair is **"Leaders Liza & Tate"** in battle memory (class `Leaders`, not `Leader`), kept as the split
+  `Tate&Liza` through a `splitRules` entry. The class lists (`splitClasses`) hold only names seen in a replay or on
+  Bulbapedia; gen 7's is empty because its kahuna/E4/champion class names have not been read from a replay.
+- The overlay's one write to game memory is the starter (`starterWrite.ts`, crypto in `logic/pk6.ts`): the party's
+  lead is decrypted, made the Solo Pokémon (species, moves for its level, exp curve, name) with the chosen nature,
+  ability, gender and IVs, re-encrypted with its checksum and written back whole through the mapper's
+  `player.encrypted_mon_0` / `_stats` (0.2.0), only out of battle, because a battle writes its own copy of the party back
+  when it ends and undoes it. `tools/gen6/starter-write-test.ts` checks a write inside a replay's emulator. What the
+  overlay reads, how it tells a win, a blackout and a reset, the mapper edits it needs and what is not built yet:
+  `docs/gen6-inventory.md`.
 
 **Adding a mapper or edition.**
 - A new `games/genN/mappers/<x>.ts` profile, listed in that generation's `manifest.ts`.
@@ -1165,7 +1264,7 @@ Re-running them would overwrite months of hand edits.
 | `docs/game-support-gaps.md` | Adding or fixing support for a game or edition |
 | `docs/performance-followups.md` | Performance work. It records what four passes did and what is still open |
 | `docs/themes-plan.md` | Themes (per-generation looks). A proposed plan, not built yet |
-| `docs/gen6-3ds-overlay-plan.md` | Gen 6 / 3DS (X/Y, OR/AS) support. A proposed plan, not built yet; the chosen layout is `docs/gen6/mockup-a.png` |
+| `docs/gen6-3ds-overlay-plan.md`, `docs/gen6-inventory.md` | Gen 6 / gen 7 (3DS) support. The plan (a first pass was built 2026-11-26; the chosen layout is `docs/gen6/mockup-a.png`) and the inventory: mapper edits, what the overlay reads, what is not built yet, how to log a 3DS replay |
 | `docs/ui-uniformity-plan.md` | Making the generations look and behave alike, cutting CSS and template lines (decision 26 as a guideline). The order of work and Scott's open questions; `docs/ui-audit/A-E` hold the 2026-10-14 audit with file:line detail |
 | `docs/ui-uniformity-log.md` | The uniformity work step by step (2026-10-14/15): a git tree snapshot per step and what the harness showed against the step before; for reviewing or committing the steps one at a time |
 | `docs/shortcuts-menu-plan.md` | Shortcuts or the settings controls. The plan behind the Keyboard Shortcuts window and the per-generation action lists (built 2026-10-14), with an inventory of each generation's controls and the old F-key quirks |

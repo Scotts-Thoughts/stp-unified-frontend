@@ -23,18 +23,31 @@ export const WEBCAM_FRAME_BOTTOM = 730;
 /** The lowest y a panel without a movable border (the enemy team) may reach in Webcam Mode. */
 export const WEBCAM_PANEL_BOTTOM = 740;
 
+/**
+ * A generation's own lines, where they differ from the three above: the 3DS overlay (games/gen6/layout.ts) draws its
+ * right panel inside a scaled box, where the same places on screen have other numbers. Gens 1-5 pass nothing.
+ */
+export interface PanelLines {
+    /** Instead of `WEBCAM_FRAME_BOTTOM`. */
+    frameBottom?: number;
+    /** Instead of `WEBCAM_PANEL_BOTTOM`. */
+    panelBottom?: number;
+    /** Instead of `WEBCAM_ROWS_LINE`. */
+    rowsLine?: number;
+}
+
 /** How far up a frame whose bottom border's inner edge is at `frameBottom` moves in Webcam Mode (0: it already fits). */
-export function webcamFrameShift(frameBottom: number): number {
-    return Math.max(0, frameBottom - WEBCAM_FRAME_BOTTOM);
+export function webcamFrameShift(frameBottom: number, limit: number = WEBCAM_FRAME_BOTTOM): number {
+    return Math.max(0, frameBottom - limit);
 }
 
 /**
  * The vertical scale that keeps a panel running from `top` to `bottom` (canvas px) above the webcam, its top edge where
  * it is: 1 when it fits. `top` is the panel's top edge, level with the top of the game area, which must not move.
  */
-export function webcamPanelScale(bottom: number | undefined, top = 0): number {
-    if (bottom === undefined || !(bottom > WEBCAM_PANEL_BOTTOM)) return 1;
-    return (WEBCAM_PANEL_BOTTOM - top) / (bottom - top);
+export function webcamPanelScale(bottom: number | undefined, top = 0, panelBottom: number = WEBCAM_PANEL_BOTTOM): number {
+    if (bottom === undefined || !(bottom > panelBottom)) return 1;
+    return (panelBottom - top) / (bottom - top);
 }
 
 /**
@@ -85,14 +98,14 @@ export function rowCount(art: EnemyRowArt, crop: number | undefined): number {
  * whole pixels (a leftover pixel goes to the first rows), so the frames' edges stay sharp. `null`: the team fits as
  * it is (four or fewer Pokémon), and nothing changes.
  */
-export function webcamRowLayout(art: EnemyRowArt, count: number): FittedRows | null {
+export function webcamRowLayout(art: EnemyRowArt, count: number, rowsLine: number = WEBCAM_ROWS_LINE): FittedRows | null {
     const n = Math.min(count, art.tops.length);
     if (n === 0) return null;
     let gap = Infinity;
     for (let k = 1; k < art.tops.length; k++) gap = Math.min(gap, art.tops[k] - (art.tops[k - 1] + art.height));
     if (!Number.isFinite(gap)) gap = 0;
-    if (art.tops[n - 1] + art.height + gap <= WEBCAM_ROWS_LINE) return null;
-    const room = WEBCAM_ROWS_LINE - art.tops[0] - n * gap;
+    if (art.tops[n - 1] + art.height + gap <= rowsLine) return null;
+    const room = rowsLine - art.tops[0] - n * gap;
     const base = Math.floor(room / n);
     const extra = room - base * n;
     let y = art.tops[0];
@@ -117,22 +130,22 @@ export const WEBCAM_ART_MIN_HEIGHT = 120;
  * has it across and moved up to the webcam line. `null`: no room, or a picture with no measured box
  * (`trainerArtBoxes.json`, made by `tools/assets/trainer-art-boxes.ts`), so it is not drawn.
  */
-export function webcamArtStyle(src: unknown, teamBottom: number | undefined): Record<string, string> | null {
+export function webcamArtStyle(src: unknown, teamBottom: number | undefined, panelBottom: number = WEBCAM_PANEL_BOTTOM): Record<string, string> | null {
     const box = typeof src === "string" ? (trainerArtBoxes as Record<string, number[]>)[src.replace(/^\.?\//, "")] : undefined;
     if (!box || teamBottom === undefined) return null;
     const [, top, right, bottom] = box;
-    const room = WEBCAM_PANEL_BOTTOM - Math.min(teamBottom, WEBCAM_PANEL_BOTTOM) - ART_GAP;
+    const room = panelBottom - Math.min(teamBottom, panelBottom) - ART_GAP;
     if (room < WEBCAM_ART_MIN_HEIGHT) return null;
     const scale = Math.min(1, room / (bottom - top));
     return {
-        transform: `translate(0px, ${WEBCAM_PANEL_BOTTOM - bottom}px) scale(${scale})`,
+        transform: `translate(0px, ${panelBottom - bottom}px) scale(${scale})`,
         "transform-origin": `${right}px ${bottom}px`,
     };
 }
 
 /** `webcamArtStyle`, or a style that hides the picture when it has no room. */
-export function webcamArtStyleOrHidden(src: unknown, teamBottom: number | undefined): Record<string, string> {
-    return webcamArtStyle(src, teamBottom) ?? { display: "none" };
+export function webcamArtStyleOrHidden(src: unknown, teamBottom: number | undefined, panelBottom: number = WEBCAM_PANEL_BOTTOM): Record<string, string> {
+    return webcamArtStyle(src, teamBottom, panelBottom) ?? { display: "none" };
 }
 
 /** The `height: NNNpx` in an enemy panel's art crop style (every generation writes one), or `undefined`. */

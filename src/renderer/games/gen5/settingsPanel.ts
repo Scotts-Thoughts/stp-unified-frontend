@@ -202,7 +202,7 @@ export function gen5SettingsPanel(vm: any): SettingsPanelSpec {
                 { kind: "readout", id: "readout.hp", label: "Overworld HP", value: () => `${team0().stats.hp.value} / ${team0().stats.hp_max.value}` },
                 { kind: "readout", id: "readout.status", label: "Status", value: () => (team0().status_condition.value == null ? "None" : team0().status_condition.value) },
                 {
-                    kind: "statGrid", id: "readout.evs", label: "EVs",
+                    kind: "statGrid", id: "readout.evs", label: "EVs", class: "stp-statgrid-numbers",
                     items: () => [
                         { label: "HP", value: evs().hp, extra: evBenefit("hp") },
                         { label: "Spe", value: evs().speed, extra: evBenefit("speed") },

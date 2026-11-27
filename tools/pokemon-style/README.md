@@ -1,7 +1,7 @@
 # tools/pokemon-style
 
 Default looks (art size, position, flip, overlay colour) for every species Scott hasn't styled, in every
-game of gens 1-5, plus the record of what he changed so the rules can learn from it. Run through the
+game of gens 1-7 (gens 6-7 are the one 3DS overlay, `games/gen6/`), plus the record of what he changed so the rules can learn from it. Run through the
 `/pokemon-style` skill (`.claude/skills/pokemon-style/SKILL.md`).
 
 Needs Python 3 with `numpy` and `Pillow` (`python -m pip install numpy pillow`).
@@ -17,7 +17,9 @@ Needs Python 3 with `numpy` and `Pillow` (`python -m pip install numpy pillow`).
 | `data/known.json` | `generated`: every look this tool wrote. `user`: Scott's looks already learned from. |
 | `LESSONS.md` | What each of Scott's changes taught, newest last. |
 
-Where looks are stored: gens 2-5 `src/renderer/games/genN/data/style/*.json` (a dev-mode edit writes there;
+Where looks are stored: gens 2-5 `src/renderer/games/genN/data/style/*.json`, gens 6 and 7 both in
+`games/gen6/data/style/` (`<Game>_<Species>.json`; a 3DS species' picture comes from `data/species_art.js`, carried
+into `dex.json` as `img`) (a dev-mode edit writes there;
 an installed build saves `user_<key>` in `<userData>/stp-overlay/data/user_state.json`, which `diff` also
 reads). gen1: presets in `storage/Storage.json` (`games.Yellow` / `games.Red`, `.style`); its edits go to
 `<userData>/stp-overlay/data/<game>/<species>/settings.json`. Evolution-line looks

@@ -30,6 +30,11 @@ export interface ScreenBox {
 export interface GameScreens {
     top: ScreenBox;
     bottom?: ScreenBox | null;
+    /**
+     * Where the two screens are in Super Shuckie's picture, when they are not two equal halves: the 3DS's bottom
+     * screen is narrower than its top one (`N3DS_PICTURE`). Omitted: `splitScreens`.
+     */
+    source?: { top: ScreenBox; bottom: ScreenBox | null };
 }
 
 /**
@@ -45,7 +50,20 @@ export const SCREEN_BOXES = {
     dsTop: { x: 448, y: 19, width: 1024, height: 768 },
     /** The DS touch screen under the move pool, 256x192 at 1.640625x, gens 4 and 5 with Secondary Screen on: `images/gen{4,5}/ui/second_screen_game_area.svg`. */
     dsSecondScreen: { x: 1486, y: 747, width: 420, height: 315 },
+    /** 3DS top screen, 400x240 at 3x: `images/gen6/ui/game_area.svg` (gens 6 and 7). */
+    n3dsTop: { x: 360, y: 19, width: 1200, height: 720 },
+    /** The 3DS bottom screen at the bottom right, 320x240 at 1.2625x (exactly 4:3): `images/gen6/ui/second_screen_game_area.svg`. */
+    n3dsBottom: { x: 1501, y: 758, width: 404, height: 303 },
 } as const satisfies Record<string, ScreenBox>;
+
+/**
+ * The 3DS's screens in Super Shuckie's `/screenshot` picture: stacked top to bottom, each left-aligned on black
+ * (supershuckie-frontend `encode_screens_png`), so the 320-wide bottom screen has 80 black columns to its right.
+ */
+export const N3DS_PICTURE = {
+    top: { x: 0, y: 0, width: 400, height: 240 },
+    bottom: { x: 0, y: 240, width: 320, height: 240 },
+} as const;
 
 /** What the file name says about the run, from the generation (its `screenshotAction`). */
 export interface ScreenshotFacts {
@@ -158,7 +176,7 @@ export async function composeGameScreenshot(screens: GameScreens): Promise<Uint8
 
         // Sharp pixels for the game, as Super Shuckie and OBS's point filter show it.
         context.imageSmoothingEnabled = false;
-        const parts = splitScreens(game.width, game.height);
+        const parts = screens.source ?? splitScreens(game.width, game.height);
         const draw = (from: ScreenBox, to: ScreenBox) =>
             context.drawImage(game, from.x, from.y, from.width, from.height, to.x, to.y, to.width, to.height);
         draw(parts.top, screens.top);

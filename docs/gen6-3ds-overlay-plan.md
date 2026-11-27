@@ -1,6 +1,9 @@
 # Gen 6 (3DS) overlay: implementation plan
 
-Status: **proposed, 2026-11-25. Not approved, nothing built.** The layout was picked by Scott from mockups
+Status: **first build pass done 2026-11-26** for X/Y, OR/AS, Sun/Moon and Ultra Sun/Ultra Moon (two modules, gen6 and
+gen7, one overlay in `games/gen6/`). What was built, what the mappers gained and what is still open is in
+`docs/gen6-inventory.md`; where this plan and that file differ, that file is what the code does. Originally
+**proposed, 2026-11-25.** The layout was picked by Scott from mockups
 (layout "A", `docs/gen6/mockup-a.png`). Everything else in this plan is a recommendation for him to approve.
 
 ## 1. Goal
@@ -56,13 +59,13 @@ values:
 |---|---|---|
 | Top screen (game area) | inner 1200×720 at (360, 19); 2px black border, 358..1562 × 17..741 | 400×240 at exactly 3×. Centred, so both side columns are the same width |
 | Side columns | 332px wide: left x 13..345, right x 1575..1907 | 13px to the canvas edge and 13px to the game border, on **both** sides (Gen 4/5: 13px) |
-| Top line / bottom line | y 20 / y 1062 | Same as Gen 4/5. The moveset ends at 1060, as in Gen 4/5 |
+| Top line / bottom line | y 20 / y 1063 | One below Gen 4/5's 1062, so the margins above the top screen and under the bottom screen are both 17px |
 | Left column, top | timer, badges, faults box: Gen 5 art scaled 0.7905 (332/420), anchored to the top line | |
 | Left column, bottom | stats panel (exp, nature, stat tiles): Gen 5 art scaled 0.7905, anchored to the bottom line | |
 | Left column, middle | pokéball flush to the canvas edge, behind the stats as in Gen 5; type pill on the ball; species art standing in the ball, ~440px tall | The art's slider transform (`SpeciesArt`) still applies per species |
 | Right panel | x 1575..1907, y 18..741 (frame bottom lined up with the game border's bottom) | The **one** right-panel slot: movepool, enemy team, splits or trainer preview take turns in it, exactly as in Gen 5 (`rightPanelMode.ts`). It is never split into two panels |
 | Movepool table | fills the frame; rows fitted with `movepoolFitStyle` | Gen 5 `.movepoolDemo` look: Play bold, header in the lead's type colour with a 2px black outline, alternating rows |
-| Bottom screen | inner 404×303 (exactly 4:3) at (1501, 757); 2px border, 1499..1907 × 755..1062 | Right and bottom edges sit on the same margins as everything else. 14px under the game border |
+| Bottom screen | inner 404×303 (exactly 4:3) at (1501, 758); 2px border, 1499..1907 × 756..1063 | Right and bottom edges sit on the same margins as everything else. 14px under the game border |
 | Ability / held item band | x 361..1486 (Gen 5 band ×1.1008), y ≈ 761 | |
 | Moveset | x 361..1486 (Gen 5 moveset ×1.1008), y ≈ 862..1060 | Ends 13px before the bottom screen's border |
 | Shadows | every panel `filter: drop-shadow(0px 1px 1px)`; game areas `drop-shadow(0 0 1px #000000c5)` | As in Gen 5 |

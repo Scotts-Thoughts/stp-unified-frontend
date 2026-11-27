@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="262.83" y1="348" x2="413.17" y2="348" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g transform="translate(0 72)">
+  <g id="Badge">
+    <g id="Layer_26_copy_2" data-name="Layer 26 copy 2">
+      <g id="Screens_copy_2" data-name="Screens copy 2">
+        <g id="Evasion">
+          <path d="M272.3,323.53A10.22,10.22 0 0 1 281.83,317L394.17,317A10.22,10.22 0 0 1 403.7,323.53L410.87,342.06A16.46,16.46 0 0 1 410.87,353.94L403.7,372.47A10.22,10.22 0 0 1 394.17,379L281.83,379A10.22,10.22 0 0 1 272.3,372.47L265.13,353.94A16.46,16.46 0 0 1 265.13,342.06Z" style="fill: url(#linear-gradient); stroke-width: 0px;"/>
+          <path d="M275.01,325.38A10.33,10.33 0 0 1 284.55,319L391.44,319A10.33,10.33 0 0 1 400.98,325.38L407.7,341.62A16.69,16.69 0 0 1 407.7,354.38L400.98,370.62A10.33,10.33 0 0 1 391.44,377L284.55,377A10.33,10.33 0 0 1 275.01,370.62L268.29,354.38A16.69,16.69 0 0 1 268.29,341.62ZM262.29,341.7A18.43,18.43 0 0 0 262.29,354.3L269.61,374.42A9.99,9.99 0 0 0 279,381L397,381A9.99,9.99 0 0 0 406.39,374.42L413.71,354.3A18.44,18.44 0 0 0 413.71,341.7L406.39,321.58A9.99,9.99 0 0 0 397,315L279,315A9.99,9.99 0 0 0 269.61,321.58Z" style="fill: gray; stroke-width: 0px;"/>
+          <path d="M272.3,323.53A10.22,10.22 0 0 1 281.83,317L394.17,317A10.22,10.22 0 0 1 403.7,323.53L410.87,342.06A16.46,16.46 0 0 1 410.87,353.94L403.7,372.47A10.22,10.22 0 0 1 394.17,379L281.83,379A10.22,10.22 0 0 1 272.3,372.47L265.13,353.94A16.46,16.46 0 0 1 265.13,342.06ZM262.29,341.7A18.43,18.43 0 0 0 262.29,354.3L269.61,374.42A9.99,9.99 0 0 0 279,381L397,381A9.99,9.99 0 0 0 406.39,374.42L413.71,354.3A18.44,18.44 0 0 0 413.71,341.7L406.39,321.58A9.99,9.99 0 0 0 397,315L279,315A9.99,9.99 0 0 0 269.61,321.58Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+          <path d="M268.79,323.83A13.41,13.41 0 0 1 281.39,315L395.44,315A12.22,12.22 0 0 1 406.92,323.04L413.61,341.42A19.25,19.25 0 0 1 413.61,354.58L407.21,372.17A13.41,13.41 0 0 1 394.61,381L280.56,381A12.22,12.22 0 0 1 269.08,372.96L262.39,354.58A19.25,19.25 0 0 1 262.39,341.42ZM260.91,341.4A19.83,19.83 0 0 0 260.91,354.6L267.85,374.26A11.6,11.6 0 0 0 278.79,382L397.63,382A10.99,10.99 0 0 0 408,374.67L415.08,354.6A19.83,19.83 0 0 0 415.08,341.4L408.14,321.73A11.59,11.59 0 0 0 397.21,314L278.36,314A10.99,10.99 0 0 0 267.99,321.33Z" style="stroke: #000; stroke-width: 0.8px; stroke-linejoin: round;"/>
+        </g>
+        <rect x="302.77" y="334.18" width="70.45" height=".82" style="fill: #231f20; filter: url(#drop-shadow-1); stroke-width: 0px;"/>
+      </g>
+    </g>
+  </g>
+  </g>
+</svg>

@@ -261,7 +261,7 @@ const main = defineComponent({
                 // did here with its own data layer and settings store (PokeData.setGame,
                 // overlay.setGame) is gen1's activate(); a lifted module has its own.
                 //
-                await Promise.all([this.overlayLoaded, module.prepare?.()]);
+                await Promise.all([this.overlayLoaded, module.prepare?.(detection.game)]);
                 if (sequence !== this.loadSequence) return;
                 await applyModuleStyles(module);
                 if (sequence !== this.loadSequence) return;

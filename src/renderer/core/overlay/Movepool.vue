@@ -75,7 +75,7 @@ export default defineComponent({
         /** How far up the table's bottom and the art's bottom border move in Webcam Mode (0: off). */
         webcamShift(): number {
             const webcam = this.view.webcam;
-            return webcam ? webcamFrameShift(webcam.frameBottom) : 0;
+            return webcam ? webcamFrameShift(webcam.frameBottom, webcam.limit) : 0;
         },
         tableStyle(): string | undefined {
             const rows = this.view.groups.reduce((sum, group) => sum + group.rows.length, 0);

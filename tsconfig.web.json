@@ -5,8 +5,10 @@
     "src/renderer/**/*",
     "src/renderer/**/*.vue",
     "src/shared/**/*",
-    "src/preload/*.d.ts"
+    "src/preload/*.d.ts",
+    "damage-calc/src/**/*"
   ],
+  "exclude": ["damage-calc/src/__tests__/**"],
   "compilerOptions": {
     "noEmit": true,
     "composite": true,
@@ -20,7 +22,9 @@
     "paths": {
       "~/*": [
         "src/renderer/*"
-      ]
+      ],
+      "@stp/damage-calc": ["damage-calc/src/index.ts"],
+      "@stp/damage-calc/*": ["damage-calc/src/*"]
     }
   }
 }

@@ -1,6 +1,6 @@
 import { createCommentVNode, defineComponent, h, toDisplayString, Transition, vShow, withDirectives, type PropType, type StyleValue, type VNode } from "vue";
 import "../styles/enemyPanel.css";
-import { cropHeight, rowCount, WEBCAM_PANEL_BOTTOM, webcamArtStyleOrHidden, webcamPanelScale, webcamRowLayout, type EnemyRowArt, type FittedRows } from "../logic/webcamMode";
+import { cropHeight, rowCount, WEBCAM_PANEL_BOTTOM, webcamArtStyleOrHidden, webcamPanelScale, webcamRowLayout, type EnemyRowArt, type FittedRows, type PanelLines } from "../logic/webcamMode";
 
 /**
  * One element of a generation's enemy team panel (`games/genN/enemyPanel.ts`). Strings in `children` are text;
@@ -294,6 +294,8 @@ export const EnemyTeamPanel = defineComponent({
          * slices). Without it, the old squeeze.
          */
         webcamRows: { type: Object as PropType<EnemyRowArt | null>, default: null },
+        /** The generation's own lines for a shortened panel, where they aren't the shared ones (the 3DS overlay). */
+        webcamLines: { type: Object as PropType<PanelLines | null>, default: null },
     },
     computed: {
         /**
@@ -304,17 +306,18 @@ export const EnemyTeamPanel = defineComponent({
             const src = (this.view as { art?: unknown }).art;
             if (!this.webcam || typeof src !== "string") return null;
             const crop = cropHeight((this.view as { crop?: unknown }).crop);
-            return { src, style: webcamArtStyleOrHidden(src, this.squeeze || this.fitted ? WEBCAM_PANEL_BOTTOM : crop) };
+            const panelBottom = this.webcamLines?.panelBottom ?? WEBCAM_PANEL_BOTTOM;
+            return { src, style: webcamArtStyleOrHidden(src, this.squeeze || this.fitted ? panelBottom : crop, panelBottom) };
         },
         /** The fitted rows (`webcamRows`), or null when the team fits as it is or the generation gives no rows. */
         fitted(): FittedRows | null {
             const art = this.webcamRows;
             if (!this.webcam || !art) return null;
-            return webcamRowLayout(art, rowCount(art, cropHeight((this.view as { crop?: unknown }).crop)));
+            return webcamRowLayout(art, rowCount(art, cropHeight((this.view as { crop?: unknown }).crop)), this.webcamLines?.rowsLine);
         },
         squeeze(): Squeeze | null {
             if (this.webcamRows) return null;
-            const rows = this.webcam ? webcamPanelScale(cropHeight((this.view as { crop?: unknown }).crop), this.webcamHeader) : 1;
+            const rows = this.webcam ? webcamPanelScale(cropHeight((this.view as { crop?: unknown }).crop), this.webcamHeader, this.webcamLines?.panelBottom) : 1;
             return rows === 1 ? null : { rows, text: Math.min(1, rows * 1.2) };
         },
     },

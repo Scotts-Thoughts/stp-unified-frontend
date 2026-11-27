@@ -7,11 +7,13 @@ import { gen2Manifest } from "./gen2/manifest";
 import { gen3Manifest } from "./gen3/manifest";
 import { gen4Manifest } from "./gen4/manifest";
 import { gen5Manifest } from "./gen5/manifest";
+import { gen6Manifest } from "./gen6/manifest";
+import { gen7Manifest } from "./gen7/manifest";
 
 /**
  * Mapper -> generation (plan 1.4, 3.1).
  *
- * The registry holds the five *manifests* -- profiles, editions, the edition key --
+ * The registry holds the *manifests* (gens 1-5, and gens 6-7, the 3DS games, which share one overlay) -- profiles, editions, the edition key --
  * and loads a generation's module only once its mapper is detected: a lifted
  * generation is a ten-thousand-line component plus its data tables, and Vite splits
  * each `load()` into its own chunk, so the renderer bundle carries gen1 (the
@@ -23,7 +25,7 @@ import { gen5Manifest } from "./gen5/manifest";
  * have no meta properties). A mapper nothing claims -- every hack mapper, by decision 8
  * -- yields `null`, and `main.ts` shows the unsupported-mapper state.
  */
-export const MANIFESTS: readonly ModuleManifest[] = [gen1Manifest, gen2Manifest, gen3Manifest, gen4Manifest, gen5Manifest];
+export const MANIFESTS: readonly ModuleManifest[] = [gen1Manifest, gen2Manifest, gen3Manifest, gen4Manifest, gen5Manifest, gen6Manifest, gen7Manifest];
 
 export interface Detection {
     manifest: ModuleManifest;

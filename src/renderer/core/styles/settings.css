@@ -539,6 +539,13 @@
     color: var(--stp-muted);
 }
 
+/* A grid of numbers (the EVs readout): each value right-aligned in a 3-digit slot, so the digits line up. */
+.stp-settings .stp-statgrid-numbers .stp-statgrid-cell .stp-value {
+    min-width: 3ch;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 .stp-settings .stp-extra {
     margin-left: auto;
     font-size: 11px;

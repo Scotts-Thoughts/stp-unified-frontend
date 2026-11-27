@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Export_Layer" data-name="Export Layer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <g id="Game_Area_2_bottom_right_" data-name="Game Area 2 (bottom right)">
+    <!-- The 3DS bottom screen, 320x240 at 1.2625x: 404x303 (exactly 4:3) at (1501, 758), inside a 2px black edge
+         (1499..1907 x 756..1063). Its right and bottom edges sit on the overlay's side margin and bottom line. -->
+    <rect x="1500" y="757" width="406" height="305" style="fill: #39b54a; stroke-width: 0px;"/>
+    <path d="m1905,758v303h-404v-303h404m2-2h-408v307h408v-307h0Z" style="stroke-width: 0px;"/>
+  </g>
+</svg>

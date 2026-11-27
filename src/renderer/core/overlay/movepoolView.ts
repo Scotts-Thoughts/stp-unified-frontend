@@ -59,7 +59,7 @@ export interface MovepoolView {
      * border in its 1920×1080 picture, and the table's height in its `style.css`. The table, its rows and the art's
      * bottom border all move up to leave the bottom right corner free.
      */
-    webcam?: { frameBottom: number; tableHeight: number };
+    webcam?: { frameBottom: number; tableHeight: number; /** The line the frame stops at, where it isn't `WEBCAM_FRAME_BOTTOM` (the 3DS overlay). */ limit?: number };
     /** Row groups in display order (level, form, TM/HM, tutor). */
     groups: MovepoolGroup[];
 }

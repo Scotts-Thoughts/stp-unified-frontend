@@ -4,7 +4,7 @@ import json, math, os, re
 from art import (HERE, R, IMAGES, bbox, core_cx, category, info, palette, srgb2lab, rgb2hex,
                  texture_display_color)
 
-GENNUM = {"gen1": 1, "gen2": 2, "gen3": 3, "gen4": 4, "gen5": 5}
+GENNUM = {"gen1": 1, "gen2": 2, "gen3": 3, "gen4": 4, "gen5": 5, "gen6": 6, "gen7": 7}
 
 # Per generation, in screen pixels relative to the middle of the art box (+ is down / right):
 #   C      the art box's size in the overlay
@@ -19,7 +19,16 @@ T = {
     "gen3": dict(C=396, cx=-20, bot=125, size=dict(first=192, middle=260, final=326, single=300, legend=345), hmax=365, wmax=420, ui=1.6),
     "gen4": dict(C=396, cx=20, bot=146, size=dict(first=205, middle=285, final=370, single=323, legend=339), hmax=392, wmax=432, ui=1.5),
     "gen5": dict(C=376, cx=0, bot=163, size=dict(first=200, middle=298, final=397, single=316, legend=357), hmax=428, wmax=445, ui=1.5),
+    # The 3DS overlay (gens 6-7 share it, games/gen6/layout.ts ART_BOX): a 440 box with no padding, centred at canvas
+    # (197, 548). Feet and body centre are gen 5's points carried through the ball's zone (x0.79 from the bottom-left
+    # corner): canvas (175, 786). Sizes are gen 5's x1.1, as mockup A draws the art bigger than gen 5 (440 against
+    # ~382 tall: docs/gen6/build_mockup_a.py). `xlim`: the outline stays between 10px past the canvas's left edge and
+    # 6px before the top screen's border (canvas x -10..352), shifted in, or shrunk if it is wider than that.
+    # Not yet checked against Scott's looks.
+    "gen6": dict(C=440, cx=-22, bot=238, size=dict(first=220, middle=328, final=437, single=348, legend=393), hmax=520, wmax=350,
+                 xlim=(-207, 155), ui=1.5),
 }
+T["gen7"] = T["gen6"]
 RB_ABS = (204, 580)  # Red/Blue art is drawn at its natural size; where its feet go in the container
 
 # Inside a stage, real height and base stat total move the size: (height weight, BST weight, mean log height,
@@ -30,7 +39,7 @@ SIZE_MODEL = {"first": (0.093, 0.137, -0.628, 3.121), "middle": (0.198, 0.113, -
 SIZE_MIN, SIZE_MIN_FIRST, SIZE_MAX = 0.72, 0.95, 1.22  # first stages never shrink much (Pidgey)
 
 FLOAT_LIFT = {"gen1": 90, "gen2": 80, "gen3": 110, "gen4": 95, "gen5": 80}  # Red/Blue floaters only
-FLOAT_CENTRE = {"gen1": -55, "gen2": -55, "gen3": -95, "gen4": -55, "gen5": -50}  # a floater's middle
+FLOAT_CENTRE = {"gen1": -55, "gen2": -55, "gen3": -95, "gen4": -55, "gen5": -50, "gen6": -40, "gen7": -40}  # a floater's middle
 FLOAT_MIN_LIFT = 80
 EYE_MAX_OFF, EYE_NARROW = 0.2, 0.55  # centre on the eyes only for narrow art (Watchog)
 CORE_W = 0.75  # body centre vs outline centre (tails and wings count less: Pidgey)
@@ -111,6 +120,18 @@ def layout(e):
         if best is None or cand < best:
             best = cand
     _, s, x, y = best
+    lim = t.get("xlim")
+    if lim and not rb:
+        # Keep the outline between the column's limits: shift it in, and only if it is wider than the room, shrink it.
+        room = lim[1] - lim[0]
+        if s * bw > room:
+            s = math.floor(room / bw * 100) / 100
+            x = round(tcx / (s * F) - cx_rel); y = round(bot_rel - tbot / s)
+        a, b = s * F * (x0 * kx - CW / 2 + x), s * F * (x1 * kx - CW / 2 + x)
+        lo, hi = min(a, b), max(a, b)
+        shift = lim[0] - lo if lo < lim[0] else (lim[1] - hi if hi > lim[1] else 0)
+        if shift:
+            x += math.ceil(shift / (s * F)) if shift / (s * F) > 0 else math.floor(shift / (s * F))
     return dict(imageScale=s, imageXOffset=x, imageYOffset=y, imageFlip=F == -1), cat, capped
 
 
@@ -165,7 +186,7 @@ def texture_path(gen, t1):
     if gen == "gen1":
         src = open(os.path.join(R, "data", "textures.js"), encoding="utf-8").read(); name = gen1_texture(t1)
     else:
-        src = open(os.path.join(R, "games", gen, "data", "textures.js"), encoding="utf-8").read()
+        src = open(os.path.join(R, "games", "gen6" if gen == "gen7" else gen, "data", "textures.js"), encoding="utf-8").read()
         name = t1.lower() if gen == "gen2" else t1
     m = re.search(r"['\"]%s['\"]\s*:\s*(?:\{\s*['\"]path['\"]\s*:\s*)?['\"]([^'\"]+)" % re.escape(name), src, re.I)
     if not m:
@@ -180,7 +201,7 @@ def style_for(e):
     t1 = e.get("t1") or "Normal"
     tp = texture_path(e["gen"], t1)
     v["overlay_color"] = pick_color(e["img"], texture_display_color(tp) if tp else None)[0]
-    if e["gen"] in ("gen3", "gen4", "gen5"):
+    if e["gen"] in ("gen3", "gen4", "gen5", "gen6", "gen7"):
         v.update(TEX_FRAMING.get(t1, {}))
     ui = T[e["gen"]]["ui"]
     if e["gen"] == "gen1":

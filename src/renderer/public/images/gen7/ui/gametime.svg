@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Export_Layer" data-name="Export Layer" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="linear-gradient" x1="87" y1="662.5" x2="361" y2="662.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#999"/>
+      <stop offset=".04" stop-color="#a0a0a0"/>
+      <stop offset=".21" stop-color="#b8b8b8"/>
+      <stop offset=".37" stop-color="#c6c6c6"/>
+      <stop offset=".5" stop-color="#ccc"/>
+      <stop offset=".63" stop-color="#c6c6c6"/>
+      <stop offset=".79" stop-color="#b7b7b7"/>
+      <stop offset=".97" stop-color="#9d9d9d"/>
+      <stop offset="1" stop-color="#999"/>
+    </linearGradient>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="-1"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".5"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-2" filterUnits="userSpaceOnUse">
+      <feOffset dx="1" dy="1"/>
+      <feGaussianBlur result="blur-2" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Gametime_copy" data-name="Gametime copy">
+    <g>
+      <path d="M96.36,639.48A10.4,10.4 0 0 1 106,633L342,633A10.4,10.4 0 0 1 351.64,639.48L358.36,656.02A17.21,17.21 0 0 1 358.36,668.98L351.64,685.52A10.4,10.4 0 0 1 342,692L106,692A10.4,10.4 0 0 1 96.36,685.52L89.64,668.98A17.21,17.21 0 0 1 89.64,656.02Z" style="fill: url(#linear-gradient); stroke-width: 0px;"/>
+      <path d="M98.92,639.77A7.94,7.94 0 0 1 106.2,635L341.5,635A8.4,8.4 0 0 1 349.2,640.04L356.35,656.43A15.19,15.19 0 0 1 356.35,668.58L349.08,685.24A7.95,7.95 0 0 1 341.8,690.01L106.51,690.01A8.41,8.41 0 0 1 98.8,684.96L91.65,668.58A15.2,15.2 0 0 1 91.65,656.43ZM87.44,656.11A17.96,17.96 0 0 0 87.44,668.89L94.51,687.46A10.16,10.16 0 0 0 104,694L344,694A10.16,10.16 0 0 0 353.49,687.46L360.57,668.89A17.95,17.95 0 0 0 360.57,656.11L353.49,637.54A10.16,10.16 0 0 0 344,631L104,631A10.16,10.16 0 0 0 94.51,637.54Z" style="fill: gray; stroke-width: 0px;"/>
+      <path d="M96.36,639.48A10.4,10.4 0 0 1 106,633L342,633A10.4,10.4 0 0 1 351.64,639.48L358.36,656.02A17.21,17.21 0 0 1 358.36,668.98L351.64,685.52A10.4,10.4 0 0 1 342,692L106,692A10.4,10.4 0 0 1 96.36,685.52L89.64,668.98A17.21,17.21 0 0 1 89.64,656.02ZM87.44,656.11A17.96,17.96 0 0 0 87.44,668.89L94.51,687.46A10.16,10.16 0 0 0 104,694L344,694A10.16,10.16 0 0 0 353.49,687.46L360.57,668.89A17.95,17.95 0 0 0 360.57,656.11L353.49,637.54A10.16,10.16 0 0 0 344,631L104,631A10.16,10.16 0 0 0 94.51,637.54Z" style="fill: #4d4d4d; stroke-width: 0px;"/>
+      <path d="M94.51,637.54A10.16,10.16 0 0 1 104,631L344,631A10.16,10.16 0 0 1 353.49,637.54L360.51,655.96A18.38,18.38 0 0 1 360.51,669.04L353.49,687.46A10.16,10.16 0 0 1 344,694L104,694A10.16,10.16 0 0 1 94.51,687.46L87.49,669.04A18.38,18.38 0 0 1 87.49,655.96ZM86.43,655.93A18.96,18.96 0 0 0 86.43,669.06L93.27,687.57A11.36,11.36 0 0 0 103.92,694.99L344.23,694.99A11.15,11.15 0 0 0 354.69,687.7L361.58,669.06A18.96,18.96 0 0 0 361.58,655.93L354.74,637.43A11.37,11.37 0 0 0 344.08,630L103.78,630A11.16,11.16 0 0 0 93.32,637.29Z" style="stroke: #000; stroke-width: 0.8px; stroke-linejoin: round;"/>
+    </g>
+    <path id="_highlight_" data-name="&amp;lt;highlight&amp;gt;" d="" style="fill: gray; filter: url(#drop-shadow-1); opacity: .2; stroke: #6e5597; stroke-miterlimit: 10;"/>
+    <rect x="107" y="651" width="234" height=".59" style="fill: #231f20; filter: url(#drop-shadow-2); stroke-width: 0px;"/>
+  </g>
+</svg>

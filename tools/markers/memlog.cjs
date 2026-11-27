@@ -6,12 +6,18 @@
 // Output: frame@replayMs,path,value (JSON value), only on change, in frame order. Lines at a chunk boundary
 // take the frame of the next change. Tools: the Router's replay_to_route (A:/pkmn_yellow_xp_router/tools/replay_to_route).
 // --mappers <dir> reads mappers from elsewhere than %APPDATA%\PokeAByte\Mappers (a patched copy).
+// --snapshot <file.json> also writes every property's value at the first frame read ({path: value}): a short replay
+// that starts mid-game never changes most of them, so they are in no log line (mem-to-scenario.ts --initial).
+// --worker <xpr-replay-worker.exe> uses another build of the replay reader (the Router's has no 3DS core yet).
+// --pab <pab-host.exe> uses another build of the mapper host (3DS mappers need one built from a
+// Poke-A-Byte that knows the 3DS platform; see docs/gen6-inventory.md).
 'use strict';
 const { spawn } = require('child_process');
 const fs = require('fs');
 
 const TOOLS = 'A:/pkmn_yellow_xp_router/tools/replay_to_route/out';
 const args = {}; for (let i = 2; i < process.argv.length; i += 2) args[process.argv[i].slice(2)] = process.argv[i + 1];
+const WORKER = args.worker || TOOLS + '/xpr-replay-worker.exe';
 const MAPPERS = args.mappers || (process.env.APPDATA + '/PokeAByte/Mappers');
 const stride = +(args.stride || 1), nChunks = +(args.chunks || 8), WARM = 1200;
 const pathRe = new RegExp(args.paths);
@@ -36,10 +42,10 @@ class Proc {
 }
 
 async function chunk(from, to, idx) {
-  const pab = new Proc(TOOLS + '/pab-host/pab-host.exe', ['--mappers', MAPPERS, '--mapper', args.mapper, '--compact']);
+  const pab = new Proc(args.pab || TOOLS + '/pab-host/pab-host.exe', ['--mappers', MAPPERS, '--mapper', args.mapper, '--compact']);
   const hello = JSON.parse((await pab.next()).toString());
   if (hello.error) throw new Error(hello.error);
-  const wk = new Proc(TOOLS + '/xpr-replay-worker.exe', ['--replay', args.replay, '--rom', args.rom, '--allow-mismatch']);
+  const wk = new Proc(WORKER, ['--replay', args.replay, '--rom', args.rom, '--allow-mismatch']);
   const ready = await wk.next(); if (ready[0] !== 0x4a) throw new Error('worker: ' + ready);
   wk.write('blocks ' + hello.blocks.map(([s, l]) => s + ':' + l).join(',') + '\n');
   await wk.next();
@@ -57,6 +63,14 @@ async function chunk(from, to, idx) {
     pab.write(s);
     const ans = JSON.parse((await pab.next()).toString());
     if (!Array.isArray(ans)) throw new Error('pab-host: ' + JSON.stringify(ans).slice(0, 200));
+    if (args.snapshot && idx === 0 && count === 0) {
+      // 'M': the mapper as GET /mapper serves it, values included.
+      pab.write(Buffer.from('M'));
+      const mapper = JSON.parse((await pab.next()).toString());
+      const values = {};
+      for (const p of mapper.properties ?? []) values[p.path] = p.value ?? null;
+      fs.writeFileSync(args.snapshot, JSON.stringify({ frame, ms, values }));
+    }
     for (const c of ans) {
       if (!pathRe.test(c.path)) continue;
       const v = JSON.stringify(c.value);
@@ -75,7 +89,7 @@ async function chunk(from, to, idx) {
 (async () => {
   let to = +args.to;
   if (!to) {
-    const info = JSON.parse(require('child_process').execFileSync(TOOLS + '/xpr-replay-worker.exe', ['--replay', args.replay, '--info']).toString());
+    const info = JSON.parse(require('child_process').execFileSync(WORKER, ['--replay', args.replay, '--info']).toString());
     to = info.total_frames - 1;
   }
   const from = +(args.from || 0), size = Math.ceil((to - from + 1) / nChunks);
