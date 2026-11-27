@@ -14,7 +14,7 @@ Pokémon, with the settings' nature, ability, gender and IVs, written straight i
 | `Sun and Moon` | `STANDARD/gen7/pokemon_sun_moon.xml` | gen7 |
 | `Ultra Sun and Ultra Moon` | `STANDARD/gen7/pokemon_ultra_sun_moon.xml` | gen7 |
 
-Each mapper covers both versions of its pair. All four are **version 0.2.0**, made from the stock 0.0.2 files by
+Each mapper covers both versions of its pair. All four are **version 0.3.0**, made from the stock 0.0.2 files by
 `py tools/mappers/make-3ds-mappers.py` (idempotent; `--check` reports without writing; `--dir` for another
 mappers folder). It edits the files in `%APPDATA%\PokeAByte\Mappers` and bumps `mapper_tree.json`. **A PokeAByte
 mapper update can put the stock files back: run the script again.** The script needs LF files; restore a stock
@@ -39,6 +39,9 @@ What the script changes:
    them, at the script's `PARTY_BASE`) and `player.encrypted_mon_0_stats` (its 28 party-stat bytes, `PARTY_BASE +
    0x158`). Both are `string` properties read and written as bytes, as gen 5's `decrypted_mon_0` (which, despite its
    name, is also the encrypted copy).
+6. **The new game** (gen 7, 0.3.0; X/Y and OR/AS move to 0.3.0 with nothing added): `meta.save_loaded`, the byte at
+   `{save_block} + 0x82C`. What the byte is in the save is not known; what it does was read from the replays (below,
+   "The new game").
 
 ## What the overlay reads
 
@@ -61,15 +64,37 @@ The read list the profiles claim is `games/gen6/mappers/standard-paths.ts`.
   `in_battle` turns off**, with the id still set.
 - **Blackout**: the battle ends unwon with every one of the player's battle records at 0 HP.
 - **Enemy out**: `battle.opponent.party_position`; the battle team records keep their order when one faints.
-- **Reset**: `player.name` empties (then `confirmReset`, as every generation). **Not confirmed against a replay**: the
-  overlay's handling was checked with a hand-made scenario only. **New game**: the name is entered with no time played
-  and no Pokemon.
+- **Reset**: `player.name` empties (then `confirmReset`, as every generation). The name empties on the reset in all
+  four `save, save, reset, reload` replays (logged 2026-11-27); the overlay's own handling was checked with a
+  hand-made scenario only. **New game**: see "The new game" below.
 - **Horde battles** (wild, several opponents) show each move's own power. A trainer double can't be told from a
   single (no battle format in the mappers), so its power is against the opponent `party_position` names.
 - **Gen 7's battle teams hold leftovers outside battle**: read them only while `in_battle` is true.
 - **Map ids pass through others while a map loads**: US/UM's `overworld.map_index` sits at 0 for about two seconds
   around battles and doors, and shows 2 for one frame. The Map Change marker therefore waits until a nonzero id has
   held for a second (`MAP_SETTLE_MS`) and is not the map last marked.
+
+## The new game (2026-11-27)
+
+Read from Scott's replays with the headless worker (`xy-properties-new game`, Sun `default-0`, and the four
+`save, save, reset, reload` replays), with screenshots at the frames:
+
+- **X/Y**: with no save the game shows the language screen ("Begin game"), a black screen, then Sycamore's intro.
+  The play-time clock (`game_time`) leaves 0:00:00 as the intro begins (seconds 1 about 60 frames later), and the
+  new save is set up on the same frames. The name is entered much later, with the clock already running. The
+  overlay starts the timer when the clock goes from 0:00:00 to 5 s or less with no name and no Pokemon: about one
+  game second after "Begin game". OR/AS share the engine; **no OR/AS new-game replay exists, so it is unchecked**.
+- **Sun/Moon**: with no save the game opens on the language screen, says "Your settings have been saved", then a
+  message from Kukui and the intro (appearance, name about a minute in, the prologue). The clock only leaves
+  0:00:00 in the player's house, about three minutes in. `meta.save_loaded` turns on as the language is confirmed;
+  the overlay waits 1.5 s and, if the name is still empty, no time is played and the party is empty, starts the
+  timer as of the moment the byte turned on. **No US/UM new-game replay exists**: the byte sits at the same offset
+  from the save block and behaves the same on a reset there, but the new game itself is unchecked.
+- **Reset, then Continue** (all four replays): on the title screen the name empties, the clock reads 0:00:00 and
+  `save_loaded` is off; on Continue the name comes first (with `save_loaded`), then the time and party up to 60
+  frames later (OR/AS, Ultra Moon). The clock jumps to the save's time, so it never trips the new-game test. The
+  old test (the name entered with no time played and no Pokemon) would have, so it is now a late fallback that
+  waits 1.5 s.
 
 ## Writing the starter (2026-11-27)
 
@@ -153,5 +178,14 @@ Scott's Super Shuckie replay worker and the installed `pab-host` have no 3DS sup
 `--worker <xpr-replay-worker.exe>` and `--pab <pab-host.exe>` for 3DS-capable builds (a worker built with the
 `Nintendo3DS` core; a pab-host built from the PokeAByte source that knows platform `3DS`). `--snapshot <file>`
 saves every property's value at the first frame, and `mem-to-scenario.ts --initial <file>` uses it, because a
-short replay that starts mid-game never changes most values. A replay with a reset in it needs the ROM loaded in
-the worker and has not been logged successfully yet.
+short replay that starts mid-game never changes most values.
+
+**A replay that opens the save (a new game, a reset, Continue) needs a copy of Super Shuckie's save folder.** The
+keyframes keep the save card's path as Super Shuckie had it, `./UserData/azahar/sdmc/...`, relative to the working
+folder; without it the game hits a fatal "not formatted" error and the worker hangs. Copy `supershuckie
+2\UserData\azahar` (nand, sdmc, sysdata, config; not the 36 MB shader cache) to a short folder such as
+`%TEMP%\x3w\UserData\azahar` (a long path breaks Windows' 260-character limit), run the worker with `x3w` as its
+working folder, **and** set `XPR_3DS_USER_DIR` to the copy: after a reset the game mounts the card from the user
+folder, and without it a Continue finds no save and starts a new game. The game writes its saves into the copy, so
+copy it again before each replay (a new game overwrites that game's save). Never point either at Super Shuckie's
+own folder.

@@ -740,3 +740,29 @@
 - **OBS:** the bottom screen's green area is 1px lower; a 3DS bottom-screen source already placed in OBS needs to
   move down 1px.
 - Checked: typecheck and build pass; Sun and X/Y double battle replays, no console errors.
+
+## Gen 6 and gen 7 (3DS): the run timer starts by itself on a new game
+- Before, a new game was "the trainer name entered with no time played and no Pokemon". In X/Y that is long after
+  the start (the clock already runs during the intro, so it never fired); in Sun/Moon a minute in; and on a Continue
+  in OR/AS and Ultra Moon the name arrives a few frames before the save's time and party, so it could start the
+  timer on a loaded save.
+- Now, as gens 3-5 start at New Game (`games/gen6/Overlay.vue`, "A NEW GAME"):
+  - X/Y, OR/AS: the play-time clock leaving 0:00:00 (to 5 s or less, no name, no Pokemon). It leaves 0:00:00 as
+    the intro begins, right after "Begin game", about one game second before the timer sees it.
+  - Sun/Moon, Ultra Sun/Ultra Moon: the new mapper byte `meta.save_loaded` turning on (the language confirmed,
+    which is where these games start) and the save still nameless with no time played 1.5 s later; the timer is
+    started as of the moment the byte turned on (`runStarted(lateMs)`, Super Shuckie's `mark-start` offset too).
+  - The old name test stays as a late fallback, with the same 1.5 s check.
+- Mapper: `tools/mappers/make-3ds-mappers.py` step 6 adds `meta.save_loaded` ({save_block} + 0x82C) to the two
+  gen 7 mappers; all four go 0.2.0 -> 0.3.0 together. Already run on Scott's `%APPDATA%\PokeAByte\Mappers`
+  (backup of the 0.2.0 files in my scratchpad); `mapper_tree.json` updated. A Poke-A-Byte mapper update puts the
+  stock files back: run the script again. `standard-paths.ts` reads the new key.
+- Found from Scott's replays, headlessly, with screenshots: X new game, Sun new game (`default-0`), and the four
+  `save, save, reset, reload` replays (no false start in any). The headless worker only gets past a save open with
+  a copy of Super Shuckie's `UserData\azahar` as its working folder and `XPR_3DS_USER_DIR` (now in
+  `docs/gen6-inventory.md`, which also has a new "The new game" section).
+- Checked: typecheck; Poke-A-Byte (pab-host) reads `meta.save_loaded` from the patched mappers in Sun and Ultra
+  Moon; the built app on fixtures made from those replays: X starts at the clock's first tick, Sun at the language
+  confirm, OR and Ultra Moon reset + Continue leave the timer at 0 with no attempt counted.
+- Not checked: a new game in OR/AS or US/UM (no replay of one exists), a live run through Poke-A-Byte and Super
+  Shuckie, and the Super Shuckie timer path (the harness runs the local timer).

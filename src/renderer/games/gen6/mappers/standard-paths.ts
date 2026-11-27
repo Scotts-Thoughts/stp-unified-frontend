@@ -2,7 +2,7 @@ import type { WriteKind } from "../../../core/mapper/MapperProfile";
 
 /**
  * What the 3DS overlay reads from the `STANDARD/gen6` and `STANDARD/gen7` mappers (docs/gen6-inventory.md), as
- * mapper version 0.2.0 (`tools/mappers/make-3ds-mappers.py`).
+ * mapper version 0.3.0 (0.2.0 lacks `meta.save_loaded`, the gen 7 new game; everything else works) (`tools/mappers/make-3ds-mappers.py`).
  *
  * The four mappers share one vocabulary, so every canonical key is the mapper path and the four profiles differ
  * only in identity. The top-level containers are aliased whole: the overlay walks `player.team[n]`,
@@ -47,7 +47,7 @@ export const THREE_DS_READS: readonly string[] = [
     ...slots.flatMap((n) => BATTLER_LEAVES.map((leaf) => `battle.opponent_team.${n}.${leaf}`)),
     "overworld.map_index", "overworld.map_name",
     "game_time.hours", "game_time.minutes", "game_time.seconds",
-    "meta.generation", "meta.game_name", "meta.state", "meta.saves",
+    "meta.generation", "meta.game_name", "meta.state", "meta.saves", "meta.save_loaded",
 ];
 
 /**

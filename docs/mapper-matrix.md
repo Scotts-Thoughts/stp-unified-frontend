@@ -51,8 +51,8 @@ and the fixture headers are the ground truth for which mapper a recording used.
 | `STANDARD/gen7/pokemon_sun_moon.xml` | `Sun and Moon` | gen7 |
 | `STANDARD/gen7/pokemon_ultra_sun_moon.xml` | `Ultra Sun and Ultra Moon` | gen7 |
 
-All four are the stock STANDARD files patched in place to version 0.2.0 by `tools/mappers/make-3ds-mappers.py`
-(name tables, gen 6 battle teams, trainer names). There is no ST flavour and no ROM patch. Details and the
+All four are the stock STANDARD files patched in place to version 0.3.0 by `tools/mappers/make-3ds-mappers.py`
+(name tables, gen 6 battle teams, trainer names, the starter write, gen 7's new-game byte). There is no ST flavour and no ROM patch. Details and the
 re-run rule after a PokeAByte mapper update: `docs/gen6-inventory.md`.
 
 ## Consequences for the unified app (decisions of 2026-09-10 applied)

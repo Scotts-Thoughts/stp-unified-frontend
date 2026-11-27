@@ -241,6 +241,19 @@ const STARTER_WRITE_TRIES = 5;
 const STARTER_MAX_LEVEL = 6;
 /** How long after the starter write a lead that changes back is written again (the game may still be handing it over). */
 const STARTER_GUARD_MS = 3 * 60 * 1000;
+/** A new game shows its play-time clock leaving 0:00:00 by at most this much (seconds), where a loaded save jumps further. */
+const NEW_GAME_CLOCK_MAX_S = 5;
+/** Sun/Moon: how long the new save must stay nameless, with no time played, before it counts as a new game. */
+const NEW_SAVE_CONFIRM_MS = 1500;
+
+/** The timer's `hh:mm:ss.cc` start offset, `ms` further on. */
+function addToOffset(offset, ms) {
+    const m = /(\d+):(\d{2}):(\d{2})\.(\d{2})/.exec(offset ?? "");
+    const total = (m ? ((+m[1] * 60 + +m[2]) * 60 + +m[3]) * 1000 + +m[4] * 10 : 0) + Math.round(ms);
+    const cs = Math.floor(total / 10) % 100, s = Math.floor(total / 1000) % 60, min = Math.floor(total / 60000) % 60, h = Math.floor(total / 3600000);
+    const two = (n) => String(n).padStart(2, "0");
+    return `${two(h)}:${two(min)}:${two(s)}.${two(cs)}`;
+}
 /** Plain settings, saved under their own names in the generation's section. */
 const SAVED_SETTINGS = [
     "selected_game", "show_advanced_settings", "refilming_mode", "testRun", "right_ui", "show_wild_battles", "show_ev_gauge",
@@ -1020,14 +1033,17 @@ export default defineComponent({
             this.clear_right_panel_override();
             this.syncExpBar();
         },
-        /** A new game began in the cartridge: the timer starts if it stands at zero, and the attempt is counted. */
-        runStarted() {
+        /**
+         * A new game began in the cartridge: the timer starts if it stands at zero, and the attempt is counted.
+         * `lateMs`: how long ago it began (the timer starts that far on, so a check that waited costs nothing).
+         */
+        runStarted(lateMs = 0) {
             if (this.shuckie_timer == true) {
                 if (this.emulatorStats?.time_current != null) return;
-                this.sendEmulatorStart();
+                this.sendEmulatorStart(lateMs);
             } else {
                 if (parseInt(this.timer.formatted_time[0]) != 0) return;
-                this.timer.startTime(this.timer_startTimeOffset);
+                this.timer.startTime(lateMs > 0 ? addToOffset(this.timer_startTimeOffset, lateMs) : this.timer_startTimeOffset);
             }
             if (this.refilming_mode == false) this.attempt_number++;
             this.current_splits = [];
@@ -1085,10 +1101,11 @@ export default defineComponent({
                 return false;
             }
         },
-        sendEmulatorStart() {
-            const offset = this.timer_startTimeOffset != "00:00:00.00"
+        sendEmulatorStart(lateMs = 0) {
+            const base = this.timer_startTimeOffset != "00:00:00.00"
                 ? this.timer_startTimeOffset.split(":").map((x) => parseInt(x)).reduce((acc, curr) => acc * 60 + curr, 0) * 1000
                 : null;
+            const offset = lateMs > 0 ? (base ?? 0) + Math.round(lateMs) : base;
             return this.postToEmulator(offset === null ? "mark-start" : `mark-start?offset=${offset}`, "start command");
         },
         sendEmulatorEnd() {
@@ -1159,11 +1176,42 @@ export default defineComponent({
                     if (this.shuckie_counters) this.incrementEmulatorCounter("playerResets");
                 }
             }
-            // A NEW GAME: the name is entered with nothing played and no Pokemon yet.
-            if (filled && (Number(value(P.game_time?.hours)) || 0) === 0 && (Number(value(P.game_time?.minutes)) || 0) === 0
-                && (Number(value(P.player?.team_count)) || 0) === 0) {
-                this.runStarted();
+            // A NEW GAME, the late fallback (Sun/Moon name the player a minute into the intro, before the clock runs):
+            // the name entered with no time played and no Pokemon, and still so a moment later, because a Continue
+            // shows the name a few frames before the save's time and party (OR/AS, Ultra Moon).
+            if (filled && clockSeconds() === 0 && partyEmpty()) {
+                const at = Date.now();
+                await this.sleep(NEW_SAVE_CONFIRM_MS);
+                if (!this._unmounted && value(P.player?.name) && clockSeconds() === 0 && partyEmpty()) this.runStarted(Date.now() - at);
             }
+        });
+
+        // A NEW GAME (docs/gen6-inventory.md, "The new game"). The timer starts where it would in gens 3-5, as the new
+        // game begins, from what the game shows (all checked against Scott's Super Shuckie replays):
+        // - X/Y, OR/AS: the play-time clock leaves 0:00:00 as the intro begins, straight after "Begin game"; a loaded
+        //   save jumps from 0:00:00 to its own time instead, and brings its name with it (or before it).
+        // - Sun/Moon, Ultra Sun/Ultra Moon: `meta.save_loaded` (mapper 0.3.0) turns on as the language is confirmed,
+        //   which is where these games start; a Continue turns it on too, with the save's name in the same read, so
+        //   the new save must stay nameless, with no time played, for a moment. The timer is started that moment late.
+        const clockSeconds = () => (Number(value(P.game_time?.hours)) || 0) * 3600 + (Number(value(P.game_time?.minutes)) || 0) * 60
+            + (Number(value(P.game_time?.seconds)) || 0);
+        const partyEmpty = () => (Number(value(P.player?.team_count)) || 0) === 0;
+        let clockWas = clockSeconds();
+        const clockMoved = () => {
+            const now = clockSeconds();
+            if (clockWas === 0 && now > 0 && now <= NEW_GAME_CLOCK_MAX_S && partyEmpty() && !value(P.player?.name)) this.runStarted((now - 1) * 1000);
+            clockWas = now;
+        };
+        P.game_time?.seconds?.change?.(clockMoved);
+        P.game_time?.minutes?.change?.(clockMoved);
+        P.game_time?.hours?.change?.(clockMoved);
+        P.meta?.save_loaded?.change?.(async (newProp, oldProp) => {
+            if (newProp?.value !== true || oldProp?.value === true) return;
+            if (value(P.player?.name) || clockSeconds() !== 0 || !partyEmpty()) return;
+            const at = Date.now();
+            await this.sleep(NEW_SAVE_CONFIRM_MS);
+            if (this._unmounted || value(P.meta?.save_loaded) !== true) return;
+            if (!value(P.player?.name) && clockSeconds() === 0 && partyEmpty()) this.runStarted(Date.now() - at);
         });
 
         // THE STARTER: the party goes from empty to one Pokemon, a fresh one (level 6 or under, as OR/AS can level it in

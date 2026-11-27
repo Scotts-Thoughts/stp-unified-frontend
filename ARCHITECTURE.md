@@ -760,7 +760,7 @@ to his cabin (a map-temporary flag), not one a day as in the real game, and stil
 - The overlay's one write to game memory is the starter (`starterWrite.ts`, crypto in `logic/pk6.ts`): the party's
   lead is decrypted, made the Solo Pokémon (species, moves for its level, exp curve, name) with the chosen nature,
   ability, gender and IVs, re-encrypted with its checksum and written back whole through the mapper's
-  `player.encrypted_mon_0` / `_stats` (0.2.0), only out of battle, because a battle writes its own copy of the party back
+  `player.encrypted_mon_0` / `_stats` (0.2.0 on), only out of battle, because a battle writes its own copy of the party back
   when it ends and undoes it. `tools/gen6/starter-write-test.ts` checks a write inside a replay's emulator. What the
   overlay reads, how it tells a win, a blackout and a reset, the mapper edits it needs and what is not built yet:
   `docs/gen6-inventory.md`.
